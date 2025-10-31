@@ -3328,7 +3328,7 @@ const spawn = {
         mobs.spawn(x, y, 6, radius, "#b386e8");
         let me = mob[mob.length - 1];
         me.tier = 1
-        Matter.Body.setDensity(me, 0.003); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
+        Matter.Body.setDensity(me, 0.0025); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.isBoss = true;
         me.damageReduction = 0.13  //normal is 1,  most bosses have 0.25
 

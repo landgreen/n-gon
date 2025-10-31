@@ -33,8 +33,9 @@ const level = {
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
-            // m.setField(1) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 1000
+            // m.couplingChange(999999999)
 
             // m.fieldUpgrades[6].isRewindMode = true
             // window.removeEventListener("keydown", m.fieldEvent);
@@ -62,7 +63,7 @@ const level = {
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("AIM-9 Sidewinder")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("tamagotchi")
             // for (let i = 0; i < 1; i++) tech.giveTech("spherical harmonics")
             // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
@@ -192,6 +193,45 @@ const level = {
             simulation.inGameConsole(`<span class='color-var'>duplicationChance</span> <span class='color-symbol'>=</span> 0 //for anyon`);
         }
         level.newLevelOrPhase()
+        if (tech.isDigitalPet) {
+
+            for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+                if (simulation.ephemera[i].name === 'tamagotchi') {
+                    simulation.inGameConsole(`digital pet report:`);
+                    simulation.inGameConsole(`<strong>hunger</strong> = ${simulation.ephemera[i].hunger.toFixed(0)}`);
+                    simulation.inGameConsole(`<strong>energy</strong> = ${simulation.ephemera[i].energy.toFixed(0)}`);
+                    simulation.inGameConsole(`<strong>cleanliness</strong> = ${simulation.ephemera[i].cleanliness.toFixed(0)}`);
+                    simulation.inGameConsole(`your digital pet has brought you something!`);
+
+                    // console.log(simulation.ephemera[i])
+                    //I think 340 is max for each stat?
+                    if (simulation.ephemera[i].hunger + simulation.ephemera[i].energy + simulation.ephemera[i].cleanliness > 900) {
+                        powerUps.spawnDelay("tech", 1);
+                    } else if (Math.random() < 0.33) {
+                        if (simulation.ephemera[i].hunger > 300) {
+                            powerUps.spawnDelay("heal", 20);
+                        } else {
+                            powerUps.spawnDelay("heal", 3);
+                        }
+                    } else if (Math.random() < 0.5) {
+                        if (simulation.ephemera[i].energy > 300) {
+                            powerUps.spawnDelay("research", 9);
+                        } else {
+                            powerUps.spawnDelay("research", 2);
+                        }
+                    } else {
+                        if (simulation.ephemera[i].cleanliness > 300) {
+                            powerUps.spawnDelay("ammo", 15);
+                        } else {
+                            powerUps.spawnDelay("ammo", 4);
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+        }
         if (simulation.isTraining) {
             simulation.difficultyMode = 1
         } else {

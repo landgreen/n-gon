@@ -2901,216 +2901,212 @@ const b = {
     worm(where, isFreeze = tech.isSporeFreeze) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
         const wormSize = 6 + tech.wormSize * 4.2 * Math.random()
-        if (bIndex < 500) { //can't make over 500 spores
-            bullet[bIndex] = Bodies.polygon(where.x, where.y, 3, 3, {
-                inertia: Infinity,
-                isFreeze: isFreeze,
-                restitution: 0.5,
-                // angle: Math.random() * 2 * Math.PI,
-                friction: 0,
-                frictionAir: 0.025,
-                thrust: (tech.isSporeFollow ? 0.0012 : 0.00055) * (1 + 0.5 * (Math.random() - 0.5)),
-                wormSize: wormSize,
-                wormTail: 1 + Math.max(4, Math.min(wormSize - 2 * tech.wormSize, 30)),
-                dmg: (tech.isMutualism ? 9.5 : 3.2) * wormSize,
-                lookFrequency: 100 + Math.floor(37 * Math.random()),
-                classType: "bullet",
-                collisionFilter: {
-                    category: cat.bullet,
-                    mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
-                },
-                endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.bulletsLastLonger),
-                minDmgSpeed: 0,
-                playerOffPosition: { //used when moving towards player to keep spores separate
-                    x: 100 * (Math.random() - 0.5),
-                    y: 100 * (Math.random() - 0.5)
-                },
-                beforeDmg(who) {
-                    if (who.isInvulnerable) {
-                        Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.1));
-                    } else {
-                        if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
-                            setTimeout(() => {
-                                if (!who.alive) {
-                                    for (let i = 0; i < 3; i++) { //spawn 3 more
-                                        b.worm(this.position)
-                                        bullet[bullet.length - 1].endCycle = Math.min(simulation.cycle + Math.floor(420 * tech.bulletsLastLonger), this.endCycle + 180 + Math.floor(60 * Math.random())) //simulation.cycle + Math.floor(420 * tech.bulletsLastLonger)
-                                    }
+        bullet[bIndex] = Bodies.polygon(where.x, where.y, 3, 3, {
+            inertia: Infinity,
+            isFreeze: isFreeze,
+            restitution: 0.5,
+            // angle: Math.random() * 2 * Math.PI,
+            friction: 0,
+            frictionAir: 0.025,
+            thrust: (tech.isSporeFollow ? 0.0012 : 0.00055) * (1 + 0.5 * (Math.random() - 0.5)),
+            wormSize: wormSize,
+            wormTail: 1 + Math.max(4, Math.min(wormSize - 2 * tech.wormSize, 30)),
+            dmg: (tech.isMutualism ? 9.5 : 3.2) * wormSize,
+            lookFrequency: 100 + Math.floor(37 * Math.random()),
+            classType: "bullet",
+            collisionFilter: {
+                category: cat.bullet,
+                mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
+            },
+            endCycle: simulation.cycle + Math.floor((600 + Math.floor(Math.random() * 420)) * tech.bulletsLastLonger),
+            minDmgSpeed: 0,
+            playerOffPosition: { //used when moving towards player to keep spores separate
+                x: 100 * (Math.random() - 0.5),
+                y: 100 * (Math.random() - 0.5)
+            },
+            beforeDmg(who) {
+                if (who.isInvulnerable) {
+                    Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.1));
+                } else {
+                    if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
+                        setTimeout(() => {
+                            if (!who.alive) {
+                                for (let i = 0; i < 3; i++) { //spawn 3 more
+                                    b.worm(this.position)
+                                    bullet[bullet.length - 1].endCycle = Math.min(simulation.cycle + Math.floor(420 * tech.bulletsLastLonger), this.endCycle + 180 + Math.floor(60 * Math.random())) //simulation.cycle + Math.floor(420 * tech.bulletsLastLonger)
                                 }
-                                this.endCycle = 0; //bullet ends cycle after doing damage 
-                            }, 1);
-                        } else {
+                            }
                             this.endCycle = 0; //bullet ends cycle after doing damage 
-                        }
-                        if (this.isFreeze) mobs.statusSlow(who, 90)
-                    }
-                },
-                onEnd() {
-                    if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.02
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
-                    }
-                },
-                tailCycle: 6.28 * Math.random(),
-                do() {
-                    this.tailCycle += this.speed * 0.025
-                    ctx.beginPath(); //draw nematode
-                    ctx.moveTo(this.position.x, this.position.y);
-                    // const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(100, this.wormTail * this.speed))
-                    const speed = Math.min(7, this.speed)
-                    const dir = Vector.mult(Vector.normalise(this.velocity), -0.6 * this.wormTail * speed)
-                    const tail = Vector.add(this.position, dir)
-                    const wiggle = Vector.add(Vector.add(tail, dir), Vector.rotate(dir, Math.sin(this.tailCycle)))
-                    // const wiggle = Vector.add(tail, Vector.rotate(dir, Math.sin((m.cycle - this.endCycle) * 0.03 * this.speed)))
-                    ctx.quadraticCurveTo(tail.x, tail.y, wiggle.x, wiggle.y) // ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
-                    // ctx.lineTo(tail.x, tail.y);
-                    ctx.lineWidth = this.wormSize;
-                    ctx.strokeStyle = "#000";
-                    ctx.stroke();
-
-                    if (this.lockedOn && this.lockedOn.alive) {
-                        this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+                        }, 1);
                     } else {
-                        if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
-                            this.closestTarget = null;
-                            this.lockedOn = null;
-                            let closeDist = Infinity;
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
-                                    const targetVector = Vector.sub(this.position, mob[i].position)
-                                    const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
-                                    if (dist < closeDist) {
-                                        this.closestTarget = mob[i].position;
-                                        closeDist = dist;
-                                        this.lockedOn = mob[i]
-                                        if (0.3 > Math.random()) break //doesn't always target the closest mob
-                                    }
+                        this.endCycle = 0; //bullet ends cycle after doing damage 
+                    }
+                    if (this.isFreeze) mobs.statusSlow(who, 90)
+                }
+            },
+            onEnd() {
+                if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
+                    m.health += 0.02
+                    if (m.health > m.maxHealth) m.health = m.maxHealth;
+                    m.displayHealth();
+                }
+            },
+            tailCycle: 6.28 * Math.random(),
+            do() {
+                this.tailCycle += this.speed * 0.025
+                ctx.beginPath(); //draw nematode
+                ctx.moveTo(this.position.x, this.position.y);
+                // const dir = Vector.mult(Vector.normalise(this.velocity), -Math.min(100, this.wormTail * this.speed))
+                const speed = Math.min(7, this.speed)
+                const dir = Vector.mult(Vector.normalise(this.velocity), -0.6 * this.wormTail * speed)
+                const tail = Vector.add(this.position, dir)
+                const wiggle = Vector.add(Vector.add(tail, dir), Vector.rotate(dir, Math.sin(this.tailCycle)))
+                // const wiggle = Vector.add(tail, Vector.rotate(dir, Math.sin((m.cycle - this.endCycle) * 0.03 * this.speed)))
+                ctx.quadraticCurveTo(tail.x, tail.y, wiggle.x, wiggle.y) // ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                // ctx.lineTo(tail.x, tail.y);
+                ctx.lineWidth = this.wormSize;
+                ctx.strokeStyle = "#000";
+                ctx.stroke();
+
+                if (this.lockedOn && this.lockedOn.alive) {
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+                } else {
+                    if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
+                        this.closestTarget = null;
+                        this.lockedOn = null;
+                        let closeDist = Infinity;
+                        for (let i = 0, len = mob.length; i < len; ++i) {
+                            if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                                const targetVector = Vector.sub(this.position, mob[i].position)
+                                const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
+                                if (dist < closeDist) {
+                                    this.closestTarget = mob[i].position;
+                                    closeDist = dist;
+                                    this.lockedOn = mob[i]
+                                    if (0.3 > Math.random()) break //doesn't always target the closest mob
                                 }
                             }
                         }
-                        if (tech.isSporeFollow && this.lockedOn === null) { //move towards player //checking for null means that the spores don't go after the player until it has looked and not found a target
-                            const dx = this.position.x - m.pos.x;
-                            const dy = this.position.y - m.pos.y;
-                            if (dx * dx + dy * dy > 10000) {
-                                this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
-                            }
-                        } else {
-                            const unit = Vector.normalise(this.velocity)
-                            const force = Vector.mult(Vector.rotate(unit, 0.005 * this.playerOffPosition.x), 0.000003)
-                            this.force.x += force.x
-                            this.force.y += force.y
-                        }
                     }
-                },
-            });
-            const SPEED = 2 + 1 * Math.random();
-            const ANGLE = 2 * Math.PI * Math.random()
-            Matter.Body.setVelocity(bullet[bIndex], {
-                x: SPEED * Math.cos(ANGLE),
-                y: SPEED * Math.sin(ANGLE)
-            });
-            Composite.add(engine.world, bullet[bIndex]); //add bullet to world
-            if (tech.isMutualism && m.health > 0.5) {
-                m.health -= 0.02
-                m.displayHealth();
-                bullet[bIndex].isMutualismActive = true
-            }
+                    if (tech.isSporeFollow && this.lockedOn === null) { //move towards player //checking for null means that the spores don't go after the player until it has looked and not found a target
+                        const dx = this.position.x - m.pos.x;
+                        const dy = this.position.y - m.pos.y;
+                        if (dx * dx + dy * dy > 10000) {
+                            this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+                        }
+                    } else {
+                        const unit = Vector.normalise(this.velocity)
+                        const force = Vector.mult(Vector.rotate(unit, 0.005 * this.playerOffPosition.x), 0.000003)
+                        this.force.x += force.x
+                        this.force.y += force.y
+                    }
+                }
+            },
+        });
+        const SPEED = 2 + 1 * Math.random();
+        const ANGLE = 2 * Math.PI * Math.random()
+        Matter.Body.setVelocity(bullet[bIndex], {
+            x: SPEED * Math.cos(ANGLE),
+            y: SPEED * Math.sin(ANGLE)
+        });
+        Composite.add(engine.world, bullet[bIndex]); //add bullet to world
+        if (tech.isMutualism && m.health > 0.5) {
+            m.health -= 0.02
+            m.displayHealth();
+            bullet[bIndex].isMutualismActive = true
         }
     },
     spore(where, velocity = null) { //used with the tech upgrade in mob.death()
         const bIndex = bullet.length;
         const size = 4
-        if (bIndex < 500) { //can't make over 500 spores
-            bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
-                // density: 0.0015,			//frictionAir: 0.01,
-                inertia: Infinity,
-                isFreeze: tech.isSporeFreeze,
-                restitution: 0.5,
-                angle: Math.random() * 2 * Math.PI,
-                friction: 0,
-                frictionAir: 0.025,
-                thrust: (tech.isSporeFollow ? 0.0011 : 0.0005) * (1 + 0.3 * (Math.random() - 0.5)),
-                dmg: (tech.isMutualism ? 20 : 7), //bonus damage from tech.isMutualism
-                lookFrequency: 100 + Math.floor(117 * Math.random()),
-                classType: "bullet",
-                isSpore: true,
-                collisionFilter: {
-                    category: cat.bullet,
-                    mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
-                },
-                endCycle: simulation.cycle + Math.floor((540 + Math.floor(Math.random() * 420)) * tech.bulletsLastLonger),
-                minDmgSpeed: 0,
-                playerOffPosition: { //used when moving towards player to keep spores separate
-                    x: 100 * (Math.random() - 0.5),
-                    y: 100 * (Math.random() - 0.5)
-                },
-                beforeDmg(who) {
-                    if (!who.isInvulnerable) {
-                        this.endCycle = 0; //bullet ends cycle after doing damage 
-                        if (this.isFreeze) mobs.statusSlow(who, 90)
-                    }
-                },
-                onEnd() {
-                    if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                        m.health += 0.01
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
-                    }
-                },
-                do() {
-                    if (this.lockedOn && this.lockedOn.alive) {
-                        this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
-                    } else {
-                        if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
-                            this.closestTarget = null;
-                            this.lockedOn = null;
-                            let closeDist = Infinity;
-                            for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
-                                    const targetVector = Vector.sub(this.position, mob[i].position)
-                                    const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
-                                    if (dist < closeDist) {
-                                        this.closestTarget = mob[i].position;
-                                        closeDist = dist;
-                                        this.lockedOn = mob[i]
-                                        if (0.3 > Math.random()) break //doesn't always target the closest mob
-                                    }
+        bullet[bIndex] = Bodies.polygon(where.x, where.y, size, size, {
+            // density: 0.0015,			//frictionAir: 0.01,
+            inertia: Infinity,
+            isFreeze: tech.isSporeFreeze,
+            restitution: 0.5,
+            angle: Math.random() * 2 * Math.PI,
+            friction: 0,
+            frictionAir: 0.025,
+            thrust: (tech.isSporeFollow ? 0.0011 : 0.0005) * (1 + 0.3 * (Math.random() - 0.5)),
+            dmg: (tech.isMutualism ? 20 : 7), //bonus damage from tech.isMutualism
+            lookFrequency: 100 + Math.floor(117 * Math.random()),
+            classType: "bullet",
+            isSpore: true,
+            collisionFilter: {
+                category: cat.bullet,
+                mask: cat.map | cat.mob | cat.mobBullet | cat.mobShield //no collide with body
+            },
+            endCycle: simulation.cycle + Math.floor((540 + Math.floor(Math.random() * 420)) * tech.bulletsLastLonger),
+            minDmgSpeed: 0,
+            playerOffPosition: { //used when moving towards player to keep spores separate
+                x: 100 * (Math.random() - 0.5),
+                y: 100 * (Math.random() - 0.5)
+            },
+            beforeDmg(who) {
+                if (!who.isInvulnerable) {
+                    this.endCycle = 0; //bullet ends cycle after doing damage 
+                    if (this.isFreeze) mobs.statusSlow(who, 90)
+                }
+            },
+            onEnd() {
+                if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
+                    m.health += 0.01
+                    if (m.health > m.maxHealth) m.health = m.maxHealth;
+                    m.displayHealth();
+                }
+            },
+            do() {
+                if (this.lockedOn && this.lockedOn.alive) {
+                    this.force = Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.mass * this.thrust)
+                } else {
+                    if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
+                        this.closestTarget = null;
+                        this.lockedOn = null;
+                        let closeDist = Infinity;
+                        for (let i = 0, len = mob.length; i < len; ++i) {
+                            if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                                const targetVector = Vector.sub(this.position, mob[i].position)
+                                const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
+                                if (dist < closeDist) {
+                                    this.closestTarget = mob[i].position;
+                                    closeDist = dist;
+                                    this.lockedOn = mob[i]
+                                    if (0.3 > Math.random()) break //doesn't always target the closest mob
                                 }
                             }
                         }
-                        if (tech.isSporeFollow && this.lockedOn === null) { //move towards player
-                            //checking for null means that the spores don't go after the player until it has looked and not found a target
-                            const dx = this.position.x - m.pos.x;
-                            const dy = this.position.y - m.pos.y;
-                            if (dx * dx + dy * dy > 10000) {
-                                this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
-                            }
-                        } else {
-                            this.force.y += this.mass * 0.0001; //gravity
-                        }
-
                     }
-                },
+                    if (tech.isSporeFollow && this.lockedOn === null) { //move towards player
+                        //checking for null means that the spores don't go after the player until it has looked and not found a target
+                        const dx = this.position.x - m.pos.x;
+                        const dy = this.position.y - m.pos.y;
+                        if (dx * dx + dy * dy > 10000) {
+                            this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, Vector.add(this.playerOffPosition, this.position))), this.mass * this.thrust)
+                        }
+                    } else {
+                        this.force.y += this.mass * 0.0001; //gravity
+                    }
+
+                }
+            },
+        });
+        if (velocity) {
+            Matter.Body.setVelocity(bullet[bIndex], velocity);
+        } else {
+            const SPEED = 4 + 8 * Math.random();
+            const ANGLE = 2 * Math.PI * Math.random()
+            Matter.Body.setVelocity(bullet[bIndex], {
+                x: SPEED * Math.cos(ANGLE),
+                y: SPEED * Math.sin(ANGLE)
             });
-            if (velocity) {
-                Matter.Body.setVelocity(bullet[bIndex], velocity);
-            } else {
-                const SPEED = 4 + 8 * Math.random();
-                const ANGLE = 2 * Math.PI * Math.random()
-                Matter.Body.setVelocity(bullet[bIndex], {
-                    x: SPEED * Math.cos(ANGLE),
-                    y: SPEED * Math.sin(ANGLE)
-                });
-            }
+        }
 
-            Composite.add(engine.world, bullet[bIndex]); //add bullet to world
+        Composite.add(engine.world, bullet[bIndex]); //add bullet to world
 
-            if (tech.isMutualism && m.health > 0.05) {
-                m.health -= 0.01
-                m.displayHealth();
-                bullet[bIndex].isMutualismActive = true
-            }
+        if (tech.isMutualism && m.health > 0.05) {
+            m.health -= 0.01
+            m.displayHealth();
+            bullet[bIndex].isMutualismActive = true
         }
     },
     iceIX(speed = 0, dir = m.angle + Math.PI * 2 * Math.random(), where = {

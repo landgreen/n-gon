@@ -12419,6 +12419,104 @@ const tech = {
         remove() { }
     },
     {
+        name: "tamagotchi",
+        description: `you adopt a digital <strong>pet</strong>!!!1!!<br>after each <strong>n-gon</strong> level your pet brings you <strong>something</strong><br>if your <strong>pet</strong> <strong style="color:red;">dies</strong> you <strong style="color:red;">die</strong> in <strong>n-gon</strong>`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isInstant: true,
+        isJunk: true,
+        allowed() { return true },
+        requires: "",
+        effect() {
+            tech.isDigitalPet = true
+            window.open('../tamagotchi-dog/index.html', '_blank')
+
+            // for communicating to other tabs, like planetesimals
+            // Connection to a broadcast channel
+            const bc = new BroadcastChannel('tamagotchi');
+            bc.activated = false
+
+            bc.onmessage = function (ev) {
+                // if (ev.data === 'tech') {
+                //     powerUps.spawn(m.pos.x, m.pos.y, "tech");
+                // }
+                if (ev.data === 'death') {
+                    simulation.inGameConsole(`your digital pet died!`, 360)
+                    m.death()
+                    bc.activated = false
+                    bc.close(); //end session
+                }
+                if (ev.data === 'ready' && !bc.activated) {
+                    bc.activated = true //prevents n-gon from activating multiple copies of planetesimals
+                    bc.postMessage("activate");
+                }
+                if (ev.data.hunger) {
+                    // console.log(ev.data, 'hi')
+                    for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+                        if (simulation.ephemera[i].name === 'tamagotchi') {
+                            simulation.ephemera[i].hunger = ev.data.hunger
+                            simulation.ephemera[i].energy = ev.data.energy
+                            simulation.ephemera[i].cleanliness = ev.data.cleanliness
+                            break;
+                        }
+                    }
+                }
+            }
+
+            simulation.ephemera.push({
+                name: "tamagotchi",
+                hunger: 340,
+                energy: 340,
+                cleanliness: 340,
+                do() {
+                    if (this.hunger <= 0 && this.energy <= 0) {
+                        simulation.inGameConsole(`your digital pet died!`, 360)
+                        m.death()
+                        const message = {
+                            hunger: this.hunger,
+                            energy: this.energy,
+                            cleanliness: this.cleanliness,
+                        };
+                        bc.postMessage(message);
+                        bc.activated = false
+                        bc.close(); //end session
+                    }
+                    this.hunger -= 0.06
+                    this.energy -= 0.06
+                    this.cleanliness -= 0.06
+                    if (!(simulation.cycle % 120)) {
+                        const message = {
+                            hunger: this.hunger,
+                            energy: this.energy,
+                            cleanliness: this.cleanliness,
+                        };
+                        bc.postMessage(message);
+                    }
+                    // bc.postMessage('status');
+                },
+            })
+
+            window.addEventListener('blur', () => {
+                for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+                    if (simulation.ephemera[i].name === 'tamagotchi') {
+                        const message = {
+                            hunger: simulation.ephemera[i].hunger,
+                            energy: simulation.ephemera[i].energy,
+                            cleanliness: simulation.ephemera[i].cleanliness,
+                        };
+                        bc.postMessage(message);
+                        break;
+                    }
+                }
+            });
+
+        },
+        remove() {
+            tech.isDigitalPet = false
+        }
+    },
+    {
         name: "tinker",
         description: `<strong>permanently</strong> unlock <strong class='color-junk'>JUNK</strong>${powerUps.orb.tech()} in experiment mode<br><em>this effect is stored for future visits</em>`,
         maxCount: 1,
@@ -12968,4 +13066,5 @@ const tech = {
     isExplodeContact: null,
     isMissileSide: null,
     isLaserShot: null,
+    isDigitalPet: null
 }

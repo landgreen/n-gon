@@ -1417,8 +1417,7 @@ const m = {
                         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
                         player.force.y = -m.jumpForce; //player jump force
                         //if head is clear don't do xForce
-                        if (Matter.Query.ray(map, { x: m.pos.x - sensorWidth, y: m.pos.y }, { x: m.pos.x + sensorWidth, y: m.pos.y }).length) {
-                            console.log('head not clear')
+                        if (Matter.Query.ray(map, { x: m.pos.x - sensorWidth, y: m.pos.y - 25 }, { x: m.pos.x + sensorWidth, y: m.pos.y - 25 }).length) {
                             player.force.x = xForce * m.jumpForce; //player jump force
                         }
                         Matter.Body.setVelocity(player, { x: 0, y: 0 });//zero player y-velocity for consistent jumps
@@ -4578,10 +4577,10 @@ const m = {
                 m.fieldMeterColor = "#ff0"
                 m.eyeFillColor = m.fieldMeterColor
                 m.hold = function () {
-                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && bullet.length < 300 && (m.cycle % 2)) {
+                    if (m.energy > m.maxEnergy - 0.02 && m.fieldCDcycle < m.cycle && !input.field && (m.cycle % 2)) {
                         if (simulation.molecularMode === 0) {
                             if (tech.isSporeFlea) {
-                                const drain = 0.18 + (Math.max(bullet.length, 200) - 200) * 0.02
+                                const drain = 0.2// + (Math.max(bullet.length, 200) - 200) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     const speed = m.crouch ? 20 + 8 * Math.random() : 10 + 3 * Math.random()
@@ -4595,7 +4594,7 @@ const m = {
                                     m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             } else if (tech.isSporeWorm) {
-                                const drain = 0.18 + (Math.max(bullet.length, 200) - 200) * 0.02
+                                const drain = 0.2// + (Math.max(bullet.length, 200) - 200) * 0.02
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.worm({
@@ -4610,8 +4609,8 @@ const m = {
                                     m.fieldUpgrades[4].endoThermic(drain)
                                 }
                             } else {
-                                const drain = 0.095 + (Math.max(bullet.length, 200) - 200) * 0.01
-                                for (let i = 0, len = 5; i < len; i++) {
+                                const drain = 0.1// + (Math.max(bullet.length, 200) - 200) * 0.01
+                                for (let i = 0, len = 3; i < len; i++) {
                                     if (m.energy > 3 * drain) {
                                         m.energy -= drain
                                         const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
@@ -4645,7 +4644,7 @@ const m = {
                             m.fieldUpgrades[4].endoThermic(drain)
                         } else if (simulation.molecularMode === 3) {
                             if (tech.isDroneRadioactive) {
-                                const drain = 0.8 + (Math.max(bullet.length, 150) - 150) * 0.01
+                                const drain = 0.9// + (Math.max(bullet.length, 150) - 150) * 0.01
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.droneRadioactive({
@@ -4657,7 +4656,7 @@ const m = {
                             } else {
                                 //every bullet above 100 adds 0.005 to the energy cost per drone
                                 //at 200 bullets the energy cost is 0.45 + 100*0.006 = 1.05
-                                const drain = (0.45 + (Math.max(bullet.length, 200) - 200) * 0.006) * tech.droneEnergyReduction
+                                const drain = (0.5) * tech.droneEnergyReduction //+ (Math.max(bullet.length, 200) - 200) * 0.006
                                 if (m.energy > drain) {
                                     m.energy -= drain
                                     b.drone()
