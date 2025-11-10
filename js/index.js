@@ -537,7 +537,7 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
         ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>` : " "}
         ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
         ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row">one mob per level will<br>be from <strong>2</strong> <strong class="color-tier">TIER</strong> higher</div>` : " "}
+        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>3</strong> levels</div>` : " "}
         ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>` : " "}
         ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
         ${simulation.difficultyMode > 6 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>` : " "}

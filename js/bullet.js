@@ -643,12 +643,9 @@ const b = {
                     requestAnimationFrame(cycle)
                 } else {
                     count++
-                    if (count < 21) requestAnimationFrame(cycle);
-                    if (count % 2) {
-                        const unit = Vector.rotate({
-                            x: 1,
-                            y: 0
-                        }, curl * 6.28 * count / 18 + off)
+                    if (count < 29) requestAnimationFrame(cycle);
+                    if (!(count % 3)) {
+                        const unit = Vector.rotate({ x: 1, y: 0 }, curl * 6.28 * count / 27 + off)
                         b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color, 0.5); //makes bullet do explosive damage at end
                     }
                 }
@@ -7202,7 +7199,15 @@ const b = {
             isDischarge: false,
             knockBack: 0.0005, //set in tech: cavitation
             applyKnock(velocity) {
-                player.force.x -= 0.7 * this.knockBack * velocity.x
+                if (m.onGround) {
+                    if (m.crouch) {
+                        player.force.x -= 0.1 * this.knockBack * velocity.x
+                    } else {
+                        player.force.x -= 0.4 * this.knockBack * velocity.x
+                    }
+                } else {
+                    player.force.x -= 0.7 * this.knockBack * velocity.x
+                }
                 if (velocity.y > 0) {
                     player.force.y -= 4.3 * this.knockBack * velocity.y
                 } else {

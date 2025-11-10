@@ -17,7 +17,6 @@ const level = {
     start() {
         level.setConstraints()
         if (level.levelsCleared === 0) { //this code only runs on the first level
-
             // simulation.enableConstructMode()  //used to build maps in testing mode
             // simulation.difficultyMode = 1
             // build.isExperimentRun = true
@@ -29,19 +28,20 @@ const level = {
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(99999)
+            // powerUps.research.changeRerolls(100)
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
+
             // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 1000
-            // m.couplingChange(999999999)
-
+            // m.couplingChange(100)
             // m.fieldUpgrades[6].isRewindMode = true
             // window.removeEventListener("keydown", m.fieldEvent);
             // m.fieldUpgrades[6].set()
             // m.wakeCheck();
             // m.damageDone *= 5
+
             // m.maxHealth = m.health = 9999999
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
@@ -51,26 +51,16 @@ const level = {
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
-            // b.giveGuns("shotgun") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns("laser") //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+
+            // b.giveGuns(8) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("aerostat") });
-
-            // tech.laserColor = "#fff"
-            // tech.laserColorAlpha = "rgba(255, 255, 255, 0.5)"
-
-            // requestAnimationFrame(() => { tech.giveTech("MIRV") });
+            // requestAnimationFrame(() => { tech.giveTech("pair production") });
             // tech.giveTech("smelting")
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nitinol")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tamagotchi")
-            // for (let i = 0; i < 1; i++) tech.giveTech("spherical harmonics")
+
+            // for (let i = 0; i < 1; ++i) tech.giveTech("pyrotechnics")
             // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
-            // requestAnimationFrame(() => { level.blurryChoices = true });
-            // m.lastKillCycle = m.cycle
-            // for (let i = 0; i < 4; i++) powerUps.directSpawn(1550, -450, "field");
-            // for (let i = 0; i < 20; i++) powerUps.directSpawn(m.pos.x + 200, m.pos.y - 250, "research", false);
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
@@ -80,18 +70,14 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.starter(1300 + 200 * i, -200, 700)
-            // for (let i = 0; i < 1; i++) spawn.pitcher4(1100 + 100 * i, -100 - i * 100)
-            // for (let i = 0; i < 1; i++) spawn.defendingBoss(1100 + 100 * i, -300)
-            // for (let i = 0; i < 1; i++) spawn.slasher4(1100 + 100 * i, -500, 50)
-            // for (let i = 0; i < 1; i++) spawn.defendingBoss(1300 + 100 * i, -400)
-            // for (let i = 0; i < 1; i++) spawn.laserBoss(1100 + 100 * i, -500)
-            // for (let i = 0; i < 1; i++) spawn.hopsploder(1100 + 100 * i, -500)
-            // for (let i = 0; i < 1; ++i) spawn.spiderBoss(1900, -500)
+            // for (let i = 0; i < 1; i++) spawn.tendrilBoss3(1300 + 200 * i, -200)
+            // for (let i = 0; i < 2; i++) spawn.stabber(1300 + 200 * i, -200)
+            // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
-            // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 500 * Math.random(), m.pos.y + 500 * Math.random(), "boost");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
+            // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
+
             //lore testing
             // localSettings.isTrainingNotAttempted = true
             // simulation.isCheating = false //true;
@@ -280,7 +266,7 @@ const level = {
             if (m.coupling > 0 && rate > 0) {
                 const c = Math.ceil(rate * m.coupling / 3)
                 powerUps.spawnDelay("coupling", c, 4);
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
+                simulation.inGameConsole(`${(rate * 100 / 3).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
             }
 
             // let ammoSum = 0
@@ -545,6 +531,19 @@ const level = {
     constraintDescription2: "",
     constraint: [
         {
+            description: "hallucinations",
+            effect() {
+                requestAnimationFrame(() => {
+                    spawn.hallucinationMob()
+                    spawn.hallucinationMob()
+                    spawn.hallucinationMob()
+                    // spawn.hallucinationPowerUp()
+                })
+            },
+            remove() {
+            }
+        },
+        {
             description: "reduced healing",//just A-Z for use with simulation.draw.font.drawString 
             effect() {
                 level.isLowHeal = true
@@ -615,7 +614,7 @@ const level = {
                     do() {
                         this.time++
                         if (level.levels[level.onLevel] === this.levelName) {
-                            if (this.time > 3000 && !(this.time % 540)) spawn.WIMP(level.enter.x, level.enter.y)
+                            if (this.time > 3000 && !(this.time % 720)) spawn.WIMP(level.enter.x, level.enter.y)
                         } else {
                             simulation.removeEphemera(this);
                         }
@@ -2267,7 +2266,7 @@ const level = {
                 // }
                 if (tech.isHealAttract) {  //send heals to next portal
                     for (let i = 0; i < powerUp.length; i++) {
-                        if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) {
+                        if (powerUp[i].name === "heal") {
                             Matter.Body.setPosition(powerUp[i], Vector.add(this.portalPair.portal.position, { x: 500 * (Math.random() - 0.5), y: 500 * (Math.random() - 0.5) }));
                         }
                     }

@@ -506,7 +506,7 @@ const tech = {
     },
     {
         name: "Verlet integration",
-        description: "<strong>3x</strong> <strong class='color-d'>damage</strong><br>after mobs <strong>die</strong> advance time <strong>0.5</strong> seconds",
+        description: "<strong>3x</strong> <strong class='color-d'>damage</strong><br>after mobs <strong>die</strong> advance <strong>time</strong> <strong>0.5</strong> seconds",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -3654,7 +3654,7 @@ const tech = {
         descriptionFunction() {
             const r = Math.ceil(this.rate * powerUps.research.count)
             const c = Math.ceil(this.rate * m.coupling)
-            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(100 * this.rate / 3).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)}`
+            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${(Math.ceil(c / 3)).toFixed(0)} ${powerUps.orb.coupling(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(100 * this.rate / 3).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)}`
         },
         maxCount: 9,
         count: 0,
@@ -3850,7 +3850,9 @@ const tech = {
     },
     {
         name: "counterfactual conditional",
-        description: `add a <strong>30x</strong> <em class='flicker'>frequency</em> ${powerUps.orb.tech()} to the possible <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br>when chosen it <strong>randomizes</strong> current ${powerUps.orb.tech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
+        // description: `add a <strong>30x</strong> <em class='flicker'>frequency</em> ${powerUps.orb.tech()} to the <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br>when chosen it <strong>randomizes</strong> current ${powerUps.orb.tech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
+        // description: `add a <strong>30x</strong> <em class='flicker'>frequency</em> ${powerUps.orb.tech()} to the pool of choices<br>that <strong>randomizes</strong> current ${powerUps.orb.tech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
+        description: `when <strong class='color-choice'><span>ch</span><span>oos</span><span>ing</span></strong> ${powerUps.orb.tech()} you have a <strong>~33%</strong> chance<br>to get a <strong class='color-choice'><span>ch</span><span>oi</span><span>ce</span></strong> that <strong>randomizes</strong> your <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4959,7 +4961,7 @@ const tech = {
     {
         name: "paradigm shift",
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech * m.defense()).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(health cost grows by 2x each use)</em>`
+            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech * m.defense()).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(cost grows by 2x each use)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -8037,7 +8039,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.isLaserBotUpgrade || tech.isLaserMine || (tech.isLaserShot && tech.haveGunCheck("shotgun"))
+            return (tech.haveGunCheck("laser") && !tech.isPulseLaser) || tech.isLaserBotUpgrade || (tech.haveGunCheck("laser") && tech.isLaserMine) || (tech.isLaserShot && tech.haveGunCheck("shotgun"))
         },
         requires: "laser, not pulse",
         effect() {
@@ -8102,7 +8104,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade || tech.isLaserField || (tech.isLaserShot && tech.haveGunCheck("shotgun"))) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
+            return (tech.haveGunCheck("laser") || (tech.haveGunCheck("laser") && tech.isLaserMine) || tech.isLaserBotUpgrade || tech.isLaserField || (tech.isLaserShot && tech.haveGunCheck("shotgun"))) && !tech.isWideLaser && !tech.isPulseLaser && !tech.historyLaser
         },
         requires: "laser, not diffuse beam, pulse, slow light",
         effect() {
@@ -8241,7 +8243,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || tech.isLaserMine || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
+            return (tech.haveGunCheck("laser") || tech.isLaserBotUpgrade || (tech.haveGunCheck("laser") && tech.isLaserMine) || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
         },
         requires: "laser, not free-electron, pulse",
         effect() {
@@ -8264,7 +8266,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
+            return (tech.haveGunCheck("laser") || (tech.haveGunCheck("laser") && tech.isLaserMine) || tech.isLaserBotUpgrade || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
         },
         requires: "laser, not pulse, infrared diode",
         effect() {
@@ -8289,7 +8291,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("laser") || tech.isLaserMine || tech.isLaserBotUpgrade || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
+            return (tech.haveGunCheck("laser") || (tech.haveGunCheck("laser") && tech.isLaserMine) || tech.isLaserBotUpgrade || tech.isLaserField) && !tech.isPulseLaser && tech.laserDrain === 0.003
         },
         requires: "laser, not pulse, infrared diode",
         effect() {
@@ -8854,7 +8856,7 @@ const tech = {
     },
     {
         name: "pair production",
-        description: "after picking up a <strong>power up</strong><br><strong>+200</strong> <strong class='color-f'>energy</strong>",
+        description: "after picking up a <strong>power up</strong><br><strong>+200</strong> <strong class='color-f'>energy</strong> and advance <strong>time</strong> <strong>0.3</strong> seconds",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -12469,47 +12471,45 @@ const tech = {
                 hunger: 340,
                 energy: 340,
                 cleanliness: 340,
+                report() {
+                    const message = {
+                        hunger: Math.max(1, this.hunger),
+                        energy: Math.max(1, this.energy),
+                        cleanliness: Math.max(1, this.cleanliness),
+                    };
+                    bc.postMessage(message);
+                },
                 do() {
                     if (this.hunger <= 0 && this.energy <= 0) {
                         simulation.inGameConsole(`your digital pet died!`, 360)
                         m.death()
-                        const message = {
-                            hunger: this.hunger,
-                            energy: this.energy,
-                            cleanliness: this.cleanliness,
-                        };
-                        bc.postMessage(message);
+                        this.report()
                         bc.activated = false
                         bc.close(); //end session
+                        simulation.removeEphemera("tamagotchi", true)
                     }
                     this.hunger -= 0.06
                     this.energy -= 0.06
                     this.cleanliness -= 0.06
-                    if (!(simulation.cycle % 120)) {
-                        const message = {
-                            hunger: this.hunger,
-                            energy: this.energy,
-                            cleanliness: this.cleanliness,
-                        };
-                        bc.postMessage(message);
+                    if (!(simulation.cycle % 30)) {
+                        this.report()
                     }
-                    // bc.postMessage('status');
                 },
             })
 
-            window.addEventListener('blur', () => {
-                for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
-                    if (simulation.ephemera[i].name === 'tamagotchi') {
-                        const message = {
-                            hunger: simulation.ephemera[i].hunger,
-                            energy: simulation.ephemera[i].energy,
-                            cleanliness: simulation.ephemera[i].cleanliness,
-                        };
-                        bc.postMessage(message);
-                        break;
-                    }
-                }
-            });
+            // window.addEventListener('blur', () => {
+            //     for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
+            //         if (simulation.ephemera[i].name === 'tamagotchi') {
+            //             const message = {
+            //                 hunger: simulation.ephemera[i].hunger,
+            //                 energy: simulation.ephemera[i].energy,
+            //                 cleanliness: simulation.ephemera[i].cleanliness,
+            //             };
+            //             bc.postMessage(message);
+            //             break;
+            //         }
+            //     }
+            // });
 
         },
         remove() {

@@ -535,7 +535,7 @@ const mobs = {
                     ctx.fill();
                 }
             },
-            wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0006) {
+            wing(a, radius = 250, ellipticity = 0.4, dmg = 0.0003) {
                 const minorRadius = radius * ellipticity
                 const perp = { x: Math.cos(a), y: Math.sin(a) } //
                 const where = Vector.add(this.position, Vector.mult(perp, radius + 0.8 * this.radius))
@@ -552,10 +552,10 @@ const mobs = {
 
                     //push player away
                     const sub = Vector.sub(m.pos, this.position)
-                    const push = Vector.mult(Vector.normalise(sub), 0.3 * player.mass)
+                    const push = Vector.mult(Vector.normalise(sub), 0.15 * player.mass)
                     Matter.Body.setVelocity(player, {
-                        x: 0.8 * player.velocity.x + push.x,
-                        y: 0.8 * player.velocity.y + push.y - 0.1 * player.mass
+                        x: 0.9 * player.velocity.x + push.x,
+                        y: 0.9 * player.velocity.y + push.y - 0.1 * player.mass
                     })
                 }
             },

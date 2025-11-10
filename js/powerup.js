@@ -1643,7 +1643,17 @@ const powerUps = {
     onPickUp(who) {
         powerUps.research.currentRerollCount = 0
         if (tech.isTechDamage && who.name === "tech") m.takeDamage(0.1)
-        if (tech.isMassEnergy) m.energy += 2 * level.isReducedRegen;
+        if (tech.isMassEnergy) {
+            if (!m.isTimeDilated) {
+                requestAnimationFrame(() => {
+                    simulation.timePlayerSkip(15)
+                    simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                    m.energy += 2 * level.isReducedRegen;
+                }); //wrapping in animation frame prevents errors, probably
+            } else {
+                m.energy += 2 * level.isReducedRegen;
+            }
+        }
         if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
             if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)

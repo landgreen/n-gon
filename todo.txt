@@ -1,30 +1,38 @@
 ******************************************************** NEXT PATCH **************************************************
 
-nitinol skin tech: ledge grab upgraded to full wall grab and wall jump
-  wall grab will hold hold the player in place with left and right keys
-  nitinol no longer has higher jumps
-  nitinol can no long get acoustic levitation
+new bosses:
+  spiderBoss2
+  spiderBoss3
+  spiderBoss4
+  tendrilBoss
+  tendrilBoss3
+  hydraBoss
+  hydraBoss2
+  hydraBoss3
 
-Higgs mechanism gets 1.3x jumps, but 4->3x fire rate
-mass-energy equivalence has 1.2 movement
-quenching gives 0.5->0.6x overheal to max health
+new constraint - hallucinations
 
-alternate trainBoss2 on corridor level with yellow beams
-the moving platform on towers level comes consistently after 2-3 seconds to reduce the wait
+pair production will advance time 0.3s after picking up power ups
+foam recoil is reduce while standing on the ground or crouching
+when you have accretion, heals will now go to the next level even if they aren't nearby
+clarified counterfactual conditional text
+mob wings push 30% less and do 30% less damage
+pyrotechnics grenades explode about 0.05 seconds slower and a 1 fewer explosion
 
 bug fixes
-  Cordyceps no longer eats dark matter
-  shotgun laser graphical glitch with laser lens
+  adjusted interest wording to match 6% coupling spawn
+  assignment to const var on laserTargetingBoss
 
 *********************************************************** TODO *****************************************************
 
-should blocks block mobs and bullets?
-  is this too easy to cheese by holding a huge block
-    maybe drain energy when the block you hold hits a mob...
 
-rework martingale?
-  it's really strong, but people may not understand how to use it.
-  how to be true to the name (where you gamble by doubling your bet)
+tech: advance time 1 second after eating a power up
+  skin tech Verlet integration unlocks
+
+
+drain energy when the block you hold hits a mob
+  set held block to collide with mob and mob bullets
+  in player code check for collisions between block and mobs
 
 performance issue with experiment mode
   causes my computer fan to turn on when I leave it on for a few minutes
@@ -35,16 +43,6 @@ performance issue with experiment mode
       choices
     find a way to not draw things off screen?
     something might be changing size and forcing a redraw of everything
-
-new constraint - see hallucinations
-  draw shapes that don't exists that look like
-    mobs
-    map
-    power ups?
-    blocks?
-  shapes end
-    fade over time?
-    fade when player gets close?
 
 perfect diamagnetism tech:   - using field while crouching will pull in blocks
   releasing field will fire the blocks  (like control)
