@@ -736,20 +736,6 @@ const powerUps = {
 
             m.couplingChange(1)
         },
-        // spawnDelay(num) {
-        //     let count = num
-        //     let respawnDrones = () => {
-        //         if (count > 0) {
-        //             requestAnimationFrame(respawnDrones);
-        //             if (!simulation.paused && !simulation.isChoosing) { //&& !(simulation.cycle % 2)
-        //                 count--
-        //                 const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
-        //                 powerUps.spawn(where.x, where.y, "coupling");
-        //             }
-        //         }
-        //     }
-        //     requestAnimationFrame(respawnDrones);
-        // }
     },
     boost: {
         name: "boost",
@@ -1539,7 +1525,7 @@ const powerUps = {
                                 document.body.style.cursor = "auto";
                                 document.getElementById("choose-grid").style.transitionDuration = "0s";
                             }
-                            if (count < 10 && simulation.isChoosing && tech.isBrainstormActive) {
+                            if (count < 7 && simulation.isChoosing && tech.isBrainstormActive) {
                                 requestAnimationFrame(cycle);
                             } else {
                                 tech.isBrainstormActive = false
@@ -1624,7 +1610,7 @@ const powerUps = {
             }
         },
     },
-    spawnDelay(type, count, delay = 2) {
+    spawnDelay(type, count, delay = 2, location = m.pos) {
         count *= delay
         let cycle = () => {
             if (count > 0) {
@@ -1632,7 +1618,7 @@ const powerUps = {
                 if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300) { //&& !(simulation.cycle % 2)
                     count--
                     if (!(count % delay)) {
-                        const where = { x: m.pos.x + 50 * (Math.random() - 0.5), y: m.pos.y + 50 * (Math.random() - 0.5) }
+                        const where = { x: location.x + 50 * (Math.random() - 0.5), y: location.y + 50 * (Math.random() - 0.5) }
                         powerUps.spawn(where.x, where.y, type);
                     }
                 }
@@ -1738,9 +1724,9 @@ const powerUps = {
                 powerUps.spawn(x, y + 40, "heal", false)
                 powerUps.spawn(x, y - 40, "heal", false)
             }
-            if (tech.isResearchReality) powerUps.spawnDelay("research", 6)
-            if (tech.isBanish) powerUps.spawnDelay("research", 3)
-            if (tech.isCouplingNoHit) powerUps.spawnDelay("coupling", 9)
+            if (tech.isResearchReality) powerUps.spawnDelay("research", 6, 2, { x: x, y: y })
+            if (tech.isBanish) powerUps.spawnDelay("research", simulation.difficultyMode > 2 ? 2 : 4, 2, { x: x, y: y })
+            if (tech.isCouplingNoHit) powerUps.spawnDelay("coupling", 9, 2, { x: x, y: y })
             // if (tech.isRerollDamage) powerUps.spawnDelay("research", 1)
         }
     },

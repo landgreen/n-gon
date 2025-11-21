@@ -320,7 +320,7 @@ const m = {
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
-        m.fieldUpgrades[4].endoThermic(0.4)
+        m.fieldUpgrades[4].endoThermic(0.6)
     },
     alive: false,
     isSwitchingWorlds: false,
@@ -6614,6 +6614,9 @@ const m = {
                                     }
                                 }
                                 // simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>, {</span> x<span class='color-symbol'>:</span> 0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span> 0 <span class='color-symbol'>})</span> &nbsp; &nbsp; <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">//↑↑↓↓</em>`);
+                            } else {
+                                simulation.inGameConsole(`<em style ="color:#777;">//additional height required</em>`);
+
                             }
                         }
                         //  AoE stun mobs?

@@ -28,12 +28,12 @@ const level = {
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(100)
+            // powerUps.research.changeRerolls(90)
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
 
-            // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 1000
             // m.couplingChange(100)
             // m.fieldUpgrades[6].isRewindMode = true
@@ -42,7 +42,7 @@ const level = {
             // m.wakeCheck();
             // m.damageDone *= 5
 
-            // m.maxHealth = m.health = 9999999
+            // m.maxHealth = m.health = 6
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -52,26 +52,27 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.1);
 
-            // b.giveGuns(8) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
             // requestAnimationFrame(() => { tech.giveTech("pair production") });
-            // tech.giveTech("smelting")
+            // tech.giveTech("ice-shot")
             // tech.addJunkTechToPool(0.5)
 
-            // for (let i = 0; i < 1; ++i) tech.giveTech("pyrotechnics")
-            // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("infrared diode") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("invariant")
+            // for (let i = 0; i < 1; i++) tech.giveTech("brainstorming")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("fine-structure constant") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
+            // level.subway()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.tendrilBoss3(1300 + 200 * i, -200)
-            // for (let i = 0; i < 2; i++) spawn.stabber(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.spiderBoss4(1300 + 200 * i, -200)
+            // for (let i = 0; i < 2; i++) spawn.hydraBoss(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
@@ -536,7 +537,7 @@ const level = {
                 requestAnimationFrame(() => {
                     spawn.hallucinationMob()
                     spawn.hallucinationMob()
-                    spawn.hallucinationMob()
+                    // spawn.hallucinationMob()
                     // spawn.hallucinationPowerUp()
                 })
             },
@@ -3019,7 +3020,7 @@ const level = {
         const mover = level.mover(2800, -300, 1000, 25); //x,y,width.height,VxGoal,force
 
         const train = level.transport(2900, -500, 500, 25, 8); //x,y,width.height,VxGoal,force
-        spawn.bodyRect(500, -500, 50, 50);
+        // spawn.bodyRect(500, -500, 50, 50);
         const button = level.button(2535, -200)
         // spawn.bodyRect(250, -450, 50, 50); //block on button
 
@@ -3900,6 +3901,16 @@ const level = {
                     };
                 },
                 () => { //portal maze
+
+                    // const softBoss = [() => {
+                    //     spawn.centipedeBoss(x + 500, -2500, 16, 16, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                    // }, () => {
+                    //     spawn.centipedeBoss(x + -2800, -2500, 16, 16, 2, stationNumber > 0);
+                    // }, () => {
+                    //     spawn.centipedeBoss(x + 1300, -2125, 16, 16, 2, stationNumber > 0);
+                    // }]
+                    // softBoss[Math.floor(softBoss.length * Math.random())]()
+
                     const buttonsCoords = [{ x: x + 50, y: -1595 }, { x: x + 637, y: -2195 }, { x: x - 1487, y: -2145 }]
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
                     if (isExitOpen) {
@@ -4009,6 +4020,17 @@ const level = {
                     }
                 },
                 () => { //opening and closing doors
+                    // const softBoss = [() => {
+                    //     spawn.caterpillarBoss(x - 775, -2575, 15, 24, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                    // }, () => {
+                    //     spawn.caterpillarBoss(x - 1200, -1600, 15, 24, 2, stationNumber > 0);
+                    // }, () => {
+                    //     spawn.caterpillarBoss(x - 1250, -1325, 15, 24, 2, stationNumber > 0);
+                    // }, () => {
+                    //     spawn.caterpillarBoss(x + 550, -2375, 15, 24, 2, stationNumber > 0);
+                    // }]
+                    // softBoss[Math.floor(softBoss.length * Math.random())]()
+
                     const buttonsCoords = [{ x: x - 800, y: -2245 }, { x: x + 250, y: -870 }, { x: x + 1075, y: -1720 }, { x: x - 1600, y: -1995 }]
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
                     if (isExitOpen) {
@@ -4117,6 +4139,15 @@ const level = {
                     }
                 },
                 () => { //slime
+                    // const softBoss = [() => {
+                    //     spawn.larvaBoss(x - 794, -1032, 15, 24, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                    // }, () => {
+                    //     spawn.larvaBoss(x - 868, -177, 15, 24, 2, stationNumber > 0);
+                    // }, () => {
+                    //     spawn.larvaBoss(x + 112, -1540, 15, 24, 2, stationNumber > 0);
+                    // }]
+                    // softBoss[Math.floor(softBoss.length * Math.random())]() // softBoss[2]()
+
                     const buttonsCoords = [{ x: x - 675, y: -895 }, { x: x - 750, y: -70 }, { x: x + 75, y: -570 },]
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
                     if (isExitOpen) {
@@ -4216,6 +4247,12 @@ const level = {
                     }
                 },
                 () => { //portal fling
+                    // const softBoss = [() => {
+                    //     spawn.ringwormBoss2(x - 900, -1400); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                    // }]
+                    // softBoss[Math.floor(softBoss.length * Math.random())]()
+
+
                     const buttonsCoords = [{ x: x + 775, y: -1695 }, { x: x - 775, y: -800 }, { x: x - 375, y: -2080 },]
                     const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
                     if (isExitOpen) {
@@ -4806,7 +4843,9 @@ const level = {
             simulation.zoomTransition(level.defaultZoom)
             // spawn.randomHigherTierMob(1732, -2267)
             // stations[10]() //for testing a specific station
-            stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when uploading
+            stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when done testing individual stations
+            // stations[4]()
+
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor
             spawn.mapRect(x + 1500 - 200, -2000, 6400, 1500); //tunnel roof
@@ -7566,12 +7605,13 @@ const level = {
         let buttons = []
         let lasers = []
         let balance = []
+        let boost = []
         level.isFlipped = false;
         let isFlipping = false;
         let isSpawned = false
         const flipAnimationCycles = 120
 
-        let elevator = body[body.length] = Bodies.rectangle(800, 500, 300, 50, {
+        let elevator = body[body.length] = Bodies.rectangle(800, 500, 200, 50, {
             collisionFilter: {
                 category: cat.body, //cat.map,
                 mask: cat.player | cat.body | cat.bullet | cat.mob | cat.mobBullet //| cat.powerUp
@@ -7584,7 +7624,7 @@ const level = {
             restitution: 0,
             frictionAir: 1,
             classType: "body",
-            holdX: 1762,
+            holdX: 1712,
             maxHeight: -1580,
             minHeight: 90,
             verticalForce: 0.02,
@@ -7694,6 +7734,9 @@ const level = {
 
             lasers.push(level.laser({ x: 1610, y: -850 }, { x: -1625, y: -850 }))
 
+            boost.push(level.boost(1800, 1980, 3000, Math.PI / 2)) //floor
+            boost.push(level.boost(1800, -2050, 3000, -Math.PI / 2)) //top
+
             //left side
             //level entrance
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -7778,6 +7821,10 @@ const level = {
             // spawn.mapRect(1980, 862 - 25, 25, 25); //laser entrance
             // balance.push(level.rotor(1000, 910 - 32, 550, 32, 0.01, 0, 0.5))
 
+            boost.push(level.boost(1800, -2050, 3000, -Math.PI / 2))
+            boost.push(level.boost(1800, 1980, 3000, Math.PI / 2))
+
+
             //left side
             //level entrance
             spawn.mapRect(level.enter.x, level.enter.y - 20 - 20, 100, 20);
@@ -7842,6 +7889,7 @@ const level = {
             removeAll(buttons);
             buttons = []
             lasers = []
+            boost = []
 
             function invertVertical(array) {
                 for (let i = 0; i < array.length; ++i) {
@@ -7888,6 +7936,9 @@ const level = {
         buildMapOutline()
         buildNormalMap()
         level.custom = () => {
+            for (let i = 0; i < boost.length; i++) {
+                boost[i].query()
+            }
             elevator.move()
             // console.log(elevator)
             lasers[lasers.length - 1].look.y = elevator.position.y
@@ -7988,7 +8039,18 @@ const level = {
         level.customTopLayer = () => {
             if (buttons[1].isUp) {
                 for (let i = 0; i < lasers.length - 1; i++) lasers[i].query()
-                if (simulation.cycle % 120 > 60) lasers[lasers.length - 1].query()
+                if (simulation.cycle % 120 > 60) {
+                    lasers[lasers.length - 1].query()
+                }
+                // else {
+                //     ctx.strokeStyle = "rgba(255,0,0,0.05)"
+                //     ctx.lineWidth = 10;
+                //     ctx.beginPath()
+                //     // console.log(lasers[lasers.length - 1])
+                //     ctx.moveTo(lasers[lasers.length - 1].position.x, lasers[lasers.length - 1].position.y)
+                //     ctx.lineTo(lasers[lasers.length - 1].look.x, lasers[lasers.length - 1].look.y)
+                //     ctx.stroke()
+                // }
             }
             ctx.fillStyle = "#233" //balances center dot
             ctx.beginPath();

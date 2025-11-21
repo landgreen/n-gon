@@ -1,34 +1,96 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new bosses:
-  spiderBoss2
-  spiderBoss3
-  spiderBoss4
-  tendrilBoss
-  tendrilBoss3
-  hydraBoss
-  hydraBoss2
-  hydraBoss3
 
-new constraint - hallucinations
+new bosses
+  centipedeBoss T1
+  caterpillarBoss T2
+  larvaBoss T3
+  ringwormBoss T1
+  ringwormBoss4 T4
 
-pair production will advance time 0.3s after picking up power ups
-foam recoil is reduce while standing on the ground or crouching
-when you have accretion, heals will now go to the next level even if they aren't nearby
-clarified counterfactual conditional text
-mob wings push 30% less and do 30% less damage
-pyrotechnics grenades explode about 0.05 seconds slower and a 1 fewer explosion
+hydraBosses leg spawns have an animation for growing the leg
+hydraBoss3 removed
+
+brainstorming lasts 10s -> 7s
+JUNK tech: slink - move really fast when crouched
+added 2 boost jumps to interferometer
+decoherence spawns 3->2 research, but on difficulties with only 1 boss it spawns 4
+fine-structure constant, banish, and Ψ(t) collapse power ups spawn on the boss, not the player
+spray boss bullets are 1.3x larger and do 1.3x damage
+  9->7 total fire cycles
 
 bug fixes
-  adjusted interest wording to match 6% coupling spawn
-  assignment to const var on laserTargetingBoss
+  couldn't see stinger wings
+  martingale and coherence reset correctly at the end of a run
 
 *********************************************************** TODO *****************************************************
 
 
+add a custom boss to each subway station  (soft bosses   or  modifed reactor bosses  or level specific bosses like laserBoss)
+  subway stations: 
+    stations[stationList[Math.abs(stationNumber % stationList.length)]]()
+    people movers
+      need a way to keep the boss from being dragged around
+        maybe bind a worm to a point in space above the movers
+    angled jumps
+      extra long worm
+    crouch tunnels
+    jump pads and 6 sided platforms
+      standard worm
+    tower levels and squares
+      smaller worm
+    portal fling
+      ring worm
+    done: slime,opening and closing doors,portal maze
+
+softBosses
+  shared health between mobs?
+    or can each piece die independent?
+      shared health in cells of 2 or 4?
+  completed softBosses
+    centipedeBoss
+  ideas for new softBosses
+    cycling invulnerability regions
+      also catapiller, but with a head on both ends
+    unconnected mobs have some attack effect
+    2 mob wide ring shaped (or oval)
+      or square or triangle...
+    normal worm body, with 2 branching arms that have stringers on the tip
+    wings every 3 segments?
+    slasher 1,2,3,4 style head
+    softbody that isn't in a square grid, instead one column is set half way to make a series of triangle constraint connections
+    add hydra style appendages
+    add extra layers of head mobs, slicer or stinger
+    earthworm can move through walls
+
+subway rework
+  make a function that runs as each station loads and has a chance to spawn a random boss as a random spot on the level
+    track how many bosses have spawned, if it's 2 then don't spawn any more bosses
+      1 on easy? or allow easy to have an extra 2 tech?
+    make an array with a list of random positions to spawn bosses on each station
+  remove tech at the end
+  remove buttons?
+  custom softBody boss for each station
+    reduce mobs by 1/2
+  2 or 3 stations?
+
+T4 bosses and mobs
+  !slower speed
+  less effects
+
+JUNK tech
+  mobs talk when you hit them, or when they hit you.
+  https://github.com/landgreen/n-gon/discussions/500
+
+Boltzmann brain
+  do something with a low probability to occur.
+    remove the level and get rid of player legs?
+    chance to spawn something good?
+  JUNK tech?
+
 tech: advance time 1 second after eating a power up
   skin tech Verlet integration unlocks
-
+    remove effect form pair production?
 
 drain energy when the block you hold hits a mob
   set held block to collide with mob and mob bullets
