@@ -23,12 +23,12 @@ const level = {
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             // simulation.isHorizontalFlipped = false//true
-            // level.levelsCleared = 6
+            // level.levelsCleared = 11
             // level.updateDifficulty()
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(90)
+            // powerUps.research.changeRerolls(150)
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
@@ -42,7 +42,7 @@ const level = {
             // m.wakeCheck();
             // m.damageDone *= 5
 
-            // m.maxHealth = m.health = 6
+            // m.maxHealth = m.health = 20
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -71,7 +71,7 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.spiderBoss4(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.launchPusher(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.hydraBoss(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
@@ -3778,12 +3778,12 @@ const level = {
         for (let i = 1, totalNumberOfStations = 10; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
         stationList.sort(() => Math.random() - 0.5);
         // console.log(stationList)
-        stationList.splice(0, stationList.length - 3); //remove all but 3 stations
+        stationList.splice(0, stationList.length - 2); //remove all but 3 stations
         stationList.unshift(0) //add index zero to the front of the array for the starting station
         // console.log(stationList, "after splice")
 
         let isExitOpen = false
-        let isTechSpawned = false
+        // let isTechSpawned = false
         let gatesOpenRight = -1
         let gatesOpenLeft = -1
         const infrastructure = (x, isInProgress = true) => {
@@ -3841,7 +3841,7 @@ const level = {
                                 gatesOpenRight = stationNumber
                             }
                             if (Math.abs(stationNumber) > 0 && ((Math.abs(stationNumber) + 1) % stationList.length) === 0) {
-                                simulation.inGameConsole(`level exit opened`, 360);
+                                // simulation.inGameConsole(`level exit opened`, 360);
                                 isExitOpen = true;
                             }
                         }
@@ -3868,14 +3868,24 @@ const level = {
                 }
             }
             const stations = [ //update totalNumberOfStations as you add more stations 
-                () => { //empty starting station                    
+                () => { //empty starting station   
+                    console.log(stationNumber)
+                    if (Math.abs(stationNumber) > 2) isExitOpen = true
                     if (isExitOpen) {
                         level.exit.x = x - 50;
                         level.exit.y = -260;
-                        if (simulation.difficultyMode < 7 && !isTechSpawned) {
-                            isTechSpawned = true
-                            powerUps.spawn(level.exit.x, level.exit.y - 100, "tech");
+                        // if (simulation.difficultyMode < 7 && !isTechSpawned) {
+                        // isTechSpawned = true
+                        // powerUps.spawn(level.exit.x, level.exit.y - 100, "tech");
+                        // }
+                        var gateButton = level.button(x - 62, -736, 125, false) //x, y, width = 126, isSpawnBase = true
+                        gateButton.isUp = true
+                        if (stationNumber > 0) {
+                            var gateR = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                        } else {
+                            var gateL = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
                         }
+
                     } else {
                         var gateButton = level.button(x - 62, -237, 125, false) //x, y, width = 126, isSpawnBase = true
                         gateButton.isUp = true
@@ -3901,30 +3911,20 @@ const level = {
                     };
                 },
                 () => { //portal maze
-
-                    // const softBoss = [() => {
-                    //     spawn.centipedeBoss(x + 500, -2500, 16, 16, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
-                    // }, () => {
-                    //     spawn.centipedeBoss(x + -2800, -2500, 16, 16, 2, stationNumber > 0);
-                    // }, () => {
-                    //     spawn.centipedeBoss(x + 1300, -2125, 16, 16, 2, stationNumber > 0);
-                    // }]
-                    // softBoss[Math.floor(softBoss.length * Math.random())]()
-
-                    const buttonsCoords = [{ x: x + 50, y: -1595 }, { x: x + 637, y: -2195 }, { x: x - 1487, y: -2145 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x + 50, y: -1595 }, { x: x + 637, y: -2195 }, { x: x - 1487, y: -2145 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     spawn.mapRect(x + -1775, -1600, 3400, 1000); //center pillar
                     spawn.mapRect(x + -4100, -3325, 8000, 700); //roof
@@ -3948,37 +3948,48 @@ const level = {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 2850, -2425, 0);
                             spawn.randomMob(x + 2275, -2425, 0);
-                            spawn.randomMob(x + 2000, -2150, 0);
+                            // spawn.randomMob(x + 2000, -2150, 0);
                             spawn.randomMob(x + 1650, -2150, 0);
-                            spawn.randomMob(x + 1000, -2475, 0);
+                            // spawn.randomMob(x + 1000, -2475, 0);
                             spawn.randomMob(x + 725, -2450, 0);
-                            spawn.randomMob(x + 525, -2175, 0);
+                            // spawn.randomMob(x + 525, -2175, 0);
                             spawn.randomMob(x + 200, -1950, 0);
-                            spawn.randomMob(x + -25, -1825, 0);
+                            // spawn.randomMob(x + -25, -1825, 0);
                             spawn.randomMob(x + -975, -2000, 0);
-                            spawn.randomMob(x + -1500, -2225, 0);
+                            // spawn.randomMob(x + -1500, -2225, 0);
                             spawn.randomMob(x + 1850, -2125, 0);
-                            spawn.randomMob(x + 225, -1975, 0);
+                            // spawn.randomMob(x + 225, -1975, 0);
                             spawn.randomMob(x + 25, -1950, 0);
-                            spawn.randomMob(x + 25, -1950, 0);
+                            // spawn.randomMob(x + 25, -1950, 0);
                         } else {
                             spawn.randomMob(x + 250, -1850, 0);
                             spawn.randomMob(x + 225, -1950, 0);
-                            spawn.randomMob(x + 125, -2000, 0);
+                            // spawn.randomMob(x + 125, -2000, 0);
                             spawn.randomMob(x + 0, -1800, 0);
-                            spawn.randomMob(x + -1725, -2300, 0);
+                            // spawn.randomMob(x + -1725, -2300, 0);
                             spawn.randomMob(x + -2025, -2175, 0);
-                            spawn.randomMob(x + -2050, -2250, 0);
+                            // spawn.randomMob(x + -2050, -2250, 0);
                             spawn.randomMob(x + -2000, -2350, 0);
-                            spawn.randomMob(x + -2950, -2400, 0);
+                            // spawn.randomMob(x + -2950, -2400, 0);
                             spawn.randomMob(x + -2775, -2400, 0);
-                            spawn.randomMob(x + -2425, -2550, 0);
+                            // spawn.randomMob(x + -2425, -2550, 0);
                             spawn.randomMob(x + 1950, -2225, 0);
-                            spawn.randomMob(x + -2700, -2100, 0);
+                            // spawn.randomMob(x + -2700, -2100, 0);
                             spawn.randomMob(x + -1925, -2175, 0);
-                            spawn.randomMob(x + -825, -2050, 0);
+                            // spawn.randomMob(x + -825, -2050, 0);
                         }
-                        //spawn.randomHigherTierMob(x + 1732, -2267)
+                        const softBoss = [() => {
+                            spawn.centipedeBoss(x + 500, -2500, 16, 16, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }, () => {
+                            spawn.centipedeBoss(x + -2800, -2500, 16, 16, 2, stationNumber > 0);
+                        }, () => {
+                            spawn.centipedeBoss(x + 1300, -2125, 16, 16, 2, stationNumber > 0);
+                        }]
+
+                        softBoss[Math.floor(softBoss.length * Math.random())]()
+                        for (let i = 0; i < mob.length; i++) {
+                            mob[i].tier = 4  //make all mobs T5
+                        }
                     }
 
                     const portal1 = level.portal({ x: x - 250, y: -310 }, Math.PI,
@@ -4000,7 +4011,7 @@ const level = {
                         portal4[3].query()
                     }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         portal1[0].draw();
                         portal1[1].draw();
                         portal1[2].draw();
@@ -4020,70 +4031,71 @@ const level = {
                     }
                 },
                 () => { //opening and closing doors
-                    // const softBoss = [() => {
-                    //     spawn.caterpillarBoss(x - 775, -2575, 15, 24, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
-                    // }, () => {
-                    //     spawn.caterpillarBoss(x - 1200, -1600, 15, 24, 2, stationNumber > 0);
-                    // }, () => {
-                    //     spawn.caterpillarBoss(x - 1250, -1325, 15, 24, 2, stationNumber > 0);
-                    // }, () => {
-                    //     spawn.caterpillarBoss(x + 550, -2375, 15, 24, 2, stationNumber > 0);
-                    // }]
-                    // softBoss[Math.floor(softBoss.length * Math.random())]()
-
-                    const buttonsCoords = [{ x: x - 800, y: -2245 }, { x: x + 250, y: -870 }, { x: x + 1075, y: -1720 }, { x: x - 1600, y: -1995 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x - 800, y: -2245 }, { x: x + 250, y: -870 }, { x: x + 1075, y: -1720 }, { x: x - 1600, y: -1995 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
 
                     if (!isExitOpen) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 1125, -650, 0);
                             spawn.randomMob(x + 150, -950, 0);
-                            spawn.randomMob(x + 100, -975, 0);
+                            // spawn.randomMob(x + 100, -975, 0);
                             spawn.randomMob(x + 75, -975, 0);
-                            spawn.randomMob(x + 275, -1225, 0);
+                            // spawn.randomMob(x + 275, -1225, 0);
                             spawn.randomMob(x + 825, -975, 0);
-                            spawn.randomMob(x + -50, -1625, 0);
+                            // spawn.randomMob(x + -50, -1625, 0);
                             spawn.randomMob(x + -950, -1550, 0);
-                            spawn.randomMob(x + -975, -1550, 0);
+                            // spawn.randomMob(x + -975, -1550, 0);
                             spawn.randomMob(x + -900, -2500, 0);
-                            spawn.randomMob(x + -975, -2550, 0);
+                            // spawn.randomMob(x + -975, -2550, 0);
                             spawn.randomMob(x + 675, -1950, 0);
-                            spawn.randomMob(x + 675, -2550, 0);
+                            // spawn.randomMob(x + 675, -2550, 0);
                             spawn.randomMob(x + 1225, -1825, 0);
-                            spawn.randomMob(x + -750, -2450, 0);
+                            // spawn.randomMob(x + -750, -2450, 0);
                             spawn.randomMob(x + -700, -825, 0);
                         } else {
                             spawn.randomMob(x + -675, -675, 0);
                             spawn.randomMob(x + -575, -925, 0);
-                            spawn.randomMob(x + -425, -1100, 0);
+                            // spawn.randomMob(x + -425, -1100, 0);
                             spawn.randomMob(x + -225, -1225, 0);
-                            spawn.randomMob(x + -650, -1250, 0);
+                            // spawn.randomMob(x + -650, -1250, 0);
                             spawn.randomMob(x + -675, -775, 0);
-                            spawn.randomMob(x + 75, -1000, 0);
+                            // spawn.randomMob(x + 75, -1000, 0);
                             spawn.randomMob(x + -1100, -1575, 0);
-                            spawn.randomMob(x + -1250, -1850, 0);
+                            // spawn.randomMob(x + -1250, -1850, 0);
                             spawn.randomMob(x + -1625, -2100, 0);
-                            spawn.randomMob(x + -700, -2500, 0);
+                            // spawn.randomMob(x + -700, -2500, 0);
                             spawn.randomMob(x + -375, -2550, 0);
-                            spawn.randomMob(x + 250, -2025, 0);
+                            // spawn.randomMob(x + 250, -2025, 0);
                             spawn.randomMob(x + 675, -2175, 0);
-                            spawn.randomMob(x + -1000, -2000, 0);
+                            // spawn.randomMob(x + -1000, -2000, 0);
                             spawn.randomMob(x + -1550, -2325, 0);
-                            spawn.randomMob(x + -1725, -2425, 0);
+                            // spawn.randomMob(x + -1725, -2425, 0);
                         }
-                        //spawn.randomHigherTierMob(x + 393, -1280)
+                        const softBoss = [() => {
+                            spawn.caterpillarBoss(x - 775, -2575, 18, 24, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }, () => {
+                            spawn.caterpillarBoss(x - 1200, -1600, 18, 24, 2, stationNumber > 0);
+                        }, () => {
+                            spawn.caterpillarBoss(x - 1250, -1325, 18, 24, 2, stationNumber > 0);
+                        }, () => {
+                            spawn.caterpillarBoss(x + 550, -2375, 18, 24, 2, stationNumber > 0);
+                        }]
+                        softBoss[Math.floor(softBoss.length * Math.random())]()
+                        for (let i = 0; i < mob.length; i++) {
+                            mob[i].tier = 3  //make all mobs T4
+                        }
                     }
 
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
@@ -4131,7 +4143,7 @@ const level = {
                         portal1[3].query()
                     }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         portal1[0].draw();
                         portal1[1].draw();
                         portal1[2].draw();
@@ -4139,29 +4151,20 @@ const level = {
                     }
                 },
                 () => { //slime
-                    // const softBoss = [() => {
-                    //     spawn.larvaBoss(x - 794, -1032, 15, 24, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
-                    // }, () => {
-                    //     spawn.larvaBoss(x - 868, -177, 15, 24, 2, stationNumber > 0);
-                    // }, () => {
-                    //     spawn.larvaBoss(x + 112, -1540, 15, 24, 2, stationNumber > 0);
-                    // }]
-                    // softBoss[Math.floor(softBoss.length * Math.random())]() // softBoss[2]()
-
-                    const buttonsCoords = [{ x: x - 675, y: -895 }, { x: x - 750, y: -70 }, { x: x + 75, y: -570 },]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x - 675, y: -895 }, { x: x - 750, y: -70 }, { x: x + 75, y: -570 },]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
 
 
                     spawn.mapRect(x + -1575, -2000, 3025, 100); //roof
@@ -4188,32 +4191,42 @@ const level = {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + -850, -450, 0);
                             spawn.randomMob(x + -850, -125, 0);
-                            spawn.randomMob(x + -725, -100, 0);
+                            // spawn.randomMob(x + -725, -100, 0);
                             spawn.randomMob(x + 0, -100, 0);
-                            spawn.randomMob(x + 800, -50, 0);
+                            // spawn.randomMob(x + 800, -50, 0);
                             spawn.randomMob(x + 50, -275, 0);
-                            spawn.randomMob(x + -300, -425, 0);
+                            // spawn.randomMob(x + -300, -425, 0);
                             spawn.randomMob(x + -750, -475, 0);
-                            spawn.randomMob(x + -850, -775, 0);
+                            // spawn.randomMob(x + -850, -775, 0);
                             spawn.randomMob(x + -650, -1000, 0);
-                            spawn.randomMob(x + -150, -1325, 0);
+                            // spawn.randomMob(x + -150, -1325, 0);
                             spawn.randomMob(x + -825, -1350, 0);
-                            spawn.randomMob(x + -375, -150, 0);
+                            // spawn.randomMob(x + -375, -150, 0);
                         } else {
                             spawn.randomMob(x + 350, -350, 0);
                             spawn.randomMob(x + 175, -700, 0);
-                            spawn.randomMob(x + 350, -1175, 0);
+                            // spawn.randomMob(x + 350, -1175, 0);
                             spawn.randomMob(x + 200, -1600, 0);
-                            spawn.randomMob(x + 500, -1675, 0);
+                            // spawn.randomMob(x + 500, -1675, 0);
                             spawn.randomMob(x + 425, -50, 0);
-                            spawn.randomMob(x + 725, -75, 0);
+                            // spawn.randomMob(x + 725, -75, 0);
                             spawn.randomMob(x + 650, -700, 0);
-                            spawn.randomMob(x + 775, -1150, 0);
+                            // spawn.randomMob(x + 775, -1150, 0);
                             spawn.randomMob(x + 500, -1675, 0);
-                            spawn.randomMob(x + -150, -175, 0);
+                            // spawn.randomMob(x + -150, -175, 0);
                             spawn.randomMob(x + -800, -150, 0);
                         }
-                        //spawn.randomHigherTierMob(x + -452, -453)
+                        const softBoss = [() => {
+                            spawn.larvaBoss(x - 794, -1032, 15, 16, 2, stationNumber > 0); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }, () => {
+                            spawn.larvaBoss(x - 868, -177, 15, 16, 2, stationNumber > 0);
+                        }, () => {
+                            spawn.larvaBoss(x + 112, -1540, 15, 16, 2, stationNumber > 0);
+                        }]
+                        softBoss[Math.floor(softBoss.length * Math.random())]() // softBoss[2]()
+                        for (let i = 0; i < mob.length; i++) {
+                            mob[i].tier = 4  //make all mobs T4
+                        }
                     }
 
                     const boost1 = level.boost(x - 1185, -225, 1400)
@@ -4233,7 +4246,7 @@ const level = {
                         // drip3.draw();
                     }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
 
                         hazard1.query();
                         hazard1.level(isSlimeRiseUp, 1.5)
@@ -4247,26 +4260,20 @@ const level = {
                     }
                 },
                 () => { //portal fling
-                    // const softBoss = [() => {
-                    //     spawn.ringwormBoss2(x - 900, -1400); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
-                    // }]
-                    // softBoss[Math.floor(softBoss.length * Math.random())]()
-
-
-                    const buttonsCoords = [{ x: x + 775, y: -1695 }, { x: x - 775, y: -800 }, { x: x - 375, y: -2080 },]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x + 775, y: -1695 }, { x: x - 775, y: -800 }, { x: x - 375, y: -2080 },]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
                     spawn.mapRect(x + -1600, -3450, 300, 1475); //roof
                     spawn.mapRect(x + -1600, -3450, 3225, 100);
                     spawn.mapRect(x + 1300, -3450, 325, 1525);
@@ -4286,21 +4293,33 @@ const level = {
                     if (!isExitOpen) {
                         spawn.randomMob(x + -750, -1925, 0);
                         spawn.randomMob(x + -425, -2300, 0);
-                        spawn.randomMob(x + -350, -2200, 0);
+                        // spawn.randomMob(x + -350, -2200, 0);
                         spawn.randomMob(x + -275, -2175, 0);
-                        spawn.randomMob(x + -375, -2175, 0);
+                        // spawn.randomMob(x + -375, -2175, 0);
                         spawn.randomMob(x + 1075, -1850, 0);
-                        spawn.randomMob(x + 925, -1775, 0);
+                        // spawn.randomMob(x + 925, -1775, 0);
                         spawn.randomMob(x + 1150, -1800, 0);
-                        spawn.randomMob(x + 1400, -2150, 0);
+                        // spawn.randomMob(x + 1400, -2150, 0);
                         spawn.randomMob(x + 925, -850, 0);
-                        spawn.randomMob(x + 800, -800, 0);
+                        // spawn.randomMob(x + 800, -800, 0);
                         spawn.randomMob(x + 875, -825, 0);
-                        spawn.randomMob(x + 1050, -900, 0);
+                        // spawn.randomMob(x + 1050, -900, 0);
                         spawn.randomMob(x + 19050, -2925, 0);
-                        spawn.randomMob(x + 17150, -3150, 0);
+                        // spawn.randomMob(x + 17150, -3150, 0);
                         spawn.randomMob(x + 17700, -3300, 0);
-                        //spawn.randomHigherTierMob(x - 711, -895)
+
+                        const softBoss = [() => {
+                            spawn.roundwormBoss4(x - 900, -1400); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }, () => {
+                            spawn.roundwormBoss4(x - 750, -2750); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }, () => {
+                            spawn.roundwormBoss4(x + 950, -2000); //x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false)
+                        }]
+                        softBoss[Math.floor(softBoss.length * Math.random())]()
+
+                        for (let i = 0; i < mob.length; i++) {
+                            mob[i].tier = 4  //make all mobs T4
+                        }
                     }
                     const portal1 = level.portal({
                         x: x + 0,
@@ -4324,7 +4343,7 @@ const level = {
                         portal2[3].query()
                     }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         portal1[0].draw();
                         portal1[1].draw();
                         portal1[2].draw();
@@ -4336,20 +4355,20 @@ const level = {
                     }
                 },
                 () => { //tower levels and squares
-                    const buttonsCoords = [{ x: x - 300, y: -3120 }, { x: x + 600, y: -3020 }, { x: x - 575, y: -1770 }, { x: x - 450, y: -2370 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x - 300, y: -3120 }, { x: x + 600, y: -3020 }, { x: x - 575, y: -1770 }, { x: x - 450, y: -2370 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
 
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     spawn.mapRect(x + -1625, -3950, 3225, 350);//roof
@@ -4381,90 +4400,105 @@ const level = {
                         () => { //1st floor
                             spawn.randomMob(x + -775, -725, 0);
                             spawn.randomMob(x + -575, -700, 0);
-                            spawn.randomMob(x + -275, -700, 0);
+                            // spawn.randomMob(x + -275, -700, 0);
                             spawn.randomMob(x + -125, -650, 0);
-                            spawn.randomMob(x + 250, -675, 0);
+                            // spawn.randomMob(x + 250, -675, 0);
                             spawn.randomMob(x + 425, -650, 0);
-                            spawn.randomMob(x + 775, -650, 0);
+                            // spawn.randomMob(x + 775, -650, 0);
                             spawn.randomMob(x + 1050, -675, 0);
-                            spawn.randomMob(x + 675, -950, 0);
+                            // spawn.randomMob(x + 675, -950, 0);
                             spawn.randomMob(x + -625, -900, 0);
-                            spawn.randomMob(x + -750, -1400, 0);
+                            // spawn.randomMob(x + -750, -1400, 0);
                             spawn.randomMob(x + -500, -2025, 0);
-                            spawn.randomMob(x + -125, -3225, 0);
+                            // spawn.randomMob(x + -125, -3225, 0);
                         },
                         () => { //2nd floor
                             spawn.randomMob(x + -950, -925, 0);
                             spawn.randomMob(x + -775, -1325, 0);
-                            spawn.randomMob(x + -450, -1500, 0);
+                            // spawn.randomMob(x + -450, -1500, 0);
                             spawn.randomMob(x + -325, -1250, 0);
-                            spawn.randomMob(x + 0, -1500, 0);
+                            // spawn.randomMob(x + 0, -1500, 0);
                             spawn.randomMob(x + 375, -1525, 0);
-                            spawn.randomMob(x + 750, -1550, 0);
+                            // spawn.randomMob(x + 750, -1550, 0);
                             spawn.randomMob(x + 1175, -1550, 0);
-                            spawn.randomMob(x + -875, -1350, 0);
+                            // spawn.randomMob(x + -875, -1350, 0);
                             spawn.randomMob(x + -875, -2375, 0);
-                            spawn.randomMob(x + 175, -2850, 0);
+                            // spawn.randomMob(x + 175, -2850, 0);
                             spawn.randomMob(x + 750, -2475, 0);
                         },
                         () => {//3rd floor
                             spawn.randomMob(x + 1075, -2000, 0);
                             spawn.randomMob(x + 725, -2125, 0);
-                            spawn.randomMob(x + 350, -2125, 0);
+                            // spawn.randomMob(x + 350, -2125, 0);
                             spawn.randomMob(x + -325, -2000, 0);
-                            spawn.randomMob(x + -675, -1875, 0);
+                            // spawn.randomMob(x + -675, -1875, 0);
                             spawn.randomMob(x + -725, -2200, 0);
-                            spawn.randomMob(x + -675, -2575, 0);
+                            // spawn.randomMob(x + -675, -2575, 0);
                             spawn.randomMob(x + -425, -2675, 0);
-                            spawn.randomMob(x + -50, -2875, 0);
+                            // spawn.randomMob(x + -50, -2875, 0);
                             spawn.randomMob(x + 425, -2725, 0);
-                            spawn.randomMob(x + 1150, -2550, 0);
+                            // spawn.randomMob(x + 1150, -2550, 0);
                             spawn.randomMob(x + 1150, -2175, 0);
-                            spawn.randomMob(x + 1000, -1900, 0);
+                            // spawn.randomMob(x + 1000, -1900, 0);
                             spawn.randomMob(x + 500, -2550, 0);
-                            spawn.randomMob(x + 125, -2900, 0);
+                            // spawn.randomMob(x + 125, -2900, 0);
                         },
                         () => {//all floors
                             spawn.randomMob(x + 1000, -850, 0);
                             spawn.randomMob(x + 300, -850, 0);
-                            spawn.randomMob(x + -450, -825, 0);
+                            // spawn.randomMob(x + -450, -825, 0);
                             spawn.randomMob(x + -1025, -1125, 0);
-                            spawn.randomMob(x + -750, -1375, 0);
+                            // spawn.randomMob(x + -750, -1375, 0);
                             spawn.randomMob(x + -225, -1375, 0);
-                            spawn.randomMob(x + 625, -1525, 0);
+                            // spawn.randomMob(x + 625, -1525, 0);
                             spawn.randomMob(x + 1025, -1925, 0);
-                            spawn.randomMob(x + -425, -2100, 0);
+                            // spawn.randomMob(x + -425, -2100, 0);
                             spawn.randomMob(x + -400, -2650, 0);
-                            spawn.randomMob(x + 150, -3000, 0);
+                            // spawn.randomMob(x + 150, -3000, 0);
                             spawn.randomMob(x + 675, -3200, 0);
-                            spawn.randomMob(x + -550, -3300, 0);
+                            // spawn.randomMob(x + -550, -3300, 0);
 
                         },
                     ]
                     if (!isExitOpen) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
-                        //spawn.randomHigherTierMob(x + 51, -419)
+                        const softBoss = [() => {
+                            spawn.hydraBoss2(x + 800, -3300, 25, 5);
+                        }, () => {
+                            spawn.hydraBoss2(x + 775, -2650, 25, 5);
+                        }, () => {
+                            spawn.hydraBoss2(x - 400, -2075, 25, 5);
+                        }]
+                        softBoss[Math.floor(softBoss.length * Math.random())]()
+
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isBoss) {
+                                mob[i].tier = 4  //make all mobs T4
+                            } else if (mob[i].swordVertex) {
+                                mob[i].damageReduction = 0.002
+                            }
+                        }
                     }
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                     }
                 },
                 () => { //jump pads and 6 sided platforms
-                    const buttonsCoords = [{ x: x + 278, y: -1814 }, { x: x + 778, y: -1814 }, { x: x + 2025, y: -1995 }, { x: x - 2025, y: -2425 }, { x: x - 2100, y: -1995 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x + 278, y: -1814 }, { x: x + 778, y: -1814 }, { x: x + 2025, y: -1995 }, { x: x - 2025, y: -2425 }, { x: x - 2100, y: -1995 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
 
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     spawn.mapRect(x + -3200, -3200, 300, 1400); //roof left wall
@@ -4485,89 +4519,104 @@ const level = {
                         () => { //rightish
                             spawn.randomMob(x + 2250, -2375, 0);
                             spawn.randomMob(x + 1950, -2825, 0);
-                            spawn.randomMob(x + 1275, -2775, 0);
+                            // spawn.randomMob(x + 1275, -2775, 0);
                             spawn.randomMob(x + 1450, -2200, 0);
-                            spawn.randomMob(x + 825, -1950, 0);
+                            // spawn.randomMob(x + 825, -1950, 0);
                             spawn.randomMob(x + 400, -1875, 0);
-                            spawn.randomMob(x + -75, -2275, 0);
+                            // spawn.randomMob(x + -75, -2275, 0);
                             spawn.randomMob(x + -650, -2550, 0);
-                            spawn.randomMob(x + 1500, -2075, 0);
+                            // spawn.randomMob(x + 1500, -2075, 0);
                             spawn.randomMob(x + 2125, -2650, 0);
-                            spawn.randomMob(x + 2075, -2250, 0);
+                            // spawn.randomMob(x + 2075, -2250, 0);
                             spawn.randomMob(x + 1000, -2850, 0);
-                            spawn.randomMob(x + 750, -950, 0);
+                            // spawn.randomMob(x + 750, -950, 0);
                             spawn.randomMob(x + -750, -1125, 0);
-                            spawn.randomMob(x + -1575, -2050, 0);
+                            // spawn.randomMob(x + -1575, -2050, 0);
                         },
                         () => { //leftish
                             spawn.randomMob(x + -2225, -2125, 0);
                             spawn.randomMob(x + -2675, -2125, 0);
-                            spawn.randomMob(x + -2600, -2600, 0);
+                            // spawn.randomMob(x + -2600, -2600, 0);
                             spawn.randomMob(x + -2100, -2725, 0);
-                            spawn.randomMob(x + -1425, -2600, 0);
+                            // spawn.randomMob(x + -1425, -2600, 0);
                             spawn.randomMob(x + -1375, -2050, 0);
-                            spawn.randomMob(x + -575, -2575, 0);
+                            // spawn.randomMob(x + -575, -2575, 0);
                             spawn.randomMob(x + -125, -2300, 0);
-                            spawn.randomMob(x + 350, -1925, 0);
+                            // spawn.randomMob(x + 350, -1925, 0);
                             spawn.randomMob(x + -350, -1050, 0);
-                            spawn.randomMob(x + -1000, -1000, 0);
+                            // spawn.randomMob(x + -1000, -1000, 0);
                             spawn.randomMob(x + -700, -1300, 0);
-                            spawn.randomMob(x + 350, -1150, 0);
+                            // spawn.randomMob(x + 350, -1150, 0);
                             spawn.randomMob(x + -575, -2525, 0);
-                            spawn.randomMob(x + -1075, -2525, 0);
+                            // spawn.randomMob(x + -1075, -2525, 0);
                         },
                         () => {//centerish
                             spawn.randomMob(x + 25, -2275, 0);
                             spawn.randomMob(x + 300, -1975, 0);
-                            spawn.randomMob(x + 700, -1950, 0);
+                            // spawn.randomMob(x + 700, -1950, 0);
                             spawn.randomMob(x + 325, -1200, 0);
-                            spawn.randomMob(x + -225, -950, 0);
+                            // spawn.randomMob(x + -225, -950, 0);
                             spawn.randomMob(x + -925, -975, 0);
-                            spawn.randomMob(x + -675, -2575, 0);
+                            // spawn.randomMob(x + -675, -2575, 0);
                             spawn.randomMob(x + -1425, -2175, 0);
-                            spawn.randomMob(x + 1575, -2075, 0);
+                            // spawn.randomMob(x + 1575, -2075, 0);
                             spawn.randomMob(x + 2300, -2075, 0);
-                            spawn.randomMob(x + 425, -1925, 0);
+                            // spawn.randomMob(x + 425, -1925, 0);
                             spawn.randomMob(x + 125, -2175, 0);
-                            spawn.randomMob(x + -325, -2150, 0);
+                            // spawn.randomMob(x + -325, -2150, 0);
                             spawn.randomMob(x + -350, -950, 0);
-                            spawn.randomMob(x + 600, -325, 0);
+                            // spawn.randomMob(x + 600, -325, 0);
                             spawn.randomMob(x + -600, -375, 0);
                         },
                     ]
                     if (!isExitOpen) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
-                        //spawn.randomHigherTierMob(x + 378, -1905)
+                        //    centipedeBoss(x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false) {
+                        const softBoss = [() => {
+                            spawn.centipedeBoss(x - 2800, -2900, 25, 40, 3);
+                        }, () => {
+                            spawn.centipedeBoss(x - 400, -2450, 25, 30, 3);
+                        },]
+                        softBoss[Math.floor(softBoss.length * Math.random())]()
+
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isBoss) {
+                                mob[i].tier = 3  //make all mobs T4
+                                mob[i].accelMag *= 1.1
+                            }
+                        }
                     }
                     const boost1 = level.boost(x - 50, -225, 790)
                     const boost2 = level.boost(x + 550, -985, 900)
                     const boost3 = level.boost(x + -850, -835, 1900)
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         boost1.query();
                         boost2.query();
                         boost3.query();
                     }
                 },
                 () => { //crouch tunnels
-                    const buttonsCoords = [{ x: x + 625, y: -1395 }, { x: x - 15, y: -1595 }, { x: x - 800, y: -1295 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x + 625, y: -1395 }, { x: x - 15, y: -1595 }, { x: x - 800, y: -1295 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array 
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     spawn.mapRect(x + -1575, -2200, 3025, 300); //roof
-                    spawn.mapRect(x + -1100, -925, 100, 425);
+                    spawn.mapRect(x + -1100, -925, 100, 610);
+                    spawn.mapRect(x + 900, -550, 100, 235);
+
                     spawn.mapRect(x + -1100, -575, 375, 75);
                     spawn.mapRect(x + -925, -1300, 375, 125);
                     spawn.mapRect(x + -300, -1300, 620, 125);
@@ -4586,33 +4635,43 @@ const level = {
                     if (!isExitOpen) {
                         spawn.randomMob(x + -750, -1425, 0);
                         spawn.randomMob(x + -1050, -1100, 0);
-                        spawn.randomMob(x + -825, -750, 0);
+                        // spawn.randomMob(x + -825, -750, 0);
                         spawn.randomMob(x + -500, -400, 0);
-                        spawn.randomMob(x + 450, -650, 0);
+                        // spawn.randomMob(x + 450, -650, 0);
                         spawn.randomMob(x + 0, -725, 0);
-                        spawn.randomMob(x + 300, -1350, 0);
+                        // spawn.randomMob(x + 300, -1350, 0);
                         spawn.randomMob(x + 550, -1500, 0);
-                        spawn.randomMob(x + 725, -1650, 0);
+                        // spawn.randomMob(x + 725, -1650, 0);
                         spawn.randomMob(x + 900, -1550, 0);
-                        spawn.randomMob(x + 1100, -1300, 0);
+                        // spawn.randomMob(x + 1100, -1300, 0);
                         spawn.randomMob(x + -1050, -1050, 0);
-                        spawn.randomMob(x + -925, -350, 0);
+                        // spawn.randomMob(x + -925, -350, 0);
                         spawn.randomMob(x + 75, -1750, 0);
-                        spawn.randomMob(x + 1000, -375, 0);
-                        //spawn.randomHigherTierMob(x + 89, -632)
+                        // spawn.randomMob(x + 1000, -375, 0);
+
+                        spawn.bounceBoss(x + 75, -975, 40, true)
+                        for (let i = 0; i < mob.length; i++) {
+                            if (mob[i].isBoss) {
+                                mob[i].tier = 4  //make all mobs T4
+                                // mob[i].accelMag *= 1.1
+                            }
+                        }
                     }
                     stationCustom = () => { }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         ctx.fillStyle = "rgba(0,0,0,0.08)"
                         ctx.fillRect(x + -225, -325, 800, 125);
                         ctx.fillRect(x + -100, -1425, 300, 125);
                         ctx.fillRect(x + 950, -675, 400, 125);
+                        ctx.fillRect(x + -1100, -350, 100, 150);
+                        ctx.fillRect(x + 900, -325, 100, 150);
+
                     }
                 },
                 () => { //angled jumps
-                    const buttonsCoords = [{ x: x + 50, y: -1395 }, { x: x - 625, y: -2945 }, { x: x + 900, y: -2945 }]
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
+                    // const buttonsCoords = [{ x: x + 50, y: -1395 }, { x: x - 625, y: -2945 }, { x: x + 900, y: -2945 }]
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
 
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     boosts = []
@@ -4642,36 +4701,37 @@ const level = {
                     spawn.mapRect(x + 225, -2950, 1100, 150);
                     spawn.mapRect(x + -1325, -2950, 1325, 150);
 
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
 
                     if (!isExitOpen) {
                         spawn.randomMob(x + 350, -600, 0);
                         spawn.randomMob(x + -25, -600, 0);
-                        spawn.randomMob(x + 600, -300, 0);
+                        // spawn.randomMob(x + 600, -300, 0);
                         spawn.randomMob(x + 1050, -300, 0);
-                        spawn.randomMob(x + 350, -1525, 0);
-                        spawn.randomMob(x + -75, -1525, 0);
-                        spawn.randomMob(x + -1075, -1275, 0);
+                        // spawn.randomMob(x + 350, -1525, 0);
+                        // spawn.randomMob(x + -75, -1525, 0);
+                        // spawn.randomMob(x + -1075, -1275, 0);
                         spawn.randomMob(x + -1350, -2050, 0);
-                        spawn.randomMob(x + -50, -2250, 0);
+                        // spawn.randomMob(x + -50, -2250, 0);
                         spawn.randomMob(x + -200, -3050, 0);
-                        spawn.randomMob(x + -925, -3150, 0);
-                        spawn.randomMob(x + 450, -3125, 0);
-                        spawn.randomMob(x + 1075, -3025, 0);
-                        spawn.randomMob(x + 750, -3125, 0);
-                        spawn.randomMob(x + -725, -3125, 0);
-                        //spawn.randomHigherTierMob(x + 64, -1514)
+                        // spawn.randomMob(x + -925, -3150, 0);
+                        // spawn.randomMob(x + 450, -3125, 0);
+                        // spawn.randomMob(x + 1075, -3025, 0);
+                        // spawn.randomMob(x + 750, -3125, 0);
+                        // spawn.randomMob(x + -725, -3125, 0);
+                        // myriapodsBoss(where, num = 5, radius = 22, gridX = 14, gridY = 2) {
+                        spawn.myriapodsBoss([{ x: -650, y: -1550 }, { x: x + 825, y: -1100 }, { x: x + -550, y: -825 }, { x: x + 800, y: -2400 }, { x: x + -650, y: -2500 }, { x: x + -675, y: -3225 }])
                     }
                     stationCustom = () => {
                         for (let i = 0; i < boosts.length; i++) {
@@ -4679,7 +4739,7 @@ const level = {
                         }
                     }
                     stationCustomTopLayer = () => {
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                         ctx.fillStyle = "rgba(0,0,0,0.08)"
                         ctx.fillRect(x - 225, -775, 675, 275);
                         ctx.fillRect(x - 225, -1750, 675, 375);
@@ -4688,23 +4748,23 @@ const level = {
                 () => { //people movers
                     simulation.removeEphemera("zoom", true)//stop previous zooms
                     simulation.zoomTransition(2000)
-                    const buttonsCoords = [{ x: x - 65, y: -2045 }] //only one button location?
-                    const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
-                    const moverDirection = stationNumber > 0 ? 1 : -1
-                    // console.log(stationNumber)
-                    if (isExitOpen) {
-                        level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
-                        level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
-                    } else {
-                        var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
-                        gateButton.isUp = true
-                        if (stationNumber > gatesOpenRight) {
-                            var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
-                        } else if (stationNumber < gatesOpenLeft) {
-                            var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
-                        }
-                    }
+                    // const buttonsCoords = [{ x: x - 65, y: -2045 }] //only one button location?
+                    // const buttonsCoordsIndex = Math.floor(Math.random() * buttonsCoords.length) //pick a random element from the array
 
+                    // console.log(stationNumber)
+                    // if (isExitOpen) {
+                    //     level.exit.x = buttonsCoords[buttonsCoordsIndex].x;
+                    //     level.exit.y = buttonsCoords[buttonsCoordsIndex].y - 25;
+                    // } else {
+                    //     var gateButton = level.button(buttonsCoords[buttonsCoordsIndex].x, buttonsCoords[buttonsCoordsIndex].y, 126, false) //x, y, width = 126, isSpawnBase = true
+                    //     gateButton.isUp = true
+                    //     if (stationNumber > gatesOpenRight) {
+                    //         var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     } else if (stationNumber < gatesOpenLeft) {
+                    //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    //     }
+                    // }
+                    const moverDirection = stationNumber > 0 ? 1 : -1
                     //floor 0
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     const movers = []
@@ -4757,33 +4817,34 @@ const level = {
                     if (!isExitOpen) {
                         spawn.randomMob(x + 3900, -3725, 0);
                         spawn.randomMob(x + 3675, -3700, 0);
-                        spawn.randomMob(x + 2075, -3400, 0);
+                        // spawn.randomMob(x + 2075, -3400, 0);
                         spawn.randomMob(x + 2500, -3500, 0);
-                        spawn.randomMob(x + 1975, -3700, 0);
+                        // spawn.randomMob(x + 1975, -3700, 0);
                         spawn.randomMob(x + 1250, -3900, 0);
-                        spawn.randomMob(x + 800, -3750, 0);
+                        // spawn.randomMob(x + 800, -3750, 0);
                         spawn.randomMob(x + 2700, -4700, 0);
                         spawn.randomMob(x + -75, -3650, 0);
                         spawn.randomMob(x + 575, -3500, 0);
-                        spawn.randomMob(x + -850, -3900, 0);
+                        // spawn.randomMob(x + -850, -3900, 0);
                         spawn.randomMob(x + -2725, -4350, 0);
-                        spawn.randomMob(x + -2975, -4300, 0);
+                        // spawn.randomMob(x + -2975, -4300, 0);
                         spawn.randomMob(x + -3950, -3675, 0);
                         spawn.randomMob(x + -2950, -3450, 0);
                         spawn.randomMob(x + -2075, -3575, 0);
-                        spawn.randomMob(x + -1650, -3450, 0);
+                        // spawn.randomMob(x + -1650, -3450, 0);
                         spawn.randomMob(x + -2825, -4400, 0);
-                        spawn.randomMob(x + -900, -4475, 0);
+                        // spawn.randomMob(x + -900, -4475, 0);
                         spawn.randomMob(x + -75, -3575, 0);
-                        spawn.randomMob(x + 3900, -3775, 0);
+                        // spawn.randomMob(x + 3900, -3775, 0);
                         spawn.randomMob(x + 2825, -3375, 0);
-                        spawn.randomMob(x + 2075, -3425, 0);
+                        // spawn.randomMob(x + 2075, -3425, 0);
                         spawn.randomMob(x + 1525, -3425, 0);
                         spawn.randomMob(x + 350, -3500, 0);
                         spawn.randomMob(x + -1675, -3650, 0);
                         spawn.randomMob(x + -3025, -3450, 0);
                         spawn.randomMob(x + -3850, -3750, 0);
-                        //spawn.randomHigherTierMob(x + 1201, -4110)
+
+                        spawn.tetherBoss4(x + 0, -4000, { x: x, y: -4974 }, 150) // tetherBoss(x, y, constraint, radius = 90)
                     }
 
                     //floor 3 fast with bumps
@@ -4834,7 +4895,7 @@ const level = {
                             ctx.stroke();
                         }
                         ctx.setLineDash([0, 0]);
-                        checkGate(gate, gateButton)
+                        // checkGate(gate, gateButton)
                     }
                 },
             ]
@@ -4844,7 +4905,7 @@ const level = {
             // spawn.randomHigherTierMob(1732, -2267)
             // stations[10]() //for testing a specific station
             stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when done testing individual stations
-            // stations[4]()
+            // stations[9]()
 
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor

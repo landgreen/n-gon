@@ -2157,7 +2157,7 @@ document.getElementById("updates").addEventListener("toggle", function () {
 
 
 
-    let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a> and complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a><hr>`
+    let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a>, complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a>, commit <a href="https://www.cornbread2100.com/n-gon-loader">loader</a><hr>`
     document.getElementById("updates-div").innerHTML = text
 
     ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity

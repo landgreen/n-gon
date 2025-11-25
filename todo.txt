@@ -1,57 +1,35 @@
 ******************************************************** NEXT PATCH **************************************************
 
+subway
+  removed most doors and buttons
+  3->2 stations
+  1 custom boss per station
+    removed the free tech at the end
+  0.5x mobs
 
-new bosses
-  centipedeBoss T1
-  caterpillarBoss T2
-  larvaBoss T3
-  ringwormBoss T1
-  ringwormBoss4 T4
+ringWormBoss renamed roundwormBoss
+  ring mobs can move through the map, but not the head mob
+  boss draws a prediction of where the new ring will form to warn player
+all bosses no longer skip invulnerability phases if you one shot them
+hydraBoss,spiderBoss2, hydraBoss2
+   has 1.2x health and 1.2x acceleration
+iceBlockBoss makes fewer blocks
+quasarBoss effect lasts 1/2s shorter
+most T4 mobs move 0.8x slower
 
-hydraBosses leg spawns have an animation for growing the leg
-hydraBoss3 removed
-
-brainstorming lasts 10s -> 7s
-JUNK tech: slink - move really fast when crouched
-added 2 boost jumps to interferometer
-decoherence spawns 3->2 research, but on difficulties with only 1 boss it spawns 4
-fine-structure constant, banish, and Ψ(t) collapse power ups spawn on the boss, not the player
-spray boss bullets are 1.3x larger and do 1.3x damage
-  9->7 total fire cycles
-
-bug fixes
-  couldn't see stinger wings
-  martingale and coherence reset correctly at the end of a run
 
 *********************************************************** TODO *****************************************************
 
-
-add a custom boss to each subway station  (soft bosses   or  modifed reactor bosses  or level specific bosses like laserBoss)
-  subway stations: 
-    stations[stationList[Math.abs(stationNumber % stationList.length)]]()
-    people movers
-      need a way to keep the boss from being dragged around
-        maybe bind a worm to a point in space above the movers
-    angled jumps
-      extra long worm
-    crouch tunnels
-    jump pads and 6 sided platforms
-      standard worm
-    tower levels and squares
-      smaller worm
-    portal fling
-      ring worm
-    done: slime,opening and closing doors,portal maze
+brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
+  make the delay shorter?
 
 softBosses
-  shared health between mobs?
-    or can each piece die independent?
-      shared health in cells of 2 or 4?
-  completed softBosses
-    centipedeBoss
   ideas for new softBosses
+    shared health between mobs?
+      or can each piece die independent?
+        shared health in cells of 2 or 4?
     cycling invulnerability regions
-      also catapiller, but with a head on both ends
+    also catapiller, but with a head on both ends
     unconnected mobs have some attack effect
     2 mob wide ring shaped (or oval)
       or square or triangle...
@@ -62,17 +40,6 @@ softBosses
     add hydra style appendages
     add extra layers of head mobs, slicer or stinger
     earthworm can move through walls
-
-subway rework
-  make a function that runs as each station loads and has a chance to spawn a random boss as a random spot on the level
-    track how many bosses have spawned, if it's 2 then don't spawn any more bosses
-      1 on easy? or allow easy to have an extra 2 tech?
-    make an array with a list of random positions to spawn bosses on each station
-  remove tech at the end
-  remove buttons?
-  custom softBody boss for each station
-    reduce mobs by 1/2
-  2 or 3 stations?
 
 T4 bosses and mobs
   !slower speed
