@@ -27,7 +27,7 @@ const spawn = {
         [],//T0
         ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "hydraBoss", "centipedeBoss", "roundwormBoss"],//T1
         ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "spiderBoss2", "tendrilBoss", "hydraBoss2", "caterpillarBoss"],//T2
-        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss", "spiderBoss3", "hydraBoss3", "tendrilBoss3", "larvaBoss"],//T3
+        ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss", "spiderBoss3", "tendrilBoss3", "larvaBoss"],//T3
         ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4", "roundwormBoss4"] //T4
         //finalBoss is T5
     ],
@@ -2628,7 +2628,36 @@ const spawn = {
                 Matter.Body.setVelocity(mob[mob.length - 1], Vector.mult(unit, 30))
             }
             spawn.allowShields = true;
-            spawn.constrain2AdjacentMobs(num, stiffness, true, damping); //loop mobs together
+            spawn.constrain2AdjacentMobs(num - 1, stiffness, true, damping); //loop mobs together
+            consBB[consBB.length] = Constraint.create({
+                bodyA: this,
+                bodyB: mob[mob.length - 1],
+                stiffness: stiffness,
+                damping: damping
+            });
+            Composite.add(engine.world, consBB[consBB.length - 1]);
+            consBB[consBB.length] = Constraint.create({
+                bodyA: this,
+                bodyB: mob[mob.length - 2],
+                stiffness: stiffness,
+                damping: damping
+            });
+            Composite.add(engine.world, consBB[consBB.length - 1]);
+
+            consBB[consBB.length] = Constraint.create({
+                bodyA: this,
+                bodyB: mob[mob.length - num + 1],
+                stiffness: stiffness,
+                damping: damping
+            });
+            Composite.add(engine.world, consBB[consBB.length - 1]);
+            consBB[consBB.length] = Constraint.create({
+                bodyA: this,
+                bodyB: mob[mob.length - num + 2],
+                stiffness: stiffness,
+                damping: damping
+            });
+            Composite.add(engine.world, consBB[consBB.length - 1]);
         }
         me.ring(me.segmentNumber, me.ringRadius)
         me.onDeath = function () {
@@ -13762,6 +13791,105 @@ const spawn = {
         //     this.alwaysSeePlayer();
         //     this.attraction();
         // };
+    },
+    tetherBoss(x, y, constraint, radius = 90) {
+        // constrained mob boss for the towers level
+        // often has a ring of mobs around it
+        mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
+        let me = mob[mob.length - 1];
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.0006 + 0.0001 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        me.damageReduction = 0.27
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        me.nextHealthThreshold = 0.75
+        me.invulnerableCount = 0
+        me.g = 0.0001; //required if using this.gravity
+        me.accelMag = 0.0012 + 0.0013 * simulation.accelScale;
+        me.memory = 20;
+        me.repulsionRange = 1800 * 1800
+
+        cons[cons.length] = Constraint.create({
+            pointA: { x: constraint.x, y: constraint.y },
+            bodyB: me,
+            stiffness: 0.00012
+        });
+        Composite.add(engine.world, cons[cons.length - 1]);
+
+        spawn.shield(me, x, y, 1);
+        setTimeout(() => { spawn.spawnOrbitals(me, radius + 50 + 200 * Math.random()) }, 100); //have to wait a sec so the tether constraint doesn't attach to an orbital
+        me.onDeath = function () {
+            powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            this.removeCons(); //remove constraint
+            me.babies(0.05 * simulation.difficulty + 1)
+        };
+        me.babies = function (len) {
+            const delay = Math.max(3, Math.floor(15 - len / 2))
+            let i = 0
+            let spawnFlutters = () => {
+                if (i < len) {
+                    if (!(simulation.cycle % delay) && !simulation.paused && !simulation.isChoosing && m.alive) {
+                        // const phase = i / len * 2 * Math.PI
+                        // const where = Vector.add(this.position, Vector.mult({ x: Math.cos(phase), y: Math.sin(phase) }, radius * 1.5))
+                        const unit = Vector.normalise(Vector.sub(player.position, this.position))
+                        const velocity = Vector.mult(unit, 10 + 10 * Math.random())
+                        const where = Vector.add(this.position, Vector.mult(unit, radius * 1.2))
+                        spawn.allowShields = false
+                        spawn.flutter(where.x, where.y, Math.floor(9 + 8 * Math.random()))
+                        const who = mob[mob.length - 1]
+                        Matter.Body.setDensity(who, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
+                        Matter.Body.setVelocity(who, velocity);
+                        Matter.Body.setAngle(who, Math.atan2(velocity.y, velocity.x))
+
+                        this.alertNearByMobs();
+                        spawn.allowShields = true
+                        i++
+                    }
+                    requestAnimationFrame(spawnFlutters);
+                }
+            }
+            requestAnimationFrame(spawnFlutters);
+        }
+        me.onDamage = function () {
+            if (this.health < this.nextHealthThreshold && this.alive && this.health > 0) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 4) / 4
+                this.invulnerableCount = 60 + Math.floor(30 * Math.random()) + simulation.difficultyMode * 10
+                this.isInvulnerable = true
+                this.damageReduction = 0
+            }
+        };
+        me.do = function () {
+            this.gravity();
+            if (this.isInvulnerable) {
+                this.repulsion();
+                this.invulnerableCount--
+                if (this.invulnerableCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                    this.frictionAir = 0.05
+                    me.babies(0.07 * simulation.difficulty + 2)
+                    if (this.radius > 15) {
+                        const scale = 0.88;
+                        Matter.Body.scale(this, scale, scale);
+                        this.radius *= scale;
+                    }
+                }
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.stroke();
+            } else {
+                this.seePlayerCheck();
+                this.checkStatus();
+                this.attraction();
+            }
+        };
     },
     tetherBoss4(x, y, constraint, radius = 90) {
         // constrained mob boss for the towers level

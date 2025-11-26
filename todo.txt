@@ -1,26 +1,21 @@
 ******************************************************** NEXT PATCH **************************************************
 
-subway
-  removed most doors and buttons
-  3->2 stations
-  1 custom boss per station
-    removed the free tech at the end
-  0.5x mobs
 
-ringWormBoss renamed roundwormBoss
-  ring mobs can move through the map, but not the head mob
-  boss draws a prediction of where the new ring will form to warn player
-all bosses no longer skip invulnerability phases if you one shot them
-hydraBoss,spiderBoss2, hydraBoss2
-   has 1.2x health and 1.2x acceleration
-iceBlockBoss makes fewer blocks
-quasarBoss effect lasts 1/2s shorter
-most T4 mobs move 0.8x slower
+bug fixes
+  added back tetherBoss
+  spawn[name] is not a function: spawn.js:294
+    solved by removing reference to hydraBoss3
+  solved roundWormBoss bug issue with attaching onto other mobs
 
 
 *********************************************************** TODO *****************************************************
 
-brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
+!bug fixes
+  removed any backwards motion in subway  
+  going to next level very quickly in testing (under 0.5s)
+     NaN -> simulation.ingamemouse, maybe m.pos?, m.angle?
+
+?brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
   make the delay shorter?
 
 softBosses

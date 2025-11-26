@@ -71,8 +71,8 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.launchPusher(1300 + 200 * i, -200)
-            // for (let i = 0; i < 2; i++) spawn.hydraBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.roundwormBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 2; i++) spawn.shooterBoss(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
@@ -3782,13 +3782,13 @@ const level = {
         stationList.unshift(0) //add index zero to the front of the array for the starting station
         // console.log(stationList, "after splice")
 
+        const stationsCleared = []
         let isExitOpen = false
         // let isTechSpawned = false
         let gatesOpenRight = -1
         let gatesOpenLeft = -1
         const infrastructure = (x, isInProgress = true) => {
             if (isInProgress) {
-
                 //randomize the mobs for each station
                 spawn.pickList.splice(0, 2);
                 let array = simulation.difficultyMode > 3 ? spawn.tier[4] : spawn.tier[3]
@@ -3869,7 +3869,7 @@ const level = {
             }
             const stations = [ //update totalNumberOfStations as you add more stations 
                 () => { //empty starting station   
-                    console.log(stationNumber)
+                    // console.log(stationNumber)
                     if (Math.abs(stationNumber) > 2) isExitOpen = true
                     if (isExitOpen) {
                         level.exit.x = x - 50;
@@ -3925,6 +3925,14 @@ const level = {
                     //         var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
                     //     }
                     // }
+
+
+
+                    // if (stationsCleared[stationNumber] ) {
+                    //     var gate = level.doorMap(x + 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20                        
+                    //     var gate = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
+                    // }
+
                     spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                     spawn.mapRect(x + -1775, -1600, 3400, 1000); //center pillar
                     spawn.mapRect(x + -4100, -3325, 8000, 700); //roof
@@ -3944,7 +3952,7 @@ const level = {
                     spawn.mapRect(x + -1550, -2150, 250, 250);
                     spawn.mapRect(x + -2575, -2450, 275, 345);
 
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 2850, -2425, 0);
                             spawn.randomMob(x + 2275, -2425, 0);
@@ -4046,7 +4054,7 @@ const level = {
                     //     }
                     // }
 
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 1125, -650, 0);
                             spawn.randomMob(x + 150, -950, 0);
@@ -4187,7 +4195,7 @@ const level = {
                     spawn.mapRect(x - 925, -75, 875, 150);
                     spawn.mapRect(x + 475, -1400, 75, 1250);
 
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + -850, -450, 0);
                             spawn.randomMob(x + -850, -125, 0);
@@ -4290,7 +4298,7 @@ const level = {
                     spawn.mapVertex(x + -675, -725, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
                     spawn.mapRect(x + 625, -1700, 750, 500);
 
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         spawn.randomMob(x + -750, -1925, 0);
                         spawn.randomMob(x + -425, -2300, 0);
                         // spawn.randomMob(x + -350, -2200, 0);
@@ -4460,7 +4468,7 @@ const level = {
 
                         },
                     ]
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
                         const softBoss = [() => {
                             spawn.hydraBoss2(x + 800, -3300, 25, 5);
@@ -4569,7 +4577,7 @@ const level = {
                             spawn.randomMob(x + -600, -375, 0);
                         },
                     ]
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
                         //    centipedeBoss(x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false) {
                         const softBoss = [() => {
@@ -4632,7 +4640,7 @@ const level = {
                     spawn.bodyRect(x + -1000, -750, 125, 175, 0.3);
                     spawn.bodyRect(x + -625, -1450, 75, 150, 0.3);
                     spawn.bodyRect(x + -650, -300, 300, 75, 0.3);
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         spawn.randomMob(x + -750, -1425, 0);
                         spawn.randomMob(x + -1050, -1100, 0);
                         // spawn.randomMob(x + -825, -750, 0);
@@ -4714,7 +4722,7 @@ const level = {
                     //     }
                     // }
 
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         spawn.randomMob(x + 350, -600, 0);
                         spawn.randomMob(x + -25, -600, 0);
                         // spawn.randomMob(x + 600, -300, 0);
@@ -4814,7 +4822,7 @@ const level = {
                     }
                     spawn.mapRect(x + 3550, -3625, 550, 100);
                     spawn.mapRect(x + -4100, -3650, 325, 100);
-                    if (!isExitOpen) {
+                    if (!stationsCleared[Math.abs(stationNumber)]) {
                         spawn.randomMob(x + 3900, -3725, 0);
                         spawn.randomMob(x + 3675, -3700, 0);
                         // spawn.randomMob(x + 2075, -3400, 0);
@@ -4905,7 +4913,7 @@ const level = {
             // spawn.randomHigherTierMob(1732, -2267)
             // stations[10]() //for testing a specific station
             stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when done testing individual stations
-            // stations[9]()
+            // stations[1]()
 
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor
@@ -4954,6 +4962,7 @@ const level = {
                 for (let i = 0; i < debrisCount; ++i) spawn.bodyRect(x + -1500 - 6400 + 200 + Math.random() * wide, -35, size * (0.6 + Math.random()), size * (0.6 + Math.random()), 1);
                 for (let i = 0; i < debrisCount; ++i) spawn.bodyRect(x + 1500 - 200 + Math.random() * wide, -35, size * (0.6 + Math.random()), size * (0.6 + Math.random()), 1);
             }
+            stationsCleared[stationNumber] = true
         }
         infrastructure(0, false) //if this is run before the level starts, it needs a false
 
