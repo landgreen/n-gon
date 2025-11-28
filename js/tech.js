@@ -8057,7 +8057,7 @@ const tech = {
     },
     {
         name: "lens",
-        description: "<strong>2.5x</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> if it passes<br>through a revolving <strong>90°</strong> arc circular lens", //<span style='font-size: 125%;'>π</span> / 2</strong>
+        description: "<strong>3x</strong> <strong class='color-laser'>laser</strong> <strong class='color-d'>damage</strong> if it passes<br>through a revolving <strong>90°</strong> arc circular lens", //<span style='font-size: 125%;'>π</span> / 2</strong>
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8082,7 +8082,7 @@ const tech = {
     },
     {
         name: "compound lens",
-        description: "<strong>1.4x</strong> <strong class='color-laser'>laser</strong> lens <strong class='color-d'>damage</strong><br><strong>+30°</strong> lens arc",
+        description: "<strong>1.5x</strong> <strong class='color-laser'>laser</strong> lens <strong class='color-d'>damage</strong><br><strong>+30°</strong> lens arc",
         isGunTech: true,
         maxCount: 9,
         count: 0,
@@ -8094,11 +8094,11 @@ const tech = {
         requires: "lens",
         effect() {
             b.guns[11].arcRange += 30 * Math.PI / 180 / 2
-            b.guns[11].lensDamageOn += 0.4
+            b.guns[11].lensDamageOn += 0.5
         },
         remove() {
             b.guns[11].arcRange = 90 * Math.PI / 180 / 2 //0.78 divded by 2 because of how it's drawn
-            b.guns[11].lensDamageOn = 2.5
+            b.guns[11].lensDamageOn = 3
         }
     },
     {
@@ -12385,6 +12385,24 @@ const tech = {
         }
     },
     {
+        name: "chatter",
+        description: `you can listen in on what mobs are saying after you damage them`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isJunk: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            tech.isChatter = true;
+        },
+        remove() {
+            tech.isChatter = false;
+        }
+    },
+    {
         name: "cosmogonic myth",
         description: `<span style = "opacity: 9%;">open a portal to a primordial version of reality<br>in 5 minutes close the portal, spawn 1 of each power up</span>`,
         maxCount: 1,
@@ -13124,5 +13142,6 @@ const tech = {
     isExplodeContact: null,
     isMissileSide: null,
     isLaserShot: null,
-    isDigitalPet: null
+    isDigitalPet: null,
+    isChatter: null
 }

@@ -534,13 +534,13 @@ const simulation = {
         if (simulation.isAutoZoom) {
             simulation.ephemera.push({
                 name: "zoom",
-                count: simulation.testing ? 0 : 120, //cycles before it self removes
+                count: simulation.testing ? 1 : 120, //cycles before it self removes
                 currentLevel: level.onLevel,
                 do() {
                     this.count--
                     const step = (newZoomScale - simulation.zoomScale) / this.count
                     simulation.zoomScale += step
-                    if (this.count < 1 && this.currentLevel === level.onLevel && simulation.isAutoZoom) {
+                    if (this.count < 1 && simulation.isAutoZoom) {
                         simulation.zoomScale = newZoomScale
                         simulation.removeEphemera(this)
                     }

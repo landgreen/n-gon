@@ -3107,7 +3107,7 @@ const spawn = {
         let me = mob[mob.length - 1];
         // me.tier = 2
         me.isBoss = true;
-        me.isDropPowerUp
+        me.isDropPowerUp = false
         me.isSoftBoss = true;
         me.softID = softID
         me.memory = Infinity;
@@ -3141,6 +3141,7 @@ const spawn = {
                 for (let i = 0, len = mob.length; i < len; i++) { //kill all other soft mobs
                     if (mob[i].isSoftBoss && mob[i].softID === this.softID) {
                         mob[i].onDeath = () => { }
+                        mob[i].isDropPowerUp = false
                         mob[i].death()
                     }
                 }
@@ -3216,6 +3217,7 @@ const spawn = {
                 for (let i = 0, len = mob.length; i < len; i++) { //kill all other soft mobs
                     if (mob[i].isSoftBoss && mob[i].softID === this.softID) {
                         mob[i].onDeath = () => { }
+                        mob[i].isDropPowerUp = false
                         mob[i].death()
                     }
                 }
@@ -3347,6 +3349,7 @@ const spawn = {
                 for (let i = 0, len = mob.length; i < len; i++) { //kill all other soft mobs
                     if (mob[i].isSoftBoss && mob[i].softID === this.softID) {
                         mob[i].onDeath = () => { }
+                        mob[i].isDropPowerUp = false
                         mob[i].death()
                     }
                 }
@@ -4475,7 +4478,7 @@ const spawn = {
         me.tier = 4
         me.isVerticesChange = true
         me.big = false; //required for grow
-        me.accelMag = 0.00012
+        me.accelMag = 0.00014
         me.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.player //can't touch other mobs
         me.eventHorizon = radius * 8; //required for black hole
         me.memory = 300
@@ -6759,7 +6762,7 @@ const spawn = {
         me.flapRate = 0.06 + 0.03 * Math.random()
         // me.flapRadius = 40 + radius * 3
         me.flapArc = 0.25 //don't go past 1.57 for normal flaps
-        me.wingLength = 110
+        me.wingLength = 100
         me.ellipticity = 0.2
         me.angleOff = 0.4
 
@@ -6797,10 +6800,10 @@ const spawn = {
                 let a = Math.atan2(this.velocity.y, this.velocity.x)
                 const color = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.9)`;
                 ctx.fillStyle = color
-                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.004)//dmg = 0.0006
-                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.004)
-                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.004)
-                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.004)
+                this.wing(a + Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.002)//dmg = 0.0006
+                this.wing(a - Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.002)
+                this.wing(a - Math.PI / 2 + this.angleOff + this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.002)
+                this.wing(a + Math.PI / 2 - this.angleOff - this.flapArc * Math.sin(simulation.cycle * this.flapRate), this.wingLength, this.ellipticity, 0.002)
                 // const seeRange = 2000 + 35 * simulation.difficultyMode;
                 if (this.distanceToPlayer() < 3000) {
                     best = {
@@ -12759,7 +12762,7 @@ const spawn = {
                     //fire
                     const dist = Vector.magnitude(Vector.sub(this.position, player.position))
                     for (let i = 0; i < 4; i++) {
-                        const dir = Vector.rotate(Vector.mult(this.fireDir, 11 + 7 * Math.random()), 0.4 * (Math.random() - 0.5))
+                        const dir = Vector.rotate(Vector.mult(this.fireDir, 9 + 5 * Math.random()), 0.4 * (Math.random() - 0.5))
                         const speed = Vector.magnitude(dir)
                         spawn.grenade(this.vertices[1].x, this.vertices[1].y, this.tier, Math.max(40, Math.min(dist / speed, 240)));
                         Matter.Body.setVelocity(mob[mob.length - 1], Vector.add(this.velocity, dir));
@@ -12776,8 +12779,6 @@ const spawn = {
                 this.noseLength -= this.fireFreq / 2;
                 setNoseShape();
             }
-
-
             if (this.seePlayer.recall) {
                 if (this.alpha < 1) this.alpha += 0.01;
             } else {

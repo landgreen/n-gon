@@ -28,7 +28,7 @@ const level = {
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(150)
+            // powerUps.research.changeRerolls(1500)
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
@@ -58,8 +58,8 @@ const level = {
             // tech.giveTech("ice-shot")
             // tech.addJunkTechToPool(0.5)
 
-            // for (let i = 0; i < 1; ++i) tech.giveTech("invariant")
-            // for (let i = 0; i < 1; i++) tech.giveTech("brainstorming")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("chatter")
+            // for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("fine-structure constant") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
@@ -71,8 +71,8 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.roundwormBoss(1300 + 200 * i, -200)
-            // for (let i = 0; i < 2; i++) spawn.shooterBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.centipedeBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 10; i++) spawn.stingWinger(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
@@ -512,7 +512,7 @@ const level = {
             }
         }
     },
-    announceTextTraining(x, y, text) {  //max width around 900-1000
+    announceTextTraining(x, y, text, color = `rgb(200, 200, 200)`) {  //max width around 900-1000
         let xAdjusted = x - text.length * 29 / 2
         // simulation.draw.font.drawString('abcdefghijklmnopqrstuvwxyzdnasijfnibdiasbfuyabndkjbsdufdbaisfbkadsbfkusbfdkuhbsdfubdsaifbadosifbiousadbfiuasdbfiuasdbifubasi', x, y)
         simulation.draw.font.word = new Path2D()
@@ -521,7 +521,26 @@ const level = {
             onLevel: level.levels[level.onLevel],
             do() {
                 if (!m.alive || this.onLevel !== level.levels[level.onLevel]) simulation.removeEphemera(this)
-                ctx.strokeStyle = `rgb(200, 200, 200)`
+                ctx.strokeStyle = color
+                ctx.lineWidth = 3// + Math.random()
+                ctx.beginPath()
+                ctx.stroke(simulation.draw.font.word)
+            },
+        })
+    },
+    inGameText(x, y, text, count = 240, color = `rgb(200, 200, 200)`) {  //max width around 900-1000
+        let xAdjusted = x - text.length * 29 / 2
+        // simulation.draw.font.drawString('abcdefghijklmnopqrstuvwxyzdnasijfnibdiasbfuyabndkjbsdufdbaisfbkadsbfkusbfdkuhbsdfubdsaifbadosifbiousadbfiuasdbfiuasdbifubasi', x, y)
+        simulation.draw.font.word = new Path2D()
+        simulation.draw.font.drawString(text, xAdjusted, y)
+        simulation.ephemera.push({
+            name: "in game text",
+            onLevel: level.levels[level.onLevel],
+            count: count,
+            do() {
+                count--
+                if (count < 0 || !m.alive || this.onLevel !== level.levels[level.onLevel]) simulation.removeEphemera(this)
+                ctx.strokeStyle = color
                 ctx.lineWidth = 3// + Math.random()
                 ctx.beginPath()
                 ctx.stroke(simulation.draw.font.word)
@@ -3871,13 +3890,10 @@ const level = {
                 () => { //empty starting station   
                     // console.log(stationNumber)
                     if (Math.abs(stationNumber) > 2) isExitOpen = true
-                    if (isExitOpen) {
+                    if (stationsCleared[Math.abs(stationNumber)]) {
+                        // if (isExitOpen) {
                         level.exit.x = x - 50;
                         level.exit.y = -260;
-                        // if (simulation.difficultyMode < 7 && !isTechSpawned) {
-                        // isTechSpawned = true
-                        // powerUps.spawn(level.exit.x, level.exit.y - 100, "tech");
-                        // }
                         var gateButton = level.button(x - 62, -736, 125, false) //x, y, width = 126, isSpawnBase = true
                         gateButton.isUp = true
                         if (stationNumber > 0) {
@@ -4962,7 +4978,7 @@ const level = {
                 for (let i = 0; i < debrisCount; ++i) spawn.bodyRect(x + -1500 - 6400 + 200 + Math.random() * wide, -35, size * (0.6 + Math.random()), size * (0.6 + Math.random()), 1);
                 for (let i = 0; i < debrisCount; ++i) spawn.bodyRect(x + 1500 - 200 + Math.random() * wide, -35, size * (0.6 + Math.random()), size * (0.6 + Math.random()), 1);
             }
-            stationsCleared[stationNumber] = true
+            stationsCleared[Math.abs(stationNumber)] = true
         }
         infrastructure(0, false) //if this is run before the level starts, it needs a false
 
@@ -8043,19 +8059,19 @@ const level = {
                                 isSpawned = true
                                 //spawn second wave of flipped mobs only once
                                 spawn.randomMob(-1500, -1425, 0);
-                                spawn.randomMob(-950, -1425, 0);
+                                // spawn.randomMob(-950, -1425, 0);
                                 // spawn.randomMob(-800, -1475, 0);
                                 spawn.randomMob(-425, -1425, 0);
                                 spawn.randomMob(850, -1750, 0.1);
                                 // spawn.randomMob(325, -850, 0.1);
                                 spawn.randomMob(400, -400, 0.2);
                                 // spawn.randomMob(825, -475, 0.2);
-                                spawn.randomMob(875, -1050, 0.3);
+                                // spawn.randomMob(875, -1050, 0.3);
                                 // spawn.randomMob(1425, 1425, 0.4);
                                 // spawn.randomMob(675, 1450, 0.5);
                                 // spawn.randomMob(225, 1475, 0.6);
                                 spawn.randomMob(-275, 1425, 1);
-                                spawn.randomMob(-800, 1375, 1);
+                                // spawn.randomMob(-800, 1375, 1);
 
                                 spawn.secondaryBossChance(700, 1100)
                             }
@@ -8201,27 +8217,27 @@ const level = {
         spawn.bodyRect(1200, 1900, 125, 100, 0.1);
 
         // spawn.randomMob(125, -1900, 0);
-        spawn.randomMob(-375, -1875, 0);
+        // spawn.randomMob(-375, -1875, 0);
         spawn.randomMob(-1350, -1750, 0);
-        spawn.randomMob(-875, -1575, 0);
+        // spawn.randomMob(-875, -1575, 0);
         // spawn.randomMob(500, -1875, 0);
         spawn.randomMob(350, 825, 0);
         // spawn.randomMob(375, 400, 0);
         spawn.randomMob(1500, -25, 0.1);
         // spawn.randomMob(650, -1950, 0.2);
         // spawn.randomMob(775, 700, 0.2);
-        spawn.randomMob(275, -50, 0.3);
+        // spawn.randomMob(275, -50, 0.3);
         spawn.randomMob(75, -1750, 0.3);
         // spawn.randomMob(1750, -1425, 0.4);
         spawn.randomMob(950, 50, 0.4);
         // spawn.randomMob(-1375, 175, 0.4);
-        spawn.randomMob(-350, 175, 0.5);
+        // spawn.randomMob(-350, 175, 0.5);
         // spawn.randomMob(725, 1175, 0.5);
         spawn.randomMob(-850, -1950, 0.6);
         // spawn.randomMob(-1400, -1725, 0.7);
         spawn.randomMob(1400, -1700, 0.7);
         // spawn.randomMob(-800, 200, 0.7);
-        spawn.randomMob(1475, 1550, 0.8);
+        // spawn.randomMob(1475, 1550, 0.8);
         spawn.randomMob(1475, 500, 0.8);
 
         powerUps.spawnStartingPowerUps(-875, -1925);

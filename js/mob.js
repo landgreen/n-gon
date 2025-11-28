@@ -1004,6 +1004,47 @@ const mobs = {
                                         },
                                     })
                                 }
+                                if (tech.isChatter && !this.isInvulnerable) {
+                                    const quotes = [
+                                        "I can do *anything!*",
+                                        "Chaos, chaos!",
+                                        "Let's make the devilskn-",
+                                        "Darmok and Jaled at Tanagra",
+                                        "Kiazi's children, their faces wet!",
+                                        "Sokath with his eyes uncovered!",
+                                        "Are you suggesting that coconuts can migrate?",
+                                        "One, Two, Five!",
+                                        "Is it an African swallow or a European swallow?",
+                                        "kept you waiting, huh?",
+                                        "This prison... to hold... me?",
+                                        "Did everyone see that? Because I will not be doing it again",
+                                        "I see the light... it's a [404 Error]!",
+                                        "I wish i took those digeridoo lessons",
+                                        "Your mother was a hamster, and your father smelt of elderberries",
+                                        "In Rod we trust",
+                                        "AAAAAAAA",
+                                        // "I caught size 2",
+                                        "the devil may cry?",
+                                        "hey Mr M? are you still mad at me?"
+                                    ];
+                                    const color = `#${Math.floor(Math.random() * 76 + 180).toString(16)}${Math.floor(Math.random() * 121).toString(16).padStart(2, '0')}${Math.floor(Math.random() * 121).toString(16).padStart(2, '0')}`
+                                    simulation.inGameConsole(`<span style="color:"${color}">${quotes[Math.floor(Math.random() * quotes.length)]}</span>`, 360)
+                                    let isTalking = false
+                                    for (let i = 0; i < simulation.ephemera.length; i++) {
+                                        if (simulation.ephemera[i].name === "in game text") {
+                                            isTalking = true
+                                        }
+                                    }
+                                    if (!isTalking) level.inGameText(this.position.x, this.position.y - 50, quotes[Math.floor(Math.random() * quotes.length)], 240, color)
+                                    // simulation.ephemera.push({
+                                    //     count: 240, //cycles before it self removes
+                                    //     vertices: this.vertices,
+                                    //     do() {
+                                    //         this.count--
+                                    //         if (this.count < 0) simulation.removeEphemera(this)
+                                    //     },
+                                    // })
+                                }
                             } else if (tech.isMobLowHealth && this.health < 0.25) {
                                 dmg *= 3
                                 simulation.ephemera.push({

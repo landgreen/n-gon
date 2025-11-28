@@ -1,19 +1,18 @@
 ******************************************************** NEXT PATCH **************************************************
 
+JUNK tech: chatter - mobs talk to you
+
+lens 2.5-3x damage
+compound lens 1.4->1.5x damage
+removed 3-4 mobs from interferometer
+softBody boss elements no longer drop power ups
 
 bug fixes
-  added back tetherBoss
-  spawn[name] is not a function: spawn.js:294
-    solved by removing reference to hydraBoss3
-  solved roundWormBoss bug issue with attaching onto other mobs
-
-
+  thermal runaway issue no longer causing crashes with soft body bosses
+  subway exploit for extra tech is removed, probably
+  going to next level very quickly in testing no longer causes issues
+  
 *********************************************************** TODO *****************************************************
-
-!bug fixes
-  removed any backwards motion in subway  
-  going to next level very quickly in testing (under 0.5s)
-     NaN -> simulation.ingamemouse, maybe m.pos?, m.angle?
 
 ?brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
   make the delay shorter?
@@ -35,10 +34,6 @@ softBosses
     add hydra style appendages
     add extra layers of head mobs, slicer or stinger
     earthworm can move through walls
-
-T4 bosses and mobs
-  !slower speed
-  less effects
 
 JUNK tech
   mobs talk when you hit them, or when they hit you.
