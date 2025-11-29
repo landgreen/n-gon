@@ -1,21 +1,19 @@
 ******************************************************** NEXT PATCH **************************************************
 
-JUNK tech: chatter - mobs talk to you
-
-lens 2.5-3x damage
-compound lens 1.4->1.5x damage
-removed 3-4 mobs from interferometer
-softBody boss elements no longer drop power ups
-
-bug fixes
-  thermal runaway issue no longer causing crashes with soft body bosses
-  subway exploit for extra tech is removed, probably
-  going to next level very quickly in testing no longer causes issues
+big fixes
+  the subway level cleared flag now holds for all states after the exit
+  the subway exit now properly shows the exit
   
 *********************************************************** TODO *****************************************************
 
 ?brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
   make the delay shorter?
+
+
+tech that can pause other tech
+  synergies: tech debt, stimulated emission, cache, mass-energy equivalence, Zenos paradox, Ψ(t) collapse, fine-structure constant
+
+
 
 softBosses
   ideas for new softBosses

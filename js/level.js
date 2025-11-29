@@ -50,7 +50,7 @@ const level = {
             // tech.isHookWire = true
             // m.energy = 0
             // simulation.molecularMode = 2
-            // m.takeDamage(0.1);
+            // m.takeDamage(0.01);
 
             // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[0].ammo = 100000000000
@@ -74,6 +74,7 @@ const level = {
             // for (let i = 0; i < 1; i++) spawn.centipedeBoss(1300 + 200 * i, -200)
             // for (let i = 0; i < 10; i++) spawn.stingWinger(1300 + 200 * i, -200)
             // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
+            // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
             // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
@@ -3797,7 +3798,8 @@ const level = {
         for (let i = 1, totalNumberOfStations = 10; i < totalNumberOfStations; ++i) stationList.push(i) //!!!! update station number when you add a new station
         stationList.sort(() => Math.random() - 0.5);
         // console.log(stationList)
-        stationList.splice(0, stationList.length - 2); //remove all but 3 stations
+        const totalStations = 3 //including the initial station and 2 stations with bosses (exit station is a repeat of the initial)
+        stationList.splice(0, stationList.length - (totalStations - 1)); //remove all but 3 stations
         stationList.unshift(0) //add index zero to the front of the array for the starting station
         // console.log(stationList, "after splice")
 
@@ -3890,8 +3892,8 @@ const level = {
                 () => { //empty starting station   
                     // console.log(stationNumber)
                     if (Math.abs(stationNumber) > 2) isExitOpen = true
-                    if (stationsCleared[Math.abs(stationNumber)]) {
-                        // if (isExitOpen) {
+                    // console.log(stationNumber, stationsCleared, stationsCleared[Math.abs(stationNumber)])
+                    if (isExitOpen) {
                         level.exit.x = x - 50;
                         level.exit.y = -260;
                         var gateButton = level.button(x - 62, -736, 125, false) //x, y, width = 126, isSpawnBase = true
@@ -3901,7 +3903,6 @@ const level = {
                         } else {
                             var gateL = level.doorMap(x - 1375, -525, 50, 375, 300, 20, false) //x, y, width, height, distance, speed = 20
                         }
-
                     } else {
                         var gateButton = level.button(x - 62, -237, 125, false) //x, y, width = 126, isSpawnBase = true
                         gateButton.isUp = true
@@ -3917,7 +3918,6 @@ const level = {
                     // spawn.mapRect(x + -550, -220, 1125, 100); //floor
                     // spawn.mapRect(x + -475, -230, 975, 150);//floor
                     spawn.mapVertex(x + 0, -200, "400 0  -400 0  -300 -80  300 -80"); //hexagon but wide
-
                     // spawn.mapRect(x + -1350, -550, 50, 150);
                     // spawn.mapRect(x + 1300, -550, 50, 150);
                     stationCustom = () => { };
@@ -3968,7 +3968,7 @@ const level = {
                     spawn.mapRect(x + -1550, -2150, 250, 250);
                     spawn.mapRect(x + -2575, -2450, 275, 345);
 
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 2850, -2425, 0);
                             spawn.randomMob(x + 2275, -2425, 0);
@@ -4070,7 +4070,7 @@ const level = {
                     //     }
                     // }
 
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + 1125, -650, 0);
                             spawn.randomMob(x + 150, -950, 0);
@@ -4211,7 +4211,7 @@ const level = {
                     spawn.mapRect(x - 925, -75, 875, 150);
                     spawn.mapRect(x + 475, -1400, 75, 1250);
 
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         if (Math.random() < 0.5) {
                             spawn.randomMob(x + -850, -450, 0);
                             spawn.randomMob(x + -850, -125, 0);
@@ -4314,7 +4314,7 @@ const level = {
                     spawn.mapVertex(x + -675, -725, "325 0  250 80  -250 80  -325 0  -250 -80  250 -80");
                     spawn.mapRect(x + 625, -1700, 750, 500);
 
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         spawn.randomMob(x + -750, -1925, 0);
                         spawn.randomMob(x + -425, -2300, 0);
                         // spawn.randomMob(x + -350, -2200, 0);
@@ -4484,7 +4484,7 @@ const level = {
 
                         },
                     ]
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
                         const softBoss = [() => {
                             spawn.hydraBoss2(x + 800, -3300, 25, 5);
@@ -4593,7 +4593,7 @@ const level = {
                             spawn.randomMob(x + -600, -375, 0);
                         },
                     ]
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         mobPlacement[Math.floor(Math.random() * mobPlacement.length)]()//different random mob placements, with mobs clustered to surprise player
                         //    centipedeBoss(x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false) {
                         const softBoss = [() => {
@@ -4656,7 +4656,7 @@ const level = {
                     spawn.bodyRect(x + -1000, -750, 125, 175, 0.3);
                     spawn.bodyRect(x + -625, -1450, 75, 150, 0.3);
                     spawn.bodyRect(x + -650, -300, 300, 75, 0.3);
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         spawn.randomMob(x + -750, -1425, 0);
                         spawn.randomMob(x + -1050, -1100, 0);
                         // spawn.randomMob(x + -825, -750, 0);
@@ -4738,7 +4738,7 @@ const level = {
                     //     }
                     // }
 
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         spawn.randomMob(x + 350, -600, 0);
                         spawn.randomMob(x + -25, -600, 0);
                         // spawn.randomMob(x + 600, -300, 0);
@@ -4838,7 +4838,7 @@ const level = {
                     }
                     spawn.mapRect(x + 3550, -3625, 550, 100);
                     spawn.mapRect(x + -4100, -3650, 325, 100);
-                    if (!stationsCleared[Math.abs(stationNumber)]) {
+                    if (!stationsCleared[Math.abs(stationNumber % totalStations)]) {
                         spawn.randomMob(x + 3900, -3725, 0);
                         spawn.randomMob(x + 3675, -3700, 0);
                         // spawn.randomMob(x + 2075, -3400, 0);
