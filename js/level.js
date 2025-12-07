@@ -28,12 +28,12 @@ const level = {
             // tech.giveTech("performance")
             // m.coyoteCycles = 120
             // tech.isRerollDamage = true
-            // powerUps.research.changeRerolls(1500)
+            // powerUps.research.changeRerolls(40)
             // tech.tech[297].frequency = 100
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(10)
 
-            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = 1000
             // m.couplingChange(100)
             // m.fieldUpgrades[6].isRewindMode = true
@@ -42,7 +42,7 @@ const level = {
             // m.wakeCheck();
             // m.damageDone *= 5
 
-            // m.maxHealth = m.health = 20
+            // m.maxHealth = m.health = 10
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -52,15 +52,14 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.guns[0].ammo = 100000000000
-            // requestAnimationFrame(() => { tech.giveTech("pair production") });
-            // tech.giveTech("ice-shot")
+            // b.giveGuns(11) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.guns[b.inventory[0]].ammo = 100000000000
+            // tech.giveTech("options exchange")
+            // tech.giveTech("accretion")
             // tech.addJunkTechToPool(0.5)
-
             // for (let i = 0; i < 1; ++i) tech.giveTech("chatter")
-            // for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; i++) tech.giveTech("fine-structure constant") });
+            // for (let i = 0; i < 1; i++) tech.giveTech("brainstorming")
+            // tech.giveTech("mass-energy equivalence")
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
@@ -71,12 +70,12 @@ const level = {
 
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
-            // for (let i = 0; i < 1; i++) spawn.centipedeBoss(1300 + 200 * i, -200)
+            // for (let i = 0; i < 10; i++) spawn.roundwormBoss4(1300 + 200 * i, -200)
             // for (let i = 0; i < 10; i++) spawn.stingWinger(1300 + 200 * i, -200)
-            // for (let i = 0; i < 2; i++) spawn.beamer(1300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
+            // m.storeTech() //sets entanglement
             // for (let i = 0; i < 1; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "entanglement");
-            // for (let i = 0; i < 7; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
+            // for (let i = 0; i < 40; ++i) powerUps.directSpawn(m.pos.x + 450, m.pos.y + 50 * Math.random(), "tech");
             // for (let i = 0; i < 2; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "field", false);
             // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
 
@@ -3826,7 +3825,8 @@ const level = {
                 composite = []
                 //remove any powerUp that is too far from player
                 for (let i = 0; i < powerUp.length; ++i) {
-                    if (Vector.magnitudeSquared(Vector.sub(player.position, powerUp[i].position)) > 9000000) { //remove any powerUp farther then 3000 pixels from player
+                    if (Vector.magnitudeSquared(Vector.sub(player.position, powerUp[i].position)) > 9000000 && (!tech.isHealAttract || powerUp[i].name !== "heal")) { //remove any powerUp farther then 3000 pixels from player
+                        console.log(powerUp[i].name)
                         Matter.Composite.remove(engine.world, powerUp[i]);
                         powerUp.splice(i--, 1)
                     }

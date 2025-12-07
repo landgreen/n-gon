@@ -1282,7 +1282,7 @@ const simulation = {
         if (tech.isHealAttract && m.alive) { //send health power ups to the next level
             let healCount = 0
             for (let i = 0, len = powerUp.length; i < len; i++) {
-                if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, m.pos)) < 1000000) healCount++
+                if (powerUp[i].name === "heal") healCount++
             }
             //respawn health in animation frame
             let respawnHeal = () => {

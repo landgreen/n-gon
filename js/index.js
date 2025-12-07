@@ -2055,6 +2055,10 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         localSettings.pauseMenuDetailsOpen = [true, false, false, true]
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
+    if (localSettings.techHistory === undefined) {
+        localSettings.techHistory = []
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
 } else {
     console.log('setting default localSettings')
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -2076,7 +2080,8 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideImages: true, //default to hide images
         isHideHUD: false,
-        pauseMenuDetailsOpen: [true, false, false, true]
+        pauseMenuDetailsOpen: [true, false, false, true],
+        techHistory: [],
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage

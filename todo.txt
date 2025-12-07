@@ -1,19 +1,69 @@
 ******************************************************** NEXT PATCH **************************************************
 
-big fixes
-  the subway level cleared flag now holds for all states after the exit
-  the subway exit now properly shows the exit
-  
+n-gon will now try to record your last 1000 tech choices
+  NO information from n-gon is ever shared, it just stays with your browser as localstorage
+tech: archetype - 3x frequency for your top tech
+tech: aberration - 0x frequency for your top tech, spawn 2 tech
+  unlocks once you have chosen 100 tech on the same browser
+
+flame test
+  11->15 explosions
+  1.15x increased size and damage
+  longer delay between explosions
+  more concentrated location
+pyrotechnics are shrunk 0.7x->0.65x
+fireworks 1.1x size and damage increase and flower petal range increase
+brainstorming max 6->20 sets of choices, but each new set of choices drains 25 energy
+  this also applies to the JUNK tech "brainstorm"
+additive manufacturing blocks no longer have extra density (and damage)
+expansion 77->100 max energy
+
+tier 4 mob damage done 5.4->4.5x,  mob damage taken 0.01->0.013x
+centipedeBoss and caterpillarBoss have 0.8x health
+hydraBosses have 1.2x health
+quadLaser does 0.75x damage
+slasher4 has 0.7x health
+freeze grenades shrink to a smaller size before ending
+
+bug fixes
+  some mobs that make up the newer composite bosses are now set to not drop power ups
+    they don't count as full mobs for various tech
+  fixed diaphragm tech text
+  chatter no longer has console messages
+  entanglement no longer falsely offers randomized choices from options exchange
+  accretion heals didn't follow from subway to final level
+  extended the roundwormBoss fix to roundwormBoss4
+    head sometimes didn't connect with new body
+    
+
 *********************************************************** TODO *****************************************************
 
-?brainstorming -> reduce number of options by 1 or 2, extend the time back to 10 seconds
-  make the delay shorter?
+add white box and caption to chatter JUNK tech
 
+new constraint - no pause while choosing?
+  this was removed because it had issues with full screen
 
-tech that can pause other tech
+if player has missile bot and a few other bots
+  convert up to 10 other bots into missile bot
+  convert all your guns into missile bots
+
+new tech that can pause other tech
   synergies: tech debt, stimulated emission, cache, mass-energy equivalence, Zenos paradox, Ψ(t) collapse, fine-structure constant
+  cost research to pause or un pause?
+    seems too expensive?
+  pause mechanism
+    ?pause tech
+    ?remove tech, but get it back at the start of next level
 
 
+constraint ideas
+  blocks are converted to mobs
+    similar to blockBoss code
+  ?blocks do 0.2x damage
+  ?all gun and field techs are available
+    wording?
+      extra choices
+    better as a JUNK tech?
 
 softBosses
   ideas for new softBosses

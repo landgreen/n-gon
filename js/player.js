@@ -313,14 +313,14 @@ const m = {
             classType: "body",
             isPrinted: true,
             radius: 10, //used to grow and warp the shape of the block
-            density: 0.002, //double density for 2x damage
+            density: 0.001, //double density for 2x damage
         });
         const who = body[body.length - 1]
         Composite.add(engine.world, who); //add to world
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
-        m.fieldUpgrades[4].endoThermic(0.6)
+        m.fieldUpgrades[4].endoThermic(0.7)
     },
     alive: false,
     isSwitchingWorlds: false,
@@ -2942,7 +2942,7 @@ const m = {
         }
     },
     setMaxEnergy(isMessage = true) {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + 0.77 * tech.isStandingWaveExpand
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + tech.isStandingWaveExpand
         m.maxEnergy *= m.fieldUpgrades[1].energyHealthRatio
         if (level.isReducedEnergy) m.maxEnergy *= 0.5
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
@@ -3196,7 +3196,7 @@ const m = {
                         //trajectory prediction
                         const cycles = 30
                         const charge = Math.min(m.throwCharge / 5, 1)
-                        const speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                        const speed = (tech.isPrinter ? 5 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
                         const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
                         ctx.beginPath()
                         for (let i = 1, len = 10; i < len + 1; i++) {
@@ -3263,7 +3263,7 @@ const m = {
                     const charge = Math.min(m.throwCharge / 5, 1)
                     //***** scale throw speed with the first number, 80 *****
                     // let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-                    let speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                    let speed = (tech.isPrinter ? 5 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
 
                     if (Matter.Query.collides(m.holdingTarget, map).length !== 0) {
                         speed *= 0.7 //drop speed by 30% if touching map
@@ -3347,7 +3347,7 @@ const m = {
                     //trajectory prediction
                     const cycles = 30
                     const charge = Math.min(m.throwCharge / 5, 1)
-                    const speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                    const speed = (tech.isPrinter ? 5 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
                     const v = { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) }
                     ctx.beginPath()
                     for (let i = 1, len = 10; i < len + 1; i++) {
@@ -3392,7 +3392,7 @@ const m = {
                 const charge = Math.min(m.throwCharge / 5, 1)
                 //***** scale throw speed with the first number, 80 *****
                 // let speed = 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25));
-                let speed = (tech.isPrinter ? 15 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
+                let speed = (tech.isPrinter ? 5 + 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.1)) : 80 * charge * Math.min(0.85, 0.8 / Math.pow(m.holdingTarget.mass, 0.25)))
 
 
                 m.throwCharge = 0;
@@ -6646,6 +6646,8 @@ const m = {
                             b.grapple({ x: m.pos.x + 40 * Math.cos(m.angle), y: m.pos.y + 40 * Math.sin(m.angle) }, m.angle)
                             if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
                         }
+                        //cap velocity to prevent clipping, maybe...
+                        if (player.speed > 100) Matter.Body.setVelocity(player, Vector.mult(Vector.normalise(player.velocity), 100));
                         m.grabPowerUp();
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)

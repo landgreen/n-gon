@@ -624,10 +624,11 @@ const b = {
                     requestAnimationFrame(cycle)
                 } else {
                     count++
-                    if (count < 84) requestAnimationFrame(cycle);
-                    if (!(count % 7)) {
+                    if (count < 160) requestAnimationFrame(cycle);
+                    if (!(count % 10)) {
+                        // console.log(count / 10)
                         const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
-                        b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.01 + 0.03 * Math.random()))), size * (0.4 + Math.random() * 0.35), `hsla(${360 * Math.random()},100%,66%,0.6)`, 0.2); //makes bullet do explosive damage at end
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * (count * 0.0045 + 0.04 * Math.random()))), size * (0.4 + Math.random() * 0.5), `hsla(${360 * Math.random()},100%,66%,0.6)`, 0.2); //makes bullet do explosive damage at end
                     }
                 }
             }
@@ -645,8 +646,9 @@ const b = {
                     count++
                     if (count < 29) requestAnimationFrame(cycle);
                     if (!(count % 3)) {
+                        // console.log(count / 3)
                         const unit = Vector.rotate({ x: 1, y: 0 }, curl * 6.28 * count / 27 + off)
-                        b.explosion(Vector.add(where, Vector.mult(unit, size * 0.75)), size * 0.7, color, 0.5); //makes bullet do explosive damage at end
+                        b.explosion(Vector.add(where, Vector.mult(unit, size * 0.7)), size * 0.65, color, 0.5); //makes bullet do explosive damage at end
                     }
                 }
             }
@@ -667,26 +669,20 @@ const b = {
                     if (count < 30 && m.alive) requestAnimationFrame(cycle);
                     if (count === 0) {
                         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
-                        b.explosion(where, size * 0.8, color, 0.5);
+                        b.explosion(where, size * 0.9, color, 0.5);
                     }
                     if (count === 8) {
                         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
                         for (let i = 0, len = 6; i < len; i++) {
-                            const unit = Vector.rotate({
-                                x: 1,
-                                y: 0
-                            }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.1 * range)), size * 0.6, color, 0.5); //makes bullet do explosive damage at end
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.2 * range)), size * 0.65, color, 0.5); //makes bullet do explosive damage at end
                         }
                     }
                     if (count === 16) {
                         const color = `hsla(${360 * Math.random()},100%,66%,0.6)`
                         for (let i = 0, len = 10; i < len; i++) {
-                            const unit = Vector.rotate({
-                                x: 1,
-                                y: 0
-                            }, 6.28 * i / len)
-                            b.explosion(Vector.add(where, Vector.mult(unit, 1.4 * range)), size * 0.45, color, 0.5); //makes bullet do explosive damage at end
+                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * i / len)
+                            b.explosion(Vector.add(where, Vector.mult(unit, 1.5 * range)), size * 0.5, color, 0.5); //makes bullet do explosive damage at end
                         }
                     }
                     count++
