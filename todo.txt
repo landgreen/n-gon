@@ -1,39 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
-n-gon will now try to record your last 1000 tech choices
-  NO information from n-gon is ever shared, it just stays with your browser as localstorage
-tech: archetype - 3x frequency for your top tech
-tech: aberration - 0x frequency for your top tech, spawn 2 tech
-  unlocks once you have chosen 100 tech on the same browser
-
-flame test
-  11->15 explosions
-  1.15x increased size and damage
-  longer delay between explosions
-  more concentrated location
-pyrotechnics are shrunk 0.7x->0.65x
-fireworks 1.1x size and damage increase and flower petal range increase
-brainstorming max 6->20 sets of choices, but each new set of choices drains 25 energy
-  this also applies to the JUNK tech "brainstorm"
-additive manufacturing blocks no longer have extra density (and damage)
-expansion 77->100 max energy
-
-tier 4 mob damage done 5.4->4.5x,  mob damage taken 0.01->0.013x
-centipedeBoss and caterpillarBoss have 0.8x health
-hydraBosses have 1.2x health
-quadLaser does 0.75x damage
-slasher4 has 0.7x health
-freeze grenades shrink to a smaller size before ending
 
 bug fixes
-  some mobs that make up the newer composite bosses are now set to not drop power ups
-    they don't count as full mobs for various tech
-  fixed diaphragm tech text
-  chatter no longer has console messages
-  entanglement no longer falsely offers randomized choices from options exchange
-  accretion heals didn't follow from subway to final level
-  extended the roundwormBoss fix to roundwormBoss4
-    head sometimes didn't connect with new body
+  archetype and aberration
+    sorting order was reversed
+    removed tech you have and archetype and aberration from list
     
 
 *********************************************************** TODO *****************************************************

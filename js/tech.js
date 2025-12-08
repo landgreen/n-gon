@@ -4254,19 +4254,24 @@ const tech = {
                 for (const str of arr) {
                     freqMap.set(str, (freqMap.get(str) || 0) + 1);
                 }
+
                 const unique = [...new Set(arr)]; // Get unique strings in order of first appearance
-                return unique.sort((a, b) => freqMap.get(a) - freqMap.get(b)); // Sort by frequency (ascending), maintaining original order for same frequency
+                return unique.sort((a, b) => freqMap.get(b) - freqMap.get(a)); // Sort by frequency (descending)
             }
             const sorted = sortByFrequency(localSettings.techHistory)
 
             let text = '3x <strong>frequency</strong> for:<br>'
             for (let j = 0; j < this.num; j++) {
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].name === sorted[j]) {
-                        tech.tech[i].frequency *= 3
-                        // simulation.inGameConsole(`<span class='color-var'>tech</span>["<strong>${tech.tech[i].name}</strong>"].frequency = <strong>${tech.tech[i].frequency}</strong>`);
-                        // simulation.inGameConsole(`<span class='color-var'>${tech.tech[i].name}</span> frequency = <strong>${tech.tech[i].frequency}</strong>`);
-                        text += `<span class='color-var'>${tech.tech[i].name}</span><br>`
+                    if (tech.tech[i].name === sorted[j] && tech.tech[i].name !== "archetype" && tech.tech[i].name !== "aberration") {
+                        if (tech.tech[i].count > 0) { //don't add tech you already have
+                            this.num++
+                        } else {
+                            tech.tech[i].frequency *= 3
+                            // simulation.inGameConsole(`<span class='color-var'>tech</span>["<strong>${tech.tech[i].name}</strong>"].frequency = <strong>${tech.tech[i].frequency}</strong>`);
+                            // simulation.inGameConsole(`<span class='color-var'>${tech.tech[i].name}</span> frequency = <strong>${tech.tech[i].frequency}</strong>`);
+                            text += `<span class='color-var'>${tech.tech[i].name}</span><br>`
+                        }
                     }
                 }
             }
@@ -4304,17 +4309,24 @@ const tech = {
                 for (const str of arr) {
                     freqMap.set(str, (freqMap.get(str) || 0) + 1);
                 }
+
                 const unique = [...new Set(arr)]; // Get unique strings in order of first appearance
-                return unique.sort((a, b) => freqMap.get(a) - freqMap.get(b)); // Sort by frequency (ascending), maintaining original order for same frequency
+                return unique.sort((a, b) => freqMap.get(b) - freqMap.get(a)); // Sort by frequency (descending)
             }
             const sorted = sortByFrequency(localSettings.techHistory)
 
-            let text = '0 <strong>frequency</strong> for:<br>'
+            let text = '0x <strong>frequency</strong> for:<br>'
             for (let j = 0; j < this.num; j++) {
                 for (let i = 0, len = tech.tech.length; i < len; i++) {
-                    if (tech.tech[i].name === sorted[j]) {
-                        tech.tech[i].frequency = 0
-                        text += `<span class='color-var'>${tech.tech[i].name}</span><br>`
+                    if (tech.tech[i].name === sorted[j] && tech.tech[i].name !== "archetype" && tech.tech[i].name !== "aberration") {
+                        if (tech.tech[i].count > 0) { //don't add tech you already have
+                            this.num++
+                        } else {
+                            tech.tech[i].frequency *= 3
+                            // simulation.inGameConsole(`<span class='color-var'>tech</span>["<strong>${tech.tech[i].name}</strong>"].frequency = <strong>${tech.tech[i].frequency}</strong>`);
+                            // simulation.inGameConsole(`<span class='color-var'>${tech.tech[i].name}</span> frequency = <strong>${tech.tech[i].frequency}</strong>`);
+                            text += `<span class='color-var'>${tech.tech[i].name}</span><br>`
+                        }
                     }
                 }
             }
