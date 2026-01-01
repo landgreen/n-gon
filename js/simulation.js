@@ -18,7 +18,7 @@ const simulation = {
         level.custom();
         powerUps.do();
         mobs.draw();
-        simulation.draw.cons();
+        // simulation.draw.cons();
         simulation.draw.body();
         if (!m.isTimeDilated) mobs.loop();
         m.draw();
@@ -1236,9 +1236,15 @@ const simulation = {
             if (tech.isMutualism && !tech.isEnergyHealth) {
                 for (let i = 0; i < bullet.length; i++) {
                     if (bullet[i].isMutualismActive) {
-                        m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
+                        if (tech.isMutualism && this.isMutualismActive) {
+                            if (tech.isEnergyHealth) {
+                                m.energy += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
+                            } else {
+                                m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
+                                if (m.health > m.maxHealth) m.health = m.maxHealth;
+                                m.displayHealth();
+                            }
+                        }
                     }
                 }
             }
@@ -1303,6 +1309,7 @@ const simulation = {
             let sporeCount = 0
             let wormCount = 0
             let fleaCount = 0
+            // let zombieCount = 0
             for (let i = 0; i < bullet.length; ++i) {
                 if (bullet[i].isDrone && bullet[i].endCycle !== Infinity) {
                     droneArray.push({
@@ -1317,15 +1324,14 @@ const simulation = {
                 } else if (bullet[i].isFlea) {
                     fleaCount++
                 }
+                // else if (bullet[i].isZombie) {
+                //     zombieCount++
+                // }
             }
-
+            const where = { x: level.enter.x + 50, y: level.enter.y - 60 }
             //respawn drones in animation frame
             requestAnimationFrame(() => {
                 let respawnDrones = () => {
-                    const where = {
-                        x: level.enter.x + 50,
-                        y: level.enter.y - 60
-                    }
                     if (droneArray.length) {
                         requestAnimationFrame(respawnDrones);
                         if (!simulation.paused && !simulation.isChoosing && m.alive) {
@@ -1355,14 +1361,7 @@ const simulation = {
                     requestAnimationFrame(respawnSpores);
                     if (!simulation.paused && !simulation.isChoosing) {
                         sporeCount--
-                        const where = {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 60
-                        }
-                        b.spore({
-                            x: where.x + 100 * (Math.random() - 0.5),
-                            y: where.y + 120 * (Math.random() - 0.5)
-                        })
+                        b.spore({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
                     }
                 }
             }
@@ -1374,14 +1373,7 @@ const simulation = {
                     requestAnimationFrame(respawnWorms);
                     if (!simulation.paused && !simulation.isChoosing) {
                         wormCount--
-                        const where = {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 60
-                        }
-                        b.worm({
-                            x: where.x + 100 * (Math.random() - 0.5),
-                            y: where.y + 120 * (Math.random() - 0.5)
-                        })
+                        b.worm({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) })
                     }
                 }
             }
@@ -1393,23 +1385,26 @@ const simulation = {
                     requestAnimationFrame(respawnFleas);
                     if (!simulation.paused && !simulation.isChoosing) {
                         fleaCount--
-                        const where = {
-                            x: level.enter.x + 50,
-                            y: level.enter.y - 60
-                        }
                         const speed = 6 + 3 * Math.random()
                         const angle = 2 * Math.PI * Math.random()
-                        b.flea({
-                            x: where.x + 100 * (Math.random() - 0.5),
-                            y: where.y + 120 * (Math.random() - 0.5)
-                        }, {
-                            x: speed * Math.cos(angle),
-                            y: speed * Math.sin(angle)
-                        })
+                        b.flea({ x: where.x + 100 * (Math.random() - 0.5), y: where.y + 120 * (Math.random() - 0.5) }, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
                     }
                 }
             }
             requestAnimationFrame(respawnFleas);
+
+
+            //respawn spores in animation frame
+            // let respawnZombies = () => {
+            //     if (zombieCount > 0) {
+            //         requestAnimationFrame(respawnZombies);
+            //         if (!simulation.paused && !simulation.isChoosing) {
+            //             zombieCount--
+            //             spawn.zombie(where.x + 100 * (Math.random() - 0.5), where.y + 120 * (Math.random() - 0.5))
+            //         }
+            //     }
+            // }
+            // requestAnimationFrame(respawnZombies);
         }
         if (tech.isQuantumEraser && m.alive) {
             let count = 0
@@ -1927,7 +1922,7 @@ const simulation = {
                 ctx.lineTo(bodyDraw[j].x, bodyDraw[j].y);
             }
             ctx.lineTo(bodyDraw[0].x, bodyDraw[0].y);
-            ctx.fillStyle = "rgba(255, 255, 0, 0.4)";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
             ctx.fill();
             // ctx.stroke();
             //head sensor

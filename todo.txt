@@ -1,33 +1,98 @@
 ******************************************************** NEXT PATCH **************************************************
 
 
+tech: scale invariance - press down to toggle player size between big = 3x damage, small = 0.7x damage taken
+tech: bijection - toggle between huge = 3x->6x damage, tiny = 0.7x->0.5x damage taken
+  adjusted steps so baby players can walk smoothly
+tech: optical tweezers - collect power ups hit by your laser and gain 80 energy
+
+finalBoss is invulnerable until all mobs are destroyed (between phases)
+  spawned mobs can now be any tier, but mob health and damage is scaled up
+final boss attack - large AoE ring
+final Boss attack - 5 vertical laser sensors
+reactorBoss: laserScanBoss - leaves a vertical and horizontal laser sensors
+mayflyBoss - tier 2 very long worm style soft body with wings
+all soft worm bosses have 2->3 vulnerable tail mobs
+no longer drawing constraints in bulk (for performance and cleaner graphics)
+  but some constraints are now custom drawn
+  mobs groups are no longer sometimes constrained together
+trainBoss2 on corridor level has shorter beams, and 0.25s shorter invulnerability
+constraint - blocks explode 2 seconds after you touch them
+blocks you are holding deflect mobs
+your above max energy your energy bar has a nonlinear horizontal extension
+vanish blocks draw an outline of their position while hidden
+foam bounces off invulnerable mobs
+foam has no knock back if you are crouched
+removed angled arrows ↘ in combos because it confused people
+nitinol gained 0.6x damage taken
+updated JUNK tech chatter with newer user generated quotes from github
+Lorentz transformation 1->9x stacks
+working mass 1->9x stacks
+counterfactual conditional removed, because it was too confusing
+counterfactual now has a normal 1x frequency
+  so it shows up once automatically
+renormalization renamed frequentist
+Bayesian statistics renamed Bayesian
+  also 1.05->1.06x damage
+peer review 1.03->1.02 damage
+field coupling spawns 9->10 coupling and now comes with a field
+compound lens bonus damage 3x + 0.5->0.8
+unified field theory now requires a field upgrade
+changed text "jumps"->"jump height"
+fault tolerance 5->8 drones
+drones with cache will not pick up ammo unless you are below 20 ammo
+tungsten carbide updated graphics,  falling damage goes up to 60->80 health
+pilot wave tech - principle of locality 0.1->0.25x damage reduction, (-2)->(+3) choices
+pulse laser uses 0.8x energy
+quasiparticles no longer have a random chance to occur with optical amplifier
+  so you don't lose ammo without meaning to
+boost power ups no longer have a small chance to spawn per level
+coupling balance
+  grappling hook 4->5% more ammo
+  wormhole +2->3 energy per block eaten (and some bug fixes involving getting not enough or too much energy)
+  cloaking 1.05->1.06x ambush damage
+  time dilation 1.03->1.05x longer time dilation
+  molecular assembler 0.6->0.5 energy per second
+  negative mass 0.973->0.976x damage reduction
+
 bug fixes
-  archetype and aberration
-    sorting order was reversed
-    removed tech you have and archetype and aberration from list
-    
+  constraint wimps no longer switch with you to new alternate realities
+  railgun now works with 2x ammo constraint
+  mutualism now works with mass energy properly
+  instability disabled for top 2 difficulties, since it can't activate work
+  fixed bug where paradigm shift can kill you if you have died from quantum immortality and have quantum immortality again
+  bounce boss is properly set to isVerticesChange = true for foam interaction
+  paradigm shift no longer lets you go below 0 health if you have quantum Zeno effect and quantum immortality has triggered
 
 *********************************************************** TODO *****************************************************
 
-add white box and caption to chatter JUNK tech
+add a setting to say the name of each tech/field/guns
+  is the built in voice good enough accuracy? (yep)
+  when to generate audio?
+    click on the orb while paused?
+    add new icon to click on to the right align of the title
+    after choose (this needs a setting to disable)
 
-new constraint - no pause while choosing?
-  this was removed because it had issues with full screen
+mob attack - crash on top of player when above
+  mob flies towards player, but aims for a space above the player (if there is no map of body elements int the way)
+mob attack - run towards player when in same vertical row
 
-if player has missile bot and a few other bots
+make more Cordyceps/zombie tech?
+  spawn zombie in other ways?
+  tech that buff zombies?
+    zombies move with you to next zone?
+      this is tricky because zombies hurt you when they touch, so where should they spawn?
+      
+show stats for popular tech choices
+  in splash screen?
+  track other stats?
+
+tech: - if player has missile bot and a few other bots
   convert up to 10 other bots into missile bot
   convert all your guns into missile bots
 
-new tech that can pause other tech
-  synergies: tech debt, stimulated emission, cache, mass-energy equivalence, Zenos paradox, Ψ(t) collapse, fine-structure constant
-  cost research to pause or un pause?
-    seems too expensive?
-  pause mechanism
-    ?pause tech
-    ?remove tech, but get it back at the start of next level
-
-
 constraint ideas
+  0.66x fire rate
   blocks are converted to mobs
     similar to blockBoss code
   ?blocks do 0.2x damage
@@ -35,52 +100,16 @@ constraint ideas
     wording?
       extra choices
     better as a JUNK tech?
-
-softBosses
-  ideas for new softBosses
-    shared health between mobs?
-      or can each piece die independent?
-        shared health in cells of 2 or 4?
-    cycling invulnerability regions
-    also catapiller, but with a head on both ends
-    unconnected mobs have some attack effect
-    2 mob wide ring shaped (or oval)
-      or square or triangle...
-    normal worm body, with 2 branching arms that have stringers on the tip
-    wings every 3 segments?
-    slasher 1,2,3,4 style head
-    softbody that isn't in a square grid, instead one column is set half way to make a series of triangle constraint connections
-    add hydra style appendages
-    add extra layers of head mobs, slicer or stinger
-    earthworm can move through walls
-
-JUNK tech
-  mobs talk when you hit them, or when they hit you.
-  https://github.com/landgreen/n-gon/discussions/500
+  no pause while choosing?
+    this was removed because it had issues with full screen
+  blocks explode 2 seconds after you touch them
 
 Boltzmann brain
   do something with a low probability to occur.
     remove the level and get rid of player legs?
+      convert with ship tech
     chance to spawn something good?
   JUNK tech?
-
-tech: advance time 1 second after eating a power up
-  skin tech Verlet integration unlocks
-    remove effect form pair production?
-
-drain energy when the block you hold hits a mob
-  set held block to collide with mob and mob bullets
-  in player code check for collisions between block and mobs
-
-performance issue with experiment mode
-  causes my computer fan to turn on when I leave it on for a few minutes
-    maybe do a performance test in dev tools
-  fixes?
-    remove some CSS animations
-      cloaking
-      choices
-    find a way to not draw things off screen?
-    something might be changing size and forcing a redraw of everything
 
 perfect diamagnetism tech:   - using field while crouching will pull in blocks
   releasing field will fire the blocks  (like control)
@@ -1547,6 +1576,8 @@ possible names for tech
   gravity wave - 
   tuple - a finite list
   Navier–Stokes - equations for the movement of fluids
+  renormalization
+
 
 
 ******************************************************** UNSOLVED BUGS ********************************************************

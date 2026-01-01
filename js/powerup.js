@@ -775,8 +775,8 @@ const powerUps = {
                 m.velocitySmooth = Vector.add(Vector.mult(m.velocitySmooth, 0.8), Vector.mult(player.velocity, 0.2))
                 ctx.rotate(Math.atan2(m.velocitySmooth.y, m.velocitySmooth.x))
                 ctx.beginPath();
-                const radius = 40
-                const mag = 8 * Vector.magnitude(m.velocitySmooth) + radius
+                const radius = 40 * player.scale
+                const mag = 8 * Vector.magnitude(m.velocitySmooth) * player.scale + radius
                 ctx.arc(0, 0, radius, -Math.PI / 2, Math.PI / 2);
                 ctx.bezierCurveTo(-radius, radius, -radius, 0, -mag, 0); // bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y)
                 ctx.bezierCurveTo(-radius, 0, -radius, -radius, 0, -radius);
@@ -814,7 +814,7 @@ const powerUps = {
                             // powerUps.research.count -= cost
                             powerUps.research.expend(cost)
                             b.randomBot()
-                            // if (tech.renormalization) {
+                            // if (tech.isFrequentist) {
                             //     for (let i = 0; i < cost; i++) {
                             //         if (Math.random() < 0.47) {
                             //             m.fieldCDcycle = m.cycle + 20;
@@ -833,7 +833,7 @@ const powerUps = {
             if (tech.isDeathAvoid && document.getElementById("tech-anthropic")) {
                 document.getElementById("tech-anthropic").innerHTML = `-${powerUps.research.count}`
             }
-            if (tech.renormalization && Math.random() < 0.47 && amount < 0) {
+            if (tech.isFrequentist && Math.random() < 0.47 && amount < 0) {
                 for (let i = 0, len = -amount; i < len; i++) powerUps.spawn(m.pos.x, m.pos.y, "research");
             }
             if (tech.isRerollHaste) {
@@ -853,8 +853,8 @@ const powerUps = {
                 if (powerUps.research.count > 0) {
                     powerUps.research.changeRerolls(-1)
                     if (tech.isResearchDamage) {
-                        m.damageDone *= 1.03
-                        simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.03} //peer review`);
+                        m.damageDone *= 1.02
+                        simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.02} //peer review`);
                         // tech.addJunkTechToPool(0.01)
                     }
                     if (tech.isResearchHeal) {
@@ -870,8 +870,8 @@ const powerUps = {
                 powerUps.research.changeRerolls(-1)
             }
             if (tech.isResearchDamage) {
-                m.damageDone *= 1.03
-                simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.03} //peer review`);
+                m.damageDone *= 1.02
+                simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.02} //peer review`);
                 // tech.addJunkTechToPool(0.01)
             }
             if (tech.isResearchHeal) {
@@ -982,7 +982,7 @@ const powerUps = {
             return 17;
         },
         effect() {
-            const couplingExtraAmmo = (m.fieldMode === 10 || m.fieldMode === 0) ? 1 + 0.04 * m.coupling : 1
+            const couplingExtraAmmo = (m.fieldMode === 10 || m.fieldMode === 0) ? 1 + 0.05 * m.coupling : 1
             if (b.inventory.length > 0) {
                 powerUps.animatePowerUpGrab('rgba(68, 102, 119,0.25)')
                 if (tech.isAmmoForGun && (b.activeGun !== null && b.activeGun !== undefined)) { //give extra ammo to one gun only with tech logistics
@@ -1238,7 +1238,7 @@ const powerUps = {
                 }
                 // console.log(options.length)
                 if (options.length > 0 || !tech.isSuperDeterminism) {
-                    let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 1 : 3) * (m.fieldMode === 8) - level.fewerChoices
+                    let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
                     if (tech.isCancelTech && tech.cancelTechCount === 1) {
                         totalChoices *= 3
                         tech.cancelTechCount++
@@ -1305,7 +1305,7 @@ const powerUps = {
                 for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
                     if (i !== m.fieldMode) options.push(i);
                 }
-                let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 1 : 3) * (m.fieldMode === 8) - level.fewerChoices
+                let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
                 if (tech.isCancelTech && tech.cancelTechCount === 1) {
                     totalChoices *= 3
                     tech.cancelTechCount++
@@ -1384,7 +1384,7 @@ const powerUps = {
                     }
                 }
                 //set total choices
-                let totalChoices = 3 + tech.extraChoices + (tech.isInPilot ? 1 : 3) * (m.fieldMode === 8) - level.fewerChoices
+                let totalChoices = 3 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
                 if (tech.isCancelTech && tech.cancelTechCount === 1) {
                     totalChoices *= 3
                     tech.cancelTechCount++
@@ -1683,7 +1683,7 @@ const powerUps = {
             if (Math.random() < 0.2 * (simulation.difficultyMode - 4)) powerUps.spawn(x + 20, y, "ammo");
             return;
         }
-        if (Math.random() < 0.02 || (tech.isBoostPowerUps && Math.random() < 0.14)) {
+        if (tech.isBoostPowerUps && Math.random() < 0.14) {
             powerUps.spawn(x, y, "boost");
             return;
         }
@@ -1832,7 +1832,7 @@ const powerUps = {
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant && m.immuneCycle < m.cycle) {
             const dmg = tech.pauseEjectTech * 0.01
-            if ((!tech.isEnergyHealth && (dmg * m.defense() < m.health || tech.isNoDeath)) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
+            if ((!tech.isEnergyHealth && dmg * m.defense() < m.health) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
                 if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)

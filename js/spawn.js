@@ -26,7 +26,7 @@ const spawn = {
     bossTier: [
         [],//T0
         ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "hydraBoss", "centipedeBoss", "roundwormBoss"],//T1
-        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "spiderBoss2", "tendrilBoss", "hydraBoss2", "caterpillarBoss"],//T2
+        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "spiderBoss2", "tendrilBoss", "hydraBoss2", "caterpillarBoss", "mayflyBoss"],//T2
         ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss", "spiderBoss3", "tendrilBoss3", "larvaBoss"],//T3
         ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4", "roundwormBoss4"] //T4
         //finalBoss is T5
@@ -365,7 +365,7 @@ const spawn = {
                         //draw halo
                         ctx.strokeStyle = "rgba(80,120,200,0.2)" //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
-                        ctx.arc(m.pos.x, m.pos.y, 36, 0, 2 * Math.PI);
+                        ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
                         if (tech.isDarkEnergy) m.energy += 0.0017 * scale
@@ -376,7 +376,7 @@ const spawn = {
                         //draw halo
                         ctx.strokeStyle = "rgba(80,120,200,0.2)" //"rgba(255,255,0,0.2)" //ctx.strokeStyle = `rgba(0,0,255,${0.5+0.5*Math.random()})`
                         ctx.beginPath();
-                        ctx.arc(m.pos.x, m.pos.y, 36, 0, 2 * Math.PI);
+                        ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
                         if (tech.isDarkEnergy) m.energy += 0.0017 * scale
@@ -516,37 +516,55 @@ const spawn = {
                 if (this.health === 1) me.cycle = 1; //reset fight
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4 //0.75,0.5,0.25
-                this.invulnerableCount = 220 + 10 * simulation.difficultyMode //how long does invulnerable time last
+                // this.invulnerableCount = 220 + 10 * simulation.difficultyMode //how long does invulnerable time last
+                this.invulnerableCount = 0
                 this.isInvulnerable = true
                 this.damageReduction = 0
             }
         };
         me.invulnerable = function () {
             if (this.isInvulnerable) {
-                this.invulnerableCount--
-                if (this.invulnerableCount < 0) {
-                    this.isInvulnerable = false
-                    this.damageReduction = this.startingDamageReduction
-                    this.pushAway();
-                    this.mode[this.totalModes].enter() //enter new mode
-                    this.totalModes++
-                    //spawn 6 mobs
-                    let tier = 3
-                    if (simulation.difficultyMode > 4 && this.health < 0.4) tier = 4
+                this.invulnerableCount++
+                if (this.invulnerableCount === 120 || this.invulnerableCount === 300 || this.invulnerableCount === 540) { //after a couple sec ond delay
+                    //spawn mobs
+                    // let tier = 3
+                    // if (simulation.difficultyMode > 4 && this.health < 0.4) tier = 4
+                    const tier = 1 + Math.floor(Math.random() * 4)
                     me.mobType = spawn.tier[tier][Math.floor(Math.random() * spawn.tier[tier].length)]; //fire a mob from each vertex
-                    for (let i = 0; i < 6; i++) me.spawnMobs(i)
+                    // for (let i = 0, len = 3 + 7 * Math.random(); i < len; i++) me.spawnMobs(i)
+                    for (let i = 0, len = Math.floor(4 + 9 * Math.random()); i < len; i++) me.spawnMobs(i)
+                }
+                //check if any mobs are alive
 
-                    level.newLevelOrPhase() //run some new level tech effects
+                //count mobs
+                if (this.invulnerableCount > 600) {
+                    let foundMobs = false
+                    for (let i = 0; i < mob.length; i++) {
+                        if (mob[i].isFinalBossMob) {
+                            foundMobs = true
+                            // mob[i].damage(0.01);
+                            break
+                        }
+                    }
+                    if (!foundMobs) {
+                        setTimeout(() => { this.pushAway(); }, 1000);
+                        this.isInvulnerable = false
+                        this.damageReduction = this.startingDamageReduction
+                        this.mode[this.totalModes].enter() //enter new mode
+                        this.totalModes++
+                        level.newLevelOrPhase() //run some new level tech effects
+                    }
                 }
                 ctx.beginPath(); //draw invulnerable
                 let vertices = this.vertices;
                 ctx.moveTo(vertices[0].x, vertices[0].y);
                 for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
                 ctx.lineTo(vertices[0].x, vertices[0].y);
-                ctx.lineWidth = 15 + 6 * Math.random();
-                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.lineWidth = 25 + 10 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.8 + 0.2 * Math.random()})`;
                 ctx.stroke();
-                ctx.fillStyle = `rgba(255,255,255,${Math.min(1, 120 / (this.invulnerableCount + 60))})`;
+                // ctx.fillStyle = `rgba(255,255,255,${Math.min(1, 120 / (this.invulnerableCount + 60))})`;
+                ctx.fillStyle = `rgba(255,255,255,0.7)`;
                 ctx.fill()
             }
         }
@@ -555,15 +573,75 @@ const spawn = {
         }
         me.mobType = spawn.tier[4][Math.floor(Math.random() * spawn.tier[4].length)]
         me.spawnMobs = function (index = 0) {
-            const vertex = me.vertices[index]
+            const vertex = me.vertices[index % 6]
             const unit = Vector.normalise(Vector.sub(me.position, vertex))
             const where = Vector.add(vertex, Vector.mult(unit, -30))
+            spawn.allowShields = false; //don't want shields on individual mobs
             spawn[me.mobType](where.x + 50 * (Math.random() - 0.5), where.y + 50 * (Math.random() - 0.5));
+            spawn.allowShields = true; //don't want shields on individual mobs
+            mob[mob.length - 1].tier = undefined
+            mob[mob.length - 1].isFinalBossMob = true
             const velocity = Vector.mult(Vector.perp(unit), -10) //give the mob a rotational velocity as if they were attached to a vertex
             Matter.Body.setVelocity(mob[mob.length - 1], { x: me.velocity.x + velocity.x, y: me.velocity.y + velocity.y });
         }
         me.maxMobs = 400
         me.mode = [{
+            name: "motionLaser",
+            laser: [],
+            do() {
+                for (let i = 0; i < this.laser.length; i++) {
+                    this.laser[i].motionQuery()
+                }
+            },
+            enter() {
+                for (let i = -3; i < 4; i++) {
+                    const x = me.position.x + i * 700
+                    this.laser.push(level.laser({ x: x, y: -1500 }, { x: x, y: 0 }))
+                }
+            },
+            exit() { },
+        }, {
+            name: "ring",
+            count: 0,
+            radius: 400, //2100 is max, 400 is min
+            width: 300,
+            do() {
+                this.count++
+                if (this.count > 210) { //reset and wait
+                    this.count = 0
+                    this.radius = 400 + Math.floor(1700 * Math.random())
+                } else if (this.count > 180) { //check for player collision
+                    const dist = Vector.magnitude(Vector.sub(me.position, player.position)) //find distance to player
+                    if (m.immuneCycle < m.cycle && dist > this.radius - this.width / 2 && dist < this.radius + this.width / 2) {
+                        if (m.immuneCycle < m.cycle + 60 + m.collisionImmuneCycles) m.immuneCycle = m.cycle + 60 + m.collisionImmuneCycles; //player is immune to damage extra time
+                        const dmg = 0.1 * me.damageScale()
+                        m.takeDamage(dmg);
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: m.pos.x,
+                            y: m.pos.y,
+                            radius: dmg * 1500,
+                            color: `rgba(255,0,50,0.7)`,
+                            time: 20
+                        });
+                    }
+                    //draw AoE
+                    ctx.beginPath();
+                    ctx.arc(me.position.x, me.position.y, this.radius + 3 * (Math.random() - 0.5), 0, 2 * Math.PI); // Create a full circle
+                    ctx.lineWidth = this.width;  // This gives the ring its "body"
+                    ctx.strokeStyle = `rgba(255,0,50,${0.84 + 0.16 * Math.random()})`
+                    ctx.stroke();
+                } else if (this.count > 60) {
+                    //draw prediction
+                    ctx.beginPath();
+                    ctx.arc(me.position.x, me.position.y, this.radius, 0, 2 * Math.PI); // Create a full circle
+                    ctx.lineWidth = this.width;  // This gives the ring its "body"
+                    ctx.strokeStyle = `rgba(255,0,50,${0.1 + 0.07 * Math.random()})`
+                    ctx.stroke();
+                }
+            },
+            enter() { },
+            exit() { },
+        }, {
             name: "boulders",
             spawnRate: Math.max(30, 170 - 5 * simulation.difficultyMode),
             do() {
@@ -578,7 +656,7 @@ const spawn = {
             name: "mobs",
             spawnRate: Math.max(60, 240 - 20 * simulation.difficultyMode),
             do() {
-                if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs) {
+                if (!(me.cycle % this.spawnRate) && mob.length < me.maxMobs && !this.isInvulnerable) {
                     me.torque += 0.000015 * me.inertia; //spin
 
                     const index = Math.floor((me.cycle % (this.spawnRate * 6)) / this.spawnRate) //int from 0 to 5
@@ -941,6 +1019,9 @@ const spawn = {
             // },
         ]
         me.mode.sort(() => Math.random() - 0.5);
+        // me.mode[me.totalModes].enter() //force boss to enter new mode for testing
+        // me.totalModes++
+
         me.healthBarFinal = function () {
             const size = this.radius * 0.2;
             // const h = this.radius * 0.43;
@@ -1288,13 +1369,14 @@ const spawn = {
             }
         };
     },
-    zombie(x, y, radius, sides, color) { //mob that attacks other mobs
+    zombie(x, y, radius = 20, sides = 4, color = "#000") { //mob that attacks other mobs
         mobs.spawn(x, y, sides, radius, color);
         let me = mob[mob.length - 1];
         me.damageReduction = 0 //take NO damage, but also slowly lose health
-        Matter.Body.setDensity(me, 0.0001) // normal density is 0.001 // this reduces life by half and decreases knockback
+        Matter.Body.setDensity(me, 0.0001) // normal density is 0.001
         me.isZombie = true
         me.isBadTarget = true;
+        me.isSlowed = true
         me.isDropPowerUp = false;
         me.stroke = "#83a"
         me.accelMag = 0.003
@@ -1303,7 +1385,7 @@ const spawn = {
         me.seeAtDistance2 = 1000000 //1000 vision range
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar1()
-            this.checkStatus();
+            // this.checkStatus();
             this.zombieHealthBar();
             this.lookForMobTargets();
             this.attack();
@@ -1353,10 +1435,12 @@ const spawn = {
         }
         me.hitCD = 0
         me.attack = function () { //hit non zombie mobs
-            if (this.hitCD < simulation.cycle && !this.isStunned && !this.isSlowed) {
+            if (this.hitCD < simulation.cycle) {
                 if (this.target) {
+                    //chase target
                     this.force = Vector.mult(Vector.normalise(Vector.sub(this.target.position, this.position)), this.accelMag * this.mass)
-                } else { //wonder around
+                } else {
+                    //wonder around in a circle
                     this.torque += 0.0000003 * this.inertia;
                     const mag = 0.0003 * this.mass
                     this.force.x += mag * Math.cos(this.angle)
@@ -1401,6 +1485,25 @@ const spawn = {
                         hit(collide[i].bodyA)
                         hit(collide[i].bodyB)
                     }
+                }
+
+                if (m.immuneCycle < m.cycle && Matter.Query.collides(this, [player]).length) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles + 10;
+                    m.takeDamage(0.04);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 5,
+                        color: "rgba(136, 51, 170,0.5)",
+                        time: 20
+                    });
+
+                    this.hitCD = simulation.cycle + 15
+                    //knock back  away from recently hit mob
+                    const force = Vector.mult(Vector.normalise(Vector.sub(player.position, this.position)), 0.1 * this.mass)
+                    this.force.x -= force.x;
+                    this.force.y -= force.y;
+                    this.target = null //look for a new target
                 }
             }
         }
@@ -2098,10 +2201,10 @@ const spawn = {
 
         }
     },
-    centipedeBoss(x, y, radius = 16, gridX = 16, gridY = 2, flipHead = false) {
+    centipedeBoss(x, y, radius = 20, gridX = 16, gridY = 2, flipHead = false) {
         const meArray = [];
         const softID = Math.random();
-        const spacing = 34 + radius
+        const spacing = 24 + radius
         const stiffness = 0.2;
         const stiffnessDiagonal = 0.05;
         const stiffnessBending = 0.1;
@@ -2120,7 +2223,7 @@ const spawn = {
                     spawn.softBody(spawnX, spawnY, radius, softID);  //col % 2 === 0 ? "rgba(219, 84, 84, 1)" : "rgba(64, 11, 11, 1)"
                     // mob[mob.length - 1].accelMag = 0.0001
                 }
-                if (col > 1) {
+                if (col > 2) {
                     mob[mob.length - 1].isInvulnerable = true
                     mob[mob.length - 1].damageReductionMemory = mob[mob.length - 1].damageReduction
                     mob[mob.length - 1].damageReduction = 0
@@ -2237,7 +2340,7 @@ const spawn = {
                     spawn.softBody(spawnX, spawnY, radius, softID);
                     mob[mob.length - 1].damageReduction = 0.11
                 }
-                if (col > 1) {
+                if (col > 2) {
                     mob[mob.length - 1].isInvulnerable = true
                     mob[mob.length - 1].damageReductionMemory = mob[mob.length - 1].damageReduction
                     mob[mob.length - 1].damageReduction = 0
@@ -2328,6 +2431,141 @@ const spawn = {
                     });
                     Composite.add(engine.world, consBB[consBB.length - 1]);
                 }
+            }
+        }
+    },
+    mayflyBoss(x, y, radius = 15, gridX = 35, gridY = 2, flipHead = false) {
+        const meArray = [];
+        const softID = Math.random();
+        const spacing = 30
+        const stiffness = 0.6;
+        const stiffnessDiagonal = 0.15;
+        const stiffnessBending = 0.3;
+        const damping = 0;
+        if (flipHead) x += spacing * gridX
+
+        spawn.allowShields = false; //don't want shields on individual mobs
+        for (let row = 0; row < gridY; row++) {
+            for (let col = 0; col < gridX; col++) {
+                const spawnX = x + col * spacing * (flipHead ? -1 : 1);
+                const spawnY = y + row * spacing * (flipHead ? -1 : 1);
+                if (col === gridX - 1) { // || col === 0
+                    spawn.softSlicer(spawnX, spawnY, radius, softID);
+                    mob[mob.length - 1].swordRadiusMax = 400
+                    mob[mob.length - 1].swordRadiusGrowRateInitial = 1.09
+                    mob[mob.length - 1].accelMag = 0.0008;
+                } else if (col === gridX - 6 || col === 3) { //!(col % 8)
+                    spawn.softFlutter(spawnX, spawnY, radius, softID);
+                    mob[mob.length - 1].damageReduction = 0.18
+                } else {
+                    spawn.softBody(spawnX, spawnY, radius, softID);
+                    mob[mob.length - 1].damageReduction = 0.12
+                    Matter.Body.setDensity(mob[mob.length - 1], 0.0002);
+                }
+                if (col > 2) {
+                    mob[mob.length - 1].isInvulnerable = true
+                    mob[mob.length - 1].damageReductionMemory = mob[mob.length - 1].damageReduction
+                    mob[mob.length - 1].damageReduction = 0
+                } else {
+                    mob[mob.length - 1].fill = '#fff'
+                }
+                mob[mob.length - 1].tier = 2
+                mob[mob.length - 1].col = col
+                meArray.push(mob[mob.length - 1]);
+            }
+        }
+        spawn.allowShields = true;
+
+        // Apply constraints
+        for (let row = 0; row < gridY; row++) {
+            for (let col = 0; col < gridX; col++) {
+
+                const currentIndex = row * gridX + col;
+
+                // Horizontal (right)
+                if (col < gridX - 1) {
+                    const rightIndex = currentIndex + 1;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[rightIndex],
+                        stiffness: stiffness,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+
+                // Vertical (down)
+                if (row < gridY - 1) {
+                    const bottomIndex = currentIndex + gridX;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[bottomIndex],
+                        stiffness: stiffness,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+
+                // Diagonal (down-right)
+                if (row < gridY - 1 && col < gridX - 1) {
+                    const bottomRightIndex = currentIndex + gridX + 1;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[bottomRightIndex],
+                        stiffness: stiffnessDiagonal,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+
+                // Diagonal (down-left)
+                if (row < gridY - 1 && col > 0) {
+                    const bottomLeftIndex = currentIndex + gridX - 1;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[bottomLeftIndex],
+                        stiffness: stiffnessDiagonal,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+
+                // Bending horizontal (2 right)
+                if (col < gridX - 2) {
+                    const right2Index = currentIndex + 2;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[right2Index],
+                        stiffness: stiffnessBending,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+
+                // Bending vertical (2 down)
+                if (row < gridY - 2) {
+                    const bottom2Index = currentIndex + gridX * 2;
+                    consBB[consBB.length] = Constraint.create({
+                        bodyA: meArray[currentIndex],
+                        bodyB: meArray[bottom2Index],
+                        stiffness: stiffnessBending,
+                        damping: damping
+                    });
+                    Composite.add(engine.world, consBB[consBB.length - 1]);
+                }
+            }
+        }
+
+        //organize boss into a circle
+        const ringRadius = (gridX * spacing) / (2 * Math.PI);
+        for (let row = 0; row < gridY; row++) {
+            for (let col = 0; col < gridX; col++) {
+                const body = meArray[row * gridX + col];
+                const angle = (col / gridX) * 2 * Math.PI;
+                const currentRadius = ringRadius + (row * spacing);
+                const newX = x + Math.cos(angle) * currentRadius;
+                const newY = y + Math.sin(angle) * currentRadius;
+                Matter.Body.setPosition(body, { x: newX, y: newY });
             }
         }
     },
@@ -2481,7 +2719,7 @@ const spawn = {
                     spawn.softBody(spawnX, spawnY, radius, softID);  //col % 2 === 0 ? "rgba(219, 84, 84, 1)" : "rgba(64, 11, 11, 1)"
                     mob[mob.length - 1].damageReduction = 0.15
                 }
-                if (col > 1) {
+                if (col > 2) {
                     mob[mob.length - 1].isInvulnerable = true
                     mob[mob.length - 1].damageReductionMemory = mob[mob.length - 1].damageReduction
                     mob[mob.length - 1].damageReduction = 0
@@ -3158,7 +3396,7 @@ const spawn = {
         }
     },
     softBody(x, y, radius, softID, color = "hsl(0, 0%, 100%)") {
-        mobs.spawn(x + Math.random(), y + Math.random(), 7, radius, color) //);
+        mobs.spawn(x + Math.random(), y + Math.random(), 5, radius, color) //);
         const lineWidth = Math.floor(radius / 2)
         let me = mob[mob.length - 1];
         // me.tier = 2
@@ -3183,7 +3421,6 @@ const spawn = {
         // me.stroke = "transparent"
         me.collisionFilter.mask = cat.player | cat.bullet | cat.body | cat.map// | cat.mob
         me.leaveBody = false;
-        me.buffCount = 0
         me.onDamage = function () {
             for (let i = 0; i < mob.length; i++) { //alert
                 if (mob[i].softID === this.softID) mob[i].locatePlayer();
@@ -3208,7 +3445,7 @@ const spawn = {
             requestAnimationFrame(() => {
                 for (let i = 0, len = mob.length; i < len; i++) {
                     //tell cells in next 2 columns to drop invulnerability
-                    if (mob[i].isSoftBoss && mob[i].softID === this.softID && (mob[i].col === this.col + 1 || mob[i].col === this.col + 2)) {
+                    if (mob[i].isSoftBoss && mob[i].softID === this.softID && (mob[i].col === this.col + 1 || mob[i].col === this.col + 2 || mob[i].col === this.col + 3)) {
                         mob[i].isInvulnerable = false
                         mob[i].damageReduction = mob[i].damageReductionMemory
                     }
@@ -3222,6 +3459,8 @@ const spawn = {
         }
         me.do = function () {
             // if (this.seePlayer.recall) this.healthBar2()
+            Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.9)
+
             this.checkStatus();
             if (this.isDecay) {
                 this.health -= 0.001
@@ -3241,6 +3480,94 @@ const spawn = {
             }
 
         }
+    },
+    softFlutter(x, y, radius, softID, isLeftWing) {
+        mobs.spawn(x, y, 7, radius, "hsl(0, 0%, 100%)");
+        const lineWidth = Math.floor(radius / 2)
+        let me = mob[mob.length - 1];
+        me.tier = 1
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
+        // me.damageReduction = 0.04 
+        me.isBoss = true;
+        me.isDropPowerUp = false
+        me.inertia = Infinity
+        me.isSoftBoss = true;
+        me.softID = softID
+        me.memory = Infinity;
+        me.isInvulnerable = false
+        me.damageReduction = 0.24
+        me.damageReductionMemory = me.damageReduction
+
+        me.vertices = Matter.Vertices.rotate(me.vertices, Math.PI, me.position); //make the pointy side of triangle the front
+        Matter.Body.rotate(me, Math.random() * Math.PI * 2);
+        me.accelMag = 0.0007
+        me.frictionAir = 0.04;
+        me.memory = 240;
+        me.restitution = 1;
+        me.frictionStatic = 0;
+        me.friction = 0;
+        me.leaveBody = false;
+        me.onDamage = function () {
+            for (let i = 0; i < mob.length; i++) { //alert
+                if (mob[i].softID === this.softID) mob[i].locatePlayer();
+            }
+        }
+        me.onDeath = function () {
+            this.isSoftBoss = false;
+            let count = 0 //count other cells by id
+            for (let i = 0, len = mob.length; i < len; i++) {
+                if (mob[i].isSoftBoss && mob[i].softID === this.softID) count++
+            }
+            if (count < 3) { //only drop a power up if this is the last cell
+                for (let i = 0, len = mob.length; i < len; i++) { //kill all other soft mobs
+                    if (mob[i].isSoftBoss && mob[i].softID === this.softID) {
+                        mob[i].onDeath = () => { }
+                        mob[i].isDropPowerUp = false
+                        mob[i].death()
+                    }
+                }
+                powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+            }
+            requestAnimationFrame(() => {
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    //tell cells in next 2 columns to drop invulnerability
+                    if (mob[i].isSoftBoss && mob[i].softID === this.softID && (mob[i].col === this.col + 1 || mob[i].col === this.col + 2 || mob[i].col === this.col + 2)) {
+                        mob[i].isInvulnerable = false
+                        mob[i].damageReduction = mob[i].damageReductionMemory
+                    }
+                    if (mob[i].isSoftBoss && mob[i].softID === this.softID && mob[i].col === this.col - 1) {
+                        // mob[i].death()
+                        mob[i].isDecay = true
+                    }
+                    //tell cells in previous column to die
+                }
+            })
+        }
+        me.flapRadius = 100 + radius * 3
+        me.flapRate = 0.13
+        me.do = function () {
+            this.checkStatus();
+            ctx.fillStyle = `hsla(${160 + 40 * Math.random()}, 100%, ${25 + 25 * Math.random() * Math.random()}%, 0.2)`; //"rgba(0,235,255,0.3)";   // ctx.fillStyle = `hsla(44, 79%, 31%,0.4)`; //"rgba(0,235,255,0.3)";
+
+            this.wing(this.angle + 0.3 * Math.sin(simulation.cycle * this.flapRate), this.flapRadius)
+
+            if (this.isDecay) {
+                this.health -= 0.001
+                if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
+                this.alwaysSeePlayer();
+                this.attraction();
+            }
+            if (this.isInvulnerable) {
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = lineWidth + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.stroke();
+            }
+        };
     },
     softStinger(x, y, radius, softID) {
         const color = '#5bc'
@@ -3420,11 +3747,13 @@ const spawn = {
             }
         }
         me.do = function () {
-            if (this.seePlayer.recall) this.healthBar2()
             this.seePlayerByHistory()
             this.checkStatus();
-            if (this.distanceToPlayer() < 500) {
-                if (!this.isSlashing && m.immuneCycle < m.cycle && Matter.Query.ray(map, this.position, m.pos).length === 0) this.sword = this.swordWaiting
+            if (this.seePlayer.recall) {
+                this.healthBar2()
+                if (this.distanceToPlayer() < 500) {
+                    if (!this.isSlashing && m.immuneCycle < m.cycle && Matter.Query.ray(map, this.position, m.pos).length === 0) this.sword = this.swordWaiting
+                }
             }
             this.attraction();
             this.sword() //does various things depending on what stage of the sword swing
@@ -3465,6 +3794,8 @@ const spawn = {
         }
         me.sword = () => { } //base function that changes during different aspects of the sword swing
         me.swordGrow = function () {
+            Matter.Body.setAngularVelocity(this, 0.99 * this.angularVelocity)
+
             this.laserSpear(this.vertices[this.swordVertex], this.angle + this.laserAngle);
             Matter.Body.setVelocity(this, Vector.mult(this.velocity, 0.98))
             // this.swordRadius += this.swordRadiusGrowRate
@@ -4715,7 +5046,7 @@ const spawn = {
                 // toMe(bullet, this.position, this.eventHorizon))
             }
         };
-        me.damageReduction = 0.27
+        me.damageReduction = 0.3
         me.do = function () {
             // if (this.seePlayer.recall) this.healthBar1()
             //keep it slow, to stop issues from explosion knock backs
@@ -5352,7 +5683,7 @@ const spawn = {
         me.tier = tier
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.isBoss = true;
-        me.damageReduction = 0.035  //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.03  //normal is 1,  most bosses have 0.25
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.nextHealthThreshold = 0.75
@@ -5370,11 +5701,11 @@ const spawn = {
 
         targets.push(me) //add to shield protection
         me.friction = 0;
-        me.frictionAir = 0.004;
+        me.frictionAir = 0.0035;
         me.lookTorque = 0.0000008; //controls spin while looking for player
         // me.seeAtDistance2 = 2000000 //1400 vision range
         // me.g = 0.0002; //required if using this.gravity
-        me.accelMag = 0.0005
+        me.accelMag = 0.0006
         me.seePlayerFreq = Math.floor((30 + 20 * Math.random()));
         me.seePlayerFreq = 70
 
@@ -5488,7 +5819,7 @@ const spawn = {
         me.tier = 2
         Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
         me.isBoss = true;
-        me.damageReduction = 0.05  //normal is 1,  most bosses have 0.25
+        me.damageReduction = 0.045  //normal is 1,  most bosses have 0.25
 
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
@@ -5511,7 +5842,7 @@ const spawn = {
         me.lookTorque = 0.0000008; //controls spin while looking for player
         // me.seeAtDistance2 = 2000000 //1400 vision range
         // me.g = 0.0002; //required if using this.gravity
-        me.accelMag = 0.00045
+        me.accelMag = 0.0006
         me.seePlayerFreq = Math.floor((30 + 20 * Math.random()));
         me.seePlayerFreq = 70
 
@@ -5587,9 +5918,11 @@ const spawn = {
                 const where = Vector.add(pos, Vector.mult(unit, d))
                 if (i === tendrils - 1) {
                     spawn.sliceSpiderLeg(where.x, where.y, mobRadius);
+                    mob[mob.length - 1].frictionAir = 0;
                 } else {
                     spawn.tendrilBody(where.x, where.y, mobRadius);
                     mob[mob.length - 1].fill = 'transparent'
+                    mob[mob.length - 1].frictionAir = 0;
                     this.transparentArray.push(mob[mob.length - 1])
                 }
                 this.tendrilHeads[this.tendrilHeads.length - 1].push(mob[mob.length - 1])
@@ -8490,12 +8823,12 @@ const spawn = {
         }
         Matter.Body.rotate(me, Math.random() * Math.PI * 2);
         Matter.Body.setDensity(me, 0.0014); //normal is 0.001
-        me.accelMag = 0.0002 * simulation.accelScale;
+        me.accelMag = 0.0005;
         spawn.shield(me, x, y);
 
         me.laserArray = [] //keeps track of static laser beams
         me.laserLimit = simulation.difficultyMode < 3 ? 1 : 2
-        me.fireDelay = Math.max(75, 140 - simulation.difficulty * 0.5)
+        me.fireDelay = 75
         me.cycle = 0
         me.laserDelay = 150 + Math.floor(Math.random() * 120)
         me.addLaser = function () {
@@ -9888,6 +10221,7 @@ const spawn = {
         me.isBoss = true;
         me.isReactorBoss = true;
         Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        me.isVerticesChange = true
         me.damageReduction = 0.25
         me.startingDamageReduction = me.damageReduction
         me.inertia = Infinity;
@@ -9961,6 +10295,97 @@ const spawn = {
             // } else if (player.position.x < this.position.x - 200) {
             //     this.force.x -= xMag * this.mass;
             // }
+        };
+    },
+    laserScanBoss(x, y, radius = 80, isSpawnBossPowerUp = true) {
+        mobs.spawn(x, y, 0, radius, "rgb(255,255,255)") // "rgb(201,202,225)");
+        let me = mob[mob.length - 1];
+        Matter.Body.rotate(me, 2 * Math.PI * Math.random());
+        me.isBoss = true;
+        me.isReactorBoss = true;
+        Matter.Body.setDensity(me, 0.003); //normal is 0.001
+        me.damageReduction = 0.25
+        me.startingDamageReduction = me.damageReduction
+        me.inertia = Infinity;
+        me.isInvulnerable = false
+        me.frictionAir = 0.01
+        me.restitution = 1
+        me.friction = 0
+        me.collisionFilter.mask = cat.bullet | cat.player | cat.body | cat.map | cat.mob
+        Matter.Body.setVelocity(me, { x: 10 * (Math.random() - 0.5), y: 10 * (Math.random() - 0.5) });
+        me.seePlayer.recall = 1;
+        // spawn.shield(me, x, y, 1);
+        me.lasers = []
+        me.onDamage = function () {
+            if (this.health < this.nextHealthThreshold) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = Math.floor(this.health * 5) / 5
+                this.invulnerableCount = 180
+                this.isInvulnerable = true
+                this.damageReduction = 0
+
+                // for (let i = 0; i < 3; i++) {
+                //     const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
+                //     const where = Vector.add(this.position, Vector.mult(unit, radius))
+                //     spawn.seeker(where.x, where.y, this.tier);
+                // }
+
+                //find bounds for vertical laser
+                const top = vertexCollision(this.position, { x: this.position.x, y: this.position.y - 3000 }, [map]);
+                const bottom = vertexCollision(this.position, { x: this.position.x, y: this.position.y + 3000 }, [map]);
+                this.lasers.push(level.laser({ x: this.position.x, y: top.y }, { x: this.position.x, y: bottom.y }))
+
+                //find bounds for horizontal laser
+                const left = vertexCollision(this.position, { x: this.position.x - 3000, y: this.position.y }, [map]);
+                const right = vertexCollision(this.position, { x: this.position.x + 3000, y: this.position.y }, [map]);
+                this.lasers.push(level.laser({ x: left.x, y: this.position.y }, { x: right.x, y: this.position.y }))
+
+                spawn.seeker(this.position.x, top.y, this.tier);
+                spawn.seeker(this.position.x, bottom.y, this.tier);
+                spawn.seeker(left.x, this.position.y, this.tier);
+                spawn.seeker(right.x, this.position.y, this.tier);
+            }
+        };
+        if (isSpawnBossPowerUp) me.onDeath = function () { powerUps.spawnBossPowerUp(this.position.x, this.position.y) };
+        me.cycle = 0
+        me.nextHealthThreshold = 0.8
+        me.invulnerableCount = 0
+
+        me.do = function () {
+            me.seePlayer.recall = 1
+            //maintain speed //faster in the vertical to help avoid repeating patterns
+            if (this.speed < 0.01) {
+                const unit = Vector.sub(player.position, this.position)
+                Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(unit), 0.1));
+            } else {
+                if (Math.abs(this.velocity.y) < 15) Matter.Body.setVelocity(this, { x: this.velocity.x, y: this.velocity.y * 1.03 });
+                if (Math.abs(this.velocity.x) < 11) Matter.Body.setVelocity(this, { x: this.velocity.x * 1.03, y: this.velocity.y });
+            }
+
+            if (this.isInvulnerable) {
+                this.invulnerableCount--
+                if (this.invulnerableCount < 0) {
+                    this.isInvulnerable = false
+                    this.damageReduction = this.startingDamageReduction
+                }
+                //draw invulnerable
+                ctx.beginPath();
+                let vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.stroke();
+            } else if (this.mass < 100) {
+                Matter.Body.scale(this, 1.01, 1.01); //grow back to normal size
+            }
+
+            this.checkStatus();
+
+            for (let i = 0; i < this.lasers.length; i++) {
+                this.lasers[i].motionQuery()
+            }
         };
     },
     timeBoss(x, y, radius = 50, isSpawnBossPowerUp = true) {
@@ -10465,7 +10890,7 @@ const spawn = {
             if (this.health < this.nextHealthThreshold) {
                 this.health = this.nextHealthThreshold - 0.01
                 this.nextHealthThreshold = Math.floor(this.health * 4) / 4
-                this.invulnerableCount = 60 + simulation.difficultyMode * 12
+                this.invulnerableCount = 45 + simulation.difficultyMode * 6
                 this.isInvulnerable = true
                 this.damageReduction = 0
                 for (let i = 0, len = mob.length; i < len; ++i) { //trigger old mines
@@ -10567,7 +10992,6 @@ const spawn = {
 
         Matter.Body.setPosition(me, me.track[me.trackIndex])
         me.do = function () {
-
             //move towards next coordinate
             const where = this.track[this.trackIndex]
             const sub = Vector.sub(where, this.position)
@@ -10627,10 +11051,7 @@ const spawn = {
                 }
                 if (!slowed) {
                     this.count++
-                    // Matter.Body.setAngle(this, this.count * this.rotateVelocity)
-                    // Matter.Body.setAngularVelocity(this, 0)
                 }
-
 
                 //find the final and initial points, then find the angle between them to use to aim the lasers
                 let isResetAngle = false
@@ -10651,9 +11072,9 @@ const spawn = {
                 ctx.beginPath();
                 index = this.trackIndex - 3
                 if (index < 0) index = this.track.length - 1
-                for (let i = 0; i < 6; i++) {
+                for (let i = 0; i < 8; i++) {
                     let dist = Vector.magnitude(Vector.sub(this.position, this.track[index]))
-                    dist = 1000 - dist
+                    dist = 0.4 * Math.ceil(1300 - dist, 0)
                     if (dist > 10) {
                         this.laserArray(this.track[index], this.smoothAngle + Math.PI / 2, dist);
                         this.laserArray(this.track[index], this.smoothAngle - Math.PI / 2, dist);
@@ -13733,12 +14154,12 @@ const spawn = {
         let me = mob[mob.length - 1];
         me.tier = 1
         me.isBoss = true;
-        Matter.Body.setDensity(me, 0.00165 + 0.00011 * Math.sqrt(simulation.difficulty)); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger
         me.startingDamageReduction = 0.1
         me.damageReduction = 0
         me.isInvulnerable = true
 
-        me.accelMag = 0.00008 + 0.00045 * Math.sqrt(simulation.accelScale)
+        me.accelMag = 0.00055
         me.memory = 250;
         me.seePlayerFreq = 13
         me.flapRate = 0.4
@@ -13789,6 +14210,7 @@ const spawn = {
             angle -= 0.1
             spawn.snakeBody(x + tailRadius * Math.cos(angle), y + tailRadius * Math.sin(angle), this.tier, i === 0 ? 25 : 20);
             const who = mob[mob.length - 1]
+            who.damageReduction = 0.05   //me.damageReduction = 0.031
             who.fill = `hsl(${160 + 40 * Math.random()}, 100%, ${5 + 25 * Math.random() * Math.random()}%)`
             if (i < 4) who.snakeHeadID = me.id
             if (i === 0) me.snakeBody1 = who //track this segment, so the difference in position between this segment and the head can be used to angle the wings
@@ -13875,7 +14297,7 @@ const spawn = {
         me.memory = 20;
         me.repulsionRange = 1800 * 1800
 
-        cons[cons.length] = Constraint.create({
+        const constraint1 = cons[cons.length] = Constraint.create({
             pointA: { x: constraint.x, y: constraint.y },
             bodyB: me,
             stiffness: 0.00012
@@ -13955,6 +14377,13 @@ const spawn = {
                 this.checkStatus();
                 this.attraction();
             }
+            //draw
+            ctx.beginPath();
+            ctx.moveTo(constraint1.pointA.x, constraint1.pointA.y);
+            ctx.lineTo(constraint1.bodyB.position.x + constraint1.pointB.x, constraint1.bodyB.position.y + constraint1.pointB.y);
+            ctx.lineWidth = 1
+            ctx.strokeStyle = "rgba(0,0,0,0.2)";
+            ctx.stroke();
         };
     },
     tetherBoss4(x, y, constraint, radius = 90) {
@@ -14286,9 +14715,9 @@ const spawn = {
         sideLength = Math.ceil(Math.random() * 100) + 70, // distance between each node mob
         stiffness = Math.random() * 0.03 + 0.005
     ) {
-        this.allowShields = false; //don't want shields on individual group mobs
+        // this.allowShields = false; //don't want shields on individual group mobs
         const angle = 2 * Math.PI / nodes
-        let targets = []
+        // let targets = []
         for (let i = 0; i < nodes; ++i) {
             let whoSpawn = spawn;
             if (spawn === "random") {
@@ -14297,18 +14726,18 @@ const spawn = {
                 whoSpawn = this.pickList[Math.floor(Math.random() * this.pickList.length)];
             }
             this[whoSpawn](x + sideLength * Math.sin(i * angle), y + sideLength * Math.cos(i * angle), radius);
-            targets.push(mob[mob.length - 1].id) //track who is in the group, for shields
+            // targets.push(mob[mob.length - 1].id) //track who is in the group, for shields
         }
-        if (Math.random() < 0.3) {
-            this.constrain2AdjacentMobs(nodes, stiffness * 2, true);
-        } else {
-            this.constrainAllMobCombos(nodes, stiffness);
-        }
+        // if (Math.random() < 0.3) {
+        //     this.constrain2AdjacentMobs(nodes, stiffness * 2, true);
+        // } else {
+        //     this.constrainAllMobCombos(nodes, stiffness);
+        // }
         //spawn shield for entire group
-        if (nodes > 2 && Math.random() < 0.998) {
-            this.groupShield(targets, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
-        }
-        this.allowShields = true;
+        // if (nodes > 2 && Math.random() < 0.998) {
+        //     this.groupShield(targets, x, y, sideLength + 2.5 * radius + nodes * 6 - 25);
+        // }
+        // this.allowShields = true;
     },
     lineGroup(
         x,
@@ -14320,7 +14749,7 @@ const spawn = {
         l = Math.ceil(Math.random() * 80) + 30,
         stiffness = Math.random() * 0.06 + 0.01
     ) {
-        this.allowShields = false; //don't want shields on individual group mobs
+        // this.allowShields = false; //don't want shields on individual group mobs
         for (let i = 0; i < nodes; ++i) {
             let whoSpawn = spawn;
             if (spawn === "random") {
@@ -14330,8 +14759,8 @@ const spawn = {
             }
             this[whoSpawn](x + i * radius + i * l, y, radius);
         }
-        this.constrain2AdjacentMobs(nodes, stiffness);
-        this.allowShields = true;
+        // this.constrain2AdjacentMobs(nodes, stiffness);
+        // this.allowShields = true;
     },
     //constraints ************************************************************************************************
     //*************************************************************************************************************

@@ -47,7 +47,7 @@ function playerOnGroundCheck(event) {
                 //falling damage
                 if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
                     // m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.02, 0.4) * spawn.dmgToPlayerByLevelsCleared());
-                    m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.03, 0.6));
+                    m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.04, 0.8));
                     // m.takeDamage(20);
                     if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 }
