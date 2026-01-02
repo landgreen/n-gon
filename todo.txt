@@ -1,68 +1,8 @@
 ******************************************************** NEXT PATCH **************************************************
 
 
-tech: scale invariance - press down to toggle player size between big = 3x damage, small = 0.7x damage taken
-tech: bijection - toggle between huge = 3x->6x damage, tiny = 0.7x->0.5x damage taken
-  adjusted steps so baby players can walk smoothly
-tech: optical tweezers - collect power ups hit by your laser and gain 80 energy
-
-finalBoss is invulnerable until all mobs are destroyed (between phases)
-  spawned mobs can now be any tier, but mob health and damage is scaled up
-final boss attack - large AoE ring
-final Boss attack - 5 vertical laser sensors
-reactorBoss: laserScanBoss - leaves a vertical and horizontal laser sensors
-mayflyBoss - tier 2 very long worm style soft body with wings
-all soft worm bosses have 2->3 vulnerable tail mobs
-no longer drawing constraints in bulk (for performance and cleaner graphics)
-  but some constraints are now custom drawn
-  mobs groups are no longer sometimes constrained together
-trainBoss2 on corridor level has shorter beams, and 0.25s shorter invulnerability
-constraint - blocks explode 2 seconds after you touch them
-blocks you are holding deflect mobs
-your above max energy your energy bar has a nonlinear horizontal extension
-vanish blocks draw an outline of their position while hidden
-foam bounces off invulnerable mobs
-foam has no knock back if you are crouched
-removed angled arrows ↘ in combos because it confused people
-nitinol gained 0.6x damage taken
-updated JUNK tech chatter with newer user generated quotes from github
-Lorentz transformation 1->9x stacks
-working mass 1->9x stacks
-counterfactual conditional removed, because it was too confusing
-counterfactual now has a normal 1x frequency
-  so it shows up once automatically
-renormalization renamed frequentist
-Bayesian statistics renamed Bayesian
-  also 1.05->1.06x damage
-peer review 1.03->1.02 damage
-field coupling spawns 9->10 coupling and now comes with a field
-compound lens bonus damage 3x + 0.5->0.8
-unified field theory now requires a field upgrade
-changed text "jumps"->"jump height"
-fault tolerance 5->8 drones
-drones with cache will not pick up ammo unless you are below 20 ammo
-tungsten carbide updated graphics,  falling damage goes up to 60->80 health
-pilot wave tech - principle of locality 0.1->0.25x damage reduction, (-2)->(+3) choices
-pulse laser uses 0.8x energy
-quasiparticles no longer have a random chance to occur with optical amplifier
-  so you don't lose ammo without meaning to
-boost power ups no longer have a small chance to spawn per level
-coupling balance
-  grappling hook 4->5% more ammo
-  wormhole +2->3 energy per block eaten (and some bug fixes involving getting not enough or too much energy)
-  cloaking 1.05->1.06x ambush damage
-  time dilation 1.03->1.05x longer time dilation
-  molecular assembler 0.6->0.5 energy per second
-  negative mass 0.973->0.976x damage reduction
-
 bug fixes
-  constraint wimps no longer switch with you to new alternate realities
-  railgun now works with 2x ammo constraint
-  mutualism now works with mass energy properly
-  instability disabled for top 2 difficulties, since it can't activate work
-  fixed bug where paradigm shift can kill you if you have died from quantum immortality and have quantum immortality again
-  bounce boss is properly set to isVerticesChange = true for foam interaction
-  paradigm shift no longer lets you go below 0 health if you have quantum Zeno effect and quantum immortality has triggered
+ exploding blocks was exploding blocks that shouldn't explode, like switches and platforms
 
 *********************************************************** TODO *****************************************************
 
@@ -72,6 +12,7 @@ add a setting to say the name of each tech/field/guns
     click on the orb while paused?
     add new icon to click on to the right align of the title
     after choose (this needs a setting to disable)
+    just make it a JUNK tech?
 
 mob attack - crash on top of player when above
   mob flies towards player, but aims for a space above the player (if there is no map of body elements int the way)

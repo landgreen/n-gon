@@ -571,11 +571,11 @@ const level = {
                             for (let i = 0; i < hits.length; i++) {
                                 //hits[i].bodyA.inertia !== Infinity checks if it's not the player
                                 let who = hits[i].bodyA
-                                if (who.inertia !== Infinity && !who.isExplodingConstraintTimer) {
+                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isExplodingConstraintTimer) {
                                     who.isExplodingConstraintTimer = 90
                                 }
                                 who = hits[i].bodyB
-                                if (who.inertia !== Infinity && !who.isExplodingConstraintTimer) {
+                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isExplodingConstraintTimer) {
                                     who.isExplodingConstraintTimer = 90
                                 }
                             }
