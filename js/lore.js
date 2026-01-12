@@ -1018,9 +1018,11 @@ const lore = {
             },
             () => {
                 lore.talkingColor = "#dff"
-                setTimeout(() => {
-                    m.death();
-                }, 6000);
+                if (!tech.isImmortal) {
+                    setTimeout(() => {
+                        m.death();
+                    }, 6000);
+                }
             },
         ],
         [ //chapter 6 - if pacifist run game is over, wipe local storage? or just reset lore.count, but keep testing mode,

@@ -1,8 +1,22 @@
 ******************************************************** NEXT PATCH **************************************************
 
+skin tech icon has a slightly darker background color
+mass-energy skin vibrates horizontally a bit
+precision bombing gets 1.4x grenade ammo
+  greatly improved targeting, it just teleports to the target
+control theory text predicts 1x or 2x damage
 
 bug fixes
- exploding blocks was exploding blocks that shouldn't explode, like switches and platforms
+  dark matter is no longer moved by moving sidewalks, boosts, vacuum bombs 
+  draw lines on office level for bouncy square
+  exploding blocks
+    was exploding blocks that shouldn't explode, like switches and platforms
+    fixed a bad interaction with chain reaction
+  scale invariance
+    adjusted going from small to large to not clip map above or below
+    adjusted side to side positioning to not allow easy wall jumps
+    fixed issues with portals on tower level
+    bijection no longer gets extra small, just extra big
 
 *********************************************************** TODO *****************************************************
 
@@ -36,14 +50,8 @@ constraint ideas
   0.66x fire rate
   blocks are converted to mobs
     similar to blockBoss code
-  ?blocks do 0.2x damage
-  ?all gun and field techs are available
-    wording?
-      extra choices
-    better as a JUNK tech?
   no pause while choosing?
     this was removed because it had issues with full screen
-  blocks explode 2 seconds after you touch them
 
 Boltzmann brain
   do something with a low probability to occur.
@@ -101,13 +109,6 @@ new boss - murmuration of small mobs (maybe 30-50)
       use seePlayerByHistory to set goal for the murmuration
         if one mob can't see goal have them target other mobs in the murmuration
     if no more mobs left on death spawn power ups
-
-diagetic letters
-  initial
-    !added instructions for inputs
-      maybe only if new player...
-    !let player know what lore chapter they are on
-      especially pacifist chapter
 
 tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
   so you can't heal if you take damage twice before doing enough damage

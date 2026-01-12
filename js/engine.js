@@ -23,6 +23,7 @@ function playerOnGroundCheck(event) {
     //runs on collisions events
     function enter() {
         m.numTouching++;
+        // m.groundCount++
         if (!m.onGround) {
             m.onGround = true;
             if (m.crouch) {
@@ -78,6 +79,7 @@ function playerOffGroundCheck(event) {
         if (pairs[i].bodyA === jumpSensor) { //|| pairs[i].bodyB === jumpSensor) {
             if (m.onGround && m.numTouching === 0) {
                 m.onGround = false;
+                // m.groundCount = 0
                 m.lastOnGroundCycle = m.cycle;
                 m.hardLandCD = 0 // disable hard landing
                 if (m.checkHeadClear()) {

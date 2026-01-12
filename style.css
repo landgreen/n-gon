@@ -1131,10 +1131,10 @@ summary {
 }
 
 .circle-grid-instant {
-    width: 1.3em;
-    height: 1.3em;
+    width: 1.15em;
+    height: 1.15em;
     border-radius: 50%;
-    border: 0.15em solid hsl(255, 100%, 71%);
+    border: 0.18em solid hsl(255, 100%, 71%);
     display: inline-block;
     margin-bottom: -0.5em;
     margin-top: -0.3em;
@@ -1146,8 +1146,8 @@ summary {
     height: 1.3em;
     border-radius: 50%;
     display: inline-block;
-    background-color: #fff;
-    opacity: 0.8;
+    background-color: #eee;
+    opacity: 1;
     border: 0.08em solid #222;
     position: absolute;
     top: -0.05em;

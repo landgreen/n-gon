@@ -94,6 +94,7 @@ const m = {
     yOffGoal: 70,
     onGround: false, //checks if on ground or in air
     lastOnGroundCycle: 0, //use to calculate coyote time
+    // groundCount: 0, // used to prevent wall jumps
     coyoteCycles: 5,
     hardLanding: 130,
     squirrelFx: 1,
@@ -260,7 +261,8 @@ const m = {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
         } else if (input.down || m.hardLandCD > m.cycle) {
             m.doCrouch(); //on ground && not crouched and pressing s or down
-        } else if (input.up && m.buttonCD_jump + 20 < m.cycle) {
+        } else if (input.up && m.buttonCD_jump + 20 < m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
+            // console.log("ground", m.groundCount, player.speed, player.velocity)
             m.jump()
         }
         //Math.abs(player.velocity.x) < 7.5
@@ -290,8 +292,10 @@ const m = {
     },
     airControl() {
         //check for coyote time jump
-        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle) m.jump()
-
+        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
+            // console.log("air", m.groundCount, player.speed, player.velocity)
+            m.jump()
+        }
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
         if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
             Matter.Body.setVelocity(player, { x: player.velocity.x, y: player.velocity.y * 0.94 }); //reduce player y-velocity every cycle
@@ -1506,7 +1510,6 @@ const m = {
             player.scale = 2
             m.isDown = false
 
-
             //different scales can sometimes have trouble with jumps so it's a bit faster and higher jumping
             m.squirrelJump = 1.05;
             m.squirrelFx = 1.05;
@@ -1534,26 +1537,72 @@ const m = {
                         m.damageReduction *= 0.7
                         m.damageDone /= 3
                     } else if (player.scale === 0.5) {
-                        //check if space about player is clear
-                        const collides = Matter.Query.ray([...body, ...map], { x: m.pos.x, y: player.bounds.max.y - 30 }, { x: m.pos.x, y: player.bounds.min.y - 150 }, 20)
-                        if (collides.length === 0 || (m.isHolding && collides.length === 1 && collides[0].body === m.holdingTarget)) {//don't check for collisions with a block you are holding
+                        const shift = function () {
                             m.isDown = true
-                            if (m.onGround) {
-                                //move player up
-                                Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 100 });
-                                m.yOff = m.yOffGoal = m.yOffWhen.crouch
-                            }
+                            requestAnimationFrame(() => {
+                                // m.fieldCDcycle = m.cycle + 23;
+                                player.scale = 2
+                                const mass = player.mass
+                                Matter.Body.scale(player, player.scale * player.scale, player.scale * player.scale);
+                                Matter.Body.setMass(player, mass);
+                                Matter.Body.setInertia(player, Infinity);
 
-                            // m.fieldCDcycle = m.cycle + 23;
-                            player.scale = 2
-                            const mass = player.mass
-                            Matter.Body.scale(player, player.scale * player.scale, player.scale * player.scale);
-                            Matter.Body.setMass(player, mass);
-                            Matter.Body.setInertia(player, Infinity);
-
-                            m.damageReduction /= 0.7
-                            m.damageDone *= 3
+                                m.damageReduction /= 0.7
+                                m.damageDone *= 3
+                            });
                         }
+
+                        //find the distance to the left, right, up, down before hitting a wall
+                        const tall = 200
+                        const up = player.position.y - (vertexCollision(player.position, { x: player.position.x, y: player.position.y - tall }, [map, body]).y ?? (player.position.y - tall))
+                        const down = (vertexCollision(player.position, { x: player.position.x, y: player.position.y + tall }, [map, body]).y ?? (player.position.y + tall)) - player.position.y
+
+                        const wide = 50 * 2
+                        const left = player.position.x - (vertexCollision(player.position, { x: player.position.x - wide, y: player.position.y }, [map, body]).x ?? (player.position.x - wide))
+                        const right = (vertexCollision(player.position, { x: player.position.x + wide, y: player.position.y }, [map, body]).x ?? (player.position.x + wide)) - player.position.x
+
+                        //if no room don't transform    //small = 60 tall, big = 250 tall
+                        if (right + left < wide || up + down < tall) {
+                            m.isDown = true
+                            return
+                        }
+                        //most of this left/right setPosition is to prevent clipping into walls and using that to wall jump
+                        if (left < wide / 2) {                            //teleport player to the right
+                            Matter.Body.setPosition(player, { x: player.position.x + wide / 2 - left, y: player.position.y });
+                        } else if (right < wide / 2) {   //teleport player to the left
+                            Matter.Body.setPosition(player, { x: player.position.x - wide / 2 + right, y: player.position.y });
+                        }
+                        if (up < 50) {
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y + 100 - up });
+                        }
+                        if (down < 100 && up > down) {
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 100 + down });
+                        } else {
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 20 });
+                        }
+                        shift()
+
+
+                        // //check if space about player is clear
+                        // const collides = Matter.Query.ray([...body, ...map], { x: m.pos.x, y: player.bounds.max.y - 30 }, { x: m.pos.x, y: player.bounds.min.y - 150 }, 20)
+                        // if (collides.length === 0 || (m.isHolding && collides.length === 1 && collides[0].body === m.holdingTarget)) {//don't check for collisions with a block you are holding
+                        //     m.isDown = true
+                        //     if (m.onGround) {
+                        //         //move player up
+                        //         Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 100 });
+                        //         m.yOff = m.yOffGoal = m.yOffWhen.crouch
+                        //     }
+
+                        //     // m.fieldCDcycle = m.cycle + 23;
+                        //     player.scale = 2
+                        //     const mass = player.mass
+                        //     Matter.Body.scale(player, player.scale * player.scale, player.scale * player.scale);
+                        //     Matter.Body.setMass(player, mass);
+                        //     Matter.Body.setInertia(player, Infinity);
+
+                        //     m.damageReduction /= 0.7
+                        //     m.damageDone *= 3
+                        // }
                     }
 
                 } if (!input.down) {
@@ -1600,7 +1649,7 @@ const m = {
             playerBody.vertices[3].y -= 20
 
             //go back to small size because it fits better
-            player.scale = 0.3
+            player.scale = 0.5
             Matter.Body.scale(player, player.scale / 2, player.scale / 2);
             Matter.Body.setMass(player, mass);
             Matter.Body.setInertia(player, Infinity);
@@ -1618,7 +1667,7 @@ const m = {
                 if (!m.isDown && input.down && !simulation.paused && !simulation.isChoosing) {
                     if (player.scale === 3) {
                         m.isDown = true
-                        const scale = 0.3
+                        const scale = 0.5
                         const mass = player.mass
                         Matter.Body.scale(player, scale / player.scale, scale / player.scale);
                         Matter.Body.setMass(player, mass);
@@ -1627,27 +1676,86 @@ const m = {
 
                         m.damageReduction *= 0.5
                         m.damageDone /= 6
-                    } else if (player.scale === 0.3) {
-                        //check if space above player is clear
-                        const collides = Matter.Query.ray([...body, ...map], { x: m.pos.x, y: player.bounds.max.y - 30 }, { x: m.pos.x, y: player.bounds.min.y - 230 }, 10)
-                        if (collides.length === 0 || (m.isHolding && collides.length === 1 && collides[0].body === m.holdingTarget)) {//don't check for collisions with a block you are holding
+                    } else if (player.scale === 0.5) {
+                        const shift = function () {
                             m.isDown = true
-                            if (m.onGround) {
-                                //move player up
-                                Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 150 });
-                                m.yOff = m.yOffGoal = m.yOffWhen.crouch
-                            }
+                            requestAnimationFrame(() => {
+                                m.isDown = true
+                                const scale = 3
+                                const mass = player.mass
+                                Matter.Body.scale(player, scale / player.scale, scale / player.scale);
+                                Matter.Body.setMass(player, mass);
+                                Matter.Body.setInertia(player, Infinity);
+                                player.scale = scale
 
-                            const scale = 3
-                            const mass = player.mass
-                            Matter.Body.scale(player, scale / player.scale, scale / player.scale);
-                            Matter.Body.setMass(player, mass);
-                            Matter.Body.setInertia(player, Infinity);
-                            player.scale = scale
-
-                            m.damageReduction /= 0.5
-                            m.damageDone *= 6
+                                m.damageReduction /= 0.5
+                                m.damageDone *= 6
+                            });
                         }
+
+                        //find the distance to the left, right, up, down before hitting a wall
+                        const tall = 300
+                        const up = player.position.y - (vertexCollision(player.position, { x: player.position.x, y: player.position.y - tall }, [map, body]).y ?? (player.position.y - tall))
+                        const down = (vertexCollision(player.position, { x: player.position.x, y: player.position.y + tall }, [map, body]).y ?? (player.position.y + tall)) - player.position.y
+
+                        const wide = 60 * 2
+                        const left = player.position.x - (vertexCollision(player.position, { x: player.position.x - wide, y: player.position.y }, [map, body]).x ?? (player.position.x - wide))
+                        const right = (vertexCollision(player.position, { x: player.position.x + wide, y: player.position.y }, [map, body]).x ?? (player.position.x + wide)) - player.position.x
+
+                        // console.log(left, right)
+
+                        //if no room don't transform    //small = 60 tall, big = 250 tall
+                        if (right + left < 100 || up + down < tall) {
+                            m.isDown = true
+                            return
+                        }
+                        //most of this left/right setPosition is to prevent clipping into walls and using that to wall jump
+                        if (left < wide / 2) {
+                            //teleport player to the right
+                            Matter.Body.setPosition(player, { x: player.position.x + wide / 2 - left, y: player.position.y });
+                        } else if (right < wide / 2) {
+                            //teleport player to the left
+                            Matter.Body.setPosition(player, { x: player.position.x - wide / 2 + right, y: player.position.y });
+                        }
+
+                        if (up < 70) {
+                            // console.log("before UP", player.position.y)
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y + 100 - up });
+                            // console.log("after UP", player.position.y)
+                        }
+
+                        if (down < 140 && up > down) {
+                            // console.log("before down", player.position.y)
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 150 + down });
+                            // console.log("after down", player.position.y)
+                        } else {
+                            // console.log("default before", m.pos.y)
+                            Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 40 });
+                            // console.log("default after", m.pos.y)
+                        }
+                        shift()
+
+
+                        //check if space above player is clear
+                        // const collides = Matter.Query.ray([...body, ...map], { x: m.pos.x, y: player.bounds.max.y - 30 }, { x: m.pos.x, y: player.bounds.min.y - 230 }, 10)
+                        // if (collides.length === 0 || (m.isHolding && collides.length === 1 && collides[0].body === m.holdingTarget)) {//don't check for collisions with a block you are holding
+                        //     m.isDown = true
+                        //     if (m.onGround) {
+                        //         //move player up
+                        //         Matter.Body.setPosition(player, { x: player.position.x, y: player.position.y - 150 });
+                        //         m.yOff = m.yOffGoal = m.yOffWhen.crouch
+                        //     }
+
+                        //     const scale = 3
+                        //     const mass = player.mass
+                        //     Matter.Body.scale(player, scale / player.scale, scale / player.scale);
+                        //     Matter.Body.setMass(player, mass);
+                        //     Matter.Body.setInertia(player, Infinity);
+                        //     player.scale = scale
+
+                        //     m.damageReduction /= 0.5
+                        //     m.damageDone *= 6
+                        // }
                     }
                 } if (!input.down) {
                     m.isDown = false
@@ -1850,7 +1958,13 @@ const m = {
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
                 ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
-                ctx.translate(m.pos.x, m.pos.y);
+                ctx.translate(m.pos.x + (simulation.cycle % 2) * 4, m.pos.y);
+                // ctx.translate(m.pos.x, m.pos.y);
+                // if (m.immuneCycle < m.cycle) {
+                //     ctx.translate(m.pos.x, m.pos.y);
+                // } else {
+                //     ctx.translate(m.pos.x + (simulation.cycle % 2 ? -3 : 3), m.pos.y);
+                // }
                 m.calcLeg(Math.PI, -3);
                 m.drawLeg("#456");
                 m.calcLeg(0, 0);
@@ -2939,7 +3053,7 @@ const m = {
         }
     },
     setMaxEnergy(isMessage = true) {
-        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0 || m.fieldMode === 1) * 0.05 * m.coupling + tech.isStandingWaveExpand
+        m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0) * 0.01 * m.coupling + (m.fieldMode === 1) * 0.05 * m.coupling + tech.isStandingWaveExpand
         m.maxEnergy *= m.fieldUpgrades[1].energyHealthRatio
         if (level.isReducedEnergy) m.maxEnergy *= 0.5
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
@@ -2962,6 +3076,32 @@ const m = {
 
             m.regenEnergy(); //only regen if below max
         }
+
+        // const yOff = m.pos.y - 50
+        // const height = 10
+        // if (m.energy > m.maxEnergy) { //not sure why 0.05 and not this:  m.fieldRegen * level.isReducedRegen
+        //     //draw full normal energy bar
+        //     let xOff = m.pos.x - range * m.maxEnergy / 2
+        //     ctx.fillStyle = m.fieldMeterColor;
+        //     ctx.fillRect(xOff, yOff, range * m.maxEnergy, height);
+
+        //     ctx.strokeStyle = "#000"
+        //     ctx.moveTo()
+        //     //draw energy bar beyond that
+        //     const width = range * (Math.log(m.energy + 1 - m.maxEnergy) + m.maxEnergy)
+        //     xOff = m.pos.x - width / 2
+        //     ctx.fillStyle = m.fieldMeterColor + "8";
+        //     ctx.fillRect(xOff, yOff, width, height);//range = 60, m.radius = 30 (1/2*60)
+        // } else { //
+        //     const xOff = m.pos.x - range * m.maxEnergy / 2
+        //     ctx.fillStyle = bgColor; //background
+        //     ctx.fillRect(xOff, yOff, range * m.maxEnergy, height);
+        //     ctx.fillStyle = m.fieldMeterColor;
+        //     ctx.fillRect(xOff, yOff, range * m.energy, height);
+
+        //     m.regenEnergy(); //only regen if below max
+        // }
+
 
         // if (m.energy < m.maxEnergy) {
         //     m.regenEnergy();
@@ -3687,11 +3827,11 @@ const m = {
             }
             if (!who.isInvulnerable && (m.coupling && m.fieldMode === 0) && bullet.length < 200) { //for field emitter iceIX
                 for (let i = 0; i < m.coupling; i++) {
-                    if (0.1 * m.coupling - i > 1.25 * Math.random()) {
+                    if (0.02 * m.coupling - i > Math.random()) {
                         const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
-                        const rad = Vector.rotate(sub, 1 * (Math.random() - 0.5))
+                        const rad = Vector.rotate(sub, Math.random() - 0.5)
                         const angle = Math.atan2(sub.y, sub.x)
-                        b.iceIX(6 + 6 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
+                        b.iceIX(4 + 4 * Math.random(), angle + 3 * (Math.random() - 0.5), Vector.add(m.pos, rad))
                     }
                 }
             }

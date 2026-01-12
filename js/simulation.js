@@ -958,6 +958,7 @@ const simulation = {
         m.alive = true;
         m.definePlayerMass();
         m.onGround = false
+        // m.groundCount = 0
         m.lastOnGroundCycle = 0
         m.health = 0;
         level.isLowHeal = false

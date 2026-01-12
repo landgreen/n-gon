@@ -282,7 +282,7 @@ const tech = {
         if (tech.isDilate) dmg *= 1.9 + 1.1 * Math.sin(m.cycle * 0.01)
         if (tech.isGunChoice) dmg *= 1 + 0.4 * b.inventory.length
         if (powerUps.boost.endCycle > simulation.cycle) dmg *= 1 + powerUps.boost.damage
-        if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + 0.025 * m.coupling
+        if (m.coupling && (m.fieldMode === 0 || m.fieldMode === 5)) dmg *= 1 + m.coupling * (m.fieldMode === 0 ? 0.015 : 0.025)
         if (tech.isVerlet) dmg *= 3
         if (tech.isTechDebt) dmg *= tech.totalCount > 20 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.71828
@@ -405,7 +405,7 @@ const tech = {
     {
         name: "scale invariance",
         descriptionFunction() {
-            return `press <strong>down</strong> to scale your <strong>size</strong> between<br><span style ="font-size:80%;"><strong>small</strong> (<strong>0.7x</strong> <strong class='color-defense'>damage taken</strong>)</span> or <strong>big</strong> (<strong>3x</strong> <strong class='color-d'>damage</strong>)`
+            return `press <strong>down</strong> to scale your <strong>size</strong> between<br><span style ="font-size:80%;"><strong>small</strong> (<strong>${tech.isBijection ? "0.5" : "0.7"}x</strong> <strong class='color-defense'>damage taken</strong>)</span> or <strong>big</strong> (<strong>${tech.isBijection ? "6" : "3"}x</strong> <strong class='color-d'>damage</strong>)`
         },
         maxCount: 1,
         count: 0,
@@ -421,16 +421,19 @@ const tech = {
         },
         remove() {
             if (this.count) {
-                if (player.scale === 0.5) {
-                    m.damageReduction /= 0.7
-                } else if (player.scale === 2) {
-                    m.damageDone /= 3
-                } else if (player.scale === 0.3) {
-                    m.damageReduction /= 0.5
-                } else if (player.scale === 3) {
-                    m.damageDone /= 6
+                if (tech.isBijection) {
+                    if (player.scale === 0.5) {
+                        m.damageReduction /= 0.5
+                    } else if (player.scale === 3) {
+                        m.damageDone /= 6
+                    }
+                } else {
+                    if (player.scale === 0.5) {
+                        m.damageReduction /= 0.7
+                    } else if (player.scale === 2) {
+                        m.damageDone /= 3
+                    }
                 }
-
 
                 //scale up to 2 because that what works for the vertices adjustment,  I don't know why
                 const mass = player.mass
@@ -469,15 +472,12 @@ const tech = {
         },
         requires: "scale invariance",
         effect() {
+            tech.isBijection = true
             //reset scale to prepare
             if (player.scale === 0.5) {
                 m.damageReduction /= 0.7
             } else if (player.scale === 2) {
                 m.damageDone /= 3
-            } else if (player.scale === 0.33) {
-                m.damageReduction /= 0.5
-            } else if (player.scale === 3) {
-                m.damageDone /= 6
             }
 
             const mass = player.mass
@@ -488,7 +488,9 @@ const tech = {
 
             m.skin.scaleInvariance2();
         },
-        remove() { }
+        remove() {
+            tech.isBijection = false
+        }
     },
     {
         name: "Higgs mechanism",
@@ -3317,7 +3319,7 @@ const tech = {
     {
         name: "control theory",
         descriptionFunction() {
-            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is at maximum`
+            return `<strong>2x</strong> <strong class='color-d'>damage</strong><br>while your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is at maximum<em style ="float: right;">(${(m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01)) ? 2 : 1}x damage)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6724,7 +6726,8 @@ const tech = {
     },
     {
         name: "precision bombing",
-        description: "if your <strong>grenades</strong> are directly <strong>above</strong> a mob<br>the <strong>grenade</strong> will <strong>fall</strong> on them",
+        // description: `if your <strong>grenades</strong> are <strong>above</strong> a mob it <strong>strikes</strong> them<br><strong>1.4x</strong> grenade <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
+        description: `your <strong>grenades</strong> rapidly <strong>strike</strong> mobs from above<br><strong>1.4x</strong> grenade <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -6734,11 +6737,30 @@ const tech = {
             return tech.haveGunCheck("grenades")
         },
         requires: "grenades",
+        ammoBonus: 1.4,
         effect() {
             tech.isPrecision = true;
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                if (b.guns[i].name === "grenades") {
+                    b.guns[i].ammoPack *= this.ammoBonus;
+                    b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
+                    simulation.updateGunHUD();
+                    break
+                }
+            }
         },
         remove() {
             tech.isPrecision = false;
+            if (this.count > 0) {
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    if (b.guns[i].name === "grenades") {
+                        b.guns[i].ammoPack /= this.ammoBonus;
+                        b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
+                        simulation.updateGunHUD();
+                        break
+                    }
+                }
+            }
         }
     },
     {
@@ -8548,9 +8570,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDrain === 0.003 && !tech.isStuckOn && !tech.beamCollimator
+            return tech.haveGunCheck("laser") && tech.laserReflections < 3 && !tech.isWideLaser && tech.laserDrain === 0.003 && !tech.isStuckOn && !tech.beamCollimator && !tech.isLaserGrabPowerUp
         },
-        requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier, collimator",
+        requires: "laser gun, not specular reflection, diffuse, free-electron laser, optical amplifier, collimator, tweezers",
         effect() {
             tech.isPulseLaser = true;
             b.guns[11].chooseFireMethod()
@@ -9449,9 +9471,9 @@ const tech = {
         name: "Lorentz transformation",
         description: `<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span><strong>1.5x</strong> <strong class="color-speed">movement</strong> and <strong>jump</strong> height<br><strong>1.5x</strong> <em>fire rate</em>`,
         isFieldTech: true,
-        maxCount: 3,
+        maxCount: 9,
         count: 0,
-        frequency: 3,
+        frequency: 9,
         frequencyDefault: 3,
         allowed() {
             return (m.fieldMode === 6 || m.fieldMode === 8) && (build.isExperimentSelection || powerUps.research.count > 2)
@@ -13407,4 +13429,5 @@ const tech = {
     isDigitalPet: null,
     isChatter: null,
     isLaserGrabPowerUp: null,
+    isBijection: null,
 }
