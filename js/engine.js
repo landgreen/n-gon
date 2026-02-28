@@ -14,9 +14,82 @@ const Engine = Matter.Engine,
 // create an engine
 const engine = Engine.create();
 engine.world.gravity.scale = 0; //turn off gravity (it's added back in later)
-// engine.velocityIterations = 100
-// engine.positionIterations = 100
 // engine.enableSleeping = true
+
+//to reduce lag, maybe
+engine.constraintIterations = 1; //default is 2
+engine.positionIterations = 4; //default is 6
+engine.velocityIterations = 2; //default is 4
+
+
+
+// const removalQueue = [];
+
+// // Helper to queue any type of removal
+// function queueRemoval(type, index) {
+//     // Avoid duplicate entries
+//     if (!removalQueue.some(r => r.type === type && r.index === index)) {
+//         removalQueue.push({ type, index });
+//     }
+// }
+
+// Events.on(engine, 'afterUpdate', () => {
+//     // Grouped by type, sort each group descending so splices don't shift indices
+//     const types = ['map', 'body', 'mob', 'powerUp', 'cons', 'consBB', 'bullet', 'composite'];
+
+//     types.forEach(type => {
+//         const entries = removalQueue
+//             .filter(r => r.type === type)
+//             .map(r => r.index)
+//             .sort((a, b) => b - a);
+
+//         entries.forEach(i => {
+//             switch (type) {
+//                 case 'map':
+//                     Matter.Composite.remove(engine.world, map[i]);
+//                     map.splice(i, 1);
+//                     break;
+//                 case 'body':
+//                     Matter.Composite.remove(engine.world, body[i]);
+//                     body.splice(i, 1);
+//                     break;
+//                 case 'mob':
+//                     Matter.Composite.remove(engine.world, mob[i]);
+//                     mob.splice(i, 1);
+//                     break;
+//                 case 'powerUp':
+//                     Matter.Composite.remove(engine.world, powerUp[i]);
+//                     powerUp.splice(i, 1);
+//                     break;
+//                 case 'cons':
+//                     Matter.Composite.remove(engine.world, cons[i]);
+//                     cons.splice(i, 1);
+//                     break;
+//                 case 'consBB':
+//                     Matter.Composite.remove(engine.world, consBB[i]);
+//                     consBB.splice(i, 1);
+//                     break;
+//                 case 'bullet':
+//                     Matter.Composite.remove(engine.world, bullet[i]);
+//                     bullet.splice(i, 1);
+//                     break;
+//                 case 'composite':
+//                     Matter.Composite.remove(engine.world, composite[i]);
+//                     composite.splice(i, 1);
+//                     break;
+//             }
+//         });
+//     });
+
+//     removalQueue.length = 0;
+// });
+
+
+
+
+
+
+
 
 // matter events
 function playerOnGroundCheck(event) {

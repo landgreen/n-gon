@@ -1,23 +1,38 @@
 ******************************************************** NEXT PATCH **************************************************
 
-skin tech: eigenstate - press down to swap with another you and get 3x damage for 10 seconds
+reducing matter.js physics performance settings to see if it helps with lag
+  engine.constraintIterations = 1; //default is 2, saggy constraints
+    adjusted levels - warehouse, towers
+  engine.positionIterations = 4; //default is 6, bodies bleed into each other more in large stacks
+  engine.velocityIterations = 2; //default is 4, bodies are less bouncy?
 
-pause/experiment menus tech,guns,field orbs produce text to speech of it's name when clicked
-improved clarity of text to speech voices
+bosses no longer have a lower chance to drop tech at higher levels
+snake and king snake bosses now eat blocks and heal
 
-aperture is no longer a skin tech
-  no longer has +10% movement
-  damage oscillates between 0.5x and 3x
-diaphragm oscillates between 0.2x and 1x
-
-bug fixes
-  tokamak and Halbach array work together
-  fixed lore text timing issues for when the n-gon tab is muted
-  path integration is sending your bullets to the correct location again
-  it's possible I fixed the press pause while picking up a tech at the same time bug
-  removed input text sort in pause menu, it's just buttons now.
+bug
+  tokamak unlocks Halbach array
+  tokamak plus Halbach array no longer explodes eigenstate block
+  fixed graphics issue with eigen swap path reset
+  snake boss & tubewormBoss no longer have an extra long tail for a few cycles on flipped horizontal levels
+  eigenstate and quantum Zeno effect interacted to keep you alive at the end of the game if you have below 0 health
+  removing scaleInvariance properly resets player vertices
+  time dilation pauses explosive blocks
+  applied science no longer gives gives quasiparticles
+  getting maul without rebar now works properly
 
 *********************************************************** TODO *****************************************************
+
+
+try these settings and see if they break the game
+engine.constraintIterations = 1; //default is 2
+engine.positionIterations = 4; //default is 6
+engine.velocityIterations = 2; //default is 4
+  issues
+    done - warehouse constraints on hanging platforms are loose
+    swinging blocks are too loose
+      done - superstructure is fine, maybe better
+      towers is bad
+
 
 in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name
   !a second click will read the description?
@@ -32,7 +47,17 @@ sort text input is broken in pause menu
     bot tech
     JUNK
   
+eigenstate
+  update node animation, it doesn't look right...
+  add custom text for eigenstate (if you add at least 2 more tech)
 eigenstate - additional tech
+  while your eigan state is moving it will fire ______ at nearby mobs
+  your state teleports to you when you____
+        hold down?   tap up up up
+  your eigen state fires when you fire
+    too hard to code...
+  gain a laser bot and your laser bots follow your eigen state
+  when you use ammo your eigen state makes an isometric wave?
   do something after swap for a few seconds
     damage?
     faster move speed 6s after swap??
@@ -1649,6 +1674,7 @@ possible names for tech
   Navier–Stokes - equations for the movement of fluids
   renormalization
   fractal dimension - maybe for surface area?
+  self-locating uncertainty - something related to anthropic principle, or many worlds
 
 
 

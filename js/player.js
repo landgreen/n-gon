@@ -562,7 +562,7 @@ const m = {
         }
 
         document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
-        document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - m.defense())) + "px";
+        document.getElementById("defense-bar").style.width = Math.max(0, Math.floor(300 * m.maxHealth * (1 - m.defense()))) + "px";
 
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -2002,6 +2002,7 @@ const m = {
                                 do() {
                                     this.count--
                                     if (this.count < 0) simulation.removeEphemera(this)
+                                    ctx.beginPath();
                                     ctx.moveTo(this.from.x, this.from.y);
                                     ctx.lineTo(this.to.x, this.to.y);
                                     ctx.lineWidth = 60;
@@ -2357,6 +2358,21 @@ const m = {
                 //     m.eigen.downCount = m.eigen.downCountMax
                 // }
                 m.eigen.draw()
+
+
+
+                if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
+                    if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire)) {
+                        if (b.guns[b.activeGun].ammo > 0) {
+                            b.fireWithAmmo()
+                        } else {
+                            b.outOfAmmo()
+                        }
+                        if (m.holdingTarget) m.drop();
+                    }
+                    b.guns[b.activeGun].do();
+                }
+
             }
         },
         energy() {
@@ -3940,9 +3956,9 @@ const m = {
                     if (tech.isGroupThrow) {
                         const range = 810000
                         for (let i = body.length - 1; i > 0; i--) {
-                            if (body[i] !== m.holdingTarget) {
+                            if (body[i] && body[i] !== m.holdingTarget) {
                                 const dist2 = Vector.magnitudeSquared(Vector.sub(m.pos, body[i].position))
-                                if (dist2 < range) {
+                                if (dist2 < range && !body[i].isInvulnerable) {
                                     const where = { x: body[i].position.x, y: body[i].position.y }
                                     Matter.Composite.remove(engine.world, body[i]);
                                     body.splice(i, 1);

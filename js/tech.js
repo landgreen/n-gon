@@ -444,8 +444,8 @@ const tech = {
                 Matter.Body.setInertia(player, Infinity);
                 player.scale = 2
                 //increase angle of the floor connection to allow smoothly walking over bumps
-                playerBody.vertices[6].y += 20
-                playerBody.vertices[3].y += 20
+                // playerBody.vertices[6].y += 20
+                // playerBody.vertices[3].y += 20
 
 
                 //back to scale 1
@@ -2740,15 +2740,17 @@ const tech = {
     },
     {
         name: "Halbach array",
-        description: "throwing a <strong class='color-block'>block</strong> will<br>also throw other nearby <strong class='color-block'>blocks</strong>",
+        descriptionFunction() {
+            return `throwing a <strong class='color-block'>block</strong> will<br>${tech.isTokamak ? "<strong class='color-e'>explode</strong>" : "throw"} other nearby <strong class='color-block'>blocks</strong>`
+        },
         maxCount: 1,
         count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
+        frequency: 2,
+        frequencyDefault: 2,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak) && m.fieldMode !== 8 && m.fieldMode !== 9
         },
-        requires: "mass driver, additive manufacturing, not wormhole, pilot wave, tokamak",
+        requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave",
         effect() {
             tech.isGroupThrow = true
         },
@@ -8726,6 +8728,7 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isBadRandomOption: true,
         allowed() {
             return ((tech.haveGunCheck("wave") && tech.isInfiniteWaveAmmo) || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun))
         },

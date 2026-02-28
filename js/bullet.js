@@ -1768,7 +1768,7 @@ const b = {
         const me = bullet.length;
         const returnRadius = 100 * Math.sqrt(harpoonSize)
         let shape
-        if (tech.isRebar) {
+        if (tech.isRebar || tech.isMaul) {
             const long = tech.isMaul ? 32 : 65
             const tall = tech.isMaul ? 25 : 5
             shape = [{

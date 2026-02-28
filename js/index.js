@@ -1,25 +1,10 @@
 "use strict";
 
-//list of the recent github hashes, shortened to the first 7 digits of the full hash.
-//the last element of the array is the most recent commit
-// const commitHashes = ['6472d6d', 'c8bf77d', 'eb8f4b0', 'f556371', '74f569b', 'c9f355b', '6814c10', '9402cf2', 'f8b4b6f', '82c0ea8', 'f9849d4', 'd00a94a', '3654198', '9bcf4d3', 'eecf763', 'be109bb', 'e2bf9aa', '3ea8bfd', 'c614451', '1752453', '34e05c7', '07af7a7', '2e76b5c', '1b23dec', '0b728fb', 'e6e5058', '4f87444', 'e418b93', 'b3fa1bf', '09c9e93', 'd8e978f', 'da559f4', '1d4b0c4', '4415942', '6cd2502', '8a211e8', '3d423a5', '4933ef5', '77cafe3', 'bffaeed', '99bd1c8', '8a3ac11', 'bf5f866', 'b14f2c1', 'ff613dc', '1129b9d', '3844d00', 'e9d2262', 'ce74f42', 'ad33cf6', '2d12f1d', 'c47d860', '4e6acdd', '778a2c9', '68f9269', '17f65cf', 'b5e4b0d', '38d9931', '64f2a9f', '64c81cd', '254ec00', '38ef45a', '1728b53', 'fde3a58', '6c3d97a', '951806d', '2b99e59', '3ce6bec', '773ee5c', '4c6b480', 'a1164ed', '507b060', '63bfaba', 'eabd146', '438c166', '1903b9e', '5e12cea', 'f43a5e3', '022e2fa', '20f9b79', 'fc70dfe', '5eae070', '8dacb02', '52046ca', '220a6b4', 'ebd2274', 'cea1c64', 'a47ef97', 'a8c6c0e', '9c2c9be', '8bb8222', '1fde74d', 'f1a6713', '97c5509', '1966173', '2daeae1', '1040d1f', 'c9a5ab9', '77e484c', 'b2426cd']
-// const lastShortHash = 'b2426cd'
-//Landgreen needs to update the commitHashes array with the most recent commit hash on each new upload, but the array will always be missing the current hash since it is generated with each new commit
-//write code to check the 2nd most recent hash and see if it match an element in the commitHashes array.  Use that to calculate how many commits have been made since the last update
-
-
-
 //convert text into numbers for seed
 Math.hash = s => {
     for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9);
     return h ^ h >>> 9
 }
-
-// const date1 = new Date()
-// console.log(date1.getUTCHours())
-// document.getElementById("seed").placeholder = Math.initialSeed = String(date1.getUTCDate() * date1.getUTCFullYear()) // daily seed,  day + year
-
-// document.getElementById("seed").placeholder = Math.initialSeed = Math.floor(Date.now() % 100000) //random every time:  just the time in milliseconds UTC
 
 // simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
 window.addEventListener('error', error => {

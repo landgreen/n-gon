@@ -22,7 +22,7 @@ const level = {
             // build.isExperimentRun = true
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            // simulation.isHorizontalFlipped = false//true
+            // simulation.isHorizontalFlipped = true    
             // level.levelsCleared = 7
             // level.updateDifficulty()
             // simulation.isCheating = true
@@ -34,7 +34,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(100)
             // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = m.maxEnergy = 12.2
             // m.energy += 1
             // m.couplingChange(1000)
@@ -54,19 +54,20 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(7) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("microstates")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("homeostasis")
             // tech.giveTech("lens")
-            // for (let i = 0; i < 1; i++) tech.giveTech("anthropic principle")
+            // for (let i = 0; i < 1; i++) tech.giveTech("Halbach array")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
             // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("nail-bot")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
-            // level.satellite()
+            // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
+            // level.towers()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
@@ -75,11 +76,11 @@ const level = {
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
             // for (let i = 0; i < 2; i++) spawn.sniper(1300 + 300 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.blockBoss(2300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.kingSnakeBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 400); });
             // m.storeTech() //sets entanglement
-            // for (let i = 0; i < 2; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "tech");
+            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");
             // for (let i = 0; i < 100; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "coupling", false);
             // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
@@ -147,7 +148,7 @@ const level = {
             } else {
                 m.health = 0;
                 m.displayHealth();
-                m.death();
+                requestAnimationFrame(() => { m.death(); });
             }
         }
         tech.isDeathAvoidedThisLevel = false;
@@ -597,8 +598,8 @@ const level = {
                                     ctx.fillStyle = `rgba(255,80,30,${0.4 + 0.5 * Math.random()})`
                                     ctx.fill();
 
-                                    body[i].isExplodingConstraintTimer--
                                     // explode blocks when they are out of time
+                                    if (!m.isTimeDilated) body[i].isExplodingConstraintTimer--
                                     if (body[i].isExplodingConstraintTimer === 0) {
                                         // if (body[i] === m.holdingTarget) m.drop()
                                         // b.explosion(body[i].position, 20 + 300 * Math.pow(body[i].mass, 0.25));
@@ -5756,11 +5757,12 @@ const level = {
                 }
             },
         })
+        const stiffness = 0.0015
         const constraint1 = cons[cons.length] = Constraint.create({
             pointA: { x: 1300, y: 100 },
             pointB: { x: -300, y: -50 }, //offset from bodyB
             bodyB: body[body.length - 1],
-            stiffness: 0.001,
+            stiffness: stiffness,
             // damping: 0, //I don't know why but this needs to be 0 or not included to properly transfer traction to the player
             // length: 1000,
         });
@@ -5769,7 +5771,7 @@ const level = {
             pointA: { x: 5400, y: 100 },
             pointB: { x: 300, y: -50 }, //offset from bodyB
             bodyB: body[body.length - 1],
-            stiffness: 0.001,
+            stiffness: stiffness,
             // length: 1000,
         });
         Composite.add(engine.world, cons[cons.length - 1]);
@@ -11607,7 +11609,7 @@ const level = {
                     y: -500
                 },
                 bodyB: body[body.length - 1],
-                stiffness: 0.0001815,
+                stiffness: 0.0003,
                 length: 1
             });
             Composite.add(engine.world, cons[cons.length - 1]);
@@ -11620,13 +11622,13 @@ const level = {
                     y: 100
                 },
                 bodyB: body[body.length - 1],
-                stiffness: 0.0001815,
+                stiffness: 0.0003,
                 length: 1
             });
             Composite.add(engine.world, cons[cons.length - 1]);
 
-            spawn.bodyRect(-2700, 1150, 100, 160, 1, spawn.propsSlide); //weight
-            spawn.bodyRect(-2550, 1200, 150, 150, 1, spawn.propsSlide); //weight
+            spawn.bodyRect(-2700, 1150, 100, 160, 1); //weight
+            spawn.bodyRect(-2550, 1200, 150, 150, 1); //weight
             spawn.bodyRect(-2763, 1300, 350, 100, 1, spawn.propsHoist); //hoist
             warehouseCons[2] = cons[cons.length] = Constraint.create({
                 pointA: {
@@ -11634,7 +11636,7 @@ const level = {
                     y: 150
                 },
                 bodyB: body[body.length - 1],
-                stiffness: 0.0004,
+                stiffness: 0.0008,
                 length: 566
             });
             Composite.add(engine.world, cons[cons.length - 1]);

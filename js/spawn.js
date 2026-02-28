@@ -1261,6 +1261,7 @@ const spawn = {
         me.onDeath = function () {
             if (m.health < 0) {
                 m.death() //needed for quantum Zeno effect
+                if (m.alive) m.death() //needed for quantum Zeno effect
                 return
             }
             if (!this.hasRunDeathScript) {
@@ -7944,7 +7945,7 @@ const spawn = {
         me.delay = 3 + 2 * simulation.CDScale;//8 + 3 * simulation.CDScale;
         me.nextBlinkCycle = me.delay;
         me.JumpDistance = 0//set in redMode()
-        me.collisionFilter.mask = cat.bullet | cat.map //| cat.body  //cat.player |
+        me.collisionFilter.mask = cat.bullet | cat.map// | cat.body  //cat.player |
         me.powerUpNames = []
         me.redMode = function () {
             this.color = `rgba(255,0,200,`
@@ -8044,10 +8045,6 @@ const spawn = {
                 let move = (target = this.seePlayer.position) => {
                     const dist = Vector.sub(target, this.position);
                     this.force = { x: 0, y: 0 }
-                    // if (this.isStunned) {
-                    //     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.JumpDistance * 0.1));
-                    // } else {
-                    // }
                     Matter.Body.translate(this, Vector.mult(Vector.normalise(dist), this.JumpDistance));
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
                     // Matter.Body.setAngle(this, 0);
@@ -8055,6 +8052,45 @@ const spawn = {
                     //track previous locations for the tail
                     this.history.push({ x: this.position.x, y: this.position.y }) //add newest to end
                     this.history.shift() //remove first (oldest)
+
+
+
+
+                    for (let i = 0; i < body.length; i++) {
+                        if (!body[i].isInvulnerable && !body[i].isNotHoldable) {
+                            const diff = Vector.sub(this.position, body[i].position);
+                            const distance = Vector.magnitude(diff);
+                            // if within range, apply an outward force
+                            if (distance < 150) {
+                                const savedVertices = body[i].vertices.map(v => ({ x: v.x, y: v.y }));
+                                simulation.ephemera.push({
+                                    count: 60,
+                                    v: savedVertices,
+                                    do() {
+                                        this.count--;
+                                        if (this.count < 0) simulation.removeEphemera(this);
+                                        ctx.beginPath();
+                                        let vertices = this.v;
+                                        ctx.moveTo(vertices[0].x, vertices[0].y);
+                                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                                        ctx.lineWidth = 2;
+                                        ctx.strokeStyle = `rgba(0,0,0,${this.count / 60})`;
+                                        ctx.stroke();
+                                        ctx.fillStyle = `rgba(255,0,200,${Math.max(0.01, this.count / 200)})`;
+                                        ctx.fill()
+                                    }
+                                });
+
+                                Matter.Composite.remove(engine.world, body[i]);
+                                body.splice(i, 1);
+
+                                this.health += 0.25;
+                                if (this.health > 1) this.health = 1;
+                            }
+                        }
+                    }
+
                 }
                 //look for close power ups in line of sight
                 let close = {
@@ -8082,7 +8118,8 @@ const spawn = {
                         this.powerUpNames.push(close.target.name)  //save name to return power ups after this mob dies
                         Matter.Composite.remove(engine.world, close.target);
                         powerUp.splice(close.index, 1);
-                        this.health = 1 //heal to full
+                        this.health += 0.25 //heal
+                        if (this.health > 1) this.health = 1
                         //add more segments to tail
                         if (this.history.length < 200) for (let i = 0; i < 4; i++) this.history.unshift(this.history[0])
                         //draw pickup for a single cycle
@@ -8148,6 +8185,17 @@ const spawn = {
             ctx.strokeStyle = color //"rgba(0,235,255,0.5)";
             ctx.stroke();
         };
+        //reset tail length (in case the mob is moved around after it spawned, like in flipped level)
+        simulation.ephemera.push({
+            cycle: 30,
+            do() {
+                this.cycle--
+                if (this.cycle < 1) simulation.removeEphemera(this);
+                for (let i = 0, len = me.history.length; i < len; i++) {
+                    me.history[i] = { x: me.position.x, y: me.position.y }
+                }
+            },
+        })
     },
     kingSnakeBoss(x, y) {
         mobs.spawn(x, y, 0, 35, `rgba(255,255,255)`); //"rgb(221,102,119)"
@@ -8284,6 +8332,44 @@ const spawn = {
                     //track previous locations for the tail
                     this.history.push({ x: this.position.x, y: this.position.y }) //add newest to end
                     this.history.shift() //remove first (oldest)
+
+
+
+                    for (let i = 0; i < body.length; i++) {
+                        if (!body[i].isInvulnerable && !body[i].isNotHoldable) {
+                            const diff = Vector.sub(this.position, body[i].position);
+                            const distance = Vector.magnitude(diff);
+                            // if within range, apply an outward force
+                            if (distance < 150) {
+                                const savedVertices = body[i].vertices.map(v => ({ x: v.x, y: v.y }));
+                                simulation.ephemera.push({
+                                    count: 60,
+                                    v: savedVertices,
+                                    do() {
+                                        this.count--;
+                                        if (this.count < 0) simulation.removeEphemera(this);
+                                        ctx.beginPath();
+                                        let vertices = this.v;
+                                        ctx.moveTo(vertices[0].x, vertices[0].y);
+                                        for (let j = 1; j < vertices.length; j++) ctx.lineTo(vertices[j].x, vertices[j].y);
+                                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                                        ctx.lineWidth = 2;
+                                        ctx.strokeStyle = `rgba(0,0,0,${this.count / 60})`;
+                                        ctx.stroke();
+                                        ctx.fillStyle = `rgba(255,255,0,${Math.max(0.01, this.count / 200)})`;
+                                        ctx.fill()
+                                    }
+                                });
+
+                                Matter.Composite.remove(engine.world, body[i]);
+                                body.splice(i, 1);
+
+                                this.health += 0.25;
+                                if (this.health > 1) this.health = 1;
+
+                            }
+                        }
+                    }
                 }
                 //look for close power ups in line of sight
                 let close = {
@@ -8373,6 +8459,17 @@ const spawn = {
             ctx.strokeStyle = color //"rgba(0,235,255,0.5)";
             ctx.stroke();
         };
+        //reset tail length (in case the mob is moved around after it spawned, like in flipped level)
+        simulation.ephemera.push({
+            cycle: 30,
+            do() {
+                this.cycle--
+                if (this.cycle < 1) simulation.removeEphemera(this);
+                for (let i = 0, len = me.history.length; i < len; i++) {
+                    me.history[i] = { x: me.position.x, y: me.position.y }
+                }
+            },
+        })
     },
     pulsarBoss(x, y, radius = 90, isNonCollide = false) {
         mobs.spawn(x, y, 3, radius, "#a0f");
@@ -14167,7 +14264,21 @@ const spawn = {
                 }
             }
         }
+        me.do = function () { }
         const tail = new Scarf()
+
+        //reset tail length (in case the mob is moved around after it spawned, like in flipped level)
+        simulation.ephemera.push({
+            cycle: 30,
+            do() {
+                this.cycle--
+                if (this.cycle < 1) {
+                    simulation.removeEphemera(this);
+                }
+                for (let i = 0; i < tail.segments.length; i++) tail.segments[i] = { x: me.position.x, y: me.position.y, vx: 0, vy: 0 }
+            },
+        })
+
         me.onDeath = function () {
             simulation.ephemera.push({
                 cycle: 60,
