@@ -3346,7 +3346,7 @@ const tech = {
     {
         name: "recycling",
         descriptionFunction() {
-            return `if a mob has <strong>died</strong> in the last <strong>5</strong> seconds<br>recover <strong>0.005x</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} per second`
+            return `recover <strong>0.005x</strong> maximum ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} per second<br>if a mob has <strong>died</strong> in the last <strong>5</strong> seconds <em style ="float: right;">(${(0.5 * m.maxHealth).toFixed(1)}/s)</em>`
         },
         description: "",
         maxCount: 1,
@@ -7519,7 +7519,7 @@ const tech = {
         frequencyDefault: 2,
         allowed() {
             // return (tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("mines"))
-            return tech.isMineDrop || tech.isNailBotUpgrade || tech.hookNails || tech.fragments || tech.nailsDeathMob || (tech.haveGunCheck("mine") && !(tech.isLaserMine || tech.isFoamMine)) || (tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot) && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isIncendiary)
+            return tech.isNailBotUpgrade || (tech.haveGunCheck("mine") && !(tech.isLaserMine || tech.isFoamMine)) || (tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot) && !tech.isRivets && !tech.isNeedles) || (tech.haveGunCheck("super balls") && !tech.isIncendiary)
         },
         //
         requires: "super balls, nail gun, not rotary cannon, rivets, or needles",
@@ -8738,8 +8738,7 @@ const tech = {
             for (let i = powerUp.length - 1; i > -1; i--) {
                 if (powerUp[i].name === "ammo") {
                     powerUps.spawn(powerUp[i].position.x + 50 * (Math.random() - 0.5), powerUp[i].position.y + 50 * (Math.random() - 0.5), "boost");
-                    Matter.Composite.remove(engine.world, powerUp[i]);
-                    powerUp.splice(i, 1);
+                    queueRemoval('powerUp', i)
                 }
             }
 
@@ -10860,10 +10859,9 @@ const tech = {
             setInterval(() => {
                 for (let i = body.length - 1; i > -1; i--) {
                     if (!body[i].isNotHoldable) {
-                        Matter.Composite.remove(engine.world, body[i]);
                         spawn.blockMob(body[i].position.x, body[i].position.y, body[i], 0);
                         if (!body[i].isAboutToBeRemoved) mob[mob.length - 1].isDropPowerUp = true
-                        body.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
             }, 6000);
@@ -10895,8 +10893,7 @@ const tech = {
                     setTimeout(() => { //remove block
                         for (let i = 0; i < body.length; i++) {
                             if (body[i] === bodyBullet) {
-                                Matter.Composite.remove(engine.world, body[i]);
-                                body.splice(i, 1);
+                                queueRemoval('body', i)
                             }
                         }
                     }, 4000 + Math.floor(9000 * Math.random()));

@@ -1086,8 +1086,7 @@ const simulation = {
                                         Matter.Body.setPosition(body[i], { x: level.enter.x + 50, y: level.enter.y - 20 });
                                     }
                                 } else {
-                                    Matter.Composite.remove(engine.world, body[i]);
-                                    body.splice(i, 1);
+                                    queueRemoval('body', i)
                                 }
                             }
                         }
@@ -2456,13 +2455,10 @@ const simulation = {
             if (simulation.testing && event.code === "KeyZ" && simulation.constructMapString.length) {
                 if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level
                     const index = map.length - 1
-                    Matter.Composite.remove(engine.world, map[index]);
-                    map.splice(index, 1);
+                    queueRemoval('body', index)
                     simulation.draw.setPaths() //update map graphics  
                 } else if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'b') { //remove body from current level
-                    const index = body.length - 1
-                    Matter.Composite.remove(engine.world, body[index]);
-                    body.splice(index, 1);
+                    queueRemoval('body', body.length - 1)
                 }
                 simulation.constructMapString.pop();
                 simulation.outputMapString();

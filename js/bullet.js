@@ -250,8 +250,7 @@ const b = {
             if (bullet[i].endCycle < simulation.cycle) {
                 bullet[i].onEnd(i); //some bullets do stuff on end
                 if (bullet[i]) {
-                    Matter.Composite.remove(engine.world, bullet[i]);
-                    bullet.splice(i, 1);
+                    queueRemoval('bullet', i);
                 } else {
                     break; //if bullet[i] doesn't exist don't complete the for loop, because the game probably reset
                 }
@@ -479,8 +478,7 @@ const b = {
                             const x = body[i].position.x
                             const y = body[i].position.y
                             const onLevel = level.onLevel //prevent explosions in the next level
-                            Matter.Composite.remove(engine.world, body[i]);
-                            body.splice(i, 1);
+                            queueRemoval('body', i)
                             setTimeout(() => {
                                 if (onLevel === level.onLevel) b.explosion({ x: x, y: y }, size);
                             }, 250 + 300 * Math.random());
@@ -2540,8 +2538,7 @@ const b = {
                             m.energy += 0.8
                             powerUps.onPickUp(powerUp[i]);
                             powerUp[i].effect();
-                            Matter.Composite.remove(engine.world, powerUp[i]);
-                            powerUp.splice(i, 1);
+                            queueRemoval('powerUp', i)
                             return;
                         }
                     }
@@ -2830,10 +2827,10 @@ const b = {
                                             this.do = function () { //overwrite the do method for this bullet
                                                 this.force.y += this.mass * 0.002; //extra gravity
                                                 if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
-                                                    if (tech.isFoamMine) {
+                                                    if (tech.isFoamMine && bullet.length < 600) {
                                                         this.shots -= 0.6 * b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
                                                         b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
-                                                    } else if (tech.isSuperMine) {
+                                                    } else if (tech.isSuperMine && bullet.length < 600) {
                                                         const cost = tech.oneSuperBall ? 2 : 0.7
                                                         this.shots -= cost * b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false)
                                                         for (let i = 0, len = tech.extraSuperBalls / 4; i < len; i++) {
@@ -3470,8 +3467,7 @@ const b = {
                 //pick up nearby power ups
                 powerUps.onPickUp(powerUp[i]);
                 powerUp[i].effect();
-                Matter.Composite.remove(engine.world, powerUp[i]);
-                powerUp.splice(i, 1);
+                queueRemoval('powerUp', i)
                 if (tech.isDroneGrab) {
                     this.isImproved = true;
                     if (this.scale > 1) Matter.Body.scale(this, 1 / this.scale, 1 / this.scale);
@@ -3785,8 +3781,7 @@ const b = {
                                         //pick up nearby power ups
                                         powerUps.onPickUp(powerUp[i]);
                                         powerUp[i].effect();
-                                        Matter.Composite.remove(engine.world, powerUp[i]);
-                                        powerUp.splice(i, 1);
+                                        queueRemoval('powerUp', i)
                                         if (tech.isDroneGrab) {
                                             this.isImproved = true;
                                             const SCALE = 2.25
@@ -3819,8 +3814,7 @@ const b = {
                                             //pick up nearby power ups
                                             powerUps.onPickUp(powerUp[i]);
                                             powerUp[i].effect();
-                                            Matter.Composite.remove(engine.world, powerUp[i]);
-                                            powerUp.splice(i, 1);
+                                            queueRemoval('powerUp', i)
                                             if (tech.isDroneGrab) {
                                                 this.isImproved = true;
                                                 const SCALE = 2.25

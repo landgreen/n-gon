@@ -1712,10 +1712,9 @@ const spawn = {
                 //find blocks to turn into mobs
                 for (let i = 0; i < body.length; i++) {
                     if (Vector.magnitude(Vector.sub(this.position, body[i].position)) < 700 && !body[i].isNotHoldable && !body[i].isInvulnerable) { // check distance for each block
-                        Matter.Composite.remove(engine.world, body[i]);
                         this.target = null //player;
                         spawn.blockMob(body[i].position.x, body[i].position.y, body[i], 0);
-                        body.splice(i, 1);
+                        queueRemoval('body', i)
                         activeBeams.push([beamTotalDuration, mob[mob.length - 1]]);
                     }
                 }
@@ -1899,10 +1898,9 @@ const spawn = {
                 //find blocks to turn into mobs
                 for (let i = 0; i < body.length; i++) {
                     if (Vector.magnitude(Vector.sub(this.position, body[i].position)) < 700 && !body[i].isNotHoldable && !body[i].isInvulnerable) { // check distance for each block
-                        Matter.Composite.remove(engine.world, body[i]);
                         this.target = null //player;
                         spawn.blockMob(body[i].position.x, body[i].position.y, body[i], 0, true);
-                        body.splice(i, 1);
+                        queueRemoval('body', i)
                         activeBeams.push([beamTotalDuration, mob[mob.length - 1]]);
                     }
                 }
@@ -8055,7 +8053,7 @@ const spawn = {
 
 
 
-
+                    //eating blocks
                     for (let i = 0; i < body.length; i++) {
                         if (!body[i].isInvulnerable && !body[i].isNotHoldable) {
                             const diff = Vector.sub(this.position, body[i].position);
@@ -8082,8 +8080,7 @@ const spawn = {
                                     }
                                 });
 
-                                Matter.Composite.remove(engine.world, body[i]);
-                                body.splice(i, 1);
+                                queueRemoval('body', i)
 
                                 this.health += 0.25;
                                 if (this.health > 1) this.health = 1;
@@ -8361,8 +8358,7 @@ const spawn = {
                                     }
                                 });
 
-                                Matter.Composite.remove(engine.world, body[i]);
-                                body.splice(i, 1);
+                                queueRemoval('body', i)
 
                                 this.health += 0.25;
                                 if (this.health > 1) this.health = 1;
@@ -15166,8 +15162,7 @@ const spawn = {
                     //remove difficulty power up if the wire breaks to prevent getting power ups and then making the difficulty harder
                     for (let i = 0; i < powerUp.length; ++i) {
                         if (powerUp[i].name === "difficulty") {
-                            Matter.Composite.remove(engine.world, powerUp[i]);
-                            powerUp.splice(i, 1);
+                            queueRemoval('powerUp', i)
                         }
                     }
 

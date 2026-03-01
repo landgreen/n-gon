@@ -34,7 +34,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(100)
             // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(8) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(5) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = m.maxEnergy = 12.2
             // m.energy += 1
             // m.couplingChange(1000)
@@ -54,20 +54,20 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(7) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("homeostasis")
             // tech.giveTech("lens")
             // for (let i = 0; i < 1; i++) tech.giveTech("Halbach array")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect")
             // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("recycling")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.towers()
+            // level.superstructure()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
@@ -76,7 +76,7 @@ const level = {
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
             // for (let i = 0; i < 2; i++) spawn.sniper(1300 + 300 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.kingSnakeBoss(2300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.snakeBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 400); });
             // m.storeTech() //sets entanglement
@@ -601,18 +601,12 @@ const level = {
                                     // explode blocks when they are out of time
                                     if (!m.isTimeDilated) body[i].isExplodingConstraintTimer--
                                     if (body[i].isExplodingConstraintTimer === 0) {
-                                        // if (body[i] === m.holdingTarget) m.drop()
-                                        // b.explosion(body[i].position, 20 + 300 * Math.pow(body[i].mass, 0.25));
-                                        // Matter.Composite.remove(engine.world, body[i]);
-                                        // body.splice(i, 1);
-
                                         if (body[i] === m.holdingTarget) m.drop()
                                         const size = 20 + 300 * Math.pow(body[i].mass, 0.25)
                                         const x = body[i].position.x
                                         const y = body[i].position.y
                                         const onLevel = level.onLevel //prevent explosions in the next level
-                                        Matter.Composite.remove(engine.world, body[i]);
-                                        body.splice(i, 1);
+                                        queueRemoval('body', i)
                                         requestAnimationFrame(() => {
                                             if (onLevel === level.onLevel) b.explosion({ x: x, y: y }, size);
                                         })
@@ -786,8 +780,7 @@ const level = {
                 //remove all current power ups
                 for (let i = powerUp.length - 1; i > -1; i--) {
                     powerUps.powerUpStorage.push({ name: powerUp[i].name, size: powerUp[i].size })
-                    Matter.Composite.remove(engine.world, powerUp[i]);
-                    powerUp.splice(i, 1)
+                    queueRemoval('powerUp', i)
                 }
             },
             remove() {
@@ -2352,8 +2345,7 @@ const level = {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
                     } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
                         if (isRemoveBlocks) {
-                            Matter.Composite.remove(engine.world, body[i]);
-                            body.splice(i, 1);
+                            queueRemoval('body', i)
                             break
                         }
                         body[i].isInPortal = this.portalPair
@@ -3606,8 +3598,7 @@ const level = {
                 for (let i = 0, len = powerUp.length; i < len; i++) {
                     if (powerUp[i].name === "instructions") {
                         if (simulation.isCheating) {
-                            Matter.Composite.remove(engine.world, powerUp[i]);
-                            powerUp.splice(i, 1);
+                            queueRemoval('powerUp', i)
                             break
                         }
                     } else if (powerUp[i].position.y < -1000) {
@@ -3808,8 +3799,7 @@ const level = {
                 level.exit.x = 5500;
             }
             level.exit.y = -330;
-            Matter.Composite.remove(engine.world, map[map.length - 1]);
-            map.splice(map.length - 1, 1);
+            queueRemoval('body', map.length - 1)
             simulation.draw.setPaths(); //redraw map draw path
             level.levels.push("null")
         }
@@ -3961,8 +3951,7 @@ const level = {
                 //remove any powerUp that is too far from player
                 for (let i = 0; i < powerUp.length; ++i) {
                     if (Vector.magnitudeSquared(Vector.sub(player.position, powerUp[i].position)) > 9000000 && (!tech.isHealAttract || powerUp[i].name !== "heal")) { //remove any powerUp farther then 3000 pixels from player
-                        Matter.Composite.remove(engine.world, powerUp[i]);
-                        powerUp.splice(i--, 1)
+                        queueRemoval('powerUp', i)
                     }
                 }
                 //remove any mob that is too far from player
@@ -3972,8 +3961,7 @@ const level = {
                         mob[i].removeCons()
                         mob[i].leaveBody = false
                         mob[i].alive = false
-                        Matter.Composite.remove(engine.world, mob[i]);
-                        mob.splice(i--, 1)
+                        queueRemoval('mob', i)
                     }
                 }
             }
@@ -6007,8 +5995,7 @@ const level = {
                                         who.leaveBody = false;
                                         who.isDropPowerUp = false
                                         //remove block
-                                        Matter.Composite.remove(engine.world, body[i]);
-                                        body.splice(i, 1);
+                                        queueRemoval('body', i)
                                         break
                                     }
                                 }
@@ -6511,8 +6498,7 @@ const level = {
                                     setTimeout(() => { //remove block
                                         for (let i = 0; i < body.length; i++) {
                                             if (body[i] === bodyBullet) {
-                                                Matter.Composite.remove(engine.world, body[i]);
-                                                body.splice(i, 1);
+                                                queueRemoval('body', i)
                                             }
                                         }
                                     }, 1000);
@@ -6562,8 +6548,7 @@ const level = {
                                     setTimeout(() => { //remove block
                                         for (let i = 0; i < body.length; i++) {
                                             if (body[i] === bodyBullet) {
-                                                Matter.Composite.remove(engine.world, body[i]);
-                                                body.splice(i, 1);
+                                                queueRemoval('body', i)
                                             }
                                         }
                                     }, 1000);
@@ -9975,7 +9960,8 @@ const level = {
         spawn.bodyRect(3825, 2240, 150, 75, 0.5);
 
         spawn.mapVertex(3500, 2452, "-500 -135    500 -135    500 35 400 135  -400 135 -500 35");
-        spawn.mapVertex(1200, 2850, "-500 -100 -550 -50     500 -100 550 -50   550 300   -550 300");
+        spawn.mapVertex(1200, 2850, "-500 -100     500 -100 550 -50   550 300   -500 300");
+
         // spawn.mapVertex(1200, 2875, "-400 0  -300 -100   300 -100   400 0");
 
         spawn.mapVertex(1317, 275, "-500 0  -300 -200     300 -200 550 50     550  500    -500 500");
@@ -14075,8 +14061,7 @@ const level = {
                         y: slowY * body[i].velocity.y
                     });
                     if (body[i].mass < 0.05) {
-                        Matter.Composite.remove(engine.world, body[i])
-                        body.splice(i, 1)
+                        queueRemoval('body', i)
                         break
                     }
                 }
@@ -15176,8 +15161,7 @@ const level = {
             if ((simulation.cycle % 120) === 0) {
                 for (var i = 0; i < map.length; i++) {
                     if (map[i].isRemove) {
-                        Matter.Composite.remove(engine.world, map[i]);
-                        map.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
 
@@ -16384,8 +16368,7 @@ const level = {
             relocateWIMPs(0, -10030);
             for (let i = 0; i < powerUp.length; i++) {
                 while (powerUp[i] && powerUp[i].name === "research") {
-                    Matter.Composite.remove(engine.world, powerUp[i]);
-                    powerUp.splice(i, 1);
+                    queueRemoval('powerUp', i)
                 }
             }
             level.exit.x = 1500;
@@ -22723,8 +22706,7 @@ const level = {
                 // section of roof is deleted
                 for (var i = 0; i < map.length; i++) {
                     if (map[i].fallsOff) {
-                        Matter.Composite.remove(engine.world, map[i]);
-                        map.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
 
@@ -22762,8 +22744,7 @@ const level = {
 
                 for (var i = 0; i < map.length; i++) {
                     if (map[i].fallsOff2) {
-                        Matter.Composite.remove(engine.world, map[i]);
-                        map.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
 
@@ -23165,8 +23146,7 @@ const level = {
                 // remove old elements
                 for (var i = 0; i < map.length; i++) {
                     if (map[i].isRemove) {
-                        Matter.Composite.remove(engine.world, map[i]);
-                        map.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
 
@@ -23177,8 +23157,7 @@ const level = {
             } else if (Math.sin(simulation.cycle / 50) * 0.3 >= 0 && lastBlock) {
                 for (var i = 0; i < map.length; i++) {
                     if (map[i].isRemove) {
-                        Matter.Composite.remove(engine.world, map[i]);
-                        map.splice(i, 1);
+                        queueRemoval('body', i)
                     }
                 }
 
@@ -38536,8 +38515,7 @@ const level = {
             //check if blocks are in the exit zone and destroy them
             for (let i = 0; i < body.length; i++) {
                 if (body[i].position.x > 1675) {
-                    Matter.Composite.remove(engine.world, body[i]);
-                    body.splice(i, 1);
+                    queueRemoval('body', i)
                     break
                 }
             }
@@ -38640,8 +38618,7 @@ const level = {
             //check if blocks are in the exit zone and destroy them
             for (let i = 0; i < body.length; i++) {
                 if (body[i].position.x > 1675 && body[i].position.y > -350) {
-                    Matter.Composite.remove(engine.world, body[i]);
-                    body.splice(i, 1);
+                    queueRemoval('body', i)
                     break
                 }
             }
@@ -38715,8 +38692,7 @@ const level = {
             //check if blocks are in the exit zone and destroy them
             for (let i = 0; i < body.length; i++) {
                 if (body[i].position.x > 1675 && body[i].position.y > -350) {
-                    Matter.Composite.remove(engine.world, body[i]);
-                    body.splice(i, 1);
+                    queueRemoval('body', i)
                     break
                 }
             }
@@ -40168,8 +40144,7 @@ const level = {
                             if (body[i].isInPortal === this) body[i].isInPortal = null
                         } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
                             if (isRemoveBlocks) {
-                                Matter.Composite.remove(engine.world, body[i]);
-                                body.splice(i, 1);
+                                queueRemoval('body', i)
                                 break
                             }
                             body[i].isInPortal = this.portalPair
