@@ -1,16 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-replaced physics body removal with a queued removal system that runs after the engine update
-  might reduce matter.js physics engine crashes when the browser is lagging
 
-recycling tech has heal numbers to the description
-
-bug fixes
-  mine + extended magazine + elephants toothpaste now has a bullet cap of 600
-  rewrote mapVertex on flocculation
-  halbach array + tokamak was exploding some blocks that shouldn't explode
 
 *********************************************************** TODO *****************************************************
+
+look for more splices
+
+                        Matter.Composite.remove(engine.world, this.caughtPowerUp);
+                        powerUp.splice(index, 1);
+
+                        Matter.Composite.remove(engine.world, mob[i]);
+                        powerUp.splice(i, 1);
+
 
 in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name
   !a second click will read the description?
@@ -1653,7 +1654,8 @@ possible names for tech
   renormalization
   fractal dimension - maybe for surface area?
   self-locating uncertainty - something related to anthropic principle, or many worlds
-
+  ontic - real (maybe something with research)
+  epistemic - knowledge about whats real, but not strictly real... (maybe something with research)
 
 
 ******************************************************** UNSOLVED BUGS ********************************************************
