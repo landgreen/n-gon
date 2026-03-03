@@ -1,6 +1,10 @@
 ******************************************************** NEXT PATCH **************************************************
 
+Difficulty is now locked at level 2 (the normal starting level) for the training.
+paradigm shift starts at 1->2 health cost
 
+bug fixes
+  extended queued removal when exiting level
 
 *********************************************************** TODO *****************************************************
 

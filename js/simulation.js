@@ -1143,7 +1143,13 @@ const simulation = {
         simulation.unFlipCameraVertical()
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
-            if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
+            if (tech.isLongitudinal) {
+                b.guns[3].waves = []; //empty array of wave bullets
+                // console.log(b.guns[3].waves)
+                // for (let i = 0; i < b.guns[3].waves.length; i++) {
+                // }
+            }
+
             if (b.guns[10].have) { //do you have mines as a gun
                 let count = 0;
                 for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
@@ -1356,20 +1362,30 @@ const simulation = {
         }
         removeAll(map);
         map = [];
-        removeAll(body);
-        body = [];
-        removeAll(mob);
-        mob = [];
-        removeAll(powerUp);
-        powerUp = [];
+        // removeAll(body);
+        // body = [];
+        // removeAll(mob);
+        // mob = [];
+        // removeAll(powerUp);
+        // powerUp = [];
+        // removeAll(bullet);
+        // bullet = [];
         removeAll(cons);
         cons = [];
         removeAll(consBB);
         consBB = [];
-        removeAll(bullet);
-        bullet = [];
         removeAll(composite);
         composite = [];
+
+        for (let i = 0; i < bullet.length; i++) queueRemoval('bullet', i);
+        for (let i = 0; i < powerUp.length; i++) queueRemoval('powerUp', i);
+        for (let i = 0; i < body.length; i++) queueRemoval('body', i);
+        for (let i = 0; i < mob.length; i++) queueRemoval('mob', i);
+        // for (let i = 0; i < map.length; i++) queueRemoval('map', i);
+
+
+
+
         // if player was holding something this makes a new copy to hold
         if (holdTarget && m.alive) {
             len = body.length;

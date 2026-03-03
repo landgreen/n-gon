@@ -18,7 +18,7 @@ const tech = {
         }
         m.resetSkin();
         tech.removeCount = 0;
-        tech.pauseEjectTech = 1; //used in paradigm shift
+        tech.pauseEjectTech = 2; //used in paradigm shift
         powerUps.retainList = [] //used in coherence
         lore.techCount = 0;
         tech.duplication = 0;
