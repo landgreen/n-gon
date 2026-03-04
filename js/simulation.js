@@ -1377,7 +1377,7 @@ const simulation = {
         removeAll(composite);
         composite = [];
 
-        // for (let i = 0; i < bullet.length; i++) queueRemoval('bullet', i);
+        for (let i = 0; i < bullet.length; i++) queueRemoval('bullet', i);
         for (let i = 0; i < powerUp.length; i++) queueRemoval('powerUp', i);
         for (let i = 0; i < body.length; i++) queueRemoval('body', i);
         // for (let i = 0; i < mob.length; i++) queueRemoval('mob', i);
