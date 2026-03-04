@@ -3665,7 +3665,7 @@ const m = {
 
             //check for block collisions with mobs and push the mobs
             const collide = Matter.Query.collides(m.holdingTarget, mob)
-            if (m.fieldCDcycle < m.cycle && collide.length) {
+            if (m.fieldCDcycle < m.cycle && collide.length && !collide.isUnblockable) {
                 let push = function (who) { // similar code to m.pushMobsFacing()
                     fieldBlockCost = (0.025 + Math.sqrt(who.mass) * Vector.magnitude(Vector.sub(who.velocity, player.velocity)) * 0.002) * m.fieldShieldingScale
                     if (who.isShielded) fieldBlockCost *= 2; //shielded mobs take more energy to block

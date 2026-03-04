@@ -18,8 +18,8 @@ engine.world.gravity.scale = 0; //turn off gravity (it's added back in later)
 
 //to reduce lag, maybe
 engine.constraintIterations = 1; //default is 2
-engine.positionIterations = 4; //default is 6
-engine.velocityIterations = 2; //default is 4
+// engine.positionIterations = 4; //default is 6
+// engine.velocityIterations = 2; //default is 4
 
 
 

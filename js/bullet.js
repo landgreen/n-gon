@@ -994,7 +994,7 @@ const b = {
                     //keep bomb in place
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
                     //draw suck
-                    const radius = 2.75 * this.explodeRad * (this.endCycle - simulation.cycle) / suckCycles
+                    const radius = Math.max(1, 2.75 * this.explodeRad * (this.endCycle - simulation.cycle) / suckCycles)
                     ctx.fillStyle = "rgba(0,0,0,0.1)";
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, radius, 0, 2 * Math.PI);
@@ -1950,6 +1950,10 @@ const b = {
                 } else {
                     this.dropCaughtPowerUp()
                 }
+                if (isReturnAmmo) {
+                    b.guns[9].ammo++;
+                    simulation.updateGunHUD();
+                }
             },
             drawDamageAura() {
                 ctx.beginPath();
@@ -1998,15 +2002,6 @@ const b = {
                     player.force.x += momentum.x
                     player.force.y += momentum.y
                     // refund ammo
-                    if (isReturnAmmo) {
-                        b.guns[9].ammo++;
-                        simulation.updateGunHUD();
-                        // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
-                        //     if (b.guns[i].name === "harpoon") {
-                        //         break;
-                        //     }
-                        // }
-                    }
                 } else {
                     const sub = Vector.sub(this.position, m.pos)
                     const rangeScale = 1 + 0.000001 * Vector.magnitude(sub) * Vector.magnitude(sub) //return faster when far from player

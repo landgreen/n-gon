@@ -1,20 +1,29 @@
 ******************************************************** NEXT PATCH **************************************************
 
-Difficulty is now locked at level 2 (the normal starting level) for the training.
+undoing low performance settings
+  keeping: engine.constraintIterations = 1; //default is 2
+  reverting back to 6: engine.positionIterations = 4; //default is 6
+  reverting back to 2: engine.velocityIterations = 2; //default is 4
+
+training difficulty is now locked at level 2 (the normal starting level)
 paradigm shift starts at 1->2 health cost
+wormhole has an orange energy bar
 
 bug fixes
-  extended queued removal when exiting level
+  queued removal
+    added queued removal when exiting level for powerUp and body
+    harpoon ammo on return was double triggering because of the delay in removal
+  held blocks no longer push dark matter
+  vacuum bomb explosion can't get below 0 and crash any more
 
 *********************************************************** TODO *****************************************************
 
 look for more splices
+  Matter.Composite.remove(engine.world, this.caughtPowerUp);
+  powerUp.splice(index, 1);
 
-                        Matter.Composite.remove(engine.world, this.caughtPowerUp);
-                        powerUp.splice(index, 1);
-
-                        Matter.Composite.remove(engine.world, mob[i]);
-                        powerUp.splice(i, 1);
+  Matter.Composite.remove(engine.world, mob[i]);
+  powerUp.splice(i, 1);
 
 
 in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name

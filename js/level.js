@@ -17,12 +17,13 @@ const level = {
     start() {
         level.setConstraints()
         if (level.levelsCleared === 0) { //this code only runs on the first level
+
             // simulation.enableConstructMode()  //used to build maps in testing mode
             // simulation.difficultyMode = 1
             // build.isExperimentRun = true
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            // simulation.isHorizontalFlipped = true    
+            // simulation.isHorizontalFlipped = true
             // level.levelsCleared = 7
             // level.updateDifficulty()
             // simulation.isCheating = true
@@ -54,20 +55,20 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(3) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(4) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("homeostasis")
             // tech.giveTech("lens")
-            // for (let i = 0; i < 1; i++) tech.giveTech("Halbach array")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
+            // for (let i = 0; i < 1; i++) tech.giveTech("scale invariance")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bijection")
             // for (let i = 0; i < 1; ++i) tech.giveTech("defunct")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.flocculation()
+            // level.office()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
@@ -76,7 +77,7 @@ const level = {
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
             // for (let i = 0; i < 2; i++) spawn.sniper(1300 + 300 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.snakeBoss(2300 + 200 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.laserTargetingBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 400); });
             // m.storeTech() //sets entanglement
@@ -3198,6 +3199,23 @@ const level = {
         spawn.bodyRect(-150, -600, 75, 150);
         spawn.bodyRect(775, -75, 50, 75);
         spawn.bodyRect(4250, -350, 250, 350); //about as a big a block as possible
+
+
+        function spawnGrid(startX, startY, blockWidth, blockHeight, numberX, numberY) {
+            for (let row = 0; row < numberY; row++) {
+                for (let col = 0; col < numberX; col++) {
+                    // Calculate the position for the current block
+                    let posX = startX + (col * blockWidth);
+                    let posY = startY + (row * blockHeight);
+
+                    // Execute the matter.js command
+                    spawn.bodyRect(posX, posY, blockWidth, blockHeight);
+                }
+            }
+        }
+        //used for performance testing
+        // spawnGrid(500, -2500, 50, 50, 30, 10)
+
 
 
         spawn.mapRect(-950, 0, 8200, 800); //ground
