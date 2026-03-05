@@ -1,6 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
+dark matter 0.3->0.25x damage reduction
+dark energy 1->15 energy/s
+dark star 1.3->1.4 radius
 
+removed the last 3 training levels
+  "mine","grenades", "harpoon"
+
+boson composite also affects filament
+
+bug fixes
+  neutron bomb wall colliding with dark matter
+  fixed delayed removal bug on pacifist final level
 
 *********************************************************** TODO *****************************************************
 

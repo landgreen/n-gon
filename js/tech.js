@@ -2881,7 +2881,7 @@ const tech = {
     {
         name: "dark matter",
         descriptionFunction() {
-            return `<strong class='color-dark-matter'>dark matter</strong> slowly gravitates <strong>towards</strong> you<br><strong>0.3x</strong> <strong class='color-defense'>damage taken</strong> <strong>${tech.isNotDarkMatter ? "outside" : "inside"}</strong> <strong class='color-dark-matter'>dark matter</strong>`
+            return `<strong class='color-dark-matter'>dark matter</strong> slowly gravitates <strong>towards</strong> you<br><strong>0.25x</strong> <strong class='color-defense'>damage taken</strong> <strong>${tech.isNotDarkMatter ? "outside" : "inside"}</strong> <strong class='color-dark-matter'>dark matter</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -2926,7 +2926,7 @@ const tech = {
     {
         name: "dark energy",
         descriptionFunction() {
-            return `while <strong>${tech.isNotDarkMatter ? "outside" : "inside"}</strong> <strong class='color-dark-matter'>dark matter</strong><br>generate <strong>10</strong> <strong class='color-f'>energy</strong> per second`
+            return `while <strong>${tech.isNotDarkMatter ? "outside" : "inside"}</strong> <strong class='color-dark-matter'>dark matter</strong><br>generate <strong>15</strong> <strong class='color-f'>energy</strong> per second`
         },
         maxCount: 1,
         count: 0,
@@ -2981,7 +2981,7 @@ const tech = {
     },
     {
         name: "dark star",
-        description: `mobs <strong>inside</strong> <strong class='color-dark-matter'>dark matter</strong> are <strong class='color-d'>damaged</strong><br><strong>1.3x</strong> <strong class='color-dark-matter'>dark matter</strong> radius`,
+        description: `mobs <strong>inside</strong> <strong class='color-dark-matter'>dark matter</strong> are <strong class='color-d'>damaged</strong><br><strong>1.4x</strong> <strong class='color-dark-matter'>dark matter</strong> radius`,
         maxCount: 1,
         count: 0,
         frequency: 2,
@@ -5257,7 +5257,7 @@ const tech = {
                     }
 
                     // check for collisions with mobs
-                    if (!m.isTimeDilated) {
+                    if (!m.isTimeDilated && !(tech.isIntangible && m.isCloak)) {
                         for (let i = 1; i < this.segments.length - 1; i++) {
                             let hit = Matter.Query.ray(mob, this.segments[i], this.segments[i + 1])
                             if (hit.length && !hit[0].body.isUnblockable) {

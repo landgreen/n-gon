@@ -580,7 +580,7 @@ const m = {
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.6 + 0.4 * Math.sin(m.cycle * 0.01);
-        if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.1875 : 0.3
+        if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.15625 : 0.25
         if (tech.isImmortal) dmg *= 0.7
         if (m.fieldMode === 0) dmg *= 0.99 ** m.coupling
         if (m.fieldMode === 3) dmg *= 0.977 ** m.coupling

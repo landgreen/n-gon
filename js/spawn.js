@@ -343,7 +343,7 @@ const spawn = {
             if (!simulation.isTimeSkipping) {
                 const scale = ((tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 1.6 : 1) * level.isReducedRegen
                 const sine = Math.sin(simulation.cycle * 0.015)
-                this.radius = 111 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
+                this.radius = 148 * tech.isDarkStar + 370 * (1 + 0.1 * sine)
                 //chase player
                 const sub = Vector.sub(player.position, this.position)
                 const mag = Vector.magnitude(sub)
@@ -368,7 +368,7 @@ const spawn = {
                         ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
-                        if (tech.isDarkEnergy) m.energy += 0.0017 * scale
+                        if (tech.isDarkEnergy) m.energy += 0.00255 * scale
                     }
                 } else {
                     if (mag < this.radius) { //buff to player when inside radius
@@ -379,7 +379,7 @@ const spawn = {
                         ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
-                        if (tech.isDarkEnergy) m.energy += 0.0017 * scale
+                        if (tech.isDarkEnergy) m.energy += 0.00255 * scale
                     } else {
                         tech.isHarmDarkMatter = false;
                     }
@@ -398,7 +398,7 @@ const spawn = {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (mob[i].alive && !mob[i].isShielded) {
                             if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius < this.radius) {
-                                const dmg = 0.03 * scale
+                                const dmg = 0.035 * scale
                                 mob[i].damage(dmg);
                                 simulation.drawList.push({ //add dmg to draw queue
                                     x: mob[i].position.x,

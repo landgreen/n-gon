@@ -12,7 +12,7 @@ const level = {
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial"],
-    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack", "grenades", "harpoon"], //"mine",
+    trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack",], //"mine","grenades", "harpoon"
     levels: [],
     start() {
         level.setConstraints()
@@ -35,7 +35,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(100)
             // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = m.maxEnergy = 12.2
             // m.energy += 1
             // m.couplingChange(1000)
@@ -54,16 +54,16 @@ const level = {
             // m.energy = 0
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
-
-            // b.giveGuns(4) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // tech.duplication += 1
+            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("homeostasis")
-            // tech.giveTech("lens")
-            // for (let i = 0; i < 1; i++) tech.giveTech("scale invariance")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("bijection")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("defunct")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("futures exchange")
+            // tech.giveTech("shear stress")
+            // for (let i = 0; i < 1; i++) tech.giveTech("boson composite")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("filament")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("perturbation theory")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Bells theorem") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
@@ -76,10 +76,10 @@ const level = {
             // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
-            // for (let i = 0; i < 2; i++) spawn.sniper(1300 + 300 * i, -200)
+            // for (let i = 0; i < 2; i++) spawn.starter(1300 + 3 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.laserTargetingBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
-            // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 400); });
+            // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 100); });
             // m.storeTech() //sets entanglement
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");
@@ -3817,7 +3817,7 @@ const level = {
                 level.exit.x = 5500;
             }
             level.exit.y = -330;
-            queueRemoval('body', map.length - 1)
+            queueRemoval('map', map.length - 1)  //fixed
             simulation.draw.setPaths(); //redraw map draw path
             level.levels.push("null")
         }

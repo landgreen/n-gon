@@ -1126,24 +1126,26 @@ const b = {
                 }
                 const mobCollisions = Matter.Query.collides(this, mob)
                 if (mobCollisions.length) {
-                    onCollide()
-                    this.stuckTo = mobCollisions[0].bodyA
-                    mobs.statusDoT(this.stuckTo, 0.6, 360) //apply radiation damage status effect on direct hits
-                    if (this.stuckTo.isVerticesChange) {
-                        this.stuckToRelativePosition = { x: 0, y: 0 }
-                    } else {
-                        //find the relative position for when the mob is at angle zero by undoing the mobs rotation
-                        this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
-                    }
-                    this.stuck = function () {
-                        if (this.stuckTo && this.stuckTo.alive) {
-                            const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
-                            Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
-                            Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+                    if (!mobCollisions[0].bodyA.isDarkMatter) {
+                        onCollide()
+                        this.stuckTo = mobCollisions[0].bodyA
+                        mobs.statusDoT(this.stuckTo, 0.6, 360) //apply radiation damage status effect on direct hits
+                        if (this.stuckTo.isVerticesChange) {
+                            this.stuckToRelativePosition = { x: 0, y: 0 }
                         } else {
-                            this.collisionFilter.mask = cat.map | cat.body | cat.player | cat.mob; //non collide with everything but map
-                            this.stuck = function () {
-                                this.force.y += this.mass * 0.001;
+                            //find the relative position for when the mob is at angle zero by undoing the mobs rotation
+                            this.stuckToRelativePosition = Vector.rotate(Vector.sub(this.position, this.stuckTo.position), -this.stuckTo.angle)
+                        }
+                        this.stuck = function () {
+                            if (this.stuckTo && this.stuckTo.alive) {
+                                const rotate = Vector.rotate(this.stuckToRelativePosition, this.stuckTo.angle) //add in the mob's new angle to the relative position vector
+                                Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.stuckTo.velocity), this.stuckTo.position))
+                                Matter.Body.setVelocity(this, this.stuckTo.velocity); //so that it will move properly if it gets unstuck
+                            } else {
+                                this.collisionFilter.mask = cat.map | cat.body | cat.player | cat.mob; //non collide with everything but map
+                                this.stuck = function () {
+                                    this.force.y += this.mass * 0.001;
+                                }
                             }
                         }
                     }
