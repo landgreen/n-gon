@@ -3817,8 +3817,10 @@ const level = {
                 level.exit.x = 5500;
             }
             level.exit.y = -330;
-            queueRemoval('map', map.length - 1)  //fixed
-            simulation.draw.setPaths(); //redraw map draw path
+            queueRemoval('map', map.length - 1)  //fixed 
+            requestAnimationFrame(() => {
+                simulation.draw.setPaths(); //redraw map draw path
+            });
             level.levels.push("null")
         }
     },

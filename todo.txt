@@ -1,19 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
-dark matter 0.3->0.25x damage reduction
-dark energy 1->15 energy/s
-dark star 1.3->1.4 radius
-
-removed the last 3 training levels
-  "mine","grenades", "harpoon"
-
-boson composite also affects filament
 
 bug fixes
-  neutron bomb wall colliding with dark matter
-  fixed delayed removal bug on pacifist final level
+
 
 *********************************************************** TODO *****************************************************
+
+
+tech: plating - at the start of each level gain 0.25 damage reduction, reduce this effect by 0.25 after taking damage
+  (0.25->0.5-0.75->1)
+  rename?
 
 look for more splices
   Matter.Composite.remove(engine.world, this.caughtPowerUp);

@@ -5347,7 +5347,7 @@ const m = {
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
                         m.holding();
-                        if (tech.isPrinter && m.holdingTarget.isPrinted && input.field) {
+                        if (tech.isPrinter && m.holdingTarget && m.holdingTarget?.isPrinted && input.field) {
                             // if (Math.random() < 0.004 && m.holdingTarget.vertices.length < 12) m.holdingTarget.vertices.push({ x: 0, y: 0 }) //small chance to increase the number of vertices
                             m.holdingTarget.radius += Math.min(1.1, 1.3 / m.holdingTarget.mass) //grow up to a limit
                             const r1 = m.holdingTarget.radius * (1 + 0.12 * Math.sin(m.cycle * 0.11))

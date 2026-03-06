@@ -5260,7 +5260,7 @@ const tech = {
                     if (!m.isTimeDilated && !(tech.isIntangible && m.isCloak)) {
                         for (let i = 1; i < this.segments.length - 1; i++) {
                             let hit = Matter.Query.ray(mob, this.segments[i], this.segments[i + 1])
-                            if (hit.length && !hit[0].body.isUnblockable) {
+                            if (hit.length && !hit[0].body.isUnblockable && hit[0].body.collisionFilter.mask > 0) {
                                 if (tech.isChitin) { //tail segments past the collisions point are made into worms
                                     hit = hit[0].body
                                     for (let j = Math.max(1, i); j < this.segments.length - 1; j++) {
