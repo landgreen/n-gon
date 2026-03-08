@@ -218,7 +218,8 @@ const powerUps = {
                 if (Math.random() < 0.003 && !m.isTimeDilated) { //  (1-0.003)^240 = chance to be removed after 4 seconds,   240 = 4 seconds * 60 cycles per second
                     b.explosion(powerUp[i].position, 175 + (11 + 3 * Math.random()) * powerUp[i].size);
                     if (powerUp[i]) {
-                        queueRemoval('powerUp', i)
+                        Matter.Composite.remove(engine.world, powerUp[i]);
+                        powerUp.splice(i, 1);
                     }
                     break
                 }
@@ -666,8 +667,8 @@ const powerUps = {
                 if (level.levelsCleared === 0 && initialDifficultyMode !== simulation.difficultyMode) {
                     powerUps.difficulty.setDamageAndDefense()
                     //remove and respawn all power ups if difficulty mode was changed
-                    for (let i = 0; i < powerUp.length; ++i) queueRemoval('powerUp', i)
-                    // powerUp = [];
+                    for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
+                    powerUp = [];
                     level.initialPowerUps()
                     simulation.trails(30)
                 }
@@ -1811,7 +1812,8 @@ const powerUps = {
             for (let j = 0; j < 3; j++) {
                 for (let i = 0; i < powerUp.length; i++) {
                     if (powerUp[i].name === "heal" || powerUp[i].name === "research" || powerUp[i].name === "ammo" || powerUp[i].name === "coupling" || powerUp[i].name === "boost") {
-                        queueRemoval('powerUp', i)
+                        Matter.Composite.remove(engine.world, powerUp[i]);
+                        powerUp.splice(i, 1);
                         break
                     }
                 }
@@ -1823,12 +1825,14 @@ const powerUps = {
             const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
             for (let i = 0; i < 3; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
 
-            queueRemoval('powerUp', index)
+            Matter.Composite.remove(engine.world, powerUp[index]);
+            powerUp.splice(index, 1);
         } else if (smallIndexes.length > 0) { // console.log("no big, at least 1 small will swap flavors")
             const index = Math.floor(Math.random() * powerUp.length)
             options = options.filter(e => e !== powerUp[index].name); //don't repeat the current power up type
             powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
-            queueRemoval('powerUp', index)
+            Matter.Composite.remove(engine.world, powerUp[index]);
+            powerUp.splice(index, 1);
         }
     },
     spawn(x, y, name, moving = true, size = powerUps[name].size()) {

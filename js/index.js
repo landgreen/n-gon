@@ -1032,8 +1032,8 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             b.inventoryGun = 0;
             simulation.makeGunHUD();
         }
-        for (let i = 0; i < bullet.length; ++i) queueRemoval('bullet', i);
-        // bullet = []; //remove any bullets that might have spawned from tech
+        for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
+        bullet = []; //remove any bullets that might have spawned from tech
         build.hasExperimentalMode = false
         if (!simulation.isCheating) {
             for (let i = 0, len = tech.tech.length; i < len; i++) {

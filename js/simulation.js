@@ -1086,7 +1086,8 @@ const simulation = {
                                         Matter.Body.setPosition(body[i], { x: level.enter.x + 50, y: level.enter.y - 20 });
                                     }
                                 } else {
-                                    queueRemoval('body', i)
+                                    Matter.Composite.remove(engine.world, body[i]);
+                                    body.splice(i, 1);
                                 }
                             }
                         }
@@ -1143,13 +1144,7 @@ const simulation = {
         simulation.unFlipCameraVertical()
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         if (m.alive) {
-            if (tech.isLongitudinal) {
-                b.guns[3].waves = []; //empty array of wave bullets
-                // console.log(b.guns[3].waves)
-                // for (let i = 0; i < b.guns[3].waves.length; i++) {
-                // }
-            }
-
+            if (tech.isLongitudinal) b.guns[3].waves = []; //empty array of wave bullets
             if (b.guns[10].have) { //do you have mines as a gun
                 let count = 0;
                 for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
@@ -1362,30 +1357,20 @@ const simulation = {
         }
         removeAll(map);
         map = [];
-        // removeAll(body);
-        // body = [];
+        removeAll(body);
+        body = [];
         removeAll(mob);
         mob = [];
-        // removeAll(powerUp);
-        // powerUp = [];
-        // removeAll(bullet);
-        // bullet = [];
+        removeAll(powerUp);
+        powerUp = [];
         removeAll(cons);
         cons = [];
         removeAll(consBB);
         consBB = [];
+        removeAll(bullet);
+        bullet = [];
         removeAll(composite);
         composite = [];
-
-        for (let i = 0; i < bullet.length; i++) queueRemoval('bullet', i);
-        for (let i = 0; i < powerUp.length; i++) queueRemoval('powerUp', i);
-        for (let i = 0; i < body.length; i++) queueRemoval('body', i);
-        // for (let i = 0; i < mob.length; i++) queueRemoval('mob', i);
-        // for (let i = 0; i < map.length; i++) queueRemoval('map', i);
-
-
-
-
         // if player was holding something this makes a new copy to hold
         if (holdTarget && m.alive) {
             len = body.length;
@@ -2471,10 +2456,13 @@ const simulation = {
             if (simulation.testing && event.code === "KeyZ" && simulation.constructMapString.length) {
                 if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'm') { //remove map from current level
                     const index = map.length - 1
-                    queueRemoval('body', index)
+                    Matter.Composite.remove(engine.world, map[index]);
+                    map.splice(index, 1);
                     simulation.draw.setPaths() //update map graphics  
                 } else if (simulation.constructMapString[simulation.constructMapString.length - 1][6] === 'b') { //remove body from current level
-                    queueRemoval('body', body.length - 1)
+                    const index = body.length - 1
+                    Matter.Composite.remove(engine.world, body[index]);
+                    body.splice(index, 1);
                 }
                 simulation.constructMapString.pop();
                 simulation.outputMapString();
