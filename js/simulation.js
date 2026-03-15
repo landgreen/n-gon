@@ -264,39 +264,41 @@ const simulation = {
         }
     },
     circleFlare(dup, loops = 100) {
-        boltNum = dup * 300
-        const bolts = []
-        colors = [powerUps.research.color, powerUps.ammo.color, powerUps.heal.color, powerUps.tech.color, powerUps.field.color, powerUps.gun.color]
-        for (let i = 0; i < boltNum; ++i) {
-            const mag = 6 + 20 * Math.random()
-            const angle = 2 * Math.PI * Math.random()
-            bolts.push({
-                x: m.pos.x,
-                y: m.pos.y,
-                Vx: mag * Math.cos(angle),
-                Vy: mag * Math.sin(angle),
-                color: colors[Math.floor(Math.random() * colors.length)]
-            })
-        }
-        let count = 0
-        loop = () => { //draw electricity
-            if (count++ < loops) requestAnimationFrame(loop)
-            for (let i = 0, len = bolts.length; i < len; ++i) {
-                bolts[i].x += bolts[i].Vx
-                bolts[i].y += bolts[i].Vy
-                if (Math.random() < 0.2) {
-                    simulation.drawList.push({
-                        x: bolts[i].x,
-                        y: bolts[i].y,
-                        radius: 1.5 + 5 * Math.random(),
-                        // color: "rgba(0,155,155,0.7)",
-                        color: bolts[i].color,
-                        time: Math.floor(9 + 25 * Math.random() * Math.random())
-                    });
+        if (!localSettings.isHideHUD) {
+            boltNum = dup * 300
+            const bolts = []
+            colors = [powerUps.research.color, powerUps.ammo.color, powerUps.heal.color, powerUps.tech.color, powerUps.field.color, powerUps.gun.color]
+            for (let i = 0; i < boltNum; ++i) {
+                const mag = 6 + 20 * Math.random()
+                const angle = 2 * Math.PI * Math.random()
+                bolts.push({
+                    x: m.pos.x,
+                    y: m.pos.y,
+                    Vx: mag * Math.cos(angle),
+                    Vy: mag * Math.sin(angle),
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                })
+            }
+            let count = 0
+            loop = () => { //draw electricity
+                if (count++ < loops) requestAnimationFrame(loop)
+                for (let i = 0, len = bolts.length; i < len; ++i) {
+                    bolts[i].x += bolts[i].Vx
+                    bolts[i].y += bolts[i].Vy
+                    if (Math.random() < 0.2) {
+                        simulation.drawList.push({
+                            x: bolts[i].x,
+                            y: bolts[i].y,
+                            radius: 1.5 + 5 * Math.random(),
+                            // color: "rgba(0,155,155,0.7)",
+                            color: bolts[i].color,
+                            time: Math.floor(9 + 25 * Math.random() * Math.random())
+                        });
+                    }
                 }
             }
+            requestAnimationFrame(loop)
         }
-        requestAnimationFrame(loop)
     },
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
@@ -755,6 +757,23 @@ const simulation = {
     fpsInterval: 0, //set in startGame
     then: null,
     startGame(isBuildRun = false, isTrainingRun = false) {
+        if (localSettings.isHideHUD) {
+            simulation.draw.body = function () {
+                ctx.beginPath();
+                for (let i = 0, len = body.length; i < len; ++i) {
+                    let vertices = body[i].vertices;
+                    ctx.moveTo(vertices[0].x, vertices[0].y);
+                    for (let j = 1; j < vertices.length; j++) {
+                        ctx.lineTo(vertices[j].x, vertices[j].y);
+                    }
+                    ctx.lineTo(vertices[0].x, vertices[0].y);
+                }
+                ctx.fillStyle = color.block;
+                ctx.fill();
+            }
+        } else {
+            simulation.draw.body = simulation.draw.bodyDefault
+        }
         simulation.isTextLogOpen = true
         simulation.clearMap()
         if (!isBuildRun) { //if a build run logic flow returns to "experiment-button").addEventListener
@@ -1771,7 +1790,7 @@ const simulation = {
                 }
             }
         },
-        body() {
+        bodyDefault() {
             ctx.beginPath();
             for (let i = 0, len = body.length; i < len; ++i) {
                 let vertices = body[i].vertices;
@@ -1787,6 +1806,7 @@ const simulation = {
             ctx.strokeStyle = color.blockS;
             ctx.stroke();
         },
+        body() { },
         cons() {
             ctx.beginPath();
             for (let i = 0, len = cons.length; i < len; ++i) {

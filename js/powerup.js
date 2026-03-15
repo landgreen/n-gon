@@ -1559,7 +1559,7 @@ const powerUps = {
         let cycle = () => {
             if (count > 0) {
                 if (m.alive) requestAnimationFrame(cycle);
-                if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300) { //&& !(simulation.cycle % 2)
+                if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300 * localSettings.isHideHUD ? 0.5 : 1) { //&& !(simulation.cycle % 2)
                     count--
                     if (!(count % delay)) {
                         const where = { x: location.x + 50 * (Math.random() - 0.5), y: location.y + 50 * (Math.random() - 0.5) }
@@ -1751,16 +1751,17 @@ const powerUps = {
     },
     pauseEjectTech(index) {
         if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant && m.immuneCycle < m.cycle) {
-            const dmg = tech.pauseEjectTech * 0.01
-            if ((!tech.isEnergyHealth && dmg * m.defense() < m.health) || (tech.isEnergyHealth && dmg * Math.pow(m.defense(), 0.6) < m.energy)) {
+            const dmg = tech.pauseEjectTech * 0.01 //* (tech.isEnergyHealth ? Math.pow(m.defense(), 0.6) : m.defense())
+
+            if ((!tech.isEnergyHealth && dmg < m.health) || (tech.isEnergyHealth && dmg < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
-                if (m.immuneCycle < m.cycle) m.takeDamage(tech.pauseEjectTech * 0.01, false)
+                if (m.immuneCycle < m.cycle) m.takeDamage(dmg, false)
                 tech.pauseEjectTech *= 2
                 if (tech.isEnergyHealth) {
-                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>energy</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>energy</span> <span class='color-symbol'>-=</span> ${(100 * dmg).toFixed(1)} <em>//paradigm shift</em>`)
                 } else {
-                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> <span class='color-symbol'>-=</span> ${(100 * dmg * m.defense()).toFixed(1)} <em>//paradigm shift</em>`)
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h'>health</span> <span class='color-symbol'>-=</span> ${(100 * dmg).toFixed(1)} <em>//paradigm shift</em>`)
                 }
 
 

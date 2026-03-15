@@ -724,8 +724,10 @@ const m = {
             m.fieldUpgrades[4].endoThermic(Math.min(5 * dmg, 1))
         }
         if (tech.isEnergyHealth) {
-            if (isDefense) dmg *= Math.pow(m.defense(), 0.6) //if you change this, search for this code and adjust it everywhere (like paradigm shift)
-            dmg = Math.min(dmg, 0.49 * m.maxHealth)
+            if (isDefense) {
+                dmg *= Math.pow(m.defense(), 0.6) //if you change this, search for this code and adjust it everywhere (like paradigm shift)
+                dmg = Math.min(dmg, 0.49 * m.maxHealth)
+            }
             m.energy -= dmg //scale damage with heal reduction difficulty
 
             if (tech.isEnergyNoAmmo && m.energy < 0.33) {
@@ -770,8 +772,10 @@ const m = {
                 return;
             }
         } else {
-            if (isDefense) dmg *= m.defense()
-            dmg = Math.min(dmg, 0.4 * m.maxHealth)
+            if (isDefense) {
+                dmg *= m.defense()
+                dmg = Math.min(dmg, 0.4 * m.maxHealth)
+            }
             m.health -= dmg;
 
             if (tech.isEnergyNoAmmo && m.health < 0.33) {
@@ -2098,6 +2102,26 @@ const m = {
                         ctx.fillStyle = "rgb(9, 245, 166)"; //background
                         ctx.fillRect(xOff, yOff - 15, range * health, height);
 
+
+                        //fire 360 iostropic wave form eigen block
+                        if (tech.isNormalMode && m.eigen.cycle < m.eigen.cycleLimit) {
+                            if (tech.isFirstHarmonic) {
+                                rate = Math.floor(Math.max(4, 30 - 3.5 * m.eigen.block.speed))
+                                if (!(simulation.cycle % rate)) b.isoWave360Solo(m.eigen.block.position)
+                            } else {
+                                if (!(simulation.cycle % 30)) b.isoWave360Solo(m.eigen.block.position)
+                            }
+                        }
+
+                        //fire laser from eigen block
+                        // const angle = m.eigen.block.angle
+                        // const unit = { x: 30 * Math.cos(angle), y: 30 * Math.sin(angle) }
+                        // const exit = Vector.add(m.eigen.block.position, unit)
+                        // b.laser(exit, {
+                        //     x: exit.x + 5000 * unit.x,
+                        //     y: exit.y + 5000 * unit.y
+                        // }, tech.laserDamage, false, false, 1, "#f00", false);
+                        // b.plasma();
                     }
                 },
                 draw0eye() {
@@ -2156,7 +2180,15 @@ const m = {
                         const maxNodes = 8
                         const nodes = maxNodes - Math.floor(t / Math.PI) % maxNodes
                         const amplitude = nodes === 1 ? 0 : 5 * Math.sin(t)
-                        this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                        if (localSettings.isHideHUD) {
+                            ctx.beginPath();
+                            ctx.arc(0, 0, 40 * player.scale, 0, 2 * Math.PI);
+                            ctx.strokeStyle = "rgba(169, 0, 81, 0.63)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                            ctx.lineWidth = 10
+                            ctx.stroke();
+                        } else {
+                            this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                        }
                     }
 
                     ctx.rotate(m.angle);
@@ -2188,11 +2220,19 @@ const m = {
 
                     if (m.eigen.cycle < m.eigen.cycleLimit) {
                         m.eigen.cycle++
-                        const t = m.eigen.cycle * 0.0373// 0.06
+                        const t = m.eigen.cycle * 0.0367// 0.0373
                         const maxNodes = 8
                         const nodes = maxNodes - Math.floor(t / Math.PI) % maxNodes
                         const amplitude = nodes === 1 ? 0 : 5 * Math.sin(t)
-                        this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                        if (localSettings.isHideHUD) {
+                            ctx.beginPath();
+                            ctx.arc(0, 0, 40 * player.scale, 0, 2 * Math.PI);
+                            ctx.strokeStyle = "rgba(169, 0, 81, 0.63)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
+                            ctx.lineWidth = 10
+                            ctx.stroke();
+                        } else {
+                            this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                        }
                     }
 
                     ctx.rotate(m.angle);
@@ -2258,6 +2298,8 @@ const m = {
                     ctx.restore();
                 },
                 drawSine(radius, amplitude, cycles, color) {
+                    // if (cycles < 3) radius *= 0.5
+                    // console.log(amplitude, cycles)
                     const segments = cycles * 2; // One segment per half-cycle (peak to trough)
                     const angleStep = (Math.PI * 2) / segments;
 
@@ -3746,7 +3788,7 @@ const m = {
             if (input.field) {
                 if (m.energy > 0.001) {
                     if (m.fireCDcycle < m.cycle) m.fireCDcycle = m.cycle
-                    if (tech.isCapacitor && m.throwCharge < 4) m.throwCharge = 4
+                    if ((tech.isCapacitor || tech.isThrowBlocks) && m.throwCharge < 4) m.throwCharge = 4
                     m.throwCharge += 0.5 / m.holdingTarget.mass / b.fireCDscale
                     if (m.throwCharge < 6) m.energy -= 0.001 / b.fireCDscale; // m.throwCharge caps at 5 
 
@@ -4349,7 +4391,7 @@ const m = {
             } else {
                 m.drawHold(who);
             }
-            if (tech.isStunField) mobs.statusStun(who, tech.isStunField)
+            if (tech.stunField) mobs.statusStun(who, tech.stunField)
             //knock backs
             const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
             Matter.Body.setVelocity(who, { x: player.velocity.x - (15 * unit.x) / massRoot, y: player.velocity.y - (15 * unit.y) / massRoot });
@@ -4860,7 +4902,7 @@ const m = {
                                     }
                                 }
                                 m.bulletsToBlocks(mob[i])
-                                if (tech.isStunField) mobs.statusStun(mob[i], tech.isStunField)
+                                if (tech.stunField) mobs.statusStun(mob[i], tech.stunField)
                                 //mob knock backs
                                 const massRoot = Math.sqrt(Math.max(1, mob[i].mass));
                                 Matter.Body.setVelocity(mob[i], {
@@ -4881,6 +4923,56 @@ const m = {
                                     }
                                 }
                             }
+                        }
+
+                        //deflect player with tech
+                        if (isFree && tech.isPerfectBrake) {
+                            const sub = Vector.sub(m.pos, m.fieldPosition)
+                            const unit = Vector.normalise(sub)
+                            if (
+                                Vector.magnitude(sub) - 30 < m.fieldRange &&
+                                Vector.magnitude(sub) + 130 > m.fieldRange &&
+                                Matter.Query.ray(map, m.pos, m.fieldPosition).length === 0 &&
+                                Vector.dot({ x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }, unit) > m.fieldThreshold
+                            ) {
+                                m.fieldCDcycle = m.cycle + m.fieldBlockCD
+                                const mag = 30
+                                const add = { x: mag * Math.cos(m.fieldAngle), y: mag * Math.sin(m.fieldAngle) }
+                                const v = Vector.mult(Vector.normalise(Vector.add(add, player.velocity)), Math.max(40, player.speed))
+                                // const v = Vector.mult(Vector.normalise(add), Math.max(40, player.speed))
+                                Matter.Body.setVelocity(player, v);
+                            }
+
+                            //deflect blocks
+                            // for (let i = 0, len = body.length; i < len; ++i) {
+                            //     if (
+                            //         Vector.magnitude(Vector.sub(body[i].position, m.fieldPosition)) < m.fieldRange &&
+                            //         Vector.dot({ x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }, Vector.normalise(Vector.sub(body[i].position, m.fieldPosition))) > m.fieldThreshold &&
+                            //         Matter.Query.ray(map, body[i].position, m.fieldPosition).length === 0
+                            //     ) {
+                            //         // const unit = Vector.normalise(Vector.sub(m.fieldPosition, body[i].position))
+                            //         // m.fieldCDcycle = m.cycle + m.fieldBlockCD
+                            //         // if (isFree) {
+                            //         // ctx.lineWidth = 2; //when blocking draw this graphic
+                            //         // ctx.fillStyle = `rgba(110,150,220, ${0.2 + 0.4 * Math.random()})`
+                            //         // ctx.strokeStyle = "#000";
+                            //         // const len = body[i].vertices.length - 1;
+                            //         // const mag = body[i].radius
+                            //         // ctx.beginPath();
+                            //         // ctx.moveTo(body[i].vertices[len].x + mag * (Math.random() - 0.5), body[i].vertices[len].y + mag * (Math.random() - 0.5))
+                            //         // for (let j = 0; j < len; j++) {
+                            //         //     ctx.lineTo(body[i].vertices[j].x + mag * (Math.random() - 0.5), body[i].vertices[j].y + mag * (Math.random() - 0.5));
+                            //         // }
+                            //         // ctx.lineTo(body[i].vertices[len].x + mag * (Math.random() - 0.5), body[i].vertices[len].y + mag * (Math.random() - 0.5))
+                            //         // ctx.fill();
+                            //         // ctx.stroke();
+
+                            //         Matter.Body.setVelocity(body[i], { x: 20 * Math.cos(m.fieldAngle), y: 20 * Math.sin(m.fieldAngle) });
+                            //         // console.log(body[i])
+                            //         // }
+                            //     }
+                            // }
+
                         }
                     }
                 }
@@ -4914,6 +5006,7 @@ const m = {
                         m.lookForBlock();
                         m.fieldPosition = { x: m.pos.x, y: m.pos.y }
                         m.fieldAngle = m.angle
+
                         //draw field attached to player
                         if (m.holdingTarget) {
                             ctx.fillStyle = `rgba(110,150,220, ${0.06 + 0.03 * Math.random()})`
@@ -4939,6 +5032,73 @@ const m = {
                         ctx.quadraticCurveTo(cp1x, cp1y, m.pos.x + 1 * m.fieldRange * Math.cos(m.angle - Math.PI * m.fieldArc), m.pos.y + 1 * m.fieldRange * Math.sin(m.angle - Math.PI * m.fieldArc))
                         ctx.fill();
                         m.perfectPush();
+
+                        if (tech.isThrowBlocks && input.down) {
+                            let target = { index: null, dist: Infinity };
+                            for (let i = 0, len = body.length; i < len; ++i) {
+                                //check if looking at
+                                if (
+                                    !body[i].isNotHoldable &&
+                                    Matter.Query.ray(map, body[i].position, m.pos).length === 0 &&
+                                    Vector.dot({ x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }, Vector.normalise(Vector.sub(body[i].position, m.pos))) > 0.97
+                                ) {
+                                    const dist = Vector.magnitude(Vector.sub(body[i].position, m.pos))
+                                    //if block is close hold it
+                                    if (dist < m.fieldRange) {
+                                        m.holdingTarget = body[i];
+                                        m.pickUp();
+                                        m.throwCharge = 4//pre charge so player can throw immediately
+
+                                        if (tech.isReel && m.immuneCycle < m.cycle) {
+                                            const regen = Math.min(0.003 * m.holdingTarget.speed * m.holdingTarget.mass, 1) * level.isReducedRegen
+                                            m.energy += regen
+                                            simulation.drawList.push({ //add dmg to draw queue
+                                                x: m.pos.x,
+                                                y: m.pos.y,
+                                                radius: regen * 30,
+                                                color: m.fieldMeterColor,
+                                                time: simulation.drawTime
+                                            });
+                                        }
+                                        break
+                                    } else if (dist < target.dist && body[i].mass > 1) {
+                                        target = {
+                                            who: body[i],
+                                            dist: dist
+                                        }
+                                        // ctx.beginPath();
+                                        // let vertices = body[i].vertices;
+                                        // ctx.moveTo(vertices[0].x, vertices[0].y);
+                                        // for (let j = 1; j < vertices.length; j++) {
+                                        //     ctx.lineTo(vertices[j].x, vertices[j].y);
+                                        // }
+                                        // ctx.lineTo(vertices[0].x, vertices[0].y);
+                                        // ctx.strokeStyle = "#000";
+                                        // ctx.stroke();
+                                    }
+                                }
+                            }
+
+                            //pull blocks
+                            if (target.who) {
+                                const massCapped = Math.min(6, target.who.mass)
+                                let attract = Vector.mult(Vector.normalise(Vector.sub(m.pos, target.who.position)), 0.03 * massCapped)
+                                target.who.force.x += attract.x;
+                                target.who.force.y += attract.y - massCapped * simulation.g; //negate gravity
+                                Matter.Body.setVelocity(target.who, Vector.mult(target.who.velocity, 0.8));
+
+                                ctx.beginPath();
+                                let vertices = target.who.vertices;
+                                ctx.moveTo(vertices[0].x, vertices[0].y);
+                                for (let j = 1; j < vertices.length; j++) {
+                                    ctx.lineTo(vertices[j].x, vertices[j].y);
+                                }
+                                ctx.lineTo(vertices[0].x, vertices[0].y);
+                                ctx.fillStyle = "rgb(112, 219, 255)"
+                                ctx.fill();
+                            }
+
+                        }
                     } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                         m.pickUp();
                     } else {
@@ -4962,7 +5122,7 @@ const m = {
                     // m.drawRegenEnergy()
                     m.drawRegenEnergy("rgba(0,0,0,0.2)")
                     if (tech.isPerfectBrake) { //cap mob speed around player
-                        const range = 200 + 140 * wave + 150 * m.energy
+                        const range = 100 + 90 * wave + 250 * m.energy
                         for (let i = 0; i < mob.length; i++) {
                             const distance = Vector.magnitude(Vector.sub(m.pos, mob[i].position))
                             if (distance < range) {

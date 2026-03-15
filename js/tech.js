@@ -601,7 +601,7 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `<strong>1.5x</strong> <strong class='color-d'>damage</strong> and <strong>1.2x</strong> <strong class="color-speed">movement</strong><br><strong class='color-f'>energy</strong> replaces your <strong class='color-h'>health</strong>`,
+        description: `<strong>1.4x</strong> <strong class='color-d'>damage</strong> and <strong>1.2x</strong> <strong class="color-speed">movement</strong><br><strong class='color-f'>energy</strong> replaces your <strong class='color-h'>health</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -611,7 +611,7 @@ const tech = {
             return !m.isAltSkin && !tech.isPiezo && !tech.isRewindAvoidDeath && !tech.isAnnihilation && !tech.isNoDeath//&& !tech.isAmmoFromHealth && !tech.isRewindGun
         },
         requires: "not piezoelectricity, CPT, annihilation, quantum Zeno effect",
-        damage: 1.5,
+        damage: 1.4,
         effect() {
             m.damageDone *= this.damage
 
@@ -653,8 +653,8 @@ const tech = {
         },
         maxCount: 1,
         count: 0,
-        frequency: 5,
-        frequencyDefault: 5,
+        frequency: 3,
+        frequencyDefault: 3,
         allowed() {
             return tech.isEnergyHealth && !tech.isOverHeal
         },
@@ -742,6 +742,46 @@ const tech = {
                 window.removeEventListener("keydown", m.eigen.keyListener);
                 m.resetSkin();
             }
+        }
+    },
+    {
+        name: "normal mode",
+        descriptionFunction() {
+            return `<strong>eigenstate</strong> generates isotropic <strong>phonon</strong> waves<br>for <strong>10</strong> seconds after <strong>swapping</strong> states`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        allowed() {
+            return tech.isEigenstate
+        },
+        requires: "eigenstate",
+        effect() {
+            tech.isNormalMode = true;
+        },
+        remove() {
+            tech.isNormalMode = false;
+        }
+    },
+    {
+        name: "first harmonic",
+        descriptionFunction() {
+            return `if your <strong>eigenstate</strong> is moving get<br>up to <strong>7x</strong> normal mode's wave <strong>frequency</strong>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        allowed() {
+            return tech.isNormalMode
+        },
+        requires: "normal mode",
+        effect() {
+            tech.isFirstHarmonic = true;
+        },
+        remove() {
+            tech.isFirstHarmonic = false;
         }
     },
     {
@@ -1522,58 +1562,58 @@ const tech = {
         requires: "",
         effect() {
             tech.isDilate = true
-            simulation.ephemera.push({
-                HEX_DIRS: [{ x: 0, y: -1 }, { x: 0.8660254, y: -0.5 }, { x: 0.8660254, y: 0.5 }, { x: 0, y: 1 }, { x: -0.8660254, y: 0.5 }, { x: -0.8660254, y: -0.5 }],
-                do() {
-                    if (tech.isDilate) {
-                        const outerRadius = 30;
-                        const radius = 8 * (1.9 + 1.1 * Math.sin(m.cycle * 0.01));
-                        ctx.save();
-                        ctx.translate(m.pos.x, m.pos.y - 90);
-                        // ctx.translate(simulation.mouseInGame.x, simulation.mouseInGame.y);
+            if (!localSettings.isHideHUD) {
+                simulation.ephemera.push({
+                    HEX_DIRS: [{ x: 0, y: -1 }, { x: 0.8660254, y: -0.5 }, { x: 0.8660254, y: 0.5 }, { x: 0, y: 1 }, { x: -0.8660254, y: 0.5 }, { x: -0.8660254, y: -0.5 }],
+                    do() {
+                        if (tech.isDilate) {
+                            const outerRadius = 30;
+                            const radius = 8 * (1.9 + 1.1 * Math.sin(m.cycle * 0.01));
+                            ctx.save();
+                            ctx.translate(m.pos.x, m.pos.y - 90);
+                            //white background circle
+                            ctx.beginPath();
+                            ctx.arc(0, 0, outerRadius, 0, 2 * Math.PI);
+                            ctx.clip(); //to cap the blade extensions
+                            ctx.fillStyle = `#111`;
+                            ctx.fill();
 
-                        //white background circle
-                        ctx.beginPath();
-                        ctx.arc(0, 0, outerRadius, 0, 2 * Math.PI);
-                        ctx.clip(); //to cap the blade extensions
-                        ctx.fillStyle = `#111`;
-                        ctx.fill();
+                            // the inner hexagon
+                            ctx.beginPath();
+                            for (let i = 0; i < 6; i++) {
+                                ctx.lineTo(radius * this.HEX_DIRS[i].x, radius * this.HEX_DIRS[i].y);
+                            }
+                            ctx.closePath();
+                            ctx.fillStyle = `rgb(255, 55, 95)`
+                            ctx.fill();
 
-                        // the inner hexagon
-                        ctx.beginPath();
-                        for (let i = 0; i < 6; i++) {
-                            ctx.lineTo(radius * this.HEX_DIRS[i].x, radius * this.HEX_DIRS[i].y);
+                            // blade extensions
+                            ctx.beginPath();
+                            for (let i = 0; i < 6; i++) {
+                                const curr = this.HEX_DIRS[i];
+                                const prev = this.HEX_DIRS[(i + 5) % 6];
+                                const xStart = radius * prev.x;
+                                const yStart = radius * prev.y;
+                                const dx = (curr.x - prev.x);
+                                const dy = (curr.y - prev.y);
+                                const xEnd = xStart + dx * 200;
+                                const yEnd = yStart + dy * 200;
+                                ctx.moveTo(xStart, yStart);
+                                ctx.lineTo(xEnd, yEnd);
+                            }
+                            ctx.strokeStyle = `rgb(255, 55, 95)`;
+                            ctx.lineWidth = 2;
+                            // ctx.lineCap = "butt";
+                            ctx.stroke();
+
+                            ctx.restore();
+                            return;
+                        } else {
+                            simulation.removeEphemera(this);
                         }
-                        ctx.closePath();
-                        ctx.fillStyle = `rgb(255, 55, 95)`
-                        ctx.fill();
-
-                        // blade extensions
-                        ctx.beginPath();
-                        for (let i = 0; i < 6; i++) {
-                            const curr = this.HEX_DIRS[i];
-                            const prev = this.HEX_DIRS[(i + 5) % 6];
-                            const xStart = radius * prev.x;
-                            const yStart = radius * prev.y;
-                            const dx = (curr.x - prev.x);
-                            const dy = (curr.y - prev.y);
-                            const xEnd = xStart + dx * 200;
-                            const yEnd = yStart + dy * 200;
-                            ctx.moveTo(xStart, yStart);
-                            ctx.lineTo(xEnd, yEnd);
-                        }
-                        ctx.strokeStyle = `rgb(255, 55, 95)`;
-                        ctx.lineWidth = 2;
-                        // ctx.lineCap = "butt";
-                        ctx.stroke();
-
-                        ctx.restore();
-                        return;
-                    } else {
-                        simulation.removeEphemera(this);
-                    }
-                },
-            });
+                    },
+                });
+            }
         },
         remove() {
             tech.isDilate = false
@@ -1655,7 +1695,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isStunField || tech.oneSuperBall || tech.isCloakStun || tech.isOrbitBotUpgrade || tech.isStun
+            return tech.stunField || tech.oneSuperBall || tech.isCloakStun || tech.isOrbitBotUpgrade || tech.isStun
         },
         requires: "a stun effect",
         effect() {
@@ -2748,7 +2788,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak) && m.fieldMode !== 8 && m.fieldMode !== 9
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9
         },
         requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave",
         effect() {
@@ -2767,7 +2807,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
         requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2785,7 +2825,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
         },
         requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
         effect() {
@@ -2803,7 +2843,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter)
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks)
         },
         requires: "mass driver, additive manufacturing",
         effect() {
@@ -2823,7 +2863,7 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter) && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && !tech.isTokamak
         },
         requires: "mass driver, additive manufacturing, not pilot wave, tokamak",
         effect() {
@@ -3649,7 +3689,7 @@ const tech = {
         allowed() {
             return !tech.isPerfectBrake
         },
-        requires: "not eddy current brake",
+        requires: "not eddy current",
         effect() {
             tech.isHealBrake = true;
         },
@@ -4983,9 +5023,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return true
+            return !localSettings.isHideHUD
         },
-        requires: "",
+        requires: "not performance mode",
         effect() {
 
             // class Scarf {
@@ -5261,7 +5301,7 @@ const tech = {
                     if (!m.isTimeDilated && !(tech.isIntangible && m.isCloak)) {
                         for (let i = 1; i < this.segments.length - 1; i++) {
                             let hit = Matter.Query.ray(mob, this.segments[i], this.segments[i + 1])
-                            if (hit.length && !hit[0].body.isUnblockable && hit[0].body.collisionFilter.mask > 0) {
+                            if (hit.length && (!hit[0].body.isUnblockable || hit[0].body.shield) && hit[0].body.collisionFilter.mask > 0) {
                                 if (tech.isChitin) { //tail segments past the collisions point are made into worms
                                     hit = hit[0].body
                                     for (let j = Math.max(1, i); j < this.segments.length - 1; j++) {
@@ -5360,6 +5400,7 @@ const tech = {
                                 }
                                 this.segments.length = Math.max(2, i - 1)
                             }
+                            // if (hit.length) console.log(hit[0].body)
                         }
                     }
                 }
@@ -5751,7 +5792,7 @@ const tech = {
     {
         name: "paradigm shift",
         descriptionFunction() {
-            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech * m.defense()).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(cost grows by 2x each use)</em>`
+            return `when <strong>paused</strong> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong>${(tech.pauseEjectTech).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(cost grows by 2x each use)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -6553,7 +6594,7 @@ const tech = {
         allowed() {
             return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isLaserShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce && !tech.isFoamBall && !tech.isSlime) || (tech.isRivets && !tech.isNailCrit) || (m.fieldMode === 4 && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
         },
-        requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane, Zectron, photonic crystal",
+        requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane, slime, photonic crystal",
         effect() {
             tech.isIncendiary = true
         },
@@ -6602,7 +6643,7 @@ const tech = {
     {
         name: "borax",
         descriptionFunction() {
-            return `after <strong>Zectron</strong> removes a <strong>super ball</strong><br>gain <strong>1</strong> <strong class='color-ammo'>ammo</strong> for <strong>super balls</strong>`
+            return `after <strong>slime</strong> removes a <strong>super ball</strong><br>gain <strong>1</strong> <strong class='color-ammo'>ammo</strong> for <strong>super balls</strong>`
         },
         isGunTech: true,
         maxCount: 1,
@@ -6742,7 +6783,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade
+            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
         },
         requires: "wave",
         effect() {
@@ -6763,7 +6804,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade
+            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
         },
         requires: "wave",
         effect() {
@@ -6889,7 +6930,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade
+            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
         },
         requires: "wave, phonon",
         effect() {
@@ -6908,7 +6949,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade
+            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
         },
         requires: "wave, phonon",
         effect() {
@@ -7150,7 +7191,7 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075 || tech.isHookDefense || tech.isExplodeContact)
+            return !tech.isExplodeRadio && ((tech.haveGunCheck("harpoon") && !tech.isFoamBall) || (tech.haveGunCheck("grenades") && !tech.isNeutronBomb) || tech.haveGunCheck("missiles") || (m.fieldMode === 4 && simulation.molecularMode === 1) || tech.missileBotCount || tech.isRivets || tech.blockDamage > 0.075 || tech.isThrowBlocks || tech.isHookDefense || tech.isExplodeContact)
         },
         requires: "grenades, missiles, rivets, harpoon, or mass driver, not iridium-192, not polyurethane foam",
         effect() {
@@ -7439,7 +7480,7 @@ const tech = {
     },
     {
         name: "neutron bomb",
-        description: "<strong>grenades</strong> are <strong class='color-p'>irradiated</strong> with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over time",
+        description: "<strong>grenades</strong> are <strong class='color-p'>irradiated</strong> with <strong class='color-p'>Cf-252</strong><br>does <strong class='color-p'>area</strong> <strong class='color-d'>damage</strong> to mobs and you",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8100,7 +8141,7 @@ const tech = {
     {
         name: "irradiated drones",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' class="link">irradiated drones</a>`,
-        description: `the space around <strong>drones</strong> is <strong class='color-p'>irradiated</strong><br><strong>0.25x</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} and <strong class='color-f'>energy</strong>`,
+        description: `<strong>drones</strong> do <strong class='color-p'>area</strong> <strong class='color-d'>damage</strong> to mobs and you<br><strong>0.25x</strong> <strong>drones</strong> per ${powerUps.orb.ammo()} or <strong class='color-print'>printed</strong>`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8202,7 +8243,7 @@ const tech = {
         allowed() {
             return (tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine) || (tech.haveGunCheck("wave") && !tech.is360Longitudinal) || (tech.haveGunCheck("super balls") && !tech.isSlime) || tech.isSoundBotUpgrade
         },
-        requires: "foam, wave, super balls, not isotropic, Zectron",
+        requires: "foam, wave, super balls, not isotropic, slime",
         effect() {
             tech.isBulletTeleport = true
         },
@@ -8429,7 +8470,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("harpoon") && !tech.isFilament && !tech.isHarpoonPowerUp && !tech.isBoostReplaceAmmo && !tech.isBreakHarpoon
+            return tech.haveGunCheck("harpoon") && !tech.isUHMWPE && !tech.isHarpoonPowerUp && !tech.isBoostReplaceAmmo && !tech.isBreakHarpoon
         },
         requires: "harpoon, not UHMWPE, induction furnace, quasiparticles, wear",
         ammoBonus: 9,
@@ -8696,10 +8737,10 @@ const tech = {
         },
         requires: "harpoon, not railgun",
         effect() {
-            tech.isFilament = true;
+            tech.isUHMWPE = true;
         },
         remove() {
-            tech.isFilament = false;
+            tech.isUHMWPE = false;
         }
     },
     {
@@ -9359,7 +9400,7 @@ const tech = {
     },
     {
         name: "flux pinning",
-        description: `mobs <strong>deflected</strong> by your ${powerUps.orb.field()}<br>are <strong>stunned</strong> for <strong>4</strong> seconds`,
+        description: `<strong>deflected</strong> mobs are <strong>stunned</strong> for <strong>4</strong> seconds`,
         isFieldTech: true,
         maxCount: 9,
         count: 0,
@@ -9370,15 +9411,34 @@ const tech = {
         },
         requires: "a field that can block",
         effect() {
-            tech.isStunField += 240;
+            tech.stunField += 240;
         },
         remove() {
-            tech.isStunField = 0;
+            tech.stunField = 0;
         }
     },
     {
-        name: "eddy current brake",
-        description: "perfect diamagnetism <strong class='color-s'>slows</strong> nearby mobs<br>effect <strong>radius</strong> scales with stored <strong class='color-f'>energy</strong>",
+        name: "paramagnetism",
+        description: `activate <strong>perfect diamagnetism</strong> ${powerUps.orb.field()}<br>and hold <strong>down</strong> to attract distant <strong class='color-block'>blocks</strong>`, // and <strong>release</strong> to launch
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 2
+        },
+        requires: "perfect diamagnetism",
+        effect() {
+            tech.isThrowBlocks = true;
+        },
+        remove() {
+            tech.isThrowBlocks = false;
+        }
+    },
+    {
+        name: "eddy current",
+        description: "<strong>perfect diamagnetism</strong> pushes <strong>you</strong> and it<br><strong class='color-s'>slows</strong> nearby mobs, <strong>radius</strong> scales with <strong class='color-f'>energy</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -9717,9 +9777,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 4 || m.fieldMode === 1 || m.fieldMode === 8
+            return (m.fieldMode === 4 || m.fieldMode === 1 || m.fieldMode === 8) && !localSettings.isHideHUD
         },
-        requires: "molecular assembler, pilot wave, standing wave",
+        requires: "molecular assembler, pilot wave, standing wave, not performance mode",
         effect() {
             tech.isMassEnergy = true // used in m.grabPowerUp
             m.energy += 2 * level.isReducedRegen
@@ -10633,16 +10693,16 @@ const tech = {
     },
     {
         name: "reel",
-        description: "<strong>5x</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong><br>up to <strong>+100</strong> <strong class='color-f'>energy</strong> after reeling in <strong class='color-block'>blocks</strong>",
+        description: "<strong>5x</strong> <strong class='color-block'>block</strong> collision <strong class='color-d'>damage</strong><br>up to <strong>+100</strong> <strong class='color-f'>energy</strong> after pulling in <strong class='color-block'>blocks</strong>",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
+        frequency: 2,
+        frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 10 && !tech.isTokamak && tech.blockDamage === 0.075 && !tech.hookNails
+            return (m.fieldMode === 10 || tech.isThrowBlocks) && !tech.isTokamak && tech.blockDamage === 0.075 && !tech.hookNails
         },
-        requires: "grappling hook, not mass driver, swarf, tokamak",
+        requires: "grappling hook, paramagnetism, not mass driver, swarf, tokamak",
         effect() {
             tech.blockDamage = 0.375
             tech.isReel = true
@@ -13642,7 +13702,7 @@ const tech = {
     isIceCrystals: null,
     blockDamage: null,
     isBlockStun: null,
-    isStunField: null,
+    stunField: null,
     isHarmDamage: null,
     isVacuumBomb: null,
     isFrequentist: null,
@@ -13845,7 +13905,7 @@ const tech = {
     isExtraGunField: null,
     isBigField: null,
     isSmartRadius: null,
-    isFilament: null,
+    isUHMWPE: null,
     isLargeHarpoon: null,
     extraHarpoons: null,
     ammoCap: null,
@@ -13990,5 +14050,8 @@ const tech = {
     isLaserWire: null,
     isMycelium: null,
     isEigenstate: null,
+    isNormalMode: null,
+    isFirstHarmonic: null,
     isSlimeAmmo: null,
+    isThrowBlocks: null,
 }

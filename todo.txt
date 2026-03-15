@@ -1,24 +1,46 @@
 ******************************************************** NEXT PATCH **************************************************
 
-Zectron renamed slime
-tech borax - gives ammo when slime removes super ball bullets
+new community level zenith by Destiny
+new community level archipelago by Destiny
+  enable community maps in settings
+
+performance mode in settings
+  this replaces and extends the "minimal UI setting"
+  it might help if you have lag or matter.js game crashes regularly when too much occurs at once
+  turns off
+    previous minimal UI stuff
+    final boss health bar
+    tech: filament
+    tech: pair production
+    duplication animation
+    eigen animation
+    max mob caps are lower
+    no stroke on blocks
+
+tech: normal mode - eigenstate generates a 360 isotropic phonon wave
+  every 0.5 seconds for 10 seconds after swapping states
+tech: first harmonic - if your other eigenstate is moving 4x normal mode frequency
+  getting first harmonic unlocks wave gun tech: mechanical resonance, sympathetic resonance, amplitude, propagation
+
+tech: paramagnetism - activate perfect diamagnetism while holding down to pull in blocks
+  unlocks block tech
+eddy current brake renamed eddy current
+  perfect diamagnetism field now also pushes the player
 
 bug fixes
-  reverted to the build before queued removal
-    added back most changes not related to queued removal
+  fixes slime name in text descriptions
+  paradigm shift damage prediction text is consistent with high health and it no longer incorrectly scales with damage reduction
 
 *********************************************************** TODO *****************************************************
 
-
-make a low graphics setting?
-  turn off
-    final boss health bar
-    filament animation
-    minimal UI stuff
-    stroke on blocks?
-    duplication animation
+add gradients to performance mode
+  plasma ball
+  tungsten carbide
+make orbital bots have an elliptical orbit that precesses
 
 tech: plating- at the start of each level gain 0.25 damage reduction, slowly lose this effect over 40 seconds
+
+Grenade- grenades bounce # number of times, detonating 1 second after final bounce (You ever play overwatch? pretty much junkrat in terms of how the grenade bounces)
 
 in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name
   !a second click will read the description?
@@ -33,27 +55,6 @@ sort text input is broken in pause menu
     bot tech
     JUNK
   
-eigenstate
-  update node animation, it doesn't look right...
-  add custom text for eigenstate (if you add at least 2 more tech)
-eigenstate - additional tech
-  while your eigan state is moving it will fire ______ at nearby mobs
-  your state teleports to you when you____
-        hold down?   tap up up up
-  your eigen state fires when you fire
-    too hard to code...
-  gain a laser bot and your laser bots follow your eigen state
-  when you use ammo your eigen state makes an isometric wave?
-  do something after swap for a few seconds
-    damage?
-    faster move speed 6s after swap??
-  general damage reduction
-  3x block damage?
-  2 different bonus effects for each state
-    damage, damage reduction, movement and jump
-  the damage you do after swapping states lasts longer?
-  tech.field,guns, ammo, coupling, research, max health, max energy, duplication, ... will swap
-
 
 replace damage side bar with a number?
   where: red text above tech list
@@ -81,10 +82,14 @@ try to also allow players to unpause in choosing menu
 add an HTML input in the tech description(slider or checkbox, dropdown menu,  other inputs)
   put html slider in tech description, adjust when paused
   it will control some property that is sometimes better at different values
+    checkboxes or sliders for drone priorities
+      power ups
+      bosses
+      range
     convert all bots to a type with dropdown menu
       or change what bots are upgraded to
     cost benefit trades with slider
-      bot AI behaviors
+      bot or drone AI behaviors
         range - frequency
       health - energy
       dmg - dmg reduction
@@ -112,46 +117,20 @@ new level - ducts
 filament
   tech: - filament tip is drawn towards blocks?, power ups?, mobs?
     and does something good when it touches them
-?world line - give energy when cut?
-  stop giving extra length from power ups?
-tech filament attacks mobs with the tip
-  gravitate every segment, maybe with less weigh to the shorter parts
+      maybe isoWave360
 
 tubeWormBoss T4 or T5
-
-tech: filament - gets longer as you eat power ups (up to a max length), mobs can cut wire, wire length gives duplication
-  long tails looks strange in vertical flip?
-  improve with additional tech
-    coaxial, ductile - wire length increases damage
-    aura around wire (to kill bullets)
-    aura around wire (or just tip) that freezes
-      tip spawns ice-IX
-    change wire physics, color, draw style with upgrades
-      const rigidity = 1; // 0 (loose) to 1 (crinkles), -0.6 has wiggly knots
-      this.gravity = 0.6;
-      this.friction = 0.5;
-      spacing = 20//40 has bigger loops and a whole different feel
 
 zoom in/out when choosing power ups
   interactions with other zoom actions
     zoom at start of level  (this could be instant)
 
-make orbital bots have an elliptical orbit that precesses
-
-do something with verlet wire system and elastic thread system      https://gemini.google.com/app/d4459990774e555d?utm_source=app_launcher&utm_medium=owned&utm_campaign=base_all
-  skin with wires attached
-    upgrades increase wire length
-  boss mob with tail? - done
-  JUNK tech with several wires as hair
-  wire length is diegetic energy bar/health bar
-  snake boss?
-    maybe use the simple elastic tail code?
-
-
 do something with powerUps.totalUsed
   give dmg for each power up used this game?
 
-make a new power up that is small and white
+make a new power up that is
+  small and white
+  large and orange or red
   unlock with a tech
   effect?
     temporary buff, like boost
@@ -159,14 +138,6 @@ make a new power up that is small and white
 
 use the horizontal vibration effect on a mob or gun or level effect
   ctx.translate((simulation.cycle % 2) * 8, 0);
-
-add a setting to say the name of each tech/field/guns
-  is the built in browser voice good enough accuracy? (yep)
-  when to generate audio?
-    click on the orb while paused?
-    add new icon to click on to the right align of the title
-    after choose (this needs a setting to disable)
-    just make it a JUNK tech?
 
 mob attack - crash on top of player when above
   mob flies towards player, but aims for a space above the player (if there is no map of body elements int the way)
@@ -199,10 +170,6 @@ Boltzmann brain
       convert with ship tech
     chance to spawn something good?
   JUNK tech?
-
-perfect diamagnetism tech:   - using field while crouching will pull in blocks
-  releasing field will fire the blocks  (like control)
-  very strong, but high energy cost
 
 gun tech upgrade that rewards pressing fire with a precise rhythm
   press fire every 2-3 seconds and each time you get a "perfect" rhythm
