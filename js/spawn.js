@@ -31,7 +31,7 @@ const spawn = {
         ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4", "roundwormBoss4"] //T4
         //finalBoss is T5
     ],
-    // tier-n bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss, trainBoss    //these need a particular level to work so they scale with level.levelsCleared
+    // tier-n bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss, trainBoss, trainBoss2    //these need a particular level to work so they scale with level.levelsCleared
     bossTierIndex: [0, 0, 0, 0, 0], //tracks which boss just spawned to avoid duplicates in random bosses
     randomBossList: [
         // "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
@@ -209,7 +209,7 @@ const spawn = {
     spawnChance(chance) {
         if (Math.random() < 0.1 + mob.length) false
         // const mobs = 12 * Math.log10(5 * level.levelsCleared)
-        const mobs = 5 * Math.log(level.levelsCleared + 1) * localSettings.isHideHUD ? 0.5 : 1
+        const mobs = 5 * Math.log(level.levelsCleared + 1) * (localSettings.isHideHUD ? 0.5 : 1)
         const maxMobs = (simulation.difficultyMode === 1) ? 2 : mobs //localSettings.isHideHUD
         return (Math.random() < chance + 0.35 * level.levelsCleared) && (mob.length < maxMobs)
     },
@@ -4390,7 +4390,7 @@ const spawn = {
         Matter.Body.rotate(me, Math.random());
         spawn.shield(me, x, y);
         me.dropEgg = function () {
-            if (mob.length < 360 * localSettings.isHideHUD ? 0.5 : 1) {
+            if (mob.length < 360 * (localSettings.isHideHUD ? 0.5 : 1)) {
                 let where = { x: this.position.x, y: this.position.y + 0.3 * radius }
                 for (let i = 0; i < 30; i++) { //find the ground
                     if (Matter.Query.point(map, where).length > 0 || Matter.Query.point(body, where).length > 0) break
@@ -10714,7 +10714,7 @@ const spawn = {
                 ctx.stroke();
             }
             this.checkStatus();
-            if (!(simulation.cycle % 15) && mob.length < 360 * localSettings.isHideHUD ? 0.5 : 1) spawn.mine(this.position.x, this.position.y)
+            if (!(simulation.cycle % 15) && mob.length < 360 * (localSettings.isHideHUD ? 0.5 : 1)) spawn.mine(this.position.x, this.position.y)
         };
     },
     mine(x, y) {
@@ -10976,7 +10976,7 @@ const spawn = {
                 ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
                 ctx.stroke();
                 //drop mines while invulnerable
-                if (!(simulation.cycle % 12) && mob.length < 360 * localSettings.isHideHUD ? 0.5 : 1 && level.levelsCleared > 5) {
+                if (!(simulation.cycle % 12) && mob.length < 360 * (localSettings.isHideHUD ? 0.5 : 1) && level.levelsCleared > 5) {
                     // spawn.freezeGrenade(this.position.x, this.position.y, null, 60, 100 + 20 * simulation.difficultyMode);
                     spawn.mine(this.position.x, this.position.y)
                 }
@@ -11240,8 +11240,8 @@ const spawn = {
                 ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
                 ctx.stroke();
                 //drop mines while invulnerable
-                const delay = Math.max(12, 120 - 6 * simulation.difficultyMode - level.levelsCleared)
-                if (!(simulation.cycle % delay) && mob.length < 360 * localSettings.isHideHUD ? 0.5 : 1) {
+                const delay = Math.max(12, 150 - 11 * simulation.difficultyMode - 3 * level.levelsCleared)
+                if (!(simulation.cycle % delay) && mob.length < (360 * (localSettings.isHideHUD ? 0.5 : 1))) {
                     index = this.trackIndex - 3
                     if (index < 0) index = this.track.length - 1
                     for (let i = 0; i < 6; i++) {
@@ -11249,7 +11249,6 @@ const spawn = {
                         if (index > this.track.length - 1) index = 0
                         spawn.freezeGrenade(this.track[index].x, this.track[index].y, null, 40, 80 + 20 * simulation.difficultyMode); //freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
                     }
-
                     // spawn.mine(this.position.x, this.position.y)
                 }
             }
@@ -13078,7 +13077,7 @@ const spawn = {
             this.checkStatus();
             this.attraction();
             this.repulsion();
-            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && mob.length < 300 * localSettings.isHideHUD ? 0.5 : 1) {
+            if (this.seePlayer.recall && !(simulation.cycle % this.fireFreq) && mob.length < 300 * (localSettings.isHideHUD ? 0.5 : 1)) {
                 for (let i = 0, len = 6; i < len; i++) spawn.orbital(me, 3 * this.radius, i / len * 2 * Math.PI + this.angle, 0.01)
 
                 Matter.Body.setAngularVelocity(this, 0.11)

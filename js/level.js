@@ -23,7 +23,7 @@ const level = {
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             // simulation.isHorizontalFlipped = true    
-            // level.levelsCleared = 7
+            // level.levelsCleared = 3
             // level.updateDifficulty()
             // simulation.isCheating = true
 
@@ -57,7 +57,7 @@ const level = {
             // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("paramagnetism")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("interest")
             // tech.giveTech("reel")
             // for (let i = 0; i < 1; i++) tech.giveTech("first harmonic")
             // for (let i = 0; i < 1; ++i) tech.giveTech("eddy current")
@@ -68,7 +68,7 @@ const level = {
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
             // level.archipelago()
-            // level.testing()
+            // level.subway()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
@@ -280,7 +280,7 @@ const level = {
             if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
                 const levelName = level.levels[level.onLevel]
                 if (levelName === "final") rate *= 1 / 5
-                if (levelName === "subway") rate *= 1 / 5
+                // if (levelName === "subway") rate *= 1 / 3
             }
             if (powerUps.research.count > 0 && rate > 0) {
                 const r = Math.ceil(rate * powerUps.research.count)
@@ -6014,7 +6014,7 @@ const level = {
                                 }
                             }
                         }
-                        if (mob.length < 100 - 50 * localSettings.isHideHUD && !m.isTimeDilated) {
+                        if (mob.length < (100 - 50 * localSettings.isHideHUD) && !m.isTimeDilated) {
                             block2Mob(0)
                             block2Mob(1)
                             block2Mob(2)

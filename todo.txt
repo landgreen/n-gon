@@ -1,35 +1,9 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level zenith by Destiny
-new community level archipelago by Destiny
-  enable community maps in settings
 
-performance mode in settings
-  this replaces and extends the "minimal UI setting"
-  it might help if you have lag or matter.js game crashes regularly when too much occurs at once
-  turns off
-    previous minimal UI stuff
-    final boss health bar
-    tech: filament
-    tech: pair production
-    duplication animation
-    eigen animation
-    max mob caps are lower
-    no stroke on blocks
-
-tech: normal mode - eigenstate generates a 360 isotropic phonon wave
-  every 0.5 seconds for 10 seconds after swapping states
-tech: first harmonic - if your other eigenstate is moving 4x normal mode frequency
-  getting first harmonic unlocks wave gun tech: mechanical resonance, sympathetic resonance, amplitude, propagation
-
-tech: paramagnetism - activate perfect diamagnetism while holding down to pull in blocks
-  unlocks block tech
-eddy current brake renamed eddy current
-  perfect diamagnetism field now also pushes the player
 
 bug fixes
-  fixes slime name in text descriptions
-  paradigm shift damage prediction text is consistent with high health and it no longer incorrectly scales with damage reduction
+  interest on subway is back to full % since it no longer has doors
 
 *********************************************************** TODO *****************************************************
 

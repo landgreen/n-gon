@@ -1559,7 +1559,7 @@ const powerUps = {
         let cycle = () => {
             if (count > 0) {
                 if (m.alive) requestAnimationFrame(cycle);
-                if (!simulation.paused && !simulation.isChoosing && powerUp.length < 300 * localSettings.isHideHUD ? 0.5 : 1) { //&& !(simulation.cycle % 2)
+                if (!simulation.paused && !simulation.isChoosing && powerUp.length < (300 * (localSettings.isHideHUD ? 0.5 : 1))) { //&& !(simulation.cycle % 2)
                     count--
                     if (!(count % delay)) {
                         const where = { x: location.x + 50 * (Math.random() - 0.5), y: location.y + 50 * (Math.random() - 0.5) }

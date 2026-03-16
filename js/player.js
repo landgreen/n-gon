@@ -2093,15 +2093,14 @@ const m = {
                             ctx.fillRect(xOff, yOff, range * energy, height);
                         }
                         //health bar
-                        // Math.floor(300 * m.maxHealth * Math.pow(Math.max(0, m.health) / m.maxHealth, 1.4))
-                        const health = m.eigen.health[m.eigen.state === 1 ? 0 : 1]
-
-                        const xOff = m.eigen.block.position.x - range * m.maxHealth / 2
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
-                        ctx.fillRect(xOff, yOff - 15, range * m.maxHealth, height);
-                        ctx.fillStyle = "rgb(9, 245, 166)"; //background
-                        ctx.fillRect(xOff, yOff - 15, range * health, height);
-
+                        if (!level.isHideHealth) {
+                            const health = m.eigen.health[m.eigen.state === 1 ? 0 : 1]
+                            const xOff = m.eigen.block.position.x - range * m.maxHealth / 2
+                            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+                            ctx.fillRect(xOff, yOff - 15, range * m.maxHealth, height);
+                            ctx.fillStyle = "rgb(9, 245, 166)"; //background
+                            ctx.fillRect(xOff, yOff - 15, range * health, height);
+                        }
 
                         //fire 360 iostropic wave form eigen block
                         if (tech.isNormalMode && m.eigen.cycle < m.eigen.cycleLimit) {
