@@ -23,7 +23,7 @@ const level = {
             // tech.duplicateChance += 1
             // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
             // simulation.isHorizontalFlipped = true    
-            // level.levelsCleared = 3
+            // level.levelsCleared = 7
             // level.updateDifficulty()
             // simulation.isCheating = true
 
@@ -59,16 +59,16 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // for (let i = 0; i < 1; ++i) tech.giveTech("interest")
             // tech.giveTech("reel")
-            // for (let i = 0; i < 1; i++) tech.giveTech("first harmonic")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("eddy current")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("normal mode")
+            // for (let i = 0; i < 1; i++) tech.giveTech("mass driver")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Halbach array")
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
             // level.archipelago()
-            // level.subway()
+            // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 

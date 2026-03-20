@@ -3962,12 +3962,12 @@ const m = {
                         for (let i = body.length - 1; i > 0; i--) {
                             if (body[i] && body[i] !== m.holdingTarget) {
                                 const dist2 = Vector.magnitudeSquared(Vector.sub(m.pos, body[i].position))
-                                if (dist2 < range && !body[i].isInvulnerable) {
+                                if (dist2 < range && !body[i].isInvulnerable && !body[i].isNotHoldable) {
                                     const where = { x: body[i].position.x, y: body[i].position.y }
+                                    const dmg = 60 * Math.pow(body[i].mass, 0.25)
                                     Matter.Composite.remove(engine.world, body[i]);
                                     body.splice(i, 1);
-                                    b.pulse(60 * Math.pow(m.holdingTarget.mass, 0.25), m.angle, where) //    pulse(charge, angle = m.angle, where = m.pos) {
-
+                                    b.pulse(dmg, m.angle, where) //    pulse(charge, angle = m.angle, where = m.pos) {
                                 }
                             }
                         }

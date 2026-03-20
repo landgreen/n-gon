@@ -1,8 +1,7 @@
 ******************************************************** NEXT PATCH **************************************************
 
-
-
 bug fixes
+  Halbach + tokamak crash
   interest on subway is back to full % since it no longer has doors
 
 *********************************************************** TODO *****************************************************
@@ -51,7 +50,12 @@ tech:  - if you have no field get....
 try to also allow players to unpause in choosing menu
 
 
-
+web lines - putting down lines that last maybe 10-20 seconds that slow and damage mobs.
+  plasma field tech? maybe when the plasma globe explodes make web lines
+  plasma extruder could make lines when it kills a mob?
+  wormhole tech? when you teleport you leave a web behind?
+  spore tech? (when sporangium hatch they shoot out a few web lines that slow nearby mobs?
+  ***most obvious is grappling hook tech: grappling hook leaves behind web lines
 
 add an HTML input in the tech description(slider or checkbox, dropdown menu,  other inputs)
   put html slider in tech description, adjust when paused
