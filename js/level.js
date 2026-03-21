@@ -9975,7 +9975,7 @@ const level = {
         spawn.bodyRect(3825, 2240, 150, 75, 0.5);
 
         spawn.mapVertex(3500, 2452, "-500 -135    500 -135    500 35 400 135  -400 135 -500 35");
-        spawn.mapVertex(1200, 2850, "-500 -100     500 -100 550 -50   550 300   -500 300");
+        spawn.mapVertex(1200, 2850, "-550 -50 -500 -100     500 -100 550 -50   550 300   -550 300");
         // spawn.mapVertex(1200, 2875, "-400 0  -300 -100   300 -100   400 0");
 
         spawn.mapVertex(1317, 275, "-500 0  -300 -200     300 -200 550 50     550  500    -500 500");
@@ -34283,7 +34283,7 @@ const level = {
         spawn.mapRect(4685, 1300, 50, 550);
         spawn.mapRect(4400, 2000, 550, 50);
         spawn.mapRect(5150, 1000, 550, 50);
-        spawn.mapVertex(5500, 1550, "0 0  -500 600  100 0  -400 600");
+        spawn.mapVertex(5500, 1550, "0 0 -500 600 -400 600 100 0");
 
         //second room
         spawn.mapRect(8000, 0, 1500, 2300);
@@ -37813,7 +37813,7 @@ const level = {
         bouncyBody.restitution = 0.9;
         spawn.mapVertex(-2175 + 1300 / 2, -1050 + 1225 / 2, "0 -400 -100 -300 -100 0 100 0 100 -300");
 
-        spawn.mapVertex(-4150 + 1975 / 2, -200 + 2575 / 2, "0 -800 -200 -600 -200 0 0 200 200 0 200 -600 0 200");
+        spawn.mapVertex(-4150 + 1975 / 2, -200 + 2575 / 2, "0 -800 -200 -600 -200 0 0 200 200 0 200 -600");
         const mapWithVertex = map[map.length - 1];
         let index1 = 0;
         level.custom = () => {
