@@ -1,6 +1,15 @@
 ******************************************************** NEXT PATCH **************************************************
 
+tech: Casimir effect - mobs have a chance to drop power ups that give max energy
+tech: Lie group - merge small power ups into Casimir
+tech: van der Waals force - Casimir power ups also give max health
+tech: vacuum energy - after using a coupling, boost, Casimir, research, heal, or ammo power up randomly set energy to 0 or max energy
+ionization energy converts heal power ups to Casimir power ups (15->10 max energy)
+  ergodicity and adiabatic effect Casimir power ups
+mass production now has options for coupling and Casimir power ups
+
 bug fixes
+  testing optimization, not setting declaring tech variables on game start
   Halbach + tokamak crash
   interest on subway is back to full % since it no longer has doors
 
@@ -9,6 +18,7 @@ bug fixes
 add gradients to performance mode
   plasma ball
   tungsten carbide
+
 make orbital bots have an elliptical orbit that precesses
 
 tech: plating- at the start of each level gain 0.25 damage reduction, slowly lose this effect over 40 seconds

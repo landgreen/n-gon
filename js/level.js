@@ -57,28 +57,28 @@ const level = {
             // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("interest")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("ergodicity")
             // tech.giveTech("reel")
-            // for (let i = 0; i < 1; i++) tech.giveTech("mass driver")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tokamak")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Halbach array")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
+            // for (let i = 0; i < 1; i++) tech.giveTech("vacuum energy")
+            // for (let i = 0; i < 4; ++i) tech.giveTech("Lie group")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Casimir effect")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("van der Waals force") });
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.archipelago()
+            // level.flocculation()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
-            // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+            // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
             // for (let i = 0; i < 3; i++) spawn.slasher2(1300 + 10 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.kingSnakeBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
-            // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 400); });
+            // requestAnimationFrame(() => { powerUps.spawnDelay("Casimir", 30); });
             // m.storeTech() //sets entanglement
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
             // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");

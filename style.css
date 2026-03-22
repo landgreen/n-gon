@@ -1244,6 +1244,16 @@ summary {
     margin-bottom: -0.5px;
 }
 
+.energy-circle {
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 50%;
+    display: inline-block;
+    background-color: #ff0;
+    border: 0.05em #000 solid;
+    margin-bottom: -0.5px;
+}
+
 .boost-circle {
     width: 0.7em;
     height: 0.7em;

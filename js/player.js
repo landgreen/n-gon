@@ -3954,8 +3954,11 @@ const m = {
                     if (tech.isTokamakHeal && tech.tokamakHealCount < 5) {
                         tech.tokamakHealCount++
                         let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
-                        if (powerUps.healGiveMaxEnergy) massScale = powerUps["heal"].size()
-                        powerUps.spawn(m.pos.x, m.pos.y, "heal", true, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+                        if (powerUps.healGiveMaxEnergy) {
+                            powerUps.spawn(m.pos.x, m.pos.y, "energy", true);
+                        } else {
+                            powerUps.spawn(m.pos.x, m.pos.y, "heal", true, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
+                        }
                     }
                     if (tech.isGroupThrow) {
                         const range = 810000
