@@ -4152,7 +4152,8 @@ const b = {
                     x: targets[index].x + SPREAD * (Math.random() - 0.5),
                     y: targets[index].y + SPREAD * (Math.random() - 0.5)
                 }
-                b.superBall(position, Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed), radius)
+                const dir = Vector.mult(Vector.normalise(Vector.sub(WHERE, position)), speed)
+                b.superBall(position, dir, radius)
                 shotsFired++
             } else if (isRandomAim) { // aim in random direction
                 const ANGLE = 2 * Math.PI * Math.random()
@@ -5802,10 +5803,19 @@ const b = {
                         }
                     }
                 }
-                //orbit player
+
+
+
                 const time = simulation.cycle * this.orbitalSpeed + this.phase
-                const orbit = { x: Math.cos(time), y: Math.sin(time) }
+                // if (this.isUpgraded) {
+                //     const baseOrbit = { x: 1.5 * Math.cos(time), y: 0.8 * Math.sin(time) };
+                //     const precessionAngle = simulation.cycle * 0.03;
+                //     const orbit = Vector.rotate(baseOrbit, precessionAngle);
+                //     Matter.Body.setPosition(this, Vector.add(m.pos, Vector.mult(orbit, this.range))) //bullets move with player
+                // } else {
+                const orbit = { x: Math.cos(time), y: Math.sin(time) };
                 Matter.Body.setPosition(this, Vector.add(m.pos, Vector.mult(orbit, this.range))) //bullets move with player
+                // }
             }
         })
         // bullet[me].orbitalSpeed = Math.sqrt(0.7 / bullet[me].range)

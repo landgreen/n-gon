@@ -934,7 +934,8 @@ const simulation = {
                         }
                         const damage = tech.damageAdjustments() //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
-                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.63 * canvas.height) + "px";
+                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.5 * canvas.height) + "px";
+                            // document.getElementById("damage-num").innerHTML = `${damage.toFixed(2)}x dmg`
                             m.lastCalculatedDamage = damage
                         }
                     }
@@ -1056,12 +1057,14 @@ const simulation = {
 
                     if (!(m.cycle % 420)) { //once every 7 seconds
                         //check if player is inside the map
-                        if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+
+                        if (Matter.Query.ray(map, m.pos, player.position).length > 0) {
+                            // if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
                             //check for the next few seconds to see if being stuck continues
                             simulation.ephemera.push({
                                 count: 240, //cycles before it self removes
                                 do() {
-                                    if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
+                                    if (Matter.Query.ray(map, m.pos, player.position).length > 0) {
                                         this.count--
 
                                         if (this.count < 0) {

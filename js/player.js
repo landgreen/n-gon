@@ -408,7 +408,20 @@ const m = {
         }
     },
     death() {
-        if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
+        if (tech.isEigenstate && m.eigen.deathCount === 0) {
+            m.eigen.deathCount++
+            m.eigen.isAlive[m.eigen.state] = false
+            m.eigen.swap()
+            simulation.inGameConsole(`<em>//your other state died</em>`)
+            simulation.inGameConsole(`<span class='color-var'>m</span>.eigen.isAlive<span class='color-symbol'>[</span>m.eigen.state<span class='color-var'>]</span> <span class='color-var'>=</span> false `)
+            m.addHealth(1)
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].name === "eigenstate") {
+                    powerUps.ejectTech(i)
+                    break
+                }
+            }
+        } else if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
             // for (let i = 0; i < tech.tech.length; i++) {
             //     if (tech.tech[i].name === "quantum immortality") tech.removeTech(i)
@@ -452,19 +465,6 @@ const m = {
                 simulation.inGameConsole("simulation.amplitude <span class='color-symbol'>=</span> null");
                 tech.isImmortal = false //disable future immortality
             }, 6 * swapPeriod);
-        } else if (tech.isEigenstate && m.eigen.deathCount === 0) {
-            m.eigen.deathCount++
-            m.eigen.isAlive[m.eigen.state] = false
-            m.eigen.swap()
-            simulation.inGameConsole(`<em>//your other state died</em>`)
-            simulation.inGameConsole(`<span class='color-var'>m</span>.eigen.isAlive<span class='color-symbol'>[</span>m.eigen.state<span class='color-var'>]</span> <span class='color-var'>=</span> false `)
-            m.addHealth(1)
-            for (let i = 0; i < tech.tech.length; i++) {
-                if (tech.tech[i].name === "eigenstate") {
-                    powerUps.ejectTech(i)
-                    break
-                }
-            }
         } else if (m.alive) { //normal death code here            
             if (!simulation.isCheating && localSettings.isAllowed) {
                 localSettings.levelsClearedLastGame = level.levelsCleared
@@ -581,7 +581,6 @@ const m = {
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.6 + 0.4 * Math.sin(m.cycle * 0.01);
         if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 0.15625 : 0.3
-        if (tech.isImmortal) dmg *= 0.7
         if (m.fieldMode === 0) dmg *= 0.99 ** m.coupling
         if (m.fieldMode === 3) dmg *= 0.977 ** m.coupling
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
@@ -6663,7 +6662,7 @@ const m = {
                                 }
                                 for (let i = 0, len = bullet.length; i < len; ++i) {
                                     // console.log(bullet[i].speed)
-                                    if (!bullet[i].botType && bullet[i].speed < 30 && Vector.magnitude(Vector.sub(bullet[i].position, m.fieldPosition)) < m.fieldRadius && !bullet[i].isNotHoldable) {
+                                    if (!bullet[i].botType && bullet[i].speed < 30 && Vector.magnitude(Vector.sub(bullet[i].position, m.fieldPosition)) < m.fieldRadius && !bullet[i].isNotHoldable && bullet[i].collisionFilter.mask !== 0) {
                                         const drainBlock = m.fieldUpgrades[8].drain * speedChange * bullet[i].mass * 0.000095
                                         if (m.energy > drainBlock) {
                                             Matter.Body.setVelocity(bullet[i], m.fieldUpgrades[8].collider.velocity); //give block mouse velocity

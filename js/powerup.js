@@ -427,21 +427,22 @@ const powerUps = {
         // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
     },
     animatePowerUpGrab(color) {
-        simulation.ephemera.push({
-            count: 25, //cycles before it self removes
-            do() {
-                this.count -= 2
-                if (this.count < 5) simulation.removeEphemera(this)
+        if (!localSettings.isHideHUD) {
+            simulation.ephemera.push({
+                count: 25, //cycles before it self removes
+                do() {
+                    this.count -= 2
+                    if (this.count < 5) simulation.removeEphemera(this)
 
-                ctx.beginPath();
-                ctx.arc(m.pos.x, m.pos.y, Math.max(3, this.count), 0, 2 * Math.PI);
-                ctx.fillStyle = color
-                ctx.fill();
-                // ctx.strokeStyle = "hsla(200,50%,61%,0.18)";
-                // ctx.stroke();
-            },
-        })
-
+                    ctx.beginPath();
+                    ctx.arc(m.pos.x, m.pos.y, Math.max(3, this.count), 0, 2 * Math.PI);
+                    ctx.fillStyle = color
+                    ctx.fill();
+                    // ctx.strokeStyle = "hsla(200,50%,61%,0.18)";
+                    // ctx.stroke();
+                },
+            })
+        }
     },
     instructions: {
         name: "instructions",
@@ -795,6 +796,7 @@ const powerUps = {
         effect() {
             powerUps.animatePowerUpGrab('rgba(0, 170, 238,0.3)')
             m.couplingChange(1)
+            powerUps.Casimir.random()
             powerUps.Casimir.random()
         },
     },

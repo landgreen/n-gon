@@ -1,17 +1,17 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: Casimir effect - mobs have a chance to drop power ups that give max energy
-tech: Lie group - merge small power ups into Casimir
-tech: van der Waals force - Casimir power ups also give max health
-tech: vacuum energy - after using a coupling, boost, Casimir, research, heal, or ammo power up randomly set energy to 0 or max energy
-ionization energy converts heal power ups to Casimir power ups (15->10 max energy)
-  ergodicity and adiabatic effect Casimir power ups
-mass production now has options for coupling and Casimir power ups
+right damage bar is a bit shorter
+performance mode now disables
+  animatePowerUpGrab
 
 bug fixes
-  testing optimization, not setting declaring tech variables on game start
-  Halbach + tokamak crash
-  interest on subway is back to full % since it no longer has doors
+  quantum immortality was getting extra damage reduction
+  issue with getting Lie group multiple times without resetting
+  expanded the trigger zone for the teleport if you get stuck in the map
+  incendiary ammunition + polyurethane foam is now unlocked 
+  fixed several issues related to remove tech variable initialization to null
+    blast ball 
+    beam splitter
 
 *********************************************************** TODO *****************************************************
 
@@ -19,11 +19,10 @@ add gradients to performance mode
   plasma ball
   tungsten carbide
 
-make orbital bots have an elliptical orbit that precesses
-
 tech: plating- at the start of each level gain 0.25 damage reduction, slowly lose this effect over 40 seconds
 
 Grenade- grenades bounce # number of times, detonating 1 second after final bounce (You ever play overwatch? pretty much junkrat in terms of how the grenade bounces)
+  explosions after each bounce?
 
 in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name
   !a second click will read the description?
@@ -39,14 +38,9 @@ sort text input is broken in pause menu
     JUNK
   
 
-replace damage side bar with a number?
-  where: red text above tech list
+replace damage side bar with a number??
+  where: red text below field
   changing numbers might get distracting?
-replace damage reduction with a number?
-  I actually like this bar, so maybe don't replace
-  where
-    white text above health bar?
-    inside health bar?
 
 tech: - at the end of each level get 40% of current gun's ammo
   requires interest

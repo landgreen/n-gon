@@ -18,6 +18,7 @@ const tech = {
         }
         m.resetSkin();
         tech.removeCount = 0;
+        tech.beamSplitter = 0
         tech.pauseEjectTech = 2; //used in paradigm shift
         powerUps.retainList = [] //used in coherence
         lore.techCount = 0;
@@ -905,12 +906,7 @@ const tech = {
             this.refundAmount += tech.addJunkTechToPool(0.06)
         },
         refundAmount: 0,
-        remove() {
-            if (this.count > 0 && this.refundAmount > 0) {
-                tech.removeJunkTechFromPool(this.refundAmount)
-                this.refundAmount = 0
-            }
-        }
+        remove() { }
     },
     {
         name: "arsenal",
@@ -2128,8 +2124,8 @@ const tech = {
             for (let i = 0; i < bullet.length; i++) {
                 if (bullet[i].botType === 'foam') bullet[i].isUpgraded = true
             }
-            tech.setBotTechFrequency()
-            tech.setTechFrequency("foam-bot", 5)
+            tech.setBotTechFrequency() //set all bots to zero frequency
+            tech.setTechFrequency("foam-bot", 5) //set foam bot to 5x frequency
         },
         remove() {
             if (this.count) {
@@ -4854,32 +4850,7 @@ const tech = {
         }
     },
     {
-        name: "Lie group",
-        descriptionFunction() {
-            const resultsArray = tech.mergedList.map(item => powerUps.orb[item](1));
-            const resultString = resultsArray.join(", ");
-            return `randomly merge future ${powerUps.orb.coupling(1)},&nbsp; ${powerUps.orb.ammo(1)}, ${powerUps.orb.boost(1)}, &nbsp;or&nbsp; ${powerUps.orb.research(1)} into ${powerUps.orb.Casimir(1)}<br>${powerUps.orb.Casimir(1)} gain their effect <em style ="float: right;">(merged: ${resultString})</em>`
-        },
-        maxCount: 4,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        allowed: () => tech.isCasimir && !tech.isEnergyHealth,
-        requires: "Casimir effect, not mass-energy",
-        list: ["coupling", "boost", "research", "ammo"],
-        effect() {
-            const pick1 = this.list[Math.floor(this.list.length * Math.random())]
-            this.list = this.list.filter(item => item !== pick1)
-            tech.mergedList.push(pick1)
-            simulation.inGameConsole(`${powerUps.orb[pick1](1)} merged into ${powerUps.orb.Casimir(1)} <em>//from Lie group</em>`);
-            // console.log(tech.mergedList, this.list, pick1)
-        },
-        remove() {
-            tech.mergedList = []
-        }
-    },
-    {
-        name: "van der Waals force",
+        name: "van der Waals",
         descriptionFunction() {
             return `${powerUps.orb.Casimir(1)} will also give <strong>10</strong> maximum <strong class='color-h'>health</strong><br><em>${powerUps.Casimir.descriptionFunction()}</em>`
         },
@@ -4899,7 +4870,7 @@ const tech = {
     {
         name: "vacuum energy",
         descriptionFunction() {
-            return `after using ${powerUps.orb.coupling(1)},&nbsp; ${powerUps.orb.ammo(1)},&nbsp; ${powerUps.orb.heal(1)}, &nbsp;${powerUps.orb.Casimir(1)}, &nbsp;or&nbsp; ${powerUps.orb.research(1)}<br>randomly set your <strong class='color-f'>energy</strong> to <strong>0</strong> or <strong>${(100 * m.maxEnergy).toFixed(0)}`
+            return `after using ${powerUps.orb.coupling(1)},&nbsp; ${powerUps.orb.ammo(1)},&nbsp; ${powerUps.orb.boost(1)},&nbsp; ${powerUps.orb.heal(1)}, &nbsp;${powerUps.orb.Casimir(1)}, &nbsp;or&nbsp; ${powerUps.orb.research(1)}<br>randomly set your <strong class='color-f'>energy</strong> to <strong>0</strong> or <strong>${(100 * m.maxEnergy).toFixed(0)}`
         },
         maxCount: 1,
         count: 0,
@@ -4912,6 +4883,36 @@ const tech = {
         },
         remove() {
             tech.isCasimirRandom = false
+        }
+    },
+    {
+        name: "Lie group",
+        descriptionFunction() {
+            let mergedText = ""
+            if (tech.mergedList.length) {
+                const resultsArray = tech.mergedList.map(item => powerUps.orb[item](1));
+                const resultString = resultsArray.join(", ");
+                mergedText = `<em style ="float: right;">(merged: ${resultString})</em>`
+            }
+            return `randomly <strong>merge</strong> future ${powerUps.orb.coupling(1)},&nbsp; ${powerUps.orb.ammo(1)}, ${powerUps.orb.boost(1)}, &nbsp;or&nbsp; ${powerUps.orb.research(1)} into ${powerUps.orb.Casimir(1)}<br>${powerUps.orb.Casimir(1)} gain their effect ${mergedText}`
+        },
+        maxCount: 4,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        allowed: () => tech.isCasimir && !tech.isEnergyHealth,
+        requires: "Casimir effect, not mass-energy",
+        list: ["coupling", "boost", "research", "ammo"],
+        effect() {
+            const pick1 = this.list[Math.floor(this.list.length * Math.random())]
+            this.list = this.list.filter(item => item !== pick1)
+            tech.mergedList.push(pick1)
+            simulation.inGameConsole(`${powerUps.orb[pick1](1)} merged into ${powerUps.orb.Casimir(1)} <em>//from Lie group</em>`);
+            // console.log(tech.mergedList, this.list, pick1)
+        },
+        remove() {
+            tech.mergedList = []
+            this.list = ["coupling", "boost", "research", "ammo"]
         }
     },
     {
@@ -6690,7 +6691,11 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isLaserShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles) || ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce && !tech.isFoamBall && !tech.isSlime) || (tech.isRivets && !tech.isNailCrit) || (m.fieldMode === 4 && simulation.molecularMode === 3) || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
+            return (tech.haveGunCheck("shotgun") && !tech.isNailShot && !tech.isIceShot && !tech.isLaserShot && !tech.isRivets && !tech.isFoamShot && !tech.isSporeWorm && !tech.isSporeFlea && !tech.isNeedles)
+                || ((tech.haveGunCheck("super balls") || tech.isSuperMine) && !tech.isSuperBounce && !tech.isSlime)
+                || (tech.isRivets && !tech.isNailCrit)
+                || (m.fieldMode === 4 && simulation.molecularMode === 3)
+                || (tech.haveGunCheck("drones") && !tech.isForeverDrones && !tech.isDroneRadioactive && !tech.isDroneTeleport)
         },
         requires: "shotgun, super balls, rivets, drones, not irradiated drones, burst drones, polyurethane, slime, photonic crystal",
         effect() {
@@ -6845,8 +6850,8 @@ const tech = {
             }
         },
         remove() {
+            tech.oneSuperBall = false;
             if (tech.oneSuperBall) {
-                tech.oneSuperBall = false;
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
                     if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                 }
@@ -8366,12 +8371,14 @@ const tech = {
             return tech.haveGunCheck("foam", false) && !b.hasBotUpgrade() && !tech.isAmmoFoamSize && !tech.isFoamPressure && (build.isExperimentSelection || powerUps.research.count > 1)
         },
         effect() {
-
-            requestAnimationFrame(() => { tech.giveTech("foam-bot upgrade") })
-            for (let i = 0; i < 2; i++) {
-                b.foamBot()
-                tech.foamBotCount++;
-            }
+            tech.giveTech("foam-bot upgrade")
+            tech.giveTech("foam-bot")
+            tech.giveTech("foam-bot")
+            // requestAnimationFrame(() => {  })
+            // for (let i = 0; i < 1; i++) {
+            //     b.foamBot()
+            //     tech.foamBotCount++;
+            // }
             simulation.inGameConsole(`tech.isFoamBotUpgrade = true`)
             if (tech.haveGunCheck("foam", false)) b.removeGun("foam")
             powerUps.research.expend(2)
@@ -9124,9 +9131,10 @@ const tech = {
         },
         remove() {
             if (tech.beamSplitter !== 0) {
-                tech.beamSplitter = 0
+                tech.beamSplitter -= this.count
                 b.guns[11].chooseFireMethod()
             }
+
         }
     },
     {
@@ -9172,10 +9180,10 @@ const tech = {
         },
         remove() {
             if (tech.isWideLaser) {
-                // tech.wideLaser = 0
                 tech.isWideLaser = false;
                 b.guns[11].chooseFireMethod()
             }
+            tech.isWideLaser = false;
         }
     },
     {
@@ -9220,10 +9228,11 @@ const tech = {
             b.guns[11].chooseFireMethod()
         },
         remove() {
-            if (tech.historyLaser) {
+            if (tech.historyLaser !== 0) {
                 tech.historyLaser = 0
                 b.guns[11].chooseFireMethod()
             }
+            tech.historyLaser = 0
         }
     },
     {
@@ -9320,6 +9329,7 @@ const tech = {
                 tech.isPulseLaser = false;
                 b.guns[11].chooseFireMethod()
             }
+            tech.isPulseLaser = false;
         }
     },
     //************************************************** 
@@ -10364,9 +10374,9 @@ const tech = {
         },
         remove() {
             if (tech.isIntangible) {
-                tech.isIntangible = false;
                 player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield //normal collisions
             }
+            tech.isIntangible = false;
         }
     },
     {
