@@ -1,19 +1,40 @@
 ******************************************************** NEXT PATCH **************************************************
 
-right damage bar is a bit shorter
-performance mode now disables
-  animatePowerUpGrab
+new community level vents by Destiny
+
+tech: superelasticity - if you are wall grabbing with nitinol 3x fire rate
+tech: shape-memory - if you are wall grabbing generate 30 energy per second
+tech: sintering - remove 1 gun and gain 1.3x damage and 0.8x damage reduction
+tech: amalgamation - at the start of each level remove 1 gun and gain 3 bots
+tech: austerity - if you don't have a gun at the start of each level gain 1.5x damage
+fieldtech: technical intelligence - 1.5x damage when you take a guntech
+
+new constraint: 0.5x fire rate
+
+Vacuum energy now sets energy to 1x->3x your max energy, with a 50%->33% chance to set energy to 0
+nitinol 0.6->0.5 damage reduction
+repolarization reduces cooldown by 1.25->1.33
+active cooling 1.25->1.35x fire rate, but switched to additive stacking, not multiplicative
+removed bot from several tech names (ersatz bot -> ersatz)
+added simulation.energyGenGraphic() to various energy generation effects
+
 
 bug fixes
-  quantum immortality was getting extra damage reduction
-  issue with getting Lie group multiple times without resetting
-  expanded the trigger zone for the teleport if you get stuck in the map
-  incendiary ammunition + polyurethane foam is now unlocked 
-  fixed several issues related to remove tech variable initialization to null
-    blast ball 
-    beam splitter
+  added mob out of bounds check to reactor
 
 *********************************************************** TODO *****************************************************
+
+!tech: conformal infinity - when your wormhole dissipates(wording) regenerate 50% of the energy you had when the wormhole was produced
+    how?    compare energy on wormhole creation to energy on wormhole dissipation
+  !unwritten
+
+!tech:   - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
+  !unwritten
+
+
+
+consider adding this link to physics notes on power
+  https://news.ycombinator.com/item?id=47579754
 
 add gradients to performance mode
   plasma ball
@@ -42,14 +63,8 @@ replace damage side bar with a number??
   where: red text below field
   changing numbers might get distracting?
 
-tech: - at the end of each level get 40% of current gun's ammo
+tech: - at the end of each level each gun gains 50% of their current ammo
   requires interest
-
-tech:  - at the end of each level if you have no guns....
-  get a bot? 
-  1.2x damage
-
-tech:  - if you have no field get....
 
 try to also allow players to unpause in choosing menu
 
@@ -58,7 +73,7 @@ web lines - putting down lines that last maybe 10-20 seconds that slow and damag
   plasma field tech? maybe when the plasma globe explodes make web lines
   plasma extruder could make lines when it kills a mob?
   wormhole tech? when you teleport you leave a web behind?
-  spore tech? (when sporangium hatch they shoot out a few web lines that slow nearby mobs?
+  spore tech? when sporangium hatch they shoot out a few web lines that slow nearby mobs?
   ***most obvious is grappling hook tech: grappling hook leaves behind web lines
 
 add an HTML input in the tech description(slider or checkbox, dropdown menu,  other inputs)
@@ -88,6 +103,7 @@ new level - ducts
       push less if on ground or crouching or holding block
     graphics?
       draw a line and move it in the direction of wind
+      looking community map vents and spawnStreamer
   tunnels with wind
     change wind direction with button?
       maybe two buttons that alternate the direction like on the map corridor
@@ -97,7 +113,7 @@ new level - ducts
   maybe some spinners that look like fans
 
 filament
-  tech: - filament tip is drawn towards blocks?, power ups?, mobs?
+  tech: - filament tip is pulled towards blocks?, power ups?, mobs?
     and does something good when it touches them
       maybe isoWave360
 
@@ -299,7 +315,7 @@ tech:  - limit the total number of tech
       before or after normal tech UI
       can copy the standard tech UI with a few differences
 
-tech:  - nonrefundable tech that gives you 2 tech that each have minor negative effects
+tech:  - instant tech that gives you 2 tech that each have minor negative effects
   synergy with removing tech builds
   minor negative tech
     lower damage
@@ -310,22 +326,20 @@ tech:  - nonrefundable tech that gives you 2 tech that each have minor negative 
     benefit after removing the negative tech
 
 field tech: - use _____ to refresh current choices  (or give +6 choices for the next 3 tech)
+  use 
+    10 health
   which field? (pick one based on the name)
     pilot wave (choices)
     wormhole? (alt reality)
     time dilation (rewind time)
-  or skin tech
-  use 
-    10 health
-    all your energy 
-      produce a new choice for each 30 energy
+    or skin tech (or skin tech upgrade)
 
 mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
   probably also want to add a force so effects are noticable for stationary mobs
   problem is that mobs all have different airFriction
 
 constraint: remove 10% of your tech until the end of the level
-  does remove then add give any benefits, or lasting effects?
+  what if remove then adding gives a benefits / lasting effects?
 
 mob: weeping angle - spawns long lasting bullets, like seekers, but called weepers
   tier 3
@@ -336,13 +350,6 @@ mob: weepers - bullet
   player can see
     invincible
     frozen/not moving/slow moving?
-
-!conformal infinity - after making a wormhole, subsequent wormholes generate energy 10 energy for the next 5 seconds
-  replace holographic principle?
-  !image
-!quasar  - gain 1 random small power up for each block your wormhole eats
-  cap at 10?
-  !image
 
 !!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
@@ -375,26 +382,10 @@ tech - if you haven't fired a bullet in 4 seconds your next bullet is bigger?
     ephemera?  This doesn't sync to the bullet fired, it would have to be a additional projectiles
     custom to each gun?
 
-option for numerical HUD
-  dmg, energy, health, defense
-
-hold jump to jump much higher
-  field tech?  or skin tech?
-    maybe require nitinol first?
-
 wormhole fieldtech:   - gain 1% duplication for this level each time the wormhole eats a block
   add a limit to the number of blocks that can be duplicated?
   can this be exploited to not be fun?
   how many blocks are on an average level?
-
-tech - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
-  make a new bullet type for rip() in spacetime so you can use it for several things
-  rips()
-    lasts 2-10 seconds?
-    damages mobs and player
-    slows things caught inside?
-    black circle with randomly changing radius and sparkles inside the black circle
-      white stroke (maybe with dotted lines like laser)
 
 tech - benefit if you haven't killed any mobs on this level
   have to clean up mobs that die on level spawn from falling blocks 
@@ -1542,15 +1533,13 @@ possible names for tech
   Josephson junction - superconducting junction used in SQUIDS and quantum computers
   nuclear pasta - hard matter in neutron star
   spaghettification
-  fine-tuned universe
   nonperturbative
   D-branes
   instanton or pseudoparticle
   soliton  (wave packet)
-  hall effect thrusters
+  hall effect thrusters (related to magnetism)
   particle accelerator
   superluminal signalling
-  NP-complete
   lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
   p-hacking JUNK tech
   https://en.wikipedia.org/wiki/High-entropy_alloys  high yield strength and low ductility, high temp resistance
@@ -1573,10 +1562,8 @@ possible names for tech
   radioisotope thermoelectric generator - 
   retrovirus: these things make JUNK DNA so link it somehow to that tech?
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
-  amalgam, amalgamation - the action, process, or result of combining or uniting. 
   thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
   ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
-  Casimir effect - attractive force between two close conductive plates
   difference engine - early calculator/computer
   cyanoacrylate - superglue use for a slowing effect?
   math terms - integral, derivative, Laplace transform, inflection point
@@ -1588,18 +1575,16 @@ possible names for tech
   metaphysics - maybe this changes something deep and universal about physics?  not sure
   cork - used as a heat shield for rockets
   P = NP - something with speeding up calculation times
+  NP-complete
   transistivity - something where a>b and b>c ->  a>c
   lenticular - looks different from different angles (lasers?, cloaking?)
     every few seconds pick a random skin tech?
   De Sitter space - simple model of universe related to general relativity (mass-energy?)
   active optics - something with lasers?  maybe something with diffuse beam getting smaller
-  quintessence - related to dark energy
   biofilm - something defensive?  related to spores?
   thermogalvanic - makes things cold, for no energy
   intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
-  virtual particles - can have these properties: imaginary mass, violation of the conservation of energy, violation of causality, traveling faster than light or backwards in time, popping in and out of the vacuum via vacuum fluctuations
-  Sintering - the process of compacting and forming a solid mass of material by pressure[1] or heat[2] without melting it to the point of liquefaction. Sintering happens as part of a manufacturing process used with metals, ceramics, plastics, 
-  Kolmogorov complexity - how long a computer program for an algorithm is
+  Kolmogorov complexity - how long the computer program code for an algorithm is, related to entropy?
   r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
   acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
   gravity wave - 
@@ -1608,6 +1593,7 @@ possible names for tech
   renormalization
   fractal dimension - maybe for surface area?
   self-locating uncertainty - something related to anthropic principle, or many worlds
+  fine-tuned universe
   ontic - real (maybe something with research)
   epistemic - knowledge about whats real, but not strictly real... (maybe something with research)
 

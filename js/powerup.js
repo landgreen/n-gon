@@ -753,10 +753,11 @@ const powerUps = {
         },
         random() {
             if (tech.isCasimirRandom) {
-                if (Math.random() < 0.5) {
+                if (Math.random() < 0.33) {
                     m.energy = 0.001
                 } else if (m.energy < m.maxEnergy) {
-                    m.energy = m.maxEnergy
+                    m.energy = m.maxEnergy * 3
+                    for (let i = 0; i < 4; i++)simulation.energyGenGraphic()
                 }
             }
         },
@@ -1655,9 +1656,11 @@ const powerUps = {
                     simulation.timePlayerSkip(15)
                     simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
                     m.energy += 2 * level.isReducedRegen;
+                    for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
                 }); //wrapping in animation frame prevents errors, probably
             } else {
                 m.energy += 2 * level.isReducedRegen;
+                for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
             }
         }
         if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
@@ -1927,7 +1930,10 @@ const powerUps = {
             if (!level.isNextLevelPowerUps && Math.random() < tech.duplicationChance()) {
                 powerUps.directSpawn(x, y, name, moving, size, true)
                 powerUp[powerUp.length - 1].isDuplicated = true
-                if (tech.isDupEnergy) m.energy *= 2
+                if (tech.isDupEnergy) {
+                    m.energy *= 2
+                    for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
+                }
             }
         }
     },

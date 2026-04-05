@@ -641,6 +641,26 @@ const simulation = {
     restoreCamera() {
         ctx.restore();
     },
+    energyGenGraphic(totalCycles = 10 + Math.floor(Math.random() * 20)) {
+        //energy generation animation
+        if (!localSettings.isHideHUD) {
+            simulation.ephemera.push({
+                where: { x: m.pos.x + 45 * (Math.random() - 0.5), y: m.pos.y + Math.random() * 100 },
+                count: totalCycles,
+                r: 1.5 + 3 * Math.random(),
+                do() {
+                    this.count--
+                    if (this.count < 0) simulation.removeEphemera(this)
+                    this.where.y -= 3
+
+                    ctx.beginPath();
+                    ctx.arc(this.where.x, this.where.y, this.r, 0, 2 * Math.PI);
+                    ctx.fillStyle = m.fieldMeterColor
+                    ctx.fill();
+                },
+            })
+        }
+    },
     trails(swapPeriod = 150) {
         // const swapPeriod = 150
         const len = 30
@@ -1021,25 +1041,13 @@ const simulation = {
                     if (m.lastKillCycle + 300 > m.cycle) { //effects active for 5 seconds after killing a mob
                         if (tech.isEnergyRecovery && m.immuneCycle < m.cycle) {
                             m.energy += m.maxEnergy * 0.05 * level.isReducedRegen
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: m.pos.x,
-                                y: m.pos.y - 45,
-                                radius: Math.sqrt(m.maxEnergy * 0.05) * 60,
-                                color: "rgba(0, 204, 255,0.4)", //#0cf
-                                time: 4
-                            });
+                            for (let i = 0; i < 2; i++)simulation.energyGenGraphic()
                         }
                         if (tech.isHealthRecovery) {
                             if (tech.isEnergyHealth) {
                                 if (m.immuneCycle < m.cycle) {
                                     m.energy += m.maxEnergy * 0.005 * level.isReducedRegen
-                                    simulation.drawList.push({ //add dmg to draw queue
-                                        x: m.pos.x,
-                                        y: m.pos.y,
-                                        radius: Math.sqrt(m.maxEnergy * 0.02) * 60,
-                                        color: "rgba(0, 204, 255,0.4)", //#0cf
-                                        time: 4
-                                    });
+                                    simulation.energyGenGraphic()
                                 }
                             } else {
                                 const heal = 0.005 * m.maxHealth
@@ -1188,6 +1196,7 @@ const simulation = {
                         if (tech.isMutualism && this.isMutualismActive) {
                             if (tech.isEnergyHealth) {
                                 m.energy += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
+                                simulation.energyGenGraphic()
                             } else {
                                 m.health += 0.01 + 0.01 * ((bullet[i].isSpore || bullet[i].isFlea) ? 0 : 1)
                                 if (m.health > m.maxHealth) m.health = m.maxHealth;

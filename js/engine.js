@@ -200,7 +200,10 @@ function collisionChecks(event) {
                             simulation.trails(90)
                             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
-                        if (tech.isPiezo) m.energy += 20.48 * level.isReducedRegen;
+                        if (tech.isPiezo) {
+                            m.energy += 20.48 * level.isReducedRegen;
+                            for (let i = 0; i < 9; i++)simulation.energyGenGraphic()
+                        }
                         if (tech.isExplodeContact) b.explosion(m.pos, 450);
 
                         if (tech.isCouplingNoHit && m.coupling > 0) {

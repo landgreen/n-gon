@@ -1112,7 +1112,10 @@ const mobs = {
                         if (tech.energySiphon && this.isDropPowerUp && m.immuneCycle < m.cycle) {
                             //dmg !== Infinity &&
                             const regen = Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
-                            if (!isNaN(regen) && regen !== Infinity) m.energy += regen
+                            if (!isNaN(regen) && regen !== Infinity) {
+                                m.energy += regen
+                                simulation.energyGenGraphic(5 + Math.floor(500 * regen))
+                            }
                         }
                         dmg /= Math.sqrt(this.mass)
                     }

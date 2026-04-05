@@ -368,7 +368,10 @@ const spawn = {
                         ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
-                        if (tech.isDarkEnergy) m.energy += 0.00255 * scale
+                        if (tech.isDarkEnergy) {
+                            m.energy += 0.00255 * scale
+                            if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
+                        }
                     }
                 } else {
                     if (mag < this.radius) { //buff to player when inside radius
@@ -379,7 +382,10 @@ const spawn = {
                         ctx.arc(m.pos.x, m.pos.y, 36 * player.scale, 0, 2 * Math.PI);
                         ctx.lineWidth = 10;
                         ctx.stroke();
-                        if (tech.isDarkEnergy) m.energy += 0.00255 * scale
+                        if (tech.isDarkEnergy) {
+                            m.energy += 0.00255 * scale
+                            if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
+                        }
                     } else {
                         tech.isHarmDarkMatter = false;
                     }
