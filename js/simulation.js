@@ -348,15 +348,18 @@ const simulation = {
     },
     lastLogTime: 0,
     isTextLogOpen: true,
+    consoleLength: 0,
     inGameConsole(text, time = 240) {
         if (!localSettings.isHideHUD && simulation.isTextLogOpen && !build.isExperimentSelection) {
-            if (simulation.lastLogTime > m.cycle) { //if there is an older message
+            if (simulation.lastLogTime > m.cycle && simulation.consoleLength < 30) { //if there is an older message
                 document.getElementById("text-log").innerHTML = document.getElementById("text-log").innerHTML + '<br>' + text;
                 simulation.lastLogTime = m.cycle + time;
+                simulation.consoleLength++
             } else {
                 document.getElementById("text-log").innerHTML = text;
                 document.getElementById("text-log").style.display = "inline";
                 simulation.lastLogTime = m.cycle + time;
+                simulation.consoleLength = 0
             }
         }
     },

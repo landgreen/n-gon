@@ -1113,8 +1113,9 @@ const mobs = {
                             //dmg !== Infinity &&
                             const regen = Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
                             if (!isNaN(regen) && regen !== Infinity) {
-                                m.energy += regen
-                                simulation.energyGenGraphic(5 + Math.floor(500 * regen))
+                                m.energy += regen //max regen is 0.04 with one stack of tech.energySiphon
+                                console.log(regen)
+                                simulation.energyGenGraphic(3 + Math.min(20, Math.floor(400 * regen)))
                             }
                         }
                         dmg /= Math.sqrt(this.mass)

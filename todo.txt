@@ -1,26 +1,16 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community level vents by Destiny
+tech: seismic wave -  after hard landings generate isotropic waves that stun and damage mobs
+acoustic levitation no longer gives 0.7x damage reduction
+  but it has isotropic waves coming form your feet
 
-tech: superelasticity - if you are wall grabbing with nitinol 3x fire rate
-tech: shape-memory - if you are wall grabbing generate 30 energy per second
-tech: sintering - remove 1 gun and gain 1.3x damage and 0.8x damage reduction
-tech: amalgamation - at the start of each level remove 1 gun and gain 3 bots
-tech: austerity - if you don't have a gun at the start of each level gain 1.5x damage
-fieldtech: technical intelligence - 1.5x damage when you take a guntech
-
-new constraint: 0.5x fire rate
-
-Vacuum energy now sets energy to 1x->3x your max energy, with a 50%->33% chance to set energy to 0
-nitinol 0.6->0.5 damage reduction
-repolarization reduces cooldown by 1.25->1.33
-active cooling 1.25->1.35x fire rate, but switched to additive stacking, not multiplicative
-removed bot from several tech names (ersatz bot -> ersatz)
-added simulation.energyGenGraphic() to various energy generation effects
-
+inGameConsole will wipe after 100 messages to reduce lag
+superelasticity renamed pseudoelasticity
 
 bug fixes
-  added mob out of bounds check to reactor
+  0.5x -> half fire rate for constraint text
+    in level text can't do numbers
+  added vents to custom map list
 
 *********************************************************** TODO *****************************************************
 
@@ -30,6 +20,15 @@ bug fixes
 
 !tech:   - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
   !unwritten
+
+
+!switch normal mode to something not involving 360 waves
+  each "head" has a different effect
+    line - laser
+      reflections?
+    dot - neutron bomb-like AoE
+  remove requirements for wave upgrades from normal mode
+  maybe just add another eigen tech and don't remove normal mode
 
 
 
@@ -111,6 +110,10 @@ new level - ducts
       player needs to press buttons to switch the furnace off
         but it only stays off for a short time
   maybe some spinners that look like fans
+  a very large number of buttons
+    pressing all the buttons unlocks something?
+    buttons are scatter around on wall, ceiling, floor
+      rewrite button code to have any angle?
 
 filament
   tech: - filament tip is pulled towards blocks?, power ups?, mobs?

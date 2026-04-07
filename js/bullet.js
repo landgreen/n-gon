@@ -3128,7 +3128,7 @@ const b = {
         }
     },
 
-    isoWave360Solo(where, end = 500 * Math.sqrt(tech.bulletsLastLonger), cd = 0) {//fire one 360 circular wave at a time,   the gun uses a more efficient method for firing several at a time
+    isoWave360Solo(where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0) {//fire one 360 circular wave at a time,   the gun uses a more efficient method for firing several at a time
         simulation.ephemera.push({
             position: where,
             radius: 25,
@@ -3137,7 +3137,7 @@ const b = {
             phononWaveCD: cd,
             do() {
                 if (!m.isTimeDilated && m.cycle % 2) {
-                    ctx.strokeStyle = "rgb(0,40,50)" //"000";
+                    ctx.strokeStyle = "rgb(0,20,20)" //"000";
                     ctx.lineWidth = 2 * tech.wavePacketDamage
                     ctx.beginPath();
                     ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
@@ -3167,13 +3167,16 @@ const b = {
                                     ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
                                 }
                                 //damage
+                                let damage = 2 * 2.3 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                                if (tech.isFallWave) {
+                                    mobs.statusStun(mob[j], 180)
+                                }
                                 mob[j].locatePlayer();
-                                const damage = 2 * 2.3 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) * (tech.isInfiniteWaveAmmo ? 0.75 : 1) //damage is lower for large radius mobs, since they feel the waves longer
                                 mob[j].damage(damage / Math.sqrt(mob[j].radius));
 
                                 if (tech.isPhononWave && this.phononWaveCD < m.cycle) {
                                     this.phononWaveCD = m.cycle + 50
-                                    b.isoWave360Solo(mob[j].position, 500 * Math.sqrt(tech.bulletsLastLonger), this.phononWaveCD)
+                                    b.isoWave360Solo(mob[j].position, 500 * Math.sqrt(tech.bulletsLastLonger), speed, this.phononWaveCD)
                                 }
                             }
                         }
@@ -3206,7 +3209,7 @@ const b = {
                         }
                     }
 
-                    this.radius += 2 * 0.8 * tech.waveBeamSpeed //expand / move
+                    this.radius += speed
                     if (this.radius > this.end - 30 * this.resonanceCount) { //* Math.pow(0.9, this.waves[i].resonanceCount)
                         simulation.removeEphemera(this)
                     }

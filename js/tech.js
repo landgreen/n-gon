@@ -386,6 +386,26 @@ const tech = {
         }
     },
     {
+        name: "seismic wave",
+        descriptionFunction() {
+            return `<strong>tungsten's</strong> hard <strong>landings</strong> generate isotropic<br><strong>phonon</strong> waves that <strong>stun</strong> and <strong class='color-d'>damage</strong> mobs`
+        },
+        maxCount: 3,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        allowed() {
+            return tech.isFallingDamage
+        },
+        requires: "tungsten carbide",
+        effect() {
+            tech.isFallWave = true
+        },
+        remove() {
+            tech.isFallWave = false
+        }
+    },
+    {
         name: "nitinol",
         description: `<span style='font-size:92%;'><strong>wall grab</strong>, <strong>1.3x</strong> <strong class="color-speed">movement</strong>, <strong>0.5x</strong> <strong class='color-defense'>damage taken</strong></span><br>+<strong>0.2</strong> seconds <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>`,
         maxCount: 1,
@@ -433,7 +453,7 @@ const tech = {
         }
     },
     {
-        name: "superelasticity",
+        name: "pseudoelasticity",
         descriptionFunction() {
             //<br><em style ='float: right;'>(currently ${m.ledgeCoyote === 0 ? "<strong>not</strong>" : ""} wall grabbing)</em>
             return `<strong>3x</strong> <em>fire rate</em> while <strong>wall grabbing</strong> with <strong>nitinol</strong>`
@@ -575,7 +595,7 @@ const tech = {
     },
     {
         name: "acoustic levitation",
-        description: "<strong>0.7x</strong> <strong class='color-defense'>damage taken</strong><br><strong>+2</strong> seconds of <strong>coyote time</strong> <em style ='float: right;'>(jumping after falling)</em>",
+        description: "<strong>Higgs</strong> generates isotropic <strong>phonon</strong> waves<br>you can <strong>jump</strong> from for <strong>+2</strong> seconds after falling",
         maxCount: 3,
         count: 0,
         frequency: 3,
@@ -587,13 +607,13 @@ const tech = {
         effect() {
             tech.isCoyote = true
             m.coyoteCycles += 120 //adjust this 120 value in mech() skin
-            m.damageReduction *= 0.7
+            // m.damageReduction *= 0.7
         },
         remove() {
             tech.isCoyote = false
             if (this.count > 0) {
                 for (let i = 0; i < this.count; i++) {
-                    m.damageReduction /= 0.7
+                    // m.damageReduction /= 0.7
                     m.coyoteCycles -= 120 * this.count
                 }
                 if (m.coyoteCycles < 5) m.coyoteCycles = 5
@@ -1040,7 +1060,7 @@ const tech = {
         allowed() {
             return (b.inventory.length < b.guns.length - 5) && b.inventory.length > 1
         },
-        requires: "you have at least 2 guns and 5 unclaimed guns",
+        requires: "at least 2 guns and 5 unclaimed guns",
         effect() {
             tech.isGunCycle = true;
             for (let i = 0; i < 7; i++) powerUps.spawn(m.pos.x + 10 * Math.random(), m.pos.y + 10 * Math.random(), "gun");
@@ -1074,10 +1094,11 @@ const tech = {
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
+        isBotTech: true,
         allowed() {
             return b.inventory.length
         },
-        requires: "you have at least 1 gun",
+        requires: "at least 1 gun",
         effect() {
             tech.isAmalgam = true
         },
@@ -1096,7 +1117,7 @@ const tech = {
         allowed() {
             return b.inventory.length > 0
         },
-        requires: "you have at least 1 gun",
+        requires: "at least 1 gun",
         effect() {
             if (b.inventory.length > 0) {
                 b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name)
@@ -6999,7 +7020,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
+            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || tech.isFirstHarmonic || tech.isCoyote
         },
         requires: "wave",
         effect() {
@@ -7020,7 +7041,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
+            return tech.haveGunCheck("wave") || tech.isSoundBotUpgrade || tech.isFirstHarmonic || tech.isCoyote
         },
         requires: "wave",
         effect() {
@@ -7146,7 +7167,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
+            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || tech.isFirstHarmonic || tech.isCoyote
         },
         requires: "wave, phonon",
         effect() {
@@ -7165,7 +7186,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || (tech.isFirstHarmonic)
+            return (tech.isLongitudinal && tech.haveGunCheck("wave")) || tech.isSoundBotUpgrade || tech.isFirstHarmonic || tech.isCoyote
         },
         requires: "wave, phonon",
         effect() {

@@ -115,14 +115,36 @@ function playerOnGroundCheck(event) {
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)
                     // m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(0.2 * momentum - 7.5, 60)
+                    if (tech.isFallWave && momentum < 150) {
+                        simulation.ephemera.push({
+                            count: Math.floor(0.13 * m.hardLandCDScale * (momentum / 6.5 - 6)), //cycles before it self removes
+                            where: { x: m.pos.x, y: m.pos.y + 140 },
+                            do() {
+                                this.count--
+                                if (this.count < 0) simulation.removeEphemera(this)
+                                b.isoWave360Solo(this.where, 400 * Math.sqrt(tech.bulletsLastLonger))
+                            },
+                        })
+                    }
                 } else {
                     m.yOffGoal = m.yOffWhen.stand;
                 }
                 //falling damage
                 if (tech.isFallingDamage && m.immuneCycle < m.cycle && momentum > 150) {
                     // m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.02, 0.4) * spawn.dmgToPlayerByLevelsCleared());
-                    m.takeDamage(Math.min(Math.sqrt(momentum - 100) * 0.04, 0.8));
-                    // m.takeDamage(20);
+                    const dmg = Math.min(Math.sqrt(momentum - 100) * 0.04, 0.8)
+                    m.takeDamage(dmg);
+                    if (tech.isFallWave) {
+                        simulation.ephemera.push({
+                            count: Math.floor(0.13 * m.hardLandCDScale * (momentum / 6.5 - 6)), //cycles before it self removes
+                            where: { x: m.pos.x, y: m.pos.y + 140 },
+                            do() {
+                                this.count--
+                                if (this.count < 0) simulation.removeEphemera(this)
+                                b.isoWave360Solo(this.where, 4000 * Math.sqrt(tech.bulletsLastLonger))
+                            },
+                        })
+                    }
                     if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
                 }
             }
