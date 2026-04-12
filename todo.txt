@@ -1,18 +1,29 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: seismic wave -  after hard landings generate isotropic waves that stun and damage mobs
-acoustic levitation no longer gives 0.7x damage reduction
-  but it has isotropic waves coming form your feet
+tech: Grand Unified Theory - fields and guns are quadrupled into 4 coupling and coupling is automatically duplicated
+  requires field emitter, but you can still get a field with "cross-disciplinary" or removal tech
+tech: Banach space - spawn small power ups and random bullets after entering an alternate reality
+tech: barycenter - after Verlet integration advances time build a scrap orbital-bot that lasts 22 seconds
+tech: Klemperer rosette - build 3 orbital-bots for 2 research
+tech: conchoidal - 1.04x damage after killing a mob, effect resets after colliding with a mob
+tech: dividend - at the end of each level spawn ammo power ups equal to 50% of average ammo for your guns
+  requires interest
 
-inGameConsole will wipe after 100 messages to reduce lag
-superelasticity renamed pseudoelasticity
+technical intelligence gives 2x frequency of gunTech, 1.5->1.4x damage
+antiscience ejects before killing you, 1.7->1.6 damage
+on screen power up cap 300->200
 
 bug fixes
-  0.5x -> half fire rate for constraint text
-    in level text can't do numbers
-  added vents to custom map list
-
+  fixed issue with spalling not triggering on mobs that drop power ups
+  seismic wave shouldn't stack to 3x, set to 1x stack max
+  fixed bug with "Casimir" having old name "energy" for some situations
+  adjusted gun ammo prediction text (was 2x too high)
+  removed powerUp[powerUp.length - 1].isDuplicated = true (this might cause errors)
+  
 *********************************************************** TODO *****************************************************
+
+field emitter coupling effects (compared to normal fields)
+  100% block damage, 100% bonus ammo, 50% iceIX deflection, 33% dmg reduction, 33% energy regen, 20% max energy, 10% dmg
 
 !tech: conformal infinity - when your wormhole dissipates(wording) regenerate 50% of the energy you had when the wormhole was produced
     how?    compare energy on wormhole creation to energy on wormhole dissipation
@@ -30,10 +41,6 @@ bug fixes
   remove requirements for wave upgrades from normal mode
   maybe just add another eigen tech and don't remove normal mode
 
-
-
-consider adding this link to physics notes on power
-  https://news.ycombinator.com/item?id=47579754
 
 add gradients to performance mode
   plasma ball
@@ -57,13 +64,16 @@ sort text input is broken in pause menu
     bot tech
     JUNK
   
+tech: - upgrade for diffuse beam that slowing rotates each laser beam to fire at different angles
+  and maybe gives 3 more beams
 
 replace damage side bar with a number??
   where: red text below field
   changing numbers might get distracting?
 
-tech: - at the end of each level each gun gains 50% of their current ammo
-  requires interest
+upgrade missile guidance to improve missile speed and aiming while targeting
+  and damage for direct hits?
+  not get extra ammo
 
 try to also allow players to unpause in choosing menu
 

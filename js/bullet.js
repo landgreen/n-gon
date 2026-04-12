@@ -289,9 +289,7 @@ const b = {
         b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.slowFireDamage * tech.fastTimeFire
         if (level.isSlowFireRate) b.fireCDscale *= 2
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
-        if (tech.isGrabFireRate && m.ledgeCoyote !== 0) {
-            b.fireCDscale *= 0.33
-        }
+        if (tech.isGrabFireRate && m.ledgeCoyote !== 0) b.fireCDscale *= 0.33
         if (tech.isFireRateForGuns) b.fireCDscale *= 1 / (1 + 0.35 * Math.max(0, b.inventory.length - 1)) //CDscale = 1 / (1 + (0.3 * count)); // Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
         if (tech.isFireMoveLock) b.fireCDscale *= 0.33
     },
@@ -1925,7 +1923,7 @@ const b = {
                     })
                 }
                 if (tech.isBreakHarpoon && Math.random() < 0.1 && !who.isInvulnerable) {
-                    if (tech.isBreakHarpoonGain && !who.isDropPowerUp) {
+                    if (tech.isBreakHarpoonGain && who.isDropPowerUp) {
                         powerUps.spawn(m.pos.x, m.pos.y - 50, "research");
                         powerUps.spawn(m.pos.x - 20, m.pos.y + 15, "research");
                         powerUps.spawn(m.pos.x + 20, m.pos.y + 15, "boost");
@@ -5853,7 +5851,7 @@ const b = {
             name: "nail gun", // 0
             // description: `use compressed air to shoot a stream of <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>60</strong> nails per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `use compressed air to rapidly drive <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>${this.ammoPack.toFixed(0)}</strong> nails per ${powerUps.orb.ammo()}`
+                return `use compressed air to rapidly drive <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> nails per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 27,
@@ -6168,7 +6166,7 @@ const b = {
             name: "shotgun", //1
             // description: `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>with a low <strong><em>fire rate</em></strong><br><strong>3-4</strong> nails per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `fire a wide <strong>burst</strong> of short range <strong>pellets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
+                return `fire a wide <strong>burst</strong> of short range <strong>pellets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 1.6,
@@ -6492,7 +6490,7 @@ const b = {
         }, {
             name: "super balls", //2
             descriptionFunction() {
-                return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong>, <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
+                return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong>, <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 4.05,
@@ -6578,7 +6576,7 @@ const b = {
             name: "wave", //3
             // description: `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>115</strong> packets per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `emit <strong>wave packets</strong> that propagate in <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>${this.ammoPack.toFixed(0)}</strong> wave packets per ${powerUps.orb.ammo()}`
+                return `emit <strong>wave packets</strong> that propagate in <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> wave packets per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 60,
@@ -6939,7 +6937,7 @@ const b = {
             name: "missiles", //6
             // description: `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>5</strong> missiles per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>${this.ammoPack.toFixed(1)}</strong> missiles per ${powerUps.orb.ammo()}`
+                return `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> missiles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 2.3,
@@ -7038,7 +7036,7 @@ const b = {
             name: "grenades", //5
             // description: `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second<br><strong>7</strong> grenades per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after <strong>1.5</strong> seconds<br><strong>${this.ammoPack.toFixed(0)}</strong> grenades per ${powerUps.orb.ammo()}`
+                return `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after <strong>1.5</strong> seconds<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> grenades per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 3.2,
@@ -7063,7 +7061,7 @@ const b = {
             name: "spores", //6
             // description: `toss a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs<br><strong>2-3</strong> sporangium per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `toss <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges ${b.guns[6].nameString("s")}<br>${b.guns[6].nameString("s")} seek out nearby mobs<br><strong>${this.ammoPack.toFixed(1)}</strong> sporangium per ${powerUps.orb.ammo()}`
+                return `toss <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges ${b.guns[6].nameString("s")}<br>${b.guns[6].nameString("s")} seek out nearby mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> sporangium per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 1.22,
@@ -7278,7 +7276,7 @@ const b = {
         }, {
             name: "drones", //7
             descriptionFunction() {
-                return `deploy <strong>drones</strong> that smash into mobs<br>drones <strong>collect</strong> nearby power ups<br><strong>${this.ammoPack.toFixed(0)}</strong> drones per ${powerUps.orb.ammo()}`
+                return `deploy <strong>drones</strong> that smash into mobs<br>drones <strong>collect</strong> nearby power ups<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> drones per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 7.8,
@@ -7320,7 +7318,7 @@ const b = {
         {
             name: "foam", //8
             descriptionFunction() {
-                return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>${this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
+                return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 12.6,
@@ -7445,7 +7443,7 @@ const b = {
             name: "harpoon", //9
             // description: `throw a <strong>self-steering</strong> harpoon that uses <strong class='color-f'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost<br><strong>1-2</strong> harpoons per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `throw a <strong>harpoon</strong> that uses <strong class='color-f'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
+                return `throw a <strong>harpoon</strong> that uses <strong class='color-f'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
             },
             harpoonName() {
                 return "<strong>" + (tech.isMaul ? "maul" : (tech.isRebar ? "rebar" : "harpoon")) + "</strong>"
@@ -7752,7 +7750,7 @@ const b = {
             name: "mine", //10
             // description: `toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> a level<br><strong>1-2</strong> mines per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> level<br><strong>${this.ammoPack.toFixed(1)}</strong> mines per ${powerUps.orb.ammo()}`
+                return `toss a <strong>proximity</strong> mine that <strong>sticks</strong> to walls<br>refund <strong>undetonated</strong> mines on <strong>exiting</strong> level<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> mines per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 0.77,

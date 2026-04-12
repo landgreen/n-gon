@@ -515,6 +515,8 @@ const spawn = {
         me.nextHealthThreshold = 0.999
         me.invulnerableCount = 0
         me.isInvulnerable = false
+        // me.isDropPowerUp = true
+        console.log(me.isDropPowerUp)
         me.totalModes = 0
         me.lastDamageCycle = 0
         me.onDamage = function () {

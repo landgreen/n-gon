@@ -34,7 +34,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(100)
             // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(6) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = m.maxEnergy = 12.2
             // m.energy += 1
             // m.couplingChange(1000)
@@ -54,17 +54,17 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(3) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns(2)
             // b.giveGuns(5)
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // for (let i = 0; i < 1; ++i) tech.giveTech("tungsten carbide")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("seismic wave")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("acoustic levitation")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
-            // for (let i = 0; i < 1; i++) tech.giveTech("conformal infinity")
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("sintering") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Grand Unified Theory") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("barycenter")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Verlet integration")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Klemperer rosette")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("generalist")
+            // for (let i = 0; i < 1; i++) tech.giveTech("Banach space")
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
@@ -75,11 +75,11 @@ const level = {
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-            // requestAnimationFrame(() => { powerUps.spawnDelay("Casimir", 100); });
+            // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 30); });
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
-            // for (let i = 0; i < 100; i++) spawn.starter(1300 + 10 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.kingSnakeBoss(2300 + 200 * i, -200)
+            // for (let i = 0; i < 10; i++) spawn.starter(1300 + 10 * i, -200)
+            // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // m.storeTech() //sets entanglement
             // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -204,9 +204,9 @@ const level = {
             }
         }
         if (tech.isEigenstate) m.eigen.reset()
+
         level.newLevelOrPhase()
         if (tech.isDigitalPet) {
-
             for (let i = 0, len = simulation.ephemera.length; i < len; i++) {
                 if (simulation.ephemera[i].name === 'tamagotchi') {
                     simulation.inGameConsole(`digital pet report:`);
@@ -335,6 +335,26 @@ const level = {
             // powerUps.spawn(m.pos.x, m.pos.y, "heal", true, null, Math.max(0.25, overHeal) * 40 * (simulation.healScale ** 0.25))
             // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
             // simulation.inGameConsole(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
+        }
+        if (tech.interestRateGuns) {
+            let rate = tech.interestRateGuns
+            if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
+                const levelName = level.levels[level.onLevel]
+                if (levelName === "final") rate *= 1 / 5
+            }
+            if (rate > 0) {
+                let a = 0
+                for (let i = 0; i < b.inventory.length; i++) {
+                    const gun = b.guns[b.inventory[i]]
+                    let ratio = gun.ammo / gun.ammoPack
+                    if (Number.isFinite(ratio)) a += ratio
+                }
+                //     actual code that determines ammo you get from ammo power ups        name.ammo += Math.ceil(2 * (Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo)
+                a *= rate / b.inventory.length / 2
+                a = Math.ceil(a)
+                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-ammo'>ammo</span> <span class='color-symbol'>=</span> ${powerUps.orb.ammo(1)}`)
+                powerUps.spawnDelay("ammo", a, 4);
+            }
         }
         if (tech.isEjectOld) {
             let index = null //find oldest tech that you have

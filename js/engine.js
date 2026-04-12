@@ -115,7 +115,7 @@ function playerOnGroundCheck(event) {
                     m.yOff = m.yOffWhen.jump;
                     m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(momentum / 6.5 - 6, 40)
                     // m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(0.2 * momentum - 7.5, 60)
-                    if (tech.isFallWave && momentum < 150) {
+                    if (tech.isFallWave && tech.isFallingDamage && momentum < 150) {
                         simulation.ephemera.push({
                             count: Math.floor(0.13 * m.hardLandCDScale * (momentum / 6.5 - 6)), //cycles before it self removes
                             where: { x: m.pos.x, y: m.pos.y + 140 },
@@ -226,7 +226,10 @@ function collisionChecks(event) {
                             m.energy += 20.48 * level.isReducedRegen;
                             for (let i = 0; i < 9; i++)simulation.energyGenGraphic()
                         }
-                        if (tech.isExplodeContact) b.explosion(m.pos, 450);
+                        if (tech.isConchoidal) {
+                            m.damageDone /= tech.conchoidalDamage
+                            tech.conchoidalDamage = 1
+                        }
 
                         if (tech.isCouplingNoHit && m.coupling > 0) {
                             m.couplingChange(-3)

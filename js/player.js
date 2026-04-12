@@ -331,15 +331,21 @@ const m = {
     switchWorlds(giveTech = "") {
         if (!m.isSwitchingWorlds) {
             let totalTech = 0;
+            const addBack = []
             for (let i = tech.tech.length - 1; i > -1; i--) {
-                if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isNonRefundable && !tech.tech[i].isAltRealityTech) {
-                    totalTech += tech.tech[i].count
+                if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isNonRefundable) {
+                    if (tech.tech[i].isAltRealityTech) {
+                        addBack.push(tech.tech[i].name)
+                    } else {
+                        totalTech += tech.tech[i].count
+                    }
                 }
             }
             powerUps.boost.endCycle = 0
             simulation.isTextLogOpen = false; //prevent console spam
             tech.resetAllTech()
-            if (giveTech) tech.giveTech(giveTech) //give many worlds back
+            // if (giveTech) tech.giveTech(giveTech) //give many worlds back
+            for (let i = 0; i < addBack.length; i++) tech.giveTech(addBack[i])
 
             //remove all bullets
             for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
@@ -380,7 +386,7 @@ const m = {
                         totalTech--
                         let options = [];
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk) {
+                            if ((tech.tech[i].count < tech.tech[i].maxCount) && tech.tech[i].allowed() && !tech.tech[i].isBadRandomOption && !tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isAltRealityTech) {
                                 for (let j = 0; j < tech.tech[i].frequency; j++) options.push(i);
                             }
                         }
@@ -397,6 +403,52 @@ const m = {
             }
             requestAnimationFrame(loop);
 
+            if (tech.isAltRealitySpawn) {
+                // powerUps.spawn(m.pos.x - 10, m.pos.y, powerUps.healGiveMaxEnergy ? "Casimir" : "heal", false)
+                powerUps.spawn(m.pos.x - 20, m.pos.y, "boost", false)
+                powerUps.spawn(m.pos.x - 10, m.pos.y, "coupling", false)
+                powerUps.spawn(m.pos.x, m.pos.y, tech.isBoostReplaceAmmo ? "boost" : "ammo", false)
+                powerUps.spawn(m.pos.x + 10, m.pos.y, "research", false)
+                powerUps.spawn(m.pos.x + 20, m.pos.y, "Casimir", false)
+                //random bullets
+
+                const where = m.pos
+                const things = [
+                    () => { //spore
+                        b.spore(where)
+                    },
+                    () => { //worm
+                        b.worm(where)
+                    },
+                    () => { //flea
+                        const speed = 10 + 5 * Math.random()
+                        const angle = 2 * Math.PI * Math.random()
+                        b.flea(where, {
+                            x: speed * Math.cos(angle),
+                            y: speed * Math.sin(angle)
+                        })
+                    },
+                    () => { // drones
+                        b.drone(where)
+                    },
+                    () => { // ice IX
+                        b.iceIX(1, Math.random() * 2 * Math.PI, where)
+                    },
+                    () => { //missile
+                        b.missile(where, -Math.PI / 2 + 0.5 * (Math.random() - 0.5), 0, 1)
+                    },
+                    () => { //super ball
+                        const speed = 36
+                        const angle = 2 * Math.PI * Math.random()
+                        b.superBall(where, {
+                            x: speed * Math.cos(angle),
+                            y: speed * Math.sin(angle)
+                        }, 11 * tech.bulletSize)
+                    },
+                ]
+                for (let i = 0; i < 5; i++) things[Math.floor(Math.random() * things.length)]()
+
+            }
             b.respawnBots();
             // for (let i = 0; i < randomBotCount; i++) b.randomBot()
             simulation.makeGunHUD(); //update gun HUD
@@ -3965,7 +4017,7 @@ const m = {
                         tech.tokamakHealCount++
                         let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
                         if (powerUps.healGiveMaxEnergy) {
-                            powerUps.spawn(m.pos.x, m.pos.y, "energy", true);
+                            powerUps.spawn(m.pos.x, m.pos.y, "Casimir", true);
                         } else {
                             powerUps.spawn(m.pos.x, m.pos.y, "heal", true, massScale * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)))  //    spawn(x, y, target, moving = true, mode = null, size = powerUps[target].size()) {
                         }
@@ -4526,7 +4578,7 @@ const m = {
     couplingDescription(couple = m.coupling) {
         switch (m.fieldMode) {
             case 0: //field emitter
-                return `<strong>all</strong> effects`
+                return `<strong>all</strong> applicable effects`
             case 1: //standing wave
                 // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
                 return `+${(couple * 5).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
