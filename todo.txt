@@ -1,26 +1,62 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: Grand Unified Theory - fields and guns are quadrupled into 4 coupling and coupling is automatically duplicated
-  requires field emitter, but you can still get a field with "cross-disciplinary" or removal tech
-tech: Banach space - spawn small power ups and random bullets after entering an alternate reality
-tech: barycenter - after Verlet integration advances time build a scrap orbital-bot that lasts 22 seconds
-tech: Klemperer rosette - build 3 orbital-bots for 2 research
-tech: conchoidal - 1.04x damage after killing a mob, effect resets after colliding with a mob
-tech: dividend - at the end of each level spawn ammo power ups equal to 50% of average ammo for your guns
-  requires interest
+tech: proportional - when paused use a slider to balance damage and damage taken
+tech: inverse - when paused use a slider to balance fire rate and max energy
+unified field theory now uses a dropdown menu
+paradigm shift: player health and tech's health cost text now updates without refreshing pause
 
-technical intelligence gives 2x frequency of gunTech, 1.5->1.4x damage
-antiscience ejects before killing you, 1.7->1.6 damage
-on screen power up cap 300->200
+icons for skin tech upgrades
+vacuum energy: 300->400 energy or 33->25% chance for 0 energy
+reduced the cooldown for autocannon by 1.32 cycles per stack of super duper
+barycenter 22->18 seconds for scrap orbital-bot
+virtual particles stacks 6x
+Casimir stacks 9x
+mass-energy equivalence 1.3->1x damage  1.2 move -> 1.25 move and 1.15 jump
+bijection is removable
+performance mode reduces the max number of mob bodies made into blocks 200->80
+removed comma between power ups in text descriptions
 
 bug fixes
-  fixed issue with spalling not triggering on mobs that drop power ups
-  seismic wave shouldn't stack to 3x, set to 1x stack max
-  fixed bug with "Casimir" having old name "energy" for some situations
-  adjusted gun ammo prediction text (was 2x too high)
-  removed powerUp[powerUp.length - 1].isDuplicated = true (this might cause errors)
+  added out of bounds check to final level for mobs that somehow escape the room
+  borax no longer unlocks with super ball mines
+  Casimir spawn locations were often wrong
+  quantum immortality text updates after it's used
+  Banach space was on be default
   
 *********************************************************** TODO *****************************************************
+
+make mob invulnerability more obvious
+  flashing white?
+  thicker stroke
+
+!new input tech ideas
+  names: involution (function that is it's own inverse, like 1/x), modus tollens (If P, then Q. Not Q. Therefore, not P.), modus ponens (If P, then Q. P. Therefore, Q.)
+  slider health/?
+    energy?
+  set drone AI behaviors
+    checkboxes: power up pick up, targeting mobs, follow mouse, focus bosses
+    slider: damage/duration, speed/mass(damage)
+  switch all bots to a type (also switch the upgrade type)
+    a drop down menus for bots type
+
+improve the functionality of the pause menu
+  how?
+
+tech:   - your next bullet has 5x mass    <br>5 second cooldown
+  does this work for all bullets?
+    might need special code for grenades/missile and spores/worm/fleas
+  add em right text to show CD status
+
+
+
+tech:   - clicking cancel has a % chance to spawn a tech, gun or field
+
+tech: inductive charging - 7x passive energy generation while not using field or gun or moving
+  otherwise 0x passive energy generation
+tech: rectifier  - 7x passive energy generation while on the ground
+  otherwise 0x passive energy generation
+  (m.cycle - m.lastOnGroundCycle) > 65
+
 
 field emitter coupling effects (compared to normal fields)
   100% block damage, 100% bonus ammo, 50% iceIX deflection, 33% dmg reduction, 33% energy regen, 20% max energy, 10% dmg
@@ -59,21 +95,15 @@ sort text input is broken in pause menu
   does nothing on clicking sort or pressing enter
   pressing P, O  breaks it
   add more buttons
-    duplication
     research, coupling
-    bot tech
     JUNK
-  
+
 tech: - upgrade for diffuse beam that slowing rotates each laser beam to fire at different angles
   and maybe gives 3 more beams
 
 replace damage side bar with a number??
   where: red text below field
   changing numbers might get distracting?
-
-upgrade missile guidance to improve missile speed and aiming while targeting
-  and damage for direct hits?
-  not get extra ammo
 
 try to also allow players to unpause in choosing menu
 
@@ -85,23 +115,15 @@ web lines - putting down lines that last maybe 10-20 seconds that slow and damag
   spore tech? when sporangium hatch they shoot out a few web lines that slow nearby mobs?
   ***most obvious is grappling hook tech: grappling hook leaves behind web lines
 
-add an HTML input in the tech description(slider or checkbox, dropdown menu,  other inputs)
-  put html slider in tech description, adjust when paused
-  it will control some property that is sometimes better at different values
-    checkboxes or sliders for drone priorities
-      power ups
-      bosses
-      range
-    convert all bots to a type with dropdown menu
-      or change what bots are upgraded to
-    cost benefit trades with slider
-      bot or drone AI behaviors
-        range - frequency
-      health - energy
-      dmg - dmg reduction
+graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
+  been an issue for years, but I'm unwilling to fix it
 
-consider making pause menu a grid, like experiment mode
-  this could be an setting to toggle off/on
+safari browser looks weird with several stroke animations
+  might be related to dashed stroke 
+    ctx.setLineDash([200, 200]);
+  examples
+    going to next level, doorway animation
+    plasma field secret combo lightning
 
 ngon means tasty in vietnamese
   make a JUNK tech around this?
@@ -1523,6 +1545,7 @@ make n-gon a progressive web app to manage image downloads, cache?
   boost, coupling power ups tech - cyan electron orbiting a black nucleus electric field as bas-relief   //(by Kazumasa Nagai)
   radioactive - volumetric atomic nucleus diagram by Paul Catherall
 
+
 ******************************************************** LORE ********************************************************
 
 look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
@@ -1609,38 +1632,11 @@ possible names for tech
   fine-tuned universe
   ontic - real (maybe something with research)
   epistemic - knowledge about whats real, but not strictly real... (maybe something with research)
-
-
-
-******************************************************** UNSOLVED BUGS ********************************************************
-
-  !pilot wave always on + power ups in stasis caused a game crash, stuck in paused
-    also was in fullscreen
-    !can't reproduce crash
-    maybe add try to put a delay on pilot wave collecting power ups at start of level
-
-double bots on start of level
-  towers, flocculation, highrise, aerie
-  not levelFliped
-  occured with only the base bot tech: sound-bot  giving 2x sound-bot, then back to 1 on next level
-  occured again on skyscrappers with 2x laser-bots, but should only be one
-    https://landgreen.github.io/n-gon/index.html?&seed=88132&gun0=drones&gun1=mine&tech0=quenching&tech1=sentry&tech2=energy%20conservation&tech3=boom-bot&tech4=gauge&tech5=nail-bot&tech6=enthalpy&molMode=0&field=metamaterial%20cloaking&difficulty=6
-    https://landgreen.github.io/n-gon/index.html?&seed=99677&gun0=laser&gun1=super%20balls&tech0=expansion&tech1=superposition&tech2=energy%20conservation&tech3=polyurethane%20foam&tech4=quasiparticles&tech5=laser-bot&tech6=recycling&molMode=1&field=standing%20wave&difficulty=5
-
-dmg side bar is too long sometimes
-  maybe rework damage indications
-
-graphical bug - player can become crouched while not touching the ground if they exit the ground while crouched
-
-safari browser looks weird with several stroke animations
-  might be related to dashed stroke 
-    ctx.setLineDash([200, 200]);
-  examples
-    going to next level, doorway animation
-    plasma field secret combo lightning
-
-on floccuation level there is a map element with poorly formed vertices
-  matter.min.js:16 matter-js: Bodies.fromVertices: Install the 'poly-decomp' library and use Common.setDecomp or provide 'decomp' as a global to decompose concave vertices.
+  nonagon - nine-sided polygon
+  brute fact - a fact that cannot be explained in terms of a deeper, more "fundamental" fact.
+  involution (function that is it's own inverse, like 1/x)
+  modus tollens (If P, then Q. Not Q. Therefore, not P.)
+  modus ponens (If P, then Q. P. Therefore, Q.)
 
 ******************************************************* DESIGN ******************************************************
 

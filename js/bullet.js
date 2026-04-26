@@ -286,7 +286,7 @@ const b = {
     },
     fireCDscale: 1,
     setFireCD() {
-        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.slowFireDamage * tech.fastTimeFire
+        b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.slowFireDamage * tech.fastTimeFire / tech.inverseFireRate
         if (level.isSlowFireRate) b.fireCDscale *= 2
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isGrabFireRate && m.ledgeCoyote !== 0) b.fireCDscale *= 0.33
@@ -6544,7 +6544,7 @@ const b = {
                 const num = 2 + 3 + Math.floor(tech.extraSuperBalls * Math.random()) //2 extra 
                 const speed = m.crouch ? 43 : 36
 
-                const delay = Math.floor((m.crouch ? 18 : 12) * b.fireCDscale)
+                const delay = Math.floor(((m.crouch ? 18 : 12) - Math.min(12, 0.33 * tech.extraSuperBalls)) * b.fireCDscale)
                 m.fireCDcycle = m.cycle + delay; // cool down
                 function cycle() {
                     count++

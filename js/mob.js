@@ -1272,7 +1272,7 @@ const mobs = {
                     if (tech.isVerlet && !m.isTimeDilated) {
                         if (tech.isBarycenter) {
                             b.orbitBot(player.position, false);
-                            bullet[bullet.length - 1].endCycle = simulation.cycle + 1320 //15 seconds
+                            bullet[bullet.length - 1].endCycle = simulation.cycle + 1080
                         }
 
                         requestAnimationFrame(() => {
@@ -1467,7 +1467,7 @@ const mobs = {
             replace(i) {
                 //if there are too many bodies don't turn into blocks to help performance
                 // if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 && this.radius > 18) {
-                if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 && this.mass > 1 && this.radius > 18) {
+                if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 * (localSettings.isHideHUD ? 0.4 : 1) && this.mass > 1 && this.radius > 18) {
 
                     let v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
                     if (v.length > 5 && body.length < 35 && Math.random() < 0.25) {

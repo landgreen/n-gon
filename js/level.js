@@ -60,22 +60,24 @@ const level = {
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Grand Unified Theory") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("barycenter")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Verlet integration")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Klemperer rosette")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("generalist")
-            // for (let i = 0; i < 1; i++) tech.giveTech("Banach space")
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory") });
+            // for (let i = 0; i < 1; ++i) tech.giveTech("proportional")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("scale invariance")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("bijection")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("strange attractor")
+            // for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; i++) tech.giveTech("stimulated emission")
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.vents()
+            // level.final()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-            // requestAnimationFrame(() => { powerUps.spawnDelay("coupling", 30); });
+            // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
             // for (let i = 0; i < 10; i++) spawn.starter(1300 + 10 * i, -200)
@@ -336,7 +338,7 @@ const level = {
             // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
             // simulation.inGameConsole(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
         }
-        if (tech.interestRateGuns) {
+        if (tech.interestRateGuns && b.inventory.length) {
             let rate = tech.interestRateGuns
             if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
                 const levelName = level.levels[level.onLevel]
@@ -3786,6 +3788,21 @@ const level = {
         level.custom = () => {
             level.exit.drawAndCheck();
             level.enter.draw();
+
+            //check for out of bounds mobs
+            if (!(simulation.cycle % 180)) {
+                for (let i = 0; i < mob.length; i++) {
+                    if (mob[i].isFinalBossMob && (mob[i].position.x < -200 || mob[i].position.x > 6000 || mob[i].position.y < -1600 || mob[i].position.y > 150)) {
+                        // console.log(mob[i].position)
+                        mob[i].death()
+                        // Matter.Body.setPosition(mob[i], {
+                        //     x: 3000 + 400 * (Math.random() - 0.5),
+                        //     y: -1200
+                        // });
+                        // break
+                    }
+                }
+            }
         };
         level.customTopLayer = () => {
             slime.query();
@@ -3835,8 +3852,22 @@ const level = {
             level.setPosToSpawn(0, -250);
             level.custom = () => {
                 level.exit.drawAndCheck();
-
                 level.enter.draw();
+
+                //check for out of bounds mobs
+                if (!(simulation.cycle % 180)) {
+                    for (let i = 0; i < mob.length; i++) {
+                        if (mob[i].isFinalBossMob && (mob[i].position.x < -6000 || mob[i].position.x > 400 || mob[i].position.y < -1600 || mob[i].position.y > 150)) {
+                            // console.log(mob[i].position)
+                            mob[i].death()
+                            // Matter.Body.setPosition(mob[i], {
+                            //     x: -3000 + 400 * (Math.random() - 0.5),
+                            //     y: -1200
+                            // });
+                            // break
+                        }
+                    }
+                }
             };
             level.customTopLayer = () => {
                 slime.query();

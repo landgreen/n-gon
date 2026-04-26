@@ -628,6 +628,7 @@ const m = {
     damageReduction: 1,
     defense() {
         let dmg = m.damageReduction * powerUps.difficulty.damageReduction
+        if (tech.proportionality !== null) dmg *= Math.pow(tech.proportionality, 1.631)
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
@@ -758,7 +759,7 @@ const m = {
     collisionImmuneCycles: 30,
     takeDamage(dmg, isDefense = true) {
         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
-            const steps = Math.floor(Math.min(299, 150 * m.energy))
+            const steps = Math.floor(Math.min(299, 150 * m.energy)) //150 * m.energy
             simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)
             return
@@ -1705,6 +1706,7 @@ const m = {
 
             //for some reason adjusting the vertices goes better at large size
             Matter.Body.scale(player, 2 / player.scale, 2 / player.scale); //undoes old scale and set new scale to be 2
+
             Matter.Body.setMass(player, mass);
             Matter.Body.setInertia(player, Infinity);
             player.scale = 2
@@ -2477,7 +2479,8 @@ const m = {
         },
         energy() {
             m.isAltSkin = true
-            m.squirrelFx = 1.28;
+            m.squirrelFx = 1.33;
+            m.squirrelJump = 1.1;
             m.setMovement()
 
             m.color = {
@@ -3575,7 +3578,7 @@ const m = {
     },
     setMaxEnergy(isMessage = true) {
         m.maxEnergy = (tech.isMaxEnergyTech ? 0.5 : 1) + tech.bonusEnergy + tech.healMaxEnergyBonus + tech.harmonicEnergy + 3 * tech.isGroundState + 1.5 * (m.fieldMode === 1) + (m.fieldMode === 0) * 0.01 * m.coupling + (m.fieldMode === 1) * 0.05 * m.coupling + tech.isStandingWaveExpand
-        m.maxEnergy *= m.fieldUpgrades[1].energyHealthRatio
+        m.maxEnergy *= m.fieldUpgrades[1].energyHealthRatio / tech.inverseFireRate
         if (level.isReducedEnergy) m.maxEnergy *= 0.5
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-f'>maxEnergy</span> <span class='color-symbol'>=</span> ${(m.maxEnergy.toFixed(2))}`)
     },
@@ -4013,7 +4016,7 @@ const m = {
                         }
                     }
                     b.pulse(60 * Math.pow(m.holdingTarget.mass, 0.25), m.angle)
-                    if (tech.isTokamakHeal && tech.tokamakHealCount < 5) {
+                    if (tech.isTokamakHeal && tech.tokamakHealCount < 5 && m.holdingTarget) {
                         tech.tokamakHealCount++
                         let massScale = Math.min(65 * Math.sqrt(m.maxHealth), 14 * Math.pow(m.holdingTarget.mass, 0.4))
                         if (powerUps.healGiveMaxEnergy) {
@@ -6490,7 +6493,7 @@ const m = {
         },
         {
             name: "pilot wave",
-            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><div class="circle-grid tech"></div>, <div class="circle-grid gun"></div>, and <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↓←↓↓</em>`,
+            description: `use <strong class='color-f'>energy</strong> to guide <strong class='color-block'>blocks</strong><br><div class="circle-grid tech"></div> <div class="circle-grid gun"></div> <div class="circle-grid field"></div> have <strong>+3</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong><br><strong>10</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓↓→↓←↓↓</em>`,
             keyLog: [null, null, null, null, null, null, null],
             collider: null,
             fieldMass: 1,

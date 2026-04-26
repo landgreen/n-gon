@@ -46,21 +46,6 @@ const powerUps = {
             }
             return text
         },
-        ammo(num = 1) {
-            switch (num) {
-                case 1:
-                    return `<div class="ammo-circle"></div>`
-            }
-            let text = '<span style="position:relative;">'
-            for (let i = 0; i < num; i++) {
-                text += `<div class="ammo-circle" style="position:absolute; top:1.5px; left:${i * 0.6}em;"></div>`
-            }
-            text += '</span> &nbsp; &nbsp; '
-            for (let i = 0; i < num; i++) {
-                text += '&nbsp; '
-            }
-            return text
-        },
         heal(num = 1) {
             if (powerUps.healGiveMaxEnergy) {
                 switch (num) {
@@ -104,6 +89,21 @@ const powerUps = {
         fieldTech(num = 1) {
             return `<div class="circle-grid tech tooltip" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>
                     <div class="circle-grid field tooltip" style="position:relative; top:-0.05em; left:-0.55em;opacity:0.65;margin-right:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>`
+        },
+        ammo(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="ammo-circle"></div>`
+            }
+            let text = '<span style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="ammo-circle" style="position:absolute; top:1.5px; left:${i * 0.5}em;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp; '
+            for (let i = 0; i < num; i++) {
+                text += '&nbsp; '
+            }
+            return text
         },
         coupling(num = 1) {
             switch (num) {
@@ -753,11 +753,11 @@ const powerUps = {
         },
         random() {
             if (tech.isCasimirRandom) {
-                if (Math.random() < 0.33) {
+                if (Math.random() < 0.25) {
                     m.energy = 0.001
                 } else if (m.energy < m.maxEnergy) {
-                    m.energy = m.maxEnergy * 3
-                    for (let i = 0; i < 4; i++)simulation.energyGenGraphic()
+                    m.energy = m.maxEnergy * 4
+                    for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
                 }
             }
         },
@@ -1143,12 +1143,13 @@ const powerUps = {
     buildColumns(totalChoices, type) {
         let width
         if (canvas.width < 1710) {
-            width = "285px"
+            width = "285px" //285px
         } else if (canvas.width < 1950) {
-            width = "340px"
+            width = "340px" //340px
         } else {
-            width = "384px"
+            width = "384px" //384px
         }
+
         let text = ""
         document.getElementById("choose-grid").style.gridTemplateColumns = width
         text += powerUps.researchAndCancelText(type)
@@ -1199,6 +1200,23 @@ const powerUps = {
                 &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
+    skinTechUpgradeText(choose, click) {
+        const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+                <div class="card-text">
+                <div class="grid-title">
+                <span style="position:relative;">
+                    <div class="circle-grid-title" style="position:absolute; top:0.18em; left:0.56em;opacity:1;">
+                        <span style="position:relative;">
+                            <div class="circle-grid-skin"></div>
+                            <div class="circle-grid-skin-eye"></div>
+                        </span>
+                    </div>
+                    <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:-0.1em;opacity:0.93;"></div>
+                </span>
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
+                ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
+    },
     fieldTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
         return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
@@ -1206,7 +1224,7 @@ const powerUps = {
                 <div class="grid-title">
                 <span style="position:relative;">
                     <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
-                    <div class="circle-grid-title field" style="position:absolute; top:0.12em; left:10px;opacity:0.65;"></div>
+                    <div class="circle-grid-title field" style="position:absolute; top:0.12em; left:0.55em;opacity:0.65;"></div>
                 </span>
                 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1218,7 +1236,7 @@ const powerUps = {
                 <div class="grid-title">         
                 <span style="position:relative;">
                     <div class="circle-grid-title tech" style="position:absolute; top:0.12em; left:0;opacity:0.8;"></div>
-                    <div class="circle-grid-title gun" style="position:absolute; top:0.12em; left:10px; opacity:0.65;"></div>
+                    <div class="circle-grid-title gun" style="position:absolute; top:0.12em; left:0.55em; opacity:0.65;"></div>
                 </span>
                 &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1439,6 +1457,8 @@ const powerUps = {
                             text += powerUps.junkTechText(choose, `powerUps.choose('tech',${choose})`)
                         } else if (tech.tech[choose].isSkin) {
                             text += powerUps.skinTechText(choose, `powerUps.choose('tech',${choose})`)
+                        } else if (tech.tech[choose].isSkinUpgrade) {
+                            text += powerUps.skinTechUpgradeText(choose, `powerUps.choose('tech',${choose})`)
                         } else if (tech.tech[choose].isInstant) {
                             text += powerUps.instantTechText(choose, `powerUps.choose('tech',${choose})`)
                         } else { //normal tech
@@ -1680,6 +1700,10 @@ const powerUps = {
                     m.energy += 2 * level.isReducedRegen;
                     for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
                 }); //wrapping in animation frame prevents errors, probably
+                if (tech.isBarycenter) {
+                    b.orbitBot(player.position, false);
+                    bullet[bullet.length - 1].endCycle = simulation.cycle + 1320 //15 seconds
+                }
             } else {
                 m.energy += 2 * level.isReducedRegen;
                 for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
@@ -1695,11 +1719,11 @@ const powerUps = {
         if (level.isNoDamage) level.noDamageCycle = m.cycle
     },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
-        if (tech.isCouplingPowerUps && Math.random() < 0.15) {
+        if (tech.coupling && Math.random() < tech.coupling) {
             powerUps.spawn(x + 10, y - 1, "coupling");
         }
-        if (tech.isCasimir && Math.random() < 0.1) {
-            powerUps.spawn(10 - x, y + 1, "Casimir");
+        if (tech.Casimir && Math.random() < tech.Casimir) {
+            powerUps.spawn(x - 10, y + 1, "Casimir");
         }
         if (!tech.isEnergyHealth && (Math.random() * Math.random() - 0.3 > Math.sqrt(m.health)) || Math.random() < 0.04) { //spawn heal chance is higher at low health
             powerUps.spawn(x, y, "heal");
@@ -1852,9 +1876,8 @@ const powerUps = {
         }
     },
     pauseEjectTech(index) {
-        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant && m.immuneCycle < m.cycle) {
+        if ((tech.isPauseEjectTech || simulation.testing) && !simulation.isChoosing && !tech.tech[index].isInstant && m.immuneCycle < m.cycle) { //&& !tech.tech[index].isInput
             const dmg = tech.pauseEjectTech * 0.01 //* (tech.isEnergyHealth ? Math.pow(m.defense(), 0.6) : m.defense())
-
             if ((!tech.isEnergyHealth && dmg < m.health) || (tech.isEnergyHealth && dmg < m.energy)) {
                 tech.tech[index].frequency = 0 //banish tech
                 powerUps.ejectTech(index)
@@ -1884,6 +1907,9 @@ const powerUps = {
             document.getElementById(`${index}-pause-tech`).style.textDecoration = "line-through"
             document.getElementById(`${index}-pause-tech`).style.animation = ""
             document.getElementById(`${index}-pause-tech`).onclick = null
+
+            if (document.getElementById("paradigm-cost")) document.getElementById("paradigm-cost").innerHTML = tech.pauseEjectTech.toFixed(1)
+            build.generatePauseLeft() //makes the left side of the pause menu refresh
         }
     },
     randomize(where) { //makes a random power up convert into a random different power up
