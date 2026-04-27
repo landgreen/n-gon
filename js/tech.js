@@ -361,20 +361,56 @@ const tech = {
         }
     },
     inputHTML: {
-        inverse(value) { //updates as the slider moves
-            // console.log(value)
-            tech.inverseFireRate = Number(value);
-            b.setFireCD();
-            m.setMaxEnergy(false)
+        // inverse(value) { //updates as the slider moves
+        //     // console.log(value)
+        //     // tech.inverseFireRate = Number(value);
+        //     // b.setFireCD();
+        //     // m.setMaxEnergy(false)
 
-            document.getElementById("inverse-info-fire").innerHTML = tech.inverseFireRate.toFixed(1)
-            document.getElementById("inverse-info-ammo").innerHTML = (1 / tech.inverseFireRate).toFixed(2)
+        //     // document.getElementById("inverse-info-fire").innerHTML = tech.inverseFireRate.toFixed(1)
+        //     // document.getElementById("inverse-info-ammo").innerHTML = (1 / tech.inverseFireRate).toFixed(2)
+        // },
+        inverse(el) { // 'el' is the slider element itself
+            const val = Number(el.value);
+            tech.inverseFireRate = val;
+
+            // Run your logic
+            try {
+                if (typeof b !== 'undefined') b.setFireCD();
+                if (typeof m !== 'undefined') m.setMaxEnergy(false);
+            } catch (e) {
+                console.error("Logic error in setFireCD or setMaxEnergy:", e);
+            }
+
+            // Find the labels relative to the slider's parent container
+            const parent = el.parentElement;
+            const fireLabel = parent.querySelector(".fire-label");
+            const ammoLabel = parent.querySelector(".ammo-label");
+
+            if (fireLabel) fireLabel.innerHTML = val.toFixed(1);
+            if (ammoLabel) ammoLabel.innerHTML = (1 / val).toFixed(2);
         },
-        proportionality(value) { //updates as the slider moves
-            tech.proportionality = Number(value);
+        // proportionality(value) { //updates as the slider moves
+        //     tech.proportionality = Number(value);
 
-            document.getElementById("proportionality-info-damage").innerHTML = tech.proportionality.toFixed(1)
-            document.getElementById("proportionality-info-reduction").innerHTML = (Math.pow(tech.proportionality, 1.631)).toFixed(2)  //1.4305 for 10x
+        //     document.getElementById("proportionality-info-damage").innerHTML = tech.proportionality.toFixed(1)
+        //     document.getElementById("proportionality-info-reduction").innerHTML = (Math.pow(tech.proportionality, 1.631)).toFixed(2)  //1.4305 for 10x
+        // },
+        proportionality(el) { // 'el' is the slider element
+            const val = Number(el.value);
+            tech.proportionality = val;
+
+            // Scope the search to the container this slider lives in
+            const parent = el.parentElement;
+            const damageLabel = parent.querySelector(".prop-damage");
+            const reductionLabel = parent.querySelector(".prop-reduction");
+
+            if (damageLabel) {
+                damageLabel.innerHTML = val.toFixed(1);
+            }
+            if (reductionLabel) {
+                reductionLabel.innerHTML = Math.pow(val, 1.631).toFixed(2);
+            }
         },
         fieldTheory(value) {
             const energy = m.energy //save current energy
@@ -1834,11 +1870,15 @@ const tech = {
     {
         name: "inverse",
         descriptionFunction() {
-
-            return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> <em style ="float: right;">(<span id="inverse-info-fire">${tech.inverseFireRate.toFixed(1)}</span>x fire rate)</em><br>
-            <input class="tech-slider" type="range" id="inverse" name="inverse" min="0.5" max="3" step="0.1" value="${tech.inverseFireRate}" oninput="tech.inputHTML.inverse(this.value)" onchange="build.generatePauseLeft()">
-            <em style ="float: right;">(<span id="inverse-info-ammo">${(1 / tech.inverseFireRate).toFixed(2)}</span>x maximum <strong class='color-f'>energy</strong>)</em>            
-            `
+            return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> 
+            <em style ="float: right;">(<span class="fire-label">${tech.inverseFireRate.toFixed(1)}</span>x fire rate)</em><br>
+            <input class="tech-slider" type="range" min="0.5" max="3" step="0.1" value="${tech.inverseFireRate}" oninput="tech.inputHTML.inverse(this)" onchange="build.generatePauseLeft()"> <em style ="float: right;">
+            (<span class="ammo-label">${(1 / tech.inverseFireRate).toFixed(2)}</span>x maximum <strong class='color-f'>energy</strong>)</em>            
+`
+            // return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> <em style ="float: right;">(<span id="inverse-info-fire">${tech.inverseFireRate.toFixed(1)}</span>x fire rate)</em><br>
+            // <input class="tech-slider" type="range" id="inverse" name="inverse" min="0.5" max="3" step="0.1" value="${tech.inverseFireRate}" oninput="tech.inputHTML.inverse(this.value)" onchange="build.generatePauseLeft()">
+            // <em style ="float: right;">(<span id="inverse-info-ammo">${(1 / tech.inverseFireRate).toFixed(2)}</span>x maximum <strong class='color-f'>energy</strong>)</em>            
+            // `
         },
         maxCount: 1,
         count: 0,
@@ -1865,12 +1905,21 @@ const tech = {
     {
         name: "proportional",
         descriptionFunction() {
-
-            return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> <em style ="float: right;">(<span id="proportionality-info-damage">${tech.proportionality.toFixed(1)}</span>x <strong class='color-d'>damage</strong>)</em><br>
-            <input class="tech-slider" type="range" id="proportionality" name="proportionality" min="0.5" max="3" step="0.1" value="${tech.proportionality}" oninput="tech.inputHTML.proportionality(this.value)" onchange="build.generatePauseLeft()">
-            <em style ="float: right;">(<span id="proportionality-info-reduction">${Math.pow(tech.proportionality, 1.631).toFixed(2)}</span>x <strong class='color-defense'>damage taken</strong>)</em>            
-            `
+            return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> 
+        <em style ="float: right;">(<span class="prop-damage">${tech.proportionality.toFixed(1)}</span>x <strong class='color-d'>damage</strong>)</em><br>
+        <input class="tech-slider" type="range" name="proportionality" min="0.5" max="3" step="0.1" value="${tech.proportionality}" 
+            oninput="tech.inputHTML.proportionality(this)" 
+            onchange="build.generatePauseLeft()">
+        <em style ="float: right;">(<span class="prop-reduction">${Math.pow(tech.proportionality, 1.631).toFixed(2)}</span>x <strong class='color-defense'>damage taken</strong>)</em>            
+    `
         },
+        // descriptionFunction() {
+
+        //     return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> <em style ="float: right;">(<span id="proportionality-info-damage">${tech.proportionality.toFixed(1)}</span>x <strong class='color-d'>damage</strong>)</em><br>
+        //     <input class="tech-slider" type="range" id="proportionality" name="proportionality" min="0.5" max="3" step="0.1" value="${tech.proportionality}" oninput="tech.inputHTML.proportionality(this.value)" onchange="build.generatePauseLeft()">
+        //     <em style ="float: right;">(<span id="proportionality-info-reduction">${Math.pow(tech.proportionality, 1.631).toFixed(2)}</span>x <strong class='color-defense'>damage taken</strong>)</em>            
+        //     `
+        // },
         maxCount: 1,
         count: 0,
         frequency: 1,

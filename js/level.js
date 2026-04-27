@@ -59,10 +59,10 @@ const level = {
             // b.giveGuns(5)
             // b.guns[b.inventory[0]].ammo = 100000000000
             // tech.addJunkTechToPool(0.5)
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Grand Unified Theory") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("inverse") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("proportional")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("scale invariance")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("inverse")
             // for (let i = 0; i < 1; ++i) tech.giveTech("bijection")
             // for (let i = 0; i < 1; ++i) tech.giveTech("strange attractor")
             // for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift")

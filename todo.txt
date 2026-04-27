@@ -1,27 +1,12 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: proportional - when paused use a slider to balance damage and damage taken
-tech: inverse - when paused use a slider to balance fire rate and max energy
-unified field theory now uses a dropdown menu
-paradigm shift: player health and tech's health cost text now updates without refreshing pause
 
-icons for skin tech upgrades
-vacuum energy: 300->400 energy or 33->25% chance for 0 energy
-reduced the cooldown for autocannon by 1.32 cycles per stack of super duper
-barycenter 22->18 seconds for scrap orbital-bot
-virtual particles stacks 6x
-Casimir stacks 9x
-mass-energy equivalence 1.3->1x damage  1.2 move -> 1.25 move and 1.15 jump
-bijection is removable
-performance mode reduces the max number of mob bodies made into blocks 200->80
-removed comma between power ups in text descriptions
 
 bug fixes
-  added out of bounds check to final level for mobs that somehow escape the room
-  borax no longer unlocks with super ball mines
-  Casimir spawn locations were often wrong
-  quantum immortality text updates after it's used
-  Banach space was on be default
+  inverse slider no updating text, in game with standing wave, harpoon and 30 other tech
+  pause menu left is updating properly
+  https://landgreen.github.io/n-gon/index.html?&seed=66751&gun0=harpoon&gun1=drones&tech0=inverse&tech1=tungsten%20carbide&tech2=electronegativity&tech3=von%20Neumann%20probe&tech4=autonomous%20defense&tech5=zero%20point%20energy&tech6=maul&tech7=tessellation&tech8=frequentist&tech9=brittle&tech10=ceramics&tech11=spherical%20harmonics&tech12=smelting&tech13=smelting&tech14=alternator&tech15=rebar&tech16=pair%20production&tech17=UHMWPE&tech18=expansion&tech19=filament&tech20=spalling&tech21=wear&tech22=options%20exchange&molMode=3&field=standing%20wave&difficulty=5
+
   
 *********************************************************** TODO *****************************************************
 
