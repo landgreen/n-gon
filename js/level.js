@@ -11,7 +11,7 @@ const level = {
     isFlipped: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
     start() {
@@ -54,24 +54,24 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(1) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
             // b.giveGuns(2)
             // b.giveGuns(5)
-            // b.guns[b.inventory[0]].ammo = 100000000000
+            // b.guns[b.inventory[0]].ammo = 10000000
             // tech.addJunkTechToPool(0.5)
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("inverse") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("needle gun") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("proportional")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("inverse")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("bijection")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("strange attractor")
-            // for (let i = 0; i < 1; i++) tech.giveTech("paradigm shift")
-            // for (let i = 0; i < 1; i++) tech.giveTech("stimulated emission")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("shotgun shell")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("Hall effect")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
+            // for (let i = 0; i < 1; i++) tech.giveTech("prototypes")
+            // // for (let i = 0; i < 1; i++) tech.giveTech("deprecated")
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.final()
+            // level.warehouse()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
@@ -104,7 +104,6 @@ const level = {
             // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
             // level.null()
             // localSettings.isHuman = true
-            // tech.isNoDraftPause = false //disable pause
             // mobs.mobDeaths = 200 //to prevent pacifist mode
             // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
             // lore.unlockTesting();
@@ -2398,7 +2397,8 @@ const level = {
                     if (Matter.Query.collides(this, [body[i]]).length === 0) {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
                     } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
-                        if (isRemoveBlocks) {
+                        if (isRemoveBlocks && !body[i].isInvulnerable) {
+                            // console.log(body[i])
                             Matter.Composite.remove(engine.world, body[i]);
                             body.splice(i, 1);
                             break
@@ -5139,7 +5139,7 @@ const level = {
             // spawn.randomHigherTierMob(1732, -2267)
             // stations[10]() //for testing a specific station
             stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when done testing individual stations
-            // stations[1]()
+            // stations[4]()
 
             //add in standard station map infrastructure
             spawn.mapRect(x + -8000, 0, 16000, 800);//tunnel floor
@@ -40439,6 +40439,1316 @@ const level = {
         spawn.randomLevelBoss(472, -1403);
         spawn.secondaryBossChance(-2056, -3178);
         powerUps.addResearchToLevel();
+    },
+    turbine() {
+        randList1 = Array.from({ length: 40 }, () => Math.random());
+        randList2 = Array.from({ length: 40 }, () => Math.random());
+        randList3 = Array.from({ length: 40 }, () => Math.random());
+        randList4 = Array.from({ length: 40 }, () => Math.random());
+        randListCount = 0;
+        let allEntities = [body, powerUp, mob];
+        checkCounter = 0;
+        let ent = allEntities[1];
+        simulation.inGameConsole(`<strong>Turbine</strong> by <span class='color-var'>Desboot</span>`);
+        level.announceText(-36, 30, true)
+        level.announceMobTypes()
+        // tech.giveTech("performance")
+        // level.levelsCleared = 5;
+        powerUps.directSpawn(-1783, 395, "tech", false);
+        level.defaultZoom = 500
+        windBoxState = 1;
+        leverX = 0;
+        leverY = 0;
+        windBoxTransition = 0;
+        inhiddenroom = 0;
+        intoHiddenRoom = 0;
+        bossPlace = Math.round(Math.random());
+        turbineSwitchOption = Math.random();// Math.round(3*Math.random()-0.5);
+        if (turbineSwitchOption < 0.375) {
+            leverX = 2600
+            leverY = -1725
+        } else {
+            if (turbineSwitchOption < 0.75) {
+                leverX = 850
+                leverY = -1860
+            } else {
+                leverX = 4350
+                leverY = -1775
+            }
+        }
+        const fizzlers = level.fizzler({ x: 2875, y: 409 }, { x: 3000, y: 409 })
+
+
+        const boost1 = level.boost((3775 + 4000) / 2 - 50, 400, 1000)
+        const turbineToggle = level.toggle(leverX, leverY) //on the right side
+        // const turbineToggle = level.toggle(-700+3300*turbineSwitchOption, -2000+200*turbineSwitchOption) //on the right side
+        const mover = level.mover(1035 + 470, 390, 1840 - 470, 25, 10); //x,y,width.height,VxGoal,force
+        // if (turbineSwitchOption == 0) {
+        // const turbineToggle = level.toggle(4000, -2000) //on the right side
+        // } else {
+        //     const toggle = toggle.boost(-700, -1800, true) //on the left side
+        // }
+
+        // const boost2 = level.boost(2820, -320, 1750)
+        // level.announceMobTypes()
+        // simulation.enableConstructMode()
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = -444.5//-73 * 5 - 60;
+        level.exit.y = -30;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        // movers.push(level.mover(125, -140, 925, 35, -5))
+
+
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        // color.map = "#444" //custom map color
+
+        spawn.bodyRect(215, -550 - 25, 280, 30, 1, spawn.propsDoor); // door
+        body[body.length - 1].isNotHoldable = true;
+        body[body.length - 1].collisionFilter.mask = cat.player | cat.body | cat.mob | cat.mobBullet | cat.bullet
+        cons[cons.length] = Constraint.create({
+            bodyB: body[body.length - 1],
+            pointB: {
+                x: -100,
+                y: 0
+            },
+            pointA: {
+                x: 180, //- 250 * (windBoxState - 1), //490
+                y: -537 // + 2620 * (windBoxState - 1)//275
+            },
+            stiffness: 1,
+        });
+        Composite.add(engine.world, cons[cons.length - 1]);
+        const connector = cons[cons.length] = Constraint.create({
+            bodyB: body[body.length - 1],
+            pointB: {
+                x: 100,
+                y: 0
+            },
+            pointA: {
+                x: 520,
+                y: -537
+            },
+            stiffness: 0.5,
+        });
+        Composite.add(engine.world, cons[cons.length - 1]);
+
+
+        level.custom = () => {
+            if (checkCounter < 10) {
+                ++checkCounter
+            } else {
+                checkCounter = 0;
+            }
+            if (m.pos.x < -3000) {
+                Matter.Body.setPosition(player, {
+                    x: 7000,
+                    y: 400
+                });
+                // m.setVelocity(m, { x: 0, y: 0 });
+            }
+            if (m.pos.y < -4500) {
+                Matter.Body.setPosition(player, {
+                    x: 7000,
+                    y: 400
+                });
+            }
+            // if (m.position.y < -3000) {
+            //     Matter.Body.setPosition(body[i], { x: 7000, y: 400 });
+            //     Matter.Body.setVelocity(body[i], { x: 0, y: 0 });
+            // }
+            // if (checkCounter = 1) {
+            //     for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+            //         if (body[i].position.x < -2000 || body[i].position.y < -3000) {
+            //             Matter.Body.setPosition(body[i], { x: 7000, y: 400 });
+            //             Matter.Body.setVelocity(body[i], { x: 0, y: 0 });
+            //         }
+            //     }
+            //     for (let i = 0, len = powerUp.length; i < len; ++i) {
+            //         if (powerUp[i].position.x < -2000 || powerUp[i].position.y < -3000) {
+            //             Matter.Body.setPosition(powerUp[i], { x: 7000, y: 400 });
+            //             Matter.Body.setVelocity(powerUp[i], { x: 0, y: 0 });
+            //             // simulation.inGameConsole('tp powerups')
+            //         }
+            //     }
+            //     for (let i = 0, len = mob.length; i < len; ++i) {
+            //         if (mob[i].position.x < -2000 || mob[i].position.y < -3000) {
+            //             Matter.Body.setPosition(mob[i], { x: 7000, y: 400 });
+            //             Matter.Body.setVelocity(mob[i], { x: 0, y: 0 });
+            //         }
+            //     }
+            // }
+            if (checkCounter = 1) {
+                allEntities = [...body, ...powerUp, ...mob];
+                for (let i = 0; i < allEntities.length; i++) {
+                    const ent = allEntities[i];
+                    if (ent.position.x < -2000 || ent.position.y < -3000) {
+                        Matter.Body.setPosition(ent, { x: 6000, y: 400 });
+                        Matter.Body.setVelocity(ent, { x: 0, y: 0 });
+                    }
+                }
+            }
+            // for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+            //     if (body[i].position.x < -4000) {
+            //         body[i].position.x += 4000;
+            //     }
+            // }
+            // for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+            //     if (powerUp[i].position.x < -4000) {
+            //         powerUp[i].position.x +=4000;
+            //     }
+            // }
+            // for (let i = 0, len = mob.length; i < len; ++i) { //push mobs away vertically
+            //     if (mob[i].position.x < -4000) {
+            //         mob[i].velocity.x=0;
+            //         mob[i].position.x =600;
+            //         mob[i].position.y =340;
+            //         mob[i].velocity.x=0;
+            //     }
+            // }
+            mover.push();
+            if (windBoxState == 2) {
+                connector.pointA = {
+                    x: 500,
+                    y: -537 + windBoxTransition //-275
+                }
+                // simulation.inGameConsole(windBoxTransition);
+            } else {
+                connector.pointA = {
+                    x: 520,
+                    y: -537
+                }
+            }
+
+
+            //background
+            ctx.fillStyle = `#c9c9c9`
+            ctx.fillRect(-3000, -10100, 10000, 12600)
+            ctx.fillStyle = `#b8b6b6`
+            ctx.fillRect(-700, -300, 4000, 6600)
+            ctx.fillRect(-4700, -300, 4000, 6600)
+            ctx.fillRect(2800, -1150, 401, 6600)
+            ctx.fillRect(3200, -525, 350, 6600)
+
+            ctx.beginPath()
+            ctx.moveTo(3550, -220)
+            ctx.lineTo(3714, -220)
+            ctx.lineTo(3714 - 285 / 5, 65)
+            ctx.lineTo(3540, 65)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(4475, -500)
+            ctx.lineTo(4475 + 200 / 5, -300)
+            ctx.lineTo(99999, 300)
+            ctx.lineTo(99999, -500)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(-605, -500)
+            ctx.lineTo(-605 - 200 / 5, -300)
+            ctx.lineTo(-99999, 300)
+            ctx.lineTo(-99999, -500)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(3450, -525)
+            ctx.lineTo(3775, -525)
+            ctx.lineTo(3775 - 305 / 5, -525 + 305)
+            ctx.lineTo(3450 + 305 / 5, -525 + 305)
+
+            ctx.moveTo(3450, -830)
+            ctx.lineTo(3775, -830)
+            ctx.lineTo(3775 - 305 / 5, -830 + 305)
+            ctx.lineTo(3450 + 305 / 5, -830 + 305)
+
+            ctx.moveTo(3450, -1135)
+            ctx.lineTo(3775, -1135)
+            ctx.lineTo(3775 - 305 / 5, -1135 + 305)
+            ctx.lineTo(3450 + 305 / 5, -1135 + 305)
+
+            ctx.moveTo(3450, -1440)
+            ctx.lineTo(3775, -1440)
+            ctx.lineTo(3775 - 305 / 5, -1440 + 305)
+            ctx.lineTo(3450 + 305 / 5, -1440 + 305)
+
+            ctx.moveTo(3450, -1745)
+            ctx.lineTo(3775, -1745)
+            ctx.lineTo(3775 - 305 / 5, -1745 + 305)
+            ctx.lineTo(3450 + 305 / 5, -1745 + 305)
+
+            ctx.moveTo(3450, -2085)
+            ctx.lineTo(3775, -2085)
+            ctx.lineTo(3775 - 305 / 5, -2050 + 305)
+            ctx.lineTo(3450 + 305 / 5, -2050 + 305)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(1400, -500)
+            ctx.lineTo(1400 + 300 / 5, -300)
+            ctx.lineTo(2600 - 300 / 5, -300)
+            ctx.lineTo(2600, -500)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(-325, -1650)
+            ctx.lineTo(-650, -1650)
+            ctx.lineTo(-325 - 500, -1650 + 100)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(-325, -850)
+            ctx.lineTo(-650, -850)
+            ctx.lineTo(-325 - 500, -850 + 100)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(-400, -1140)
+            ctx.lineTo(130, -1140)
+            ctx.lineTo(130, -1140 + 530 / 5)
+            ctx.fill();
+
+            if (windBoxState == 1) {
+                ctx.beginPath()
+                ctx.moveTo(-184, -500)
+                ctx.lineTo(-184 + 300 / 5, -300)
+                ctx.lineTo(729 - 300 / 5, -300)
+                ctx.lineTo(729, -500)
+                ctx.fill();
+            } else {
+                ctx.beginPath()
+                ctx.moveTo(190, -536)
+                ctx.lineTo(505, -265)
+                ctx.lineTo(729 - 300 / 5, -300)
+                ctx.lineTo(729, -500)
+                ctx.lineTo(530, -770)
+                ctx.lineTo(530, -7100)
+                ctx.lineTo(190, -7100)
+                ctx.fill();
+            }
+
+
+            ctx.beginPath()
+            ctx.moveTo(740, -1410)
+            ctx.lineTo(580, -1410 + 160 * 3)
+            ctx.lineTo(555, -1425)
+            ctx.fill();
+            ctx.beginPath()
+            ctx.moveTo(930, -1060)
+            ctx.lineTo(990, -1050 + 150)
+            ctx.lineTo(990, -525)
+            ctx.lineTo(1030, -525)
+            ctx.lineTo(1030, -1050 + 150)
+            ctx.lineTo(1090, -1060)
+            ctx.fill();
+
+            ctx.fillRect(1400, -1300, 50, 800)
+            ctx.beginPath()
+            ctx.moveTo(500, -760)
+            ctx.lineTo(500, -550)
+            ctx.lineTo(730, -550)
+            ctx.lineTo(800, -760)
+
+            ctx.fill();
+
+
+
+
+            //door box
+            ctx.fillStyle = `#b8b6b6`
+            ctx.fillRect(-185, -300, 350, 6600)
+            ctx.fillRect(1960, -1700, 850, 6600)
+
+            boost1.query();
+            // boost2.query();
+            // simulation.inGameConsole(qq);
+
+
+            //turbine
+            // spawn.mapRect(2075, -1460, 60, 290);
+
+            ctx.fillStyle = `#b0b0b0`
+            ctx.fillRect(1960, -2560, 290, 5000) //background for rotor
+            //the middle is at 2105
+            // ctx.fillStyle = `#6e6e6e`
+
+            //engines
+            ctx.fillStyle = `#b0b0b0`
+
+            ctx.fillStyle = `#545454`
+
+
+
+
+            ctx.fillStyle = `#6e6e6e` //main rotor
+
+            ctx.fillStyle = `#b0b0b0`
+            ctx.beginPath()
+
+
+
+
+
+
+            //WINDBOX DECALS
+            //NOTE - MAKE THE TURN MORE CONVINCING
+            // push player out of exit
+            //push player down when out of bounds
+            if (m.pos.x < -4000) {
+                player.force.y -= m.mass * -0.1
+            }
+            if (windBoxState == 1) {
+                // simulation.inGameConsole(`MODE ONE`);
+                // push player out of exit
+                if (m.pos.y < -500 && m.pos.x > -600 && m.pos.x < -190) {
+                    player.force.y -= m.mass * -0.02
+                }
+                if (m.pos.y > -300 && m.pos.y < 0 && m.pos.x > -600 && m.pos.x < -190) {
+                    player.force.y -= m.mass * 0.02
+                }
+                if (m.pos.y > -500.0 && m.pos.y < -370.0 && player.velocity.x > -120) {//m.pos.x > 11500 && m.pos.x < 11950 && 
+                    player.force.x -= m.mass * simulation.g + (input.down ? 0 : 0.012 * 4);
+                    if (m.pos.y < -370.0 && m.pos.y > -435) {
+                        player.force.y -= m.mass * 0.01
+                    }
+                }
+
+                //push other stuff
+                for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+                    if (body[i].position.y > -500 && body[i].position.y < -300) {
+                        body[i].force.x -= simulation.g * body[i].mass + 0.001;
+                    }
+                }
+                for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+                    if (powerUp[i].position.y > -500 && powerUp[i].position.y < -300) {
+                        powerUp[i].force.x -= 0.01;
+                    }
+                }
+                for (let i = 0, len = mob.length; i < len; ++i) { //push mobs away vertically
+                    if (mob[i].position.y > -500 && mob[i].position.y < -300) {
+                        mob[i].force.x -= simulation.g * mob[i].mass + 0.0012;
+                    }
+                }
+                ctx.fillStyle = `#b0b0b0`
+                // rand1 = randList1[randListCount];
+                // rand2 = randList2[randListCount];
+                // rand3 = randList3[randListCount];
+                // rand4 = randList4[randListCount];
+                if (randListCount > 39) {
+                    randListCount = 0;
+                } else {
+                    randListCount++;
+                }
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1000, 5)
+                // ctx.beginPath()
+                // ctx.moveTo(-4800 + rand3 * 9600, rand1 * -200 - 300);
+                // ctx.lineTo(-3000 + rand3 * 9600, rand1 * -200 - 300);
+                // ctx.beginPath()
+                // ctx.moveTo(-4800 + rand4 * 9600, rand2 * -200 - 300);
+                // ctx.lineTo(-3000 + rand4 * 9600, rand2 * -200 - 300);
+                // ctx.beginPath()
+                // ctx.moveTo(-4800 + Math.floor(rand1 * 9600), Math.floor(rand3 * -200) - 300);
+                // ctx.lineTo(-3000 + Math.floor(rand1 * 9600), Math.floor(rand3 * -200) - 300);
+                // ctx.beginPath()
+                // ctx.moveTo(-4800 + Math.floor(rand2 * 9600), Math.floor(rand4 * -200) - 300);
+                // ctx.lineTo(-3000 + Math.floor(rand2 * 9600), Math.floor(rand4 * -200) - 300);
+                // ctx.moveTo(-4800 + Math.floor(Math.random() * 9600), Math.floor(rand3 * -200) - 300);
+                // ctx.lineTo(-3800 + Math.floor(Math.random() * 9600), Math.floor(rand3 * -200) - 300);
+                // ctx.moveTo(-4800 + Math.floor(Math.random() * 9600), Math.floor(rand4 * -200) - 300);
+                // ctx.lineTo(-3800 + Math.floor(Math.random() * 9600), Math.floor(rand4 * -200) - 300);
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1000, 5)
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1500, 3)
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1500, 3)
+                ctx.stroke()
+                ctx.fillStyle = `#828282`
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1000, 5)
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1000, 5)
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1500, 3)
+                ctx.fillRect(-4800 + Math.floor(Math.random() * 9600), Math.floor(Math.random() * -200) - 300, 1500, 3)
+                ctx.fill()
+                // ctx.beginPath();
+                // ctx.moveTo(260, -50*Math.random());
+                // ctx.lineTo(300, -50);
+                // ctx.stroke();
+            } else {
+                if (m.pos.y > -500.0 && m.pos.y < -370.0 && m.pos.x > 330 && player.velocity.x > -40) {//m.pos.x > 11500 && m.pos.x < 11950 && 
+                    player.force.x -= m.mass * 0.03;
+                }
+                if (m.pos.x > 210 && m.pos.x < 500 && m.pos.y < -300.0 && player.velocity.y > -74) {
+                    // simulation.inGameConsole(player.velocity.y);
+                    player.force.y -= m.mass * 0.005;
+                }
+
+                for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+                    if (body[i].position.y > -500 && body[i].position.y < -370 && body[i].position.x > 200 && body[i].velocity.x > -130) {
+                        body[i].force.x -= simulation.g * body[i].mass + 0.04;
+                    }
+                }
+                for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+                    if (powerUp[i].position.y > -500 && powerUp[i].position.y < -370 && powerUp[i].position.x > 500) {
+                        powerUp[i].force.x -= 0.02;
+                        powerUp[i].force.y -= 0.005;
+                        // if (powerUp[i].position.x > 200) {
+                        //     powerUp[i].force.x -= 0.01;
+                        // }
+                    }
+                }
+                for (let i = 0, len = mob.length; i < len; ++i) { //push mobs away vertically
+                    if (mob[i].position.y > -500 && mob[i].position.y < -370 && mob[i].position.x > 200) {
+                        mob[i].force.x -= simulation.g * mob[i].mass + 0.01;
+                    }
+                }
+
+                for (let i = 0, len = body.length; i < len; ++i) { //push blocks away vertically
+                    if (body[i].position.x > 200 && body[i].position.x < 500 && body[i].position.y < -300 && body[i].velocity.x > -130) {
+                        body[i].force.y -= simulation.g * body[i].mass + 0.012;
+                    }
+                }
+                for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+                    if (powerUp[i].position.x > 200 && powerUp[i].position.x < 500 && powerUp[i].position.y < -300) {
+                        powerUp[i].force.y -= 0.02;
+                    }
+                }
+                for (let i = 0, len = powerUp.length; i < len; ++i) { //push powerups away vertically
+                    if (powerUp[i].position.x > 200 && powerUp[i].position.x < 500 && powerUp[i].position.y < -300 && powerUp[i].position.y > -500) {
+                        Matter.Body.setVelocity(powerUp[i], { x: powerUp[i].velocity.x * 0.8, y: powerUp[i].velocity.y });
+                    }
+                }
+                for (let i = 0, len = mob.length; i < len; ++i) { //push mobs away vertically
+                    if (mob[i].position.x > 200 && mob[i].position.x < 500 && mob[i].position.y < -300) {
+                        mob[i].force.y -= simulation.g * mob[i].mass + 0.0012;
+                    }
+                }
+
+                ctx.fillStyle = `#b0b0b0`
+                rand1 = Math.floor(Math.random() * 200)
+                rand2 = Math.floor(Math.random() * 200)
+                rand3 = Math.floor(Math.random() * 200)
+                rand4 = Math.floor(Math.random() * 200)
+                rand5 = Math.floor(Math.random() * 200)
+                // rand5 = Math.floor(Math.random()*200)
+                ctx.fillStyle = `#b0b0b0`
+                ctx.fillRect(250 + rand1 + Math.floor(Math.random() * 4800), -500 + rand1, 1000, 5) //horizontal
+                ctx.fillRect(210 + rand1 * 1.45, -540 + rand1 - 1000 - Math.floor(Math.random() * 4800), 5, 1000) //vertical
+                ctx.fillRect(250 + rand2 + Math.floor(Math.random() * 4800), -500 + rand2, 1500, 3) //horizontal
+                ctx.fillRect(210 + rand2 * 1.45, -540 + rand2 - 1500 - Math.floor(Math.random() * 4800), 3, 1500) //vertical
+                ctx.fill()
+                ctx.fillStyle = `#828282`
+                ctx.fillRect(250 + rand3 + Math.floor(Math.random() * 4800), -500 + rand3, 1000, 5) //horizontal
+                ctx.fillRect(210 + rand3 * 1.45, -540 + rand3 - 1000 - Math.floor(Math.random() * 4800), 5, 1000) //vertical
+                ctx.fillRect(250 + rand4 + Math.floor(Math.random() * 4800), -500 + rand4, 1500, 3) //horizontal
+                ctx.fillRect(210 + rand4 * 1.45, -540 + rand4 - 1500 - Math.floor(Math.random() * 4800), 3, 1500) //vertical
+                ctx.fillRect(250 + rand5 + Math.floor(Math.random() * 1200), -500 + rand5, 1500, 3) //horizontal
+                ctx.fillRect(210 + rand5 * 1.45, -540 + rand5 - 1500 - Math.floor(Math.random() * 1200), 3, 1500) //vertical
+                ctx.fill()
+            }
+            //help player escape
+            if (m.pos.x > 4000 && m.pos.x < 4480 && m.pos.y > -500 && m.pos.y < -300) {
+                player.force.y -= 0.1;
+                // simulation.inGameConsole("push up")
+            }
+            // -250 - -420
+
+            level.enter.draw();
+            turbineToggle.query();
+            if (turbineToggle.isOn) {
+                windBoxState = 2;
+                if (windBoxTransition < 263) {
+                    windBoxTransition += 10;
+                }
+            }
+            ctx.fillStyle = `#adadad`
+            ctx.beginPath()
+            ctx.moveTo(500, 175)
+            ctx.lineTo(250, 175 + 250 * 1.2)
+            ctx.lineTo(230, 165)
+            ctx.fillStyle = `#adadad`
+            ctx.fill();
+            // ctx.fillRect(200, 410, 1300, 1500)
+            ctx.beginPath()
+            ctx.moveTo(950, 250)
+            ctx.lineTo(950 + 90, 700)
+            ctx.lineTo(1225 - 90, 700)
+            ctx.lineTo(1225, 250)
+            ctx.fill();
+
+            ctx.beginPath()
+            ctx.moveTo(3200, 90)
+            ctx.lineTo(3200 + 350 / 5, 450)
+            ctx.lineTo(3700 - 350 / 5, 450)
+            ctx.lineTo(3700, 90)
+            ctx.fillStyle = `#adadad`
+            ctx.fill();
+
+            ctx.fillStyle = `#969696`
+            // ctx.fillRect(400, 700, 1200, 150)
+            // ctx.moveTo(3200, 90)
+            // ctx.lineTo(3200 + 350 / 5, 450)
+            // ctx.lineTo(3700 - 350 / 5, 450)
+            // ctx.lineTo(3700, 90)
+            // ctx.fill();
+            ctx.beginPath()
+            ctx.moveTo(550, 525)
+            ctx.lineTo(550 + 300 / 5, 875)
+            ctx.lineTo(950 - 300 / 5, 875)
+            ctx.lineTo(950, 525)
+            ctx.fill();
+            ctx.beginPath()
+            ctx.moveTo(1225, 525)
+            ctx.lineTo(1225 + 300 / 5, 875)
+            ctx.lineTo(1425 - 300 / 5, 875)
+            ctx.lineTo(1425, 525)
+            ctx.fill();
+
+            ctx.fillStyle = "#cff"
+            ctx.fillRect(-610, -300, 425, 300);
+            level.exit.drawAndCheck();
+
+            if (m.pos.x < -685 && m.pos.y > -300 || m.pos.x < 260 && m.pos.y > 300) { //check if m in in the room at all
+                if (m.pos.y > 80 && m.pos.x < -1000) {
+                    intoHiddenRoom = 0;
+                } else {
+                    if (m.pos.x < -1000) {
+                        intoHiddenRoom = (100 - m.pos.y) / 400
+                        //set it based on height
+                    } else {
+                        intoHiddenRoom = (m.pos.x + 140) / 400
+                        //set it based on distance
+                    }
+                }
+
+            } else {
+                intoHiddenRoom = 1;//ctx.fillStyle = `rgba(68, 68, 68, 1)`
+            }
+        };
+        level.customTopLayer = () => {
+
+            mover.draw();
+            fizzlers.query();
+
+            //cover for hidden room
+            // ctx.fillStyle = `rgba(68, 68, 68, ${Math.max(0.3, Math.min((12350 - m.pos.x) / 100, 0.99))})`
+            ctx.fillStyle = `rgba(68, 68, 68, ${intoHiddenRoom})`
+            // ctx.fillRect(-2155, -300, 1050, 1400); //
+            // ctx.fillRect(-1107, 325, 1370, 1660);
+            ctx.beginPath()
+            ctx.moveTo(-2155, -300)
+            ctx.lineTo(-1105, -300)
+            ctx.lineTo(-580, 320)
+            ctx.lineTo(260, 320)
+            ctx.lineTo(260, 550)
+            ctx.lineTo(-2340, 666)
+            ctx.lineTo(-2300, -80)
+            ctx.fill();
+        };
+
+
+
+        //OUTSIDE FRAME
+
+        spawn.mapRect(-2550, -300, 800, 400);
+        spawn.mapRect(-2550, -300, 400, 800);
+
+
+        spawn.mapRect(-4930, -300, 2425, 2715);
+        spawn.mapRect(-3600, 500, 3800, 2715);
+        spawn.mapRect(-4930, -300, 2325, 2715);
+        spawn.mapRect(-1605, -300, 1000, 650);
+        spawn.mapRect(-610, 0, 760, 350);
+        spawn.mapRect(145, 45, 115, 355);
+        spawn.mapRect(145, 500, 115, 355);
+        spawn.mapRect(-115, 810, 2150, 3500);
+        spawn.mapRect(1500, 410, 10035, 3500);
+        spawn.mapRect(-185, -300, 40, 350);
+        spawn.mapRect(-185, -300, 330, 50);
+
+        spawn.mapRect(-610, -300, 130, 35);
+        spawn.mapRect(-185 - 130, -300, 130, 35);
+
+        spawn.mapRect(-185, -550, 395, 50);
+        spawn.mapRect(500, -550, 230, 50);
+        spawn.mapRect(935, -525, 150, 25);
+        spawn.mapRect(1400, -550, 1195, 50);
+        spawn.mapRect(2800, -525, 150, 25);
+        spawn.mapRect(130, -300, 35, 125);
+        spawn.mapRect(330, -300, 2865, 75);
+        spawn.mapRect(520, -300, 600, 195);
+        spawn.mapRect(1110, -300, 620, 305);
+        spawn.mapRect(1650, -300, 1000, 405);
+        spawn.mapRect(2470, -300, 405, 410);
+        spawn.mapRect(1650, 70, 1225, 75);
+        spawn.mapRect(3000, 45, 50, 750);
+        spawn.mapRect(3200, 45, 500, 50);
+        // spawn.mapRect(3420, -2140, 49995, 1635);
+        //stuff on the far right
+        spawn.mapRect(4475, -2100, 9375, 1600);
+        // spawn.mapRect(3550, -575, 925, 75);
+        // spawn.mapRect(3250, -825, 225, 50);
+        // spawn.mapRect(3250, -1375, 250, 50);
+        // spawn.mapRect(3825, -975, 450, 75);
+        // spawn.mapRect(3550, -1775, 650, 75);
+        // spawn.mapRect(3675, -1250, 275, 50);
+        spawn.mapRect(3250, -550, 525, 50);
+        spawn.mapRect(3450, -550 - 305, 325, 25);
+        spawn.mapRect(3925 + 75, -775, 375, 25);
+        spawn.mapRect(4050, -1100, 325, 25);
+        spawn.mapRect(3450, -550 - 610, 325, 25);
+        spawn.mapRect(3450, -550 - 915, 325, 25);
+        spawn.mapRect(3450, -550 - 1220, 325, 25);
+
+
+
+        spawn.mapRect(4020, -300, 49995, 1635);
+        spawn.mapRect(-4930, -4140, 4325, 3635);
+        spawn.mapRect(-930, -4140, 1120, 2055);
+        spawn.mapRect(500, -4140, 6995, 2055);
+        spawn.mapRect(2900, -1400, 350, 400);
+        spawn.mapRect(3100, -1400, 150, 900);
+        spawn.mapRect(-400, -1365, 70, 220);
+        spawn.mapRect(-400, -1200, 610, 60);
+        spawn.mapRect(130, -1200, 80, 700);
+        spawn.mapRect(500, -2140, 80, 1380);
+
+        //platofroms on left side
+        spawn.mapRect(580, -1465, 160, 55);
+        spawn.mapRect(930, -1110, 160, 55);
+        spawn.mapRect(1400, -1070, 50, 300);
+        spawn.mapRect(1400, -1570, 50, 300);
+        spawn.mapRect(580, -810, 225, 50);
+
+        // spawn.mapRect(815, -725, 160, 60);
+        //platforms on top right
+        spawn.mapRect(1625, -915, 115, 370);
+        spawn.mapRect(1625, -915, 970, 370);
+        spawn.mapRect(2470, -915, 125, 370);
+        spawn.mapRect(2385, -1220, 555, 70);
+        spawn.mapRect(1960, -1715, 860, 70);
+        spawn.mapRect(1570, -1570, 255, 50);
+        spawn.mapRect(1960, -1460, 290, 60);
+        spawn.mapRect(2075, -1460, 60, 290);
+        spawn.mapRect(499995, 499995, 49995, 49995);
+
+        spawn.mapRect(190 - 4000, -8000, 4000, 4000);
+        spawn.mapRect(500, -8000, 4000, 4000);
+
+        //lever rooms
+
+
+        if (turbineSwitchOption > 0.375) {
+            if (turbineSwitchOption > 0.75) {
+                spawn.mapRect(4150, -1775, 325, 25);
+                for (let i = 0; i < 5; i++) {
+                    spawn.mapRect(4275 + i * 50, -1775 + i * 12, 325, 25);
+                }
+
+            } else {
+                spawn.mapRect(915 - 150, -1850, 300, 25);
+                spawn.mapRect(915 - 100, -1850, 200, 35);
+                spawn.mapRect(915 - 75, -1850, 150, 40);
+                spawn.mapRect(915 - 50, -1850, 100, 48);
+            }
+        }
+        spawn.mapRect(0, -3, 165, 48);
+        spawn.debris(1400, -1780, 1800, 8);
+
+        spawn.debris(1462, -1350, 1400, 8);
+        spawn.debris(-1600, -400, 7000, 4);
+        spawn.bodyRect(130, -175, 35, 170);
+        spawn.mapRect(250, 150, 250, 25);
+        spawn.mapRect(550, 500, 400, 25);
+        spawn.mapRect(950, 225, 275, 25);
+        spawn.mapRect(1225, 500, 200, 25);
+        spawn.mapRect(250, 625, 150, 250);
+        spawn.mapRect(950, 700, 250, 150);
+        spawn.mapRect(1425, 700, 150, 150);
+
+        spawn.mapRect(-50, -1800, 250, 25);
+        spawn.mapRect(-650, -1675, 325, 25);
+        spawn.mapRect(-50, -2100, 25, 150);
+        spawn.mapRect(-650, -875, 325, 25);
+
+
+
+        spawn.randomMob(2830, -1150, 0); //-0.5
+        spawn.randomMob(-400, -1200, 0);
+        spawn.randomMob(1080, 420, 0.1); //-0.1
+        spawn.randomMob(1822, 1900, 0.1); //-0.5
+        spawn.randomMob(750, -1900, 0.1);
+        spawn.randomMob(-200, 1850, 0.1);
+        spawn.randomMob(700, -1950, 0.1);
+        spawn.randomMob(4150, 900, 0.2); //0.5
+        spawn.randomMob(3600, -600 + 200 * Math.round(Math.random() * 3), 0.2); //-0.3
+        spawn.randomMob(0, -700, 0.2);
+        spawn.randomMob(3600, 300, 0.3); //0.5
+        spawn.randomMob(3600, -1300 + 200 * Math.round(Math.random() * 3), 0.4); //-0.2
+        spawn.randomMob(1900, -750, 0.5); //-0.5
+        spawn.randomMob(0, -700, 0.6);
+        spawn.randomMob(2300, -1475, 0.6); //-0.5
+        spawn.randomMob(4200, -1125, 0.7); //-0.1
+        spawn.randomMob(750, 160, 0.7); //-0.2
+        spawn.pulsar(1475, 213); //0
+        spawn.randomMob(-250, -850, 0.8);
+        spawn.randomMob(-80, 1850, 0.8);
+        spawn.randomMob(3630, -123, 0.9); //0.5
+        spawn.randomMob(3375, 300, 1); //0.5
+
+        spawn.stabber(2800, 275);
+        spawn.grenadier(3350, -1700);
+        spawn.grenadier(4200, -1475);
+        // spawn.revolutionBoss(1000,-1400)
+        // spawn.randomLevelBoss(1000, -1400 + 600 * bossPlace);
+        spawn.secondaryBossChance(1000, -800 - 600 * bossPlace);
+        //not: blockboss
+        spawn.randomLevelBoss(1000, -1400 + 600 * bossPlace, ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "laserLayerBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss"]);
+        //["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss"]
+
+
+
+
+
+        // spawn.debris(750, -2200, 3700, 8);
+        // spawn.debris(750, -2200, 3700, 8);
+        // spawn.bodyRect(125, -62, 39, 30);
+        // spawn.bodyRect(125, -133, 39, 30);
+        // spawn.bodyRect(125, -130, 38.5, 30);
+        // spawn.bodyRect(125, -160, 38, 30);
+        // for(let i = 0; i < 4; i++) {
+        //     spawn.bodyRect(125, -70.1-35.1*i, 35, 35, 1);
+        // }
+
+
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        // spawn.debris(750, -2200, 3700, 16); //16 debris per level
+        // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+        // spawn.randomSmallMob(1300, -70);
+        // spawn.randomMob(2650, -975, 0.8);
+        // spawn.randomGroup(1700, -900, 0.4);
+        // spawn.randomLevelBoss(2200, -1300);
+        // spawn.secondaryBossChance(100, -1500)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
+    intervals() {
+        simulation.inGameConsole(`<strong>intervals</strong> by <b style='color: crimson;'>Destiny</b>`);
+        setTimeout(() => {
+            simulation.inGameConsole(`Beat my <b>challenge</b>.<br>I'll give you <b>three</b> <span class='color-var'>tech</span>, and I'll let you leave.`);
+            setTimeout(() => {
+                simulation.inGameConsole(`Use your <strong class="color-f">field</strong> to select your answer.`);
+            }, 1000);
+        }, 1000);
+        level.setPosToSpawn(-400, -30);
+        level.defaultZoom = 1400;
+        simulation.zoomTransition(level.defaultZoom, 1);
+        level.exit.x = 3960;
+        level.exit.y = -10;
+        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+        spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 25);
+        const exitDoor = level.door(3800, 0, 25, 300, 250, 3);
+        spawn.mapRect(-925, 25, 5150, 625);
+        spawn.mapRect(3775, -275, 450, 50);
+        spawn.mapRect(4175, -275, 50, 375);
+        spawn.mapRect(3775, -250, 75, 50);
+        spawn.mapRect(-1400, 25, 675, 300);
+        spawn.mapRect(-1400, -625, 200, 950);
+        spawn.mapRect(-1400, -300, 400, 100);
+        spawn.mapRect(-2450, -625, 725, 150);
+        spawn.mapRect(-2450, -250, 725, 150);
+        spawn.mapRect(-2825, -625, 175, 525);
+        spawn.mapRect(-2825, 125, 550, 150);
+        spawn.mapRect(-4475, -500, 325, 300);
+        spawn.mapRect(-4275, -1075, 125, 775);
+        spawn.mapRect(-4275, -1075, 250, 100);
+        spawn.mapRect(-3650, -125, 275, 275);
+        spawn.mapRect(-3475, 0, 100, 525);
+        spawn.mapRect(-3475, 425, 200, 100);
+        spawn.mapRect(-4875, 775, 1600, 200);
+        spawn.mapRect(-5200, 250, 150, 150);
+        spawn.mapRect(-5100, 275, 50, 275);
+        spawn.mapRect(-5100, 500, 100, 50);
+        spawn.mapRect(-4925, -50, 225, 225);
+        spawn.mapRect(-4775, -350, 75, 525);
+        spawn.mapRect(-4775, -350, 150, 75);
+        spawn.mapRect(-5300, -450, 175, 175);
+        spawn.mapRect(-5300, -450, 75, 375);
+        spawn.mapRect(-5375, -150, 150, 75);
+        spawn.mapRect(-3825, -1150, 1400, 125);
+        spawn.mapRect(-4625, -850, 175, 25);
+        spawn.mapRect(-4575, -925, 25, 225);
+        spawn.mapRect(-4525, -925, 25, 225);
+        spawn.mapRect(-4625, -800, 175, 25);
+        spawn.mapRect(-2225, -1325, 225, 225);
+        spawn.mapRect(-2075, -1675, 75, 575);
+        spawn.mapRect(-2075, -1675, 150, 75);
+        spawn.mapRect(-1700, -1925, 250, 250);
+        spawn.mapRect(-1550, -2200, 100, 525);
+        spawn.mapRect(-1300, -1925, 250, 250);
+        spawn.mapRect(-1150, -2200, 100, 525);
+        spawn.mapRect(-925, -1925, 250, 250);
+        spawn.mapRect(-775, -2200, 100, 525);
+        spawn.mapRect(-550, -1925, 250, 250);
+        spawn.mapRect(-400, -2200, 100, 525);
+        spawn.mapRect(-1550, -2200, 1250, 75);
+        spawn.mapRect(-1550, -2100, 1250, 50);
+        spawn.mapRect(25, -1750, 1825, 150);
+        spawn.mapRect(2075, -1275, 175, 175);
+        spawn.mapRect(2200, -1500, 50, 400);
+        spawn.mapRect(2200, -1500, 100, 50);
+        spawn.mapRect(2400, -1275, 1375, 75);
+        spawn.mapRect(3750, -1000, 475, 75);
+        spawn.mapRect(3750, -700, 475, 75);
+        spawn.mapRect(975, -125, 350, 100);
+        spawn.mapRect(975, -725, 100, 700);
+        spawn.mapRect(800, -725, 275, 250);
+        spawn.mapRect(1400, -450, 300, 50);
+        spawn.mapRect(1400, -450, 75, 150);
+        spawn.mapRect(1400, -350, 300, 50);
+        spawn.mapRect(1625, -450, 75, 150);
+        spawn.randomMob(2700, -700);
+        spawn.randomMob(2175, -475);
+        spawn.randomMob(3150, -650);
+        spawn.randomMob(3125, -1425);
+        spawn.randomMob(1600, -2000);
+        spawn.randomMob(975, -2150);
+        spawn.randomMob(-800, -2325);
+        spawn.randomMob(-1650, -1975);
+        spawn.randomMob(-2200, -1400);
+        spawn.randomMob(-3125, -1675);
+        spawn.randomMob(-3100, -1300);
+        spawn.randomMob(-5275, -550);
+        spawn.randomMob(-4200, 400);
+        spawn.randomMob(-2550, -425);
+        spawn.randomMob(-3300, 150);
+        spawn.randomLevelBoss(-3430, -603);
+        const totalQ = 20;
+        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        const intervals_12 = [
+            { semitones: 0, name: 'Unison', abbr: 'P1' },
+            { semitones: 1, name: 'Minor 2nd', abbr: 'm2' },
+            { semitones: 2, name: 'Major 2nd', abbr: 'M2' },
+            { semitones: 3, name: 'Minor 3rd', abbr: 'm3' },
+            { semitones: 4, name: 'Major 3rd', abbr: 'M3' },
+            { semitones: 5, name: 'Perfect 4th', abbr: 'P4' },
+            { semitones: 6, name: 'Tritone', abbr: 'TT' },
+            { semitones: 7, name: 'Perfect 5th', abbr: 'P5' },
+            { semitones: 8, name: 'Minor 6th', abbr: 'm6' },
+            { semitones: 9, name: 'Major 6th', abbr: 'M6' },
+            { semitones: 10, name: 'Minor 7th', abbr: 'm7' },
+            { semitones: 11, name: 'Major 7th', abbr: 'M7' },
+            { semitones: 12, name: 'Octave', abbr: 'P8' },
+        ];
+        const intervals_41 = [
+            { steps: 0, name: 'Unison', abbr: 'P1' },
+            { steps: 2, name: 'Aug Unison', abbr: 'A1' },
+            { steps: 3, name: 'Minor 2nd', abbr: 'm2' },
+            { steps: 4, name: 'Neut 2nd (lo)', abbr: 'n2-' },
+            { steps: 5, name: 'Neut 2nd', abbr: 'n2' },
+            { steps: 7, name: 'Major 2nd', abbr: 'M2' },
+            { steps: 9, name: 'Aug 2nd', abbr: 'A2' },
+            { steps: 10, name: 'Minor 3rd', abbr: 'm3' },
+            { steps: 12, name: 'Neut 3rd (lo)', abbr: 'n3-' },
+            { steps: 13, name: 'Neut 3rd', abbr: 'n3' },
+            { steps: 14, name: 'Major 3rd', abbr: 'M3' },
+            { steps: 17, name: 'Perfect 4th', abbr: 'P4' },
+            { steps: 19, name: 'Aug 4th', abbr: 'A4' },
+            { steps: 20, name: 'Neut 4th', abbr: 'n4' },
+            { steps: 21, name: 'Tritone', abbr: 'TT' },
+            { steps: 22, name: 'Neut 5th (lo)', abbr: 'n5-' },
+            { steps: 24, name: 'Perfect 5th', abbr: 'P5' },
+            { steps: 27, name: 'Minor 6th', abbr: 'm6' },
+            { steps: 28, name: 'Neut 6th (lo)', abbr: 'n6-' },
+            { steps: 29, name: 'Neut 6th', abbr: 'n6' },
+            { steps: 31, name: 'Major 6th', abbr: 'M6' },
+            { steps: 34, name: 'Minor 7th', abbr: 'm7' },
+            { steps: 35, name: 'Neut 7th (lo)', abbr: 'n7-' },
+            { steps: 36, name: 'Neut 7th', abbr: 'n7' },
+            { steps: 38, name: 'Major 7th', abbr: 'M7' },
+            { steps: 41, name: 'Octave', abbr: 'P8' },
+        ];
+        function freqFromMidi(midi) {
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+        function freqFrom41(rootFreq, steps) {
+            return rootFreq * Math.pow(2, steps / 41);
+        }
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+        function playNote(freq, ms = 900, vol = 0.06, delay = 0) {
+            try {
+                const ctx2 = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx2.createOscillator();
+                const gain = ctx2.createGain();
+                osc.connect(gain);
+                gain.connect(ctx2.destination);
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, ctx2.currentTime + delay);
+                gain.gain.linearRampToValueAtTime(vol, ctx2.currentTime + delay + 0.02);
+                gain.gain.setValueAtTime(vol, ctx2.currentTime + delay + ms / 1000 - 0.07);
+                gain.gain.linearRampToValueAtTime(0, ctx2.currentTime + delay + ms / 1000);
+                osc.start(ctx2.currentTime + delay);
+                osc.stop(ctx2.currentTime + delay + ms / 1000 + 0.01);
+                setTimeout(() => { try { ctx2.close(); } catch (e) { } }, delay * 1000 + ms + 200);
+            } catch (e) { }
+        }
+        const panelW = 950;
+        const panelH = 675;
+        const btnH = 110;
+        const btnG = 18;
+        const whiteMIDI = [60, 62, 64, 65, 67, 69, 71, 72];
+        const blackKeys = [
+            { midi: 61, relX: 0.095 },
+            { midi: 63, relX: 0.220 },
+            { midi: 66, relX: 0.470 },
+            { midi: 68, relX: 0.595 },
+            { midi: 70, relX: 0.720 },
+        ];
+        function drawPiano(cx, cy, w, h, highlightMidi1, highlightMidi2) {
+            const nWhite = whiteMIDI.length;
+            const kw = w / nWhite;
+            const bh = h * 0.62;
+            for (let i = 0; i < nWhite; i++) {
+                const kx = cx - w / 2 + i * kw;
+                const midi = whiteMIDI[i];
+                const isHL = (midi === highlightMidi1 || midi === highlightMidi2);
+                ctx.fillStyle = isHL ? '#3df' : '#eee';
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                ctx.fillRect(kx, cy, kw - 1, h);
+                ctx.strokeRect(kx, cy, kw - 1, h);
+            }
+            for (let i = 0; i < blackKeys.length; i++) {
+                const bk = blackKeys[i];
+                const bx = cx - w / 2 + bk.relX * w;
+                const isHL = (bk.midi === highlightMidi1 || bk.midi === highlightMidi2);
+                ctx.fillStyle = isHL ? '#f60' : '#222';
+                ctx.fillRect(bx, cy, kw * 0.6, bh);
+            }
+        }
+        function makeChamberdQuiz(chamberId, cx, intervalData, isAudio, y) {
+            const panelX = cx - panelW / 2;
+            const panelY = y - 760;
+            let qNum = 0;
+            let correct = 0;
+            let answered = false;
+            let feedback = '';
+            let feedbackText = '';
+            let question = null;
+            let options = [];
+            let playedThisCycle = -9999;
+            let hoverBtn = -1;
+            function genQuestion() {
+                if (chamberId === 0) {
+                    const midi = randInt(60, 71);
+                    return { midi, correct: noteNames[midi - 60] };
+                } else if (chamberId === 1) {
+                    const iv = intervalData[randInt(0, intervalData.length - 1)];
+                    const root = randInt(60, 72);
+                    return { rootMidi: root, topMidi: root + iv.semitones, interval: iv, correct: iv.abbr };
+                } else {
+                    const iv = intervalData[randInt(0, intervalData.length - 1)];
+                    const root = freqFromMidi(randInt(60, 72));
+                    return { rootFreq: root, steps: iv.steps, interval: iv, correct: iv.abbr };
+                }
+            }
+            function buildOptions(q) {
+                let pool, correctLabel;
+                if (chamberId === 0) {
+                    correctLabel = q.correct;
+                    pool = shuffle(noteNames.filter(n => n !== correctLabel)).slice(0, 7);
+                } else {
+                    correctLabel = q.correct;
+                    pool = shuffle(intervalData.filter(i => i.abbr !== correctLabel)).slice(0, 7).map(i => i.abbr);
+                }
+                return shuffle([correctLabel, ...pool]);
+            }
+            function playQuestion(q) {
+                if (!isAudio) return;
+                if (chamberId === 0) {
+                    playNote(freqFromMidi(q.midi), 1000);
+                } else if (chamberId === 1) {
+                    playNote(freqFromMidi(q.rootMidi), 900);
+                    playNote(freqFromMidi(q.topMidi), 900, 0.06, 1.0);
+                } else {
+                    playNote(q.rootFreq, 900);
+                    playNote(freqFrom41(q.rootFreq, q.steps), 900, 0.06, 1.0);
+                }
+            }
+            let started = false;
+            function next() {
+                answered = false;
+                feedback = '';
+                feedbackText = '';
+                question = genQuestion();
+                options = buildOptions(question);
+                playedThisCycle = simulation.cycle;
+                playQuestion(question);
+            }
+            function isPlayerInside() {
+                return (
+                    player.position.x > cx - 230 &&
+                    player.position.x < cx + 230 &&
+                    player.position.y < y + 10 &&
+                    player.position.y > y - 600
+                );
+            }
+            function draw() {
+                if (!started && isPlayerInside()) {
+                    started = true;
+                    next();
+                }
+                if (!isPlayerInside()) return;
+                if (isAudio && !answered && simulation.cycle - playedThisCycle > 180) {
+                    playedThisCycle = simulation.cycle;
+                    playQuestion(question);
+                }
+                ctx.fillStyle = 'rgba(240,245,248,0.97)';
+                ctx.fillRect(panelX, panelY, panelW, panelH);
+                ctx.strokeStyle = '#4a5a6a';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(panelX, panelY, panelW, panelH);
+                const TITLES = ['PERFECT PITCH', '12-TET INTERVALS', '41-TET INTERVALS'];
+                ctx.font = 'bold 28px monospace';
+                ctx.fillStyle = '#4a5a6a';
+                ctx.textAlign = 'center';
+                ctx.fillText(TITLES[chamberId], cx, panelY + 40);
+                const barW = panelW - 20;
+                const barX = panelX + 10;
+                const barY = panelY + 50;
+                ctx.fillStyle = '#ccc';
+                ctx.fillRect(barX, barY, barW, 12);
+                ctx.fillStyle = '#3adf8f';
+                ctx.fillRect(barX, barY, barW * (correct / totalQ), 12);
+                ctx.font = '22px monospace';
+                ctx.fillStyle = '#444';
+                ctx.fillText(`${correct} / ${totalQ}`, cx, barY + 45);
+                const pianoY = panelY + 100;
+                if (!isAudio && chamberId < 2) {
+                    const norm1 = question ? ((question.midi || question.rootMidi) - 60) % 12 + 60 : null;
+                    const norm2 = question && question.topMidi ? ((question.topMidi - 60) % 12 + 60) : null;
+                    drawPiano(cx, pianoY, panelW - 20, 44, norm1, norm2);
+                } else if (!isAudio && chamberId === 2) {
+                    ctx.textAlign = 'center';
+                    if (question) {
+                        ctx.font = 'bold 32px monospace';
+                        ctx.fillStyle = '#604';
+                        ctx.fillText(`${question.steps} steps`, cx, pianoY + 28);
+                        ctx.font = '22px monospace';
+                        ctx.fillStyle = '#888';
+                        ctx.fillText(`${(question.steps * 1200 / 41).toFixed(1)} cents`, cx, pianoY + 55);
+                    }
+                } else if (isAudio) {
+                    ctx.font = '20px monospace';
+                    ctx.fillStyle = '#888';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(answered ? '' : 'listening...', cx, pianoY + 28);
+                    if (answered && question && chamberId === 2) {
+                        ctx.font = '18px monospace';
+                        ctx.fillStyle = '#aaa';
+                        ctx.fillText(`(${(question.steps * 1200 / 41).toFixed(1)} ¢)`, cx, pianoY + 55);
+                    }
+                }
+                const promptY = panelY + 250;
+                ctx.font = 'bold 28px monospace';
+                ctx.fillStyle = '#222';
+                ctx.textAlign = 'center';
+                const prompts = ['What note is this?', 'What interval?', 'What interval? (41-TET)'];
+                ctx.fillText(prompts[chamberId], cx, promptY);
+                const cols = 4;
+                const btnW = (panelW - 20 - (cols - 1) * btnG) / cols;
+                const gridX = panelX + 10;
+                const gridY = promptY + 10;
+                const mx = simulation.mouseInGame.x;
+                const my = simulation.mouseInGame.y;
+                hoverBtn = -1;
+                for (let i = 0; i < options.length; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const bx = gridX + col * (btnW + btnG);
+                    const by = gridY + row * (btnH + btnG);
+                    if (mx > bx && mx < bx + btnW && my > by && my < by + btnH) {
+                        hoverBtn = i;
+                    }
+                }
+                for (let i = 0; i < options.length; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const bx = gridX + col * (btnW + btnG);
+                    const by = gridY + row * (btnH + btnG);
+                    const opt = options[i];
+                    const isC = (opt === question.correct);
+                    let fill = '#f0f4f8';
+                    let stroke = '#aaa';
+                    let txtColor = '#333';
+                    if (answered) {
+                        if (isC) { fill = '#c8ffe0'; stroke = '#2a9'; txtColor = '#155'; }
+                        else if (feedback === 'wrong' && i === hoverBtn) { fill = '#fdd'; stroke = '#a33'; }
+                    } else if (i === hoverBtn) {
+                        fill = '#def5ff'; stroke = '#3af';
+                    }
+
+                    ctx.fillStyle = fill;
+                    ctx.strokeStyle = stroke;
+                    ctx.lineWidth = 1.5;
+                    ctx.fillRect(bx, by, btnW, btnH);
+                    ctx.strokeRect(bx, by, btnW, btnH);
+                    ctx.fillStyle = txtColor;
+                    ctx.textAlign = 'center';
+                    if (chamberId === 0) {
+                        ctx.font = 'bold 28px monospace';
+                        ctx.fillText(opt, bx + btnW / 2, by + btnH / 2 + 10);
+                    } else {
+                        const iv = intervalData.find(x => x.abbr === opt);
+                        ctx.font = 'bold 28px monospace';
+                        ctx.fillText(opt, bx + btnW / 2, by + btnH / 2 - 8);
+                        ctx.font = '20px monospace';
+                        ctx.fillText(iv ? iv.name : '', bx + btnW / 2, by + btnH / 2 + 22);
+                    }
+                }
+                const fbY = gridY + Math.ceil(options.length / cols) * (btnH + btnG) + 14;
+                ctx.font = '22px monospace';
+                ctx.textAlign = 'center';
+                if (feedback === 'correct') {
+                    ctx.fillStyle = '#2a9';
+                    ctx.fillText('✓ correct', cx, fbY);
+                } else if (feedback === 'wrong') {
+                    ctx.fillStyle = '#c33';
+                    ctx.fillText('✗  answer: ' + question.correct, cx, fbY);
+                }
+            }
+            function onClick() {
+                if (!isPlayerInside() || answered) return false;
+                if (!question) return false;
+                const mx = simulation.mouseInGame.x;
+                const my = simulation.mouseInGame.y;
+                const cols = 4;
+                const btnW = (panelW - 20 - (cols - 1) * btnG) / cols;
+                const gridX = panelX + 10;
+                const gridY = panelY + 200 + 10;
+                for (let i = 0; i < options.length; i++) {
+                    const col = i % cols;
+                    const row = Math.floor(i / cols);
+                    const bx = gridX + col * (btnW + btnG);
+                    const by = gridY + row * (btnH + btnG);
+                    if (mx > bx && mx < bx + btnW && my > by && my < by + btnH) {
+                        answered = true;
+                        if (options[i] === question.correct) {
+                            correct++;
+                            feedback = 'correct';
+                        } else {
+                            feedback = 'wrong';
+                        }
+                        const delay = feedback === 'correct' ? 700 : 1400;
+                        setTimeout(() => {
+                            qNum++;
+                            if (qNum >= totalQ) {
+                                if (correct >= totalQ) {
+                                    quiz.passed = true;
+                                } else {
+                                    qNum = 0;
+                                    correct = 0;
+                                    simulation.inGameConsole(`${correct}/${totalQ} — need ${totalQ}/${totalQ}. retry.`);
+                                }
+                            }
+                            next();
+                        }, delay);
+                        return true;
+                    }
+                }
+                return false;
+            }
+            const quiz = {
+                passed: false,
+                draw,
+                onClick,
+                isPlayerInside,
+            };
+            return quiz;
+        }
+        let audioAvailable = false;
+        const audioCheck = () => {
+            audioAvailable = true;
+            window.removeEventListener('click', audioCheck);
+            window.removeEventListener('keydown', audioCheck);
+        };
+        window.addEventListener('click', audioCheck, { once: true });
+        window.addEventListener('keydown', audioCheck, { once: true });
+        try {
+            const testCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (testCtx.state === 'running') audioAvailable = true;
+            testCtx.close();
+        } catch (e) { }
+        const Q1 = makeChamberdQuiz(0, -4150, null, audioAvailable, 770);
+        const Q2 = makeChamberdQuiz(1, -3120, intervals_12, audioAvailable, -1147);
+        const Q3 = makeChamberdQuiz(2, 980, intervals_41, audioAvailable, -1747);
+        const CH_BG = [
+            'rgba(200,230,255,0.18)',
+            'rgba(210,255,210,0.18)',
+            'rgba(255,215,255,0.18)',
+        ];
+        const chcx = [-4150, -3120, 980];
+        const chcy = [770, -1147, -1747];
+        const CH_LABELS = ['PERFECT PITCH', '12-TET INTERVALS', '41-TET INTERVALS'];
+        const quizzes = [Q1, Q2, Q3];
+        let allPassed = false;
+        let isHolding = false;
+        level.custom = () => {
+            if (input.field) {
+                isHolding = true;
+            } else {
+                if (isHolding) {
+                    Q1.onClick();
+                    Q2.onClick();
+                    Q3.onClick();
+                }
+                isHolding = false;
+            }
+            if (!allPassed && Q1.passed && Q2.passed && Q3.passed) {
+                allPassed = true;
+                exitDoor.isClosing = true;
+                powerUps.spawnDelay('tech', 1, 4);
+                powerUps.spawnDelay('tech', 1, 8);
+                powerUps.spawnDelay('tech', 1, 12);
+                simulation.inGameConsole("Good job.")
+            }
+            if (!allPassed) {
+                exitDoor.isClosing = false;
+            }
+            exitDoor.openClose();
+            for (let i = 0; i < 3; i++) {
+                const cx = chcx[i];
+                const cy = chcy[i];
+                ctx.fillStyle = quizzes[i].passed
+                    ? 'rgba(150,255,200,0.12)'
+                    : CH_BG[i];
+                ctx.fillRect(cx - 560, cy - 770, 1120, 770);
+                ctx.font = '25px monospace';
+                ctx.fillStyle = quizzes[i].passed ? '#2a9' : '#888';
+                ctx.textAlign = 'center';
+                ctx.fillText(
+                    quizzes[i].passed ? '✓ ' + CH_LABELS[i] : CH_LABELS[i],
+                    cx,
+                    cy - 724
+                );
+            }
+            Q1.draw();
+            Q2.draw();
+            Q3.draw();
+            level.enter.draw();
+            level.exit.drawAndCheck();
+        };
+        level.customTopLayer = () => {
+            exitDoor.draw();
+        };
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

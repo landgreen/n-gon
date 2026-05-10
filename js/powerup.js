@@ -46,7 +46,7 @@ const powerUps = {
             }
             return text
         },
-        heal(num = 1) {
+        heal(num = 1, isSwap = true) {
             if (powerUps.healGiveMaxEnergy) {
                 switch (num) {
                     case 1:
@@ -343,7 +343,7 @@ const powerUps = {
         }, 200);
 
         if (!simulation.paused) {
-            if (tech.isNoDraftPause || level.isNoPause) {
+            if (level.isNoPause) {
 
             } else {
                 simulation.paused = true;
@@ -944,9 +944,6 @@ const powerUps = {
                 simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
             }
             powerUps[type].effect();
-            // if ((tech.isNoDraftPause || level.isNoPause) && document.fullscreenElement) {
-            //     mouseMove.isLockPointer = false//this interacts with the mousedown event listener to exit pointer lock
-            // }
         },
     },
     heal: {
@@ -1773,10 +1770,10 @@ const powerUps = {
             if (simulation.difficultyMode > 5) powerUps.spawn(x - 25, y - 50, "ammo", false);
             if (tech.isAddRemoveMaxHealth) {
                 powerUps.spawn(x + 20, y, "tech", false)
-                powerUps.spawn(x - 20, y, "research", false)
+                // powerUps.spawn(x - 20, y, "research", false)
                 powerUps.spawn(x - 40, y, "research", false)
                 powerUps.spawn(x + 40, y, "research", false)
-                powerUps.spawn(x, y + 20, "research", false)
+                // powerUps.spawn(x, y + 20, "research", false)
                 powerUps.spawn(x, y - 20, "heal", false)
                 powerUps.spawn(x, y + 40, "heal", false)
                 powerUps.spawn(x, y - 40, "heal", false)
@@ -1910,6 +1907,7 @@ const powerUps = {
 
             if (document.getElementById("paradigm-cost")) document.getElementById("paradigm-cost").innerHTML = tech.pauseEjectTech.toFixed(1)
             build.generatePauseLeft() //makes the left side of the pause menu refresh
+            build.generatePauseRight() //makes the left side of the pause menu refresh
         }
     },
     randomize(where) { //makes a random power up convert into a random different power up

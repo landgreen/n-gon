@@ -143,6 +143,27 @@ function beforeUnloadEventListener(event) {
 // addEventListener('beforeunload', beforeUnloadEventListener);
 
 
+// // 1. Fix for exiting the lock (Document level)
+// document.exitPointerLock = document.exitPointerLock ||
+//     document.mozExitPointerLock ||
+//     document.webkitExitPointerLock ||
+//     function () { return; };
+
+// // 2. Fix for requesting the lock (Element level)
+// if (typeof Element !== 'undefined') {
+//     Element.prototype.requestPointerLock = Element.prototype.requestPointerLock ||
+//         Element.prototype.mozRequestPointerLock ||
+//         Element.prototype.webkitRequestPointerLock ||
+//         function () { return; };
+// }
+
+// //block pointer lock on some systems
+// if (!('pointerLockElement' in document || 'webkitPointerLockElement' in document)) {
+//     console.log("pointer lock disabled");
+// }
+
+
+
 //collision groups
 //   cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet | cat.mobShield | cat.phased
 const cat = {
@@ -463,24 +484,6 @@ ${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padd
 </div>
 </details>
 </div>`
-        //         if ((tech.isPauseSwitchField || simulation.testing)) {  //&& !simulation.isChoosing
-        //             // const fieldNameP = m.fieldUpgrades[m.fieldMode > 1 ? m.fieldMode - 1 : m.fieldUpgrades.length - 1].name
-        //             // const fieldNameN = m.fieldUpgrades[m.fieldMode === m.fieldUpgrades.length - 2 ? 1 : m.fieldMode + 1].name
-        //             //button above for previous
-        //             text += `<div class="pause-grid-module" id ="pause-field-previous" style="animation: fieldColorCycle 3s linear infinite alternate; border-top: 1px solid #000;border-bottom: 1px solid #000;">
-        // <div class="grid-title" style="text-align: center;">↑ <div class="circle-grid field"></div> ↑</div></div>`
-        //             //button for current
-        //             const style = `style="height:auto;"`
-        //             text += `<div class="pause-grid-module card-background" id="pause-field" ${style} >
-        // <div class="card-text">
-        // <div class="grid-title"><div class="circle-grid-title field" onclick="speechHandler.speech('${m.fieldUpgrades[m.fieldMode].name}')"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-        // ${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
-        //             //button below for next
-        //             text += `<div class="pause-grid-module" id="pause-field-next" style="animation: fieldColorCycle 3s linear infinite alternate;border-bottom: 1px solid #000;">
-        // <div class="grid-title" style="text-align: center;">↓ <div class="circle-grid field"></div> ↓</div></div>`
-
-
-        //         } else {
         const style = `style="height:auto;"`
         text += `<div class="pause-grid-module card-background" id="pause-field" ${style}>
 <div class="card-text">
@@ -508,6 +511,13 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         });
     },
     generatePauseRight() {
+        //sort input tech to top
+        // tech.tech.sort((a, b) => {
+        //     // This moves 'true' to the front and 'false' to the back
+        //     return Number(b.isInput) - Number(a.isInput);
+        // });
+
+
         let text = `<div class="sort">
     <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
     <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
@@ -581,7 +591,6 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             if (!aHasKeyword && bHasKeyword) return 1;
             return 0;
         }
-
         // if (find === '') {
         //     tech.tech.sort((a, b) => { //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
         //         console.log(a.cycle, b.cycle)
@@ -897,8 +906,8 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="font-weight: 100;">dmg taken</strong></button>
         <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='color-f'>energy</strong></button>
         <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h'>heal</strong></button>
-        <button onclick="build.sortTech('bot')" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
-        <button onclick="build.sortTech('duplic')" class='sort-button'><strong class='color-dup'>dup</strong></button>
+        <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
+        <button onclick="build.sortTech('duplic', true)" class='sort-button'><strong class='color-dup'>dup</strong></button>
         <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
     </div>
@@ -1390,7 +1399,7 @@ window.addEventListener("keydown", function (event) {
                             mouseMove.reset()
                         }
                     }
-                } else {  //if (!tech.isNoDraftPause)
+                } else {
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
@@ -1399,40 +1408,6 @@ window.addEventListener("keydown", function (event) {
                         mouseMove.isPointerLocked = false
                         mouseMove.reset()
                     }
-
-                    // if (tech.isPauseSwitchField || simulation.testing) {
-                    //     document.getElementById("pause-field-previous").addEventListener("click", () => {
-                    //         const energy = m.energy //save current energy
-                    //         if (m.fieldMode === 4 && simulation.molecularMode > 0) {
-                    //             simulation.molecularMode--
-                    //             m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
-                    //         } else {
-                    //             m.setField((m.fieldMode < 2) ? m.fieldUpgrades.length - 1 : m.fieldMode - 1) //cycle to previous field, skip field emitter
-                    //             if (m.fieldMode === 4) {
-                    //                 simulation.molecularMode = 3
-                    //                 m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
-                    //             }
-                    //         }
-                    //         m.energy = energy //return to current energy
-                    //         document.getElementById("pause-field").innerHTML = `<div class="card-text"> <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>${m.fieldUpgrades[m.fieldMode].description}</div>`
-                    //     });
-
-                    //     document.getElementById("pause-field-next").addEventListener("click", () => {
-                    //         const energy = m.energy //save current energy
-                    //         if (m.fieldMode === 4 && simulation.molecularMode < 3) {
-                    //             simulation.molecularMode++
-                    //             m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
-                    //         } else {
-                    //             m.setField((m.fieldMode === m.fieldUpgrades.length - 1) ? 1 : m.fieldMode + 1) //cycle to next field, skip field emitter
-                    //             if (m.fieldMode === 4) {
-                    //                 simulation.molecularMode = 0
-                    //                 m.fieldUpgrades[4].description = m.fieldUpgrades[4].setDescription()
-                    //             }
-                    //         }
-                    //         m.energy = energy //return to current energy
-                    //         document.getElementById("pause-field").innerHTML = `<div class="card-text"> <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div> ${m.fieldUpgrades[m.fieldMode].description}</div>`
-                    //     });
-                    // }
                 }
             }
             break
@@ -1465,9 +1440,14 @@ window.addEventListener("keydown", function (event) {
             //     // so the listener we added will just be garbage collected. No cleanup needed.
             //     console.error('Error attempting to enable fullscreen:', err);
             // });
+            const hasPointerLock = () => {
+                return 'pointerLockElement' in document ||
+                    'mozPointerLockElement' in document ||
+                    'webkitPointerLockElement' in document;
+            };
 
-            if (document.activeElement !== document.getElementById('sort-input')) {//not typing "o" in the sort text menu
-                if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen  
+            if (document.activeElement !== document.getElementById('sort-input') && hasPointerLock()) {//not typing "o" in the sort text menu
+                if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen
                     document.exitPointerLock();
                     mouseMove.isPointerLocked = false
                     mouseMove.reset()
@@ -1590,7 +1570,11 @@ window.addEventListener("keydown", function (event) {
                     <td class='key-used'>zoom out / in</td>
                 </tr>
                 <tr>
-                    <td class='key-input-pause'>1-9</td>
+                    <td class='key-input-pause'>9</td>
+                    <td class='key-used'>level warp</td>
+                </tr>
+                <tr>
+                    <td class='key-input-pause'>1-8</td>
                     <td class='key-used'>spawn things</td>
                 </tr>
                 <tr>

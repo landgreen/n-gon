@@ -1,37 +1,45 @@
 ******************************************************** NEXT PATCH **************************************************
 
+new community levels:
+  turbine by Desboot
+  intervals by Destiny
 
+tech: shotgun shell - in pause menu swap shotgun tech
+tech: rifling - shotgun slider (spread vs. bullets)
+tech: prototypes - dropdown menu to pick bot upgrade
+  original prototypes tech renamed BEAM robotics
+fieldtech: Hall effect - while perfect diamagnetism is active and you are not touching the ground get energy generation
+
+deprecated was removed, it was too easy to exploit
+symbiosis has fewer research, and 0.25->0.5 health lost per mob killed
+metamaterial cloaking 0.4->0.5 damage reduction
+metamaterial absorber 40->44% chance to spawn power up
 
 bug fixes
-  inverse slider no updating text, in game with standing wave, harpoon and 30 other tech
+  inductive charging works while ledge grabbing with nitinol
+  disabled using inputs if they are .isLost (removed)
+  in experiment when you press bot or dupe it didn't sort
+  inverse slider wasn't updating text
   pause menu left is updating properly
-  https://landgreen.github.io/n-gon/index.html?&seed=66751&gun0=harpoon&gun1=drones&tech0=inverse&tech1=tungsten%20carbide&tech2=electronegativity&tech3=von%20Neumann%20probe&tech4=autonomous%20defense&tech5=zero%20point%20energy&tech6=maul&tech7=tessellation&tech8=frequentist&tech9=brittle&tech10=ceramics&tech11=spherical%20harmonics&tech12=smelting&tech13=smelting&tech14=alternator&tech15=rebar&tech16=pair%20production&tech17=UHMWPE&tech18=expansion&tech19=filament&tech20=spalling&tech21=wear&tech22=options%20exchange&molMode=3&field=standing%20wave&difficulty=5
-
   
 *********************************************************** TODO *****************************************************
 
+
+fieldtech:  quantum tunneling - become invulnerable for 1s after pressing down
+  cost 5 energy?
+  3 second cooldown?
+    how to show cooldown timer?
+      maybe change color of the energy bar?
+  for wormhole, pilot wave,  grappling hook?
+  
 make mob invulnerability more obvious
   flashing white?
   thicker stroke
-
-!new input tech ideas
-  names: involution (function that is it's own inverse, like 1/x), modus tollens (If P, then Q. Not Q. Therefore, not P.), modus ponens (If P, then Q. P. Therefore, Q.)
-  slider health/?
-    energy?
-  set drone AI behaviors
-    checkboxes: power up pick up, targeting mobs, follow mouse, focus bosses
-    slider: damage/duration, speed/mass(damage)
-  switch all bots to a type (also switch the upgrade type)
-    a drop down menus for bots type
-
-improve the functionality of the pause menu
-  how?
 
 tech:   - your next bullet has 5x mass    <br>5 second cooldown
   does this work for all bullets?
     might need special code for grenades/missile and spores/worm/fleas
   add em right text to show CD status
-
 
 
 tech:   - clicking cancel has a % chance to spawn a tech, gun or field
@@ -1622,14 +1630,10 @@ possible names for tech
   involution (function that is it's own inverse, like 1/x)
   modus tollens (If P, then Q. Not Q. Therefore, not P.)
   modus ponens (If P, then Q. P. Therefore, Q.)
+  parsimony - just means Occam's razor
+  
 
 ******************************************************* DESIGN ******************************************************
-
-n-gon long term goals
-  more wild synergies, less balanced for rare combos
-  more subtle lore hints and world building
-  more secrets
-  more indication of when things occur
 
 priorities    
   synergies between tech
@@ -1637,11 +1641,8 @@ priorities
   randomized content that adds repeatability
     bosses, mobs, levels, tech
   graphical indicators of tech effects and quantity
-  subtle lore woven into unexpected places
-
-add more randomize sub level map content
-  left/right sides of lock
-  small lab rooms
+  clarity of mechanics
+  subtle lore and world building woven into unexpected places
 
 list of powerful synergies
   CPT + high energy regen

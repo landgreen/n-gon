@@ -1364,7 +1364,7 @@ const mobs = {
                     }
                     if (tech.isAddRemoveMaxHealth) {
                         if (!this.isBoss) {
-                            const amount = 0.0025
+                            const amount = 0.005
                             if (tech.isEnergyHealth) {
                                 if (m.maxEnergy > amount) {
                                     tech.healMaxEnergyBonus -= amount

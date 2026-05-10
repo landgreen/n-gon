@@ -6177,14 +6177,14 @@ const b = {
                 let knock, spread
                 const coolDown = function () {
                     if (m.crouch) {
-                        spread = 0.65
+                        spread = 0.65 * tech.riflingSpread
                         m.fireCDcycle = m.cycle + Math.floor((73 + 36 * tech.shotgunExtraShots) * b.fireCDscale) // cool down
                         if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(60 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(60 * b.fireCDscale); //player is immune to damage for 30 cycles
                         knock = 0.01
                     } else {
                         m.fireCDcycle = m.cycle + Math.floor((56 + 28 * tech.shotgunExtraShots) * b.fireCDscale) // cool down
                         if (tech.isShotgunImmune && m.immuneCycle < m.cycle + Math.floor(47 * b.fireCDscale)) m.immuneCycle = m.cycle + Math.floor(47 * b.fireCDscale); //player is immune to damage for 30 cycles
-                        spread = 1.3
+                        spread = 1.3 * tech.riflingSpread
                         knock = 0.1
                     }
 
@@ -6201,13 +6201,14 @@ const b = {
                     }
                 }
                 const spray = (num) => {
+                    num *= tech.rifling
                     const side = 22
                     for (let i = 0; i < num; i++) {
                         const me = bullet.length;
                         const dir = m.angle + (Math.random() - 0.5) * spread
                         bullet[me] = Bodies.rectangle(m.pos.x, m.pos.y, side, side, b.fireAttributes(dir));
                         Composite.add(engine.world, bullet[me]); //add bullet to world
-                        const SPEED = 52 + Math.random() * 8
+                        const SPEED = 32 + Math.random() * 8 + 20 / tech.rifling
                         Matter.Body.setVelocity(bullet[me], {
                             x: SPEED * Math.cos(dir),
                             y: SPEED * Math.sin(dir)
@@ -6226,13 +6227,13 @@ const b = {
                 const chooseBulletType = function () {
                     if (tech.isLaserShot) {
                         simulation.ephemera.push({
-                            count: 150 * tech.bulletsLastLonger, //cycles before it self removes
+                            count: 150 * tech.bulletsLastLonger * Math.max(1, tech.rifling), //cycles before it self removes
                             where: { x: m.pos.x + 15 * Math.cos(m.angle), y: m.pos.y + 15 * Math.sin(m.angle) },
                             end: {
                                 x: m.pos.x + 5000 * Math.cos(m.angle),
                                 y: m.pos.y + 5000 * Math.sin(m.angle)
                             },
-                            dmg: 0.23 * (tech.isShotgunReversed ? 1.5 : 1), //normal laser is 0.18
+                            dmg: 0.23 * (tech.isShotgunReversed ? 1.5 : 1) / Math.min(1, tech.rifling), //normal laser is 0.18
                             angle: m.angle,
                             cleared: level.levelsCleared,
                             // color: "#0f8",
@@ -6244,12 +6245,12 @@ const b = {
                                 //!(simulation.cycle % 10)
                                 const color = `hsl(${340 + 40 * Math.sin(simulation.cycle * 0.3)}, 100%, 50%)`
                                 ctx.strokeStyle = color
-                                ctx.lineWidth = 4
+                                ctx.lineWidth = 4 / Math.min(1, tech.rifling)
                                 // ctx.globalAlpha = 0.5;
                                 ctx.beginPath();
                                 b.laser(this.where, this.end, this.dmg, tech.laserReflections, true, 1, color);
                                 if (tech.beamSplitter) {
-                                    let spread = 0.05
+                                    let spread = 0.05 * tech.riflingSpread
                                     for (let i = 0; i < tech.beamSplitter; i++) {
                                         b.laser(this.where, {
                                             x: this.where.x + 5000 * Math.cos(this.angle + spread),
@@ -6290,7 +6291,7 @@ const b = {
 
                         Matter.Body.setDensity(bullet[me], 0.005 * (tech.isShotgunReversed ? 1.5 : 1));
                         Composite.add(engine.world, bullet[me]); //add bullet to world
-                        const SPEED = (m.crouch ? 50 : 43)
+                        const SPEED = (m.crouch ? 50 : 43) / Math.min(Math.sqrt(tech.rifling), 0.9)
                         Matter.Body.setVelocity(bullet[me], {
                             x: SPEED * Math.cos(m.angle),
                             y: SPEED * Math.sin(m.angle)
@@ -6339,10 +6340,10 @@ const b = {
                         }
                         spray(12); //fires normal shotgun bullets
                     } else if (tech.isIncendiary) {
-                        spread *= 0.15
-                        const END = Math.floor(m.crouch ? 8 : 5);
-                        const totalBullets = 9
-                        const angleStep = (m.crouch ? 0.3 : 0.8) / totalBullets
+                        spread *= 0.15 * tech.riflingSpread
+                        const END = Math.floor(m.crouch ? 8 : 5) / tech.rifling
+                        const totalBullets = 9 * tech.rifling
+                        const angleStep = (m.crouch ? 0.3 : 0.8) / totalBullets * tech.riflingSpread
                         let dir = m.angle - angleStep * totalBullets / 2;
                         for (let i = 0; i < totalBullets; i++) { //5 -> 7
                             dir += angleStep
@@ -6350,7 +6351,7 @@ const b = {
                             bullet[me] = Bodies.rectangle(m.pos.x + 50 * Math.cos(m.angle), m.pos.y + 50 * Math.sin(m.angle), 17, 4, b.fireAttributes(dir));
                             const end = END + Math.random() * 4
                             bullet[me].endCycle = 2 * end * tech.bulletsLastLonger + simulation.cycle
-                            const speed = 25 * end / END
+                            const speed = 15 * end / END + 10 / tech.rifling
                             const dirOff = dir + (Math.random() - 0.5) * spread
                             Matter.Body.setVelocity(bullet[me], {
                                 x: speed * Math.cos(dirOff),
@@ -6368,11 +6369,12 @@ const b = {
                             Composite.add(engine.world, bullet[me]); //add bullet to world
                         }
                     } else if (tech.isNailShot) {
-                        spread *= 0.65
+                        spread *= 0.65 * tech.riflingSpread
                         const dmg = 2 * (tech.isShotgunReversed ? 1.5 : 1)
+                        const num = 17 * tech.rifling
                         if (m.crouch) {
-                            for (let i = 0; i < 17; i++) {
-                                speed = 38 + 15 * Math.random()
+                            for (let i = 0; i < num; i++) {
+                                speed = 20 + 15 * Math.random() + 18 / tech.rifling
                                 const dir = m.angle + (Math.random() - 0.5) * spread
                                 const pos = {
                                     x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
@@ -6384,8 +6386,8 @@ const b = {
                                 }, dmg)
                             }
                         } else {
-                            for (let i = 0; i < 17; i++) {
-                                speed = 38 + 15 * Math.random()
+                            for (let i = 0; i < num; i++) {
+                                speed = 20 + 15 * Math.random() + 18 / tech.rifling
                                 const dir = m.angle + (Math.random() - 0.5) * spread
                                 const pos = {
                                     x: m.pos.x + 35 * Math.cos(m.angle) + 15 * (Math.random() - 0.5),
@@ -6402,10 +6404,10 @@ const b = {
                             x: m.pos.x + 35 * Math.cos(m.angle),
                             y: m.pos.y + 35 * Math.sin(m.angle)
                         }
-                        const number = 2 * (tech.isShotgunReversed ? 1.5 : 1)
+                        const number = 2 * (tech.isShotgunReversed ? 1.5 : 1) * Math.max(tech.rifling, 1)
                         for (let i = 0; i < number; i++) {
                             const angle = m.angle + 0.2 * (Math.random() - 0.5)
-                            const speed = (m.crouch ? 35 * (1 + 0.05 * Math.random()) : 30 * (1 + 0.15 * Math.random()))
+                            const speed = (m.crouch ? 35 * (1 + 0.05 * Math.random()) : 30 * (1 + 0.15 * Math.random())) / Math.sqrt(tech.rifling)
                             b.flea(where, {
                                 x: speed * Math.cos(angle),
                                 y: speed * Math.sin(angle)
@@ -6418,12 +6420,12 @@ const b = {
                             x: m.pos.x + 35 * Math.cos(m.angle),
                             y: m.pos.y + 35 * Math.sin(m.angle)
                         }
-                        const spread = (m.crouch ? 0.02 : 0.07)
-                        const number = 3 * (tech.isShotgunReversed ? 1.5 : 1)
+                        const spread = (m.crouch ? 0.02 : 0.07) * tech.riflingSpread
+                        const number = 3 * (tech.isShotgunReversed ? 1.5 : 1) * Math.max(tech.rifling, 1)
                         let angle = m.angle - (number - 1) * spread * 0.5
                         for (let i = 0; i < number; i++) {
                             b.worm(where)
-                            const SPEED = (30 + 10 * m.crouch) * (1 + 0.2 * Math.random())
+                            const SPEED = (15 + 10 * m.crouch + 15 / tech.rifling) * (1 + 0.2 * Math.random())
                             Matter.Body.setVelocity(bullet[bullet.length - 1], {
                                 x: player.velocity.x * 0.5 + SPEED * Math.cos(angle),
                                 y: player.velocity.y * 0.5 + SPEED * Math.sin(angle)
@@ -6432,20 +6434,25 @@ const b = {
                         }
                         spray(7); //fires normal shotgun bullets
                     } else if (tech.isIceShot) {
-                        const spread = (m.crouch ? 0.7 : 1.2)
-                        for (let i = 0, len = 10 * (tech.isShotgunReversed ? 1.5 : 1); i < len; i++) {
-                            b.iceIX(23 + 10 * Math.random(), m.angle + spread * (Math.random() - 0.5))
+                        const spread = (m.crouch ? 0.7 : 1.2) * tech.riflingSpread
+                        const number = 10 * (tech.isShotgunReversed ? 1.5 : 1) * tech.rifling
+                        for (let i = 0; i < number; i++) {
+                            b.iceIX(13 + 10 * Math.random() + 10 / tech.rifling, m.angle + spread * (Math.random() - 0.5))
+                            Matter.Body.setVelocity(bullet[bullet.length - 1], { //friction
+                                x: bullet[bullet.length - 1].velocity.x / tech.rifling,
+                                y: bullet[bullet.length - 1].velocity.y / tech.rifling
+                            });
                         }
                         spray(10); //fires normal shotgun bullets
                     } else if (tech.isFoamShot) {
-                        const spread = (m.crouch ? 0.15 : 0.4)
+                        const spread = (m.crouch ? 0.15 : 0.4) * tech.riflingSpread
                         const where = {
                             x: m.pos.x + 25 * Math.cos(m.angle),
                             y: m.pos.y + 25 * Math.sin(m.angle)
                         }
-                        const number = 16 * (tech.isShotgunReversed ? 1.5 : 1)
+                        const number = 16 * (tech.isShotgunReversed ? 1.5 : 1) * tech.rifling
                         for (let i = 0; i < number; i++) {
-                            const SPEED = 13 + 4 * Math.random();
+                            const SPEED = (4 * Math.random() + 14) / Math.pow(tech.rifling, 1)
                             const angle = m.angle + spread * (Math.random() - 0.5)
                             b.foam(where, {
                                 x: 0.6 * player.velocity.x + SPEED * Math.cos(angle),
@@ -6453,8 +6460,8 @@ const b = {
                             }, 8 + 7 * Math.random())
                         }
                     } else if (tech.isNeedles) {
-                        const number = 9 * (tech.isShotgunReversed ? 1.5 : 1)
-                        const spread = (m.crouch ? 0.03 : 0.05)
+                        const spread = (m.crouch ? 0.03 : 0.05) * tech.riflingSpread
+                        const number = 9 * (tech.isShotgunReversed ? 1.5 : 1) * tech.rifling
                         let angle = m.angle - (number - 1) * spread * 0.5
                         for (let i = 0; i < number; i++) {
                             b.needle(angle)

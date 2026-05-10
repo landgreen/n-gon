@@ -3996,7 +3996,7 @@ const m = {
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
                     if (m.immuneCycle < m.cycle) {
                         m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge) * level.isReducedRegen
-                        for (let i = 0; i < 3; i++) simulation.energyGenGraphic()
+                        for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
                     }
                     m.throwCharge = 0;
                     m.definePlayerMass() //return to normal player mass
@@ -5057,7 +5057,7 @@ const m = {
                     } else if (input.field) { //not hold but field button is pressed
                         //float while field is on
                         const angleReduction = 0.5 + 0.7 * (Math.PI / 2 - Math.min(Math.PI / 2, Math.abs(m.angle + Math.PI / 2)))
-                        // console.log(angleReduction)
+
                         if (player.velocity.y > 1) {
                             player.force.y -= angleReduction * (tech.isBigField ? 0.95 : 0.5) * player.mass * simulation.g;
 
@@ -5068,6 +5068,12 @@ const m = {
                                 player.force.x -= pushX
                             }
                             Matter.Body.setVelocity(player, { x: player.velocity.x, y: 0.98 * player.velocity.y });
+                            if (tech.isFloatEnergy) {
+                                if (m.immuneCycle < m.cycle) {
+                                    m.energy += 12 * m.fieldRegen * level.isReducedRegen;
+                                    if (!(simulation.cycle % 6)) simulation.energyGenGraphic()
+                                }
+                            }
                         }
 
                         if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
@@ -6311,7 +6317,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking",
-            description: `<strong>0.4x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`,
+            description: `<strong>0.5x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4.5x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`,
             keyLog: [null, null, null, null, null],
             smallFieldRadius: 130,
             effect: () => {
@@ -6383,7 +6389,7 @@ const m = {
                         if (!m.isCloak) { //&& m.energy > drain + 0.03
                             // m.energy -= drain
                             m.isCloak = true //enter cloak
-                            m.fieldHarmReduction = 0.4;
+                            m.fieldHarmReduction = 0.5;
                             m.enterCloakCycle = m.cycle
                             if (tech.isCloakHealLastHit && m.lastHit > 0) {
                                 const heal = Math.min(0.75 * m.lastHit, m.energy)
