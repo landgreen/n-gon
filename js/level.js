@@ -9,6 +9,7 @@ const level = {
     onLevel: -1,
     levelsCleared: 0,
     isFlipped: false,
+    isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure"],
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine"],
@@ -34,7 +35,7 @@ const level = {
             // tech.addJunkTechToPool(0.5)
             // m.couplingChange(100)
             // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+            // m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
             // m.energy = m.maxEnergy = 12.2
             // m.energy += 1
             // m.couplingChange(1000)
@@ -45,6 +46,7 @@ const level = {
             // m.damageDone *= 1000
 
             // m.maxHealth = m.health = 1000000
+            // m.energy = m.health = 0.000001
             // m.displayHealth();
             // m.immuneCycle = Infinity //you can't take damage
             // m.maxEnergy = m.energy = 10000000
@@ -54,33 +56,41 @@ const level = {
             // simulation.molecularMode = 2
             // m.takeDamage(0.01);
 
-            // b.giveGuns(1) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns(2)
+            // b.giveGuns(11) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+            // b.giveGuns(4)
             // b.giveGuns(5)
+            // b.giveGuns(6)
+            // b.giveGuns(10)
+            // b.giveGuns(0)
+            // b.giveGuns(2)
+            // b.giveGuns(3)
+            // b.giveGuns(7)
+            // b.giveGuns(8)
+            // b.giveGuns(11)
             // b.guns[b.inventory[0]].ammo = 10000000
             // tech.addJunkTechToPool(0.5)
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("needle gun") });
+            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect") });
             // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory") });
             // for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory")
             // for (let i = 0; i < 1; ++i) tech.giveTech("shotgun shell")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Hall effect")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("paradigm shift")
-            // for (let i = 0; i < 1; i++) tech.giveTech("prototypes")
-            // // for (let i = 0; i < 1; i++) tech.giveTech("deprecated")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("rotary cannon")
+            // for (let i = 0; i < 1; ++i) tech.giveTech("salvo")
+            // for (let i = 0; i < 1; i++) tech.giveTech("incendiary ammunition")
+            // for (let i = 0; i < 1; i++) tech.giveTech("anthropic principle")
             // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
             // level.levelsCleared = 7
             // simulation.isHorizontalFlipped = true
             // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.warehouse()
+            // level.interferometer()
             // level.testing()
 
             level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
 
             // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-            // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
+            // requestAnimationFrame(() => { powerUps.spawnDelay("research", 10); });
             // spawn.randomGroup(1300, -200, Infinity);
             // spawn.nodeGroup(1300, -200, 'grower');
-            // for (let i = 0; i < 10; i++) spawn.starter(1300 + 10 * i, -200)
+            // for (let i = 0; i < 3; i++) spawn.starter(1300 + 10 * i, -200)
             // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
             // Matter.Body.setPosition(player, { x: -27000, y: -400 });
             // m.storeTech() //sets entanglement
@@ -133,21 +143,31 @@ const level = {
         tech.isDeathTechTriggered = false
         if (m.health < 0 && tech.isNoDeath) { //needed for quantum Zeno effect
             if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) {
+
+                m.health = 0.01
                 tech.isDeathAvoidedThisLevel = true
-                m.health = 0.05
                 powerUps.research.changeRerolls(-1)
                 simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
-                if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
+                setTimeout(function () {
+                    powerUps.spawnDelay("heal", 16, 8);//(type, count, delay = 2, location = m.pos) {
+                }, 800);
+                simulation.ephemera.push({
+                    levelsCleared: level.levelsCleared,
+                    do() {
+                        m.timeStop(Math.random() < 0.1 ? "#00cccc55" : "#ccc")
+                        if (m.health > 0.9 || this.levelsCleared !== level.levelsCleared) {
+                            m.wakeCheck(false); //unpause time
+                            simulation.removeEphemera(this);
+                            simulation.wipe = function () { //set wipe to normal
+                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                            }
+                        }
+                    },
+                });
                 simulation.wipe = function () { //set wipe to have trails
-                    ctx.fillStyle = "rgba(255,255,255,0.03)";
+                    ctx.fillStyle = "rgba(255,255,255,0.3)";
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                 }
-                setTimeout(function () {
-                    simulation.wipe = function () { //set wipe to normal
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                }, 3000);
             } else {
                 m.health = 0;
                 m.displayHealth();
@@ -1223,7 +1243,8 @@ const level = {
                 player.position.x < level.exit.x + 100 &&
                 player.position.y > level.exit.y - 250 &&
                 player.position.y < level.exit.y + 35 &&
-                player.velocity.y < 0.15
+                player.velocity.y < 0.15 &&
+                !level.isFlipping
             ) {
                 // level.exitCount += input.down ? 8 : 2
                 level.exitCount += m.health < 0 ? 0.5 : 3
@@ -7825,7 +7846,7 @@ const level = {
         let balance = []
         let boost = []
         level.isFlipped = false;
-        let isFlipping = false;
+        level.isFlipping = false;
         let isSpawned = false
         const flipAnimationCycles = 120
 
@@ -7934,7 +7955,7 @@ const level = {
                         // for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
                         buttons[0].isUp = true
                         simulation.removeEphemera(this);
-                        isFlipping = false
+                        level.isFlipping = false
                     }
                 },
             })
@@ -8017,9 +8038,9 @@ const level = {
                 do() {
                     this.count--
                     if (this.count < 0) {
-                        buttons[0].isUp = true
+                        if (buttons[0]) buttons[0].isUp = true
                         simulation.removeEphemera(this);
-                        isFlipping = false
+                        level.isFlipping = false
                     }
                 },
             })
@@ -8165,10 +8186,10 @@ const level = {
             buttons[1].draw()
             buttons[1].query();
             buttons[0].draw()
-            if (buttons[0].isUp && !isFlipping) {
+            if (buttons[0].isUp && !level.isFlipping) {
                 buttons[0].queryPlayer();
                 if (!buttons[0].isUp) {
-                    isFlipping = true
+                    level.isFlipping = true
                     if (level.isFlipped) {
                         const normalMap = function () {
                             level.isFlipped = false
@@ -8402,7 +8423,7 @@ const level = {
         } else {
             level.isFlipped = false
         }
-        let isFlipping = false;
+        level.isFlipping = false;
         const flipAnimationCycles = 60
 
         let buildMapOutline = function () {
@@ -8427,7 +8448,7 @@ const level = {
                     if (this.count < 0) {
                         for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
                         simulation.removeEphemera(this);
-                        isFlipping = false
+                        level.isFlipping = false
                     }
                 },
             })
@@ -8489,7 +8510,7 @@ const level = {
                     if (this.count < 0) {
                         for (let i = 0; i < buttons.length; i++) buttons[i].isUp = true
                         simulation.removeEphemera(this);
-                        isFlipping = false
+                        level.isFlipping = false
                     }
                 },
             })
@@ -8637,11 +8658,11 @@ const level = {
             }
             for (let i = 0; i < buttons.length; i++) {
                 buttons[i].draw()
-                if (buttons[i].isUp && !isFlipping) {
+                if (buttons[i].isUp && !level.isFlipping) {
                     // buttons[i].query();
                     buttons[i].queryPlayer();
                     if (!buttons[i].isUp) {
-                        isFlipping = true
+                        level.isFlipping = true
                         if (level.isFlipped) {
                             const normalMap = function () {
                                 level.isFlipped = false

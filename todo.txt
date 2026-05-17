@@ -1,36 +1,36 @@
 ******************************************************** NEXT PATCH **************************************************
 
-new community levels:
-  turbine by Desboot
-  intervals by Destiny
 
-tech: shotgun shell - in pause menu swap shotgun tech
-tech: rifling - shotgun slider (spread vs. bullets)
-tech: prototypes - dropdown menu to pick bot upgrade
-  original prototypes tech renamed BEAM robotics
-fieldtech: Hall effect - while perfect diamagnetism is active and you are not touching the ground get energy generation
+tech: salvo - fire all the guns in your inventory
+tech: cargo get 2 guns, expend 3 research
+tech: Majorana fermion - pressing down makes you briefly invulnerable
+  requires other invulnerability tech
 
-deprecated was removed, it was too easy to exploit
-symbiosis has fewer research, and 0.25->0.5 health lost per mob killed
-metamaterial cloaking 0.4->0.5 damage reduction
-metamaterial absorber 40->44% chance to spawn power up
+anthropic principle pauses time until you heal to full
+incendiary ammunition makes shotgun explode for all variants
+rotary cannon and pneumatic actuator are compatible
+running out of laser energy no longer triggers a 100 cycle CD
+spore inherit the velocity of the block they were stuck to when they spawn
+output coupler now stacks to 99
 
 bug fixes
-  inductive charging works while ledge grabbing with nitinol
-  disabled using inputs if they are .isLost (removed)
-  in experiment when you press bot or dupe it didn't sort
-  inverse slider wasn't updating text
-  pause menu left is updating properly
+  ionization energy converts current heal power ups into Casimir power ups
+  spawning a bullet directly on top of a mob while time dilated no longer does damage until time resumes
+  you can no longer exit a level while in the process of vertical flipping
+  technical intelligence no longer gives a bonus when swapping tech with shotgun shell
   
 *********************************************************** TODO *****************************************************
 
 
-fieldtech:  quantum tunneling - become invulnerable for 1s after pressing down
-  cost 5 energy?
-  3 second cooldown?
-    how to show cooldown timer?
-      maybe change color of the energy bar?
-  for wormhole, pilot wave,  grappling hook?
+tech: self locating uncertainty - players have some control over switchWorlds()
+  how?
+    input
+      button to reroll upto 10 times
+         maybe spend research to reroll
+      check boxes to control what aspects are rerolled
+        gun, field, tech, health, energy, coupling, research, ...
+    when do they get this tech?
+        requires: any alternate reality tech
   
 make mob invulnerability more obvious
   flashing white?

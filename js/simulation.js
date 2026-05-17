@@ -902,6 +902,7 @@ const simulation = {
         simulation.lastLogTime = 0;
         mobs.mobDeaths = 0
         level.isFlipped = false
+        level.isFlipping = false;
         level.onLevel = 0;
         level.levelsCleared = 0;
         level.updateDifficulty()

@@ -311,7 +311,7 @@ function collisionChecks(event) {
                         // }
                     } else {
                         //mob + bullet collisions
-                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed) {
+                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed && !m.isTimeDilated) {
                             obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
                             let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4

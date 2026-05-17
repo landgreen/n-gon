@@ -642,7 +642,7 @@ const m = {
         if (tech.isHarmReduce && input.field) dmg *= 0.1
         if (tech.isNeutronium && input.field && m.fieldCDcycle < m.cycle) dmg *= 0.05
         if (tech.isBotArmor) dmg *= 0.96 ** b.totalBots()
-        if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.4;
+        if (tech.isHarmArmor && m.lastHarmCycle + 600 > m.cycle) dmg *= 0.5;
         if (tech.isNoFireDefense && m.cycle > m.fireCDcycle + 120) dmg *= 0.3
         if (tech.isTurret && m.crouch) dmg *= 0.3;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
@@ -756,6 +756,32 @@ const m = {
             }
         }
     },
+    timeStop(fill = "#ccc") {
+        m.immuneCycle = m.cycle + 10; //invulnerable to harm while time is stopped,  this also disables regen
+        //draw field everywhere
+        ctx.globalCompositeOperation = "saturation"
+        ctx.fillStyle = fill;
+        ctx.fillRect(-50000, -50000, 100000, 100000)
+        ctx.globalCompositeOperation = "source-over"
+        //stop time
+        m.isTimeDilated = true;
+
+        function sleep(who) {
+            for (let i = 0, len = who.length; i < len; ++i) {
+                if (!who[i].isSleeping) {
+                    who[i].storeVelocity = who[i].velocity
+                    who[i].storeAngularVelocity = who[i].angularVelocity
+                }
+                Matter.Sleeping.set(who[i], true)
+            }
+        }
+        sleep(mob);
+        sleep(body);
+        // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, 'before')
+        sleep(bullet);
+        // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, "after")
+        simulation.cycle--; //pause all functions that depend on game cycle increasing
+    },
     collisionImmuneCycles: 30,
     takeDamage(dmg, isDefense = true) {
         if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
@@ -801,10 +827,13 @@ const m = {
 
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
+
+
+
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 22; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
+                    powerUps.spawnDelay("heal", 16, 8);//(type, count, delay = 2, location = m.pos) {
                     m.energy = m.maxEnergy + 0.1
                     if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
                     simulation.wipe = function () { //set wipe to have trails
@@ -816,6 +845,9 @@ const m = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
+
+
+
                 } else { //death
                     m.health = 0;
                     m.energy = 0;
@@ -848,21 +880,33 @@ const m = {
             }
             if (m.health < 0 || isNaN(m.health)) {
                 if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) { //&& Math.random() < 0.5
+
+                    m.health = 0.01
                     tech.isDeathAvoidedThisLevel = true
-                    m.health = 0.05
                     powerUps.research.changeRerolls(-1)
                     simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                    for (let i = 0; i < 16; i++) powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal", false);
-                    if (m.immuneCycle < m.cycle + 300) m.immuneCycle = m.cycle + 300 //disable this.immuneCycle bonus seconds
+                    setTimeout(function () {
+                        powerUps.spawnDelay("heal", 16, 8);//(type, count, delay = 2, location = m.pos) {
+                    }, 800);
+                    simulation.ephemera.push({
+                        levelsCleared: level.levelsCleared,
+                        do() {
+                            m.timeStop(Math.random() < 0.1 ? "#00cccc55" : "#ccc")
+                            if (m.health > 0.9 || this.levelsCleared !== level.levelsCleared) {
+                                m.wakeCheck(false); //unpause time
+                                simulation.removeEphemera(this);
+                                simulation.wipe = function () { //set wipe to normal
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                }
+                            }
+                        },
+                    });
                     simulation.wipe = function () { //set wipe to have trails
-                        ctx.fillStyle = "rgba(255,255,255,0.03)";
+                        ctx.fillStyle = "rgba(255,255,255,0.3)";
                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                     }
-                    setTimeout(function () {
-                        simulation.wipe = function () { //set wipe to normal
-                            ctx.clearRect(0, 0, canvas.width, canvas.height);
-                        }
-                    }, 3000);
+
+
                 } else if (tech.isNoDeath) {
                     if (tech.isDeathTech && !tech.isDeathTechTriggered) {
                         tech.isDeathTechTriggered = true
@@ -2479,7 +2523,7 @@ const m = {
         },
         energy() {
             m.isAltSkin = true
-            m.squirrelFx = 1.33;
+            m.squirrelFx = 1.22;
             m.squirrelJump = 1.1;
             m.setMovement()
 
@@ -6116,33 +6160,6 @@ const m = {
                 // m.fieldJump = 1.09
                 m.setMovement();
                 b.setFireCD()
-
-                const timeStop = () => {
-                    m.immuneCycle = m.cycle + 10; //invulnerable to harm while time is stopped,  this also disables regen
-                    //draw field everywhere
-                    ctx.globalCompositeOperation = "saturation"
-                    ctx.fillStyle = "#ccc";
-                    ctx.fillRect(-50000, -50000, 100000, 100000)
-                    ctx.globalCompositeOperation = "source-over"
-                    //stop time
-                    m.isTimeDilated = true;
-
-                    function sleep(who) {
-                        for (let i = 0, len = who.length; i < len; ++i) {
-                            if (!who[i].isSleeping) {
-                                who[i].storeVelocity = who[i].velocity
-                                who[i].storeAngularVelocity = who[i].angularVelocity
-                            }
-                            Matter.Sleeping.set(who[i], true)
-                        }
-                    }
-                    sleep(mob);
-                    sleep(body);
-                    // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, 'before')
-                    sleep(bullet);
-                    // console.log(bullet[0].velocity, bullet[0].storeVelocity, bullet[0].isSleeping, "after")
-                    simulation.cycle--; //pause all functions that depend on game cycle increasing
-                }
                 if (m.fieldUpgrades[6].isRewindMode) {
                     this.rewindCount = 0
                     m.grabPowerUpRange2 = 600000
@@ -6164,7 +6181,7 @@ const m = {
 
                             if (!m.holdingTarget) {
                                 if (m.energy > drain) {
-                                    timeStop();
+                                    m.timeStop();
                                 } else { //holding, but field button is released
                                     m.fieldCDcycle = m.cycle + 120;
                                     m.energy = 0;
@@ -6231,7 +6248,7 @@ const m = {
                             this.rewindCount = 0;
                             m.wakeCheck();
                         } else if (tech.isTimeStop && player.speed < 1 && m.onGround && !input.fire) {
-                            timeStop();
+                            m.timeStop();
                             this.rewindCount = 0;
                         } else {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
@@ -6273,7 +6290,7 @@ const m = {
                             m.grabPowerUp();
                             m.lookForBlock(); //this drains energy 0.001
                             if (m.energy > drain) {
-                                timeStop();
+                                m.timeStop();
                             } else { //holding, but field button is released
                                 m.fieldCDcycle = m.cycle + 120;
                                 m.energy = 0;
@@ -6281,7 +6298,7 @@ const m = {
                                 m.wakeCheck();
                             }
                         } else if (tech.isTimeStop && player.speed < 1 && m.onGround && m.fireCDcycle < m.cycle && !input.fire) {
-                            timeStop();
+                            m.timeStop();
                             //makes things move at 1/5 time rate, but has an annoying flicker for mob graphics, and other minor bugs
                             // if (!(m.cycle % 4)) {
                             //     // requestAnimationFrame(() => {
@@ -6293,7 +6310,7 @@ const m = {
                             //     ctx.fillRect(-100000, -100000, 200000, 200000)
                             //     ctx.globalCompositeOperation = "source-over"
                             // } else {
-                            //     timeStop();
+                            //     m.timeStop();
                             // }
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.wakeCheck();
