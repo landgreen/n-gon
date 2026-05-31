@@ -2588,12 +2588,12 @@ const b = {
                 if (bestPowerUp.who) {
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (powerUp[i] === bestPowerUp.who && !simulation.isChoosing && (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal) && !(tech.isEnergyNoAmmo && powerUp[i].name === "ammo") && powerUp[i].cycle > 30 && !simulation.paused) {
-                            m.energy += 0.8
                             powerUps.onPickUp(powerUp[i]);
                             powerUp[i].effect();
                             Matter.Composite.remove(engine.world, powerUp[i]);
                             powerUp.splice(i, 1);
 
+                            m.energy += 0.8
                             simulation.energyGenGraphic()
                             simulation.energyGenGraphic()
                             return;
@@ -4235,6 +4235,7 @@ const b = {
             velocity = Vector.mult(velocity, 1.35)
             radius = 1.2 * radius + 13
         }
+        if (tech.nanoparticles === 7) velocity = Vector.mult(velocity, 2.5)
         // radius *= Math.sqrt(tech.bulletSize)
         const me = bullet.length;
         bullet[me] = Bodies.polygon(position.x, position.y, 20, radius, {
@@ -4243,7 +4244,7 @@ const b = {
             frictionAir: 0.003,
             dmg: 0, //damage on impact
             damage: tech.foamDamage * (tech.isFastFoam ? 2.8 : 1) * (tech.isBulletTeleport ? 1.53 : 1), //damage done over time
-            scale: 1 - 0.006 / tech.bulletsLastLonger * (tech.isFastFoam ? 1.65 : 1),
+            scale: 1 - 0.006 / tech.bulletsLastLonger * (tech.isFastFoam ? 1.65 : 1) / (tech.nanoparticles === 6 ? 1.6 : 1),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -4283,6 +4284,36 @@ const b = {
                     }
                     this.targetVertex = bestVertex
                     Matter.Body.setVelocity(this, { x: 0, y: 0 });
+                    if (tech.nanoparticles) {
+                        if (tech.nanoparticles === 1) {
+                            if (Math.random() < 0.45) b.explosion(this.position, 115 + 60 * Math.random());
+                        } else if (tech.nanoparticles === 2) {
+                            if (Math.random() < 0.3) b.isoWave360Solo(this.position, 400 * Math.sqrt(tech.bulletsLastLonger), tech.waveBeamSpeed)
+                        } else if (tech.nanoparticles === 3) {
+                            mobs.statusSlow(this.target, 300)
+                        } else if (tech.nanoparticles === 4) {
+                            if (m.immuneCycle < m.cycle) m.energy += 0.13
+                        } else if (tech.nanoparticles === 5) {
+                            if (Math.random() < 0.5) mobs.statusDoT(this.target, 3.6 * (tech.isFastRadiation ? 1.3 : 0.44), tech.isSlowRadiation ? 360 : (tech.isFastRadiation ? 60 : 180)) // one tick every 30 cycles
+                        } else if (tech.nanoparticles === 8) {
+                            if (Math.random() < 0.33) simulation.ephemera.push({
+                                count: 120, //cycles before it self removes
+                                cleared: level.levelsCleared,
+                                who: this,
+                                do() {
+                                    this.count--
+                                    if (this.count < 0 || this.cleared !== level.levelsCleared || !who.alive) {
+                                        simulation.removeEphemera(this)
+                                        return
+                                    }
+                                    const where = this.who.position
+                                    const sub = Vector.normalise(Vector.sub(where, who.position))
+                                    const end = Vector.add(where, Vector.mult(sub, 4000))
+                                    b.laser(Vector.add(where, Vector.mult(sub, 10)), end, 1.85 * tech.laserDamage);
+                                },
+                            })
+                        }
+                    }
                 }
             },
             onEnd() { },
@@ -6533,7 +6564,7 @@ const b = {
         }, {
             name: "super balls", //2
             descriptionFunction() {
-                return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong>, <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
+                return `fire <strong>3</strong> balls that retain<br><strong>momentum</strong> and <strong>kinetic energy</strong> after <strong>collisions</strong><br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> balls per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 4.05,
@@ -7527,7 +7558,7 @@ const b = {
                     const DRAIN = (tech.isRailEnergy ? 0 : 0.002)
                     //exit railgun charging without firing
                     if (m.energy < DRAIN) {
-                        m.fireCDcycle = m.cycle + 120; // cool down if out of energy
+                        // m.fireCDcycle = m.cycle + 120; // cool down if out of energy
                         this.endCycle = 0;
                         this.charge = 0
                         b.refundAmmo()

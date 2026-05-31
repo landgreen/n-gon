@@ -519,11 +519,12 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
 
 
         let text = `<div class="sort">
+        <button onclick="build.sortTech('PAUSE')" class='color-paused' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
     <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
     <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
     <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>dmg</strong></button>
-    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="font-weight: 100;">dmg taken</strong></button>
-    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>energy</strong></button>
+    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="font-weight: 100;">dmg</strong></button>
+    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>nrg</strong></button>
     <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
     <button onclick="build.sortTech('bot')" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
     <button onclick="build.sortTech('duplic')" class='sort-button'><strong class='color-dup'>dup</strong></button>
@@ -674,8 +675,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             tech.tech.sort(sortKeyword);
         } else if (find === 'duplic') {
             tech.tech.sort(sortKeyword);
-        } else if (find === 'input') {
-            find = document.getElementById("sort-input").value.toLowerCase();
+        } else if (find === 'PAUSE') {
             tech.tech.sort(sortKeyword);
         }
         if (isExperiment) {
@@ -900,14 +900,16 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         let text = `
 <div class="experiment-start-box">
     <div class="sort" style="border: 0px;">
+    <button onclick="build.sortTech('PAUSE', true)" class='color-paused' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
         <button onclick="build.sortTech('guntech', true)" class='sort-button'>${powerUps.orb.gunTech()}</button>
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
         <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>dmg</strong></button>
-        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="font-weight: 100;">dmg taken</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="font-weight: 100;">dmg</strong></button>
         <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='color-f'>energy</strong></button>
         <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h'>heal</strong></button>
         <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
         <button onclick="build.sortTech('duplic', true)" class='sort-button'><strong class='color-dup'>dup</strong></button>
+
         <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
     </div>

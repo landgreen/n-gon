@@ -494,9 +494,9 @@ const powerUps = {
  //this URL downloads newest version of n-gon 
  https://codeload.github.com/landgreen/n-gon/zip/refs/heads/master
 
-              <strong>chrome</strong>                     <strong>firefox</strong>
- <strong>Win/Linux:</strong> Ctrl + Shift + J        Ctrl + Shift + J
-       <strong>Mac:</strong> Cmd + Option + J        Cmd + Shift + J</pre></div><div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
+                         <strong>chrome</strong>                 <strong>firefox</strong>               <strong>safari</strong>
+ <strong>Win/Linux/ChromeOS:</strong> Ctrl + Shift + J       Ctrl + Shift + J      Ctrl + Alt + C
+              <strong>macOS:</strong> Cmd + Option + J       Cmd + Shift + J       Option + Cmd + C </pre></div><div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
             document.getElementById("choose-grid").innerHTML = text
             //show level info
             document.getElementById("choose-grid").style.opacity = "1"
@@ -1075,7 +1075,15 @@ const powerUps = {
         if (tech.isSuperDeterminism || type === "constraint" || type === "entanglement") {
             return `<div></div>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0) {
-            return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;"><span class="color-randomize">randomize</span></div>`
+            // return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;position: relative;"> <span class="display: block;color-randomize;text-align: center;" style="position: absolute; width: 100%; text-align: center; left: 0; top: 8px;">randomize</span> <span style="position: absolute; width: 100%; text-align: center; left: 0; bottom: 8px;">cancel</span> </div>`
+            // return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;"> <span class="display: block;color-randomize;text-align: center;">randomize</span> <span style="display: block; text-align: center;">cancel</span> </div>`
+            return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;"> <span class="color-randomize;">randomize</span></div>`
+            // return `<div class='cancel-card sticky' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;">
+            //     <span class="color-randomize" style="position: relative; display: inline-block;">
+            //         randomize
+            //         <span style="position: absolute; left: 0; top: 0;">cancel</span>
+            //     </span>
+            // </div>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) { //don't show cancel if on initial level and haven't done tutorial
             return `<div class='cancel-card sticky'  style="visibility: hidden;"></div>`
         } else {
@@ -1130,6 +1138,7 @@ const powerUps = {
             text += `<span class='cancel-card' style="width: 95px;float: right;background-color: #aaa;color:#888;">cancel</span>`
         } else if (tech.isCancelTech && tech.cancelTechCount === 0 && type !== "entanglement") {
             text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px;"><span class="color-randomize">randomize</span></span>`
+            // text += `<span class='cancel-card' onclick='powerUps.endDraft("${type}",true)' style="width: 115px;float: right;font-size:0.9em;padding-top:5px;"><span class="color-randomize" style="position: relative; display: inline-block;">randomize<span style="position: absolute; left: 0; top: 0; opacity: 0.5;font-weight:800;font-size:1.5em;font-family: Arial;">cancel</span></span></span>`
         } else if (level.levelsCleared === 0 && localSettings.isTrainingNotAttempted && b.inventory.length === 0) {
             text += `<span class='cancel-card' style="visibility: hidden;">cancel</span>` //don't show cancel if on initial level and haven't done tutorial
         } else {

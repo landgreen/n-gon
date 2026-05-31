@@ -324,7 +324,6 @@ const m = {
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
-        m.fieldUpgrades[4].endoThermic(0.7)
     },
     alive: false,
     isSwitchingWorlds: false,
@@ -466,7 +465,7 @@ const m = {
             m.eigen.swap()
             simulation.inGameConsole(`<em>//your other state died</em>`)
             simulation.inGameConsole(`<span class='color-var'>m</span>.eigen.isAlive<span class='color-symbol'>[</span>m.eigen.state<span class='color-var'>]</span> <span class='color-var'>=</span> false `)
-            m.addHealth(1)
+            // m.addHealth(1)
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].name === "eigenstate") {
                     powerUps.ejectTech(i)
@@ -828,8 +827,6 @@ const m = {
             if (m.energy < 0 || isNaN(m.energy)) { //taking deadly damage
                 if (tech.isDeathAvoid && powerUps.research.count && !tech.isDeathAvoidedThisLevel) {
 
-
-
                     tech.isDeathAvoidedThisLevel = true
                     powerUps.research.changeRerolls(-1)
                     simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
@@ -845,8 +842,6 @@ const m = {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
                         }
                     }, 3000);
-
-
 
                 } else { //death
                     m.health = 0;
@@ -2040,13 +2035,15 @@ const m = {
                     m.eigen.health[state] = m.health
                     m.eigen.energy[state] = m.energy
                 },
-                reset() {//runs at the start of a new level, and when you get this tech the first time
+                reset(isResetStats = true) {//runs at the start of a new level, and when you get this tech the first time
                     if (m.eigen.isAlive[m.eigen.state === 0 ? 1 : 0]) {
-                        m.eigen.health = []
-                        m.eigen.energy = []
-                        for (let i = 0; i < m.eigen.totalStates; i++) {
-                            m.eigen.health.push(m.health)
-                            m.eigen.energy.push(m.energy)
+                        if (isResetStats) {
+                            m.eigen.health = []
+                            m.eigen.energy = []
+                            for (let i = 0; i < m.eigen.totalStates; i++) {
+                                m.eigen.health.push(m.health)
+                                m.eigen.energy.push(m.energy)
+                            }
                         }
                         if (m.eigen.state === 1) {
                             m.eigen.draw = m.eigen.draw0
@@ -5639,6 +5636,7 @@ const m = {
                             }
                             Matter.Body.setVertices(m.holdingTarget, vertices)
                             m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                            m.fieldUpgrades[4].endoThermic(0.01)
                         }
                         m.throwBlock();
                     } else if ((input.field && m.fieldCDcycle < m.cycle)) { //not hold but field button is pressed
@@ -6599,7 +6597,7 @@ const m = {
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
-                            if (tech.isPrinter && m.holdingTarget.isPrinted && input.field) {
+                            if (tech.isPrinter && m.holdingTarget?.isPrinted && input.field) {
                                 // if (Math.random() < 0.004 && m.holdingTarget.vertices.length < 12) m.holdingTarget.vertices.push({ x: 0, y: 0 }) //small chance to increase the number of vertices
                                 m.holdingTarget.radius += Math.min(1.1, 1.3 / m.holdingTarget.mass) //grow up to a limit
                                 const r1 = m.holdingTarget.radius * (1 + 0.12 * Math.sin(m.cycle * 0.11))
@@ -6612,6 +6610,7 @@ const m = {
                                 }
                                 Matter.Body.setVertices(m.holdingTarget, vertices)
                                 m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                                m.fieldUpgrades[4].endoThermic(0.01)
                             }
                             m.throwBlock()
                         } else {

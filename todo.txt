@@ -1,25 +1,64 @@
 ******************************************************** NEXT PATCH **************************************************
 
+tech: zeitgeist - in the pause menu use a drop down menu to choose a tech that will eject at the start of the next level
+gunTech: nanoparticles - dropdown menu with various poorly balanced foam effects
+gunTech: UAV-swarm - convert your bots into missile bots, expend 1 research per conversion
+  renamed missile-bot to UAV
 
-tech: salvo - fire all the guns in your inventory
-tech: cargo get 2 guns, expend 3 research
-tech: Majorana fermion - pressing down makes you briefly invulnerable
-  requires other invulnerability tech
-
-anthropic principle pauses time until you heal to full
-incendiary ammunition makes shotgun explode for all variants
-rotary cannon and pneumatic actuator are compatible
-running out of laser energy no longer triggers a 100 cycle CD
-spore inherit the velocity of the block they were stuck to when they spawn
-output coupler now stacks to 99
+constraint - exploding blocks 1.5->2s timer
+add sort button for PAUSE tech
 
 bug fixes
-  ionization energy converts current heal power ups into Casimir power ups
-  spawning a bullet directly on top of a mob while time dilated no longer does damage until time resumes
-  you can no longer exit a level while in the process of vertical flipping
-  technical intelligence no longer gives a bonus when swapping tech with shotgun shell
+  MACHO getting teleported on reactor when it exits the center
+  adjusted energy conservation regen graphics for very small damage and very large damage
+  eigen states exiting to new levels were coping the current states energy
+
   
 *********************************************************** TODO *****************************************************
+
+
+add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D rectangles
+  make a new matter.js engine
+    const enginePause = Engine.create();
+  performance issues?
+    maybe when the number of tech gets high?
+  mouse control?
+    how to drag with mouse and still use INPUT tech
+      maybe mouse2 to drag
+      button to toggle a drag mode
+
+
+
+new level - ducts
+  wind effect
+    push player in a direction
+      push less if on ground or crouching or holding block
+    graphics?
+      draw a line and move it in the direction of wind
+      looking community map vents and spawnStreamer
+  tunnels with wind
+    change wind direction with button?
+      maybe two buttons that alternate the direction like on the map corridor
+      also open close door to channel wind into different tunnels
+    fire from furnace level fills some of the tunnels and some of the zones
+      player needs to press buttons to switch the furnace off
+        but it only stays off for a short time
+  black out zones
+    when you enter it black outs everything else
+    you also can't see inside a tunnel/cave until you enter
+    how to deal with transition between zones?
+      fade in/out if you as you get near some point using radial distance
+        zone is rectangles, but distance to center of circle will determine effect activation and fade in/out range
+  maybe some spinners that look like fans
+  a very large number of buttons
+    pressing all the buttons unlocks something?
+    buttons are scatter around on wall, ceiling, floor
+      rewrite button code to have any angle?
+
+
+
+
+
 
 
 tech: self locating uncertainty - players have some control over switchWorlds()
@@ -35,21 +74,19 @@ tech: self locating uncertainty - players have some control over switchWorlds()
 make mob invulnerability more obvious
   flashing white?
   thicker stroke
+tech: Loitering munition - missile bot follows mouse?
+
+
+replace damage side bar with a number??
+  where: red text below field
+  changing numbers might get distracting?
+
+try to also allow players to unpause in choosing menu
 
 tech:   - your next bullet has 5x mass    <br>5 second cooldown
   does this work for all bullets?
     might need special code for grenades/missile and spores/worm/fleas
   add em right text to show CD status
-
-
-tech:   - clicking cancel has a % chance to spawn a tech, gun or field
-
-tech: inductive charging - 7x passive energy generation while not using field or gun or moving
-  otherwise 0x passive energy generation
-tech: rectifier  - 7x passive energy generation while on the ground
-  otherwise 0x passive energy generation
-  (m.cycle - m.lastOnGroundCycle) > 65
-
 
 field emitter coupling effects (compared to normal fields)
   100% block damage, 100% bonus ammo, 50% iceIX deflection, 33% dmg reduction, 33% energy regen, 20% max energy, 10% dmg
@@ -71,7 +108,7 @@ field emitter coupling effects (compared to normal fields)
   maybe just add another eigen tech and don't remove normal mode
 
 
-add gradients to performance mode
+remove gradients in performance mode
   plasma ball
   tungsten carbide
 
@@ -79,27 +116,6 @@ tech: plating- at the start of each level gain 0.25 damage reduction, slowly los
 
 Grenade- grenades bounce # number of times, detonating 1 second after final bounce (You ever play overwatch? pretty much junkrat in terms of how the grenade bounces)
   explosions after each bounce?
-
-in the pause/experiment menus clicking on tech,guns,field orbs with produce text to speech of it's name
-  !a second click will read the description?
-    how to convert html to readable text??
-
-sort text input is broken in pause menu
-  does nothing on clicking sort or pressing enter
-  pressing P, O  breaks it
-  add more buttons
-    research, coupling
-    JUNK
-
-tech: - upgrade for diffuse beam that slowing rotates each laser beam to fire at different angles
-  and maybe gives 3 more beams
-
-replace damage side bar with a number??
-  where: red text below field
-  changing numbers might get distracting?
-
-try to also allow players to unpause in choosing menu
-
 
 web lines - putting down lines that last maybe 10-20 seconds that slow and damage mobs.
   plasma field tech? maybe when the plasma globe explodes make web lines
@@ -121,24 +137,6 @@ safari browser looks weird with several stroke animations
 ngon means tasty in vietnamese
   make a JUNK tech around this?
 
-new level - ducts
-  wind effect
-    push player in a direction
-      push less if on ground or crouching or holding block
-    graphics?
-      draw a line and move it in the direction of wind
-      looking community map vents and spawnStreamer
-  tunnels with wind
-    change wind direction with button?
-      maybe two buttons that alternate the direction like on the map corridor
-    fire from furnace level fills some of the tunnels and some of the zones
-      player needs to press buttons to switch the furnace off
-        but it only stays off for a short time
-  maybe some spinners that look like fans
-  a very large number of buttons
-    pressing all the buttons unlocks something?
-    buttons are scatter around on wall, ceiling, floor
-      rewrite button code to have any angle?
 
 filament
   tech: - filament tip is pulled towards blocks?, power ups?, mobs?
@@ -178,10 +176,6 @@ make more Cordyceps/zombie tech?
 show stats for popular tech choices
   in splash screen?
   track other stats?
-
-tech: - if player has missile bot and a few other bots
-  convert up to 10 other bots into missile bot
-  convert all your guns into missile bots
 
 constraint ideas
   0.66x fire rate

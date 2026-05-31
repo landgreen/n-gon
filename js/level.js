@@ -15,113 +15,186 @@ const level = {
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
+    HVAC() {
+        level.announceMobTypes()
+        level.announceText(-4325, 175, true)
+        level.setPosToSpawn(0, 400);
+        level.exit.x = 4300
+        level.exit.y = 270
+        level.defaultZoom = 2000
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#cccccc" //"#d6d2d1"//"#d0d5d5";
+        color.map = "#474444"
+
+
+        const wind = []
+        wind.push(level.wind(-2650, 550, 2050, 225, { x: 0.005, y: 0 }, true)) //horizontal
+        wind.push(level.wind(-2650, -500, 250, 1050, { x: 0, y: 0.005 })) //vertical
+        wind.push(level.wind(-2675, 425, 375, 350, { x: 0.02, y: -0.005 })) //corner
+
+        //reverse direction
+        // wind[0].velocity = { x: -0.003, y: 0 }
+        // wind[1].velocity = { x: 0, y: -0.005 }
+        // wind[2].velocity = { x: -0.006, y: -0.01 }
+
+        let buttons = []
+        buttons.push(level.button(-40, 995, 126, true, false, "hsl(330, 100%, 50%)"))
+        for (let i = 0; i < buttons.length; i++) buttons[i].isUp = false
+
+
+        level.custom = () => {
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].draw()
+                buttons[i].query()
+            }
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+
+            // ctx.fillStyle = "rgba(0,0,255,0.1)"
+            // ctx.beginPath()
+            for (let i = 0; i < wind.length; i++) {
+                wind[i].do()
+                // ctx.rect(wind[i].x, wind[i].y, wind[i].width, wind[i].height)
+            }
+            // ctx.fill()
+            wind[0].draw()
+            wind[1].draw()
+        };
+
+        //boxes center on zero,zero with deep walls to hide background
+        spawn.mapRect(4500, -2000, 1500, 4000); //right map wall
+        spawn.mapRect(-6000, -2000, 3350, 4000); //left map wall
+        spawn.mapRect(-6000, -4000, 12000, 3000); //map ceiling
+        spawn.mapRect(-6000, 1000, 12000, 3000); //floor
+
+        //central heat source
+        // spawn.mapRect(-5000, 700, 4500, 400);
+        // spawn.mapRect(500, 700, 4500, 400);
+        spawn.mapVertex(-2500, 950, "-200 -200  200 200  -200 200  -4500 200  -4500 -200");  //left
+        spawn.mapVertex(2500, 950, "200 -200  -200 200  200 200  4500 200  4500 -200");  //right
+        spawn.mapVertex(-2653, 743, "-200 -200  200 200  -200 200");  //triangle
+
+        const edge = 100;   // corner trim size
+        const hw = 1000;
+        const hh = 600;
+
+        spawn.bodyRectCorner(-1500, 0, 2000, 1200, 100);
+
+
+        // spawn.randomLevelBoss(-600, 500);
+        // spawn.secondaryBossChance(125, 100);
+
+        // powerUps.spawnStartingPowerUps(1625, 25)
+        // powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        // powerUps.chooseRandomPowerUp(-1600, -350);
+        // powerUps.chooseRandomPowerUp(-175, 800);
+        // powerUps.chooseRandomPowerUp(1675, 0);
+        // powerUps.chooseRandomPowerUp(2825, 975);
+        // powerUps.chooseRandomPowerUp(-3175, 925);
+    },
     start() {
         level.setConstraints()
         if (level.levelsCleared === 0) { //this code only runs on the first level
-            // simulation.enableConstructMode()  //used to build maps in testing mode
-            // simulation.difficultyMode = 1
-            // build.isExperimentRun = true
-            // tech.duplicateChance += 1
-            // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-            // simulation.isHorizontalFlipped = true
-            // level.levelsCleared = 7
-            // level.updateDifficulty()
-            // simulation.isCheating = true
+            // if (false) {
+            if (true) {
+                level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
+            } else {
+                simulation.enableConstructMode()  //used to build maps in testing mode
+                // simulation.difficultyMode = 1
+                // build.isExperimentRun = true
+                // tech.duplicateChance += 1
+                // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
+                // simulation.isHorizontalFlipped = true
+                // level.levelsCleared = 10
+                // level.updateDifficulty()
+                // simulation.isCheating = true
 
-            // tech.giveTech("performance")
-            // m.coyoteCycles = 120
-            // powerUps.research.changeRerolls(100000)
-            // tech.tech[297].frequency = 100
-            // tech.addJunkTechToPool(0.5)
-            // m.couplingChange(100)
-            // requestAnimationFrame(() => { m.setField(9) });
-            // m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
-            // m.energy = m.maxEnergy = 12.2
-            // m.energy += 1
-            // m.couplingChange(1000)
-            // m.fieldUpgrades[6].isRewindMode = true
-            // window.removeEventListener("keydown", m.fieldEvent);
-            // m.fieldUpgrades[6].set()
-            // m.wakeCheck();
-            // m.damageDone *= 1000
+                // tech.giveTech("performance")
+                // m.coyoteCycles = 120
+                // powerUps.research.changeRerolls(100000)
+                // tech.tech[297].frequency = 100
+                // tech.addJunkTechToPool(0.5)
+                // m.couplingChange(100)
+                // requestAnimationFrame(() => { m.setField(9) });
+                m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                // m.energy = m.maxEnergy = 12.2
+                // m.energy += 1
+                // m.couplingChange(1000)
+                // m.fieldUpgrades[6].isRewindMode = true
+                // window.removeEventListener("keydown", m.fieldEvent);
+                // m.fieldUpgrades[6].set()
+                // m.wakeCheck();
+                // m.damageDone *= 1000
 
-            // m.maxHealth = m.health = 1000000
-            // m.energy = m.health = 0.000001
-            // m.displayHealth();
-            // m.immuneCycle = Infinity //you can't take damage
-            // m.maxEnergy = m.energy = 10000000
-            // powerUps.research.count = 3
-            // tech.isHookWire = true
-            // m.energy = 0
-            // simulation.molecularMode = 2
-            // m.takeDamage(0.01);
+                // m.maxHealth = m.health = 1000000
+                // m.energy = m.health = 0.000001
+                // m.displayHealth();
+                // m.immuneCycle = Infinity //you can't take damage
+                // m.maxEnergy = m.energy = 10000000
+                powerUps.research.count = 3
+                // tech.isHookWire = true
+                // m.energy = 0
+                // simulation.molecularMode = 2
+                // m.takeDamage(0.01);
 
-            // b.giveGuns(11) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-            // b.giveGuns(4)
-            // b.giveGuns(5)
-            // b.giveGuns(6)
-            // b.giveGuns(10)
-            // b.giveGuns(0)
-            // b.giveGuns(2)
-            // b.giveGuns(3)
-            // b.giveGuns(7)
-            // b.giveGuns(8)
-            // b.giveGuns(11)
-            // b.guns[b.inventory[0]].ammo = 10000000
-            // tech.addJunkTechToPool(0.5)
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect") });
-            // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory") });
-            // for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("shotgun shell")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("rotary cannon")
-            // for (let i = 0; i < 1; ++i) tech.giveTech("salvo")
-            // for (let i = 0; i < 1; i++) tech.giveTech("incendiary ammunition")
-            // for (let i = 0; i < 1; i++) tech.giveTech("anthropic principle")
-            // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-            // level.levelsCleared = 7
-            // simulation.isHorizontalFlipped = true
-            // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-            // level.interferometer()
-            // level.testing()
+                b.giveGuns(4) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                // b.giveGuns(4)
+                b.guns[b.inventory[0]].ammo = 10000000
+                // tech.addJunkTechToPool(0.5)
+                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect") });
+                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("zeitgeist") });
+                // for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("missile-bot")
+                // for (let i = 0; i < 5; ++i) tech.giveTech("nail-bot")
+                // for (let i = 0; i < 1; i++) tech.giveTech("nanoparticles")
+                // for (let i = 0; i < 1; i++) tech.giveTech("UAV")
+                // for (let i = 0; i < 1; i++) tech.giveTech("missile-bot")
+                // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
+                // level.levelsCleared = 7
+                // simulation.isHorizontalFlipped = true
+                // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
+                level.testing()
+                // level.HVAC()
 
-            level[simulation.isTraining ? "walk" : "initial"]() //normal starting level **************************************************
+                // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
+                // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
+                // spawn.randomGroup(1300, -200, Infinity);
+                // spawn.nodeGroup(1300, -200, 'grower');
+                for (let i = 0; i < 10; i++) spawn.starter(1300 + 10 * i, -200)
+                // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
+                // Matter.Body.setPosition(player, { x: -27000, y: -400 });
+                // m.storeTech() //sets entanglement
+                // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+                // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");
+                // for (let i = 0; i < 100; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "coupling", false);
+                // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
 
-            // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-            // requestAnimationFrame(() => { powerUps.spawnDelay("research", 10); });
-            // spawn.randomGroup(1300, -200, Infinity);
-            // spawn.nodeGroup(1300, -200, 'grower');
-            // for (let i = 0; i < 3; i++) spawn.starter(1300 + 10 * i, -200)
-            // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
-            // Matter.Body.setPosition(player, { x: -27000, y: -400 });
-            // m.storeTech() //sets entanglement
-            // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
-            // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");
-            // for (let i = 0; i < 100; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "coupling", false);
-            // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
+                // level.defaultZoom = 600 //zoom in close
+                // simulation.zoomTransition(level.defaultZoom)
 
-            // level.defaultZoom = 600 //zoom in close
-            // simulation.zoomTransition(level.defaultZoom)
-
-            //lore testing
-            // localSettings.isTrainingNotAttempted = true
-            // simulation.isCheating = false //true;
-            // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
-            // lore.techCount = 1
-            // level.levelsCleared = 10
-            // localSettings.loreCount = 1 //this sets what conversation is heard
-            // localSettings.levelsClearedLastGame = 10
-            // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-            // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
-            // level.null()
-            // localSettings.isHuman = true
-            // mobs.mobDeaths = 200 //to prevent pacifist mode
-            // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
-            // lore.unlockTesting();
-            // tech.giveTech("tinker"); //show junk tech in experiment mode
-            // m.storeTech()
-            // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
-            // for (let i = 0; i < 3; i++) localSettings.difficultyCompleted[i] = true
-            // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                //lore testing
+                // localSettings.isTrainingNotAttempted = true
+                // simulation.isCheating = false //true;
+                // for (let i = 0; i < 5; i++) tech.giveTech("undefined")
+                // lore.techCount = 1
+                // level.levelsCleared = 10
+                // localSettings.loreCount = 1 //this sets what conversation is heard
+                // localSettings.levelsClearedLastGame = 10
+                // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                // level.onLevel = -1 //this sets level.levels[level.onLevel] = undefined which is required to run the conversation
+                // level.null()
+                // localSettings.isHuman = true
+                // mobs.mobDeaths = 200 //to prevent pacifist mode
+                // for (let i = 0; i < 13; i++) level.nextLevel(); //jump to final boss
+                // lore.unlockTesting();
+                // tech.giveTech("tinker"); //show junk tech in experiment mode
+                // m.storeTech()
+                // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+                // for (let i = 0; i < 3; i++) localSettings.difficultyCompleted[i] = true
+                // localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+            }
         } else {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             // spawn.pickList = ["focuser", "focuser"]
@@ -224,7 +297,7 @@ const level = {
 
             }
         }
-        if (tech.isEigenstate) m.eigen.reset()
+        if (tech.isEigenstate) m.eigen.reset(false)
 
         level.newLevelOrPhase()
         if (tech.isDigitalPet) {
@@ -274,6 +347,14 @@ const level = {
             for (let i = 0; i < 3; i++) b.randomBot()
         }
 
+        if (tech.zeitgeistRemoveName) {
+            for (let i = 0; i < tech.tech.length; i++) {
+                if (tech.tech[i].name === tech.zeitgeistRemoveName) {
+                    powerUps.ejectTech(i, true)
+
+                }
+            }
+        }
 
         if (simulation.isTraining) {
             simulation.difficultyMode = 1
@@ -644,11 +725,11 @@ const level = {
                                 //hits[i].bodyA.inertia !== Infinity checks if it's not the player
                                 let who = hits[i].bodyA
                                 if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isExplodingConstraintTimer) {
-                                    who.isExplodingConstraintTimer = 90
+                                    who.isExplodingConstraintTimer = 120
                                 }
                                 who = hits[i].bodyB
                                 if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isExplodingConstraintTimer) {
-                                    who.isExplodingConstraintTimer = 90
+                                    who.isExplodingConstraintTimer = 120
                                 }
                             }
                             for (let i = 0; i < body.length; i++) {
@@ -2554,7 +2635,7 @@ const level = {
         }
     },
     //consider switching coordinate system to starting and ending points to make angled wind easier
-    wind(x, y, width, height, velocity = { x: 10, y: 0 }) {
+    wind(x, y, width, height, velocity = { x: 10, y: 0 }, isFloat = false) {
         return {
             x: x,
             y: y,
@@ -2576,10 +2657,6 @@ const level = {
                 // ctx.strokeStyle = "#0f04"
                 // ctx.stroke();
 
-                //draw background of zone
-                ctx.fillStyle = "rgba(0,0,255,0.1)"
-                ctx.fillRect(this.x, this.y, this.width, this.height)
-
                 //push player
 
                 //push blocks, bullets, power ups, mobs
@@ -2588,6 +2665,7 @@ const level = {
                     //5 is normal player mass, so if player has more mass they are gonna go slower
                     player.force.x += this.velocity.x * 5 * (m.crouch ? 0.3 : 1) * (m.onGround ? 0.5 : 1)
                     player.force.y += this.velocity.y * 5 * (m.crouch ? 0.4 : 1)
+                    if (isFloat && player.velocity.y < 0.01) player.force.y -= 1.02 * player.mass * simulation.g
                 }
                 hit = Matter.Query.ray(body, this.a, this.b, height)
                 for (let i = 0; i < hit.length; i++) {
@@ -2610,6 +2688,7 @@ const level = {
                     hit[i].body.force.y += this.velocity.y * hit[i].body.mass * 0.5
                 }
 
+
                 // if (!m.isTimeDilated) {
                 //     if (this.dropCycle < simulation.cycle) { //reset
                 //         this.dropCycle = simulation.cycle + this.period + Math.floor(40 * Math.random())
@@ -2620,7 +2699,37 @@ const level = {
                 //         this.y += this.speed
                 //     }
                 // }                
-            }
+            },
+            draw() {
+                //draw background of zone
+                ctx.fillStyle = "rgba(0,0,255,0.1)"
+                ctx.fillRect(this.x, this.y, this.width, this.height)
+
+                //particles
+                simulation.ephemera.push({
+                    where: { x: this.x + this.width * Math.random(), y: this.y + this.height * Math.random() },
+                    velocity: Vector.mult(this.velocity, 1000),
+                    r: 1.5 + 3 * Math.random(),
+                    bounds: { min: { x: this.x, y: this.y }, max: { x: this.x + this.width, y: this.y + this.height } },
+                    do() {
+                        this.where.x += this.velocity.x
+                        this.where.y += this.velocity.y
+                        ctx.beginPath();
+                        ctx.arc(this.where.x, this.where.y, this.r, 0, 2 * Math.PI);
+                        ctx.fillStyle = "rgb(0,0,0)"
+                        ctx.fill();
+
+                        //remove
+                        if (
+                            this.where.x < this.bounds.min.x || this.where.x > this.bounds.max.x ||
+                            this.where.y < this.bounds.min.y || this.where.y > this.bounds.max.y
+                        ) {
+                            simulation.removeEphemera(this)
+                        }
+                    },
+                })
+            },
+            particles: [],
         }
     },
     laser(p1, p2, damage = 0.12, color = "#f00") {
@@ -3138,7 +3247,7 @@ const level = {
             });
             const who = body[body.length - 1]
             who.collisionFilter.category = cat.body;
-            who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+            who.collisionFilter.mask = cat.player | cat.body | cat.bullet | cat.mob | cat.mobBullet
             Composite.add(engine.world, who); //add to world
             who.classType = "body"
         }
@@ -3174,6 +3283,55 @@ const level = {
             Composite.add(engine.world, cons[cons.length - 1]);
         }
     },
+    // chain(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
+    //     const gap = 2 * radius
+    //     const unit = {
+    //         x: Math.cos(angle),
+    //         y: Math.sin(angle)
+    //     }
+    //     for (let i = 0; i < len; i++) {
+    //         body[body.length] = Bodies.polygon(x + gap * unit.x * i, y + gap * unit.y * i, 12, radius, {
+    //             inertia: Infinity,
+    //             isNotHoldable: true
+    //         });
+    //         const who = body[body.length - 1]
+    //         who.collisionFilter.category = cat.body;
+    //         who.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+    //         Composite.add(engine.world, who); //add to world
+    //         who.classType = "body"
+    //     }
+    //     for (let i = 1; i < len; i++) { //attach blocks to each other
+    //         consBB[consBB.length] = Constraint.create({
+    //             bodyA: body[body.length - i],
+    //             bodyB: body[body.length - i - 1],
+    //             stiffness: stiffness,
+    //             damping: damping
+    //         });
+    //         Composite.add(engine.world, consBB[consBB.length - 1]);
+    //     }
+    //     cons[cons.length] = Constraint.create({ //pin first block to a point in space
+    //         pointA: {
+    //             x: x,
+    //             y: y
+    //         },
+    //         bodyB: body[body.length - len],
+    //         stiffness: 1,
+    //         damping: damping
+    //     });
+    //     Composite.add(engine.world, cons[cons.length - 1]);
+    //     if (isAttached) {
+    //         cons[cons.length] = Constraint.create({ //pin last block to a point in space
+    //             pointA: {
+    //                 x: x + gap * unit.x * (len - 1),
+    //                 y: y + gap * unit.y * (len - 1)
+    //             },
+    //             bodyB: body[body.length - 1],
+    //             stiffness: 1,
+    //             damping: damping
+    //         });
+    //         Composite.add(engine.world, cons[cons.length - 1]);
+    //     }
+    // },
     // softBody(x, y, angle = 0, isAttached = true, len = 15, radius = 20, stiffness = 1, damping = 1) {
     // https://github.com/liabru/matter-js/blob/master/examples/softBody.js
     // https://brm.io/matter-js/docs/classes/Composites.html
@@ -3229,7 +3387,7 @@ const level = {
         const button = level.button(2535, -200)
         // spawn.bodyRect(250, -450, 50, 50); //block on button
 
-        const wind = []
+        // const wind = []
         // wind.push(level.wind(975, -160, 600, 150, { x: 0.01, y: 0 }))
         // wind.push(level.wind(1750, -475, 75, 475, { x: 0, y: -0.01 }))
         // wind.push(level.wind(975, -825, 475, 75, { x: 0, y: -0.01 }))
@@ -3263,7 +3421,7 @@ const level = {
             ctx.fillStyle = "rgba(0,0,0,0.1)"
             ctx.fillRect(-150, -650, 900, 250)
 
-            for (let i = 0; i < wind.length; i++) wind[i].do()
+            // for (let i = 0; i < wind.length; i++) wind[i].do()
         };
         level.setPosToSpawn(0, -450); //normal spawn
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -5586,7 +5744,7 @@ const level = {
             //check for out of bounds mobs
             if (!(simulation.cycle % 180)) {
                 for (let i = 0; i < mob.length; i++) {
-                    if (mob[i].position.x < 0 || mob[i].position.x > 3000 || mob[i].position.y < -2000 || mob[i].position.y > 150) {
+                    if ((mob[i].position.x < 0 || mob[i].position.x > 3000 || mob[i].position.y < -2000 || mob[i].position.y > 150) && !mob[i].isDarkMatter) {
                         Matter.Body.setPosition(mob[i], {
                             x: 1500 + 400 * (Math.random() - 0.5),
                             y: -1500 + 200 * (Math.random() - 0.5)

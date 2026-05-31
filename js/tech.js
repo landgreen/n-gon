@@ -413,13 +413,18 @@ const tech = {
             //add new tech
             tech.giveTech(value)
             build.generatePauseRight()
-            // build.generatePauseLeft()
+        },
+        nanoparticles(value) {
+            tech.nanoparticles = Number(value)
+        },
+        zeitgeist(value) {
+            tech.zeitgeistRemoveName = value
         },
     },
     tech: [{
         name: "tungsten carbide",
         descriptionFunction() {
-            return `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose up to <strong>${(80 * m.defense()).toFixed(0)}</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`
+            return `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose <strong>1</strong> to <strong>${(80 * m.defense()).toFixed(0)}</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`
         },
         // description: `<strong>+600</strong> maximum <strong class='color-h'>health</strong><br>lose up to <strong>~40</strong> <strong class='color-h'>health</strong> after hard <strong>landings</strong>`,
         maxCount: 1,
@@ -1473,9 +1478,9 @@ const tech = {
         isInstant: true,
         isBadRandomOption: true,
         allowed() {
-            return powerUps.research.count > 2 || build.isExperimentSelection
+            return b.inventory.length > 1 && (powerUps.research.count > 2 || build.isExperimentSelection)
         },
-        requires: "",
+        requires: "at least 2 guns",
         effect() {
             powerUps.spawn(m.pos.x - 20, m.pos.y, "gun");
             powerUps.spawn(m.pos.x + 20, m.pos.y, "gun");
@@ -1913,8 +1918,8 @@ const tech = {
             if (!this.isLost && !build.isExperimentSelection) {
                 text += `<input class="tech-slider" type="range" min="0.5" max="3" step="0.1" value="${tech.inverseFireRate}" oninput="tech.inputHTML.inverse(this)" onchange="build.generatePauseLeft()">`
             }
-            text += `<em>(<span class="fire-label">${tech.inverseFireRate.toFixed(1)}</span>x fire rate)</em>
-            <em style ="float: right;">(<span class="ammo-label">${(1 / tech.inverseFireRate).toFixed(2)}</span>x maximum <strong class='color-f'>energy</strong>)</em>`
+            text += `<em>(<span class="ammo-label">${(1 / tech.inverseFireRate).toFixed(2)}</span>x maximum <strong class='color-f'>energy</strong>)</em>
+            <em style ="float: right;">(<span class="fire-label">${tech.inverseFireRate.toFixed(1)}</span>x fire rate)</em>`
             return text
         },
         maxCount: 1,
@@ -3052,7 +3057,7 @@ const tech = {
         frequencyDefault: 1,
         isBotTech: true,
         allowed() {
-            return b.totalBots() === 0 && (powerUps.research.count > 1 || build.isExperimentSelection)
+            return b.totalBots() === 0 && (powerUps.research.count > 2 || build.isExperimentSelection)
         },
         requires: "no bots",
         effect() {
@@ -3208,7 +3213,7 @@ const tech = {
             <option value="sound-bot upgrade" ${isSel(6)}>sound-bot upgrade</option>
         </select>`;
             }
-            return `when <span class="color-paused">PAUSED</span> you can swap<br>your <strong class='color-bot'>bot</strong> <strong>upgrade</strong> type${menu}`;
+            return `when <span class="color-paused">PAUSED</span> you can select<br>your <strong class='color-bot'>bot</strong> <strong>upgrade</strong> type${menu}`;
         },
         isGunTech: true,
         maxCount: 1,
@@ -4117,7 +4122,7 @@ const tech = {
     {
         name: "quantum Zeno effect",
         descriptionFunction() {
-            return `you can only <strong>die</strong> if you <strong>end</strong> a level with <strong class='color-h'>health</strong> < <strong>0</strong><br><strong>3x</strong> <strong class='color-d'>damage</strong> while <strong class='color-h'>health</strong> < <strong>0</strong>`
+            return `you can only <strong>die</strong> if you <strong>exit</strong> level with <strong class='color-h'>health</strong> < <strong>0</strong><br><strong>3x</strong> <strong class='color-d'>damage</strong> while <strong class='color-h'>health</strong> < <strong>0</strong>`
             // return `you don't <strong>die</strong> when you go below <strong>0</strong> <strong class='color-h'>health</strong>, but<br>you need <strong class='color-h'>health</strong> above <strong>0</strong> to <strong>exit</strong> the level`
             // return `you can't <strong>die</strong> if <strong class='color-h'>health</strong> < <strong>0</strong>, but<br>you need <strong class='color-h'>health</strong> > <strong>0</strong> to <strong>exit</strong> the level`
         },
@@ -4458,8 +4463,8 @@ const tech = {
     {
         name: "anthropic principle",
         descriptionFunction() {
-            return `before you <strong>die</strong>, <span class="underline">expend</span> ${powerUps.orb.research(1)} to spawn 16${powerUps.orb.heal(1)} and<br>
-            ${tech.isEnergyHealth ? "gain full <strong class='color-f'>energy</strong>" : "<strong style='letter-spacing: 2px;'>stop time</strong> until  <strong class='color-h'>healed</strong>"}<span style ="float: right;">(once per level: ${(!tech.isDeathAvoidedThisLevel && powerUps.research.count > 0) ? "ON" : "OFF"})</span>`
+            return `<span style = 'font-size:93%;'>once per level before you <strong>die</strong>, <span class="underline">expend</span> ${powerUps.orb.research(1)} to spawn 16${powerUps.orb.heal(1)}<br>
+            and ${tech.isEnergyHealth ? "gain full <strong class='color-f'>energy</strong>" : "<strong style='letter-spacing: 2px;'>stop time</strong> until <strong class='color-h'>healed</strong>"} or next <strong>level</strong> <span style ="float: right;">(${(!tech.isDeathAvoidedThisLevel && powerUps.research.count > 0) ? "ON" : "OFF"})</span></span>`
         },
         maxCount: 1,
         count: 0,
@@ -4838,18 +4843,18 @@ const tech = {
         <select name="field-theory" id="field-theory" onchange="tech.inputHTML.fieldTheory(this.value)" style="float: right;">
             <option value="0" ${isSel(0)}>field emitter</option>
             <option value="1" ${isSel(1)}>standing wave</option>
-            <option value="2" ${isSel(2)}>perfect diamagnetism</option>
+            <option value="2" ${isSel(2)}>diamagnetism</option>
             <option value="3" ${isSel(3)}>negative mass</option>
-            <option value="4" ${isSel(4)}>molecular assembler</option>
+            <option value="4" ${isSel(4)}>assembler</option>
             <option value="5" ${isSel(5)}>plasma torch</option>
             <option value="6" ${isSel(6)}>time dilation</option>
-            <option value="7" ${isSel(7)}>metamaterial cloaking</option>
+            <option value="7" ${isSel(7)}>cloaking</option>
             <option value="8" ${isSel(8)}>pilot wave</option>
             <option value="9" ${isSel(9)}>wormhole</option>
             <option value="10" ${isSel(10)}>grappling hook</option>
         </select>`;
             }
-            return `when <span class="color-paused">PAUSED</span> swap your ${powerUps.orb.field()} ${menu}<br><strong>2x</strong> chance to get ${powerUps.orb.fieldTech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`;
+            return `when <span class="color-paused">PAUSED</span> select your ${powerUps.orb.field()} ${menu}<br><strong>2x</strong> chance to get ${powerUps.orb.fieldTech()} <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>`;
         },
         maxCount: 1,
         count: 0,
@@ -5561,7 +5566,7 @@ const tech = {
         name: "options exchange",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Option_(finance)' class="link">options exchange</a>`,
         description: `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()} ${powerUps.orb.tech()} ${powerUps.orb.gun()}<br>
-        <strong>randomizes</strong> and <strong>3x</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>, once a level`,
+        <strong>randomizes</strong> and <strong>3x</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong> <em style ="float: right;">once a level</em>`,
         // will <strong>randomize</strong> with <strong>3x</strong> <strong class='color-choice'><span>ch</span><span>oi</span><span>ces</span></strong>, once a level`,
         maxCount: 1,
         count: 0,
@@ -5625,8 +5630,8 @@ const tech = {
         description: `clicking <strong class='color-cancel'>cancel</strong> for ${powerUps.orb.field()} ${powerUps.orb.tech()} ${powerUps.orb.gun()}<br>gives <strong>+8%</strong> power up <strong class='color-dup'>duplication</strong> chance`,
         maxCount: 1,
         count: 0,
-        frequency: 1,
-        frequencyDefault: 1,
+        frequency: 2,
+        frequencyDefault: 2,
         allowed() {
             return tech.duplicationChance() < 1 && !tech.isSuperDeterminism && tech.isCancelTech
         },
@@ -5698,9 +5703,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return tech.duplicationChance() > 0.03
+            return tech.duplicationChance() > 0.1
         },
-        requires: "duplication chance > 3%",
+        requires: "duplication chance > 10%",
         effect() {
             tech.isDupDamage = true;
         },
@@ -6510,6 +6515,44 @@ const tech = {
         }
     },
     {
+        name: "zeitgeist",
+        descriptionFunction() {
+
+            let menu = ''
+            // if (this.count > 0 && !build.isExperimentSelection) {
+            if (!this.isLost) {
+                menu = `<select name="field-theory" id="field-theory" onchange="tech.inputHTML.zeitgeist(this.value)" style="float: right;"><option value="null">none</option>`
+                for (let i = 0; i < tech.tech.length; i++) {
+                    if (tech.tech[i].count && !tech.tech[i].isInstant) {
+                        // console.log(tech.tech[i].name, tech.zeitgeistRemoveName)
+                        if (tech.tech[i].name === tech.zeitgeistRemoveName) {
+                            menu += `<option value="${tech.tech[i].name}" selected>${tech.tech[i].name}</option>`
+                        } else {
+                            menu += `<option value="${tech.tech[i].name}">${tech.tech[i].name}</option>`
+                        }
+                    }
+                }
+                menu += `</select>`
+            }
+            return `when <span class="color-paused">PAUSED</span> select a ${powerUps.orb.tech()} that will be <span class='color-remove'>ejected</span> at
+            <br>the start of next <strong>level</strong> ${menu}`;
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return !tech.isSuperDeterminism
+        },
+        requires: "not superdeterminism",
+        effect() {
+            tech.zeitgeistRemoveName = null
+        },
+        remove() {
+            tech.zeitgeistRemoveName = null
+        }
+    },
+    {
         name: "paradigm shift",
         descriptionFunction() {
             return `when <span class="color-paused">PAUSED</span> clicking your ${powerUps.orb.tech()} <span class='color-remove'>ejects</span> them<br>costs <strong id="paradigm-cost">${(tech.pauseEjectTech).toFixed(1)}</strong> ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} <em style ="float: right;">(2x increased cost per use)</em>`
@@ -7146,7 +7189,7 @@ const tech = {
                 //<option value="incendiary ammunition" ${isSel(6)}>incendiary ammunition</option>
             }
 
-            return `when <span class="color-paused">PAUSED</span> you can swap<br>your <strong>shotgun</strong> ${powerUps.orb.tech()} type${menu}`;
+            return `when <span class="color-paused">PAUSED</span> you can select<br>your <strong>shotgun</strong> ${powerUps.orb.tech()} type${menu}`;
             // return `when <span class="color-paused">PAUSED</span> swap your <strong>shotgun</strong> type<br>`
         },
         isGunTech: true,
@@ -7462,8 +7505,8 @@ const tech = {
         isGunTech: true,
         maxCount: 1,
         count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
+        frequency: 3,
+        frequencyDefault: 3,
         allowed() {
             return tech.haveGunCheck("super balls") && tech.isSlime
         },
@@ -7775,7 +7818,28 @@ const tech = {
     },
     {
         name: "missile-bot",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">missile-bot</a>`,
+        description: `construct a <strong class='color-bot'>bot</strong> that fires <strong>missiles</strong>`,
+        isGunTech: true,
+        // isRemoveGun: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        frequencyDefault: 0,
+        isBot: true,
+        isBotTech: true,
+        isInstant: true,
+        allowed() {
+            return false
+        },
+        requires: "not available, only used internally",
+        effect() {
+            tech.missileBotCount++;
+            b.missileBot();
+        },
+        remove() { }
+    },
+    {
+        name: "UAV",
         description: `trade your <strong>missile</strong> ${powerUps.orb.gun()}<span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(1)}</span><br>for a <strong class='color-bot'>bot</strong> that fires <strong>missiles</strong>`,
         // isGunTech: true,
         isRemoveGun: true,
@@ -7796,15 +7860,29 @@ const tech = {
             if (tech.haveGunCheck("missiles", false)) b.removeGun("missiles") //remove your last gun
             powerUps.research.expend(1)
         },
-        remove() {
-            // if (this.count) {
-            //     tech.missileBotCount = 0;
-            //     b.clearPermanentBots();
-            //     b.respawnBots();
-            //     if (!tech.haveGunCheck("missiles", false)) b.giveGuns("missiles")
-            //     powerUps.research.changeRerolls(1)
-            // }
-        }
+        remove() { }
+    },
+    {
+        name: "UAV swarm",
+        description: `convert your <strong class='color-bot'>bots</strong> into <strong class='color-bot'>missile bots</strong><br><span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(1)} per conversion</span>`,
+        // isGunTech: true,
+        isRemoveGun: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        isBot: true,
+        isBotTech: true,
+        isInstant: true,
+        allowed() {
+            return tech.missileBotCount > 0 && b.totalBots() > 2 && (build.isExperimentSelection || powerUps.research.count >= b.totalBots())
+        },
+        requires: "missile bot and at least 3 bots",
+        effect() {
+            powerUps.research.expend(b.totalBots() - tech.missileBotCount)
+            b.convertBotsTo("missile-bot")
+        },
+        remove() { }
     },
     {
         name: "liquid-propellant",
@@ -9142,6 +9220,43 @@ const tech = {
         remove() {
             tech.foamDamage = 0.01;
         }
+    },
+    {
+        name: "nanoparticles",
+        descriptionFunction() {
+            let menu = ''
+            if (!this.isLost) {
+                const isSel = (val) => (val === tech.nanoparticles ? 'selected' : '');
+                menu = `
+        <select name="nanoparticles" id="nanoparticles" onchange="tech.inputHTML.nanoparticles(this.value)" style="float: right;">
+            <option value="0" ${isSel(0)}>none</option>
+            <option value="1" ${isSel(1)}>pyrolysis - (explosion)</option>
+            <option value="2" ${isSel(2)}>ultrasound  - (isotropic phonon)</option>
+            <option value="5" ${isSel(5)}>radiolysis - (3s of radiation)</option>
+            <option value="3" ${isSel(3)}>condensation - (5s freeze)</option>
+            <option value="4" ${isSel(4)}>ion implantation - (+13 energy)</option>
+            <option value="6" ${isSel(6)}>polymer reinforcement - (1.6x duration)</option>
+            <option value="7" ${isSel(7)}>functionalization - (2.5x velocity)</option>
+            <option value="8" ${isSel(8)}>active laser medium - (2s laser)</option>
+        </select>`;
+            }
+            return `when <span class="color-paused">PAUSED</span> you can select a <strong>foam</strong> <strong>effect</strong><br>${menu}`;
+        },
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isInput: true,
+        allowed() {
+            return tech.haveGunCheck("foam") || tech.isFoamBotUpgrade || tech.isFoamShot || tech.isFoamBall || tech.isFoamMine
+        },
+        requires: "foam",
+        effect() {
+            tech.nanoparticles = Math.ceil(7 * Math.random())
+
+        },
+        remove() { tech.nanoparticles = null }
     },
     {
         name: "cavitation",

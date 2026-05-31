@@ -37,13 +37,15 @@ body {
 }
 
 select {
-    font-size: 0.8em;
+    font-size: 1em;
     border: 1px #333 solid;
     border-radius: 6px;
-}
-
-select option {
-    background-color: #fff;
+    /* padding: 0px 5px; */
+    /* appearance: none; */
+    /* font-family: sans-serif; */
+    /* background-color: #eef1f6; */
+    color: #000;
+    cursor: pointer;
 }
 
 input {
