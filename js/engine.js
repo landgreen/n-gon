@@ -354,7 +354,13 @@ function collisionChecks(event) {
                                 let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
 
+                                if (tech.isIrradiated) {
+                                    mobs.statusDoT(mob[k], dmg * 0.62, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
+                                    dmg *= 0.5
+                                }
                                 mob[k].damage(dmg, true);
+
+
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
                                     options = ["coupling", "boost", "heal", "research", "ammo"]
                                     powerUps.spawn(mob[k].position.x, mob[k].position.y, options[Math.floor(Math.random() * options.length)]);

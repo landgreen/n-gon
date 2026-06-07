@@ -107,8 +107,8 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = true
-                // level.levelsCleared = 10
-                // level.updateDifficulty()
+                level.levelsCleared = 5
+                level.updateDifficulty()
                 // simulation.isCheating = true
 
                 // tech.giveTech("performance")
@@ -118,7 +118,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
                 // m.couplingChange(1000)
@@ -128,42 +128,43 @@ const level = {
                 // m.wakeCheck();
                 // m.damageDone *= 1000
 
-                // m.maxHealth = m.health = 1000000
+                m.maxHealth = m.health = 1000000
                 // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
                 // m.maxEnergy = m.energy = 10000000
-                powerUps.research.count = 3
+                // powerUps.research.count = 3
                 // tech.isHookWire = true
                 // m.energy = 0
                 // simulation.molecularMode = 2
                 // m.takeDamage(0.01);
 
-                b.giveGuns(4) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-                // b.giveGuns(4)
-                b.guns[b.inventory[0]].ammo = 10000000
+                b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                // b.giveGuns(3)
+                // b.guns[b.inventory[0]].ammo = 10000000
                 // tech.addJunkTechToPool(0.5)
                 // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect") });
-                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("zeitgeist") });
-                // for (let i = 0; i < 1; ++i) tech.giveTech("Unified Field Theory")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("missile-bot")
-                // for (let i = 0; i < 5; ++i) tech.giveTech("nail-bot")
-                // for (let i = 0; i < 1; i++) tech.giveTech("nanoparticles")
-                // for (let i = 0; i < 1; i++) tech.giveTech("UAV")
-                // for (let i = 0; i < 1; i++) tech.giveTech("missile-bot")
+                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
+                for (let i = 0; i < 1; ++i) tech.giveTech("bremsstrahlung")
+                for (let i = 0; i < 1; ++i) tech.giveTech("radioactive contamination")
+                for (let i = 0; i < 5; ++i) tech.giveTech("nail-bot")
+                for (let i = 0; i < 1; i++) tech.giveTech("irradiated")
+                for (let i = 0; i < 1; i++) tech.giveTech("polonium-210")
+                for (let i = 0; i < 1; i++) tech.giveTech("cherenkov radiation")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 7
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                level.testing()
+                // level.testing()
                 // level.HVAC()
+                level.office()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
-                for (let i = 0; i < 10; i++) spawn.starter(1300 + 10 * i, -200)
-                // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
+                // for (let i = 0; i < 1; i++) spawn.starter(1300 + 10 * i, -200, 200)
+                // for (let i = 0; i < 1; i++) spawn.mantisBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
                 // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
@@ -343,7 +344,10 @@ const level = {
             m.damageDone *= 1.4
         }
         if (tech.isAmalgam && b.inventory.length > 0) {
-            b.removeGun(b.guns[b.inventory[b.inventory.length - 1]].name)
+            const which = b.guns[b.inventory[b.inventory.length - 1]].name
+            simulation.inGameConsole(`<span class='color-var'>b</span><span class='color-symbol'>.</span>removeGun<span class='color-symbol'>("${which}")</span> <em>//converted to 3 bots</em>`);
+            b.removeGun(which)
+
             for (let i = 0; i < 3; i++) b.randomBot()
         }
 
@@ -8129,7 +8133,7 @@ const level = {
             balance.push(level.rotor(-750, 1755, 400, 25, 0.01, Math.PI / 2, 0.5))
             balance.push(level.rotor(-275, 1675, 550, 32, 0.01, 0, 0.5))
 
-            lasers.push(level.laser({ x: 1610, y: -850 }, { x: -1625, y: -850 }))
+            // lasers.push(level.laser({ x: 1610, y: -850 }, { x: -1625, y: -850 }))
 
             boost.push(level.boost(1800, 1980, 3000, Math.PI / 2)) //floor
             boost.push(level.boost(1800, -2050, 3000, -Math.PI / 2)) //top
@@ -8214,7 +8218,7 @@ const level = {
             balance.push(level.rotor(-750, -1755 - 25, 400, 25, 0.01, Math.PI / 2, 0.5))
             balance.push(level.rotor(-250, -1675 - 32, 500, 32, 0.01, 0, 0.5))
 
-            lasers.push(level.laser({ x: 1610, y: 850 }, { x: -1625, y: 850 })) ////x, y, width, height, damage = 0.002)
+            // lasers.push(level.laser({ x: 1610, y: 850 }, { x: -1625, y: 850 })) ////x, y, width, height, damage = 0.002)
             // spawn.mapRect(1980, 862 - 25, 25, 25); //laser entrance
             // balance.push(level.rotor(1000, 910 - 32, 550, 32, 0.01, 0, 0.5))
 
@@ -8338,8 +8342,8 @@ const level = {
             }
             elevator.move()
             // console.log(elevator)
-            lasers[lasers.length - 1].look.y = elevator.position.y
-            lasers[lasers.length - 1].position.y = elevator.position.y
+            // lasers[lasers.length - 1].look.y = elevator.position.y
+            // lasers[lasers.length - 1].position.y = elevator.position.y
 
             buttons[1].draw()
             buttons[1].query();
@@ -8369,19 +8373,19 @@ const level = {
                             if (!isSpawned) {
                                 isSpawned = true
                                 //spawn second wave of flipped mobs only once
-                                spawn.randomMob(-1500, -1425, 0);
+                                // spawn.randomMob(-1500, -1425, 0);
                                 // spawn.randomMob(-950, -1425, 0);
                                 // spawn.randomMob(-800, -1475, 0);
-                                spawn.randomMob(-425, -1425, 0);
+                                // spawn.randomMob(-425, -1425, 0);
                                 // spawn.randomMob(850, -1750, 0.1);
                                 // spawn.randomMob(325, -850, 0.1);
-                                spawn.randomMob(400, -400, 0.2);
+                                // spawn.randomMob(400, -400, 0.2);
                                 // spawn.randomMob(825, -475, 0.2);
                                 // spawn.randomMob(875, -1050, 0.3);
                                 // spawn.randomMob(1425, 1425, 0.4);
                                 // spawn.randomMob(675, 1450, 0.5);
                                 // spawn.randomMob(225, 1475, 0.6);
-                                spawn.randomMob(-275, 1425, 1);
+                                // spawn.randomMob(-275, 1425, 1);
                                 // spawn.randomMob(-800, 1375, 1);
 
                                 spawn.secondaryBossChance(700, 1100)
@@ -8435,10 +8439,9 @@ const level = {
         };
         level.customTopLayer = () => {
             if (buttons[1].isUp) {
-                for (let i = 0; i < lasers.length - 1; i++) lasers[i].query()
-                if (simulation.cycle % 120 > 60) {
-                    lasers[lasers.length - 1].query()
-                }
+                for (let i = 0; i < lasers.length; i++) lasers[i].query()
+                // if (simulation.cycle % 120 > 60) lasers[lasers.length - 1].query()
+
                 // else {
                 //     ctx.strokeStyle = "rgba(255,0,0,0.05)"
                 //     ctx.lineWidth = 10;
@@ -8527,11 +8530,11 @@ const level = {
         spawn.bodyRect(775, 75, 75, 75, 0.1);
         spawn.bodyRect(1200, 1900, 125, 100, 0.1);
 
-        // spawn.randomMob(125, -1900, 0);
-        // spawn.randomMob(-375, -1875, 0);
+        spawn.randomMob(125, -1900, 0);
+        spawn.randomMob(-375, -1875, 0);
         spawn.randomMob(-1350, -1750, 0);
         // spawn.randomMob(-875, -1575, 0);
-        // spawn.randomMob(500, -1875, 0);
+        spawn.randomMob(500, -1875, 0);
         // spawn.randomMob(350, 825, 0);
         // spawn.randomMob(375, 400, 0);
         spawn.randomMob(1500, -25, 0.1);

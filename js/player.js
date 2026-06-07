@@ -627,6 +627,7 @@ const m = {
     damageReduction: 1,
     defense() {
         let dmg = m.damageReduction * powerUps.difficulty.damageReduction
+        // if (tech.isEigenstate && m.eigen.count > 0) dmg *= 0.5
         if (tech.proportionality !== null) dmg *= Math.pow(tech.proportionality, 1.631)
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
@@ -2020,11 +2021,7 @@ const m = {
             m.isAltSkin = true
 
             m.eigen = {
-                cycle: 0,
-                cycleLimit: 600,
-                // cooldownCycle: 0,
-                // downCount: 0,
-                // downCountMax: 60,
+                count: 0,
                 state: 0,
                 totalStates: 2, //total number of different states
                 isAlive: [],
@@ -2045,17 +2042,6 @@ const m = {
                                 m.eigen.energy.push(m.energy)
                             }
                         }
-                        if (m.eigen.state === 1) {
-                            m.eigen.draw = m.eigen.draw0
-                        } else {
-                            m.eigen.draw = m.eigen.draw1
-                        }
-                        // if (m.eigen.block && m.eigen.block.position) {
-                        //     Composite.remove(engine.world, m.eigen.block)
-                        //     body.splice(body.indexOf(m.eigen.block), 1)
-                        //     // console.log(m.eigen.block.position)
-                        // }
-
                         m.eigen.makeBlock()
                         //add block to player holding
                         //&& !(m.holdingTarget || m.holdingTarget === m.eigen.block)
@@ -2087,9 +2073,6 @@ const m = {
                     Composite.add(engine.world, m.eigen.block); //add to world  
                 },
                 swap() {
-                    m.eigen.cycle = 0 //reset cycle so you don't rapidly switch between states, and this reset the bonus damage timer
-                    // m.eigen.downCount = m.eigen.downCountMax
-
                     //record current state so you can return to it
                     m.eigen.save(m.eigen.state);
 
@@ -2125,13 +2108,6 @@ const m = {
                             m.energy = m.eigen.energy[m.eigen.state]
                             const immune = 10
                             if (m.immuneCycle < m.cycle + immune) m.immuneCycle = m.cycle + immune; //player is immune to damage for 10 cycles
-
-                            if (m.eigen.state === 1) {
-                                m.eigen.draw = m.eigen.draw0
-                            } else {
-                                m.eigen.draw = m.eigen.draw1
-                            }
-
 
                             if (m.eigen.block && m.eigen.block.position.x) {
                                 Composite.remove(engine.world, m.eigen.block)
@@ -2169,14 +2145,11 @@ const m = {
                         ctx.stroke();
 
                         if (m.eigen.state === 1) {
-                            m.eigen.draw1eye()
-                        } else {
                             m.eigen.draw0eye()
+                        } else {
+                            m.eigen.draw1eye()
                         }
-
-
                         ctx.restore();
-
                         //draw energy bar
                         const range = 60
                         const yOff = m.eigen.block.position.y - 50
@@ -2187,7 +2160,7 @@ const m = {
                             const xOff = m.eigen.block.position.x - width / 2
                             ctx.fillStyle = m.fieldMeterColor;
                             ctx.fillRect(xOff, yOff, width, height);//range = 60, m.radius = 30 (1/2*60)
-                        } else { //
+                        } else {
                             const xOff = m.eigen.block.position.x - range * m.maxEnergy / 2
                             ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
                             ctx.fillRect(xOff, yOff, range * m.maxEnergy, height);
@@ -2204,40 +2177,18 @@ const m = {
                             ctx.fillRect(xOff, yOff - 15, range * health, height);
                         }
 
-                        //fire 360 iostropic wave form eigen block
-                        if (tech.isNormalMode && m.eigen.cycle < m.eigen.cycleLimit) {
-                            if (tech.isFirstHarmonic) {
-                                rate = Math.floor(Math.max(4, 30 - 3.5 * m.eigen.block.speed))
-                                if (!(simulation.cycle % rate)) b.isoWave360Solo(m.eigen.block.position)
-                            } else {
-                                if (!(simulation.cycle % 30)) b.isoWave360Solo(m.eigen.block.position)
+                        //fire 360 wave from eigen block
+                        if (tech.isNormalMode && m.eigen.count > 0) {
+                            if (!(simulation.cycle % 45)) {
+                                b.isoWave360Solo(m.eigen.block.position, 500 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(m.pos, 500 * Math.sqrt(tech.bulletsLastLonger))
                             }
+                            // else if (!((20 + simulation.cycle) % 40)) {
+                            // }
                         }
-
-                        //fire laser from eigen block
-                        // const angle = m.eigen.block.angle
-                        // const unit = { x: 30 * Math.cos(angle), y: 30 * Math.sin(angle) }
-                        // const exit = Vector.add(m.eigen.block.position, unit)
-                        // b.laser(exit, {
-                        //     x: exit.x + 5000 * unit.x,
-                        //     y: exit.y + 5000 * unit.y
-                        // }, tech.laserDamage, false, false, 1, "#f00", false);
-                        // b.plasma();
                     }
                 },
                 draw0eye() {
-                    // const ratio = (60 - m.eigen.downCount) / 60
-                    // ctx.beginPath();
-                    // ctx.moveTo(17 + 6 * ratio, 0);
-                    // ctx.lineTo(17 - 8 * ratio, 0);
-
-                    // ctx.lineWidth = 16 - 8 * ratio;
-                    // ctx.strokeStyle = "#000";
-                    // ctx.stroke();
-
-                    // ctx.lineWidth = 13 - 8 * ratio;
-                    // ctx.strokeStyle = "#fff";
-                    // ctx.stroke();
                     ctx.beginPath();
                     ctx.arc(18, 0, 7, 0, 2 * Math.PI);
                     ctx.fillStyle = '#fff'
@@ -2247,9 +2198,6 @@ const m = {
                     ctx.stroke();
                 },
                 draw1eye() {
-                    // m.eigen.downCount
-                    // const ratio = m.eigen.downCount / 60
-                    // console.log(ratio)
                     ctx.beginPath();
                     ctx.moveTo(23, 0);
                     ctx.lineTo(9, 0);
@@ -2262,8 +2210,7 @@ const m = {
                     ctx.strokeStyle = "#fff";
                     ctx.stroke();
                 },
-                draw() { },
-                draw0() {
+                draw() {
                     m.walk_cycle += m.flipLegs * m.Vx;
                     ctx.save();
                     ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
@@ -2274,57 +2221,22 @@ const m = {
                     m.calcLeg(0, 0);
                     m.eigen.drawLeg("#000");
 
-
-                    if (m.eigen.cycle < m.eigen.cycleLimit) {
-                        m.eigen.cycle++
-                        const t = m.eigen.cycle * 0.0373// 0.06
-                        const maxNodes = 8
-                        const nodes = maxNodes - Math.floor(t / Math.PI) % maxNodes
-                        const amplitude = nodes === 1 ? 0 : 5 * Math.sin(t)
-                        if (localSettings.isHideHUD) {
-                            ctx.beginPath();
-                            ctx.arc(0, 0, 40 * player.scale, 0, 2 * Math.PI);
-                            ctx.strokeStyle = "rgba(169, 0, 81, 0.63)";//"rgba(0,0,0,0.7)";//"rgba(255,255,255,0.7)";//"rgba(255,0,100,0.7)";
-                            ctx.lineWidth = 10
-                            ctx.stroke();
-                        } else {
-                            this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                    //check if close to other state
+                    if (Vector.magnitude(Vector.sub(m.pos, m.eigen.block.position)) < 900) {
+                        if (m.eigen.count < 61) m.eigen.count += 2
+                    } else {
+                        m.eigen.count--
+                        if (m.eigen.count < 0) {
+                            m.eigen.count = 0
                         }
                     }
-
-                    ctx.rotate(m.angle);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 30, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'rgb(160,160,160)'
-                    ctx.fill();
-                    // ctx.lineTo(15, 0);
-                    ctx.strokeStyle = "#000";
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-
-                    m.eigen.draw0eye()
-
-                    ctx.restore();
-                    m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
-                    powerUps.boost.draw()
-                },
-                draw1() {
-                    m.walk_cycle += m.flipLegs * m.Vx;
-                    ctx.save();
-                    ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
-                    ctx.translate(m.pos.x, m.pos.y);
-                    m.calcLeg(Math.PI, -3);
-                    ctx.fillStyle = 'rgb(160,160,160)'
-                    m.eigen.drawLeg("#222");
-                    m.calcLeg(0, 0);
-                    m.eigen.drawLeg("#000");
-
-                    if (m.eigen.cycle < m.eigen.cycleLimit) {
-                        m.eigen.cycle++
-                        const t = m.eigen.cycle * 0.0367// 0.0373
-                        const maxNodes = 8
-                        const nodes = maxNodes - Math.floor(t / Math.PI) % maxNodes
-                        const amplitude = nodes === 1 ? 0 : 5 * Math.sin(t)
+                    if (m.eigen.count > 0) {
+                        const t = m.cycle * 0.0373// 0.06
+                        const maxNodes = 4
+                        const nodes = 2 + maxNodes - Math.floor(t / Math.PI) % maxNodes
+                        // if(!(m.cycle % 60))
+                        // const nodes = Math.floor(3 + 4 * Math.random())
+                        const amplitude = (nodes === 1 ? 0 : 5 * Math.sin(t))
                         if (localSettings.isHideHUD) {
                             ctx.beginPath();
                             ctx.arc(0, 0, 40 * player.scale, 0, 2 * Math.PI);
@@ -2332,7 +2244,7 @@ const m = {
                             ctx.lineWidth = 10
                             ctx.stroke();
                         } else {
-                            this.drawSine(36, amplitude, nodes, `rgb(70,70,70)`);
+                            this.drawSine(36 * m.eigen.count / 62, amplitude, nodes, `rgb(70,70,70)`);
                         }
                     }
 
@@ -2345,7 +2257,11 @@ const m = {
                     ctx.lineWidth = 1.5;
                     ctx.stroke();
 
-                    m.eigen.draw1eye()
+                    if (m.eigen.state === 0) {
+                        m.eigen.draw0eye()
+                    } else {
+                        m.eigen.draw1eye()
+                    }
 
                     ctx.restore();
                     m.yOff = m.yOff * 0.85 + m.yOffGoal * 0.15; //smoothly move leg height towards height goal
@@ -2489,33 +2405,7 @@ const m = {
                 let nextState = m.eigen.state + 1
                 if (nextState >= m.eigen.totalStates) nextState = 0
                 m.eigen.drawBlock(nextState)
-
-                // //check for swaps
-                // if (input.left && input.right && m.eigen.cooldownCycle < m.cycle) { //&& m.onGround
-                //     m.eigen.downCount--
-                //     if (m.eigen.downCount < 1) {
-                //         m.eigen.cooldownCycle = m.cycle + 60
-                //         m.eigen.swap()
-                //     }
-                // } else {
-                //     m.eigen.downCount = m.eigen.downCountMax
-                // }
                 m.eigen.draw()
-
-
-
-                if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
-                    if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire)) {
-                        if (b.guns[b.activeGun].ammo > 0) {
-                            b.fireWithAmmo()
-                        } else {
-                            b.outOfAmmo()
-                        }
-                        if (m.holdingTarget) m.drop();
-                    }
-                    b.guns[b.activeGun].do();
-                }
-
             }
         },
         energy() {
@@ -3916,26 +3806,26 @@ const m = {
                             ctx.fill();
                         }
                         if (tech.isTokamakFly && m.throwCharge > 4 && m.energy > 0.01) {
-                            player.force.y -= 0.5 * player.mass * simulation.g; //add some reduced gravity
+                            player.force.y -= 0.55 * player.mass * simulation.g; //add some reduced gravity
                             // const mass = (player.mass + 10) / 3 * simulation.g //this makes it so you fly slower with larger blocks
                             let isDrain = false
                             const thrust = player.mass * simulation.g * Math.pow(5 / player.mass, 0.1)
                             if (input.down) {
                                 isDrain = true
-                                player.force.y += 0.9 * thrust;
+                                player.force.y += 0.91 * thrust;
                             } else if (input.up) {
                                 isDrain = true
-                                player.force.y -= 0.9 * thrust
+                                player.force.y -= 0.91 * thrust
                             }
                             if (!m.onGround) {
                                 if (input.left) {
                                     isDrain = true
-                                    player.force.x -= 0.4 * thrust
+                                    player.force.x -= 0.41 * thrust
                                 } else if (input.right) {
                                     isDrain = true
-                                    player.force.x += 0.4 * thrust
+                                    player.force.x += 0.41 * thrust
                                 }
-                                if (isDrain) m.energy -= 0.0017;
+                                if (isDrain) m.energy -= 0.0014;
                             }
 
                         }

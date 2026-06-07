@@ -377,6 +377,152 @@ const build = {
             })
         }
     },
+    // pauseGridPhysics() {
+
+    //     const { Engine, Render, Runner, Bodies, Body, World, Mouse, MouseConstraint, Events, Composite } = Matter;
+
+    //     const canvas = document.getElementById('canvas');
+
+
+    //     let W = canvas.width, H = canvas.height;
+
+    //     const enginePause = Engine.create({ gravity: { y: 1 } });
+    //     const world = enginePause.world;
+
+    //     const render = Render.create({
+    //         canvas,
+    //         engine,
+    //         options: {
+    //             width: W, height: H,
+    //             wireframes: false,
+    //             background: 'transparent',
+    //             wireframeBackground: 'transparent'
+    //         }
+    //     });
+
+    //     const bodies = [];
+    //     const divMap = new Map();
+
+    //     function makeWalls() {
+    //         const thick = 30;
+    //         const opts = { isStatic: true, render: { fillStyle: 'transparent', strokeStyle: 'transparent' } };
+    //         return [
+    //             Bodies.rectangle(W / 2, H + thick / 2, W + 60, thick, opts),
+    //             Bodies.rectangle(W / 2, -thick / 2, W + 60, thick, opts),
+    //             Bodies.rectangle(-thick / 2, H / 2, thick, H + 60, opts),
+    //             Bodies.rectangle(W + thick / 2, H / 2, thick, H + 60, opts),
+    //         ];
+    //     }
+    //     World.add(world, makeWalls());
+
+
+    //     function clearAll() {
+    //         for (const b of bodies) {
+    //             World.remove(world, b);
+    //             const entry = divMap.get(b.id);
+    //             if (entry) { entry.div.remove(); divMap.delete(b.id); }
+    //         }
+    //         bodies.length = 0;
+    //     }
+
+
+
+    //     function spawnBlock(x, y) {
+    //         const bw = 80 + Math.random() * 50;
+    //         const bh = 36 + Math.random() * 20;
+    //         x = x ?? (80 + Math.random() * (W - 160));
+    //         y = y ?? (40 + Math.random() * (H * 0.3));
+
+
+
+    //         const body = Bodies.rectangle(x, y, bw, bh, {
+    //             restitution: 0.45,
+    //             friction: 0.3,
+    //             frictionAir: 0.01,
+    //             render: {
+    //                 fillStyle: "#fff",
+    //                 strokeStyle: 'rgba(0,0,0,0.12)',
+    //                 lineWidth: 1
+    //             }
+    //         });
+    //         body._bw = bw; body._bh = bh;
+
+    //         World.add(world, body);
+
+    //         const div = document.createElement('div');
+    //         div.textContent = "hi";
+    //         Object.assign(div.style, {
+    //             position: 'absolute',
+    //             width: bw + 'px',
+    //             height: bh + 'px',
+    //             display: 'flex',
+    //             alignItems: 'center',
+    //             justifyContent: 'center',
+    //             fontSize: Math.min(14, bh * 0.38) + 'px',
+    //             fontWeight: '500',
+    //             pointerEvents: 'none',
+    //             userSelect: 'none',
+    //             willChange: 'transform',
+    //             transformOrigin: '50% 50%',
+    //             letterSpacing: '0.01em',
+    //             whiteSpace: 'nowrap',
+    //         });
+    //         document.getElementById('choose-grid').appendChild(div);  //change choose-grid to something better, this probably will cause issues
+    //         divMap.set(body.id, { div, bw, bh });
+    //         bodies.push(body);
+    //     }
+
+
+    //     const mouse = Mouse.create(canvas);
+    //     const mouseConstraint = MouseConstraint.create(enginePause, {
+    //         mouse,
+    //         constraint: { stiffness: 0.2, render: { visible: false } }
+    //     });
+    //     World.add(world, mouseConstraint);
+
+    //     function syncDivs() {
+    //         for (const b of bodies) {
+    //             const entry = divMap.get(b.id);
+    //             if (!entry) continue;
+    //             const { div, bw, bh } = entry;
+    //             const { x, y } = b.position;
+    //             const angle = b.angle;
+    //             div.style.transform = `translate(${x - bw / 2}px, ${y - bh / 2}px) rotate(${angle}rad)`;
+    //         }
+    //     }
+    //     Events.on(enginePause, 'afterUpdate', syncDivs);
+    //     for (let i = 0; i < 6; i++) spawnBlock();
+
+    //     // Render.run(render);
+    //     // const runner = Runner.create();
+    //     // Runner.run(runner, enginePause);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    //     // build.sortTech('') //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
+    //     document.getElementById("right-HUD").style.display = "none"
+    //     document.getElementById("guns").style.display = "none"
+    //     document.getElementById("field").style.display = "none"
+    //     document.getElementById("health").style.display = "none"
+    //     document.getElementById("health-bg").style.display = "none"
+    //     document.getElementById("defense-bar").style.display = "none"
+    //     document.getElementById("damage-bar").style.display = "none"
+    //     //show in game console
+    //     simulation.lastLogTime = m.cycle
+    // },
     pauseGrid() {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
@@ -389,7 +535,7 @@ const build = {
         document.getElementById("defense-bar").style.display = "none"
         document.getElementById("damage-bar").style.display = "none"
         //show in game console
-        simulation.lastLogTime = m.cycle //hide in game console
+        simulation.lastLogTime = m.cycle
     },
     generatePauseLeft() {
         //left side

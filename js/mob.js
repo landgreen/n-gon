@@ -176,8 +176,18 @@ const mobs = {
                 effect() {
                     if ((simulation.cycle - this.startCycle) % 30 === 0) {
                         let dmg = tech.radioactiveDamage * this.dmg
-                        who.damage(dmg);
-                        if (who.damageReduction) {
+                        if (who.damageReduction === 0) {
+                            this.endCycle = 0 //invulnerability clears radiation
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
+                                y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
+                                radius: Math.log(dmg + 1.1) * 30,
+                                color: "rgb(255, 255, 255)",
+                                time: simulation.drawTime * 3
+                            });
+                        } else {
+                            // requestAnimationFrame(() => { who.damage(dmg) });
+                            who.damage(dmg);
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
                                 y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
@@ -1398,11 +1408,11 @@ const mobs = {
                 }
                 if (tech.isRadioactive) {
                     //look for dots and spread them
-                    let dmgTotal = 0
+                    let dmg = 0
                     for (let i = 0, len = this.status.length; i < len; i++) {
-                        if (this.status[i].type === "dot") dmgTotal += this.status[i].dmg * (this.status[i].endCycle - simulation.cycle)
+                        if (this.status[i].type === "dot") dmg += this.status[i].dmg //* (this.status[i].endCycle - simulation.cycle)
                     }
-                    if (dmgTotal > 0) { //look for closest mob
+                    if (dmg > 0) { //look for closest mob
                         let closestRadius = 500;
                         let closestIndex = null;
                         for (let i = 0, len = mob.length; i < len; ++i) {
@@ -1413,7 +1423,7 @@ const mobs = {
                             }
                         }
                         if (closestIndex) {
-                            mobs.statusDoT(mob[closestIndex], dmgTotal / 180, 180)
+                            mobs.statusDoT(mob[closestIndex], dmg, tech.isLongRadiation ? 715392000 : 180)
                             ctx.beginPath();
                             ctx.moveTo(this.position.x, this.position.y);
                             ctx.lineTo(mob[closestIndex].position.x, mob[closestIndex].position.y);
@@ -1421,14 +1431,6 @@ const mobs = {
                             ctx.strokeStyle = "rgba(0,80,80,1)";
                             ctx.stroke();
                         }
-                        //draw AOE
-                        // simulation.drawList.push({ //add dmg to draw queue
-                        //     x: this.position.x,
-                        //     y: this.position.y,
-                        //     radius: radius,
-                        //     color: "rgba(0,80,80,0.03)",
-                        //     time: 15
-                        // });
                     }
                 }
             },

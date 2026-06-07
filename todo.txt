@@ -1,20 +1,31 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: zeitgeist - in the pause menu use a drop down menu to choose a tech that will eject at the start of the next level
-gunTech: nanoparticles - dropdown menu with various poorly balanced foam effects
-gunTech: UAV-swarm - convert your bots into missile bots, expend 1 research per conversion
-  renamed missile-bot to UAV
+radiation DoT rework
+  tech: irradiated nails renamed irradiated
+    also applies to ice-IX, blocks
+  tech: 6s half-life renamed polonium-210
+    radiation lasts 6 seconds -> 128 days, but expend 2 research
+  when bosses go invincible radioactive stacks clear
+  removed tech: 1s half-life
 
-constraint - exploding blocks 1.5->2s timer
-add sort button for PAUSE tech
+eigenstate rework - 3x dmg only when near your other state 
+  tech: normal mode has a second 360 wave originating from player
+  removed tech: first harmonic
+
+interferometer - removed elevator laser
+  2 more mobs at start, but 3 fewer mobs after flip
 
 bug fixes
-  MACHO getting teleported on reactor when it exits the center
-  adjusted energy conservation regen graphics for very small damage and very large damage
-  eigen states exiting to new levels were coping the current states energy
+  tech prototypes was getting stuck on upgrades
+  fixed radioactive DOT crashes on tetherBoss
 
-  
 *********************************************************** TODO *****************************************************
+
+?add code to merge DOTs if there are more than 20?
+
+!tech: decay chain - radioactive damage after colliding with mobs
+  field tech for negative mass?
+  too similar to annihilation?
 
 
 add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D rectangles
@@ -26,7 +37,6 @@ add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D r
     how to drag with mouse and still use INPUT tech
       maybe mouse2 to drag
       button to toggle a drag mode
-
 
 
 new level - ducts
@@ -54,8 +64,6 @@ new level - ducts
     pressing all the buttons unlocks something?
     buttons are scatter around on wall, ceiling, floor
       rewrite button code to have any angle?
-
-
 
 
 
@@ -1625,6 +1633,7 @@ possible names for tech
   modus tollens (If P, then Q. Not Q. Therefore, not P.)
   modus ponens (If P, then Q. P. Therefore, Q.)
   parsimony - just means Occam's razor
+  zero-index waveguide - something for metematerial cloaking field
   
 
 ******************************************************* DESIGN ******************************************************

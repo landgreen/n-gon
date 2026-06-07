@@ -248,7 +248,7 @@ const tech = {
     damageAdjustments() {
         let dmg = m.damageDone * m.fieldDamage * powerUps.difficulty.damageDone
         if (tech.proportionality !== null) dmg *= tech.proportionality
-        if (tech.isEigenstate && m.eigen.cycle < m.eigen.cycleLimit) dmg *= 3
+        if (tech.isEigenstate && m.eigen.count > 0) dmg *= 3
         if (tech.isLaserWire && tech.wire && tech.wire.segments.length) dmg *= 1 + 0.01 * tech.wire.segments.length
         if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= 0.3
         if (tech.isMaxHealthDamage && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 2
@@ -409,6 +409,15 @@ const tech = {
             if (tech.isOrbitBotUpgrade) tech.removeTech("orbital-bot upgrade", false)
             if (tech.isDynamoBotUpgrade) tech.removeTech("dynamo-bot upgrade", false)
             if (tech.isSoundBotUpgrade) tech.removeTech("sound-bot upgrade", false)
+
+            //set all upgrades to false to fix a bug I don't understand
+            tech.isNailBotUpgrade = false
+            tech.isFoamBotUpgrade = false
+            tech.isBoomBotUpgrade = false
+            tech.isLaserBotUpgrade = false
+            tech.isOrbitBotUpgrade = false
+            tech.isDynamoBotUpgrade = false
+            tech.isSoundBotUpgrade = false
 
             //add new tech
             tech.giveTech(value)
@@ -958,7 +967,7 @@ const tech = {
     {
         name: "eigenstate",
         descriptionFunction() {
-            return `quickly tap <strong>down</strong> <strong>3</strong> times to swap <strong>states</strong><br>and gain <strong>3x</strong> <strong class='color-d'>damage</strong> for <strong>10</strong> seconds`
+            return `quickly tap <strong>down</strong> <strong>3</strong> times to swap <strong>eigenstate</strong><br><strong>3x</strong> <strong class='color-d'>damage</strong> if near your other <strong>eigenstate</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -984,7 +993,7 @@ const tech = {
     {
         name: "normal mode",
         descriptionFunction() {
-            return `<strong>eigenstate</strong> generates isotropic <strong>phonon</strong> waves<br>for <strong>10</strong> seconds after <strong>swapping</strong> states`
+            return `when near your other <strong>eigenstate</strong><br>each state generates isotropic <strong>phonon</strong> waves`
         },
         maxCount: 1,
         count: 0,
@@ -1002,27 +1011,27 @@ const tech = {
             tech.isNormalMode = false;
         }
     },
-    {
-        name: "first harmonic",
-        descriptionFunction() {
-            return `if your <strong>eigenstate</strong> is moving get<br>up to <strong>7x</strong> normal mode's wave <strong>frequency</strong>`
-        },
-        maxCount: 1,
-        count: 0,
-        frequency: 3,
-        frequencyDefault: 3,
-        isSkinUpgrade: true,
-        allowed() {
-            return tech.isNormalMode
-        },
-        requires: "normal mode",
-        effect() {
-            tech.isFirstHarmonic = true;
-        },
-        remove() {
-            tech.isFirstHarmonic = false;
-        }
-    },
+    // {
+    //     name: "first harmonic",
+    //     descriptionFunction() {
+    //         return `if your <strong>eigenstate</strong> is moving get<br>up to <strong>7x</strong> normal mode's wave <strong>frequency</strong>`
+    //     },
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 3,
+    //     frequencyDefault: 3,
+    //     isSkinUpgrade: true,
+    //     allowed() {
+    //         return tech.isNormalMode
+    //     },
+    //     requires: "normal mode",
+    //     effect() {
+    //         tech.isFirstHarmonic = true;
+    //     },
+    //     remove() {
+    //         tech.isFirstHarmonic = false;
+    //     }
+    // },
     {
         name: "CPT symmetry",
         descriptionFunction() {
@@ -1129,7 +1138,7 @@ const tech = {
     {
         name: "arsenal",
         descriptionFunction() {
-            return `for each unused ${powerUps.orb.gun()} in your inventory<br><strong>1.25x</strong> <strong class='color-d'>damage</strong> <em style ="float: right;">(${(1 + 0.25 * Math.max(0, b.inventory.length - 1)).toFixed(2)}x)</em>`
+            return `for each inactive ${powerUps.orb.gun()} in your inventory<br><strong>1.25x</strong> <strong class='color-d'>damage</strong> <em style ="float: right;">(${(1 + 0.25 * Math.max(0, b.inventory.length - 1)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -1169,8 +1178,7 @@ const tech = {
     {
         name: "active cooling",
         descriptionFunction() {
-            //Math.pow(0.76923, Math.max(0, b.inventory.length - 1)
-            return `for each unused ${powerUps.orb.gun()} in your inventory<br><strong>1.35x</strong> <em>fire rate</em> <em style ="float: right;">(${((1 + 0.35 * Math.max(0, b.inventory.length - 1))).toFixed(2)}x)</em>`
+            return `for each inactive ${powerUps.orb.gun()} in your inventory<br><strong>1.35x</strong> <em>fire rate</em> <em style ="float: right;">(${((1 + 0.35 * Math.max(0, b.inventory.length - 1))).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -1470,7 +1478,7 @@ const tech = {
     },
     {
         name: "cargo",
-        description: `spawn ${powerUps.orb.gun()}${powerUps.orb.gun()}<br><span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(3)}</span>`,
+        description: `spawn ${powerUps.orb.gun()}${powerUps.orb.gun()}<br><span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(2)}</span>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1478,13 +1486,13 @@ const tech = {
         isInstant: true,
         isBadRandomOption: true,
         allowed() {
-            return b.inventory.length > 1 && (powerUps.research.count > 2 || build.isExperimentSelection)
+            return b.inventory.length > 1 && (powerUps.research.count > 1 || build.isExperimentSelection)
         },
         requires: "at least 2 guns",
         effect() {
             powerUps.spawn(m.pos.x - 20, m.pos.y, "gun");
             powerUps.spawn(m.pos.x + 20, m.pos.y, "gun");
-            powerUps.research.expend(3)
+            powerUps.research.expend(2)
         },
         remove() { }
     },
@@ -3185,9 +3193,7 @@ const tech = {
             let menu = ''
             if (!this.isLost) {
                 let mode = 9
-                if (tech.isNailBotUpgrade) {
-                    mode = 0
-                } else if (tech.isFoamBotUpgrade) {
+                if (tech.isFoamBotUpgrade) {
                     mode = 1
                 } else if (tech.isBoomBotUpgrade) {
                     mode = 2
@@ -3199,12 +3205,14 @@ const tech = {
                     mode = 5
                 } else if (tech.isSoundBotUpgrade) {
                     mode = 6
+                } else if (tech.isNailBotUpgrade) {
+                    mode = 7
                 }
                 const isSel = (val) => (val === mode ? 'selected' : '');
                 menu = `
         <select name="shotgun-mod" id="shotgun-mod" onchange="tech.inputHTML.prototypes(this.value)" style="float: right;">
             <option value="none" ${isSel(9)}>none</option>
-            <option value="nail-bot upgrade" ${isSel(0)}>nail-bot upgrade</option>
+            <option value="nail-bot upgrade" ${isSel(7)}>nail-bot upgrade</option>
             <option value="foam-bot upgrade" ${isSel(1)}>foam-bot upgrade</option>
             <option value="boom-bot upgrade" ${isSel(2)}>boom-bot upgrade</option>
             <option value="laser-bot upgrade" ${isSel(3)}>laser-bot upgrade</option>
@@ -6903,7 +6911,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles // && !tech.isNailRadiation && !tech.isNailCrit
+            return tech.haveGunCheck("nail gun") && !tech.isRivets && !tech.isNeedles // && !tech.isIrradiated && !tech.isNailCrit
         },
         requires: "nail gun, not rivets, needles",
         effect() {
@@ -6991,65 +6999,83 @@ const tech = {
         }
     },
     {
-        name: "irradiated nails",
+        name: "irradiated",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Irradiation' class="link">irradiated nails</a>`,
-        description: "<strong>nails</strong>, <strong>needles</strong>, and <strong>rivets</strong> are <strong class='color-p'>radioactive</strong><br><strong>2x</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
+        description: "<strong class='color-p'>radioactive</strong>: <strong>nails</strong>, <strong>needles</strong>, <strong>rivets</strong>, <strong class='color-s'>ice IX</strong>, <strong class='color-block'>blocks</strong><br><strong>2x</strong> <strong class='color-d'>damage</strong> over <strong>3</strong> seconds",
         isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNailBotUpgrade || tech.hookNails || tech.fragments || tech.nailsDeathMob || ((tech.isMineDrop || tech.haveGunCheck("mine")) && !(tech.isFoamMine || tech.isSuperMine)) || (tech.haveGunCheck("nail gun") && !tech.isShieldPierce) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot))
+            return tech.isNailBotUpgrade || tech.hookNails || tech.fragments || tech.nailsDeathMob || ((tech.isMineDrop || tech.haveGunCheck("mine")) && !(tech.isFoamMine || tech.isSuperMine)) || (tech.haveGunCheck("nail gun") && !tech.isShieldPierce) || (tech.haveGunCheck("shotgun") && (tech.isNeedles || tech.isNailShot)) || tech.isIceShot || (m.fieldMode === 4 && simulation.molecularMode === 2) || (m.coupling > 10 && m.fieldMode === 2) || tech.blockDamage > 0.075
         },
-        requires: "nail gun, nails, rivets, mine, not ceramic needles",
+        requires: "nail gun, nails, rivets, mine, ice-IX, blocks, not ceramic needles",
         effect() {
-            tech.isNailRadiation = true;
+            tech.isIrradiated = true;
         },
         remove() {
-            tech.isNailRadiation = false;
+            tech.isIrradiated = false;
         }
     },
     {
-        name: "6s half-life",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' class="link">6s half-life</a>`,
-        description: "<span style = 'font-size:90%;'><strong>nails</strong>, <strong>needles</strong>, <strong>rivets</strong> have <strong class='color-p'>plutonium-238</strong></span><br><strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> lasts <strong>+3</strong> seconds",
+        name: "polonium-210",
+        description: `<strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> lasts <strong>138</strong> days<br><span style ="float: right;"><span class="underline">expend</span> ${powerUps.orb.research(2)}</span>`,
         isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNailRadiation && !tech.isFastRadiation
+            return (tech.isIrradiated || tech.isWormholeDamage) && (build.isExperimentSelection || powerUps.research.count > 1)
         },
-        requires: "nail gun, mine, irradiated nails, not 1s half-life",
+        requires: "irradiated",
         effect() {
-            tech.isSlowRadiation = true;
+            tech.isLongRadiation = true;
+            powerUps.research.expend(2)
         },
         remove() {
-            tech.isSlowRadiation = false;
+            tech.isLongRadiation = false;
         }
     },
-    {
-        name: "1s half-life",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Half-life' class="link">1s half-life</a>`,
-        description: "<span style = 'font-size:95%;'><strong>nails</strong>, <strong>needles</strong>, <strong>rivets</strong> have <strong class='color-p'>lithium-8</strong><br><strong>4x</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> for <strong>1</strong> second</span>",
-        isGunTech: true,
-        maxCount: 1,
-        count: 0,
-        frequency: 2,
-        frequencyDefault: 2,
-        allowed() {
-            return tech.isNailRadiation && !tech.isSlowRadiation
-        },
-        requires: "nail gun, mine, irradiated nails, not 6s half-life",
-        effect() {
-            tech.isFastRadiation = true;
-        },
-        remove() {
-            tech.isFastRadiation = false;
-        }
-    },
+    // {
+    //     name: "6s half-life",
+    //     description: "<span style = 'font-size:90%;'><strong>nails</strong>, <strong>needles</strong>, <strong>rivets</strong> have <strong class='color-p'>plutonium-238</strong></span><br><strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> lasts <strong>+3</strong> seconds",
+    //     isGunTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return tech.isIrradiated && !tech.isFastRadiation
+    //     },
+    //     requires: "nail gun, mine, irradiated nails, not 1s half-life",
+    //     effect() {
+    //         tech.isLongRadiation = true;
+    //     },
+    //     remove() {
+    //         tech.isLongRadiation = false;
+    //     }
+    // },
+    // {
+    //     name: "decay chain",
+    //     description: "<strong>nails</strong>, <strong>needles</strong>, <strong>rivets</strong> have <strong class='color-p'>lithium-8</strong><br><strong>4x</strong> <strong class='color-p'>radioactive</strong> <strong class='color-d'>damage</strong> doubles af <strong>1</strong> second",
+    //     isGunTech: true,
+    //     maxCount: 1,
+    //     count: 0,
+    //     frequency: 2,
+    //     frequencyDefault: 2,
+    //     allowed() {
+    //         return tech.isIrradiated && !tech.isLongRadiation
+    //     },
+    //     requires: "nail gun, mine, irradiated nails, not 6s half-life",
+    //     effect() {
+    //         tech.isFastRadiation = true;
+    //     },
+    //     remove() {
+    //         tech.isFastRadiation = false;
+    //     }
+    // },
     {
         name: "spin-statistics",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Spin%E2%80%93statistics_theorem' class="link">spin-statistics</a>`,
@@ -7323,7 +7349,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling && (m.fieldMode === 2 || m.fieldMode === 0))
+            return tech.isIceCrystals || tech.isSporeFreeze || (m.fieldMode === 4 && simulation.molecularMode === 2) || tech.isIceShot || tech.isNeedleIce || (m.coupling > 10 && (m.fieldMode === 2 || m.fieldMode === 0))
         },
         requires: "a freeze effect",
         effect() {
@@ -7412,7 +7438,7 @@ const tech = {
     {
         name: "triple point",
         descriptionFunction() {
-            return `<strong>+5</strong> second <strong class='color-s'>freeze</strong> duration`
+            return `<strong>+6</strong> second <strong class='color-s'>freeze</strong> duration`
         },
         isGunTech: true,
         maxCount: 3,
@@ -7428,7 +7454,7 @@ const tech = {
         },
         requires: "a localized freeze effect",
         effect() {
-            tech.iceIXFreezeTime += 5 * 60
+            tech.iceIXFreezeTime += 6 * 60
             // powerUps.spawnDelay("coupling", 10)
         },
         remove() {
@@ -8419,7 +8445,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation
+            return tech.isIrradiated || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation
         },
         requires: "radiation damage source",
         effect() {
@@ -8438,7 +8464,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.isNailRadiation || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation || tech.isDroneRadioactive
+            return tech.isIrradiated || tech.isWormholeDamage || tech.isNeutronBomb || tech.isExplodeRadio || tech.isBlockRadiation || tech.isDroneRadioactive
         },
         requires: "radiation damage source",
         effect() {
@@ -8525,7 +8551,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("mine") && !tech.isSuperMine && !tech.isRicochet && !tech.isNailRadiation && !tech.isNailCrit
+            return tech.haveGunCheck("mine") && !tech.isSuperMine && !tech.isRicochet && !tech.isIrradiated && !tech.isNailCrit
         },
         requires: "mines, not blast ball, ricochet, irradiated nails, supercritical fission",
         effect() {
@@ -8546,7 +8572,7 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return tech.haveGunCheck("mine") && !tech.isFoamMine && !tech.isNailRadiation && !tech.isNailCrit
+            return tech.haveGunCheck("mine") && !tech.isFoamMine && !tech.isIrradiated && !tech.isNailCrit
         },
         requires: "mines, not elephants toothpaste, ricochet, irradiated nails, supercritical fission",
         effect() {
@@ -14713,7 +14739,7 @@ const tech = {
     // botSpawner: null,
     // isBotSpawnerReset: null,
     // isSporeFollow: null,
-    // isNailRadiation: null,
+    // isIrradiated: null,
     // isEnergyHealth: null,
     // isStun: null,
     // restDamage: null,

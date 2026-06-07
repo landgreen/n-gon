@@ -14649,6 +14649,14 @@ const spawn = {
         };
         me.do = function () {
             this.gravity();
+            //draw
+            ctx.beginPath();
+            ctx.moveTo(constraint1.pointA.x, constraint1.pointA.y);
+            ctx.lineTo(constraint1.bodyB.position.x + constraint1.pointB.x, constraint1.bodyB.position.y + constraint1.pointB.y);
+            ctx.lineWidth = 1
+            ctx.strokeStyle = "rgba(0,0,0,0.2)";
+            ctx.stroke();
+
             if (this.isInvulnerable) {
                 this.repulsion();
                 this.invulnerableCount--
@@ -14674,16 +14682,9 @@ const spawn = {
                 ctx.stroke();
             } else {
                 this.seePlayerCheck();
-                this.checkStatus();
                 this.attraction();
+                this.checkStatus();
             }
-            //draw
-            ctx.beginPath();
-            ctx.moveTo(constraint1.pointA.x, constraint1.pointA.y);
-            ctx.lineTo(constraint1.bodyB.position.x + constraint1.pointB.x, constraint1.bodyB.position.y + constraint1.pointB.y);
-            ctx.lineWidth = 1
-            ctx.strokeStyle = "rgba(0,0,0,0.2)";
-            ctx.stroke();
         };
     },
     tetherBoss4(x, y, constraint, radius = 90) {

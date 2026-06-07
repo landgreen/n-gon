@@ -912,12 +912,13 @@ const powerUps = {
             for (let i = 0; i < count; i++) {
                 if (powerUps.research.count > 0) {
                     powerUps.research.changeRerolls(-1)
-                    if (tech.isResearchDamage) {
+                    const cap = 200 * (localSettings.isHideHUD ? 0.5 : 1)
+                    if (tech.isResearchDamage && powerUp.length < cap) {
                         m.damageDone *= 1.02
                         simulation.inGameConsole(`<span class='color-var'>tech</span>.<strong class='color-d'>damage</strong> *= ${1.02} //peer review`);
                         // tech.addJunkTechToPool(0.01)
                     }
-                    if (tech.isResearchHeal) {
+                    if (tech.isResearchHeal && powerUp.length < cap) {
                         powerUps.spawn(player.position.x + 150 * (Math.random() - 0.5), player.position.y + 150 * (Math.random() - 0.5), "heal", false);
                     }
                 }
