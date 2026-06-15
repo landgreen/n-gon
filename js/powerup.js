@@ -426,10 +426,10 @@ const powerUps = {
 
         // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
     },
-    animatePowerUpGrab(color) {
+    animatePowerUpGrab(color, count = 25) {
         if (!localSettings.isHideHUD) {
             simulation.ephemera.push({
-                count: 25, //cycles before it self removes
+                count: count, //cycles before it self removes
                 do() {
                     this.count -= 2
                     if (this.count < 5) simulation.removeEphemera(this)
@@ -1042,16 +1042,43 @@ const powerUps = {
         size() {
             return 17;
         },
+        // scarcityGraphic() {
+        //     if (tech.isScarcity && b.guns[b.activeGun].ammo === 0) {
+        //         console.log('scarcity')
+        //         // powerUps.animatePowerUpGrab('#f00')
+        //         simulation.ephemera.push({
+        //             count: 40, //cycles before it self removes
+        //             do() {
+        //                 this.count -= 2
+        //                 if (this.count < 5) simulation.removeEphemera(this)
+
+        //                 ctx.beginPath();
+        //                 ctx.arc(m.pos.x, m.pos.y, Math.max(3, this.count), 0, 2 * Math.PI);
+        //                 ctx.fillStyle = '#f00'
+        //                 ctx.fill();
+        //             },
+        //         })
+        //     }
+        // },
         effect() {
             const couplingExtraAmmo = (m.fieldMode === 10 || m.fieldMode === 0) ? 1 + 0.05 * m.coupling : 1
             if (b.inventory.length > 0) {
-                powerUps.animatePowerUpGrab('rgba(68, 102, 119,0.25)')
+                let animateGrabRadius = 0
                 if (tech.isAmmoForGun && (b.activeGun !== null && b.activeGun !== undefined)) { //give extra ammo to one gun only with tech logistics
                     const name = b.guns[b.activeGun]
                     if (name.ammo !== Infinity) {
                         if (tech.ammoCap) {
-                            name.ammo = Math.ceil(2 * name.ammoPack * tech.ammoCap * couplingExtraAmmo)
+                            animateGrabRadius = 60
+                            if (tech.isScarcity && name.ammo === 0) animateGrabRadius = 85
+                            // console.log(name.ammo, animateGrabRadius)
+                            name.ammo = Math.ceil(2 * name.ammoPack * (tech.ammoCap + ((tech.isScarcity && name.ammo === 0) ? 14 : 0)) * couplingExtraAmmo)
                         } else {
+                            if (tech.isScarcity && name.ammo === 0) {
+                                animateGrabRadius = 85
+                                for (let j = 0; j < 14; j++) name.ammo += Math.ceil((Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo)
+                            } else {
+                                animateGrabRadius = 50
+                            }
                             name.ammo += Math.ceil(2 * (Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo)
                         }
                     }
@@ -1060,14 +1087,26 @@ const powerUps = {
                         const name = b.guns[b.inventory[i]]
                         if (name.ammo !== Infinity) {
                             if (tech.ammoCap) {
-                                name.ammo = Math.ceil(name.ammoPack * tech.ammoCap * couplingExtraAmmo)
-                            } else { //default ammo behavior
-                                name.ammo += Math.ceil((Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo)
+                                if (tech.isScarcity && name.ammo === 0) {
+                                    animateGrabRadius = 85
+                                } else if (animateGrabRadius < 50) {
+                                    animateGrabRadius = 50
+                                }
+                                name.ammo = Math.ceil(name.ammoPack * (tech.ammoCap + ((tech.isScarcity && name.ammo === 0) ? 14 : 0)) * couplingExtraAmmo)
+                            } else {
+                                if (tech.isScarcity && name.ammo === 0) {
+                                    animateGrabRadius = 85
+                                    for (let j = 0; j < 14; j++) name.ammo += Math.ceil((Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo)
+                                } else if (animateGrabRadius < 25) {
+                                    animateGrabRadius = 25
+                                }
+                                name.ammo += Math.ceil((Math.random() + Math.random()) * name.ammoPack * couplingExtraAmmo) //default ammo behavior
                             }
                         }
                     }
                 }
                 simulation.updateGunHUD();
+                powerUps.animatePowerUpGrab(`rgba(68, 102, 119, ${animateGrabRadius / 100})`, animateGrabRadius)
             }
             powerUps.Casimir.random()
         }
@@ -1709,7 +1748,7 @@ const powerUps = {
                 }); //wrapping in animation frame prevents errors, probably
                 if (tech.isBarycenter) {
                     b.orbitBot(player.position, false);
-                    bullet[bullet.length - 1].endCycle = simulation.cycle + 1320 //15 seconds
+                    bullet[bullet.length - 1].endCycle = simulation.cycle + 1440 //extra time to wait for pair production to end
                 }
             } else {
                 m.energy += 2 * level.isReducedRegen;

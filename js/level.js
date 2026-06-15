@@ -107,8 +107,8 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = true
-                level.levelsCleared = 5
-                level.updateDifficulty()
+                // level.levelsCleared = 5
+                // level.updateDifficulty()
                 // simulation.isCheating = true
 
                 // tech.giveTech("performance")
@@ -118,7 +118,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
                 // m.couplingChange(1000)
@@ -128,7 +128,7 @@ const level = {
                 // m.wakeCheck();
                 // m.damageDone *= 1000
 
-                m.maxHealth = m.health = 1000000
+                // m.maxHealth = m.health = 1000000
                 // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
@@ -139,35 +139,38 @@ const level = {
                 // simulation.molecularMode = 2
                 // m.takeDamage(0.01);
 
-                b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                // b.giveGuns(1) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
                 // b.giveGuns(3)
-                // b.guns[b.inventory[0]].ammo = 10000000
+                // b.giveGuns(7)
+                // b.giveGuns(11)
+                // b.guns[b.inventory[0]].ammo = 0
                 // tech.addJunkTechToPool(0.5)
-                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("quantum Zeno effect") });
+                // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("decay chain") });
                 // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
-                for (let i = 0; i < 1; ++i) tech.giveTech("bremsstrahlung")
-                for (let i = 0; i < 1; ++i) tech.giveTech("radioactive contamination")
-                for (let i = 0; i < 5; ++i) tech.giveTech("nail-bot")
-                for (let i = 0; i < 1; i++) tech.giveTech("irradiated")
-                for (let i = 0; i < 1; i++) tech.giveTech("polonium-210")
-                for (let i = 0; i < 1; i++) tech.giveTech("cherenkov radiation")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("logistics")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("perturbation theory")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("entanglement")
+                for (let i = 0; i < 1; i++) tech.giveTech("quantum Zeno effect")
+                for (let i = 0; i < 1; i++) tech.giveTech("eigenstate")
+                // for (let i = 0; i < 1; i++) tech.giveTech("quantum immortality")
+                // for (let i = 0; i < 1; i++) tech.giveTech("preserve")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 7
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                // level.testing()
+                level.testing()
                 // level.HVAC()
-                level.office()
+                // level.office()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-                // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
+                // requestAnimationFrame(() => { powerUps.spawnDelay("ammo", 10); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
-                // for (let i = 0; i < 1; i++) spawn.starter(1300 + 10 * i, -200, 200)
+                for (let i = 0; i < 5; i++) spawn.starter(1300 + 10 * i, -200)
                 // for (let i = 0; i < 1; i++) spawn.mantisBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
-                // for (let i = 0; i < 20; ++i) powerUps.directSpawn(m.pos.x + 50 * Math.random(), m.pos.y + 50 * Math.random(), "research");
+                // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 3000 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
                 // for (let i = 0; i < 30; ++i) powerUps.directSpawn(m.pos.x + 450 + 150 * Math.random(), m.pos.y + 150 * Math.random(), "coupling");
                 // for (let i = 0; i < 100; i++) powerUps.spawn(player.position.x + Math.random() * 50, player.position.y - Math.random() * 50, "coupling", false);
                 // level.constraint[0].effect()  // turn this off first ->  seededShuffle(level.constraint)
@@ -215,37 +218,56 @@ const level = {
 
         m.fieldCDcycle = m.cycle + 15;
         tech.isDeathTechTriggered = false
-        if (m.health < 0 && tech.isNoDeath) { //needed for quantum Zeno effect
-            if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) {
-
-                m.health = 0.01
-                tech.isDeathAvoidedThisLevel = true
-                powerUps.research.changeRerolls(-1)
-                simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
-                setTimeout(function () {
-                    powerUps.spawnDelay("heal", 16, 8);//(type, count, delay = 2, location = m.pos) {
-                }, 800);
-                simulation.ephemera.push({
-                    levelsCleared: level.levelsCleared,
-                    do() {
-                        m.timeStop(Math.random() < 0.1 ? "#00cccc55" : "#ccc")
-                        if (m.health > 0.9 || this.levelsCleared !== level.levelsCleared) {
-                            m.wakeCheck(false); //unpause time
-                            simulation.removeEphemera(this);
-                            simulation.wipe = function () { //set wipe to normal
-                                ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (tech.isNoDeath) { //needed for quantum Zeno effect
+            if (m.health < 0) {
+                if (tech.isDeathAvoid && powerUps.research.count > 0 && !tech.isDeathAvoidedThisLevel) {
+                    m.health = 0.01
+                    tech.isDeathAvoidedThisLevel = true
+                    powerUps.research.changeRerolls(-1)
+                    simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-r'>research</span><span class='color-symbol'>--</span><br>${powerUps.research.count}`)
+                    setTimeout(function () {
+                        powerUps.spawnDelay("heal", 16, 8);//(type, count, delay = 2, location = m.pos) {
+                    }, 800);
+                    simulation.ephemera.push({
+                        levelsCleared: level.levelsCleared,
+                        do() {
+                            m.timeStop(Math.random() < 0.1 ? "#00cccc55" : "#ccc")
+                            if (m.health > Math.min(0.7 * m.maxHealth, 99) || this.levelsCleared !== level.levelsCleared) {
+                                m.wakeCheck(false); //unpause time
+                                simulation.removeEphemera(this);
+                                simulation.wipe = function () { //set wipe to normal
+                                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                                }
                             }
-                        }
-                    },
-                });
-                simulation.wipe = function () { //set wipe to have trails
-                    ctx.fillStyle = "rgba(255,255,255,0.3)";
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        },
+                    });
+                    simulation.wipe = function () { //set wipe to have trails
+                        ctx.fillStyle = "rgba(255,255,255,0.3)";
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                } else {
+                    m.health = 0;
+                    m.displayHealth();
+                    requestAnimationFrame(() => { m.death(); });
                 }
-            } else {
+            } else if (tech.isEigenstate && m.eigen.health[m.eigen.state === 0 ? 1 : 0] < 0) { //check other state health
                 m.health = 0;
                 m.displayHealth();
                 requestAnimationFrame(() => { m.death(); });
+
+                // m.death()//this shouldn't kill, it will just eject eigen state tech
+                // m.eigen.deathCount++
+                // m.eigen.isAlive[m.eigen.state] = false
+                // m.eigen.swap()
+                // simulation.inGameConsole(`<em>//your other state died</em>`)
+                // simulation.inGameConsole(`<span class='color-var'>m</span>.eigen.isAlive<span class='color-symbol'>[</span>m.eigen.state<span class='color-var'>]</span> <span class='color-var'>=</span> false `)
+                // // m.addHealth(1)
+                // for (let i = 0; i < tech.tech.length; i++) {
+                //     if (tech.tech[i].name === "eigenstate") {
+                //         powerUps.ejectTech(i)
+                //         break
+                //     }
+                // }
             }
         }
         tech.isDeathAvoidedThisLevel = false;

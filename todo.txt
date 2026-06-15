@@ -1,31 +1,33 @@
 ******************************************************** NEXT PATCH **************************************************
 
-radiation DoT rework
-  tech: irradiated nails renamed irradiated
-    also applies to ice-IX, blocks
-  tech: 6s half-life renamed polonium-210
-    radiation lasts 6 seconds -> 128 days, but expend 2 research
-  when bosses go invincible radioactive stacks clear
-  removed tech: 1s half-life
+tech: decay chain - each stack of radioactivity increase radioactive damage on that mob by 7%
+tech: reserve - when PAUSED get ammo each time you click
+tech: preserve - when PAUSED get heals each time you click
+tech: scarcity - ammo power ups give 10x ammo to your guns that have 0 ammo
+tech: negative pressure - mobs with durability < 0.66 take 8x damage while inside your negative mass field
+tech: entanglement - if you throw eigenstate is will gravitate towards a mob
 
-eigenstate rework - 3x dmg only when near your other state 
-  tech: normal mode has a second 360 wave originating from player
-  removed tech: first harmonic
+eigenstate has a keyword style the same as blocks
+eigenstate 3->4x dmg and it's aura is pink
+barycenter bots last 18->20s
+shape-memory 30->40 energy/s
+pseudoelasticity 3->4x fire rate
+repolarization 1.33->1.5s shorter depolarization CD
+  stacks to 3->2
+paramagnetism instantly grabs blocks even before they get in range
+  and eigen block from any distance
 
-interferometer - removed elevator laser
-  2 more mobs at start, but 3 fewer mobs after flip
+grabbing ammo animation is bigger when you get bonus ammo effects
 
 bug fixes
-  tech prototypes was getting stuck on upgrades
-  fixed radioactive DOT crashes on tetherBoss
+  anthropic principle now exits time stop based on 0.7*max health capped at 90, not 90 health to prevent lock out on very low or high max health
+  eigen block properly inherits velocity from player on swap
+  exiting level with eigenstate and quantum Zeno effect now checks the health of your other state
+  health < 0 + reactor level + eigenstate + quantum Zeno effect wasn't ejecting eigenstate properly
 
 *********************************************************** TODO *****************************************************
 
 ?add code to merge DOTs if there are more than 20?
-
-!tech: decay chain - radioactive damage after colliding with mobs
-  field tech for negative mass?
-  too similar to annihilation?
 
 
 add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D rectangles
@@ -64,10 +66,6 @@ new level - ducts
     pressing all the buttons unlocks something?
     buttons are scatter around on wall, ceiling, floor
       rewrite button code to have any angle?
-
-
-
-
 
 tech: self locating uncertainty - players have some control over switchWorlds()
   how?
@@ -1634,6 +1632,7 @@ possible names for tech
   modus ponens (If P, then Q. P. Therefore, Q.)
   parsimony - just means Occam's razor
   zero-index waveguide - something for metematerial cloaking field
+  beables - randomly chosen configuration of physical quantities
   
 
 ******************************************************* DESIGN ******************************************************
