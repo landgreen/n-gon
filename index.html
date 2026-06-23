@@ -27,8 +27,6 @@
     <div id="health-bg"></div>
     <div id="health"></div>
     <div id="defense-bar"></div>
-    <div id="damage-bar"></div>
-    <!-- <div id="damage-num"></div> -->
     <div id="dmg"></div>
     <div id='construct'></div>
     <canvas id="canvas"></canvas>
@@ -56,8 +54,11 @@
             <details id='settings-details'>
                 <summary>settings</summary>
                 <div class="details-div" style="max-width: 24rem; line-height: 150%;">
-                    <input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
-                    <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks">performance mode</label>
+                    <input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
+                    <label for="hide-hud" title="hide: tech, damage taken bar, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks">performance mode</label>
+                    <br>
+                    <input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" style="width:17px; height:17px;">
+                    <label for="show-num" title="show in game combat text">damage numbers</label>
                     <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
                     <select name="fps-select" id="fps-select">

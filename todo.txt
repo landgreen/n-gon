@@ -1,31 +1,76 @@
 ******************************************************** NEXT PATCH **************************************************
 
-tech: decay chain - each stack of radioactivity increase radioactive damage on that mob by 7%
-tech: reserve - when PAUSED get ammo each time you click
-tech: preserve - when PAUSED get heals each time you click
-tech: scarcity - ammo power ups give 10x ammo to your guns that have 0 ammo
-tech: negative pressure - mobs with durability < 0.66 take 8x damage while inside your negative mass field
-tech: entanglement - if you throw eigenstate is will gravitate towards a mob
+combat text, damage numbers
+  enable in settings, defaults to off
+  some damage effects that triggered every cycle, now occur once per 5 cycles    
+removed right dmg bar
 
-eigenstate has a keyword style the same as blocks
-eigenstate 3->4x dmg and it's aura is pink
-barycenter bots last 18->20s
-shape-memory 30->40 energy/s
-pseudoelasticity 3->4x fire rate
-repolarization 1.33->1.5s shorter depolarization CD
-  stacks to 3->2
-paramagnetism instantly grabs blocks even before they get in range
-  and eigen block from any distance
-
-grabbing ammo animation is bigger when you get bonus ammo effects
+manifold has an extra +8 wormhole energy cost for 5s after entering a wormhole
+negative pressure now gives damage even if your field is off on mobs below 66->60% durability
+electronegativity 1.23->1.2x dmg per 100 energy
+Zenos paradox triggers a normal dmg event
+simulated annealing 1.2->1.3x dmg
+Grand Unified Theory guns,fields convert into 4->8 coupling
+archetype spawns 4 research  3x->4x chance for top 14->16 fav tech
+surface plasmons description clarified
+compound lens +30->+45 degree arc to lens, +0.8 dmg -> 1.25x dmg
 
 bug fixes
-  anthropic principle now exits time stop based on 0.7*max health capped at 90, not 90 health to prevent lock out on very low or high max health
-  eigen block properly inherits velocity from player on swap
-  exiting level with eigenstate and quantum Zeno effect now checks the health of your other state
-  health < 0 + reactor level + eigenstate + quantum Zeno effect wasn't ejecting eigenstate properly
+  paramagnetism was allowing a way to fly by rapidly grabbing blocks
+  paramagnetism was crashing when looking for eigen blocks
+  wormholes can fit much better into shapes that aren't squares
+
 
 *********************************************************** TODO *****************************************************
+
+autofire mode?
+  setting option with a checkbox
+    or a tech?
+  your active gun will automatically find targets and fire
+  ammo rework ideas
+    infinite ammo, remove ammo power ups, tech
+    2x fire rate while you have ammo
+      1/2 fire rate when out of ammo
+  balance fire rate for some guns
+    slower?
+      nailgun
+      foam
+      drones
+    faster?
+      spores
+      missiles
+  what to do with left mouse?
+    disable fire?
+    also field effects
+  issues/edge cases
+    nailgun fire rate ramp up?
+    arcing bullets: grenade, sporangium
+      compute solution for mobs (what about moving mobs...)
+      remove/reduce gravity
+      increase speed
+    fire rate and dmg are similar now?
+
+Simplex Noise Vector Flow Field that interacts with the player
+  perlin noise
+  https://chatgpt.com/c/6a39c218-7f44-83e8-9a5d-e2273a68e7cb
+  implementation ideas
+    on/off setting checkbox 
+    player effects flow field like wind
+    wind can add velocity to stuff
+      blocks, power ups
+    map elements block wind?
+
+
+tech: self locating uncertainty - players have some control over switchWorlds()
+  requires: any alternate reality tech
+  how?
+    button to reroll up to 10 times
+        maybe spend research to reroll
+    input tech with check boxes to control which aspects are rerolled
+      gun, field, tech, health, energy, coupling, research, ...
+      maybe check 1-2 that can't change
+      or check 1-2 that will change
+
 
 ?add code to merge DOTs if there are more than 20?
 
@@ -67,15 +112,8 @@ new level - ducts
     buttons are scatter around on wall, ceiling, floor
       rewrite button code to have any angle?
 
-tech: self locating uncertainty - players have some control over switchWorlds()
-  how?
-    input
-      button to reroll upto 10 times
-         maybe spend research to reroll
-      check boxes to control what aspects are rerolled
-        gun, field, tech, health, energy, coupling, research, ...
-    when do they get this tech?
-        requires: any alternate reality tech
+
+    
   
 make mob invulnerability more obvious
   flashing white?
@@ -1633,6 +1671,8 @@ possible names for tech
   parsimony - just means Occam's razor
   zero-index waveguide - something for metematerial cloaking field
   beables - randomly chosen configuration of physical quantities
+  complex, real, imaginary numbers - something with rotation, dimensionality, or quantum spaces
+    maybe negative mass tech?
   
 
 ******************************************************* DESIGN ******************************************************

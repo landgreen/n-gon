@@ -527,7 +527,6 @@ const m = {
             m.health = 0;
             simulation.ephemera = []
             document.getElementById("defense-bar").style.display = "none"; //hide defense
-            document.getElementById("damage-bar").style.display = "none"
             m.displayHealth();
             document.getElementById("text-log").style.display = "none"
             document.getElementById("fade-out").style.opacity = 0.9; //slowly fade to 90% white on top of canvas
@@ -598,9 +597,12 @@ const m = {
     },
     addHealth(heal) {
         if (!tech.isEnergyHealth) {
-            m.health += heal * simulation.healScale * (level.isLowHeal ? 0.5 : 1);
-            if (m.health > m.maxHealth) m.health = m.maxHealth;
+            heal *= simulation.healScale * (level.isLowHeal ? 0.5 : 1);
+            heal = Math.min(heal, m.maxHealth - m.health)
+            m.health += heal
+            // if (m.health > m.maxHealth) m.health = m.maxHealth;
             m.displayHealth();
+            simulation.dmgNumbers({ x: m.pos.x, y: m.pos.y - 13 }, Math.ceil(100 * heal).toFixed(0), "rgba(0, 238, 187,", 60, true)
         }
     },
     baseHealth: 1,
@@ -807,6 +809,7 @@ const m = {
                 dmg = Math.min(dmg, 0.49 * m.maxHealth)
             }
             m.energy -= dmg //scale damage with heal reduction difficulty
+            simulation.dmgNumbers({ x: m.pos.x, y: m.pos.y - 13 }, Math.ceil(100 * dmg).toFixed(0), "rgba(0, 255, 255,", 1000 * Math.max(Math.min(0.07, dmg), 0.03), true)
 
             if (tech.isEnergyNoAmmo && m.energy < 0.33) {
                 for (let i = 0; i < tech.tech.length; i++) {
@@ -857,6 +860,8 @@ const m = {
                 dmg = Math.min(dmg, 0.4 * m.maxHealth)
             }
             m.health -= dmg;
+            simulation.dmgNumbers({ x: m.pos.x, y: m.pos.y - 13 }, Math.ceil(100 * dmg).toFixed(0), "rgba(255, 255, 255,", 1000 * Math.max(Math.min(0.07, dmg), 0.03), true)
+
 
             if (tech.isEnergyNoAmmo && m.health < 0.33) {
                 for (let i = 0; i < tech.tech.length; i++) {
@@ -2183,12 +2188,10 @@ const m = {
 
                         //fire 360 wave from eigen block
                         if (tech.isNormalMode && m.eigen.count > 0) {
-                            if (!(simulation.cycle % 45)) {
+                            if (!(simulation.cycle % 60)) {
                                 b.isoWave360Solo(m.eigen.block.position, 500 * Math.sqrt(tech.bulletsLastLonger))
                                 b.isoWave360Solo(m.pos, 500 * Math.sqrt(tech.bulletsLastLonger))
                             }
-                            // else if (!((20 + simulation.cycle) % 40)) {
-                            // }
                         }
                     }
                 },
@@ -3474,10 +3477,6 @@ const m = {
         m.fieldThreshold = Math.cos((m.fieldArc) * Math.PI)
     },
     setHoldDefaults() {
-        // if (tech.isFreeWormHole && m.fieldMode !== 9) { //not wormhole
-        //     const removed = tech.removeTech("charmed baryon") //neutronum can get player stuck so it has to be removed if player has wrong field
-        //     if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
-        // }
         if (tech.isNeutronium && m.fieldMode !== 3) { //not negative mass field
             const removed = tech.removeTech("neutronium") //neutronum can get player stuck so it has to be removed if player has wrong field
             if (removed) powerUps.directSpawn(m.pos.x, m.pos.y, "tech");
@@ -4000,21 +3999,16 @@ const m = {
 
                             const futureDist = Vector.magnitude(Vector.sub(m.eigen.block.position, this.target.position));
                             if (futureDist < 500) {
-                                for (let i = 0, len = 8; i < len; i++) {
+                                for (let i = 0, len = 6; i < len; i++) {
                                     let where = Vector.add(m.eigen.block.position, Vector.mult(m.eigen.block.velocity, 6 * i / len))
                                     b.isoWave360Solo(where, 250 * Math.sqrt(tech.bulletsLastLonger), 25)//where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0
                                 }
                             }
 
-
-
-                            // const futurePos = Vector.add(m.eigen.block.position, Vector.mult(m.eigen.block.velocity, 50)) //look for closest target to where the missile will be in 30 cycles
                             const THRUST = 0.005 + 0.0006 * m.eigen.block.speed
                             m.eigen.block.force = Vector.mult(Vector.normalise(Vector.sub(m.eigen.block.position, this.target.position)), -m.eigen.block.mass * THRUST)
                             m.eigen.block.force.y -= simulation.g * m.eigen.block.mass
-
                             Matter.Body.setVelocity(m.eigen.block, Vector.mult(m.eigen.block.velocity, 0.94 - 0.002 * m.eigen.block.speed));
-
 
                             ctx.save();
                             ctx.translate(m.eigen.block.position.x, m.eigen.block.position.y);
@@ -5058,7 +5052,6 @@ const m = {
                                 const mag = 30
                                 const add = { x: mag * Math.cos(m.fieldAngle), y: mag * Math.sin(m.fieldAngle) }
                                 const v = Vector.mult(Vector.normalise(Vector.add(add, player.velocity)), Math.max(40, player.speed))
-                                // const v = Vector.mult(Vector.normalise(add), Math.max(40, player.speed))
                                 Matter.Body.setVelocity(player, v);
                             }
 
@@ -5169,7 +5162,7 @@ const m = {
                                 ) {
                                     const dist = Vector.magnitude(Vector.sub(body[i].position, m.pos))
                                     //if block is close hold it
-                                    if (dist < m.fieldRange + 300 || body[i] === m.eigen.block) {
+                                    if (dist < (m.fieldRange + m.onGround * 300) || (m.eigen && body[i] === m.eigen.block)) {
                                         m.holdingTarget = body[i];
                                         m.pickUp();
                                         m.throwCharge = 4//pre charge so player can throw immediately
@@ -6799,7 +6792,7 @@ const m = {
                     const patternA = ["ArrowDown", "ArrowDown", "ArrowDown", "ArrowUp", "ArrowDown"]
                     const patternB = [input.key.down, input.key.down, input.key.down, input.key.up, input.key.down,]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
-                    const drain = tech.isFreeWormHole ? 0.02 : 0.16
+                    const drain = (tech.isFreeWormHole ? 0.02 : 0.16) + tech.manifoldCost
                     if (m.energy > drain && arraysEqual(m.fieldUpgrades[9].keyLog, patternA) || arraysEqual(m.fieldUpgrades[9].keyLog, patternB)) {
                         m.energy -= drain
                         const rayResults = Matter.Query.ray(map, m.pos, { x: m.pos.x, y: m.pos.y - 10000 }, 50)
@@ -7073,25 +7066,10 @@ const m = {
                                 });
                                 player.force.x = 0
                                 player.force.y = 0
-                                // } else {
-                                //     m.wakeCheck();
-                                //     m.energy = 0;
-                                // }
                             }
 
                             m.grabPowerUp();
-                            //scale drain with distance
-                            // if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
-                            //     this.drain = (0.05 + 0.005 * Math.sqrt(mag)) * 2
-                            // } else {
-                            //     this.drain = tech.isFreeWormHole ? 0 : 0.05 + 0.005 * Math.sqrt(mag)
-                            // }
-                            // if (tech.isWormholeMapIgnore && Matter.Query.ray(map, m.pos, justPastMouse).length !== 0) {
-                            //     this.drain = tech.isFreeWormHole ? 0 : 0.25
-                            // } else {
-                            //     this.drain = tech.isFreeWormHole ? 0 : 0.15
-                            // }
-                            this.drain = tech.isFreeWormHole ? 0.02 : 0.16
+                            this.drain = (tech.isFreeWormHole ? 0.02 : 0.16) + tech.manifoldCost
                             const unit = Vector.perp(Vector.normalise(sub))
                             const where = { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }
                             m.fieldRange = 0.97 * m.fieldRange + 0.03 * (50 + 10 * Math.sin(simulation.cycle * 0.025))
@@ -7103,13 +7081,11 @@ const m = {
                             ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2a.x, edge2a.y);
                             ctx.moveTo(where.x, where.y)
                             ctx.bezierCurveTo(where.x, where.y, simulation.mouseInGame.x, simulation.mouseInGame.y, edge2b.x, edge2b.y);
+
                             if (
                                 m.energy > this.drain &&
                                 (tech.isWormholeMapIgnore || Matter.Query.ray(map, m.pos, justPastMouse).length === 0) &&
-                                Matter.Query.region(map, {
-                                    min: { x: simulation.mouseInGame.x - scale, y: simulation.mouseInGame.y - scale },
-                                    max: { x: simulation.mouseInGame.x + scale, y: simulation.mouseInGame.y + scale }
-                                }).length === 0
+                                Matter.Query.ray(map, { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y - scale }, { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y + scale }, scale).length === 0
                             ) {
                                 m.hole.isReady = true;
                                 // ctx.fillStyle = "rgba(255,255,255,0.5)"
@@ -7132,10 +7108,7 @@ const m = {
                             if (
                                 m.hole.isReady && m.energy > this.drain &&
                                 (tech.isWormholeMapIgnore || Matter.Query.ray(map, m.pos, justPastMouse).length === 0) &&
-                                Matter.Query.region(map, {
-                                    min: { x: simulation.mouseInGame.x - scale, y: simulation.mouseInGame.y - scale },
-                                    max: { x: simulation.mouseInGame.x + scale, y: simulation.mouseInGame.y + scale }
-                                }).length === 0
+                                Matter.Query.ray(map, { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y - scale }, { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y + scale }, scale).length === 0
                             ) {
                                 m.energy -= this.drain
                                 m.hole.isReady = false;
@@ -7183,6 +7156,7 @@ const m = {
                                     }
                                 }
                                 if (tech.isNewWormHoleDamage) {
+                                    tech.manifoldCost += 0.08
                                     const dmg = 1.5
                                     m.damageDone *= dmg
                                     simulation.ephemera.push({
@@ -7191,6 +7165,8 @@ const m = {
                                             this.count--
                                             if (this.count < 0) {
                                                 simulation.removeEphemera(this)
+                                                tech.manifoldCost -= 0.08
+                                                if (tech.manifoldCost < 0) tech.manifoldCost = 0
                                                 m.damageDone /= dmg
                                             }
                                         },

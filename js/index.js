@@ -312,7 +312,6 @@ const canvas = document.getElementById("canvas");
 //using "const" causes problems in safari when an ID shares the same name.
 const ctx = canvas.getContext("2d");
 // const ctx = canvas.getContext('2d', { alpha: false }); //optimization, this works if you wipe with the background color of each level
-
 document.body.style.backgroundColor = "#fff";
 
 //disable pop up menu on right click
@@ -326,6 +325,7 @@ function setupCanvas() {
     canvas.width2 = canvas.width / 2; //precalculated because I use this often (in mouse look)
     canvas.height2 = canvas.height / 2;
     ctx.font = "25px Arial";
+    ctx.textAlign = "center";
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     simulation.setZoom();
@@ -369,7 +369,6 @@ const build = {
                         }
                         const damage = tech.damageAdjustments()             //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
-                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.53 * canvas.height) + "px";
                             m.lastCalculatedDamage = damage
                         }
                     }
@@ -377,152 +376,12 @@ const build = {
             })
         }
     },
-    // pauseGridPhysics() {
-
-    //     const { Engine, Render, Runner, Bodies, Body, World, Mouse, MouseConstraint, Events, Composite } = Matter;
-
-    //     const canvas = document.getElementById('canvas');
-
-
-    //     let W = canvas.width, H = canvas.height;
-
-    //     const enginePause = Engine.create({ gravity: { y: 1 } });
-    //     const world = enginePause.world;
-
-    //     const render = Render.create({
-    //         canvas,
-    //         engine,
-    //         options: {
-    //             width: W, height: H,
-    //             wireframes: false,
-    //             background: 'transparent',
-    //             wireframeBackground: 'transparent'
-    //         }
-    //     });
-
-    //     const bodies = [];
-    //     const divMap = new Map();
-
-    //     function makeWalls() {
-    //         const thick = 30;
-    //         const opts = { isStatic: true, render: { fillStyle: 'transparent', strokeStyle: 'transparent' } };
-    //         return [
-    //             Bodies.rectangle(W / 2, H + thick / 2, W + 60, thick, opts),
-    //             Bodies.rectangle(W / 2, -thick / 2, W + 60, thick, opts),
-    //             Bodies.rectangle(-thick / 2, H / 2, thick, H + 60, opts),
-    //             Bodies.rectangle(W + thick / 2, H / 2, thick, H + 60, opts),
-    //         ];
-    //     }
-    //     World.add(world, makeWalls());
-
-
-    //     function clearAll() {
-    //         for (const b of bodies) {
-    //             World.remove(world, b);
-    //             const entry = divMap.get(b.id);
-    //             if (entry) { entry.div.remove(); divMap.delete(b.id); }
-    //         }
-    //         bodies.length = 0;
-    //     }
-
-
-
-    //     function spawnBlock(x, y) {
-    //         const bw = 80 + Math.random() * 50;
-    //         const bh = 36 + Math.random() * 20;
-    //         x = x ?? (80 + Math.random() * (W - 160));
-    //         y = y ?? (40 + Math.random() * (H * 0.3));
-
-
-
-    //         const body = Bodies.rectangle(x, y, bw, bh, {
-    //             restitution: 0.45,
-    //             friction: 0.3,
-    //             frictionAir: 0.01,
-    //             render: {
-    //                 fillStyle: "#fff",
-    //                 strokeStyle: 'rgba(0,0,0,0.12)',
-    //                 lineWidth: 1
-    //             }
-    //         });
-    //         body._bw = bw; body._bh = bh;
-
-    //         World.add(world, body);
-
-    //         const div = document.createElement('div');
-    //         div.textContent = "hi";
-    //         Object.assign(div.style, {
-    //             position: 'absolute',
-    //             width: bw + 'px',
-    //             height: bh + 'px',
-    //             display: 'flex',
-    //             alignItems: 'center',
-    //             justifyContent: 'center',
-    //             fontSize: Math.min(14, bh * 0.38) + 'px',
-    //             fontWeight: '500',
-    //             pointerEvents: 'none',
-    //             userSelect: 'none',
-    //             willChange: 'transform',
-    //             transformOrigin: '50% 50%',
-    //             letterSpacing: '0.01em',
-    //             whiteSpace: 'nowrap',
-    //         });
-    //         document.getElementById('choose-grid').appendChild(div);  //change choose-grid to something better, this probably will cause issues
-    //         divMap.set(body.id, { div, bw, bh });
-    //         bodies.push(body);
-    //     }
-
-
-    //     const mouse = Mouse.create(canvas);
-    //     const mouseConstraint = MouseConstraint.create(enginePause, {
-    //         mouse,
-    //         constraint: { stiffness: 0.2, render: { visible: false } }
-    //     });
-    //     World.add(world, mouseConstraint);
-
-    //     function syncDivs() {
-    //         for (const b of bodies) {
-    //             const entry = divMap.get(b.id);
-    //             if (!entry) continue;
-    //             const { div, bw, bh } = entry;
-    //             const { x, y } = b.position;
-    //             const angle = b.angle;
-    //             div.style.transform = `translate(${x - bw / 2}px, ${y - bh / 2}px) rotate(${angle}rad)`;
-    //         }
-    //     }
-    //     Events.on(enginePause, 'afterUpdate', syncDivs);
-    //     for (let i = 0; i < 6; i++) spawnBlock();
-
-    //     // Render.run(render);
-    //     // const runner = Runner.create();
-    //     // Runner.run(runner, enginePause);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    //     // build.sortTech('') //sorts tech into the order the player got them using tech.tech[i].cycle = m.cycle
-    //     document.getElementById("right-HUD").style.display = "none"
-    //     document.getElementById("guns").style.display = "none"
-    //     document.getElementById("field").style.display = "none"
-    //     document.getElementById("health").style.display = "none"
-    //     document.getElementById("health-bg").style.display = "none"
-    //     document.getElementById("defense-bar").style.display = "none"
-    //     document.getElementById("damage-bar").style.display = "none"
-    //     //show in game console
-    //     simulation.lastLogTime = m.cycle
-    // },
+    showDmgNumbers() {
+        localSettings.showDmgNumbers = !localSettings.showDmgNumbers
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("show-num").checked = localSettings.showDmgNumbers
+        document.getElementById("show-num").classList.toggle("ticked")
+    },
     pauseGrid() {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
@@ -533,7 +392,6 @@ const build = {
         document.getElementById("health").style.display = "none"
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
         //show in game console
         simulation.lastLogTime = m.cycle
     },
@@ -569,8 +427,12 @@ const build = {
 <br>
 ${fullscreenWarning}
 <button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
-<input onclick="build.hideHUD('settings')" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
+<input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks" style="font-size:1.15em;">performance mode</label>
+<br>
+<input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
+<label for="show-num" title="show in game combat text"  style="font-size:1.15em;">damage numbers</label>
+
 </div>
 
 <div class="pause-grid-module">
@@ -856,9 +718,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         if (!localSettings.isHideHUD) {
             document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
-            document.getElementById("damage-bar").style.display = "inline"
         }
-        // document.body.style.overflow = "hidden"
         document.getElementById("pause-grid-left").style.display = "none"
         document.getElementById("pause-grid-right").style.display = "none"
         document.getElementById("pause-grid-right").style.opacity = "1"
@@ -2121,8 +1981,11 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
 
-    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = true
+    if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = false
     document.getElementById("hide-hud").checked = localSettings.isHideHUD
+
+    if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = false
+    document.getElementById("show-num").checked = localSettings.showDmgNumbers
 
     if (localSettings.difficultyCompleted === undefined) {
         localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
@@ -2161,6 +2024,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isHuman: false,
         key: undefined,
         isHideHUD: false,
+        showDmgNumbers: false,
         pauseMenuDetailsOpen: [true, false, false, true],
         techHistory: [],
     };

@@ -519,8 +519,8 @@ const mobs = {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer() < this.laserRange) {
-                        if (m.immuneCycle < m.cycle) {
-                            m.takeDamage(0.0003 * this.damageScale());
+                        if (m.immuneCycle < m.cycle && !(m.cycle % 15)) {
+                            m.takeDamage(0.0045 * this.damageScale());
                             if (m.energy > 0.1) m.energy -= 0.003
                         }
                         ctx.beginPath();
@@ -558,7 +558,7 @@ const mobs = {
                 //check for wing -> player damage
                 const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
                 if (hitPlayer.length && m.immuneCycle < m.cycle) {
-                    m.takeDamage(dmg * this.damageScale());
+                    if (!(m.cycle % 10)) m.takeDamage(10 * dmg * this.damageScale());
                     // if (m.immuneCycle < m.cycle + immuneTime) m.immuneCycle = m.cycle + immuneTime; //player is immune to damage
 
                     //push player away
@@ -978,7 +978,11 @@ const mobs = {
             },
             explode(mass = this.mass) {
                 if (m.immuneCycle < m.cycle) {
-                    m.takeDamage(Math.min(Math.max(0.03 * Math.sqrt(mass), 0.01), 0.4) * this.damageScale());
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            m.takeDamage(Math.min(Math.max(0.03 * Math.sqrt(mass), 0.01), 0.4) * this.damageScale())
+                        })
+                    })
                     this.isDropPowerUp = false;
                     this.death(); //death with no power up or body
                 }
@@ -993,7 +997,8 @@ const mobs = {
             damageScale() {
                 return ((spawn.mobDmgDoneByTier[this.tier] && level.levelsCleared < 14) ? spawn.mobDmgDoneByTier[this.tier] : spawn.dmgToPlayerByLevelsCleared())
             },
-            damage(dmg, isBypassShield = false) { //damage taken by this mob 
+            dmgLog: 0, //used to record damage done to mob for producing damage numbers
+            damage(dmg, isBypassShield = false, where = this.position, isDmgText = false) { //damage taken by this mob 
                 if ((!this.isShielded || isBypassShield) && this.alive) {
                     if (dmg !== Infinity) {
                         dmg *= tech.damageAdjustments()
@@ -1109,16 +1114,7 @@ const mobs = {
                                 })
                             }
                         }
-
-                        //mobs specific damage changes
-                        if (this.tier && level.levelsCleared < 14) {
-                            dmg *= spawn.mobDmgTakenByTier[this.tier] //scale by tier
-                        } else {
-                            dmg *= spawn.mobDmgTakenByLevelsCleared() //scale by level.levelsCleared if no tier
-                        }
-                        dmg *= this.damageReduction
-
-                        if (tech.isNegAura && m.fieldMode === 3 && input.field && this.health < 0.66 && Vector.magnitude(Vector.sub(m.pos, this.position)) < (m.fieldDrawRadius + 2 * this.radius + 20)) {
+                        if (tech.isNegAura && m.fieldMode === 3 && this.health < 0.6 && Vector.magnitude(Vector.sub(m.pos, this.position)) < (m.fieldDrawRadius + 2 * this.radius + 20)) {
                             dmg *= 8
                             simulation.ephemera.push({
                                 count: 3, //cycles before it self removes
@@ -1156,9 +1152,23 @@ const mobs = {
                                 }
                             }
                         }
-                        dmg /= Math.sqrt(this.mass)
-                    }
+                        if (localSettings.showDmgNumbers && this.damageReduction > 0) {
+                            if (isDmgText) {
+                                simulation.dmgNumbers(where, Math.ceil(dmg).toFixed(0))
+                            } else {
+                                this.dmgLog += dmg
+                            }
+                        }
 
+                        //mobs specific damage changes
+                        if (this.tier && level.levelsCleared < 14) {
+                            dmg *= spawn.mobDmgTakenByTier[this.tier] //scale by tier
+                        } else {
+                            dmg *= spawn.mobDmgTakenByLevelsCleared() //scale by level.levelsCleared if no tier
+                        }
+                        dmg /= Math.sqrt(this.mass)
+                        dmg *= this.damageReduction
+                    }
                     this.health -= dmg
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
@@ -1208,7 +1218,28 @@ const mobs = {
                 this.onDeath(this); //custom death effects
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
-                // console.log(this.shieldCount)
+
+                if (localSettings.showDmgNumbers && this.dmgLog) {
+                    simulation.ephemera.push({
+                        count: 0, //cycles before it self removes
+                        dmg: Math.ceil(this.dmgLog).toFixed(0),
+                        where: { x: this.position.x, y: this.position.y - this.radius * 1.4 - 13 },
+                        drift: { x: (0.6 * Math.random()) * (Math.random() < 0.5 ? -1 : 1), y: 0.7 + 0.4 * Math.random() },
+                        do() {
+                            this.count++
+                            if (this.count > 40) {
+                                simulation.removeEphemera(this)
+                            } else {
+                                ctx.font = "50px Arial"; //monospace
+                                ctx.fillStyle = `rgba(255, 0, 17,${(40 - this.count) / 20})`;
+                                // ctx.textBaseline = "middle";
+                                ctx.fillText(this.dmg, this.where.x + this.count * this.drift.x, this.where.y - 40 - this.count * this.drift.y);
+
+                            }
+                        },
+                    })
+                }
+                this.dmgLog = 0
 
                 if (this.isDropPowerUp) {
                     if (level.isMobDeathHeal) {

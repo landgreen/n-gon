@@ -2029,6 +2029,10 @@ const powerUps = {
                     powerUps.directSpawn(x + 10, y + 10, "coupling", moving, size, true)
                     powerUps.directSpawn(x - 10, y - 10, "coupling", moving, size, true)
                     powerUps.directSpawn(x + 10, y - 10, "coupling", moving, size, true)
+                    powerUps.directSpawn(x, y, "coupling", moving, size, true)
+                    powerUps.directSpawn(x + 5, y + 20, "coupling", moving, size, true)
+                    powerUps.directSpawn(x, y - 20, "coupling", moving, size, true)
+                    powerUps.directSpawn(x - 20, y, "coupling", moving, size, true)
                     if (tech.isDupEnergy) {
                         m.energy *= 2
                         for (let i = 0; i < 3; i++)simulation.energyGenGraphic()

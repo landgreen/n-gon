@@ -550,7 +550,6 @@ const spawn = {
                     for (let i = 0; i < mob.length; i++) {
                         if (mob[i].isFinalBossMob) {
                             foundMobs = true
-                            // mob[i].damage(0.01);
                             break
                         }
                     }
@@ -1350,7 +1349,6 @@ const spawn = {
                                 document.getElementById("health").style.display = "none"
                                 document.getElementById("health-bg").style.display = "none"
                                 document.getElementById("defense-bar").style.display = "none"
-                                document.getElementById("damage-bar").style.display = "none"
                                 document.getElementById("text-log").style.display = "none"
                                 document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                                 // build.shareURL(false)
@@ -4956,7 +4954,7 @@ const spawn = {
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                 if (m.immuneCycle < m.cycle) {
                     if (m.energy > 0) m.energy -= 0.005
-                    if (m.energy < 0.1) m.takeDamage(0.0001 * this.damageScale());
+                    if (m.energy < 0.1 && !(m.cycle % 5)) m.takeDamage(0.0005 * this.damageScale());
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
@@ -5026,7 +5024,7 @@ const spawn = {
             if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                 if (m.immuneCycle < m.cycle) {
                     if (m.energy > 0) m.energy -= 0.005
-                    if (m.energy < 0.1) m.takeDamage(0.0001 * this.damageScale());
+                    if (m.energy < 0.1 && !(m.cycle % 5)) m.takeDamage(0.0005 * this.damageScale());
                 }
                 const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                 player.force.x -= 0.00125 * player.mass * Math.cos(angle) * (m.onGround ? 1.8 : 1);
@@ -5058,7 +5056,7 @@ const spawn = {
         me.collisionFilter.mask = cat.player | cat.bullet //| cat.body
         // me.frictionAir = 0.005;
         me.memory = 1600;
-        Matter.Body.setDensity(me, 0.06); //extra dense //normal is 0.001 //makes effective life much larger
+        Matter.Body.setDensity(me, 0.055); //extra dense //normal is 0.001 //makes effective life much larger
         me.onDeath = function () {
             //applying forces to player doesn't seem to work inside this method, not sure why
             powerUps.spawnBossPowerUp(this.position.x, this.position.y)
@@ -5148,7 +5146,7 @@ const spawn = {
                 if (Vector.magnitude(Vector.sub(this.position, player.position)) < eventHorizon) {
                     if (m.immuneCycle < m.cycle) {
                         if (m.energy > 0) m.energy -= 0.008
-                        if (m.energy < 0.1) m.takeDamage(0.00015 * this.damageScale());
+                        if (m.energy < 0.1 && !(m.cycle % 5)) m.takeDamage(0.0008 * this.damageScale());
                     }
                     const angle = Math.atan2(player.position.y - this.position.y, player.position.x - this.position.x);
                     player.force.x -= 0.0013 * Math.cos(angle) * player.mass * (m.onGround ? 1.7 : 1);
@@ -9319,8 +9317,8 @@ const spawn = {
                     best = vertexCollision(this.position, look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
 
                     // hitting player
-                    if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
-                        const dmg = 0.003 * this.damageScale();
+                    if (!(m.cycle % 2) && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                        const dmg = 0.006 * this.damageScale();
                         m.takeDamage(dmg);
                         //draw damage
                         ctx.fillStyle = color;

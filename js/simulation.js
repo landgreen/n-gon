@@ -131,7 +131,8 @@ const simulation = {
         }
     },
     runEphemera() {
-        for (let i = 0; i < simulation.ephemera.length; i++) {
+        // for (let i = 0; i < simulation.ephemera.length; i++) {
+        for (let i = simulation.ephemera.length - 1; i >= 0; i--) {
             simulation.ephemera[i].do();
         }
     },
@@ -345,6 +346,32 @@ const simulation = {
             }
         }
         document.getElementById("right-HUD").innerHTML = text
+    },
+    dmgNumbers(where, dmg, color = "rgba(255, 0, 17,", size = 45, isOutline = false) {
+        if (localSettings.showDmgNumbers && dmg > 0) {
+            simulation.ephemera.push({
+                count: 0,
+                drift: { x: (0.6 * Math.random()) * (Math.random() < 0.5 ? -1 : 1), y: 1 + 0.5 * Math.random() },
+                font: `${size}px Arial`,
+                do() {
+                    this.count++
+                    if (this.count > size) {
+                        simulation.removeEphemera(this)
+                    } else {
+                        const opacity = Math.max(0, (2 * (60 - this.count)) / 60)
+                        ctx.fillStyle = `${color}${opacity})`;
+                        ctx.font = this.font;
+                        pos = Vector.add(where, Vector.mult(this.drift, -this.count))
+                        if (isOutline) {
+                            ctx.strokeStyle = `rgba(0,0,0,${opacity})`//"#000"
+                            ctx.lineWidth = 2;
+                            ctx.strokeText(dmg, pos.x, pos.y);
+                        }
+                        ctx.fillText(dmg, pos.x, pos.y);
+                    }
+                },
+            })
+        }
     },
     lastLogTime: 0,
     isTextLogOpen: true,
@@ -682,38 +709,6 @@ const simulation = {
             }
         }, len * swapPeriod);
     },
-    // warp(translation = 5, skew = 0.05, scale = 0.05) {
-    // if (simulation.cycle % 2) { //have to alternate frames or else successive rumbles over write the effects of the previous rumble
-    // requestAnimationFrame(() => { ctx.setTransform(1, 0, 0, 1, 0, 0); }) //reset
-    // requestAnimationFrame(() => {
-    //     if (!simulation.paused && m.alive) {
-    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
-    //     }
-    // })
-
-    //reset
-    // ctx.transform(1, 0, 0, 1, 0, 0); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving)) //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setTransform
-
-    // }
-    // const loop = () => {
-    //     if (!simulation.paused && m.alive) {
-    //         ctx.save();
-    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving))
-    //         requestAnimationFrame(() => { ctx.restore(); })
-    //     }
-    // }
-    // requestAnimationFrame(loop);
-
-    // function loop() {
-    //     if (!simulation.paused && m.alive) {
-    //         ctx.save();
-    //         ctx.transform(1 - scale * (Math.random() - 0.5), skew * (Math.random() - 0.5), skew * (Math.random() - 0.5), 1 - scale * (Math.random() - 0.5), translation * (Math.random() - 0.5), translation * (Math.random() - 0.5)); //ctx.transform(Horizontal scaling. A value of 1 results in no scaling,  Vertical skewing,   Horizontal skewing,   Vertical scaling. A value of 1 results in no scaling,   Horizontal translation (moving),   Vertical translation (moving))
-    //         requestAnimationFrame(() => { ctx.restore(); })
-    //     }
-    //     requestAnimationFrame(loop);
-    // }
-    // requestAnimationFrame(loop);
-    // },
     wipe() { }, //set in simulation.startGame
     gravity() {
         function addGravity(bodies, magnitude) {
@@ -767,7 +762,6 @@ const simulation = {
         document.getElementById("dmg").style.display = "none";
         document.getElementById("health-bg").style.display = "none";
         document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
         document.body.style.cursor = "auto";
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
@@ -826,11 +820,9 @@ const simulation = {
         if (!localSettings.isHideHUD) {
             document.getElementById("right-HUD").style.display = "inline"
             document.getElementById("defense-bar").style.display = "inline"
-            document.getElementById("damage-bar").style.display = "inline"
         } else {
             document.getElementById("right-HUD").style.display = "none"
             document.getElementById("defense-bar").style.display = "none"
-            document.getElementById("damage-bar").style.display = "none"
         }
         document.getElementById("guns").style.display = "inline"
         document.getElementById("field").style.display = "inline"
@@ -920,9 +912,10 @@ const simulation = {
         m.onGround = false
         // m.groundCount = 0
         m.lastOnGroundCycle = 0
-        m.health = 0;
+        // m.addHealth(0.25)
+        m.health = 0.25;
+
         level.isLowHeal = false
-        m.addHealth(0.25)
         m.drop();
         m.holdingTarget = null
 
@@ -958,8 +951,6 @@ const simulation = {
                         }
                         const damage = tech.damageAdjustments() //update damage bar
                         if (m.lastCalculatedDamage !== damage) {
-                            document.getElementById("damage-bar").style.height = Math.floor((Math.atan(0.25 * damage - 0.25) + 0.25) * 0.5 * canvas.height) + "px";
-                            // document.getElementById("damage-num").innerHTML = `${damage.toFixed(2)}x dmg`
                             m.lastCalculatedDamage = damage
                         }
                     }
@@ -968,6 +959,16 @@ const simulation = {
         }
         simulation.ephemera.push({
             name: "checks", count: 0, do() {
+
+                if (localSettings.showDmgNumbers && !(m.cycle % 30)) {
+                    for (let i = 0; i < mob.length; i++) {
+                        if (mob[i].dmgLog) {
+                            simulation.dmgNumbers({ x: mob[i].position.x, y: mob[i].position.y - mob[i].radius * 1.4 }, Math.ceil(mob[i].dmgLog).toFixed(0), "rgba(255, 30, 67,", 40)
+                            mob[i].dmgLog = 0
+                        }
+                    }
+                }
+
                 if (!(m.cycle % 60)) { //once a second
                     //energy overfill 
                     if (m.energy > m.maxEnergy) {
@@ -1091,16 +1092,17 @@ const simulation = {
                             })
                         }
                         if (tech.isZeno) {
-                            if (tech.isEnergyHealth) {
-                                m.energy *= 0.95
-                            } else {
-                                m.health *= 0.95 //remove 5%
-                                m.displayHealth();
-                            }
+                            m.takeDamage(0.05 * (tech.isEnergyHealth ? m.energy : m.health), false)
+                            // if (tech.isEnergyHealth) {
+                            //     m.energy *= 0.95
+                            // } else {
+                            //     m.health *= 0.95 //remove 5%
+                            //     m.displayHealth();
+                            // }
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: m.pos.x,
                                 y: m.pos.y,
-                                radius: 5,
+                                radius: 10,
                                 color: "rgb(255, 0, 195)",
                                 time: 4
                             });
@@ -1457,7 +1459,6 @@ const simulation = {
     // },
     testingOutput() {
         ctx.fillStyle = "#000";
-        ctx.textAlign = "center";
         ctx.fillText(`(${simulation.mouseInGame.x.toFixed(1)}, ${simulation.mouseInGame.y.toFixed(1)})`, simulation.mouse.x, simulation.mouse.y - 20);
     },
     sight: { //credit to Cornbread2100 for adding this algorithm to n-gon
@@ -1840,9 +1841,6 @@ const simulation = {
             ctx.stroke();
         },
         wireFrame() {
-            // ctx.textAlign = "center";
-            // ctx.textBaseline = "middle";
-            // ctx.fillStyle = "#999";
             const bodies = Composite.allBodies(engine.world);
             ctx.beginPath();
             for (let i = 0; i < bodies.length; ++i) {
@@ -2522,40 +2520,4 @@ const simulation = {
         });
         document.getElementById("construct").innerHTML = outHTML
     },
-    // copyToClipBoard(value) {
-    //     // Create a fake textarea
-    //     const textAreaEle = document.createElement('textarea');
-
-    //     // Reset styles
-    //     textAreaEle.style.border = '0';
-    //     textAreaEle.style.padding = '0';
-    //     textAreaEle.style.margin = '0';
-
-    //     // Set the absolute position
-    //     // User won't see the element
-    //     textAreaEle.style.position = 'absolute';
-    //     textAreaEle.style.left = '-9999px';
-    //     textAreaEle.style.top = `0px`;
-
-    //     // Set the value
-    //     textAreaEle.value = value
-
-    //     // Append the textarea to body
-    //     document.body.appendChild(textAreaEle);
-
-    //     // Focus and select the text
-    //     textAreaEle.focus();
-    //     textAreaEle.select();
-
-    //     // Execute the "copy" command
-    //     try {
-    //         document.execCommand('copy');
-    //     } catch (err) {
-    //         // Unable to copy
-    //         console.log(err)
-    //     } finally {
-    //         // Remove the textarea
-    //         document.body.removeChild(textAreaEle);
-    //     }
-    // },
 };

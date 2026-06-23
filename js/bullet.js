@@ -4256,6 +4256,7 @@ const b = {
                 mask: cat.mob | cat.mobBullet // cat.map | cat.body | cat.mob | cat.mobShield
             },
             minDmgSpeed: 0,
+            isNotCollisionsDmg: true,
             endCycle: Infinity,
             count: 0,
             radius: radius,
@@ -4319,6 +4320,9 @@ const b = {
                             })
                         }
                     }
+                    // this.velocity = who.velocity
+                    // this.speed = 0
+                    // Matter.Body.setVelocity(this, { x: 0, y: 0 }) //doesn't work anymore... //prevents collisions damage which is too small to matter, but spams the in game dmg numbers
                 }
             },
             onEnd() { },
@@ -4351,7 +4355,7 @@ const b = {
                     Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
                     // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                     if (this.target.isShielded) {
-                        this.target.damage(this.damage, true); //shield damage bypass
+                        this.target.damage(this.damage, true, this.position); //shield damage bypass
                         const SCALE = 1 - 0.004 / tech.bulletsLastLonger //shrink if mob is shielded
                         Matter.Body.scale(this, SCALE, SCALE);
                         this.radius *= SCALE;
@@ -4602,7 +4606,7 @@ const b = {
                                     dmg *= 0.25
                                 }
                                 if (tech.isCrit && who.isStunned) dmg *= 4
-                                who.damage(dmg, tech.isShieldPierce);
+                                who.damage(dmg, tech.isShieldPierce, this.position);
                                 if (who.alive) who.foundPlayer();
                                 if (who.damageReduction) {
                                     simulation.drawList.push({ //add dmg to draw queue
@@ -4660,7 +4664,7 @@ const b = {
                                     dmg *= 0.25
                                 }
                                 if (tech.isCrit && who.isStunned) dmg *= 4
-                                who.damage(dmg, tech.isShieldPierce);
+                                who.damage(dmg, tech.isShieldPierce, this.position);
                                 if (who.alive) who.foundPlayer();
                                 if (who.damageReduction) {
                                     simulation.drawList.push({ //add dmg to draw queue

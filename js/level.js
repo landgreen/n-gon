@@ -107,10 +107,9 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = true
-                // level.levelsCleared = 5
-                // level.updateDifficulty()
+                level.levelsCleared = 2
+                level.updateDifficulty()
                 // simulation.isCheating = true
-
                 // tech.giveTech("performance")
                 // m.coyoteCycles = 120
                 // powerUps.research.changeRerolls(100000)
@@ -118,7 +117,8 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                // m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
                 // m.couplingChange(1000)
@@ -126,9 +126,9 @@ const level = {
                 // window.removeEventListener("keydown", m.fieldEvent);
                 // m.fieldUpgrades[6].set()
                 // m.wakeCheck();
-                // m.damageDone *= 1000
+                // m.damageDone *= 10
 
-                // m.maxHealth = m.health = 1000000
+                m.maxHealth = m.health = 2000
                 // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
@@ -139,35 +139,35 @@ const level = {
                 // simulation.molecularMode = 2
                 // m.takeDamage(0.01);
 
-                // b.giveGuns(1) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-                // b.giveGuns(3)
-                // b.giveGuns(7)
-                // b.giveGuns(11)
-                // b.guns[b.inventory[0]].ammo = 0
+                b.giveGuns(8) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                b.giveGuns(3)
+                b.giveGuns(7)
+                b.giveGuns(11)
+                b.guns[b.inventory[0]].ammo = 10000
                 // tech.addJunkTechToPool(0.5)
                 // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("decay chain") });
                 // requestAnimationFrame(() => { for (let i = 0; i < 1; ++i) tech.giveTech("eigenstate") });
-                // for (let i = 0; i < 1; ++i) tech.giveTech("logistics")
+                for (let i = 0; i < 1; ++i) tech.giveTech("affine connection")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("perturbation theory")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("entanglement")
-                for (let i = 0; i < 1; i++) tech.giveTech("quantum Zeno effect")
-                for (let i = 0; i < 1; i++) tech.giveTech("eigenstate")
-                // for (let i = 0; i < 1; i++) tech.giveTech("quantum immortality")
-                // for (let i = 0; i < 1; i++) tech.giveTech("preserve")
+                for (let i = 0; i < 1; ++i) tech.giveTech("manifold")
+                for (let i = 0; i < 1; i++) tech.giveTech("holographic principle")
+                // for (let i = 0; i < 1; i++) tech.giveTech("mass-energy equivalence")
+                for (let i = 0; i < 1; i++) tech.giveTech("surface plasmons")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 7
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                level.testing()
+                level.labs()
                 // level.HVAC()
-                // level.office()
+                // level.furnace()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-                // requestAnimationFrame(() => { powerUps.spawnDelay("ammo", 10); });
+                // requestAnimationFrame(() => { powerUps.spawnDelay("heal", 10); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
-                for (let i = 0; i < 5; i++) spawn.starter(1300 + 10 * i, -200)
-                // for (let i = 0; i < 1; i++) spawn.mantisBoss(2300 + 200 * i, -200)
+                // for (let i = 0; i < 4; i++) spawn.starter(1300 + 10 * i, -200, 20)
+                for (let i = 0; i < 1; i++) spawn.laserBoss(1300 + 10 * i, -200)
+                // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
                 // for (let i = 0; i < 10; ++i) powerUps.directSpawn(m.pos.x + 3000 * Math.random(), m.pos.y + 50 * Math.random(), "ammo");
@@ -1105,7 +1105,6 @@ const level = {
                     document.getElementById("health").style.display = "none"
                     document.getElementById("health-bg").style.display = "none"
                     document.getElementById("defense-bar").style.display = "none"
-                    document.getElementById("damage-bar").style.display = "none"
                     document.getElementById("text-log").style.display = "none"
                     document.getElementById("fade-out").style.opacity = 1; //slowly fades out
                     setTimeout(function () {
@@ -2926,13 +2925,13 @@ const level = {
                     ctx.fillRect(this.min.x, this.min.y + offset, this.width, this.height - offset)
 
                     if (this.height > 0 && Matter.Query.region([player], this).length) {
-                        if (m.immuneCycle < m.cycle) {
-                            const DRAIN = 0.004 * (tech.isRadioactiveResistance ? 0.2 : 1)
+                        if (m.immuneCycle < m.cycle && !(m.cycle % 5)) {
+                            const DRAIN = 0.02 * (tech.isRadioactiveResistance ? 0.2 : 1)
                             if (m.energy > DRAIN) {
                                 m.energy -= DRAIN
                                 if (tech.isEnergyHealth && m.energy < 0) m.death()
                             } else {
-                                m.takeDamage(damage * (tech.isRadioactiveResistance ? 0.2 : 1) * spawn.dmgToPlayerByLevelsCleared())
+                                m.takeDamage(5 * damage * (tech.isRadioactiveResistance ? 0.2 : 1) * spawn.dmgToPlayerByLevelsCleared())
                             }
                         }
                         //float
@@ -2992,12 +2991,13 @@ const level = {
 
                     //collision with player
                     if (this.height > 0 && Matter.Query.region([player], this).length && !(m.isCloak)) {
-                        if (m.immuneCycle < m.cycle) {
-                            m.takeDamage(damage * spawn.dmgToPlayerByLevelsCleared())
+                        if (m.immuneCycle < m.cycle && !(m.cycle % 10)) {
+                            m.takeDamage(10 * damage * spawn.dmgToPlayerByLevelsCleared())
                         }
                         //undo 1/2 of gravity if on the way up
                         if (player.velocity.y < 0) player.force.y -= 0.5 * player.mass * simulation.g;
                     }
+
                     //float blocks
                     hotBlocks = Matter.Query.region(body, this)
                     for (let i = 0; i < hotBlocks.length; i++) {
@@ -3839,20 +3839,6 @@ const level = {
 
         // let isSpawnedWarp = false
         level.custom = () => {
-            // if (!isSpawnedWarp && simulation.testing) {
-            //     isSpawnedWarp = true
-            //     powerUps.directSpawn(m.pos.x, -900, "warp")
-            //     // powerUps.directSpawn(2100, -1200, "warp")
-            // }
-            //working on a message using text
-            // ctx.font = "50px Arial";
-            // ctx.fillStyle = "rgba(0,0,0,0.3)"
-            // for (let i = 0; i < 5; i++) {
-            //     const wiggle = 2
-            //     ctx.fillText("move", 500 + wiggle * Math.random(), -500 + wiggle * Math.random());
-            //     ctx.fillText("move", 500, -400);
-            // }
-
             //push around power ups stuck in the tube wall
             if (!(simulation.cycle % 30)) {
                 for (let i = 0, len = powerUp.length; i < len; i++) {
@@ -16606,7 +16592,7 @@ const level = {
                 ctx.fillStyle = "#f00";
                 ctx.shadowBlur = 10;
                 ctx.shadowColor = "#f00";
-                ctx.textAlign = "center";
+                // ctx.textAlign = "center";
                 ctx.textBaseLine = "middle";
                 ctx.fillText("!", 900, -13050);
                 ctx.fillText("!", 900, -14350);
@@ -24086,7 +24072,7 @@ const level = {
             ctx.font = "54px monospace";
             ctx.textAlign = "right";
             ctx.fillText(mutetoggle.isOn ? "Muted" : "Unmuted", 250, -210);
-
+            ctx.textAlign = "center";
             //mute symbol
             if (mutetoggle.isOn) {
                 ctx.strokeStyle = "#ff0400";
@@ -41967,7 +41953,6 @@ const level = {
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
@@ -42600,7 +42585,6 @@ const level = {
         document.getElementById("health-bg").style.display = "inline"
         if (!localSettings.isHideHUD) {
             document.getElementById("defense-bar").style.display = "inline"
-            document.getElementById("damage-bar").style.display = "inline"
         }
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
@@ -43485,7 +43469,6 @@ const level = {
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
         const futureGuns = ["harpoon", "shotgun", "nail gun", "super balls", "wave", "foam", "laser"];
         const futureGun = Math.floor(Math.random() * futureGuns.length)
         b.giveGuns(futureGuns[futureGun], Infinity)
@@ -43943,7 +43926,6 @@ const level = {
         document.getElementById("health").style.display = "none" //hide your health bar
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
-        document.getElementById("damage-bar").style.display = "none"
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;

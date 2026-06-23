@@ -311,46 +311,28 @@ function collisionChecks(event) {
                         // }
                     } else {
                         //mob + bullet collisions
-                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed && !m.isTimeDilated) {
+                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed && !m.isTimeDilated && mob[k].damageReduction) {
+
                             obj.beforeDmg(mob[k]); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
                             let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity)))
                             if (tech.isCrit && mob[k].isStunned) dmg *= 4
-                            // console.log(dmg)
-
-                            mob[k].damage(dmg);
+                            if (!obj.isNotCollisionsDmg) mob[k].damage(dmg, false, { x: pairs[i].activeContacts[0].vertex.x, y: pairs[i].activeContacts[0].vertex.y }, true)
                             if (mob[k].alive) mob[k].foundPlayer();
-                            if (mob[k].damageReduction) {
-                                simulation.drawList.push({ //add dmg to draw queue
-                                    x: pairs[i].activeContacts[0].vertex.x,
-                                    y: pairs[i].activeContacts[0].vertex.y,
-                                    radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
-                                    color: simulation.playerDmgColor,
-                                    time: simulation.drawTime
-                                });
-                            }
+                            simulation.drawList.push({ //add dmg to draw queue
+                                x: pairs[i].activeContacts[0].vertex.x,
+                                y: pairs[i].activeContacts[0].vertex.y,
+                                radius: Math.log(dmg + 1.1) * 40 * mob[k].damageReduction + 3,
+                                color: simulation.playerDmgColor,
+                                time: simulation.drawTime
+                            });
                             if (tech.isLessDamageReduction && !mob[k].shield) mob[k].damageReduction *= mob[k].isBoss ? (mob[k].isFinalBoss ? 1.0005 : 1.0025) : 1.05
+
                             return;
                         }
                         //mob + body collisions
                         if (obj.classType === "body" && obj.speed > 9) {
                             const v = Vector.magnitude(Vector.sub(mob[k].velocity, obj.velocity));
                             if (v > 11) {
-                                // if (tech.deflectDmg) { //electricity
-                                //     Matter.Body.setVelocity(mob[k], { x: 0.5 * mob[k].velocity.x, y: 0.5 * mob[k].velocity.y });
-                                //     if (tech.isBlockRadiation && !mob[k].isShielded && !mob[k].isMobBullet) {
-                                //         mobs.statusDoT(mob[k], tech.deflectDmg * 0.42, 180) //200% increase -> x (1+2) //over 7s -> 360/30 = 12 half seconds -> 3/12
-                                //     } else {
-                                //         mob[k].damage(tech.deflectDmg)
-                                //         simulation.drawList.push({
-                                //             x: pairs[i].activeContacts[0].vertex.x,
-                                //             y: pairs[i].activeContacts[0].vertex.y,
-                                //             radius: 28 * mob[k].damageReduction + 3,
-                                //             color: "rgba(255,0,255,0.8)",
-                                //             time: 4
-                                //         });
-                                //     }
-                                // }
-
                                 let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
                                 if (mob[k].isShielded) dmg *= 0.7
 
@@ -358,8 +340,7 @@ function collisionChecks(event) {
                                     mobs.statusDoT(mob[k], dmg * 0.62, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
                                     dmg *= 0.5
                                 }
-                                mob[k].damage(dmg, true);
-
+                                mob[k].damage(dmg, false, { x: pairs[i].activeContacts[0].vertex.x, y: pairs[i].activeContacts[0].vertex.y }, true)
 
                                 if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
                                     options = ["coupling", "boost", "heal", "research", "ammo"]
