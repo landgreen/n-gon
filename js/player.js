@@ -1618,14 +1618,17 @@ const m = {
             Matter.Body.scale(player, 2 / player.scale, 2 / player.scale); //undoes old scale and set new scale to be 2
             Matter.Body.setMass(player, mass);
             Matter.Body.setInertia(player, Infinity);
-            player.scale = 2
-            m.isDown = false
-
             //different scales can sometimes have trouble with jumps so it's a bit faster and higher jumping
             m.squirrelJump = 1.05;
             m.squirrelFx = 1.05;
-            m.setMovement()
+            m.isDown = false
 
+            player.scale = 2
+            m.setMovement()
+            if (m.fieldMode !== 3) {
+                m.holdingMassScale = 0.01
+                if (m.isHolding) m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+            }
             m.damageDone *= 3
             // m.damageReduction *= 0.7
 
@@ -1644,6 +1647,10 @@ const m = {
                         Matter.Body.scale(player, player.scale * player.scale, player.scale * player.scale);
                         Matter.Body.setMass(player, mass);
                         Matter.Body.setInertia(player, Infinity);
+                        if (m.fieldMode !== 3) {
+                            m.holdingMassScale = 0.5
+                            if (m.isHolding) m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                        }
 
                         m.damageReduction *= 0.7
                         m.damageDone /= 3
@@ -1657,6 +1664,10 @@ const m = {
                                 Matter.Body.scale(player, player.scale * player.scale, player.scale * player.scale);
                                 Matter.Body.setMass(player, mass);
                                 Matter.Body.setInertia(player, Infinity);
+                                if (m.fieldMode !== 3) {
+                                    m.holdingMassScale = 0.01
+                                    if (m.isHolding) m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                                }
 
                                 m.damageReduction /= 0.7
                                 m.damageDone *= 3
@@ -1942,13 +1953,14 @@ const m = {
                 ctx.save();
                 ctx.globalAlpha = (m.immuneCycle < m.cycle) ? 1 : m.cycle % 3 ? 0.1 : 0.65 + 0.1 * Math.random()
                 ctx.translate(m.pos.x, m.pos.y);
+                if (input.fire) ctx.translate((simulation.cycle % 2) * 8, 0);
                 m.calcLeg(Math.PI, -1.25);
                 m.drawLeg("#606080");
                 m.calcLeg(0, 0);
                 m.drawLeg("#446");
 
-                if (m.coyoteCycles > 30 && !m.onGround && !(m.cycle % 2) && (m.lastOnGroundCycle + m.coyoteCycles - m.cycle) > 0) {
-                    b.isoWave360Solo({ x: m.pos.x, y: m.pos.y + 145 }, 120 * Math.sqrt(tech.bulletsLastLonger), tech.waveBeamSpeed)
+                if (m.coyoteCycles > 30 && !m.onGround && !(m.cycle % 6) && (m.lastOnGroundCycle + m.coyoteCycles - m.cycle) > 0) {
+                    b.isoWave360Solo({ x: m.pos.x, y: m.pos.y + 145 }, 11 * Math.sqrt(tech.bulletsLastLonger))
                 }
 
 
@@ -2189,8 +2201,8 @@ const m = {
                         //fire 360 wave from eigen block
                         if (tech.isNormalMode && m.eigen.count > 0) {
                             if (!(simulation.cycle % 60)) {
-                                b.isoWave360Solo(m.eigen.block.position, 500 * Math.sqrt(tech.bulletsLastLonger))
-                                b.isoWave360Solo(m.pos, 500 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(m.eigen.block.position, 48 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(m.pos, 48 * Math.sqrt(tech.bulletsLastLonger))
                             }
                         }
                     }
@@ -3990,7 +4002,7 @@ const m = {
                                         }
                                         for (let i = 0, len = 8; i < len; i++) {
                                             let where = Vector.add(m.eigen.block.position, Vector.mult(m.eigen.block.velocity, 6 * i / len))
-                                            b.isoWave360Solo(where, 250 * Math.sqrt(tech.bulletsLastLonger), 25)//where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0
+                                            b.isoWave360Solo(where, 24 * Math.sqrt(tech.bulletsLastLonger))//where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0
                                         }
                                     },
                                 })
@@ -4001,7 +4013,7 @@ const m = {
                             if (futureDist < 500) {
                                 for (let i = 0, len = 6; i < len; i++) {
                                     let where = Vector.add(m.eigen.block.position, Vector.mult(m.eigen.block.velocity, 6 * i / len))
-                                    b.isoWave360Solo(where, 250 * Math.sqrt(tech.bulletsLastLonger), 25)//where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0
+                                    b.isoWave360Solo(where, 24 * Math.sqrt(tech.bulletsLastLonger))//where, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = 1.6 * tech.waveBeamSpeed, cd = 0
                                 }
                             }
 
@@ -5733,6 +5745,7 @@ const m = {
                 if (tech.isPlasmaBall) {
                     m.plasmaBall = Bodies.circle(m.pos.x + 10 * Math.cos(m.angle), m.pos.y + 10 * Math.sin(m.angle), 1, {
                         isSensor: true,
+                        collisionFilter: { category: cat.bullet, mask: 0 },
                         frictionAir: 0,
                         alpha: 0.7,
                         isAttached: false,
@@ -6202,7 +6215,8 @@ const m = {
                             m.pickUp();
                             this.rewindCount = 0;
                             m.wakeCheck();
-                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && !input.fire) {
+                            // } else if (tech.isTimeStop && player.speed < 1 && m.onGround && !input.fire) {
+                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && (b.activeGun === 3 ? input.fire : !input.fire)) {
                             m.timeStop();
                             this.rewindCount = 0;
                         } else {
@@ -6252,7 +6266,7 @@ const m = {
                                 m.wakeCheck();
                                 m.wakeCheck();
                             }
-                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && m.fireCDcycle < m.cycle && !input.fire) {
+                        } else if (tech.isTimeStop && player.speed < 1 && m.onGround && (b.activeGun === 3 ? input.fire : !input.fire && m.fireCDcycle < m.cycle)) {
                             m.timeStop();
                             //makes things move at 1/5 time rate, but has an annoying flicker for mob graphics, and other minor bugs
                             // if (!(m.cycle % 4)) {
@@ -6356,10 +6370,8 @@ const m = {
                     }
                     //not shooting (or using field) enable cloak
                     if (m.energy < 0.05 && m.fireCDcycle < m.cycle && !input.fire) m.fireCDcycle = m.cycle
-                    if (m.fireCDcycle + 10 < m.cycle && !input.fire) { //automatically cloak if not firing
-                        // const drain = 0.02
-                        if (!m.isCloak) { //&& m.energy > drain + 0.03
-                            // m.energy -= drain
+                    if ((b.activeGun === 3 ? input.fire && !input.field : (m.fireCDcycle + 10 < m.cycle && !input.fire))) { //automatically cloak if not firing
+                        if (!m.isCloak) {
                             m.isCloak = true //enter cloak
                             m.fieldHarmReduction = 0.6;
                             m.enterCloakCycle = m.cycle
@@ -6402,17 +6414,6 @@ const m = {
                                     mobs.statusStun(mob[i], 120)
                                 }
                             }
-                            // if (isMobsAround) {
-                            //     m.energy -= drain
-                            //     simulation.drawList.push({
-                            //         x: m.pos.x,
-                            //         y: m.pos.y,
-                            //         radius: stunRange,
-                            //         color: "hsla(0,50%,100%,0.7)",
-                            //         time: 7
-                            //     });
-                            // }
-                            // }
                         }
                     }
 

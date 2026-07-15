@@ -1922,8 +1922,17 @@ function localStorageCheck() {
     }
 
 }
+// if (localStorageCheck()) {
+//     localSettings = JSON.parse(localStorage.getItem("localSettings"))
+//     if (localSettings) {
+//         console.log('localStorage is enabled')
 if (localStorageCheck()) {
-    localSettings = JSON.parse(localStorage.getItem("localSettings"))
+    try {
+        localSettings = JSON.parse(localStorage.getItem("localSettings"))
+    } catch (error) {
+        console.warn("Ignoring invalid localSettings data", error)
+        localSettings = null
+    }
     if (localSettings) {
         console.log('localStorage is enabled')
         localSettings.isAllowed = true
@@ -1984,7 +1993,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.isHideHUD === undefined) localSettings.isHideHUD = false
     document.getElementById("hide-hud").checked = localSettings.isHideHUD
 
-    if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = false
+    if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = true
     document.getElementById("show-num").checked = localSettings.showDmgNumbers
 
     if (localSettings.difficultyCompleted === undefined) {

@@ -6984,9 +6984,9 @@ const spawn = {
                 ctx.moveTo(this.position.x, this.position.y);
                 if (targetDist < r + 16) {
                     targetDist = r + 10;
-                    if (m.immuneCycle < m.cycle) {
-                        m.takeDamage(0.0003 * this.damageScale());
-                        if (m.energy > 0.1) m.energy -= 0.003
+                    if (!(m.cycle % 20) && m.immuneCycle < m.cycle) {
+                        m.takeDamage(0.006 * this.damageScale());
+                        if (m.energy > 0.1) m.energy -= 0.06
                     }
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
@@ -15462,10 +15462,58 @@ const spawn = {
     mapVertex(x, y, vector, properties) { //adds shape to map array
         map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
     },
-    bodyRectCorner(x, y, w = 800, h = 400, c = 25, properties) {
+    // bodyRectCorner(x, y, w = 800, h = 400, c = 25, properties) {
+    //     w *= 0.5
+    //     h *= 0.5
+    //     const vector = `${w} -${h - c}  ${w} ${h - c}  ${w - c} ${h}  -${w - c} ${h}  -${w} ${h - c}  -${w} -${h - c}  -${w - c} -${h}  ${w - c} -${h}`
+    //     map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
+    // },
+    bodyRectCornerVector(w = 800, h = 400, c = 25, round = [true, true, true, true]) {
         w *= 0.5
         h *= 0.5
-        const vector = `${w} -${h - c}  ${w} ${h - c}  ${w - c} ${h}  -${w - c} ${h}  -${w} ${h - c}  -${w} -${h - c}  -${w - c} -${h}  ${w - c} -${h}`
+        c = Math.max(0, Math.min(c, w, h))
+        let isRounded
+        if (typeof round === "boolean") {
+            isRounded = [round, round, round, round]
+        } else if (Array.isArray(round)) {
+            isRounded = round
+        } else if (round) {
+            isRounded = [round.topRight, round.bottomRight, round.bottomLeft, round.topLeft]
+        } else {
+            isRounded = [true, true, true, true]
+        }
+        const [topRight, bottomRight, bottomLeft, topLeft] = isRounded.map(corner => corner !== false)
+        const points = []
+        if (topRight) {
+            points.push(`${w} -${h - c}`)
+        } else {
+            points.push(`${w} -${h}`)
+        }
+        if (bottomRight) {
+            points.push(`${w} ${h - c}`, `${w - c} ${h}`)
+        } else {
+            points.push(`${w} ${h}`)
+        }
+        if (bottomLeft) {
+            points.push(`-${w - c} ${h}`, `-${w} ${h - c}`)
+        } else {
+            points.push(`-${w} ${h}`)
+        }
+        if (topLeft) {
+            points.push(`-${w} -${h - c}`, `-${w - c} -${h}`)
+        } else {
+            points.push(`-${w} -${h}`)
+        }
+        if (topRight) points.push(`${w - c} -${h}`)
+        return points.join("  ")
+    },
+    bodyRectCorner(x, y, w = 800, h = 400, c = 25, round = [true, true, true, true], properties) {
+        if (round && !Array.isArray(round) && typeof round !== "boolean" && round.topRight === undefined && round.bottomRight === undefined && round.bottomLeft === undefined && round.topLeft === undefined) {
+            properties = round
+            round = [true, true, true, true]
+        }
+        const vector = this.bodyRectCornerVector(w, h, c, round)
+        // console.log(vector)
         map[map.length] = Matter.Bodies.fromVertices(x, y, Vertices.fromPath(vector), properties);
     },
     mapRectNow(x, y, width, height, properties, isRedrawMap = true) { //adds rectangle to map array in the middle of a level

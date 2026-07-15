@@ -90,6 +90,23 @@ const powerUps = {
             return `<div class="circle-grid tech tooltip" style="position:relative; top:-0.05em; left:0.55em;opacity:0.8;margin-left:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>
                     <div class="circle-grid field tooltip" style="position:relative; top:-0.05em; left:-0.55em;opacity:0.65;margin-right:-0.55em;"><span class="tooltiptext"><span class="color-f">field</span><span class="color-m">tech</span></span></div>`
         },
+        skin() {
+            return `<span style="position:relative;top:-0.16em;">
+                        <div class="circle-grid-skin" style="width: 1.15em; height: 1.15em;"></div>
+                        <div class="circle-grid-skin-eye" style="left: 0.8em;"></div>
+                    </span>`
+        },
+        skinUpgrade() {
+            return `<span style="position:relative;">
+                        <div class="circle-grid-title" style="position:absolute; top:0.08em; left:0.5em;opacity:1;">
+                            <span style="position:relative;">
+                                <div class="circle-grid-skin" style="width: 1.15em; height: 1.15em;"></div>
+                                <div class="circle-grid-skin-eye" style="left: 0.8em;"></div>
+                            </span>
+                        </div>
+                        <div class="circle-grid-title tech" style="position:absolute; top:0.08em; left:-0.05em;opacity:0.93;width: 1.32em; height: 1.32em;"></div>
+                    </span>`
+        },
         ammo(num = 1) {
             switch (num) {
                 case 1:
@@ -325,7 +342,21 @@ const powerUps = {
                 localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
             simulation.inGameConsole(`<div class="circle-grid tech"></div> <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
+            const isSkin = tech.tech[index].isSkin
             tech.giveTech(index)
+            if (tech.isExtraGunTech && isSkin) {
+                const pool = []
+                for (let j = 0, len = tech.tech.length; j < len; j++) {
+                    if (tech.tech[j].isSkinUpgrade && tech.tech[j].allowed() && tech.tech[j].count < tech.tech[j].maxCount) {
+                        pool.push(j)
+                    }
+                }
+                if (pool.length) {
+                    const index = Math.floor(Math.random() * pool.length)
+                    simulation.inGameConsole(`<span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[pool[index]].name}</strong>")`, 360)
+                    tech.giveTech(pool[index]) // choose from the gun pool
+                }
+            }
         }
         powerUps.endDraft(type);
     },
@@ -1770,6 +1801,10 @@ const powerUps = {
         }
         if (tech.Casimir && Math.random() < tech.Casimir) {
             powerUps.spawn(x - 10, y + 1, "Casimir");
+        }
+        if (tech.isCrystalLattice && powerUps.boost.endCycle > simulation.cycle) {
+            const options = ["boost", "coupling", "Casimir"]
+            powerUps.spawn(x, y, options[Math.floor(Math.random() * options.length)]);
         }
         if (!tech.isEnergyHealth && (Math.random() * Math.random() - 0.3 > Math.sqrt(m.health)) || Math.random() < 0.04) { //spawn heal chance is higher at low health
             powerUps.spawn(x, y, "heal");

@@ -314,6 +314,9 @@ const simulation = {
     },
     updateGunHUD() {
         for (let i = 0, len = b.inventory.length; i < len; ++i) {
+            // const num = b.guns[b.inventory[i]].ammo
+            // const ammo = Number.isFinite(num) ? " - " + num : ""
+            // document.getElementById(b.inventory[i]).innerHTML = `${b.guns[b.inventory[i]].name}${ammo}`
             document.getElementById(b.inventory[i]).innerHTML = `${b.guns[b.inventory[i]].name} - ${b.guns[b.inventory[i]].ammo}`
         }
     },
@@ -430,6 +433,7 @@ const simulation = {
         } else {
             simulation.drawCursor = simulation.drawCursorBasic
         }
+        // b.setFireMethod()
     },
     zoom: null,
     zoomScale: 1000,

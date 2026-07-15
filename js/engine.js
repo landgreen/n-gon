@@ -122,7 +122,7 @@ function playerOnGroundCheck(event) {
                             do() {
                                 this.count--
                                 if (this.count < 0) simulation.removeEphemera(this)
-                                b.isoWave360Solo(this.where, 400 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(this.where, 39 * Math.sqrt(tech.bulletsLastLonger))
                             },
                         })
                     }
@@ -141,7 +141,7 @@ function playerOnGroundCheck(event) {
                             do() {
                                 this.count--
                                 if (this.count < 0) simulation.removeEphemera(this)
-                                b.isoWave360Solo(this.where, 4000 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(this.where, 333 * Math.sqrt(tech.bulletsLastLonger))
                             },
                         })
                     }
@@ -177,12 +177,16 @@ function playerOffGroundCheck(event) {
                 // m.groundCount = 0
                 m.lastOnGroundCycle = m.cycle;
                 m.hardLandCD = 0 // disable hard landing
-                if (m.checkHeadClear()) {
-                    if (m.crouch) {
-                        m.undoCrouch();
-                    }
-                    m.yOffGoal = m.yOffWhen.jump;
+                // if (m.checkHeadClear()) {
+                //     if (m.crouch) {
+                //         m.undoCrouch();
+                //     }
+                //     m.yOffGoal = m.yOffWhen.jump;
+                // }
+                if (m.crouch && m.checkHeadClear()) {
+                    m.undoCrouch();
                 }
+                m.yOffGoal = m.yOffWhen.jump;
             }
         }
     }
