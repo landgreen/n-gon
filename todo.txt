@@ -1,45 +1,77 @@
-******************************************************** NEXT PATCH **************************************************
+new level chute
+  wind zones no longer effect bullets
+  wind zones vibrate power ups to keep them from getting stuck on walls
 
-new level - HVAC
+new community level - terminal by Destiny
 
-wave rework
-  wave gun doesn't use ammo and fires automatically
-    fire button stops fire
-  phonon is the default fire mode
-  tech: transverse - sets wave mode to the original particle mode
-  different wave modes are compatible with many more wave tech
-  removed tech: frequency and phonon
+phonon waves now approximate refraction
+  no reflection though
+  some optimization to laser intersection code
+phonon and isotropic waves have less shake and slow on mobs
+transverse waves no longer benefit from fire rate (they are at max fire rate)
+quasiparticles replaces all ammo with (boost)->(a random small power up)
+  2 research cost
 
-constraint - field drains energy
-tech: crystal lattice - killing mobs while boosted spawns boost, coupling, or Casimir
-  requires exciton
 
-a priori also upgrades skintech
-scale invariance in big mode can easily hold very large blocks
-Higgs mechanism visually vibrates when firing/levitating
-damage numbers are on by default
-  
 bug fixes
-  if player exited the ground while crouched they awkwardly didn't extend their legs
-  out of bounds checks for
-    bounce boss on subway station
-    guns on initial level
-
+  phase velocity no longer does lower damage while speeding up in map
+  a bit less gravity on autocannon so it can hit mobs on all fights
    
 *********************************************************** TODO *****************************************************
 
-tech:  - beam a laser between you and a ___ drone
-  pick a new drone after the current laser target ends
+
+tech - shotgun lightning mode
+  add to tech shell as well
+  try AI for this?
+  
+new bullet type - lighting
+  can be called with a method in b
+    b.lighting(where, velocity = {x:10, y:2}) //example lighting call
+
+  bullet with no physics
+    runs inside an ephemera
+    store a counter in ephemera and and only move once every 15 counter cycles
+      check if this counter is !(count % 15) to teleport
+  
+  it teleports in velocity but with random unit circle added
+    const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random()) //add this to velocity multiplied by some value
+    find nearest mob in range and set velocity in that direction
+      range around 1000
+    moves faster inside map
+      check if inside map and 4x velocity in that case
+  
+  with each teleport check for ray mob collisions
+    Matter.Query.ray(mob, this.position, this.look, 25)
+  save previous position and current position and draw path between them every cycle
+    blue cyan mageneta type lighting colors
+      color random changes every cycle between cyan and mageneta
+      maybe thin cyan arc with magenta larger stroke width glow
+        opacity around 0.1
+
+
+
+
+tech: phased array - fire multiple phonon and transverse waves
+  PAUSE slider for angle of the second wave?
+  this stacks 3x?
+    need to fit 3 sliders    
+  works for transverse and phonon types
+  buff isotropic a bit and require this tech to unlock isotropic
+
+
+tech:  - beam a laser between you and a drone
+  requires drone gun
+  which drone to target?
+    if no drone focus focus on the next drone fired until it ends
+  run code in drone gun do
+    while drone gun is active
+    use standard b.laser
+  stacks x9 so you can have 9x focus drones with 9x lasers
 
 tech:  - _____ leaves a status effect on the mob that does damage after the invincible phase is over.
   waves? field? radiation?
 
 !have AI make a version tracker for n-gon to catch out of date hostings
-
-
-!have AI make printable version of practice problems
-  file format?
-!label AI zone
 
 
 make ammo for wave do something?

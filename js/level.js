@@ -11,8 +11,8 @@ const level = {
     isFlipped: false,
     isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine"],
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "stereoMadness", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
     start() {
@@ -28,7 +28,7 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = true
-                // level.levelsCleared = 8
+                // level.levelsCleared = 13
                 // level.updateDifficulty()
                 // simulation.isCheating = true
                 // tech.giveTech("performance")
@@ -38,7 +38,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(6) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
 
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
@@ -61,11 +61,11 @@ const level = {
                 // m.takeDamage(0.01);
 
                 b.giveGuns(3) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
-                b.giveGuns(4)
+                b.giveGuns(11)
                 // b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
-                for (let i = 0; i < 1; ++i) tech.giveTech("frame-dragging")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("acoustic levitation")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
                 // tech.giveTech("transverse")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("sympathetic resonance")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("sound-bot upgrade")
@@ -74,18 +74,18 @@ const level = {
                 // for (let i = 0; i < 1; i++) tech.giveTech("phase velocity")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-                // level.levelsCleared = 7
+                level.levelsCleared = 4
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                // level.initial()
-                level.HVAC()
-                // level.testing()
+                // level.terminal()
+                // level.chute()
+                level.testing()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
-                for (let i = 0; i < 3; i++) spawn.starter(1300 + 10 * i, -400)
+                for (let i = 0; i < 4; i++) spawn.starter(1300 + 10 * i, -400)
                 for (let i = 0; i < 1; i++) spawn.starter(1300 + 10 * i, -200, 100)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
@@ -2639,13 +2639,15 @@ const level = {
                 for (let i = 0; i < hit.length; i++) {
                     hit[i].body.force.x += this.velocity.x * hit[i].body.mass
                     hit[i].body.force.y += this.velocity.y * hit[i].body.mass
+                    if (this.isFloat) hit[i].body.force.y -= 1.05 * hit[i].body.mass * simulation.g
                     if (hit[i].body.speed > 30) Matter.Body.setVelocity(hit[i].body, Vector.mult(hit[i].body.velocity, 0.97));
+
                 }
-                hit = Matter.Query.ray(bullet, this.a, this.b, height)
-                for (let i = 0; i < hit.length; i++) {
-                    hit[i].body.force.x += this.velocity.x * hit[i].body.mass * 0.5
-                    hit[i].body.force.y += this.velocity.y * hit[i].body.mass * 0.5
-                }
+                // hit = Matter.Query.ray(bullet, this.a, this.b, height)
+                // for (let i = 0; i < hit.length; i++) {
+                //     hit[i].body.force.x += this.velocity.x * hit[i].body.mass * 0.5
+                //     hit[i].body.force.y += this.velocity.y * hit[i].body.mass * 0.5
+                // }
                 hit = Matter.Query.ray(mob, this.a, this.b, height)
                 for (let i = 0; i < hit.length; i++) {
                     hit[i].body.force.x += this.velocity.x * hit[i].body.mass * 0.5
@@ -2653,8 +2655,12 @@ const level = {
                 }
                 hit = Matter.Query.ray(powerUp, this.a, this.b, height)
                 for (let i = 0; i < hit.length; i++) {
-                    hit[i].body.force.x += this.velocity.x * hit[i].body.mass * 0.5
-                    hit[i].body.force.y += this.velocity.y * hit[i].body.mass * 0.5
+                    hit[i].body.force.x += this.velocity.x * hit[i].body.mass * 1
+                    hit[i].body.force.y += this.velocity.y * hit[i].body.mass * 1
+                    if (this.isFloat) {
+                        hit[i].body.force.y -= 1.08 * hit[i].body.mass * simulation.g
+                        hit[i].body.force.x += 0.001 * (Math.random() - 0.5) * hit[i].body.mass
+                    }
                 }
             },
             draw() {
@@ -2726,8 +2732,8 @@ const level = {
                 }
             },
             countDown: 0,
-            countTotal: 480,
-            countDelay: 440,
+            countTotal: 690,
+            countDelay: 630,
             motionQuery() {
                 if (!m.isTimeDilated) {
                     let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
@@ -5762,6 +5768,428 @@ const level = {
         // }
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    chute() {
+        level.announceMobTypes()
+        level.announceText(905, 1513, true)
+        level.setPosToSpawn(900, 1447);
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        level.exit.x = -2610
+        level.exit.y = -1617
+        level.defaultZoom = 2500
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#c3c5c8" //"#d6d2d1"//"#d0d5d5";//"#dcdcde"
+        color.map = "#444647"
+        level.fallMode = "position"; //must set level.fallModeBounds in this mode to prevent player getting stuck left or right
+        level.fallModeBounds = { left: -2700, right: 2800 } //used with level.fallMode = "position";
+
+        const lasers = []
+        //entrance laser
+        lasers.push(level.laser({ x: 550, y: 1227 }, { x: 550, y: 1496 }))
+        lasers[lasers.length - 1].oscillate = function () {
+            const angle = Math.PI / 2 + 0.3 * Math.sin(simulation.cycle * 0.02) //wiggle from -80 to -100 degrees down
+            this.look = { x: this.position.x + 300 * Math.cos(angle), y: this.position.y + 300 * Math.sin(angle) }
+        }
+
+        //laser angle rotates 180 degrees down
+        lasers.push(level.laser({ x: 1700, y: -647 }, { x: 1700, y: -647 })) //oscillating laser
+        lasers[lasers.length - 1].oscillate = function () {
+            const angle = Math.PI / 2 + 0.98 * Math.sin(simulation.cycle * 0.005) //oscillate around down
+            this.look = { x: this.position.x + 1500 * Math.cos(angle), y: this.position.y + 1500 * Math.sin(angle) }
+        }
+
+        // laser angle rotates from down to 30 degrees down-right
+        // lasers.push(level.laser({ x: 552, y: -2595 }, { x: 552, y: -2595 })) //oscillating laser
+        // lasers[lasers.length - 1].oscillate = function () {
+        //     const angle = Math.PI / 3 + Math.PI / 6 * Math.cos(simulation.cycle * 0.01)
+        //     this.look = { x: this.position.x + 2500 * Math.cos(angle), y: this.position.y + 2500 * Math.sin(angle) }
+        // }
+
+        //laser angle rotates from -15.5 to -56.5 degrees down-right
+        lasers.push(level.laser({ x: -2877, y: -1367 }, { x: -2860, y: -1367 })) //oscillating laser
+        lasers[lasers.length - 1].oscillate = function () {
+            const angle = (43 - 26 * Math.cos(simulation.cycle * 0.005)) * Math.PI / 180
+            this.look = { x: this.position.x + 3000 * Math.cos(angle), y: this.position.y + 3000 * Math.sin(angle) }
+        }
+
+        const oscillationPeriod = 1000
+        const movingLaserRigs = []
+        function addMovingLaserRig(pathStart, pathEnd, laserLength, phaseOffset = 0) {
+            const emitterRadius = 30
+            const emitterDiameter = emitterRadius * 2
+            const laserClearance = 0.5
+            const endSlack = 12
+            const pathVector = Vector.sub(pathEnd, pathStart)
+            const pathLength = Vector.magnitude(pathVector)
+            const pathDirection = Vector.normalise(pathVector)
+            const minConstraintLength = endSlack
+            const maxConstraintLength = pathLength - emitterDiameter - endSlack
+            const phase = ((simulation.cycle + phaseOffset) % oscillationPeriod) / oscillationPeriod
+            const progress = 1 - Math.abs(2 * phase - 1)
+            const initialLeftLength = minConstraintLength + (maxConstraintLength - minConstraintLength) * progress
+            const initialRightLength = minConstraintLength + (maxConstraintLength - minConstraintLength) * (1 - progress)
+            const emitterCenter = Vector.add(pathStart, Vector.mult(pathDirection, emitterRadius + initialLeftLength))
+
+            const emitter = body[body.length] = Bodies.circle(emitterCenter.x, emitterCenter.y, emitterRadius, {
+                density: 0.0005,
+                friction: 1,
+                frictionStatic: 1,
+                frictionAir: 0,
+                restitution: 0.5,
+                isNotHoldable: true,
+            })
+            emitter.collisionFilter.category = cat.body
+            emitter.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+            Composite.add(engine.world, emitter)
+            emitter.classType = "body"
+
+            const stiffness = 0.08
+            const damping = 0.003
+            const leftConstraint = cons[cons.length] = Constraint.create({
+                pointA: pathStart,
+                pointB: {
+                    x: -emitterRadius * pathDirection.x,
+                    y: -emitterRadius * pathDirection.y,
+                },
+                bodyB: emitter,
+                length: initialLeftLength,
+                stiffness: stiffness,
+                damping: damping,
+            })
+            Composite.add(engine.world, leftConstraint)
+            const rightConstraint = cons[cons.length] = Constraint.create({
+                pointA: pathEnd,
+                pointB: {
+                    x: emitterRadius * pathDirection.x,
+                    y: emitterRadius * pathDirection.y,
+                },
+                bodyB: emitter,
+                length: initialRightLength,
+                stiffness: stiffness,
+                damping: damping,
+            })
+            Composite.add(engine.world, rightConstraint)
+
+            const laser = level.laser({ x: 0, y: 0 }, { x: 0, y: 0 })
+            function updateLaserPosition() {
+                const laserAngle = Math.PI / 2 + emitter.angle
+                const direction = { x: Math.cos(laserAngle), y: Math.sin(laserAngle) }
+                const nozzleDistance = emitterRadius + laserClearance
+                laser.position.x = emitter.position.x + nozzleDistance * direction.x
+                laser.position.y = emitter.position.y + nozzleDistance * direction.y
+                laser.look.x = laser.position.x + laserLength * direction.x
+                laser.look.y = laser.position.y + laserLength * direction.y
+            }
+            updateLaserPosition()
+            laser.emitterBody = emitter
+            laser.oscillate = function () {
+                const phase = ((simulation.cycle + phaseOffset) % oscillationPeriod) / oscillationPeriod
+                const progress = 1 - Math.abs(2 * phase - 1) // 0 → 1 → 0
+                leftConstraint.length = minConstraintLength + (maxConstraintLength - minConstraintLength) * progress
+                rightConstraint.length = minConstraintLength + (maxConstraintLength - minConstraintLength) * (1 - progress)
+                updateLaserPosition()
+            }
+            movingLaserRigs.push({ emitter, leftConstraint, rightConstraint })
+            lasers.push(laser)
+        }
+
+        //vertical laser on a physics-driven block that follows a diagonal path
+        const laserPathStart = { x: -2224, y: -2097 }
+        const laserPathEnd = { x: -550, y: -2620 }
+        const laserPathLength = 1200
+        addMovingLaserRig(laserPathStart, laserPathEnd, laserPathLength)
+
+        //vertical laser on a physics-driven block that follows the right diagonal path
+        const rightLaserPathStart = { x: 552, y: -2620 }
+        const rightLaserPathEnd = { x: 2199, y: -2120 }
+        const rightLaserPathLength = 2000
+        addMovingLaserRig(rightLaserPathStart, rightLaserPathEnd, rightLaserPathLength, oscillationPeriod / 2)
+
+        const boosts = [
+            // level.boost(-2500, 100, 1350, 1.2), //60 degrees up-right
+            level.boost(2210, -2145, 1400, 2), //centered near 2306 on the roof, 45 degrees up-left
+            level.boost(2984, -271, 1650, 1.69), //slightly left, lands near 2570, -1858
+        ]
+
+        const wind = []
+        wind.push(level.wind(-350, -2425, 175, 4475, { x: 0, y: 0.001 }))//vertical left column
+        wind.push(level.wind(175, -2425, 175, 4825, { x: 0, y: -0.001 }, true))//vertical right column
+        wind.push(level.wind(-350, 2050, 700, 400, { x: 0.005, y: 0 }, true))//bottom right
+        wind.push(level.wind(-375, -2450, 750, 375, { x: -0.002, y: 0 }))//top left
+
+
+        const windDir = [
+            { x: 260, y: -1192, direction: -Math.PI / 2 },
+            { x: 260, y: 750, direction: -Math.PI / 2 },
+            { x: -260, y: -1125, direction: Math.PI / 2 },
+            { x: -260, y: 827, direction: Math.PI / 2 },
+        ]
+        function drawWindDirArrows() {
+            ctx.save();
+            ctx.beginPath();
+            for (let i = 0; i < windDir.length; i++) {
+                ctx.save();
+                ctx.translate(windDir[i].x, windDir[i].y);
+                ctx.rotate(windDir[i].direction);
+                for (let j = 0; j < 2; j++) {
+                    const x = -80 + 80 * j;
+                    ctx.moveTo(x - 24, -40);
+                    ctx.lineTo(x + 24, 0);
+                    ctx.lineTo(x - 24, 40);
+                }
+                ctx.restore();
+            }
+            ctx.strokeStyle = "rgb(164, 179, 201)";
+            ctx.lineWidth = 12;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+            ctx.stroke();
+            ctx.restore();
+        }
+        level.custom = () => {
+            for (let i = 0; i < boosts.length; i++) boosts[i].query()
+
+            drawWindDirArrows();
+            //diagonal laser paths
+            // ctx.beginPath()
+            // ctx.moveTo(laserPathStart.x, laserPathStart.y)
+            // ctx.lineTo(laserPathEnd.x, laserPathEnd.y)
+            // ctx.moveTo(rightLaserPathStart.x, rightLaserPathStart.y)
+            // ctx.lineTo(rightLaserPathEnd.x, rightLaserPathEnd.y)
+            // ctx.strokeStyle = "#a7a7a7"
+            // ctx.lineWidth = 4
+            // ctx.stroke()
+
+            //draw the two working constraints on each laser-source block
+            ctx.beginPath()
+            for (let i = 0; i < movingLaserRigs.length; i++) {
+                const rig = movingLaserRigs[i]
+                const leftPoint = Vector.add(rig.emitter.position, Vector.rotate(rig.leftConstraint.pointB, rig.emitter.angle))
+                const rightPoint = Vector.add(rig.emitter.position, Vector.rotate(rig.rightConstraint.pointB, rig.emitter.angle))
+                ctx.moveTo(rig.leftConstraint.pointA.x, rig.leftConstraint.pointA.y)
+                ctx.lineTo(leftPoint.x, leftPoint.y)
+                ctx.moveTo(rig.rightConstraint.pointA.x, rig.rightConstraint.pointA.y)
+                ctx.lineTo(rightPoint.x, rightPoint.y)
+            }
+            ctx.strokeStyle = "rgba(0,0,0,0.25)"
+            ctx.lineWidth = 2
+            ctx.stroke()
+
+            // for (let i = 0; i < lasers.length; i++) {
+            for (let i = 0; i < lasers.length; i++) {
+                lasers[i].oscillate()
+                lasers[i].motionQuery()
+            }
+            //laser emitters
+            ctx.fillStyle = color.map //"#999"
+            ctx.beginPath()
+            for (let i = 0; i < lasers.length; i++) {
+                if (!lasers[i].emitterBody) {
+                    ctx.moveTo(lasers[i].position.x + 25, lasers[i].position.y)
+                    ctx.arc(lasers[i].position.x, lasers[i].position.y, 25, 0, 2 * Math.PI)
+                }
+            }
+            ctx.fill()
+
+            //exit room
+            ctx.fillStyle = "#d5ebef"
+            ctx.fillRect(-2800, -2000, 575, 450)
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+        level.customTopLayer = () => {
+            if (!m.isTimeDilated) {
+                for (let i = 0; i < wind.length; i++) wind[i].do()
+            }
+
+            //wind glow
+            // ctx.fillStyle = "rgba(0,0,155,0.05)"
+            // ctx.fillRect(-350, -2450, 700, 4875);
+
+            //shadows
+            ctx.fillStyle = "rgba(0,0,0,0.07)"
+            ctx.beginPath()
+            ctx.rect(-525, -2550, 1050, 4975)
+            ctx.rect(525, 1200, 535, 325)
+            // ctx.rect(525, -675, 2250, 875)
+            ctx.fill()
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.beginPath()
+            ctx.rect(1860, -990, 780, 140)
+            ctx.rect(2200, -1525, 450, 325)
+            ctx.rect(2225, -2075, 275, 250)
+            ctx.rect(-1900, -110, 800, 320)
+            ctx.rect(1490, 55, 420, 120)
+            ctx.rect(-1129.5, -920, 325, 220)
+            ctx.rect(-1412, -1700, 425, 150);
+
+            ctx.fill()
+            // ctx.fillRect(2225, -2075, 250, 250);
+            // ctx.fillRect(2225, -1525, 400, 325);
+            // ctx.fillRect(2125, -1000, 550, 175);
+
+
+
+            //exit room glow
+            // ctx.fillStyle = "rgba(0,255,255,0.05)"
+            // ctx.fillRect(4005, 1975, 725, 400);
+        };
+
+        //center column
+        // spawn.bodyRectCorner(0, -1150, 350, 2000, 100, [true, false, false, true]); //top with gap
+        // spawn.bodyRectCorner(0, 1150, 350, 2000, 100, [false, true, true, false]); //bottom with gap
+        if (Math.random() > 0.5) {
+            spawn.bodyRectCorner(0, 0, 350, 4325, 100); // unbroken center column:
+        } else {
+            spawn.bodyRectCorner(0, -1193.75, 350, 1937.5, 100, [true, false, false, true]); //above gap
+            spawn.bodyRectCorner(0, 1181.25, 350, 1962.5, 100, [false, true, true, false]); //below gap
+        }
+
+        //bottom turn around in wind elevator
+        spawn.mapRect(-550, 2400, 1100, 200);//horizontal base
+        spawn.mapVertex(-350, 2400, "-200 -200  200 200  -200 200");  //triangle bottom left
+        spawn.mapVertex(350, 2400, "200 -200  -200 200  200 200");  //triangle bottom right
+
+        //top turn around in wind elevator
+        spawn.mapRect(-550, -2625, 1050, 200);//horizontal top
+        spawn.mapVertex(-350, -2400, "-200 200  200 -200  -200 -200");  //triangle bottom left
+        spawn.mapVertex(350, -2400, "200 200  -200 -200  200 -200");  //triangle bottom right
+
+        //vertical wind elevator side walls
+        //left walls
+        spawn.bodyRectCorner(-453, -2200, 200, 700, 100, [false, true, false, false]);
+        spawn.bodyRectCorner(-453, -1275, 200, 550, 100, [false, true, false, false]);
+        spawn.bodyRectCorner(-453, -425, 200, 500, 100, [false, true, false, false]);
+        spawn.mapRect(-550, 125, 200, 2425);
+
+        //right walls
+        spawn.mapRect(350, -2625, 200, 600);
+        spawn.mapRect(350, -1625, 200, 475);
+        spawn.mapRect(350, -675, 200, 575);
+        spawn.mapRect(350, 325, 200, 900);
+        spawn.mapRect(350, 1650, 200, 900);
+
+        //floor 1 entrance
+        spawn.bodyRectCorner(812, 1600, 900, 200, 200, [false, false, false, true]); // topRight: false, bottomRight: true, bottomLeft: true, topLeft: false
+        spawn.mapRect(525, 1025, 725, 200);
+        spawn.mapRect(1050, 1025, 200, 673);
+
+        // floor 2
+        //left
+        spawn.mapRect(-2550, 125, 2200, 200);
+        // spawn.mapVertex(-1775, 100, "625 0   75 0   200 -100   500 -100"); //ramp
+        spawn.bodyRectCorner(-1500, -180, 925, 270, 60);
+        spawn.mapRect(-1962.5, 115, 925, 100);
+        spawn.mapRect(-2550, -200, 225, 525);
+
+
+
+
+        //right
+        spawn.bodyRectCorner(1650, 275, 2575, 200, 200, [false, false, false, true]);
+        // spawn.mapRect(350, -250, 500, 150);
+        // spawn.mapRect(2525, -250, 400, 150);
+        spawn.mapRect(2525, -250, 590, 150);
+        spawn.mapRect(2775, -150, 150, 350);
+
+        spawn.mapVertex(2350, 180, "625 0   75 0   200 -100   500 -100"); //ramp
+        spawn.mapVertex(1050, 180, "625 0   75 0   200 -100   500 -100"); //ramp
+        spawn.bodyRectCorner(1700, -35, 525, 200, 50); // topRight: false, bottomRight: true, bottomLeft: true, topLeft: false
+        spawn.mapRect(1437.5, 165, 525, 100);
+
+        //floor 3
+        //right
+        spawn.bodyRectCorner(1587.4, -750, 2450, 200, 200, [false, false, false, true]);
+        spawn.bodyRectCorner(2250, -1117, 900, 300, 60); //lowest
+        spawn.mapRect(1800, -860, 900, 100);
+        spawn.mapRect(2200, -1850, 450, 350);
+        spawn.mapRect(2200, -2125, 300, 75);
+        spawn.mapRect(2200, -2075, 75, 275);
+        spawn.mapRect(875, -862, 725, 75);
+        spawn.mapRect(925, -874, 625, 75);
+
+        //tower connecting 2 and 3 on right
+        // spawn.mapRect(2950, -550, 250, 25);
+        // spawn.mapRect(2950, -1050, 250, 25);
+        // spawn.mapRect(2950, -1550, 250, 25);
+        // spawn.mapRect(2950, -2050, 250, 25);
+
+        //left
+        spawn.mapRect(-1475, -700, 1125, 200);
+        spawn.bodyRectCorner(-967, -1000, 425, 250, 50);
+        spawn.mapRect(-1179.5, -710, 425, 100);
+
+        //floor 4
+        //right
+        spawn.bodyRectCorner(762, -1650, 800, 200, 200, [false, false, false, true]);
+        //left
+        spawn.bodyRectCorner(-1200, -1840, 525, 300, 50);
+        spawn.mapRect(-1462.5, -1585, 525, 100);
+
+        spawn.mapRect(-2825, -1585, 600, 50);//exit room floor
+        spawn.mapRect(-2900, -2100, 675, 100); //exit room ceiling
+        spawn.mapRect(-2900, -2100, 100, 550); //exit room left wall
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //exit door step
+        spawn.mapRect(-2325, -2100, 100, 325);
+        spawn.mapRect(-2900, -1575, 2550, 200);
+
+        //blocks
+        //blocks in wind tunnels
+        spawn.bodyRect(258, -760, 30, 40, 0.5)
+        spawn.bodyRect(-298, 150, 50, 60, 0.5)
+        spawn.bodyRect(-250, -1683, 20, 80, 0.5)
+        spawn.bodyRect(258, -760, 40, 75, 0.5)
+        spawn.bodyRect(-298, 150, 75, 75, 0.5)
+        spawn.bodyRect(-250, -1683, 25, 100, 0.5)
+
+        //mobs
+        spawn.randomMob(-1000, -25, 0);
+        spawn.randomMob(-1825, -325, 0);
+        spawn.randomMob(-2275, 100, 0);
+        spawn.randomMob(725, -350, 0);
+        spawn.randomMob(1625, -275, 0);
+        spawn.randomMob(2775, -425, 0);
+        spawn.randomMob(2425, -1400, 0);
+        spawn.randomMob(2400, -1975, 0);
+        spawn.randomMob(975, -1975, 0);
+        spawn.randomMob(-1225, -2200, 0);
+        spawn.randomMob(-1825, -1725, 0);
+        spawn.randomMob(-2425, -2200, 0);
+        spawn.randomMob(-800, -1700, 0);
+        spawn.randomMob(750, 50, 0);
+        spawn.randomMob(2300, -50, 0);
+        spawn.randomMob(3025, -1150, 0);
+        spawn.randomMob(700, -1425, 0);
+        spawn.randomMob(-1550, -1700, 0);
+        spawn.randomMob(-775, -1750, 0);
+        spawn.randomMob(-1075, -875, 0);
+
+        //bosses
+        if (Math.random() < 0.33) {
+            spawn.randomLevelBoss(1670, Math.random() < 0.3 ? -450 : -1678);
+        } else if (Math.random() < 0.5) {
+            spawn.randomLevelBoss(-2217, -629);
+        } else {
+            spawn.secondaryBossChance(-1145, -2217);
+        }
+        if (Math.random() < 0.33) {
+            spawn.secondaryBossChance(837, -1978);
+        } else if (Math.random() < 0.5) {
+            spawn.secondaryBossChance(-1840, -1859);
+        } else {
+            spawn.secondaryBossChance(845, -1246);
+        }
+
+        powerUps.chooseRandomPowerUp(-288, -776);
+        powerUps.chooseRandomPowerUp(245, -1356);
+        powerUps.chooseRandomPowerUp(261, 964);
+        powerUps.chooseRandomPowerUp(-243, 1645);
+        powerUps.chooseRandomPowerUp(150, 2221);
+        powerUps.chooseRandomPowerUp(140, -2000);
+        powerUps.chooseRandomPowerUp(-149, -2000);
+        powerUps.spawnStartingPowerUps(255, 78)
+        if (Math.random() < 0.5) powerUps.chooseRandomPowerUp(50, -2682);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+    },
     HVAC() {
         level.announceMobTypes()
         level.announceText(-4000, -900, true)
@@ -5919,7 +6347,9 @@ const level = {
         };
         level.customTopLayer = () => {
             for (let i = 0; i < fizzlers.length; i++) fizzlers[i].query();
-            for (let i = 0; i < wind.length; i++) wind[i].do()
+            if (!m.isTimeDilated) {
+                for (let i = 0; i < wind.length; i++) wind[i].do()
+            }
             for (let i = startingDrawIndex; i < wind.length; i++) wind[i].draw()
 
 
@@ -12533,6 +12963,155 @@ const level = {
             };
         }
 
+    },
+    generativeTest1() {
+        level.announceMobTypes()
+        level.announceText(-4250, -75, true)
+        level.setPosToSpawn(-4250, -50);
+        level.exit.x = 4250
+        level.exit.y = -1830
+        level.defaultZoom = 1900
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#cdd2d3"
+        color.map = "#454a4d"
+
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+
+        // The fixed route uses conveyors as its signature mechanic.
+        const intakeBeltLeft = level.mover(-4100, -30, 900, 30, 4)
+        const intakeBeltRight = level.mover(-3150, -30, 750, 30, -3.5)
+        const upperBeltLeft = level.mover(-1500, -930, 950, 30, 4.5)
+        const upperBeltRight = level.mover(-500, -930, 1000, 30, -4.5)
+        const arenaBeltLeft = level.mover(1050, 370, 1100, 30, 4.5)
+        const arenaBeltRight = level.mover(2200, 370, 1000, 30, -4.5)
+        const belts = [intakeBeltLeft, intakeBeltRight, upperBeltLeft, upperBeltRight, arenaBeltLeft, arenaBeltRight]
+
+        // Freight elevators create the two major changes in elevation.
+        const entryLift = level.elevator(-2125, -50, 400, 50, -900, 0.004)
+        const exitLift = level.elevator(3200, 350, 350, 50, -1800, 0.0045)
+
+        level.custom = () => {
+            entryLift.move();
+            entryLift.drawTrack();
+            exitLift.move();
+            exitLift.drawTrack();
+
+            for (let i = 0; i < belts.length; i++) belts[i].push();
+
+            // Large background structures establish three readable sections.
+            ctx.fillStyle = "#b9c0c2"
+            ctx.fillRect(-4600, -1250, 1850, 1250)
+            ctx.fillRect(-1650, -1850, 2700, 950)
+            ctx.fillRect(950, -1150, 2550, 1550)
+
+            // Window and machinery accents.
+            ctx.fillStyle = "#aeb9bc"
+            ctx.fillRect(-4400, -1050, 1350, 260)
+            ctx.fillRect(-1350, -1650, 2100, 260)
+            ctx.fillRect(1250, -950, 1900, 260)
+            ctx.fillStyle = "#8e999c"
+            ctx.fillRect(-2375, -1300, 75, 1300)
+            ctx.fillRect(-1650, -1300, 75, 700)
+            ctx.fillRect(3025, -2350, 75, 1200)
+            ctx.fillRect(3575, -1200, 75, 1950)
+
+            // Exit-room light.
+            ctx.fillStyle = "#d5f1f3"
+            ctx.fillRect(3750, -2200, 950, 400)
+
+            level.exit.drawAndCheck();
+            level.enter.draw();
+        };
+
+        level.customTopLayer = () => {
+            for (let i = 0; i < belts.length; i++) belts[i].draw();
+
+            ctx.fillStyle = "rgba(0,0,0,0.08)"
+            ctx.fillRect(-4550, -750, 1700, 750)
+            ctx.fillRect(-1450, -1450, 2200, 550)
+            ctx.fillRect(1150, -550, 1900, 950)
+            ctx.fillRect(3750, -2150, 950, 350)
+
+            // Elevator counterweight channels.
+            ctx.fillStyle = "rgba(0,0,0,0.15)"
+            ctx.fillRect(-2290, -900, 20, 850)
+            ctx.fillRect(3560, -1800, 20, 2150)
+        };
+
+        // Outer shell and intake room.
+        spawn.mapRect(-4800, -1350, 200, 2450);
+        spawn.mapRect(-4800, -1350, 2100, 200);
+        spawn.mapRect(-4800, 0, 2650, 350);
+        spawn.mapRect(-4500, -500, 600, 50);
+        spawn.mapRect(-3650, -750, 625, 50);
+        spawn.mapRect(-2850, -500, 450, 50);
+
+        // First freight-elevator shaft. The staggered walls leave a lower
+        // entrance on the left and an upper exit on the right.
+        spawn.mapRect(-2300, -900, 150, 600);
+        spawn.mapRect(-1650, -600, 150, 600);
+        spawn.mapRect(-2300, 400, 800, 200);
+        spawn.mapRect(-2250, 250, 200, 50);
+        spawn.mapRect(-2050, 100, 200, 50);
+        spawn.mapRect(-2300, -1500, 800, 200);
+
+        // Upper transfer hall.
+        spawn.mapRect(-1725, -900, 2825, 250);
+        spawn.mapRect(-1725, -1900, 3225, 250);
+        spawn.mapRect(-1725, -1900, 150, 500);
+        spawn.mapRect(1350, -1900, 150, 700);
+        spawn.mapRect(550, -1250, 425, 50);
+
+        // Fixed descent into the sorting floor.
+        spawn.mapRect(1050, -525, 375, 50);
+        spawn.mapRect(1325, -150, 375, 50);
+        spawn.mapVertex(1035, -850, "-100 -50  100 -50  500 350  400 450");
+
+        // Sorting floor and boss arena.
+        spawn.mapRect(900, 400, 2800, 350);
+        spawn.mapRect(1550, -1200, 2150, 200);
+        spawn.mapRect(900, 250, 150, 500);
+        spawn.mapRect(3575, -1200, 125, 1950);
+        spawn.mapRect(1650, 75, 350, 50);
+        spawn.mapRect(2450, -225, 425, 50);
+
+        // Exit lift and fixed exit room.
+        spawn.mapRect(3050, -1800, 150, 650);
+        spawn.mapRect(3550, -1800, 1250, 300);
+        spawn.mapRect(3550, -2400, 1350, 200);
+        spawn.mapRect(4700, -2400, 200, 3300);
+
+        // A sealed lower catch prevents out-of-bounds falls.
+        spawn.mapRect(-4800, 750, 9700, 350);
+
+        // Fixed cargo bodies give the conveyors and fights physical texture.
+        spawn.bodyRect(-3800, -125, 90, 125, 0.4);
+        spawn.bodyRect(-3475, -90, 110, 90, 0.4);
+        spawn.bodyRect(-2825, -150, 150, 150, 0.5);
+        spawn.bodyRect(-1300, -1025, 125, 125, 0.4);
+        spawn.bodyRect(-825, -1000, 100, 100, 0.4);
+        spawn.bodyRect(-125, -1050, 150, 150, 0.5);
+        spawn.bodyRect(1350, 200, 200, 200, 0.5);
+        spawn.bodyRect(1900, 275, 125, 125, 0.4);
+        spawn.bodyRect(2850, 225, 175, 175, 0.5);
+
+        // Fixed encounter locations; only mob selection and difficulty scaling vary.
+        spawn.randomSmallMob(-3400, -225, 1);
+        spawn.randomMob(-2750, -225, 0);
+        spawn.randomMob(-1250, -1125, 0.1);
+        spawn.randomMob(-550, -1125, 0.2);
+        spawn.randomGroup(250, -1200, 0.4);
+        spawn.randomMob(1200, 100, 0);
+        spawn.randomMob(1750, 100, 0.15);
+        spawn.randomMob(3000, 75, 0.3);
+        spawn.randomLevelBoss(2450, 50);
+        spawn.secondaryBossChance(1550, 25);
+
+        powerUps.spawnStartingPowerUps(-4050, -250);
+        powerUps.chooseRandomPowerUp(750, -1125);
+        powerUps.chooseRandomPowerUp(2900, 100);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     stronghold() { // player made level  by    Francois 👑 from discord
         simulation.inGameConsole(`<strong>stronghold</strong> by <span class='color-var'>Francois</span>`);
@@ -42182,6 +42761,426 @@ const level = {
         level.customTopLayer = () => {
             exitDoor.draw();
         };
+    },
+    terminal() {
+        simulation.inGameConsole(`terminal by Destiny`)
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 1500;
+        level.exit.y = -1875;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        const boost1 = level.boost(-1000, -50, 1000, Math.PI / 4);
+        const boost2 = level.boost(-600, -700, 900, Math.PI);
+        const boost3 = level.boost(-2250, 0);
+        const boost4 = level.boost(4275, -25, 1800);
+        const button1 = level.button(-1225, -1000);
+        const button2 = level.button(3588, -1700);
+        button1.isUp = true;
+        const maxBlocks = 15;
+        let blocks = 0;
+        let balance1 = level.rotor(100, -1875, 300, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
+        let balance2 = level.rotor(-475, -1875, 325, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
+        let balance3 = level.rotor(100, -1275, 300, 25, 0.001, 0, 0.001, 0, 0.0001 * Math.random());
+        let balance4 = level.rotor(-475, -1275, 325, 25, 0.001, 0, 0.001, 0, 0.0001 * Math.random());
+        let balance5 = level.rotor(-475, -725, 325, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
+        let balance6 = level.rotor(100, -725, 300, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
+        const termSourceUrl = "https://raw.githubusercontent.com/Whyisthisnotavalable/n-scythe/aa91647ee6068775b5a9ef50444e30dd0751bc1c/multiplayer.js";
+        const termBox = { x: 1000, y: -1375, w: 2000, h: 1175 };
+        const termPad = 28;
+        const termFontSize = 30;
+        const termLineH = 36;
+        let termSpeed = 40;
+        let termPaused = false;
+        let termLines = [];
+        let termTypedChars = 0;
+        let termTotalChars = 0;
+        let termFlatOnDone = null;
+        function setFlatLines(lines, onDone) {
+            termLines = lines;
+            termTypedChars = 0;
+            termTotalChars = lines.reduce((sum, l) => sum + l.length + 1, 0);
+            termFlatOnDone = onDone || null;
+        }
+        let termScript = null;
+        let termScriptIndex = 0;
+        let termScriptCharsTyped = 0;
+        let termScriptHoldRemaining = 0;
+        let termScriptCommitted = [];
+        let termScriptOnDone = null;
+        function playTermScript(entries, onDone) {
+            termScript = entries;
+            termScriptIndex = 0;
+            termScriptCharsTyped = 0;
+            termScriptHoldRemaining = 0;
+            termScriptCommitted = [];
+            termScriptOnDone = onDone || null;
+        }
+        function updateTermScript(deltaMs) {
+            for (let guard = 0; guard < 1000; guard++) {
+                if (termScriptIndex >= termScript.length) {
+                    const cb = termScriptOnDone;
+                    termScript = null;
+                    termScriptOnDone = null;
+                    if (cb) cb();
+                    return;
+                }
+                if (termScriptHoldRemaining > 0) {
+                    if (!termPaused) termScriptHoldRemaining -= deltaMs;
+                    if (termScriptHoldRemaining > 0) return;
+                    termScriptHoldRemaining = 0;
+                }
+                const entry = termScript[termScriptIndex];
+                if (entry.action) {
+                    try { entry.action(); } catch (e) { console.error("term script action failed:", e); }
+                    termScriptIndex++;
+                    continue;
+                }
+                const text = typeof entry === "string" ? entry : entry.text;
+                const speed = (typeof entry === "object" && entry.speed) || termSpeed;
+                const holdAfter = (typeof entry === "object" && entry.holdAfter) || 0;
+                if (!termPaused) {
+                    termScriptCharsTyped = Math.min(text.length, termScriptCharsTyped + (deltaMs / 1000) * speed);
+                    deltaMs = 0;
+                }
+                termLines = [...termScriptCommitted, text];
+                termTypedChars = termScriptCommitted.reduce((s, l) => s + l.length + 1, 0) + Math.floor(termScriptCharsTyped);
+                termTotalChars = termLines.reduce((s, l) => s + l.length + 1, 0);
+                if (Math.floor(termScriptCharsTyped) < text.length) return;
+                termScriptCommitted.push(text);
+                termScriptIndex++;
+                termScriptCharsTyped = 0;
+                if (holdAfter) {
+                    termScriptHoldRemaining = holdAfter;
+                    return;
+                }
+            }
+        }
+        let fetchedLines = null;
+        let termWaitingForFetch = false;
+        let error = false;
+        fetch(termSourceUrl)
+            .then(res => res.text())
+            .then(text => { fetchedLines = text.replace(/\r\n/g, "\n").split("\n"); })
+            .catch(() => { fetchedLines = ["// couldn't reach remote source"]; error = true; });
+        function showFetchedContentWhenReady() {
+            if (fetchedLines) {
+                setFlatLines(fetchedLines, playEndingSequence);
+            } else {
+                termWaitingForFetch = true;
+            }
+        }
+        let endingStarted = false;
+        function playEndingSequence() {
+            if (endingStarted) return;
+            endingStarted = true;
+            if (!error) {
+                glitchEnabled = true;
+                playTermScript([
+                    { text: "destiny: initiating handshake...", speed: 45, holdAfter: 400 },
+                    { text: "landgreen: that's far enough.", speed: 45, holdAfter: 700 },
+                    { text: "destiny: landgreen? you can't stop me", speed: 45, holdAfter: 900 },
+                    { text: "landgreen: ...", speed: 20, holdAfter: 1300 },
+                    "",
+                    { text: "WebSocket connection to 'wss://0.peerjs.com/peerjs' failed:", speed: 70 },
+                    { text: "Error during WebSocket handshake: Unexpected response code: 401", speed: 70, holdAfter: 500 },
+                    "",
+                    { text: "connection closed (code 1008: policy violation)", speed: 70, holdAfter: 1200 },
+                    "",
+                    { text: "> spawn.mapRectNow(1975, -1750, 1175, 150)", speed: 60 },
+                    {
+                        action: () => {
+                            spawn.mapRectNow(1975, -1750, 1175, 150);
+                        }
+                    },
+                    "",
+                    { text: "check out my multiplayer mod on github!", speed: 60 },
+                    { text: "https://github.com/Whyisthisnotavalable/n-scythe", speed: 60 },
+                    { text: "if you don't know how to install the mod, go to", speed: 60 },
+                    { text: "https://whyisthisnotavalable.github.io/n-gon-multiplayer/", speed: 60 },
+                ]);
+            } else {
+                playTermScript([
+                    { text: "VM2536:1", speed: 70 },
+                    { text: "GET https://raw.githubusercontent.com/Whyisthisnotavalable/n-scythe/main/multiplayer.js", speed: 70 },
+                    { text: "net::ERR_INTERNET_DISCONNECTED", speed: 70 },
+                    "",
+                    { text: "> spawn.mapRectNow(1975, -1750, 1175, 150)", speed: 60 },
+                    {
+                        action: () => {
+                            spawn.mapRectNow(1975, -1750, 1175, 150);
+                        }
+                    },
+                ]);
+            }
+        }
+        playTermScript([{ text: "destiny@term:~$ run multiplayer.js", speed: 45, holdAfter: 400 }, { text: "fetching source...", speed: 45, holdAfter: 1400 }], showFetchedContentWhenReady);
+        let termLastFrameTime = performance.now();
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            level.enter.draw();
+            ctx.fillStyle = "rgba(0,0,0,0.08)";
+            ctx.beginPath();
+            ctx.moveTo(-2300, -2775);
+            ctx.lineTo(425, -2775);
+            ctx.lineTo(525, -525);
+            ctx.lineTo(350, -325);
+            ctx.lineTo(750, -225);
+            ctx.lineTo(750, 25);
+            ctx.lineTo(-1125, 250);
+            ctx.lineTo(-1675, 250);
+            ctx.lineTo(-2300, 25);
+            ctx.fill();
+
+            boost1.query();
+            boost2.query();
+            boost3.query();
+            boost4.query();
+            button1.query();
+            button1.draw();
+            button2.query();
+            button2.draw();
+            if (!button1.isUp) {
+                if (button1.isReady && blocks < maxBlocks) {
+                    button1.isReady = false
+                    spawn.bodyRect(-725, -2000, 125, 125);
+                    blocks++;
+                }
+            } else {
+                button1.isReady = true
+            }
+            ctx.fillStyle = "#233";
+            ctx.beginPath();
+            ctx.arc(balance1.center.x, balance1.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance2.center.x, balance2.center.y)
+            ctx.arc(balance2.center.x, balance2.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance3.center.x, balance3.center.y)
+            ctx.arc(balance3.center.x, balance3.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance4.center.x, balance4.center.y)
+            ctx.arc(balance4.center.x, balance4.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance5.center.x, balance5.center.y)
+            ctx.arc(balance5.center.x, balance5.center.y, 9, 0, 2 * Math.PI);
+            ctx.moveTo(balance6.center.x, balance6.center.y)
+            ctx.arc(balance6.center.x, balance6.center.y, 9, 0, 2 * Math.PI);
+            ctx.fill();
+
+            balance1.rotate();
+            balance2.rotate();
+            balance3.rotate();
+            balance4.rotate();
+            balance5.rotate();
+            balance6.rotate();
+
+            ctx.fillStyle = "#444";
+            ctx.fillRect(termBox.x, -1475, 2000, 1275);
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(termBox.x, -1375);
+            ctx.lineTo(termBox.x + termBox.w, -1375);
+            ctx.stroke();
+            ctx.save();
+            ["#ff5f56", "#ffbd2e", "#27c93f"].forEach((c, i) => {
+                ctx.fillStyle = c;
+                ctx.beginPath();
+                ctx.arc(1050 + i * 40, -1425, 12, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            ctx.fillStyle = "#ddd";
+            ctx.font = "26px monospace";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "middle";
+            ctx.fillText("multiplayer.js", 1200, -1425);
+            ctx.restore();
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(termBox.x, termBox.y, termBox.w, termBox.h);
+            ctx.clip();
+            ctx.fillStyle = "#0c0f0a";
+            ctx.fillRect(termBox.x, termBox.y, termBox.w, termBox.h);
+            const termNow = performance.now();
+            const termDelta = termNow - termLastFrameTime;
+            termLastFrameTime = termNow;
+            if (!button2.isUp) {
+                playEndingSequence();
+            }
+            if (termScript) {
+                updateTermScript(termDelta);
+            } else {
+                if (!termPaused) {
+                    termTypedChars = Math.min(termTotalChars, termTypedChars + (termDelta / 1000) * termSpeed);
+                }
+                const doneNow = termTypedChars >= termTotalChars;
+                if (doneNow && termFlatOnDone) {
+                    const cb = termFlatOnDone;
+                    termFlatOnDone = null;
+                    cb();
+                } else if (termWaitingForFetch && fetchedLines) {
+                    termWaitingForFetch = false;
+                    setFlatLines(fetchedLines, playEndingSequence);
+                }
+            }
+            const typedChars = Math.floor(termTypedChars);
+            let used = 0;
+            const revealed = [];
+            for (const line of termLines) {
+                const lineLen = line.length + 1;
+                if (used + lineLen <= typedChars) {
+                    revealed.push(line);
+                    used += lineLen;
+                } else {
+                    revealed.push(line.slice(0, Math.max(0, typedChars - used)));
+                    break;
+                }
+            }
+            const maxLines = Math.floor((termBox.h - termPad * 2) / termLineH);
+            const shownLines = revealed.slice(-maxLines);
+            ctx.font = `${termFontSize}px monospace`;
+            ctx.fillStyle = "#6fdc6f";
+            ctx.textAlign = "left";
+            ctx.textBaseline = "top";
+            shownLines.forEach((line, i) => {
+                ctx.fillText(line, termBox.x + termPad, termBox.y + termPad + i * termLineH);
+            });
+            if (typedChars < termTotalChars && Math.floor(performance.now() / 500) % 2 === 0) {
+                const lastLine = shownLines[shownLines.length - 1] || "";
+                const cursorX = termBox.x + termPad + ctx.measureText(lastLine).width + 3;
+                const cursorY = termBox.y + termPad + (shownLines.length - 1) * termLineH;
+                ctx.fillRect(cursorX, cursorY, termFontSize * 0.55, termLineH * 0.8);
+            }
+            ctx.restore();
+        };
+        let glitchEnabled = false;
+        let glitchSeed = 0;
+        const glitchBackdropColor = document.body.style.backgroundColor;
+        const glitchCanvas = document.createElement("canvas");
+        const glitchCtx = glitchCanvas.getContext("2d");
+        const chCanvas = document.createElement("canvas");
+        const chCtx = chCanvas.getContext("2d");
+        function isolateChannel(source, w, h, color) {
+            chCtx.clearRect(0, 0, w, h);
+            chCtx.globalCompositeOperation = "source-over";
+            chCtx.drawImage(source, 0, 0, w, h);
+            chCtx.globalCompositeOperation = "multiply";
+            chCtx.fillStyle = color;
+            chCtx.fillRect(0, 0, w, h);
+            chCtx.globalCompositeOperation = "source-over";
+        }
+        function applyGlitchEffect(canvas, ctx) {
+            if (!glitchEnabled) return;
+            const w = canvas.width;
+            const h = canvas.height;
+            if (glitchCanvas.width !== w || glitchCanvas.height !== h) {
+                glitchCanvas.width = w;
+                glitchCanvas.height = h;
+                chCanvas.width = w;
+                chCanvas.height = h;
+            }
+            glitchCtx.clearRect(0, 0, w, h);
+            glitchCtx.fillStyle = glitchBackdropColor;
+            glitchCtx.fillRect(0, 0, w, h);
+            glitchCtx.drawImage(canvas, 0, 0);
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            const rShift = Math.floor((Math.random() - 0.5) * 16);
+            const bShift = Math.floor((Math.random() - 0.5) * 16);
+            isolateChannel(glitchCanvas, w, h, "#00ff00");
+            ctx.globalCompositeOperation = "source-over";
+            ctx.drawImage(chCanvas, 0, 0);
+            isolateChannel(glitchCanvas, w, h, "#ff0000");
+            ctx.globalCompositeOperation = "lighter";
+            ctx.drawImage(chCanvas, rShift, 0);
+            isolateChannel(glitchCanvas, w, h, "#0000ff");
+            ctx.drawImage(chCanvas, bShift, 0);
+            ctx.globalCompositeOperation = "source-over";
+            const sliceCount = 8 + Math.floor(Math.random() * 6);
+            for (let i = 0; i < sliceCount; i++) {
+                const sliceY = Math.floor(Math.random() * h);
+                const sliceH = 2 + Math.floor(Math.random() * 18);
+                const shift = Math.floor((Math.random() - 0.5) * 60);
+                if (shift === 0) continue;
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(0, sliceY, w, sliceH);
+                ctx.clip();
+                ctx.clearRect(0, sliceY, w, sliceH);
+                ctx.drawImage(
+                    glitchCanvas,
+                    0, sliceY, w, sliceH,
+                    shift, sliceY, w, sliceH
+                );
+                ctx.restore();
+            }
+            if (Math.random() < 0.4) {
+                const blockCount = 3 + Math.floor(Math.random() * 5);
+                for (let i = 0; i < blockCount; i++) {
+                    const bw = 20 + Math.random() * 120;
+                    const bh = 4 + Math.random() * 20;
+                    const bx = Math.random() * w;
+                    const by = Math.random() * h;
+                    ctx.fillStyle = Math.random() < 0.5 ? "#0ff" : "#f0f";
+                    ctx.globalAlpha = 0.15 + Math.random() * 0.2;
+                    ctx.fillRect(bx, by, bw, bh);
+                }
+                ctx.globalAlpha = 1;
+            }
+            ctx.restore();
+        }
+        level.customTopLayer = () => { };
+        const oldLast = level.onLevel;
+        simulation.ephemera.push({
+            name: "glitch",
+            do() {
+                if (level.onLevel != oldLast) simulation.removeEphemera("glitch", true)
+                applyGlitchEffect(canvas, ctx);
+            }
+        })
+        spawn.mapRect(-1125, 0, 5100, 250);
+        spawn.mapRect(-600, -325, 1450, 125);
+        spawn.mapRect(-2400, 0, 725, 250);
+        spawn.mapRect(3325, -1700, 650, 1550);
+        spawn.mapRect(725, -325, 125, 400);
+        spawn.mapRect(-600, -2200, 125, 1975);
+        spawn.mapRect(-600, -2200, 575, 125);
+        spawn.mapRect(-1125, -350, 150, 600);
+        spawn.mapRect(-1900, -1000, 1425, 125);
+        spawn.mapRect(-2400, -2000, 125, 2250);
+        spawn.mapRect(-2400, -2000, 1675, 125);
+        spawn.mapRect(400, -2875, 125, 2350);
+        spawn.mapRect(-2400, -2875, 4825, 125);
+        spawn.mapRect(-2400, -2875, 125, 1000);
+        spawn.mapRect(-150, -1875, 250, 1350);
+        spawn.mapRect(3875, 0, 675, 250);
+        spawn.mapRect(1300, -1850, 500, 125);
+
+        spawn.randomMob(-850, -675, Infinity);
+        spawn.randomMob(-1775, -450, Infinity);
+        spawn.randomMob(-2125, -850, Infinity);
+        spawn.randomMob(-1450, -225, Infinity);
+        spawn.randomMob(-1375, -700, Infinity);
+        spawn.randomMob(-1650, -1425, Infinity);
+        spawn.randomMob(-850, -1200, Infinity);
+        spawn.randomMob(-1025, -1675, Infinity);
+        spawn.randomMob(-1950, -2600, Infinity);
+        spawn.randomMob(-1850, -2225, Infinity);
+        spawn.randomMob(-1275, -2400, Infinity);
+        spawn.randomMob(-75, -2450, Infinity);
+        spawn.randomMob(-50, -2000, Infinity);
+        spawn.randomMob(-25, -425, Infinity);
+        spawn.randomMob(450, -450, Infinity);
+        spawn.randomMob(1450, -1000, Infinity);
+        spawn.randomMob(1775, -350, Infinity);
+        spawn.randomMob(2675, -700, Infinity);
+        spawn.randomMob(2575, -325, Infinity);
+        spawn.randomMob(1375, -100, Infinity);
+        spawn.randomMob(1975, -2400, Infinity);
+        spawn.randomMob(1025, -2275, Infinity);
+        spawn.randomMob(4150, -450, Infinity);
+        spawn.secondaryBossChance(-1375, -1450);
+        spawn.randomLevelBoss(2050, -825);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

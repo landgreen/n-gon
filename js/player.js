@@ -4640,7 +4640,7 @@ const m = {
                 return `<strong>all</strong> applicable effects`
             case 1: //standing wave
                 // return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses +${couple.toFixed(1)} <strong class='color-s'>ice IX</strong></span>`
-                return `+${(couple * 5).toFixed(0)} maximum <strong class='color-f'>energy</strong>`
+                return `+${(couple * 5).toFixed(0)} max <strong class='color-f'>energy</strong>`
             case 2: //perfect diamagnetism
                 return `<span style = 'font-size:95%;'><strong>deflecting</strong> condenses ${(0.1 * couple).toFixed(2)} <strong class='color-s'>ice IX</strong></span>`
             // return `<span style = 'font-size:89%;'><strong>invulnerable</strong> <strong>+${2*couple}</strong> seconds post collision</span>`
@@ -6071,6 +6071,11 @@ const m = {
                             m.grabPowerUp();
                             m.lookForBlock();
                             b.plasma();
+
+                            // const speed = 70
+                            // b.lightning(m.pos, { x: speed * Math.cos(m.angle), y: speed * Math.sin(m.angle) })
+
+
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
                         } else {
@@ -6305,7 +6310,7 @@ const m = {
             name: "metamaterial cloaking",
             description: `<strong>0.6x</strong> <strong class='color-defense'>damage taken</strong> while <strong class='color-cloaked'>cloaked</strong><br>after <strong class='color-cloaked'>decloaking</strong> <strong>4x</strong> <strong class='color-d'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='color-f'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`,
             keyLog: [null, null, null, null, null],
-            smallFieldRadius: 130,
+            smallFieldRadius: 110,
             effect: () => {
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
@@ -6315,11 +6320,11 @@ const m = {
                     const patternB = [input.key.up, input.key.down, input.key.left, input.key.down, input.key.right]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[7].keyLog, patternA) || arraysEqual(m.fieldUpgrades[7].keyLog, patternB)) {
-                        if (m.fieldUpgrades[7].smallFieldRadius === 130) {
-                            m.fieldUpgrades[7].smallFieldRadius = 70
+                        if (m.fieldUpgrades[7].smallFieldRadius === 110) {
+                            m.fieldUpgrades[7].smallFieldRadius = 60
                             simulation.inGameConsole(`<strong>4.5</strong><span class='color-symbol'>→</span><strong>6x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓←↓→</em>`);
                         } else {
-                            m.fieldUpgrades[7].smallFieldRadius = 130
+                            m.fieldUpgrades[7].smallFieldRadius = 110
                             simulation.inGameConsole(`<strong>6</strong><span class='color-symbol'>→</span><strong>4.5x</strong> <strong class='color-cloaked'>decloaking</strong> <strong class='color-d'>damage</strong> &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓←↓→</em>`);
                         }
                     }
@@ -6454,7 +6459,7 @@ const m = {
                     }
                     this.drawRegenEnergyCloaking()
                     if (m.isSneakAttack && m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) > m.cycle) { //show sneak attack status
-                        m.fieldDamage = (4 + (m.fieldUpgrades[7].smallFieldRadius === 130 ? 0 : 1.5)) * (1 + 0.06 * m.coupling)
+                        m.fieldDamage = (4 + (m.fieldUpgrades[7].smallFieldRadius === 110 ? 0 : 1.5)) * (1 + 0.06 * m.coupling)
                         const timeLeft = (m.sneakAttackCycle + Math.min(100, 0.66 * (m.cycle - m.enterCloakCycle)) - m.cycle) * 0.5
                         ctx.beginPath();
                         ctx.arc(m.pos.x, m.pos.y, 32 * player.scale, 0, 2 * Math.PI);

@@ -780,7 +780,7 @@ const powerUps = {
             return 0.1 * tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)
         },
         descriptionFunction() {
-            return `${powerUps.orb.Casimir(1)} give <strong>${(this.amount() * 100).toFixed(0)}</strong> maximum <strong class='color-f'>energy</strong>${tech.isCasimirHealth ? ` and <strong class='color-h'>health</strong>` : ""}`
+            return `${powerUps.orb.Casimir(1)} give <strong>${(this.amount() * 100).toFixed(0)}</strong> max <strong class='color-f'>energy</strong>${tech.isCasimirHealth ? ` and <strong class='color-h'>health</strong>` : ""}`
         },
         random() {
             if (tech.isCasimirRandom) {
@@ -2005,10 +2005,12 @@ const powerUps = {
         }
 
         //count big power ups and small power ups
-        let options = [powerUps.healGiveMaxEnergy ? "Casimir" : "heal", "research", tech.isBoostReplaceAmmo ? "boost" : "ammo"]
-        if (m.coupling) options.push("coupling")
-        if (tech.isBoostPowerUps) options.push("boost")
-        if (tech.isCasimir) options.push("Casimir")
+
+        let options = [powerUps.healGiveMaxEnergy ? "Casimir" : "heal", "research"]
+        if (!tech.isBoostReplaceAmmo) options.push("ammo")
+        if (m.coupling || tech.isBoostReplaceAmmo) options.push("coupling")
+        if (tech.isBoostPowerUps || tech.isBoostReplaceAmmo) options.push("boost")
+        if (tech.isCasimir || tech.isBoostReplaceAmmo) options.push("Casimir")
 
         let bigIndexes = []
         let smallIndexes = []
@@ -2050,7 +2052,8 @@ const powerUps = {
     spawn(x, y, name, moving = true, size = powerUps[name].size()) {
         if ((!tech.isSuperDeterminism || (name !== 'research'))) {
             if (tech.isBoostReplaceAmmo && name === 'ammo') {
-                name = 'boost'
+                const items = ["coupling", "boost", "Casimir", "research", "heal"]
+                name = items[Math.floor(Math.random() * items.length)]
                 size = powerUps[name].size()
             }
             if (name === "heal" && powerUps.healGiveMaxEnergy) {

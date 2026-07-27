@@ -314,9 +314,6 @@ const simulation = {
     },
     updateGunHUD() {
         for (let i = 0, len = b.inventory.length; i < len; ++i) {
-            // const num = b.guns[b.inventory[i]].ammo
-            // const ammo = Number.isFinite(num) ? " - " + num : ""
-            // document.getElementById(b.inventory[i]).innerHTML = `${b.guns[b.inventory[i]].name}${ammo}`
             document.getElementById(b.inventory[i]).innerHTML = `${b.guns[b.inventory[i]].name} - ${b.guns[b.inventory[i]].ammo}`
         }
     },
@@ -1020,7 +1017,7 @@ const simulation = {
                             })
                             const before = { x: player.position.x, y: player.position.y, }
                             const posXClamped = Math.min(Math.max(level.fallModeBounds.left, player.position.x), level.fallModeBounds.right)
-                            Matter.Body.setPosition(player, { x: posXClamped, y: level.enter.y - 4000 });
+                            Matter.Body.setPosition(player, { x: posXClamped, y: level.enter.y - 6000 });
 
                             // translate camera smoothly to preserve illusion to endless fall
                             const change = { x: before.x - posXClamped, y: before.y - player.position.y }
@@ -1493,21 +1490,17 @@ const simulation = {
 
         // (Only adds an AABB guard + declares `results` with let.)
         getIntersections(v1, v1End, domain) {
-            function segmentsBboxOverlap(p1, p2, q1, q2) {
-                // Bounding box of segment p1-p2
-                const pMinX = p1.x < p2.x ? p1.x : p2.x;
-                const pMaxX = p1.x > p2.x ? p1.x : p2.x;
-                const pMinY = p1.y < p2.y ? p1.y : p2.y;
-                const pMaxY = p1.y > p2.y ? p1.y : p2.y;
+            const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
+            const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
+            const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
+            const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
 
-                // Bounding box of segment q1-q2
-                const qMinX = q1.x < q2.x ? q1.x : q2.x;
-                const qMaxX = q1.x > q2.x ? q1.x : q2.x;
-                const qMinY = q1.y < q2.y ? q1.y : q2.y;
-                const qMaxY = q1.y > q2.y ? q1.y : q2.y;
-
-                // Boxes must overlap on both axes to possibly intersect
-                return !(pMaxX < qMinX || qMaxX < pMinX || pMaxY < qMinY || qMaxY < pMinY);
+            function edgeBboxOverlapsRay(q1, q2) {
+                const edgeMinX = q1.x < q2.x ? q1.x : q2.x;
+                const edgeMaxX = q1.x > q2.x ? q1.x : q2.x;
+                const edgeMinY = q1.y < q2.y ? q1.y : q2.y;
+                const edgeMaxY = q1.y > q2.y ? q1.y : q2.y;
+                return !(rayMaxX < edgeMinX || edgeMaxX < rayMinX || rayMaxY < edgeMinY || edgeMaxY < rayMinY);
             }
 
             const intersections = [];
@@ -1519,9 +1512,9 @@ const simulation = {
                     const b = obj.vertices[i + 1];
 
                     // Cheap reject: skip if segment bbox doesn't overlap ray bbox
-                    if (!segmentsBboxOverlap(v1, v1End, a, b)) continue;
+                    if (!edgeBboxOverlapsRay(a, b)) continue;
 
-                    let results = simulation.checkLineIntersection(v1, v1End, a, b);
+                    const results = simulation.checkLineIntersection(v1, v1End, a, b);
                     if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
                 }
 
@@ -1529,8 +1522,8 @@ const simulation = {
                 const a = obj.vertices[obj.vertices.length - 1];
                 const b = obj.vertices[0];
 
-                if (segmentsBboxOverlap(v1, v1End, a, b)) {
-                    let results = simulation.checkLineIntersection(v1, v1End, a, b);
+                if (edgeBboxOverlapsRay(a, b)) {
+                    const results = simulation.checkLineIntersection(v1, v1End, a, b);
                     if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
                 }
             }
