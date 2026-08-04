@@ -1397,6 +1397,7 @@ const simulation = {
         map = [];
         removeAll(body);
         body = [];
+        lastTouchedBlock = null;
         removeAll(mob);
         mob = [];
         removeAll(powerUp);
@@ -2417,11 +2418,7 @@ const simulation = {
                 const dx = Math.max(25, round(simulation.mouseInGame.x) - x)
                 const dy = Math.max(25, round(simulation.mouseInGame.y) - y)
                 if (e.button === 1) {
-                    if (level.isProcedural) {
-                        simulation.outputMapString(`spawn.randomMob(x+${x}, ${y}, 0);\n`);
-                    } else {
-                        simulation.outputMapString(`spawn.randomMob(${x}, ${y}, 0);\n`);
-                    }
+                    simulation.outputMapString(`[${x}, ${y}],\n`);
                 } else if (e.button === 4) {
                     simulation.outputMapString(`${Math.floor(simulation.constructMouseDownPosition.x)}, ${Math.floor(simulation.constructMouseDownPosition.y)} `);
                 } else if (simulation.mouseInGame.x > simulation.constructMouseDownPosition.x && simulation.mouseInGame.y > simulation.constructMouseDownPosition.y) { //make sure that the width and height are positive

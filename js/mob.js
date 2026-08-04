@@ -1242,6 +1242,11 @@ const mobs = {
                 this.dmgLog = 0
 
                 if (this.isDropPowerUp) {
+                    if (m.alive && level.isMobDeathFreeze && !this.isFreezeAuraOnDeath) {
+                        requestAnimationFrame(() => {
+                            spawn.freezeGrenade(this.position.x, this.position.y, this.tier, 60) //freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
+                        });
+                    }
                     if (level.isMobDeathHeal) {
                         for (let i = 0; i < mob.length; i++) {
                             if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 && mob[i].alive) { //700

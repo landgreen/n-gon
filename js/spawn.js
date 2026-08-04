@@ -230,6 +230,37 @@ const spawn = {
             spawn[pick](x, y);
         }
     },
+    randomMobPositions: [],
+    randomMobFromArray() {
+        seededShuffle(spawn.randomMobPositions)
+        const maxMobs = (simulation.difficultyMode === 1) ? 2 : Math.ceil(5 * Math.log(level.levelsCleared + 1))
+        const mobsInLevel = mob.filter(who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet).length
+        const mobsToSpawn = Math.min(spawn.randomMobPositions.length, Math.max(0, maxMobs - mobsInLevel))
+        for (let i = 0; i < mobsToSpawn; i++) {
+            const position = spawn.randomMobPositions[i]
+            if (position.isSmall) {
+                const num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0)
+                const size = 16 + Math.ceil(Math.random() * 15)
+                for (let j = 0; j < num; j++) {
+                    const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                    spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
+                }
+                if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
+                    for (let j = 0; j < num; j++) {
+                        const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                        spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
+                    }
+                }
+            } else {
+                const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                spawn[pick](position.x, position.y)
+                if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
+                    const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                    spawn[pick](position.x, position.y)
+                }
+            }
+        }
+    },
     randomSmallMob(x, y,
         num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0),
         size = 16 + Math.ceil(Math.random() * 15),
@@ -13263,6 +13294,7 @@ const spawn = {
         me.frictionAir = 0.05;
         me.torque = 0.0001 * me.inertia * (Math.random() > 0.5 ? -1 : 1)
         me.fireDir = { x: 0, y: 0 };
+        me.isFreezeAuraOnDeath = true
         me.onDeath = function () { //helps collisions functions work better after vertex have been changed
             setTimeout(() => { //fix mob in place, but allow rotation
                 spawn.freezeGrenade(this.position.x, this.position.y, this.tier);

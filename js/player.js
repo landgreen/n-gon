@@ -1,5 +1,6 @@
 //global player variables for use in matter.js physics
 let player, jumpSensor, playerBody, playerHead, headSensor;
+let lastTouchedBlock = null;
 
 // player Object Prototype *********************************************
 const m = {
@@ -321,6 +322,7 @@ const m = {
         });
         const who = body[body.length - 1]
         Composite.add(engine.world, who); //add to world
+        lastTouchedBlock = who
         m.throwCharge = 4;
         m.holdingTarget = who
         m.isHolding = true;
@@ -4590,6 +4592,7 @@ const m = {
     pickUp() {
         //triggers when a hold target exits and field button is released
         m.isHolding = true;
+        if (!m.holdingTarget.isNotHoldable && !m.holdingTarget.isInvulnerable) lastTouchedBlock = m.holdingTarget
         //conserve momentum when player mass changes
         totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(m.holdingTarget.velocity, m.holdingTarget.mass))
         Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (m.defaultMass + m.holdingTarget.mass)));

@@ -52,7 +52,7 @@ const lore = {
     setTechGoal() {
         this.techGoal = Math.max(1, Math.floor(8 - 1.5 * simulation.difficultyMode))
     },
-    talkingColor: "#dff", //set color of graphic on level.null
+    talkingColor: "#dff", //set color of graphic on level.maps.null
     isSpeech: false,
     testSpeechAPI() {
         if ('speechSynthesis' in window) { // Synthesis support. Make your web apps talk!

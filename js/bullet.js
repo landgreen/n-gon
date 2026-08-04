@@ -152,7 +152,7 @@ const b = {
             b.guns[b.activeGun].do();
         }
     },
-    fireNotMove() { //added  && player.speed < 0.5 && m.onGround  
+    fireNotMove() { //added  && player.speed < 0.5 && m.onGround
         if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire) && player.speed < 2.5 && m.onGround && Math.abs(m.yOff - m.yOffGoal) < 1) {
                 if (b.guns[b.activeGun].ammo > 0) {
@@ -176,7 +176,7 @@ const b = {
             b.guns[b.activeGun].do();
         }
     },
-    fireFloat() { //added  && player.speed < 0.5 && m.onGround  
+    fireFloat() { //added  && player.speed < 0.5 && m.onGround
         if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && (!input.field || m.fieldFire)) {
                 if (m.fireCDcycle < m.cycle) {
@@ -245,7 +245,7 @@ const b = {
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.inGameConsole(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
-        m.fireCDcycle = m.cycle + 30; //fire cooldown       
+        m.fireCDcycle = m.cycle + 30; //fire cooldown
         if (tech.isAmmoFromHealth) {
             const amount = 0.02
             if (tech.isEnergyHealth) {
@@ -276,7 +276,7 @@ const b = {
         }
     },
     // returnGunAmmo(name) {
-    //     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+    //     for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
     //         if (b.guns[i].name === name) return b.guns[i].ammo
     //     }
     // },
@@ -380,7 +380,7 @@ const b = {
         b.setFireCD();
     },
     resetAllGuns() {
-        b.inventory = []; //removes guns and ammo  
+        b.inventory = []; //removes guns and ammo
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].count = 0;
             b.guns[i].have = false;
@@ -439,7 +439,7 @@ const b = {
         if (level.isSlowFireRate) b.fireCDscale *= 2
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isGrabFireRate && m.ledgeCoyote !== 0) b.fireCDscale *= 0.25
-        if (tech.isFireRateForGuns) b.fireCDscale *= 1 / (1 + 0.35 * Math.max(0, b.inventory.length - 1)) //CDscale = 1 / (1 + (0.3 * count)); // Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
+        if (tech.isFireRateForGuns) b.fireCDscale *= 1 / (1 + 0.3 * Math.max(0, b.inventory.length)) //CDscale = 1 / (1 + (0.3 * count)); // Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
         if (tech.isFireMoveLock) b.fireCDscale *= 0.33
     },
     fireAttributes(dir, rotate = true) {
@@ -588,7 +588,7 @@ const b = {
                         m.energy -= 0.05
                         knock = Vector.mult(Vector.normalise(sub), -0.6 * player.mass * Math.max(0, Math.min(0.15 - 0.002 * player.speed, 0.15)));
                         player.force.x = knock.x; // not +=  so crazy forces can't build up with MIRV
-                        player.force.y = knock.y - 0.3; //some extra vertical kick 
+                        player.force.y = knock.y - 0.3; //some extra vertical kick
                     } else {
                         m.takeDamage(harm * spawn.dmgToPlayerByLevelsCleared());
                         knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * player.mass * 0.013);
@@ -2159,7 +2159,7 @@ const b = {
                     // if (isReturnAmmo) {
                     //     b.guns[9].ammo++;
                     //     simulation.updateGunHUD();
-                    //     // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                    //     // for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     //     //     if (b.guns[i].name === "harpoon") {
                     //     //         break;
                     //     //     }
@@ -2186,7 +2186,7 @@ const b = {
                 if (this.caughtPowerUp) {
                     Matter.Body.setPosition(this.caughtPowerUp, Vector.add(this.vertices[grabPowerUpIndex], this.velocity))  //this.vertices[2]
                     Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
-                } else { //&& simulation.cycle % 2 
+                } else { //&& simulation.cycle % 2
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
                         const radius = powerUp[i].circleRadius + 50
@@ -3283,10 +3283,10 @@ const b = {
                                     bullet[bullet.length - 1].endCycle = Math.min(simulation.cycle + Math.floor(420 * tech.bulletsLastLonger), this.endCycle + 180 + Math.floor(60 * Math.random())) //simulation.cycle + Math.floor(420 * tech.bulletsLastLonger)
                                 }
                             }
-                            this.endCycle = 0; //bullet ends cycle after doing damage 
+                            this.endCycle = 0; //bullet ends cycle after doing damage
                         }, 1);
                     } else {
-                        this.endCycle = 0; //bullet ends cycle after doing damage 
+                        this.endCycle = 0; //bullet ends cycle after doing damage
                     }
                     if (this.isFreeze) mobs.statusSlow(who, 90)
                 }
@@ -3404,7 +3404,7 @@ const b = {
             },
             beforeDmg(who) {
                 if (!who.isInvulnerable) {
-                    this.endCycle = 0; //bullet ends cycle after doing damage 
+                    this.endCycle = 0; //bullet ends cycle after doing damage
                     if (this.isFreeze) mobs.statusSlow(who, 90)
                 }
             },
@@ -3526,6 +3526,7 @@ const b = {
         if (tech.waveReflections > 1) end *= 0.8
         let reflectCount = tech.waveReflections - 1
         simulation.ephemera.push({
+            name: "wave",
             count: 0,
             position: where,
             radius: 25,
@@ -3591,7 +3592,7 @@ const b = {
                             if (0.5 < Math.random()) {
                                 who.locatePlayer();
                                 const targetOverlap = phononWaveTargetOverlap(v1, v2, who)
-                                const damage = 2.8 * phononWaveDamageScale(targetOverlap) * speedUpDmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isPhaseVelocity ? 1.5 : 1) * dmg
+                                const damage = 3 * phononWaveDamageScale(targetOverlap) * speedUpDmgScale * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.4 : 1) * (tech.isPhaseVelocity ? 1.5 : 1) * dmg
                                 who.damage(damage / Math.sqrt(who.radius));
                                 b.sympatheticPhonon(who, halfArc, speed)
                             }
@@ -3670,6 +3671,7 @@ const b = {
             where = Vector.add(where, Vector.mult(unit, r))
         }
         simulation.ephemera.push({
+            name: "wave",
             position: where,
             radius: 25,
             end: end,
@@ -3705,7 +3707,7 @@ const b = {
                                     ctx.lineTo(vertices[0].x + vibe * (Math.random() - 0.5), vertices[0].y + vibe * (Math.random() - 0.5));
                                 }
                                 //damage
-                                let damage = 4.2 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
+                                let damage = 4.6 * tech.wavePacketDamage * tech.waveBeamDamage * (tech.isBulletTeleport ? 1.43 : 1) //damage is lower for large radius mobs, since they feel the waves longer
                                 if (tech.isFallWave) mobs.statusStun(who, 180)
                                 who.locatePlayer();
                                 who.damage(damage / Math.sqrt(who.radius));
@@ -3957,11 +3959,11 @@ const b = {
                         const capMinY = closeDist > 500 ? 0.05 + 0.02 * Math.random() : 0.02 + 0.01 * Math.random() //don't jump super low, unless you are very close to mob target
                         this.force.x = Math.max(-capX, Math.min(capX, Vx)) * this.mass;
                         this.force.y = -Math.max(capMinY, Math.min(capMaxY, Vy)) * this.mass
-                    } else { //random hops  
+                    } else { //random hops
                         if (Math.random() < 0.5) { //chance to continue in the same horizontal direction
-                            this.force.x = (0.01 + 0.03 * Math.random()) * this.mass * (this.velocity.x > 0 ? 1 : -1); //random move 
+                            this.force.x = (0.01 + 0.03 * Math.random()) * this.mass * (this.velocity.x > 0 ? 1 : -1); //random move
                         } else {
-                            this.force.x = (0.01 + 0.03 * Math.random()) * this.mass * (Math.random() < 0.5 ? 1 : -1); //random move 
+                            this.force.x = (0.01 + 0.03 * Math.random()) * this.mass * (Math.random() < 0.5 ? 1 : -1); //random move
                         }
                         this.force.y = -(0.03 + 0.08 * Math.random()) * this.mass
                     }
@@ -4163,7 +4165,7 @@ const b = {
                     this.restitution = 0.2;
                     if (tech.isDroneRespawn) {
                         this.do = this.doRespawning
-                        //make a list of all elements of array body that a ray can be drawn to from the drone                        
+                        //make a list of all elements of array body that a ray can be drawn to from the drone
                         const canSee = body.filter(a => Matter.Query.ray(map, this.position, a.position).length === 0 && !a.isNotHoldable)
                         if (canSee.length) {
                             //find the closest body to the drone from the canSee array
@@ -5094,7 +5096,7 @@ const b = {
             bullet[me].isInMap = false
             bullet[me].do = function () {
                 const whom = Matter.Query.collides(this, mob)
-                if (whom.length && this.speed > 20) { //if touching a mob 
+                if (whom.length && this.speed > 20) { //if touching a mob
                     for (let i = 0, len = whom.length; i < len; i++) {
                         who = whom[i].bodyA
                         if (who && who.mob) {
@@ -5152,7 +5154,7 @@ const b = {
             bullet[me].collisionFilter.mask = tech.isShieldPierce ? cat.body : cat.body | cat.mobShield
             bullet[me].do = function () {
                 const whom = Matter.Query.collides(this, mob)
-                if (whom.length && this.speed > 20) { //if touching a mob 
+                if (whom.length && this.speed > 20) { //if touching a mob
                     for (let i = 0, len = whom.length; i < len; i++) {
                         who = whom[i].bodyA
                         if (who && who.mob) {
@@ -5477,7 +5479,7 @@ const b = {
                 //     ctx.fill();
                 // }
 
-                //check for damage 
+                //check for damage
                 if (m.immuneCycle < m.cycle && !((m.cycle + this.phase) % 30)) { //twice a second
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                         Matter.Body.setAngularVelocity(this, this.spin)
@@ -5856,7 +5858,7 @@ const b = {
             onEnd() { },
             do() {
                 const playerPos = Vector.add(Vector.add(this.offPlayer, m.pos), Vector.mult(player.velocity, 20)) //also include an offset unique to this bot to keep many bots spread out
-                const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.playerRange) //linear bounding well 
+                const farAway = Math.max(0, (Vector.magnitude(Vector.sub(this.position, playerPos))) / this.playerRange) //linear bounding well
                 const mag = Math.min(farAway, 4) * this.mass * this.acceleration
                 this.force = Vector.mult(Vector.normalise(Vector.sub(playerPos, this.position)), mag)
                 //manual friction to not lose rotational velocity
@@ -6034,7 +6036,7 @@ const b = {
                     const explosionRadius = Math.min(136 + 230 * this.isUpgraded, Vector.magnitude(Vector.sub(this.position, m.pos)) - 30)
                     if (explosionRadius > 60) {
                         this.explode = explosionRadius
-                        // 
+                        //
                         //push away from player, because normal explosion knock doesn't do much
                         // const sub = Vector.sub(this.lockedOn.position, m.pos)
                         // mag = Math.min(35, 20 / Math.sqrt(this.lockedOn.mass))
@@ -6526,7 +6528,7 @@ const b = {
                 } else {
                     const KNOCK = 0.01
                     player.force.x -= KNOCK * Math.cos(m.angle)
-                    player.force.y -= KNOCK * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps    
+                    player.force.y -= KNOCK * Math.sin(m.angle) * 0.5 //reduce knock back in vertical direction to stop super jumps
                 }
             },
             fireRecoilRivets() {
@@ -7046,7 +7048,7 @@ const b = {
             },
             fireQueue() {
                 m.fireCDcycle = m.cycle + Math.floor((m.crouch ? 23 : 15) * b.fireCDscale); // cool down
-                const num = 2 + 3 + Math.floor(tech.extraSuperBalls * Math.random()) //2 extra 
+                const num = 2 + 3 + Math.floor(tech.extraSuperBalls * Math.random()) //2 extra
                 const speed = m.crouch ? 43 : 36
 
                 const delay = Math.floor(((m.crouch ? 18 : 12) - Math.min(12, 0.33 * tech.extraSuperBalls)) * b.fireCDscale)
@@ -7061,7 +7063,7 @@ const b = {
                         y: speed * Math.sin(m.angle)
                     }, 11 * tech.bulletSize)
                     if (count < num && m.alive) requestAnimationFrame(cycle);
-                    m.fireCDcycle = m.cycle + delay; // cool down                  
+                    m.fireCDcycle = m.cycle + delay; // cool down
                 }
                 let count = 0
                 requestAnimationFrame(cycle);
@@ -7190,7 +7192,7 @@ const b = {
                     // amplitude: (m.crouch ? 5 : 10) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin((this.wavePacketCycle + 1) * 0.088), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     amplitude: (m.crouch ? 6 : 12) * ((this.wavePacketCycle % 2) ? -1 : 1) * Math.sin(this.wavePacketCycle * 0.088) * Math.sin(this.wavePacketCycle * 0.04), //0.0968 //0.1012 //0.11 //0.088 //shorten wave packet
                     minDmgSpeed: 0,
-                    dmg: 2.2 * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1), //also control damage when you divide by mob.mass 
+                    dmg: 2.2 * tech.waveBeamDamage * tech.wavePacketDamage * (tech.isBulletTeleport ? 1.43 : 1), //also control damage when you divide by mob.mass
                     dmgCoolDown: 0,
                     classType: "bullet",
                     collisionFilter: {
@@ -7202,7 +7204,7 @@ const b = {
                     do() { },
                     query() {
                         let slowCheck = 1
-                        if (Matter.Query.point(map, this.position).length) { //check if inside map                                    
+                        if (Matter.Query.point(map, this.position).length) { //check if inside map
                             slowCheck = waveSpeedMap
                         } else { //check if inside a body
                             let q = Matter.Query.point(body, this.position)
@@ -8305,7 +8307,7 @@ const b = {
                                 // ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fillStyle = `rgba(255,0,0,${0.09 * Math.sqrt(this.charge)})`;
                                 ctx.fill();
-                                //fire  
+                                //fire
                                 if (!input.fire) {
                                     if (this.charge > 5) {
                                         m.fireCDcycle = m.cycle + Math.floor(35 * b.fireCDscale); // cool down

@@ -252,6 +252,7 @@ const tech = {
         if (tech.isLaserWire && tech.wire && tech.wire.segments.length) dmg *= 1 + 0.01 * tech.wire.segments.length
         if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= 0.3
         if (tech.isMaxHealthDamage && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 2
+        if (tech.isHealthDamage) dmg *= 1 + 0.5 * Math.max(0, tech.isEnergyHealth ? m.energy : m.health)
         if (tech.isNoDeath && m.health < 0) dmg *= 3
         if (tech.noDefenseSettingDamage && m.defense() === 1) dmg *= 2.5
         if (tech.isImmunityDamage && m.immuneCycle > m.cycle) dmg *= 3
@@ -267,7 +268,7 @@ const tech = {
         if (tech.isTechDebt) dmg *= tech.totalCount > 20 ? Math.pow(0.85, tech.totalCount - 20) : 4 - 0.15 * tech.totalCount
         if (tech.isAnthropicDamage && tech.isDeathAvoidedThisLevel) dmg *= 2.71828
         if (tech.isDupDamage) dmg *= 1 + Math.min(1, tech.duplicationChance())
-        if (tech.isDamageForGuns) dmg *= 1 + 0.22 * Math.max(0, b.inventory.length - 1)
+        if (tech.isDamageForGuns) dmg *= 1 + 0.2 * Math.max(0, b.inventory.length)
         if (tech.isOneGun && b.inventory.length < 2) dmg *= 1.3
         if ((tech.isAcidDmg && m.health > 1) || (tech.isEnergyHealth && m.energy > 1)) dmg *= 1.35;
         if (tech.isRerollDamage) dmg *= 1 + Math.max(0, 0.06 * powerUps.research.count)
@@ -1000,9 +1001,9 @@ const tech = {
         frequencyDefault: 1,
         isSkin: true,
         allowed() {
-            return !m.isAltSkin
+            return !m.isAltSkin && !tech.isTransposition
         },
-        requires: "not skinned",
+        requires: "not skinned, not exchange operator",
         effect() {
             tech.isEigenstate = true;
             m.skin.eigenstate()
@@ -1164,7 +1165,7 @@ const tech = {
     {
         name: "arsenal",
         descriptionFunction() {
-            return `for each inactive ${powerUps.orb.gun()} in your inventory<br><strong>1.25x</strong> <strong class='color-d'>damage</strong> <em style ="float: right;">(${(1 + 0.25 * Math.max(0, b.inventory.length - 1)).toFixed(2)}x)</em>`
+            return `for each ${powerUps.orb.gun()} in your inventory<br><strong>1.2x</strong> <strong class='color-d'>damage</strong> <em style ="float: right;">(${(1 + 0.2 * Math.max(0, b.inventory.length)).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -1204,7 +1205,7 @@ const tech = {
     {
         name: "active cooling",
         descriptionFunction() {
-            return `for each inactive ${powerUps.orb.gun()} in your inventory<br><strong>1.35x</strong> <em>fire rate</em> <em style ="float: right;">(${((1 + 0.35 * Math.max(0, b.inventory.length - 1))).toFixed(2)}x)</em>`
+            return `for each ${powerUps.orb.gun()} in your inventory<br><strong>1.3x</strong> <em>fire rate</em> <em style ="float: right;">(${((1 + 0.3 * Math.max(0, b.inventory.length))).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -1311,7 +1312,7 @@ const tech = {
     },
     {
         name: "sintering",
-        description: `<span class='color-remove'>remove</span> your most recent ${powerUps.orb.gun()} and get<br><strong>1.3x</strong> <strong class='color-d'>damage</strong>, <strong>0.75x</strong> <strong class='color-defense'>damage taken</strong>`,
+        description: `<span class='color-remove'>remove</span> your most recently acquired ${powerUps.orb.gun()} and get<br><strong>1.3x</strong> <strong class='color-d'>damage</strong>, <strong>0.75x</strong> <strong class='color-defense'>damage taken</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -1395,7 +1396,7 @@ const tech = {
                                 if (tech.tech[j].isGunTech && tech.tech[j].allowed() && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
                                     const regex = tech.tech[j].requires.search(b.guns[b.inventory[gunIndex]].name) //get string index of gun name
                                     const not = tech.tech[j].requires.search(' not ') //get string index of ' not '
-                                    if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '                        
+                                    if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '
                                 }
                                 b.activeGun = originalActiveGunIndex
                                 if (!b.guns[b.activeGun].have) {
@@ -1431,7 +1432,7 @@ const tech = {
             //         if (tech.tech[j].isGunTech && tech.tech[j].allowed() && !tech.tech[j].isJunk && !tech.tech[j].isBadRandomOption && tech.tech[j].count < tech.tech[j].maxCount) {
             //             const regex = tech.tech[j].requires.search(b.guns[b.inventory[i]].name) //get string index of gun name
             //             const not = tech.tech[j].requires.search(' not ') //get string index of ' not '
-            //             if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '                        
+            //             if (regex !== -1 && (not === -1 || not > regex)) gunTechPool.push(j) //look for the gun name in the requirements, but the gun name needs to show up before the word ' not '
             //         }
             //         b.activeGun = originalActiveGunIndex
             //         if (!b.guns[b.activeGun].have) {
@@ -2023,10 +2024,10 @@ const tech = {
     {
         name: "proportional",
         // descriptionFunction() {
-        //     return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span> 
+        //     return `<span style="font-size:90%;">when <span class="color-paused">PAUSED</span> use slider to balance</span>
         // <em style ="float: right;">(<span class="prop-damage">${tech.proportionality.toFixed(1)}</span>x <strong class='color-d'>damage</strong>)</em><br>
-        // <input class="tech-slider" type="range" name="proportionality" min="0.5" max="3" step="0.1" value="${tech.proportionality}" 
-        //     oninput="tech.inputHTML.proportionality(this)" 
+        // <input class="tech-slider" type="range" name="proportionality" min="0.5" max="3" step="0.1" value="${tech.proportionality}"
+        //     oninput="tech.inputHTML.proportionality(this)"
         //     onchange="build.generatePauseLeft()">
         // <em style ="float: right;">(<span class="prop-reduction">${Math.pow(tech.proportionality, 1.631).toFixed(2)}</span>x <strong class='color-defense'>damage taken</strong>)</em>`
         // },
@@ -3070,7 +3071,7 @@ const tech = {
         requires: "NOT EXPERIMENT MODE, at least 4 bots",
         effect() {
             this.numberOfGunsLost = b.inventory.length
-            b.inventory = []; //removes guns and ammo  
+            b.inventory = []; //removes guns and ammo
             for (let i = 0, len = b.guns.length; i < len; ++i) {
                 b.guns[i].count = 0;
                 b.guns[i].have = false;
@@ -4090,6 +4091,28 @@ const tech = {
         }
     },
     {
+        name: "positive feedback",
+        descriptionFunction() {
+            const value = Math.max(0, tech.isEnergyHealth ? m.energy : m.health)
+            const resource = tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"
+            return `<strong>1.005x</strong> <strong class='color-d'>damage</strong> for each ${resource}<br><em style ="float: right;">(${(1 + 0.5 * value).toFixed(2)}x)</em>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            tech.isHealthDamage = true;
+        },
+        remove() {
+            tech.isHealthDamage = false;
+        }
+    },
+    {
         name: "stability",
         descriptionFunction() {
             return `<strong>0.1x</strong> <strong class='color-defense'>damage taken</strong><br>while your ${tech.isEnergyHealth ? "<strong class='color-f'>energy</strong>" : "<strong class='color-h'>health</strong>"} is at max`
@@ -4305,7 +4328,7 @@ const tech = {
                 if (powerUp[i].name === "heal") {
                     const scale = Math.sqrt(0.5)
                     powerUp[i].size *= scale
-                    Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    Matter.Body.scale(powerUp[i], scale, scale); //grow
                 }
             }
         },
@@ -4316,7 +4339,7 @@ const tech = {
                     if (powerUp[i].name === "heal") {
                         const scale = 1 / Math.sqrt(0.5)
                         powerUp[i].size *= scale
-                        Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                        Matter.Body.scale(powerUp[i], scale, scale); //grow
                     }
                 }
             }
@@ -4364,7 +4387,7 @@ const tech = {
                     const oldSize = powerUp[i].size
                     powerUp[i].size = powerUps.heal.size() //update current heals
                     const scale = powerUp[i].size / oldSize
-                    Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    Matter.Body.scale(powerUp[i], scale, scale); //grow
                 }
             }
             this.refundAmount += tech.addJunkTechToPool(0.04)
@@ -4377,7 +4400,7 @@ const tech = {
                     const oldSize = powerUp[i].size
                     powerUp[i].size = powerUps.heal.size() //update current heals
                     const scale = powerUp[i].size / oldSize
-                    Matter.Body.scale(powerUp[i], scale, scale); //grow    
+                    Matter.Body.scale(powerUp[i], scale, scale); //grow
                 }
             }
             if (this.count > 0 && this.refundAmount > 0) {
@@ -5583,7 +5606,7 @@ const tech = {
         allowed: () => true,
         requires: "",
         effect() {
-            tech.Casimir += 0.1 //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level 
+            tech.Casimir += 0.1 //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level
         },
         remove() {
             tech.Casimir = 0
@@ -5601,7 +5624,7 @@ const tech = {
         allowed: () => tech.Casimir,
         requires: "Casimir effect",
         effect() {
-            tech.isCasimirHealth = true //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level 
+            tech.isCasimirHealth = true //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level
         },
         remove() {
             tech.isCasimirHealth = false
@@ -5620,7 +5643,7 @@ const tech = {
         allowed: () => tech.Casimir,
         requires: "Casimir effect",
         effect() {
-            tech.isCasimirRandom = true //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level 
+            tech.isCasimirRandom = true //about 20-30 mobs per level so at 17% that's about 4*5 max energy per level
         },
         remove() {
             tech.isCasimirRandom = false
@@ -6077,7 +6100,7 @@ const tech = {
                         let distance = Math.sqrt(dx * dx + dy * dy) + 0.01;
                         let difference = (this.spacing - distance) / distance;
 
-                        // We only move the "child" segment, not the "parent" 
+                        // We only move the "child" segment, not the "parent"
                         // This keeps the chain moving downward from the head
                         p.x += dx * difference;
                         p.y += dy * difference;
@@ -6826,7 +6849,7 @@ const tech = {
         },
         remove() { }
     },
-    //************************************************** 
+    //**************************************************
     //************************************************** gun
     //************************************************** tech
     //**************************************************
@@ -6903,7 +6926,7 @@ const tech = {
         requires: "nail gun, shotgun, not ice crystal, rivets, rotary cannon, pneumatic, incendiary, nail-shot, foam-shot, worm-shot, ice-shot, photonic crystal",
         effect() {
             tech.isNeedles = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "nail gun") {
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoScale);
                     b.guns[i].ammoPack = b.guns[i].defaultAmmoPack / this.ammoScale;
@@ -6917,7 +6940,7 @@ const tech = {
         remove() {
             if (this.count > 0) {
                 tech.isNeedles = false
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "nail gun") {
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoScale);
                         b.guns[i].ammoPack = b.guns[i].ammoPack * this.ammoScale;
@@ -6963,7 +6986,7 @@ const tech = {
         requires: "nail gun, shotgun, not ice crystal, needles, pneumatic actuator, rivet",
         effect() {
             tech.isRivets = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "nail gun") {
                     b.guns[i].chooseFireMethod()
                     break
@@ -6973,7 +6996,7 @@ const tech = {
         remove() {
             if (tech.isRivets) {
                 tech.isRivets = false
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "nail gun") {
                         b.guns[i].chooseFireMethod()
                         break
@@ -6997,14 +7020,14 @@ const tech = {
         requires: "nail gun, not rivets, or needles",
         effect() {
             tech.nailInstantFireRate = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             }
         },
         remove() {
             if (tech.nailInstantFireRate) {
                 tech.nailInstantFireRate = false
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
                 }
             }
@@ -7056,14 +7079,14 @@ const tech = {
         requires: "nail gun, not needle gun",
         effect() {
             tech.nailRecoil = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
             }
         },
         remove() {
             if (tech.nailRecoil) {
                 tech.nailRecoil = false
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "nail gun") b.guns[i].chooseFireMethod()
                 }
             }
@@ -7203,7 +7226,7 @@ const tech = {
             tech.isShotgunImmune = true;
 
             //cut current ammo by 1/2
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "shotgun") {
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.6);
                     b.guns[i].ammoPack *= 0.6
@@ -7215,7 +7238,7 @@ const tech = {
         remove() {
             tech.isShotgunImmune = false;
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "shotgun") {
                         b.guns[i].ammoPack /= 0.6
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo / 0.6);
@@ -7689,14 +7712,14 @@ const tech = {
         requires: "super balls, but not the tech super ball",
         effect() {
             tech.superBallDelay = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
             }
         },
         remove() {
             if (tech.superBallDelay) {
                 tech.superBallDelay = false;
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                 }
             }
@@ -7735,14 +7758,14 @@ const tech = {
         requires: "super balls, not super duper or autocannon",
         effect() {
             tech.oneSuperBall = true;
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
             }
         },
         remove() {
             tech.oneSuperBall = false;
             if (tech.oneSuperBall) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                 }
             }
@@ -8094,7 +8117,7 @@ const tech = {
         ammoBonus: 1.3,
         effect() {
             tech.missileFireCD = 10
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "missiles") {
                     b.guns[i].ammoPack *= this.ammoBonus;
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
@@ -8106,7 +8129,7 @@ const tech = {
         remove() {
             tech.missileFireCD = 45;
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "missiles") {
                         b.guns[i].ammoPack /= this.ammoBonus;
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
@@ -8132,7 +8155,7 @@ const tech = {
         ammoBonus: 1.5,
         effect() {
             tech.isTargeting = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "missiles") {
                     b.guns[i].ammoPack *= this.ammoBonus;
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
@@ -8144,7 +8167,7 @@ const tech = {
         remove() {
             tech.isTargeting = false;
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "missiles") {
                         b.guns[i].ammoPack /= this.ammoBonus;
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
@@ -8370,7 +8393,7 @@ const tech = {
         ammoBonus: 1.4,
         effect() {
             tech.isPrecision = true;
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "grenades") {
                     b.guns[i].ammoPack *= this.ammoBonus;
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo * this.ammoBonus);
@@ -8382,7 +8405,7 @@ const tech = {
         remove() {
             tech.isPrecision = false;
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "grenades") {
                         b.guns[i].ammoPack /= this.ammoBonus;
                         b.guns[i].ammo = Math.ceil(b.guns[i].ammo / this.ammoBonus);
@@ -9040,7 +9063,7 @@ const tech = {
         effect() {
             tech.droneCycleReduction = 0.6
             tech.droneEnergyReduction = 0.3
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "drones") b.guns[i].ammoPack *= 2
             }
         },
@@ -9048,7 +9071,7 @@ const tech = {
             tech.droneCycleReduction = 1
             tech.droneEnergyReduction = 1
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "drones") b.guns[i].ammoPack /= 2
                 }
             }
@@ -9093,7 +9116,7 @@ const tech = {
     //     }
     // },
     {
-        name: "von Neumann probe",  //"drone repair", 
+        name: "von Neumann probe",  //"drone repair",
         description: "after a <strong>drone</strong> expires it will use <strong>-4</strong> <strong class='color-f'>energy</strong><br>and a nearby <strong class='color-block'>block</strong> to <strong class='color-print'>reprint</strong> itself",
         isGunTech: true,
         maxCount: 1,
@@ -9164,7 +9187,7 @@ const tech = {
         requires: "drones, not reduced tolerances, incendiary, torque bursts, ablative drones",
         effect() {
             tech.isDroneRadioactive = true
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "drones") {
                     b.guns[i].ammoPack *= 0.25
                     b.guns[i].ammo = Math.ceil(b.guns[i].ammo * 0.25)
@@ -9175,7 +9198,7 @@ const tech = {
         remove() {
             tech.isDroneRadioactive = false
             if (this.count > 0) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "drones") {
                         b.guns[i].ammoPack /= 0.25
                         b.guns[i].ammo = b.guns[i].ammo * 4
@@ -9602,7 +9625,7 @@ const tech = {
         requires: "harpoon",
         effect() {
             tech.isRebar = true;
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "harpoon") {
                     b.guns[i].ammo -= this.removeAmmo
                     if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
@@ -9614,7 +9637,7 @@ const tech = {
         remove() {
             tech.isRebar = false;
             if (this.count) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "harpoon") {
                         b.guns[i].ammo += this.removeAmmo
                         simulation.updateGunHUD();
@@ -9641,7 +9664,7 @@ const tech = {
         requires: "harpoon, rebar",
         effect() {
             tech.isMaul = true;
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "harpoon") {
                     b.guns[i].ammo -= this.removeAmmo
                     if (b.guns[i].ammo < 0) b.guns[i].ammo = 0
@@ -9653,7 +9676,7 @@ const tech = {
         remove() {
             tech.isMaul = false;
             if (this.count) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "harpoon") {
                         b.guns[i].ammo += this.removeAmmo
                         simulation.updateGunHUD();
@@ -9746,7 +9769,7 @@ const tech = {
         },
         requires: "harpoon",
         effect() {
-            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+            for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                 if (b.guns[i].name === "harpoon") {
                     const removeAmmo = this.removeAmmo()
                     this.ammoRemoved += removeAmmo
@@ -9760,7 +9783,7 @@ const tech = {
         },
         remove() {
             if (tech.extraHarpoons) {
-                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun 
+                for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "harpoon") {
                         b.guns[i].ammo += this.ammoRemoved
                         simulation.updateGunHUD();
@@ -9850,7 +9873,7 @@ const tech = {
         frequencyDefault: 3,
         isBadRandomOption: true,
         allowed() {
-            return (tech.haveGunCheck("wave") || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun))
+            return (tech.haveGunCheck("wave") || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && powerUps.research.count > 1
         },
         requires: "harpoon, laser, wave, frequency, not railgun, non-renewables",
         effect() {
@@ -10282,7 +10305,7 @@ const tech = {
             tech.isPulseLaser = false;
         }
     },
-    //************************************************** 
+    //**************************************************
     //************************************************** field
     //************************************************** tech
     //**************************************************
@@ -10828,6 +10851,7 @@ const tech = {
                         const block = body[body.length - 1]
                         //mess with the block shape (this code is horrible)
                         Composite.add(engine.world, block); //add to world
+                        lastTouchedBlock = block
                         const r1 = radius * (1 + 0.4 * Math.random())
                         const r2 = radius * (1 + 0.4 * Math.random())
                         let angle = Math.PI / 4
@@ -10866,6 +10890,268 @@ const tech = {
         },
         remove() {
             if (this.count) simulation.removeEphemera("blockJump", true)
+        }
+    },
+    {
+        name: "exchange operator",
+        description: `quickly tap <strong>down</strong> <strong>3</strong> times to <strong>swap</strong> places<br>with the last <strong class='color-block'>block</strong> you touched`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        keyLog: [null, null, null],
+        keyLogCycle: [0, 0, 0],
+        keyListener: null,
+        allowed() {
+            return (m.fieldMode === 2 || m.fieldMode === 4 || m.fieldMode === 8) && !tech.isEigenstate
+        },
+        requires: "perfect diamagnetism, molecular assembler, pilot wave, not eigenstate",
+        effect() {
+            tech.isTransposition = true
+            m.damageReduction *= 0.5
+            this.keyLog = [null, null, null]
+            this.keyLogCycle = [0, 0, 0]
+            const transposition = this
+            simulation.ephemera.push({
+                name: "transpositionTarget",
+                do() {
+                    const target = lastTouchedBlock
+                    if (target && body.includes(target) && !target.isNotHoldable && !target.isInvulnerable) {
+                        const vertices = target.vertices
+                        ctx.save()
+                        ctx.beginPath()
+                        ctx.moveTo(vertices[0].x, vertices[0].y)
+                        for (let i = 1; i < vertices.length; i++) ctx.lineTo(vertices[i].x, vertices[i].y)
+                        ctx.closePath()
+                        ctx.lineJoin = "round"
+                        ctx.lineWidth = 10 + 10 * Math.sin(m.cycle * 0.08)
+                        ctx.strokeStyle = `rgba(130,190,215,${0.48 + 0.12 * Math.sin(m.cycle * 0.06)})`
+                        ctx.shadowBlur = 5
+                        ctx.shadowColor = "rgba(130,190,215,0.3)"
+                        ctx.stroke()
+                        ctx.restore()
+                    }
+                }
+            })
+            this.keyListener = event => {
+                if (event.repeat) return
+
+                const sub = m.cycle - transposition.keyLogCycle[transposition.keyLogCycle.length - 1]
+                if (sub < 35 || transposition.keyLogCycle[transposition.keyLogCycle.length - 1] === 0) {
+                    transposition.keyLogCycle.shift()
+                    transposition.keyLogCycle.push(m.cycle)
+                    transposition.keyLog.shift()
+                    transposition.keyLog.push(event.code)
+                } else {
+                    transposition.keyLog = [null, null, event.code]
+                    transposition.keyLogCycle = [0, 0, m.cycle]
+                }
+
+                const patternA = ["ArrowDown", "ArrowDown", "ArrowDown"]
+                const patternB = [input.key.down, input.key.down, input.key.down]
+                const arraysEqual = (a, b) => a.length === b.length && a.every((value, i) => value === b[i])
+                if (arraysEqual(transposition.keyLog, patternA) || arraysEqual(transposition.keyLog, patternB)) {
+                    transposition.keyLog = [null, null, null]
+                    transposition.keyLogCycle = [0, 0, 0]
+                    const target = lastTouchedBlock
+                    if (!target || !body.includes(target) || target.isNotHoldable || target.isInvulnerable) {
+                        lastTouchedBlock = null
+                        return
+                    }
+
+                    if (m.isHolding) m.drop()
+                    const playerPosition = { x: player.position.x, y: player.position.y }
+                    const playerVelocity = { x: player.velocity.x, y: player.velocity.y }
+                    const targetPosition = { x: target.position.x, y: target.position.y }
+                    const targetVelocity = { x: target.velocity.x, y: target.velocity.y }
+                    const targetAngle = target.angle
+                    const targetAngularVelocity = target.angularVelocity
+                    const playerFeetY = playerBody.bounds.max.y
+                    const wasCrouching = m.crouch
+                    m.doCrouch()
+
+                    const penetrationTolerance = 2
+                    const positionOffsets = [
+                        { x: 0, y: -8 },
+                        { x: -8, y: -8 },
+                        { x: 8, y: -8 },
+                        { x: 0, y: -16 },
+                        { x: -16, y: -8 },
+                        { x: 16, y: -8 }
+                    ]
+
+                    // Test the cheapest crouched-player destination first, then nearby positions.
+                    // Sensors are omitted because the head sensor is standing-height.
+                    const bottomOffset = Math.max(playerBody.bounds.max.y, playerHead.bounds.max.y) - player.position.y
+                    const firstPlayerDestination = {
+                        x: target.position.x,
+                        y: target.bounds.max.y - bottomOffset - 1
+                    }
+                    const playerHasSpace = () => Matter.Query.collides(playerBody, map)
+                        .concat(Matter.Query.collides(playerHead, map))
+                        .every(collision => collision.depth <= penetrationTolerance)
+                    const playerDestinations = [{ x: 0, y: 0 }, ...positionOffsets]
+                    let destination = null
+                    for (let i = 0; i < playerDestinations.length; i++) {
+                        const candidate = {
+                            x: firstPlayerDestination.x + playerDestinations[i].x,
+                            y: firstPlayerDestination.y + playerDestinations[i].y
+                        }
+                        Matter.Body.setPosition(player, candidate)
+                        if (playerHasSpace()) {
+                            destination = candidate
+                            break
+                        }
+                    }
+                    Matter.Body.setPosition(player, playerPosition)
+                    const playerDestinationHasSpace = destination !== null
+                    if (!playerDestinationHasSpace) destination = firstPlayerDestination
+
+                    // Start with one foot-aligned query at the original orientation. Only if it
+                    // fails do the more expensive offset and alternate-orientation searches.
+                    let bestFailedPlacement = null
+                    let bestFailedDepth = Infinity
+                    const footAlignedDestination = () => {
+                        const bottomOffset = target.bounds.max.y - target.position.y
+                        return {
+                            x: playerPosition.x,
+                            y: playerFeetY - bottomOffset - 1
+                        }
+                    }
+                    const hasAcceptableMapOverlap = () => {
+                        const collisions = Matter.Query.collides(target, map)
+                        const deepestCollision = collisions.reduce((depth, collision) => Math.max(depth, collision.depth), 0)
+                        if (deepestCollision > penetrationTolerance && deepestCollision < bestFailedDepth) {
+                            bestFailedDepth = deepestCollision
+                            bestFailedPlacement = {
+                                position: { x: target.position.x, y: target.position.y },
+                                angle: target.angle
+                            }
+                        }
+                        return deepestCollision <= penetrationTolerance
+                    }
+                    const tryNearbyPositions = baseDestination => {
+                        for (let j = 0; j < positionOffsets.length; j++) {
+                            Matter.Body.setPosition(target, {
+                                x: baseDestination.x + positionOffsets[j].x,
+                                y: baseDestination.y + positionOffsets[j].y
+                            })
+                            if (hasAcceptableMapOverlap()) return true
+                        }
+                        return false
+                    }
+
+                    Matter.Body.setAngle(target, targetAngle)
+                    const firstBlockDestination = footAlignedDestination()
+                    Matter.Body.setPosition(target, firstBlockDestination)
+                    let blockHasSpace = hasAcceptableMapOverlap()
+
+                    // Keep the original orientation for the first nearby-position search.
+                    if (!blockHasSpace) blockHasSpace = tryNearbyPositions(firstBlockDestination)
+
+                    // If needed, repeat the aligned and nearby checks at two orientations.
+                    const alternateAngles = [targetAngle + Math.PI / 2, targetAngle - Math.PI / 2]
+                    for (let i = 0; i < alternateAngles.length && !blockHasSpace; i++) {
+                        Matter.Body.setAngle(target, alternateAngles[i])
+                        const alternateDestination = footAlignedDestination()
+                        Matter.Body.setPosition(target, alternateDestination)
+                        blockHasSpace = hasAcceptableMapOverlap()
+                        if (!blockHasSpace) blockHasSpace = tryNearbyPositions(alternateDestination)
+                    }
+
+                    // As a final fallback, start at the least-overlapping failed candidate and
+                    // move the block out along the deepest collision normal before re-querying.
+                    if (!blockHasSpace && bestFailedPlacement) {
+                        Matter.Body.setAngle(target, bestFailedPlacement.angle)
+                        Matter.Body.setPosition(target, bestFailedPlacement.position)
+                        const maxNormalCorrections = 4
+                        for (let i = 0; i < maxNormalCorrections && !blockHasSpace; i++) {
+                            const collisions = Matter.Query.collides(target, map)
+                                .filter(collision => collision.depth > penetrationTolerance)
+                            if (!collisions.length) {
+                                blockHasSpace = true
+                                break
+                            }
+                            const deepest = collisions.reduce((best, collision) => collision.depth > best.depth ? collision : best)
+                            const targetIsBodyA = deepest.bodyA === target || deepest.bodyA.parent === target
+                            const direction = targetIsBodyA ? 1 : -1
+                            const distance = Math.min(24, deepest.depth + 1)
+                            Matter.Body.setPosition(target, {
+                                x: target.position.x + direction * deepest.normal.x * distance,
+                                y: target.position.y + direction * deepest.normal.y * distance
+                            })
+                            blockHasSpace = hasAcceptableMapOverlap()
+                        }
+                    }
+
+                    // Every placement and collision-normal query failed. Use the expected swap
+                    // position for ten game cycles before the failed swap is reversed below.
+                    if (!blockHasSpace) {
+                        Matter.Body.setAngle(target, targetAngle)
+                        Matter.Body.setPosition(target, firstBlockDestination)
+                    }
+                    const swapHasSpace = playerDestinationHasSpace && blockHasSpace
+                    simulation.translatePlayerAndCamera(destination)
+                    Matter.Body.setVelocity(player, targetVelocity)
+                    Matter.Body.setVelocity(target, playerVelocity)
+                    if (swapHasSpace) {
+                        lastTouchedBlock = null
+                        requestAnimationFrame(() => { //delay lets the energy graphic draw over the player
+                            m.energy += 1
+                            for (let i = 0; i < 10; i++) simulation.energyGenGraphic()
+                        });
+                    } else {
+                        simulation.ephemera.push({
+                            count: 10,
+                            do() {
+                                this.count--
+                                if (this.count <= 0) {
+                                    simulation.translatePlayerAndCamera(playerPosition)
+                                    Matter.Body.setVelocity(player, playerVelocity)
+                                    if (body.includes(target)) {
+                                        Matter.Body.setPosition(target, targetPosition)
+                                        Matter.Body.setAngle(target, targetAngle)
+                                        Matter.Body.setVelocity(target, targetVelocity)
+                                        Matter.Body.setAngularVelocity(target, targetAngularVelocity)
+                                        lastTouchedBlock = target
+                                    } else {
+                                        lastTouchedBlock = null
+                                    }
+                                    if (!wasCrouching) m.undoCrouch()
+                                    simulation.removeEphemera(this)
+                                }
+                            }
+                        })
+                    }
+
+                    simulation.ephemera.push({
+                        from: { x: playerPosition.x, y: playerPosition.y },
+                        to: { x: destination.x, y: destination.y },
+                        count: 5,
+                        do() {
+                            this.count--
+                            if (this.count < 0) simulation.removeEphemera(this)
+                            ctx.beginPath()
+                            ctx.moveTo(this.from.x, this.from.y)
+                            ctx.lineTo(this.to.x, this.to.y)
+                            ctx.lineWidth = 35
+                            ctx.strokeStyle = "rgba(160,160,160,0.3)"
+                            ctx.stroke()
+                        }
+                    })
+                }
+            }
+            window.addEventListener("keydown", this.keyListener)
+        },
+        remove() {
+            tech.isTransposition = false
+            if (this.count) {
+                m.damageReduction /= 0.5
+                window.removeEventListener("keydown", this.keyListener)
+                simulation.removeEphemera("transpositionTarget", true)
+            }
+            this.keyListener = null
         }
     },
     {
@@ -11336,9 +11622,9 @@ const tech = {
         }
     },
     {
-        name: "metamaterial absorber",  //quantum eraser
+        name: "commensalism",
         descriptionFunction() {
-            return `after you exit a <strong>level</strong>, each mob left <strong>alive</strong><br>gives a <strong>44%</strong> chance to spawn a <strong>power up</strong>`
+            return `after you exit a <strong>level</strong>, you have <strong>44%</strong> chance<br>to convert mobs left <strong>alive</strong> into a <strong>power up</strong>`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -11346,9 +11632,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 7) && !tech.cloakDuplication
+            return m.fieldMode === 7 || m.fieldMode === 6
         },
-        requires: "cloaking",
+        requires: "time dilation, cloaking",
         effect() {
             tech.isQuantumEraser = true
         },
@@ -11367,9 +11653,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 7 //|| m.fieldMode === 6
+            return m.fieldMode === 7 || m.fieldMode === 6
         },
-        requires: "cloaking",
+        requires: "time dilation, cloaking",
         effect() {
             tech.isAddRemoveMaxHealth = true
         },
@@ -11885,10 +12171,10 @@ const tech = {
         }
     },
 
-    //************************************************** 
+    //**************************************************
     //************************************************** JUNK
     //************************************************** tech
-    //************************************************** 
+    //**************************************************
     // {
     //     name: "junk",
     //     description: "",
@@ -11906,6 +12192,24 @@ const tech = {
     //     },
     //     remove() {}
     // },
+    {
+        name: "Stereo Madness",
+        description: "play Stereo Madness",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isInstant: true,
+        isJunk: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            level.levels.splice(level.onLevel + 1, 0, "stereoMadness")
+            level.nextLevel()
+        },
+        remove() { }
+    },
     {
         name: "swap meet",
         description: `normal ${powerUps.orb.tech()} become <strong class='color-junk'>JUNK</strong><br>and <strong class='color-junk'>JUNK</strong> become normal`,
@@ -12263,7 +12567,7 @@ const tech = {
     //     },
     //     requires: "",
     //     effect() {
-    //         // generate a container 
+    //         // generate a container
     //         const gtElem = document.createElement('div')
     //         gtElem.id = "gtElem"
     //         gtElem.style.visibility = 'hidden' // make it invisible
@@ -13418,7 +13722,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            //   
+            //
             simulation.ephemera.push({
                 count: 0,
                 do() {
@@ -13441,7 +13745,7 @@ const tech = {
         },
         requires: "",
         effect() {
-            //   
+            //
             simulation.ephemera.push({
                 count: 0,
                 do() {
@@ -13929,8 +14233,8 @@ const tech = {
                     Matter.Body.setVelocity(player, { x: m.moverX * 0.08 + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
                 }
 
-                if (Math.abs(moveX) > 4) { //come to a stop if fast     // if (player.speed > 4) { //come to a stop if fast 
-                    const stoppingFriction = (m.crouch && (input.down || !m.checkHeadClear())) ? 0.65 : 0.89; // this controls speed when crouched 
+                if (Math.abs(moveX) > 4) { //come to a stop if fast     // if (player.speed > 4) { //come to a stop if fast
+                    const stoppingFriction = (m.crouch && (input.down || !m.checkHeadClear())) ? 0.65 : 0.89; // this controls speed when crouched
                     Matter.Body.setVelocity(player, { x: m.moverX * (1 - stoppingFriction) + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
                 }
                 m.moverX = 0 //reset the level mover offset
@@ -14124,7 +14428,7 @@ const tech = {
         effect() {
             for (let i = 0; i < 3; i++) powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "gun");
 
-            // //removes guns and ammo  
+            // //removes guns and ammo
             // b.inventory = [];
             // b.activeGun = null;
             // b.inventoryGun = 0;
@@ -14287,7 +14591,7 @@ const tech = {
             //30
             if (state[a] && state[b] && state[c]) return false; // TTT => F
             if (state[a] && state[b] && !state[c]) return false; // TTF => F
-            if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+            if (state[a] && !state[b] && state[c]) return false; //TFT => F
             if (state[a] && !state[b] && !state[c]) return true; //TFF => T
             if (!state[a] && state[b] && state[c]) return true; //FTT => T
             if (!state[a] && state[b] && !state[c]) return true; //FTF => T
@@ -14359,7 +14663,7 @@ const tech = {
         rule(state, a, b, c) { //90
             if (state[a] && state[b] && state[c]) return false; // TTT => F
             if (state[a] && state[b] && !state[c]) return true; // TTF => T
-            if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+            if (state[a] && !state[b] && state[c]) return false; //TFT => F
             if (state[a] && !state[b] && !state[c]) return true; //TFF => T
             if (!state[a] && state[b] && state[c]) return true; //FTT => T
             if (!state[a] && state[b] && !state[c]) return false; //FTF => F
@@ -14695,7 +14999,7 @@ const tech = {
     //     rule(state, a, b, c) {
     //         if (state[a] && state[b] && state[c]) return false; // TTT => F
     //         if (state[a] && state[b] && !state[c]) return true; // TTF => T
-    //         if (state[a] && !state[b] && state[c]) return false; //TFT => F 
+    //         if (state[a] && !state[b] && state[c]) return false; //TFT => F
     //         if (state[a] && !state[b] && !state[c]) return true; //TFF => T
     //         if (!state[a] && state[b] && state[c]) return true; //FTT => T
     //         if (!state[a] && state[b] && !state[c]) return false; //FTF => F
@@ -14742,10 +15046,10 @@ const tech = {
     //     },
     // },
 
-    //************************************************** 
+    //**************************************************
     //************************************************** undefined / lore
     //************************************************** tech
-    //************************************************** 
+    //**************************************************
     {
         name: `undefined`,
         description: `<strong class="lore-text">this</strong><br> &nbsp;`,
@@ -14769,7 +15073,7 @@ const tech = {
                         //spawn a random power up
                         // if (Math.random() < 1 / 5) {
                         //     powerUps.spawn(mob[i].position.x, mob[i].position.y, "research")
-                        // } else 
+                        // } else
                         if (Math.random() < 1 / 4) {
                             powerUps.spawn(mob[i].position.x, mob[i].position.y, "ammo")
                         } else if (Math.random() < 1 / 3) {
@@ -14788,7 +15092,7 @@ const tech = {
                 if (lore.techCount === lore.techGoal) {
                     // tech.removeLoreTechFromPool();
                     this.frequency = 0;
-                    this.description = `<strong class="lore-text">null</strong> is open at level.final() <br> &nbsp;`
+                    this.description = `<strong class="lore-text">null</strong> is open at level.maps.final() <br> &nbsp;`
                 } else {
                     this.frequency += lore.techGoal * 2
                     this.description = `<em>uncaught error:</em><br><strong>${Math.max(0, lore.techGoal - lore.techCount)}</strong> more required for access to <strong class="lore-text">null</strong>`
@@ -15199,6 +15503,7 @@ const tech = {
     // isLaserWire: null,
     // isMycelium: null,
     // isEigenstate: null,
+    // isTransposition: null,
     // isNormalMode: null,
     // isSlimeAmmo: null,
     // isThrowBlocks: null,

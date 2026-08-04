@@ -377,9 +377,27 @@ function collisionChecks(event) {
     }
 }
 
+function trackLastTouchedBlock(event) {
+    const isPlayerPart = who => who === playerBody || who === playerHead || who === jumpSensor
+    for (let i = 0; i < event.pairs.length; i++) {
+        const pair = event.pairs[i]
+        let candidate = null
+        if (isPlayerPart(pair.bodyA)) {
+            candidate = pair.bodyB
+        } else if (isPlayerPart(pair.bodyB)) {
+            candidate = pair.bodyA
+        }
+        if (candidate && candidate.parent && candidate.parent !== candidate && candidate.parent.classType === "body") candidate = candidate.parent
+        if (candidate && candidate.classType === "body" && !candidate.isNotHoldable && !candidate.isInvulnerable && body.includes(candidate)) {
+            lastTouchedBlock = candidate
+        }
+    }
+}
+
 
 Events.on(engine, "collisionStart", function (event) {
     playerOnGroundCheck(event);
+    trackLastTouchedBlock(event);
     // playerHeadCheck(event);
     collisionChecks(event);
 

@@ -1,85 +1,47 @@
-new level chute
-  wind zones no longer effect bullets
-  wind zones vibrate power ups to keep them from getting stuck on walls
 
-new community level - terminal by Destiny
+level: refinery
+constraint - mobs freeze area on death
+field tech: exchange operator - swap with the last block you touched
+  diamagnetism, assembler, pilot wave
+tech: positive feedback - 1.005x dmg per health or energy
 
-phonon waves now approximate refraction
-  no reflection though
-  some optimization to laser intersection code
-phonon and isotropic waves have less shake and slow on mobs
-transverse waves no longer benefit from fire rate (they are at max fire rate)
-quasiparticles replaces all ammo with (boost)->(a random small power up)
-  2 research cost
-
+active cooling and arsenal now count your current gun for description clarity
+  damage was reduce about 25% to balance
+1.1x damage to wave gun
+metamaterial absorber renamed commensalism
+  it and symbiosis are allowed for time dilation
+removed level Stereo Madness because it's just too hard
+    it's now a JUNK tech and it gives 1 extra tech on completion and more if you gather power ups
+    
+reworked the random mob spawn system for levels 
+  more predictable and accurate randomization of mob positions
+moved community maps and training maps to a new file to help with editor lag
+moved all other maps to inside level.maps to keep it tidy
 
 bug fixes
-  phase velocity no longer does lower damage while speeding up in map
-  a bit less gravity on autocannon so it can hit mobs on all fights
-   
+    cloaking no longer gives immunity to burning AoE effect in furnace and refinery
+    quasiparticles now properly requires 2 research
+    fixed the lingering phonon waves on next level
+
 *********************************************************** TODO *****************************************************
 
+make a new level.js for community maps
+maybe make one for tutorial
 
+new map element - dynamically changing body
+    use a body similar to how you did the spinners and the elevators
+        using map is annoying because you have to update the draw
+    must keep the body convex
+        or just use multiple bodies
+    specifics
+        circle shaped verticies that pulse out when the player hits any part of them
+            like the things in a pinball machine that bounce the ball, but for the player only
+
+do something with lightning bullets
+  improve motion
 tech - shotgun lightning mode
   add to tech shell as well
   try AI for this?
-  
-new bullet type - lighting
-  can be called with a method in b
-    b.lighting(where, velocity = {x:10, y:2}) //example lighting call
-
-  bullet with no physics
-    runs inside an ephemera
-    store a counter in ephemera and and only move once every 15 counter cycles
-      check if this counter is !(count % 15) to teleport
-  
-  it teleports in velocity but with random unit circle added
-    const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random()) //add this to velocity multiplied by some value
-    find nearest mob in range and set velocity in that direction
-      range around 1000
-    moves faster inside map
-      check if inside map and 4x velocity in that case
-  
-  with each teleport check for ray mob collisions
-    Matter.Query.ray(mob, this.position, this.look, 25)
-  save previous position and current position and draw path between them every cycle
-    blue cyan mageneta type lighting colors
-      color random changes every cycle between cyan and mageneta
-      maybe thin cyan arc with magenta larger stroke width glow
-        opacity around 0.1
-
-
-
-
-tech: phased array - fire multiple phonon and transverse waves
-  PAUSE slider for angle of the second wave?
-  this stacks 3x?
-    need to fit 3 sliders    
-  works for transverse and phonon types
-  buff isotropic a bit and require this tech to unlock isotropic
-
-
-tech:  - beam a laser between you and a drone
-  requires drone gun
-  which drone to target?
-    if no drone focus focus on the next drone fired until it ends
-  run code in drone gun do
-    while drone gun is active
-    use standard b.laser
-  stacks x9 so you can have 9x focus drones with 9x lasers
-
-tech:  - _____ leaves a status effect on the mob that does damage after the invincible phase is over.
-  waves? field? radiation?
-
-!have AI make a version tracker for n-gon to catch out of date hostings
-
-
-make ammo for wave do something?
-  looking for a negative effect to balance out the auto fire no ammo cost of wave gun
-    picking up ammo adds a long CD to wave gun?  
-  if you have ammo spend it to reduce fire rate, but if ammo is zero fire at slower rate?
-  wave interacts with ammo and explodes it?
-  no space for wording in gun description???
 
 tech:   - after _____ convert you momentum into ________
   into a explosion (that doesn't include you)
@@ -88,10 +50,6 @@ tech:   - after _____ convert you momentum into ________
     deflection
     rewind
     button, field, tap down x3
-
-
-tech:   - dmg scales with max health
-
 
 tech pilot wave: antigravity - blocks have no gravity for a few seconds after releasing field
   maybe after 2 seconds the blocks automatically target mobs in line of sight
@@ -152,7 +110,7 @@ Simplex Noise Vector Flow Field that interacts with the player
   perlin noise
   https://chatgpt.com/c/6a39c218-7f44-83e8-9a5d-e2273a68e7cb
   implementation ideas
-    on/off setting checkbox 
+    on/off setting checkbox
     player effects flow field like wind
     wind can add velocity to stuff
       blocks, power ups
@@ -189,10 +147,6 @@ make mob invulnerability more obvious
   thicker stroke
 tech: Loitering munition - missile bot follows mouse?
 
-
-replace damage side bar with a number??
-  where: red text below field
-  changing numbers might get distracting?
 
 try to also allow players to unpause in choosing menu
 
@@ -259,7 +213,7 @@ make more Cordyceps/zombie tech?
   tech that buff zombies?
     zombies move with you to next zone?
       this is tricky because zombies hurt you when they touch, so where should they spawn?
-      
+
 constraint ideas
   0.66x fire rate
   blocks are converted to mobs
@@ -322,7 +276,7 @@ new boss - murmuration of small mobs (maybe 30-50)
 
 tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
   so you can't heal if you take damage twice before doing enough damage
-    should work similar to the cloaking heal tech 
+    should work similar to the cloaking heal tech
   how much damage? change in m.health needs to match total damage done to mobs
   makes sense as a field tech
     ?plasma torch, pilot wave, molecular assembler
@@ -402,10 +356,10 @@ add sounds?  see ***sound*** section below
     https://www.udio.com/create
       advanced features
       average songs
-    
+
 power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
 
-tech:  - limit the total number of tech 
+tech:  - limit the total number of tech
   skin tech or field tech
   limit:
     match level.levelsCleared (times 2?)
@@ -431,7 +385,7 @@ tech:  - instant tech that gives you 2 tech that each have minor negative effect
     benefit after removing the negative tech
 
 field tech: - use _____ to refresh current choices  (or give +6 choices for the next 3 tech)
-  use 
+  use
     10 health
   which field? (pick one based on the name)
     pilot wave (choices)
@@ -493,7 +447,7 @@ wormhole fieldtech:   - gain 1% duplication for this level each time the wormhol
   how many blocks are on an average level?
 
 tech - benefit if you haven't killed any mobs on this level
-  have to clean up mobs that die on level spawn from falling blocks 
+  have to clean up mobs that die on level spawn from falling blocks
 tech - benefit in the first 20 seconds of the level
 
 soft body boss?
@@ -523,7 +477,7 @@ new level idea:  escort mission
     make the style look like substructure, that level looks great
       use the motion sense lasers
 
-  
+
 tech: conformal - remove the research costs of all tech
   conformal - similar rules for small and big scales  linked to holographic principle
   there's about 15 tech with a research cost
@@ -537,7 +491,7 @@ tech: quasar - plasma torch from both ends of wormhole
   only after wormhole eats a block fire?
     or just increase plasma length after eating block?
 
-procedural animation 
+procedural animation
   https://www.youtube.com/watch?v=qlfh_rv6khY
 
 tech: ice-VII - 1.5x duration for ice-IX
@@ -716,7 +670,7 @@ mob non-combat behaviors, like Rain World
 make a lemming that walks until it hits a wall and then turns around robotically
   body or mob?
   can't be killed?
-  
+
 tech circular polarization - wave gun bullets move in a circle
 
 Tech: relativity
@@ -727,7 +681,7 @@ wormhole tech - teleport away mobs with mass below 3 when they get too near the 
     short CD, small energy cost, only mobs below a mass
 
 tech: Bose Einstein condensate - freezes enemies in pilot wave, and drains some energy?
-  
+
 mob status effect - vulnerability
   mobs take 4x damage for __ time
     afterwards mobs go back to normal damage taken
@@ -748,7 +702,7 @@ hookBoss fires a hook that pulls player towards it
   player targeted unless cloaking
   also add effect to finalBoss
 
-mob status effect - emit - mobs fire lasers for a few seconds 
+mob status effect - emit - mobs fire lasers for a few seconds
   tech: phosphorescence - mobs emit after being hit with laser beams
 
 Tech: "Solid rocket motor": Missiles would start at 300% speed and 200% missile damage upon explosion, but the speed and damage would decrease to 40% speed and damage as time goes on
@@ -760,7 +714,7 @@ for tech power ups no tech options are displayed until you research once
 
 tech increase max energy and energy to 5000, but you can no longer regen energy through any process
   JUNK?
-  
+
 it would be nice if there was incentive to go slow when choosing tech so n-gon is more relaxing
   add some css based visual effects for opening up a tech,gun,field
   some reward animation for choosing your tech
@@ -769,7 +723,7 @@ PWA?
   https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
   https://codeburst.io/how-to-easily-turn-your-static-website-to-a-progressive-web-app-pwa-b0af08da9693
   https://github.com/landgreen/n-gon/pull/32/files
-    
+
 tech: laser reflections increase damage
 
 Boss that shoots out a ring of bullets, then after a few seconds it gravitates the bullets back
@@ -820,7 +774,7 @@ training
       look around with your mouse?
       easier deflecting level, with 1-2 attacking mobs
   gun rooms: (different mobs type in each room)
-    different mobs in each room 
+    different mobs in each room
       how to introduce mob shields?
       "hopper" "slasher" "shooter "grenadier" "striker" "laser" "stabber" "springer" "pulsar" "launcher" "launcherOne" "exploder" "sneaker" "sucker" "sniper" "spinner" "grower" "beamer" "focuser" "spawner" "ghoster"
     spores - use 1 ammo to take out several mobs at once,  you have to block with your shield until the mobs die
@@ -905,7 +859,7 @@ add sounds
   https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode
   https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API/Advanced_techniques
   style
-    interesting chords, like music, mixolyd 
+    interesting chords, like music, mixolyd
     can fade into the background
     chords gradual rise and fall in volume
     shouldn't be traditional effects
@@ -920,7 +874,7 @@ add sounds
     if near some strange thing in the level
     after grabbing a power up, in the selection menu
     from mobs, damage,inside field
-    when activating fields: time, negative mass, 
+    when activating fields: time, negative mass,
 
     //setup audio context
     function tone(frequency) {
@@ -937,7 +891,7 @@ add sounds
     }
     // https://www.fresnostate.edu/folklore/Olson/JUSTINT.HTM
     // mixolyd. C      D       E      F+    G      A+    B
-    // key=G   264    297     330   356.40 396*   445.50 495 
+    // key=G   264    297     330   356.40 396*   445.50 495
     // const t264 = tone(264)
     // t264.oscillator.stop(t264.audioCtx.currentTime + 2) //in seconds, not milliseconds for some reason
     // tone(297)
@@ -999,11 +953,11 @@ possible names for tech
   memetics
   magnetorquers - produce spin by pushing on earth's magnetic field
   Josephson junction - superconducting junction
-  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity 
+  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
   Unruh effect - accelerating makes heat/thermal particles
   configuration space - holds the position of everything (related to fermions/bosons and particle interactions)
   stress–energy tensor
-  radioisotope thermoelectric generator - 
+  radioisotope thermoelectric generator -
   retrovirus: these things make JUNK DNA so link it somehow to that tech?
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
   thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
@@ -1031,7 +985,7 @@ possible names for tech
   Kolmogorov complexity - how long the computer program code for an algorithm is, related to entropy?
   r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
   acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
-  gravity wave - 
+  gravity wave -
   tuple - a finite list
   Navier–Stokes - equations for the movement of fluids
   renormalization
@@ -1055,7 +1009,7 @@ possible names for tech
 
 ******************************************************* DESIGN ******************************************************
 
-priorities    
+priorities
   synergies between tech
     difficult to achieve synergies that feel so powerful they are game breaking / changing
   randomized content that adds repeatability
