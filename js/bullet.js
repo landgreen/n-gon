@@ -11,18 +11,42 @@ function phononWaveCoverage(v1, v2, domain) {
     const rayMinY = Math.min(v1.y, v2.y)
     const rayMaxY = Math.max(v1.y, v2.y)
     const intervals = []
+    const stops = []
+    const midpoint = { x: 0, y: 0 }
 
     function addPartIntervals(part) {
         const bounds = part.bounds
         if (bounds.max.x < rayMinX || bounds.min.x > rayMaxX || bounds.max.y < rayMinY || bounds.min.y > rayMaxY) return
 
-        // Uses the same line intersection path as laser collision, but keeps every boundary hit.
-        const intersections = simulation.sight.getIntersections(v1, v2, [part])
-        const stops = [0, 1]
-        for (let i = 0; i < intersections.length; i++) {
-            const point = intersections[i]
-            const t = ((point.x - v1.x) * dx + (point.y - v1.y) * dy) / length2
-            if (t > 1e-8 && t < 1 - 1e-8) stops.push(t)
+        stops.length = 2
+        stops[0] = 0
+        stops[1] = 1
+        const vertices = part.vertices
+        let edgeStart = vertices[vertices.length - 1]
+        for (let i = 0; i < vertices.length; i++) {
+            const edgeEnd = vertices[i]
+            const edgeMinX = edgeStart.x < edgeEnd.x ? edgeStart.x : edgeEnd.x
+            const edgeMaxX = edgeStart.x > edgeEnd.x ? edgeStart.x : edgeEnd.x
+            const edgeMinY = edgeStart.y < edgeEnd.y ? edgeStart.y : edgeEnd.y
+            const edgeMaxY = edgeStart.y > edgeEnd.y ? edgeStart.y : edgeEnd.y
+            if (!(rayMaxX < edgeMinX || edgeMaxX < rayMinX || rayMaxY < edgeMinY || edgeMaxY < rayMinY)) {
+                const edgeDx = edgeEnd.x - edgeStart.x
+                const edgeDy = edgeEnd.y - edgeStart.y
+                const denominator = edgeDy * dx - edgeDx * dy
+                if (denominator !== 0) {
+                    const offsetY = v1.y - edgeStart.y
+                    const offsetX = v1.x - edgeStart.x
+                    const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator
+                    const edgeFraction = (dx * offsetY - dy * offsetX) / denominator
+                    if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) {
+                        const intersectionX = v1.x + rayFraction * dx
+                        const intersectionY = v1.y + rayFraction * dy
+                        const t = ((intersectionX - v1.x) * dx + (intersectionY - v1.y) * dy) / length2
+                        if (t > 1e-8 && t < 1 - 1e-8) stops.push(t)
+                    }
+                }
+            }
+            edgeStart = edgeEnd
         }
         stops.sort((a, b) => a - b)
 
@@ -33,14 +57,17 @@ function phononWaveCoverage(v1, v2, domain) {
         for (let i = 0; i < stopCount - 1; i++) {
             const start = stops[i]
             const end = stops[i + 1]
-            const midpoint = 0.5 * (start + end)
-            const point = { x: v1.x + dx * midpoint, y: v1.y + dy * midpoint }
-            if (Matter.Vertices.contains(part.vertices, point)) intervals.push([start, end])
+            const midpointFraction = 0.5 * (start + end)
+            midpoint.x = v1.x + dx * midpointFraction
+            midpoint.y = v1.y + dy * midpointFraction
+            if (Matter.Vertices.contains(vertices, midpoint)) intervals.push([start, end])
         }
     }
 
     for (let i = 0; i < domain.length; i++) {
         const body = domain[i]
+        const bounds = body.bounds
+        if (bounds.max.x < rayMinX || bounds.min.x > rayMaxX || bounds.max.y < rayMinY || bounds.min.y > rayMaxY) continue
         if (body.parts && body.parts.length > 1) {
             for (let j = 1; j < body.parts.length; j++) addPartIntervals(body.parts[j])
         } else {
@@ -554,7 +581,7 @@ const b = {
                     dist = Vector.magnitude(sub) - mob[i].radius;
                     if (dist < radius) {
                         if (mob[i].shield) dmg *= 2.5 //balancing explosion dmg to shields
-                        if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+                        if (Matter.Query.rayAny(map, mob[i].position, where)) dmg *= 0.5 //reduce damage if a wall is in the way
                         mobs.statusDoT(mob[i], dmg * damageScaler * 0.25, 240) //apply radiation damage status effect on direct hits
                         if (tech.isStun) mobs.statusStun(mob[i], 30)
                         mob[i].locatePlayer();
@@ -611,7 +638,7 @@ const b = {
                         knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg) * body[i].mass * 0.022);
                         body[i].force.x += knock.x;
                         body[i].force.y += knock.y;
-                        if (tech.isBlockExplode && !body[i].isInvulnerable) {
+                        if (tech.isBlockExplode && !body[i].isInvulnerable && !body[i].isImmutable) {
                             if (body[i] === m.holdingTarget) m.drop()
                             const size = 20 + 300 * Math.pow(body[i].mass, 0.25)
                             const x = body[i].position.x
@@ -654,7 +681,7 @@ const b = {
                     dist = Vector.magnitude(sub) - mob[i].radius;
                     if (dist < radius) {
                         if (mob[i].shield) dmg *= 1.8 //balancing explosion dmg to shields
-                        if (Matter.Query.ray(map, mob[i].position, where).length > 0) dmg *= 0.5 //reduce damage if a wall is in the way
+                        if (Matter.Query.rayAny(map, mob[i].position, where)) dmg *= 0.5 //reduce damage if a wall is in the way
                         mob[i].damage(dmg * damageScaler);
                         mob[i].locatePlayer();
                         knock = Vector.mult(Vector.normalise(sub), -Math.sqrt(dmg * damageScaler) * mob[i].mass * (mob[i].isBoss ? 0.003 : 0.01) * reducedKnock);
@@ -879,8 +906,8 @@ const b = {
                             this.position.y < mob[i].bounds.min.y &&
                             this.position.x > mob[i].position.x - mob[i].radius - 10 &&
                             this.position.x < mob[i].position.x + mob[i].radius + 10 &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             // const unit = Vector.normalise(Vector.sub(mob[i].position, this.position))
                             // Matter.Body.setVelocity(this, Vector.mult(unit, 45));
@@ -950,8 +977,8 @@ const b = {
                             this.position.y < mob[i].bounds.min.y &&
                             this.position.x > mob[i].position.x - mob[i].radius - 10 &&
                             this.position.x < mob[i].position.x + mob[i].radius + 10 &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             ctx.strokeStyle = "#000"
                             ctx.lineWidth = 30
@@ -1064,8 +1091,8 @@ const b = {
                             this.position.y < mob[i].bounds.min.y &&
                             this.position.x > mob[i].position.x - mob[i].radius - 10 &&
                             this.position.x < mob[i].position.x + mob[i].radius + 10 &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             ctx.strokeStyle = "#000"
                             ctx.lineWidth = 30
@@ -1213,8 +1240,8 @@ const b = {
                             this.position.y < mob[i].bounds.min.y &&
                             this.position.x > mob[i].position.x - mob[i].radius - 10 &&
                             this.position.x < mob[i].position.x + mob[i].radius + 10 &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             ctx.strokeStyle = "#000"
                             ctx.lineWidth = 30
@@ -1347,8 +1374,8 @@ const b = {
                             this.position.y < mob[i].bounds.min.y &&
                             this.position.x > mob[i].position.x - mob[i].radius - 10 &&
                             this.position.x < mob[i].position.x + mob[i].radius + 10 &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             ctx.strokeStyle = "#000"
                             ctx.lineWidth = 30
@@ -1411,7 +1438,7 @@ const b = {
                     let dmg = 0.15 * tech.radioactiveDamage
                     for (let i = 0, len = mob.length; i < len; i++) {
                         if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.damageRadius + mob[i].radius) {
-                            if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.2 //reduce damage if a wall is in the way
+                            if (Matter.Query.rayAny(map, mob[i].position, this.position)) dmg *= 0.2 //reduce damage if a wall is in the way
                             mob[i].damage(mob[i].shield ? dmg * 3 : dmg);
                             mob[i].locatePlayer();
                             if (tech.isNeutronSlow && mob[i].speed > 4) {
@@ -1757,7 +1784,7 @@ const b = {
                 },
                 destroyBlocks() {//not used?
                     const blocks = Matter.Query.collides(this, body)
-                    if (blocks.length && !blocks[0].bodyA.isNotHoldable) {
+                    if (blocks.length && !blocks[0].bodyA.isNotHoldable && !blocks[0].bodyA.isImmutable) {
                         if (blocks[0].bodyA.mass > 2.5) this.retract()
                         const block = blocks[0].bodyA.vertices
                         Composite.remove(engine.world, blocks[0].bodyA)
@@ -1791,7 +1818,7 @@ const b = {
                             for (let i = 0; i < blocks.length; i++) {
                                 if (blocks[i].bodyA.classType === "body" && !blocks[i].bodyA.isNotHoldable && blocks[0].bodyA.mass < 40) {
                                     this.retract()
-                                    if (tech.hookNails && !blocks[i].bodyA.isInvulnerable) {
+                                    if (tech.hookNails && !blocks[i].bodyA.isInvulnerable && !blocks[i].bodyA.isImmutable) {
                                         b.targetedNail(this.position, 3 * tech.hookNails)
                                         const ANGLE = 2 * Math.PI * Math.random() //make a few random ones
                                         for (let i = 0; i < 13; i++) b.nail(this.position, { x: 10.5 * Math.cos(ANGLE), y: 10.5 * Math.sin(ANGLE) }, 1.2)
@@ -2339,7 +2366,7 @@ const b = {
                 for (let i = 0, len = mob.length; i < len; ++i) {
                     if (
                         mob[i].alive && !mob[i].isBadTarget &&
-                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                        !Matter.Query.rayAny(map, this.position, mob[i].position) &&
                         !mob[i].isInvulnerable
                     ) {
                         const futureDist = Vector.magnitude(Vector.sub(futurePos, mob[i].position));
@@ -2854,10 +2881,11 @@ const b = {
         y: where.y + 3000 * Math.sin(m.angle)
     }, damage = tech.laserDamage, reflections = tech.laserReflections, isThickBeam = false, push = 1, laserColor = tech.laserColor, isPlayer = true) {
         const reflectivity = 1 - 1 / (reflections * 3)
+        const reflectionMinHitDistance2 = 0.0001
         let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
         const path = [{ x: where.x, y: where.y }, { x: whereEnd.x, y: whereEnd.y }];
-        const checkForCollisions = function () {
-            best = vertexCollision(path[path.length - 2], path[path.length - 1], [mob, map, body]);
+        const checkForCollisions = function (minHitDistance2 = 0) {
+            best = vertexCollision(path[path.length - 2], path[path.length - 1], [mob, map, body], minHitDistance2);
         };
         const laserHitMob = function () {
             if (best.who.alive) {
@@ -2909,7 +2937,7 @@ const b = {
 
         const grabPowerUp = function () {
             if (tech.isLaserGrabPowerUp) {
-                bestPowerUp = vertexCollision(path[path.length - 2], path[path.length - 1], [mob, map, body, powerUp]);
+                const bestPowerUp = vertexCollision(path[path.length - 2], path[path.length - 1], [powerUp]);
                 if (bestPowerUp.who) {
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (powerUp[i] === bestPowerUp.who && !simulation.isChoosing && (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal) && !(tech.isEnergyNoAmmo && powerUp[i].name === "ammo") && powerUp[i].cycle > 30 && !simulation.paused) {
@@ -2928,29 +2956,18 @@ const b = {
             }
         }
         checkForCollisions();
-        let lastBestOdd
-        let lastBestEven = best.who //used in hack below
         if (best.dist2 !== Infinity) { //if hitting something
             path[path.length - 1] = { x: best.x, y: best.y };
             laserHitMob();
             grabPowerUp()
             for (let i = 0; i < reflections; i++) {
                 reflection();
-                checkForCollisions();
+                checkForCollisions(reflectionMinHitDistance2);
                 if (best.dist2 !== Infinity) { //if hitting something
-                    lastReflection = best
                     path[path.length - 1] = { x: best.x, y: best.y };
                     damage *= reflectivity
                     laserHitMob();
                     grabPowerUp()
-                    //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.
-                    //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
-                    if (i % 2) {
-                        if (lastBestOdd === best.who) break
-                    } else {
-                        lastBestOdd = best.who
-                        if (lastBestEven === best.who) break
-                    }
                 } else {
                     break
                 }
@@ -3048,8 +3065,8 @@ const b = {
                         if (
                             Vector.magnitude(Vector.sub(this.position, mob[i].position)) < 1300 &&
                             !mob[i].isBadTarget &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             if (tech.isStun) b.AoEStunEffect(this.position, 1300); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                             this.do = this.laserSpin
@@ -3199,8 +3216,8 @@ const b = {
                                         !mob[i].isBadTarget &&
                                         !mob[i].isInvulnerable &&
                                         Vector.magnitude(Vector.sub(this.position, mob[i].position)) < this.range + mob[i].radius + random &&
-                                        Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                        Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                                        !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                                        !Matter.Query.rayAny(body, this.position, mob[i].position)
                                     ) {
                                         if (tech.isStun) b.AoEStunEffect(this.position, this.range + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                                         if (tech.isMineSentry) {
@@ -3328,7 +3345,7 @@ const b = {
                         this.lockedOn = null;
                         let closeDist = Infinity;
                         for (let i = 0, len = mob.length; i < len; ++i) {
-                            if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                            if (!mob[i].isBadTarget && !Matter.Query.rayAny(map, this.position, mob[i].position) && !mob[i].isInvulnerable) {
                                 const targetVector = Vector.sub(this.position, mob[i].position)
                                 const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                 if (dist < closeDist) {
@@ -3429,7 +3446,7 @@ const b = {
                         this.lockedOn = null;
                         let closeDist = Infinity;
                         for (let i = 0, len = mob.length; i < len; ++i) {
-                            if (!mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                            if (!mob[i].isBadTarget && !Matter.Query.rayAny(map, this.position, mob[i].position) && !mob[i].isInvulnerable) {
                                 const targetVector = Vector.sub(this.position, mob[i].position)
                                 const dist = Vector.magnitude(targetVector) * (Math.random() + 0.5);
                                 if (dist < closeDist) {
@@ -3819,8 +3836,8 @@ const b = {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (
                             !mob[i].isBadTarget &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                             !mob[i].isInvulnerable
                         ) {
                             const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
@@ -3931,8 +3948,8 @@ const b = {
                             mob[i].alive &&
                             this.position.y - mob[i].position.y < 1500 && //this is about how high fleas can jump with  capMaxY = 0.12 + 0.04 * Math.random()
                             this.position.y - mob[i].position.y > -300 && //not too far below the flea (note that fleas should be on the ground most of the time when doing this check)
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
                             const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
                             const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -3942,7 +3959,7 @@ const b = {
                             }
                         }
                     }
-                    if (tech.isSporeFollow && !this.lockedOn && Matter.Query.ray(map, this.position, m.pos).length === 0) {
+                    if (tech.isSporeFollow && !this.lockedOn && !Matter.Query.rayAny(map, this.position, m.pos)) {
                         this.lockedOn = { //make target player if there are no mobs to target
                             position: m.pos,
                             velocity: { x: 0, y: 0 }
@@ -4059,7 +4076,14 @@ const b = {
             onEnd() {
                 if (tech.isDroneRespawn) {
                     //are there any nearby bodies nearby that aren't blocked by map?
-                    const canSee = body.filter(a => Matter.Query.ray(map, this.position, a.position).length === 0 && !a.isNotHoldable && Vector.magnitude(Vector.sub(this.position, a.position)) < 70 + 30 * a.mass)
+                    const canSee = body.filter(a => {
+                        if (a.isNotHoldable || a.isImmutable) return false
+                        const dx = this.position.x - a.position.x
+                        const dy = this.position.y - a.position.y
+                        const range = 70 + 30 * a.mass
+                        if (dx * dx + dy * dy >= range * range) return false
+                        return !Matter.Query.rayAny(map, this.position, a.position)
+                    })
                     if (canSee.length) {
                         //find the closest body to the drone from the canSee array
                         const found = canSee.reduce((a, b) => {
@@ -4067,7 +4091,7 @@ const b = {
                             const distB = Vector.magnitude(Vector.sub(this.position, b.position))
                             return distA < distB ? a : b
                         })
-                        if (found && m.energy > 0.041 && !found.isInvulnerable) {
+                        if (found && m.energy > 0.041 && !found.isInvulnerable && !found.isImmutable) {
                             m.energy -= 0.04
                             m.fieldUpgrades[4].endoThermic(0.4)
                             //remove the body and spawn a new drone
@@ -4166,7 +4190,7 @@ const b = {
                     if (tech.isDroneRespawn) {
                         this.do = this.doRespawning
                         //make a list of all elements of array body that a ray can be drawn to from the drone
-                        const canSee = body.filter(a => Matter.Query.ray(map, this.position, a.position).length === 0 && !a.isNotHoldable)
+                        const canSee = body.filter(a => !Matter.Query.rayAny(map, this.position, a.position) && !a.isNotHoldable && !a.isImmutable)
                         if (canSee.length) {
                             //find the closest body to the drone from the canSee array
                             const found = canSee.reduce((a, b) => {
@@ -4200,8 +4224,8 @@ const b = {
                     for (let i = 0, len = mob.length; i < len; ++i) {
                         if (
                             !mob[i].isBadTarget &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                             !mob[i].isInvulnerable
                         ) {
                             const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
@@ -4259,7 +4283,7 @@ const b = {
                                     }
                                     //look for power ups to lock onto
                                     if (
-                                        Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 //&& Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                                        !Matter.Query.rayAny(map, this.position, powerUp[i].position) //&& Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
                                     ) {
                                         const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
                                         const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -4321,7 +4345,7 @@ const b = {
             onEnd() {
                 if (tech.isDroneRespawn) {
                     //are there any nearby bodies nearby that aren't blocked by map?
-                    const canSee = body.filter(a => Matter.Query.ray(map, this.position, a.position).length === 0 && !a.isNotHoldable && Vector.magnitude(Vector.sub(this.position, a.position)) < 70 + 30 * a.mass)
+                    const canSee = body.filter(a => !Matter.Query.rayAny(map, this.position, a.position) && !a.isNotHoldable && !a.isImmutable && Vector.magnitude(Vector.sub(this.position, a.position)) < 70 + 30 * a.mass)
                     if (canSee.length) {
                         //find the closest body to the drone from the canSee array
                         const found = canSee.reduce((a, b) => {
@@ -4329,7 +4353,7 @@ const b = {
                             const distB = Vector.magnitude(Vector.sub(this.position, b.position))
                             return distA < distB ? a : b
                         })
-                        if (found && m.energy > 0.091 && !found.isInvulnerable) {
+                        if (found && m.energy > 0.091 && !found.isInvulnerable && !found.isImmutable) {
                             m.energy -= 0.09
                             m.fieldUpgrades[4].endoThermic(0.7)
                             //remove the body and spawn a new drone
@@ -4383,7 +4407,7 @@ const b = {
                 let dmg = (0.12 + 0.04 * tech.isFastDrones) * tech.droneRadioDamage * tech.radioactiveDamage
                 for (let i = 0, len = mob.length; i < len; i++) {
                     if (Vector.magnitude(Vector.sub(mob[i].position, this.position)) < this.radioRadius + mob[i].radius) {
-                        if (Matter.Query.ray(map, mob[i].position, this.position).length > 0) dmg *= 0.25 //reduce damage if a wall is in the way
+                        if (Matter.Query.rayAny(map, mob[i].position, this.position)) dmg *= 0.25 //reduce damage if a wall is in the way
                         mob[i].damage(mob[i].shield ? dmg * 3 : dmg);
                         mob[i].locatePlayer();
                     }
@@ -4422,8 +4446,8 @@ const b = {
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             if (
                                 !mob[i].isBadTarget &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                                !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                                 !mob[i].isInvulnerable
                             ) {
                                 const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
@@ -4507,8 +4531,8 @@ const b = {
                                         }
                                         //look for power ups to lock onto
                                         if (
-                                            Matter.Query.ray(map, this.position, powerUp[i].position).length === 0 &&
-                                            Matter.Query.ray(body, this.position, powerUp[i].position).length === 0
+                                            !Matter.Query.rayAny(map, this.position, powerUp[i].position) &&
+                                            !Matter.Query.rayAny(body, this.position, powerUp[i].position)
                                         ) {
                                             const TARGET_VECTOR = Vector.sub(this.position, powerUp[i].position)
                                             const DIST = Vector.magnitude(TARGET_VECTOR);
@@ -4657,8 +4681,8 @@ const b = {
                         const dist = Vector.magnitude(Vector.sub(this.position, mob[i].position));
                         if (
                             dist < (range + mob[i].radius) &&
-                            Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                            Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                            !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                            !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                             Vector.magnitude(Vector.sub(who.position, mob[i].position)) < dist
                         ) {
                             targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
@@ -4692,8 +4716,8 @@ const b = {
             if (
                 dist < range + mob[i].radius &&
                 !mob[i].isBadTarget &&
-                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, position, mob[i].position).length === 0 &&
+                !Matter.Query.rayAny(map, position, mob[i].position) &&
+                !Matter.Query.rayAny(body, position, mob[i].position) &&
                 !mob[i].isInvulnerable
             ) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
@@ -4726,7 +4750,7 @@ const b = {
             if (
                 dist < range + mob[i].radius &&
                 !mob[i].isBadTarget && //|| mob[i].isMobBullet
-                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
+                !Matter.Query.rayAny(map, position, mob[i].position) &&
                 !mob[i].isInvulnerable
             ) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
@@ -4785,11 +4809,14 @@ const b = {
                     this.target = who;
                     if (who.radius < 20) {
                         this.targetRelativePosition = { x: 0, y: 0 } //find relative position vector for zero mob rotation
-                    } else if (Matter.Query.collides(this, [who]).length > 0) {
-                        const normal = Matter.Query.collides(this, [who])[0].normal
-                        this.targetRelativePosition = Vector.rotate(Vector.sub(Vector.sub(this.position, who.position), Vector.mult(normal, -this.radius)), -who.angle) //find relative position vector for zero mob rotation
                     } else {
-                        this.targetRelativePosition = Vector.rotate(Vector.sub(this.position, who.position), -who.angle) //find relative position vector for zero mob rotation
+                        const collisions = Matter.Query.collides(this, [who])
+                        if (collisions.length > 0) {
+                            const normal = collisions[0].normal
+                            this.targetRelativePosition = Vector.rotate(Vector.sub(Vector.sub(this.position, who.position), Vector.mult(normal, -this.radius)), -who.angle) //find relative position vector for zero mob rotation
+                        } else {
+                            this.targetRelativePosition = Vector.rotate(Vector.sub(this.position, who.position), -who.angle) //find relative position vector for zero mob rotation
+                        }
                     }
                     this.collisionFilter.category = cat.body;
                     this.collisionFilter.mask = null;
@@ -4923,7 +4950,7 @@ const b = {
                                 mob[i].alive &&
                                 !mob[i].isInvulnerable &&
                                 range < 500 &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                                !Matter.Query.rayAny(map, this.position, mob[i].position)
                             ) {
                                 const mag = 0.001 * Math.min(1, 200 / range)
                                 this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * mag)
@@ -4953,7 +4980,7 @@ const b = {
         for (let i = 0, len = mob.length; i < len; i++) {
             if (who !== mob[i] && !mob[i].isBadTarget && !mob[i].isInvulnerable) {
                 dist = Vector.magnitude(Vector.sub(who.position, mob[i].position));
-                if (dist < range && Matter.Query.ray(map, who.position, mob[i].position).length === 0) { //&& Matter.Query.ray(body, position, mob[i].position).length === 0
+                if (dist < range && !Matter.Query.rayAny(map, who.position, mob[i].position)) { //&& Matter.Query.ray(body, position, mob[i].position).length === 0
                     closestMob = mob[i]
                     range = dist
                 }
@@ -4974,8 +5001,8 @@ const b = {
             if (
                 dist < range + mob[i].radius &&
                 !mob[i].isBadTarget && //|| mob[i].isMobBullet
-                Matter.Query.ray(map, position, mob[i].position).length === 0 &&
-                Matter.Query.ray(body, position, mob[i].position).length === 0 &&
+                !Matter.Query.rayAny(map, position, mob[i].position) &&
+                !Matter.Query.rayAny(body, position, mob[i].position) &&
                 !mob[i].isInvulnerable
             ) {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
@@ -5065,8 +5092,8 @@ const b = {
                         dist < 2500 + mob[i].radius &&
                         !mob[i].isBadTarget && //|| mob[i].isMobBullet
                         !mob[i].isInvulnerable &&
-                        Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
-                        Matter.Query.ray(map, this.position, mob[i].position).length === 0
+                        !Matter.Query.rayAny(body, this.position, mob[i].position) &&
+                        !Matter.Query.rayAny(map, this.position, mob[i].position)
                     ) {
                         targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
                     }
@@ -5571,8 +5598,8 @@ const b = {
                             if (
                                 !mob[i].isBadTarget &&
                                 dist < 3000000 &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                                !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                                 !mob[i].isShielded &&
                                 !mob[i].isInvulnerable
                             ) {
@@ -5631,7 +5658,7 @@ const b = {
                                 mob[i].alive &&
                                 !mob[i].isBadTarget &&
                                 dist2 > 40000 &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position) &&
                                 !mob[i].isInvulnerable
                             ) {
                                 this.cd = simulation.cycle + this.delay;
@@ -5736,7 +5763,7 @@ const b = {
                     if (this.cd < simulation.cycle && !m.isCloak && !(simulation.cycle % this.lookFrequency)) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                            if (dist2 < 1600000 && !mob[i].isBadTarget && Matter.Query.ray(map, this.position, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                            if (dist2 < 1600000 && !mob[i].isBadTarget && !Matter.Query.rayAny(map, this.position, mob[i].position) && !mob[i].isInvulnerable) {
                                 this.fireTarget = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60)) //set target to where the mob will be in 1 second
                                 this.fire()
                                 break;
@@ -5810,7 +5837,7 @@ const b = {
                     if (this.cd < simulation.cycle && !m.isCloak && !(simulation.cycle % this.lookFrequency)) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const dist2 = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
-                            if (dist2 < 1300000 && !mob[i].isBadTarget && (Matter.Query.ray(map, this.position, mob[i].position).length === 0 || dist2 < 300000) && !mob[i].isInvulnerable) {
+                            if (dist2 < 1300000 && !mob[i].isBadTarget && (!Matter.Query.rayAny(map, this.position, mob[i].position) || dist2 < 300000) && !mob[i].isInvulnerable) {
                                 this.fireTarget = Vector.add(mob[i].position, Vector.mult(mob[i].velocity, Math.sqrt(dist2) / 60)) //set target to where the mob will be in 1 second
                                 this.fire()
                                 break;
@@ -5874,8 +5901,8 @@ const b = {
                                 DIST - mob[i].radius < closeDist &&
                                 !mob[i].isShielded &&
                                 (!mob[i].isBadTarget || mob[i].isMobBullet) &&
-                                Matter.Query.ray(map, this.vertices[0], mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.vertices[0], mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.vertices[0], mob[i].position) &&
+                                !Matter.Query.rayAny(body, this.vertices[0], mob[i].position) &&
                                 !mob[i].isInvulnerable
                             ) {
                                 closeDist = DIST;
@@ -5903,15 +5930,15 @@ const b = {
             laser() {
                 const push = 0.4
                 const reflectivity = 1 - 1 / (tech.laserReflections * 3)
+                const reflectionMinHitDistance2 = 0.0001
                 let damage = this.laserDamage * tech.laserDamage
                 //make the laser wiggle as it aims at the target
                 let best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
                 const perp2 = Vector.mult(Vector.rotate({ x: 1, y: 0 }, m.angle + Math.PI / 2), 0.6 * this.lockedOn.radius * Math.sin(simulation.cycle / this.lookFrequency))
                 const path = [{ x: this.vertices[0].x, y: this.vertices[0].y }, Vector.add(this.lockedOn.position, perp2)];
 
-                const checkForCollisions = function () {
-                    best = { x: 1, y: 1, dist2: Infinity, who: null, v1: 1, v2: 1 };
-                    best = vertexCollision(path[path.length - 2], path[path.length - 1], [mob, map, body]);
+                const checkForCollisions = function (minHitDistance2 = 0) {
+                    best = vertexCollision(path[path.length - 2], path[path.length - 1], [mob, map, body], minHitDistance2);
                 };
                 const laserHitMob = function () {
                     if (best.who.alive) {
@@ -5962,27 +5989,16 @@ const b = {
                 };
 
                 checkForCollisions();
-                let lastBestOdd
-                let lastBestEven = best.who //used in hack below
                 if (best.dist2 !== Infinity) { //if hitting something
                     path[path.length - 1] = { x: best.x, y: best.y };
                     laserHitMob();
                     for (let i = 0; i < tech.laserReflections; i++) {
                         reflection();
-                        checkForCollisions();
+                        checkForCollisions(reflectionMinHitDistance2);
                         if (best.dist2 !== Infinity) { //if hitting something
-                            lastReflection = best
                             path[path.length - 1] = { x: best.x, y: best.y };
                             damage *= reflectivity
                             laserHitMob();
-                            //I'm not clear on how this works, but it gets rid of a bug where the laser reflects inside a block, often vertically.
-                            //I think it checks to see if the laser is reflecting off a different part of the same block, if it is "inside" a block
-                            if (i % 2) {
-                                if (lastBestOdd === best.who) break
-                            } else {
-                                lastBestOdd = best.who
-                                if (lastBestEven === best.who) break
-                            }
                         } else {
                             break
                         }
@@ -6065,8 +6081,8 @@ const b = {
                             if (
                                 DIST < closeDist &&
                                 !mob[i].isBadTarget &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                                !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                                 !mob[i].isInvulnerable
                             ) {
                                 closeDist = DIST;
@@ -6079,7 +6095,7 @@ const b = {
                 if (this.lockedOn && this.lockedOn.alive && !m.isCloak) {
                     const DIST = Vector.magnitude(Vector.sub(this.vertices[0], this.lockedOn.position));
                     if (DIST - this.lockedOn.radius < this.range &&
-                        Matter.Query.ray(map, this.position, this.lockedOn.position).length === 0) {
+                        !Matter.Query.rayAny(map, this.position, this.lockedOn.position)) {
                         //move towards the target
                         this.force = Vector.add(this.force, Vector.mult(Vector.normalise(Vector.sub(this.lockedOn.position, this.position)), this.attackAcceleration * this.mass))
                     }
@@ -6129,8 +6145,8 @@ const b = {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
                             if (
                                 DIST < closeDist && (!mob[i].isBadTarget || mob[i].isMobBullet) &&
-                                Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-                                Matter.Query.ray(body, this.position, mob[i].position).length === 0 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position) &&
+                                !Matter.Query.rayAny(body, this.position, mob[i].position) &&
                                 !mob[i].isInvulnerable
                             ) {
                                 closeDist = DIST;
@@ -6344,9 +6360,9 @@ const b = {
     guns: [
         {
             name: "nail gun", // 0
-            // description: `use compressed air to shoot a stream of <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>60</strong> nails per ${powerUps.orb.ammo()}`,
+            // description: `use compressed air to shoot a stream of <strong>nails</strong><br><span class='color-fire-rate' data-help='fire-rate'>fire rate</span> <strong>increases</strong> the longer you fire<br><strong>60</strong> nails per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `use compressed air to rapidly drive <strong>nails</strong><br><em>fire rate</em> <strong>increases</strong> the longer you fire<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> nails per ${powerUps.orb.ammo()}`
+                return `use compressed air to rapidly drive <strong>nails</strong><br><span class='color-fire-rate' data-help='fire-rate'>fire rate</span> <strong>increases</strong> the longer you fire<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> nails per ${powerUps.orb.ammo()}`
                 // <em style ="float: right;">(${(11 / 60 * b.fireCDscale * 1000).toFixed(0)} to ${(1 * b.fireCDscale / 60 * 1000).toFixed(0)} millisecond cooldown)</em>`
             },
             ammo: 0,
@@ -6660,9 +6676,9 @@ const b = {
         },
         {
             name: "shotgun", //1
-            // description: `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>with a low <strong><em>fire rate</em></strong><br><strong>3-4</strong> nails per ${powerUps.orb.ammo()}`,
+            // description: `fire a wide <strong>burst</strong> of short range <strong> bullets</strong><br>with a low <strong><span class='color-fire-rate' data-help='fire-rate'>fire rate</span></strong><br><strong>3-4</strong> nails per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `fire a wide <strong>burst</strong> of short range <strong>pellets</strong><br>has a slow <strong><em>fire rate</em></strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
+                return `fire a wide <strong>burst</strong> of short range <strong>pellets</strong><br>has a slow <strong><span class='color-fire-rate' data-help='fire-rate'>fire rate</span></strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> shots per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 1.6,
@@ -7081,9 +7097,9 @@ const b = {
         },
         {
             name: "wave", //3
-            // description: `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s'>slow</strong> mobs<br><strong>115</strong> packets per ${powerUps.orb.ammo()}`,
+            // description: `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s' data-help='slow'>slow</strong> mobs<br><strong>115</strong> packets per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `emit <strong>${(0.25 * 360 / Math.PI).toFixed(0)}°</strong> expanding <strong>arcs</strong> that <strong class='color-s'>slow</strong> mobs<br>and <strong>propagate</strong> longitudinally through <strong>solids</strong><br>costs 0 <strong class='color-ammo'>ammo</strong> <em style ="float: right;">(auto fire until you press fire)</em>`
+                return `emit <strong>${(0.25 * 360 / Math.PI).toFixed(0)}°</strong> expanding <strong>arcs</strong> that <strong class='color-s' data-help='slow'>slow</strong> mobs<br>and <strong>propagate</strong> longitudinally through <strong>solids</strong><br>costs 0 <strong class='color-ammo'>ammo</strong> <em style ="float: right;">(auto fire until you press fire)</em>`
             },
             // ammo: 0,
             // ammoPack: 60,
@@ -7306,9 +7322,9 @@ const b = {
         },
         {
             name: "missiles", //6
-            // description: `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>5</strong> missiles per ${powerUps.orb.ammo()}`,
+            // description: `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='explode' data-help='explode'>explode</strong> on contact with mobs<br><strong>5</strong> missiles per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='color-e'>explode</strong> on contact with mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> missiles per ${powerUps.orb.ammo()}`
+                return `launch <strong>homing</strong> missiles that target mobs<br>missiles <strong class='explode' data-help='explode'>explode</strong> on contact with mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> missiles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 2.3,
@@ -7405,9 +7421,9 @@ const b = {
             }
         }, {
             name: "grenades", //5
-            // description: `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after one second<br><strong>7</strong> grenades per ${powerUps.orb.ammo()}`,
+            // description: `lob a single <strong>bouncy</strong> projectile<br><strong class='explode' data-help='explode'>explodes</strong> on <strong>contact</strong> or after one second<br><strong>7</strong> grenades per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `lob a single <strong>bouncy</strong> projectile<br><strong class='color-e'>explodes</strong> on <strong>contact</strong> or after <strong>1.5</strong> seconds<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> grenades per ${powerUps.orb.ammo()}`
+                return `lob a single <strong>bouncy</strong> projectile<br><strong class='explode' data-help='explode'>explodes</strong> on <strong>contact</strong> or after <strong>1.5</strong> seconds<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> grenades per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 3.2,
@@ -7430,9 +7446,9 @@ const b = {
             },
         }, {
             name: "spores", //6
-            // description: `toss a <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='color-p' style='letter-spacing: 2px;'>spores</strong><br><strong class='color-p' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs<br><strong>2-3</strong> sporangium per ${powerUps.orb.ammo()}`,
+            // description: `toss a <strong class='spore' data-help='spore' style='letter-spacing: 2px;'>sporangium</strong> that discharges <strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores</strong><br><strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores</strong> seek out nearby mobs<br><strong>2-3</strong> sporangium per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `toss <strong class='color-p' style='letter-spacing: 2px;'>sporangium</strong> that discharges ${b.guns[6].nameString("s")}<br>${b.guns[6].nameString("s")} seek out nearby mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> sporangium per ${powerUps.orb.ammo()}`
+                return `toss <strong class='spore' data-help='spore' style='letter-spacing: 2px;'>sporangium</strong> that discharges ${b.guns[6].nameString("s")}<br>${b.guns[6].nameString("s")} seek out nearby mobs<br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> sporangium per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 1.22,
@@ -7440,11 +7456,11 @@ const b = {
             have: false,
             nameString(suffix = "") {
                 if (tech.isSporeFlea) {
-                    return `<strong class='color-p' style='letter-spacing: -0.8px;'>flea${suffix}</strong>`
+                    return `<strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>flea${suffix}</strong>`
                 } else if (tech.isSporeWorm) {
-                    return `<strong class='color-p' style='letter-spacing: -0.8px;'>worm${suffix}</strong>`
+                    return `<strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>worm${suffix}</strong>`
                 } else {
-                    return `<strong class='color-p' style='letter-spacing: 2px;'>spore${suffix}</strong>`
+                    return `<strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spore${suffix}</strong>`
                 }
             },
             do() {
@@ -7701,7 +7717,7 @@ const b = {
         {
             name: "foam", //8
             descriptionFunction() {
-                return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s'>slows</strong> mobs and does <strong class='color-d'>damage</strong> over time<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
+                return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s' data-help='slow'>slows</strong> mobs and does <strong class='color-d' data-help='damage'>damage</strong> over time<br><strong>${0.5 * this.ammoPack.toFixed(0)}</strong> bubbles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 12.6,
@@ -7824,9 +7840,9 @@ const b = {
         },
         {
             name: "harpoon", //9
-            // description: `throw a <strong>self-steering</strong> harpoon that uses <strong class='color-f'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost<br><strong>1-2</strong> harpoons per ${powerUps.orb.ammo()}`,
+            // description: `throw a <strong>self-steering</strong> harpoon that uses <strong class='energy' data-help='energy'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost<br><strong>1-2</strong> harpoons per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `throw a <strong>harpoon</strong> that uses <strong class='color-f'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
+                return `throw a <strong>harpoon</strong> that uses <strong class='energy' data-help='energy'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${0.5 * this.ammoPack.toFixed(1)}</strong> harpoons per ${powerUps.orb.ammo()}`
             },
             harpoonName() {
                 return "<strong>" + (tech.isMaul ? "maul" : (tech.isRebar ? "rebar" : "harpoon")) + "</strong>"
@@ -7943,7 +7959,7 @@ const b = {
                             }; //make a vector for the player's direction of length 1; used in dot product
 
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                                if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && !Matter.Query.rayAny(map, m.pos, mob[i].position) && !mob[i].isInvulnerable) {
                                     const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                                     const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                                     if (dot > 0.95 - Math.min(dist * 0.00015, 0.3)) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
@@ -7973,7 +7989,7 @@ const b = {
                                 y: Math.sin(m.angle)
                             }; //make a vector for the player's direction of length 1; used in dot product
                             for (let i = 0, len = mob.length; i < len; ++i) {
-                                if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                                if (mob[i].alive && !mob[i].isBadTarget && !Matter.Query.rayAny(map, m.pos, mob[i].position) && !mob[i].isInvulnerable) {
                                     const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                                     const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                                     if (dist < closest.distance && dot > 0.98 - Math.min(dist * 0.00014, 0.3)) { //target closest mob that player is looking at and isn't too close to target
@@ -8065,7 +8081,7 @@ const b = {
                     const range = 450 * (tech.isUHMWPE ? 1 + 0.012 * Math.min(110, this.ammo) : 1)
                     let targetCount = 0
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                        if (mob[i].alive && !mob[i].isBadTarget && !mob[i].shield && !Matter.Query.rayAny(map, m.pos, mob[i].position) && !mob[i].isInvulnerable) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                             if (dist < range && dot > 0.9) { //lower dot product threshold for targeting then if you only have one harpoon //target closest mob that player is looking at and isn't too close to target
@@ -8109,7 +8125,7 @@ const b = {
                         y: Math.sin(m.angle)
                     }; //make a vector for the player's direction of length 1; used in dot product
                     for (let i = 0, len = mob.length; i < len; ++i) {
-                        if (mob[i].alive && !mob[i].isBadTarget && Matter.Query.ray(map, m.pos, mob[i].position).length === 0 && !mob[i].isInvulnerable) {
+                        if (mob[i].alive && !mob[i].isBadTarget && !Matter.Query.rayAny(map, m.pos, mob[i].position) && !mob[i].isInvulnerable) {
                             const dot = Vector.dot(dir, Vector.normalise(Vector.sub(mob[i].position, m.pos))) //the dot product of diff and dir will return how much over lap between the vectors
                             const dist = Vector.magnitude(Vector.sub(where, mob[i].position))
                             if (dist < closest.distance && dot > 0.98 - Math.min(dist * 0.00014, 0.3)) { //target closest mob that player is looking at and isn't too close to target
@@ -8201,7 +8217,7 @@ const b = {
         {
             name: "laser", //11
             descriptionFunction() {
-                return `emit a <strong>beam</strong> of collimated coherent <strong class='color-laser'>light</strong><br>reflects off map, <strong class='color-block'>blocks</strong>, and mobs <strong>${(tech.isWideLaser || tech.isPulseLaser) ? 0 : tech.laserReflections}</strong> times<br>costs <strong>${(tech.laserDrain * 6000).toFixed(1)}</strong> <strong class='color-f'>energy</strong> per second and 0 <strong class='color-ammo'>ammo</strong>`
+                return `emit a <strong>beam</strong> of collimated coherent <strong class='color-laser' data-help='laser'>light</strong><br>reflects off map, <strong class='block' data-help='block'>blocks</strong>, and mobs <strong>${(tech.isWideLaser || tech.isPulseLaser) ? 0 : tech.laserReflections}</strong> times<br>costs <strong>${(tech.laserDrain * 6000).toFixed(1)}</strong> <strong class='energy' data-help='energy'>energy</strong> per second and 0 <strong class='color-ammo'>ammo</strong>`
             },
             ammo: 0,
             ammoPack: Infinity,
@@ -8435,7 +8451,7 @@ const b = {
                     ctx.lineWidth = 8
                     ctx.globalAlpha = 0.5;
                     ctx.beginPath();
-                    if (Matter.Query.ray(map, eye, where).length === 0 && Matter.Query.ray(body, eye, where).length === 0) {
+                    if (!Matter.Query.rayAny(map, eye, where) && !Matter.Query.rayAny(body, eye, where)) {
                         b.laser(eye, {
                             x: eye.x + range.x,
                             y: eye.y + range.y
@@ -8446,7 +8462,7 @@ const b = {
                             x: i * rangeOffPlus.x,
                             y: i * rangeOffPlus.y
                         })
-                        if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+                        if (!Matter.Query.rayAny(map, eye, whereOff) && !Matter.Query.rayAny(body, eye, whereOff)) {
                             ctx.moveTo(eye.x, eye.y)
                             ctx.lineTo(whereOff.x, whereOff.y)
                             b.laser(whereOff, {
@@ -8458,7 +8474,7 @@ const b = {
                             x: i * rangeOffMinus.x,
                             y: i * rangeOffMinus.y
                         })
-                        if (Matter.Query.ray(map, eye, whereOff).length === 0 && Matter.Query.ray(body, eye, whereOff).length === 0) {
+                        if (!Matter.Query.rayAny(map, eye, whereOff) && !Matter.Query.rayAny(body, eye, whereOff)) {
                             ctx.moveTo(eye.x, eye.y)
                             ctx.lineTo(whereOff.x, whereOff.y)
                             b.laser(whereOff, {

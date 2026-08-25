@@ -81,24 +81,41 @@ function seededShuffle(array) {
 //     return best
 // }
 //this function is used for finding the point where a ray hits things,  used for lasers mostly
-function vertexCollision(v1, v1End, domains) {  //= [map, body, [playerBody, playerHead]]     //m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]
-    let results
+function vertexCollision(v1, v1End, domains, minHitDistance2 = 0) {  //= [map, body, [playerBody, playerHead]]     //m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]
     let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
+    const rayX = v1End.x - v1.x;
+    const rayY = v1End.y - v1.y;
+    const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
+    const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
+    const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
+    const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
     for (let j = 0; j < domains.length; j++) {
         let domain = domains[j]
         for (let i = 0; i < domain.length; ++i) {
+            const bounds = domain[i].bounds;
+            if (rayMaxX < bounds.min.x || bounds.max.x < rayMinX || rayMaxY < bounds.min.y || bounds.max.y < rayMinY) continue;
+            if (domain[i].mob && !domain[i].alive) continue;
             let vertices = domain[i].vertices;
             const len = vertices.length - 1;
             for (let j = 0; j < len; j++) {
-                results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-                if (results.onLine1 && results.onLine2) {
-                    const dx = v1.x - results.x;
-                    const dy = v1.y - results.y;
+                const edgeX = vertices[j + 1].x - vertices[j].x;
+                const edgeY = vertices[j + 1].y - vertices[j].y;
+                const denominator = edgeY * rayX - edgeX * rayY;
+                if (denominator !== 0) {
+                    const offsetY = v1.y - vertices[j].y;
+                    const offsetX = v1.x - vertices[j].x;
+                    const a = (edgeX * offsetY - edgeY * offsetX) / denominator;
+                    const b = (rayX * offsetY - rayY * offsetX) / denominator;
+                    if (!(a > 0 && a < 1 && b > 0 && b < 1)) continue;
+                    const x = v1.x + a * rayX;
+                    const y = v1.y + a * rayY;
+                    const dx = v1.x - x;
+                    const dy = v1.y - y;
                     const dist2 = dx * dx + dy * dy;
-                    if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
+                    if (dist2 >= minHitDistance2 && dist2 < best.dist2) {
                         best = {
-                            x: results.x,
-                            y: results.y,
+                            x: x,
+                            y: y,
                             dist2: dist2,
                             who: domain[i],
                             v1: vertices[j],
@@ -107,20 +124,30 @@ function vertexCollision(v1, v1End, domains) {  //= [map, body, [playerBody, pla
                     }
                 }
             }
-            results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-            if (results.onLine1 && results.onLine2) {
-                const dx = v1.x - results.x;
-                const dy = v1.y - results.y;
-                const dist2 = dx * dx + dy * dy;
-                if (dist2 < best.dist2) {
-                    best = {
-                        x: results.x,
-                        y: results.y,
-                        dist2: dist2,
-                        who: domain[i],
-                        v1: vertices[0],
-                        v2: vertices[len]
-                    };
+            const edgeX = vertices[len].x - vertices[0].x;
+            const edgeY = vertices[len].y - vertices[0].y;
+            const denominator = edgeY * rayX - edgeX * rayY;
+            if (denominator !== 0) {
+                const offsetY = v1.y - vertices[0].y;
+                const offsetX = v1.x - vertices[0].x;
+                const a = (edgeX * offsetY - edgeY * offsetX) / denominator;
+                const b = (rayX * offsetY - rayY * offsetX) / denominator;
+                if (a > 0 && a < 1 && b > 0 && b < 1) {
+                    const x = v1.x + a * rayX;
+                    const y = v1.y + a * rayY;
+                    const dx = v1.x - x;
+                    const dy = v1.y - y;
+                    const dist2 = dx * dx + dy * dy;
+                    if (dist2 >= minHitDistance2 && dist2 < best.dist2) {
+                        best = {
+                            x: x,
+                            y: y,
+                            dist2: dist2,
+                            who: domain[i],
+                            v1: vertices[0],
+                            v2: vertices[len]
+                        };
+                    }
                 }
             }
         }
@@ -398,15 +425,15 @@ const build = {
     generatePauseLeft() {
         //left side
         let botText = ""
-        if (tech.nailBotCount) botText += `<br><strong class='color-bot no-box'>nail-bots ${tech.nailBotCount}</strong>`
-        if (tech.orbitBotCount) botText += `<br><strong class='color-bot no-box'>orbital-bots ${tech.orbitBotCount}</strong>`
-        if (tech.boomBotCount) botText += `<br><strong class='color-bot no-box'>boom-bots ${tech.boomBotCount}</strong>`
-        if (tech.laserBotCount) botText += `<br><strong class='color-bot no-box'>laser-bots ${tech.laserBotCount}</strong>`
-        if (tech.foamBotCount) botText += `<br><strong class='color-bot no-box'>foam-bots ${tech.foamBotCount}</strong>`
-        if (tech.soundBotCount) botText += `<br><strong class='color-bot no-box'>sound-bots ${tech.soundBotCount}</strong>`
-        if (tech.dynamoBotCount) botText += `<br><strong class='color-bot no-box'>dynamo-bots ${tech.dynamoBotCount}</strong>`
-        if (tech.plasmaBotCount) botText += `<br><strong class='color-bot no-box'>plasma-bots ${tech.plasmaBotCount}</strong>`
-        if (tech.missileBotCount) botText += `<br><strong class='color-bot no-box'>missile-bots ${tech.missileBotCount}</strong>`
+        if (tech.nailBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>nail-bots ${tech.nailBotCount}</strong>`
+        if (tech.orbitBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>orbital-bots ${tech.orbitBotCount}</strong>`
+        if (tech.boomBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>boom-bots ${tech.boomBotCount}</strong>`
+        if (tech.laserBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>laser-bots ${tech.laserBotCount}</strong>`
+        if (tech.foamBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>foam-bots ${tech.foamBotCount}</strong>`
+        if (tech.soundBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>sound-bots ${tech.soundBotCount}</strong>`
+        if (tech.dynamoBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>dynamo-bots ${tech.dynamoBotCount}</strong>`
+        if (tech.plasmaBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>plasma-bots ${tech.plasmaBotCount}</strong>`
+        if (tech.missileBotCount) botText += `<br><strong class='color-bot no-box' data-help='bot'>missile-bots ${tech.missileBotCount}</strong>`
 
         // <strong class='color-g'>${b.activeGun === null || b.activeGun === undefined ? "undefined" : b.guns[b.activeGun].name}</strong> (${b.activeGun === null || b.activeGun === undefined ? "0" : b.guns[b.activeGun].ammo})
 
@@ -422,7 +449,7 @@ const build = {
         let fullscreenWarning = document.fullscreenElement ? `<div><span style="font-size:1.25em;font-weight: 600; float: left;">FULLSCREEN</span> <em style="float: right;color:#ccc;">press ${cleanText(input.key.fullscreen)} or hold ESC to exit</em></div><br>` : ""
 
         let text = `<div class="pause-grid-module" style="padding: 8px;">
-<span class="color-paused" style="font-size:1.0em; float: left;">PAUSED</span> 
+<span class="color-paused" data-help="pause" style="font-size:1.0em; float: left;">PAUSED</span> 
 <em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
 <br>
 ${fullscreenWarning}
@@ -439,19 +466,19 @@ ${fullscreenWarning}
 <details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
 <summary>simulation variables</summary>
 <div class="pause-details">
-<strong class='color-d'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
+<strong class='color-d' data-help='damage'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
 <span style="float: right;">empty</span>
-<br><strong class='color-defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
+<br><strong class='color-defense' data-help='defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
 <span style="float: right;">empty</span>
-<br><strong class='color-h'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+<br><strong class='color-h' data-help='health'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
 <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
-<br><strong class='color-f'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
+<br><strong class='energy' data-help='energy'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
 <span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
-<br><strong><em>fire rate</em></strong> ${(1 / b.fireCDscale).toFixed(2)}x
+<br><strong><span class='color-fire-rate' data-help='fire-rate'>fire rate</span></strong> ${(1 / b.fireCDscale).toFixed(2)}x
 <span style="float: right;">mass ${player.mass.toFixed(1)}</span>
 ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
-<br><strong class='color-dup'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
-<span style="float: right;"><strong class='color-junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
+<br><strong class='color-dup' data-help='duplicate'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
+<span style="float: right;"><strong class='color-junk' data-help='junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
 ${botText}
 <br>
 <br> ${level.levelAnnounce()}
@@ -474,11 +501,11 @@ ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
 <summary>difficulty parameters</summary>
 <div class="pause-details">
         ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>` : " "}
-        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
+        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>2x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong></div>` : " "}
         ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>` : " "}
         ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>3</strong> levels</div>` : " "}
         ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>` : " "}
-        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>` : " "}
+        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>2x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong></div>` : " "}
         ${simulation.difficultyMode > 6 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>` : " "}
 </div>
 </details>
@@ -527,15 +554,15 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
 
 
         let text = `<div class="sort">
-        <button onclick="build.sortTech('PAUSE')" class='color-paused' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
+        <button onclick="build.sortTech('PAUSE')" class='color-paused' data-help='pause' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
     <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
     <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
-    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d'>dmg</strong></button>
-    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong style="font-weight: 100;">dmg</strong></button>
-    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='color-f'>nrg</strong></button>
-    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h'>heal</strong></button>
-    <button onclick="build.sortTech('bot')" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
-    <button onclick="build.sortTech('duplic')" class='sort-button'><strong class='color-dup'>dup</strong></button>
+    <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d' data-help='damage'>dmg</strong></button>
+    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg</strong></button>
+    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='energy' data-help='energy'>nrg</strong></button>
+    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h' data-help='health'>heal</strong></button>
+    <button onclick="build.sortTech('bot')" class='sort-button color-bot' data-help='bot' style="border-radius: 0px;">bot</button>
+    <button onclick="build.sortTech('duplic')" class='sort-button'><strong class='color-dup' data-help='duplicate'>dup</strong></button>
 </div>`;
         // <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         // <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
@@ -810,6 +837,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             }
             if (!isDeselect) { //add gun
                 document.getElementById("gun-" + index).classList.add("build-gun-selected");
+                if (tech.isOneGun && b.inventory.length > 0) tech.removeTech("integrated armament", false)
                 b.giveGuns(index)
             }
         } else if (type === "field") {
@@ -906,15 +934,15 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         let text = `
 <div class="experiment-start-box">
     <div class="sort" style="border: 0px;">
-    <button onclick="build.sortTech('PAUSE', true)" class='color-paused' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
+    <button onclick="build.sortTech('PAUSE', true)" class='color-paused' data-help='pause' style="border: 1px #333 solid;border-radius: 0.3em;font-size: 0.5em;">PAUSE</button>
         <button onclick="build.sortTech('guntech', true)" class='sort-button'>${powerUps.orb.gunTech()}</button>
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
-        <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d'>dmg</strong></button>
-        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong style="font-weight: 100;">dmg</strong></button>
-        <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='color-f'>energy</strong></button>
-        <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h'>heal</strong></button>
-        <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' style="border-radius: 0px;">bot</button>
-        <button onclick="build.sortTech('duplic', true)" class='sort-button'><strong class='color-dup'>dup</strong></button>
+        <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d' data-help='damage'>dmg</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg</strong></button>
+        <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='energy' data-help='energy'>energy</strong></button>
+        <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h' data-help='health'>heal</strong></button>
+        <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' data-help='bot' style="border-radius: 0px;">bot</button>
+        <button onclick="build.sortTech('duplic', true)" class='sort-button'><strong class='color-dup' data-help='duplicate'>dup</strong></button>
 
         <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
@@ -1563,7 +1591,7 @@ window.addEventListener("keydown", function (event) {
                 </tr>
                 <tr>
                     <td class='key-input-pause'>Y</td>
-                    <td class='key-used'>random tech</td>
+                    <td class='key-used'>experiment menu</td>
                 </tr>
                 <tr>
                     <td class='key-input-pause'>U</td>
@@ -1704,7 +1732,12 @@ window.addEventListener("keydown", function (event) {
                 m.energy = m.maxEnergy
                 break
             case "y":
-                tech.giveTech()
+                simulation.paused = true;
+                build.isExperimentSelection = true;
+                build.populateGrid();
+                document.getElementById("experiment-grid").style.display = "grid";
+                Object.assign(document.body.style, { overflowY: "scroll", overflowX: "hidden", cursor: "auto" });
+                if (document.pointerLockElement) document.exitPointerLock();
                 break
             case "b":
                 tech.isRerollDamage = true
@@ -2048,6 +2081,10 @@ document.getElementById("control-testing").style.visibility = (localSettings.lor
 // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 input.controlTextUpdate()
 
+if (simulation.isCommunityMaps) {
+    level.loadMoreLevels().catch(error => console.error(error))
+}
+
 
 //**********************************************************************
 // settings
@@ -2073,6 +2110,7 @@ document.getElementById("community-maps").addEventListener("input", () => {
     simulation.isCommunityMaps = document.getElementById("community-maps").checked
     localSettings.isCommunityMaps = simulation.isCommunityMaps
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    if (simulation.isCommunityMaps) level.loadMoreLevels().catch(error => console.error(error))
 });
 
 document.getElementById("updates").addEventListener("toggle", function () {

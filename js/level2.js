@@ -1,4 +1,4 @@
-const moreLevels = {
+Object.assign(moreLevels, {
     gauntlet() {
         level.custom = () => {
             level.exit.drawAndCheck();
@@ -12037,7 +12037,7 @@ const moreLevels = {
                         text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(2)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(gray, lightgray);"></div> &nbsp; Defense Boost</div>Reduce damage by 5%</div>`;
                         text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(3)"><div class="grid-title"><div class="circle-grid tech" style="background-image: linear-gradient(red, orange);"></div> &nbsp; Damage Boost</div>Increase damage by 10%</div>`;
                         if (powerUps.pass == true) {
-                            text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(4)"><div class="grid-title"><div class="circle-grid tech" style="background-image: radial-gradient(black, gray);"></div> &nbsp; Blade of Sal</div>Press Shift to summon the <b style="color: ${m.eyeFillColor};">Mythical</b> <em style="color: lightblue; text-shadow: ${m.eyeFillColor} 0px 0 5px;">Las Slayer</em><div>Drains <strong class='color-f'>Energy</strong></div></div>`;
+                            text += `<div class="choose-grid-module" onclick="powerUps.loadOut.choose(4)"><div class="grid-title"><div class="circle-grid tech" style="background-image: radial-gradient(black, gray);"></div> &nbsp; Blade of Sal</div>Press Shift to summon the <b style="color: ${m.eyeFillColor};">Mythical</b> <em style="color: lightblue; text-shadow: ${m.eyeFillColor} 0px 0 5px;">Las Slayer</em><div>Drains <strong class='energy' data-help='energy'>Energy</strong></div></div>`;
                         }
                         document.getElementById("choose-grid").innerHTML = text;
                         powerUps.showDraft();//no known bugs ig idk, im keep this as it is
@@ -19685,6 +19685,7 @@ const moreLevels = {
             level.exit.drawAndCheck();
             level.enter.draw();
         };
+        level.customTopLayer = () => { }
         spawn.mapRect(-1150, 0, 2350, 150);
         spawn.mapRect(-1150, -600, 2350, 150);
         spawn.mapRect(-1150, -600, 150, 750);
@@ -19845,6 +19846,345 @@ const moreLevels = {
                 }
             }
         }
+    },
+    conduit() {
+        simulation.inGameConsole('conduit by Destiny');
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 2400;
+        level.exit.y = -3082;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        let button = level.button(-2340, 275);
+        let door = level.door(1850, -1100, 100, 600, 600, 10);
+        let boost = level.boost(-955, -1790, 1000, Math.PI / 3.5);
+        let boost2 = level.boost(-425, -50, 500);
+        let conduitCons = [];
+        spawn.bodyRect(1675, -700, 150, 150, 1, spawn.propsSlide);
+        spawn.bodyRect(1225, -550, 600, 50, 1, spawn.propsHoist); //hoist
+        conduitCons[0] = cons[cons.length] = Constraint.create({
+            pointA: {
+                x: 1525,
+                y: -1190
+            },
+            bodyB: body[body.length - 1],
+            stiffness: 0.0003,
+            length: 1
+        });
+        Composite.add(engine.world, cons[cons.length - 1]);
+        spawn.bodyRect(1650, -3150, 125, 125, 1, spawn.propsSlide);
+        spawn.bodyRect(1450, -3050, 325, 75, 1, spawn.propsHoist);
+        conduitCons[1] = cons[cons.length] = Constraint.create({
+            pointA: {
+                x: 1612.5,
+                y: -3675
+            },
+            bodyB: body[body.length - 1],
+            stiffness: 0.0003,
+            length: 1
+        });
+        Composite.add(engine.world, cons[cons.length - 1]);
+        let wires = new Path2D();
+        wires.moveTo(-2100, -555);
+        wires.lineTo(-1445, -555);
+        wires.lineTo(-1445, 570);
+        wires.lineTo(-1330, 570);
+        wires.lineTo(-1330, 475);
+        wires.moveTo(-2070, -525);
+        wires.lineTo(-2070, -195);
+        wires.lineTo(-2245, -195);
+        wires.lineTo(-2245, 275);
+        wires.moveTo(-2130, -525);
+        wires.lineTo(-2130, -905);
+        wires.lineTo(-475, -905);
+        wires.lineTo(1695, -905);
+        wires.lineTo(1695, -1125);
+        wires.moveTo(-1225, 345);
+        wires.lineTo(-525, 345);
+        wires.lineTo(0, 345);
+        wires.lineTo(492.5, 342.54);
+        wires.lineTo(492.5, 50);
+        wires.moveTo(1850, 435);
+        wires.lineTo(300, 435);
+        wires.lineTo(300, 725);
+        wires.moveTo(-1475, -305);
+        wires.lineTo(-925, -305);
+        wires.lineTo(-275, -305);
+        wires.moveTo(-30, 350);
+        wires.lineTo(-30, 125);
+        wires.moveTo(-2100, -540);
+        wires.lineTo(-1460, -540);
+        wires.lineTo(-1460, 585);
+        wires.lineTo(-1315, 585);
+        wires.lineTo(-1315, 475);
+        wires.moveTo(-2085, -525);
+        wires.lineTo(-2085, -210);
+        wires.lineTo(-2260, -210);
+        wires.lineTo(-2260, 275);
+        wires.moveTo(-2115, -525);
+        wires.lineTo(-2115, -890);
+        wires.lineTo(-475, -890);
+        wires.lineTo(1710, -890);
+        wires.lineTo(1710, -1125);
+        wires.moveTo(-1225, 360);
+        wires.lineTo(-525, 360);
+        wires.lineTo(0, 360);
+        wires.lineTo(507.5, 357.46);
+        wires.lineTo(507.5, 50);
+        wires.moveTo(1850, 420);
+        wires.lineTo(285, 420);
+        wires.lineTo(285, 725);
+        wires.moveTo(-1475, -290);
+        wires.lineTo(-925, -290);
+        wires.lineTo(-275, -290);
+        wires.moveTo(-15, 350);
+        wires.lineTo(-15, 125);
+        wires.moveTo(-2100, -525);
+        wires.lineTo(-1475, -525);
+        wires.lineTo(-1475, 600);
+        wires.lineTo(-1300, 600);
+        wires.lineTo(-1300, 475);
+        wires.moveTo(-2100, -525);
+        wires.lineTo(-2100, -225);
+        wires.lineTo(-2275, -225);
+        wires.lineTo(-2275, 275);
+        wires.moveTo(-2100, -525);
+        wires.lineTo(-2100, -875);
+        wires.lineTo(-475, -875);
+        wires.lineTo(1725, -875);
+        wires.lineTo(1725, -1125);
+        wires.moveTo(-1225, 375);
+        wires.lineTo(-525, 375);
+        wires.lineTo(0, 375);
+        wires.lineTo(225, 375);
+        wires.lineTo(225, 725);
+        wires.moveTo(1850, 405);
+        wires.lineTo(270, 405);
+        wires.lineTo(270, 725);
+        wires.moveTo(-1475, -275);
+        wires.lineTo(-925, -275);
+        wires.lineTo(-275, -275);
+        wires.moveTo(0, 350);
+        wires.lineTo(0, 125);
+        wires.moveTo(-2100, -510);
+        wires.lineTo(-1490, -510);
+        wires.lineTo(-1490, 600);
+        wires.lineTo(-1492.98, 1007.5);
+        wires.lineTo(-2007.5, 1007.5);
+        wires.lineTo(-2007.5, 800);
+        wires.moveTo(-2115, -525);
+        wires.lineTo(-2115, -240);
+        wires.lineTo(-2275, -240);
+        wires.lineTo(-3000.21, -237.5);
+        wires.moveTo(-2085, -525);
+        wires.lineTo(-2085, -860);
+        wires.lineTo(-475, -860);
+        wires.lineTo(7.5, -857.46);
+        wires.lineTo(7.5, -500);
+        wires.moveTo(-1225, 390);
+        wires.lineTo(-525, 390);
+        wires.lineTo(-392.5, 392.65);
+        wires.lineTo(-392.5, 725);
+        wires.moveTo(1850, 390);
+        wires.lineTo(255, 390);
+        wires.lineTo(255, 725);
+        wires.moveTo(-1475, -260);
+        wires.lineTo(-925, -260);
+        wires.lineTo(-492.5, -257.46);
+        wires.lineTo(-492.5, 50);
+        wires.moveTo(15, 350);
+        wires.lineTo(15, 125);
+        wires.moveTo(-2100, -495);
+        wires.lineTo(-1505, -495);
+        wires.lineTo(-1505, 600);
+        wires.lineTo(-1507.02, 992.5);
+        wires.lineTo(-1992.5, 992.5);
+        wires.lineTo(-1992.5, 800);
+        wires.moveTo(-2130, -525);
+        wires.lineTo(-2130, -255);
+        wires.lineTo(-2275, -255);
+        wires.lineTo(-2999.79, -252.5);
+        wires.moveTo(-2070, -525);
+        wires.lineTo(-2070, -845);
+        wires.lineTo(-475, -845);
+        wires.lineTo(-7.5, -842.54);
+        wires.lineTo(-7.5, -500);
+        wires.moveTo(-1225, 405);
+        wires.lineTo(-525, 405);
+        wires.lineTo(-407.5, 407.35);
+        wires.lineTo(-407.5, 725);
+        wires.moveTo(1850, 375);
+        wires.lineTo(240, 375);
+        wires.lineTo(240, 725);
+        wires.moveTo(-1475, -245);
+        wires.lineTo(-925, -245);
+        wires.lineTo(-507.5, -242.54);
+        wires.lineTo(-507.5, 50);
+        wires.moveTo(30, 350);
+        wires.lineTo(30, 125);
+        powerUps.directSpawn(-2100, -525, "tech");
+        const powerUp1 = powerUp[powerUp.length - 1]
+        if (powerUp1) powerUp1.holdPosition = { x: powerUp1.position.x, y: powerUp1.position.y }
+        level.custom = () => {
+            Matter.Body.setPosition(powerUp1, {
+                x: powerUp1.holdPosition.x, //1300 -2
+                y: powerUp1.holdPosition.y //335 -2
+            });
+            Matter.Body.setVelocity(powerUp1, { x: 0, y: 0 });
+            if (powerUp2 && Matter.Composite.get(engine.world, powerUp2.id, "body")) {
+                Matter.Body.setPosition(powerUp2, {
+                    x: powerUp2.holdPosition.x,
+                    y: powerUp2.holdPosition.y
+                });
+                Matter.Body.setVelocity(powerUp2, { x: 0, y: 0 });
+            }
+
+            ctx.strokeStyle = "#ccc"
+            ctx.lineWidth = 5;
+
+            ctx.stroke(wires);
+            ctx.fillStyle = "#ccc";
+            ctx.fillRect(-1525, -325, 100, 100);
+            ctx.fillRect(-2150, -575, 100, 100);
+            ctx.fillRect(-50, 325, 100, 100);
+            ctx.fillRect(-575, 325, 10, 100);
+            ctx.fillRect(200, 650, 125, 10);
+            ctx.fillRect(-1525, 400, 100, 10);
+            ctx.fillRect(-1400, 550, 10, 75);
+            ctx.fillRect(-2200, -275, 10, 100);
+            ctx.fillRect(-150, -925, 10, 100);
+            ctx.fillRect(1675, -1000, 75, 10);
+            ctx.fillRect(-625, -325, 10, 100);
+            ctx.fillRect(-2025, 900, 50, 10);
+            ctx.fillRect(375, 325, 10, 125);
+            level.exit.drawAndCheck();
+            level.enter.draw();
+            if (!button.isUp) door.openClose();
+            button.query();
+            button.draw();
+            boost.query();
+            boost2.query();
+            ctx.fillStyle = "#969696"
+            ctx.fillRect(2425, -3050, 50, 2525);
+
+            ctx.beginPath();
+            for (let i = 0, len = conduitCons.length; i < len; ++i) {
+                ctx.moveTo(conduitCons[i].pointA.x, conduitCons[i].pointA.y);
+                ctx.lineTo(conduitCons[i].bodyB.position.x + conduitCons[i].pointB.x, conduitCons[i].bodyB.position.y + conduitCons[i].pointB.y);
+            }
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgba(0,0,0,0.15)";
+            ctx.stroke();
+
+            if (powerUp2 && Matter.Composite.get(engine.world, powerUp2.id, "body")) {
+                ctx.globalAlpha = 0.4 * Math.sin(simulation.cycle * 0.15) + 0.6;
+                ctx.beginPath();
+                ctx.arc(powerUp2.position.x, powerUp2.position.y, Math.min(powerUp2.cycle, powerUp2.size), 0, 2 * Math.PI);
+                ctx.fillStyle = `hsl(${(simulation.cycle * 2) % 360}, 100%, 50%)`;
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        };
+        let fadeAlpha = 0;
+        level.customTopLayer = () => {
+            const targetAlpha =
+                (m.pos.x > -1375 && m.pos.x < 1975 &&
+                    m.pos.y > 150 && m.pos.y < 750)
+                    ? 0.1
+                    : 1;
+            fadeAlpha += (targetAlpha - fadeAlpha) * 0.08;
+            ctx.fillStyle = `rgba(68, 68, 68, ${fadeAlpha})`;
+            ctx.fillRect(-1375, 0, 3350, 850);
+        };
+
+        spawn.mapRect(-1375, 0, 3350, 150);
+        spawn.mapRect(1825, -550, 150, 1400);
+        spawn.mapRect(-325, -550, 150, 700);
+        spawn.mapRect(-325, -550, 1550, 150);
+        spawn.mapRect(-1375, 700, 3350, 150);
+        spawn.mapRect(-1375, 0, 150, 525);
+        spawn.mapRect(-3225, 275, 1650, 575);
+        spawn.mapRect(-3225, -1725, 400, 2575);
+        spawn.mapRect(-3225, -1725, 5200, 650);
+        spawn.mapRect(2150, -550, 750, 150);
+        spawn.mapRect(2750, -1725, 150, 1325);
+        spawn.mapRect(2250, -800, 400, 25);
+        spawn.mapRect(2250, -1175, 400, 25);
+        spawn.mapRect(2250, -1550, 400, 25);
+        spawn.mapRect(2250, -3050, 400, 25);
+        spawn.mapRect(-300, -2300, 2275, 200);
+        spawn.mapRect(1225, -1850, 375, 175);
+        spawn.mapRect(75, -1950, 950, 125);
+        spawn.mapRect(-3225, -3925, 2300, 2850);
+        spawn.mapRect(1775, -3050, 200, 950);
+        spawn.mapRect(-3225, -3925, 6125, 350);
+        spawn.mapRect(-1725, 0, 150, 375);
+        spawn.mapRect(-3225, -3050, 4675, 450);
+
+        spawn.bodyRect(-2525, 225, 50, 50);
+        spawn.bodyRect(-2525, 175, 50, 50);
+        spawn.bodyRect(-2525, 125, 50, 50);
+
+        spawn.randomLevelBoss(-1600, -525);
+        spawn.randomMob(1000, -750);
+        spawn.randomMob(75, -775);
+        spawn.randomMob(-800, -225);
+        spawn.randomMob(-575, -2325);
+        spawn.randomMob(-575, -1950);
+        spawn.randomMob(1575, -1950);
+        spawn.randomMob(2100, -1375);
+        spawn.randomGroup(-650, -3300);
+        const connection = {
+            connection: {
+                name: "connection",
+                get color() {
+                    return 'transparent';
+                },
+                size() { return 40 },
+                effect() {
+                    if (m.alive) {
+                        if (lore.techCount > 0) {
+                            const connect = document.createElement("iframe");
+                            connect.src = "https://whyisthisnotavalable.github.io/n-gon-autobattler/tower/?event=undefined";
+                            connect.style.display = "none";
+                            document.body.appendChild(connect);
+                            connect.addEventListener("load", () => {
+                                simulation.inGameConsole(`<strong class="lore-text">connection established</strong><br>`);
+                                setTimeout(() => {
+                                    connect.remove();
+                                }, 1000);
+                            });
+                            if (lore.techCount > 1) {
+                                lore.techCount--;
+                                for (let i = 0; i < tech.tech.length; i++) {
+                                    if (tech.tech[i].name === 'undefined') {
+                                        tech.tech[i].count--;
+                                    }
+                                }
+                                simulation.updateTechHUD()
+                            } else {
+                                tech.removeTech("undefined")
+                            }
+                        }
+                    }
+                },
+            }
+        }
+        Object.assign(powerUps, connection)
+        powerUps.directSpawn(0, 375, "connection")
+        const powerUp2 = powerUp[powerUp.length - 1]
+        if (powerUp2) powerUp2.holdPosition = { x: powerUp2.position.x, y: powerUp2.position.y }
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        spawn.debris(-1200, -25, 500, 6); //16 debris per level
+        // spawn.bodyRect(1540, -1110, 300, 25, 0.9); 
+        // spawn.randomSmallMob(1300, -70);
+        // spawn.randomMob(2650, -975, 0.8);
+        // spawn.randomGroup(1700, -900, 0.4);
+        // spawn.randomLevelBoss(2200, -1300);
+        // spawn.secondaryBossChance(100, -1500)
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     LaunchSite() {
         simulation.inGameConsole(`<strong>Launch Site</strong> by <span class='color-var'>Des Boot</span>`);
@@ -23253,8 +23593,7 @@ const moreLevels = {
         }
     },
     soft() {
-        simulation.inGameConsole(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)">`);
-        simulation.inGameConsole(`<strong>soft</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.inGameConsole(`<strong>soft</strong> by <span class='color-var'>Destiny</span>`);
         simulation.inGameConsole("<em>The lasers deal less damage the higher level you are</em>")
         const portals = [];
         portals.push(level.portal({
@@ -23273,23 +23612,24 @@ const moreLevels = {
                 const bodyHeight = radius;
                 const numRows = Math.ceil(height / bodyHeight);
                 const numCols = Math.ceil(width / bodyWidth);
-
+                const group = Matter.Body.nextGroup(true);
                 for (let i = 0; i < numRows; i++) {
                     for (let j = 0; j < numCols; j++) {
                         const posX = x + j * bodyWidth + bodyWidth / 2;
                         const posY = y + i * bodyHeight + bodyHeight / 2;
-
-                        const rect = Matter.Bodies.circle(posX, posY, (bodyWidth + bodyHeight) / 4, options);
+                        const particleRadius = bodyWidth * 0.75;
+                        const rect = Matter.Bodies.circle(posX, posY, particleRadius, options);
                         rect.collisionFilter.category = cat.body;
                         rect.collisionFilter.mask = (touchPlayer ? cat.player | cat.body | cat.bullet | cat.mob | cat.mobBullet : cat.body | cat.bullet | cat.mob | cat.mobBullet);
+                        rect.collisionFilter.group = group;
                         rect.classType = "body";
+                        Matter.Body.setInertia(rect, Infinity);
 
                         Composite.add(engine.world, rect);
 
                         bodies.push(rect);
                     }
                 }
-
                 for (let i = 0; i < numRows; i++) {
                     for (let j = 0; j < numCols; j++) {
                         const bodyIndexA = i * numCols + j;
@@ -23299,7 +23639,7 @@ const moreLevels = {
                                 bodyA: bodies[bodyIndexA],
                                 bodyB: bodies[bodyIndexB],
                                 stiffness: 0.06,
-                                damping: 0.001
+                                damping: 0.05
                             });
                             Composite.add(engine.world, constraint);
                             constraints.push(constraint);
@@ -23310,14 +23650,13 @@ const moreLevels = {
                                 bodyA: bodies[bodyIndexA],
                                 bodyB: bodies[bodyIndexB],
                                 stiffness: 0.06,
-                                damping: 0.001
+                                damping: 0.05
                             });
                             Composite.add(engine.world, constraint);
                             constraints.push(constraint);
                         }
                     }
                 }
-
                 for (let i = 0; i < numRows - 1; i++) {
                     for (let j = 0; j < numCols - 1; j++) {
                         const bodyA = bodies[i * numCols + j];
@@ -23325,8 +23664,10 @@ const moreLevels = {
                         const constraint = Constraint.create({
                             bodyA: bodyA,
                             bodyB: bodyB,
-                            stiffness: 0.02
+                            stiffness: 0.02,
+                            damping: 0.05
                         });
+                        Composite.add(engine.world, constraint);
                         constraints.push(constraint);
                     }
                 }
@@ -23338,11 +23679,14 @@ const moreLevels = {
                         const constraint = Constraint.create({
                             bodyA: bodyA,
                             bodyB: bodyB,
-                            stiffness: 0.02
+                            stiffness: 0.02,
+                            damping: 0.05
                         });
+                        Composite.add(engine.world, constraint);
                         constraints.push(constraint);
                     }
                 }
+
                 if (stayStill) {
                     for (let i = 0; i < bodies.length; i++) {
                         const by = bodies[i];
@@ -23350,7 +23694,7 @@ const moreLevels = {
                         const spawnY = by.position.y + bodyHeight / 2;
                         const isLastColumn = (i + 1) % numCols === 0;
                         const isFirstColumn = i % numCols === 0;
-                        const stiffness = constrictionStrength * (isLastColumn || isFirstColumn ? 100 : 1); // Apply extra stiffness to first and last columns
+                        const stiffness = constrictionStrength * (isLastColumn || isFirstColumn ? 100 : 1);
 
                         const cost = Constraint.create({
                             bodyA: by,
@@ -23375,7 +23719,81 @@ const moreLevels = {
                     }
                 }
 
-                return { bodies, constraints, otherCons };
+                return { bodies, constraints, otherCons, numRows, numCols };
+            },
+            computeOutlinePoints(bodies, numRows, numCols) {
+                const loop = [];
+                for (let j = 0; j < numCols; j++) loop.push(bodies[j]);
+                for (let i = 1; i < numRows; i++) loop.push(bodies[i * numCols + (numCols - 1)]);
+                for (let j = numCols - 2; j >= 0; j--) loop.push(bodies[(numRows - 1) * numCols + j]);
+                for (let i = numRows - 2; i >= 1; i--) loop.push(bodies[i * numCols]);
+
+                const n = loop.length;
+                if (n < 3) return loop.map(b => ({ x: b.position.x, y: b.position.y }));
+                let cx = 0, cy = 0;
+                for (let i = 0; i < n; i++) { cx += loop[i].position.x; cy += loop[i].position.y; }
+                cx /= n; cy /= n;
+
+                const p0 = loop[0].position;
+                const pPrev0 = loop[n - 1].position;
+                const pNext0 = loop[1].position;
+                const tx0 = pNext0.x - pPrev0.x, ty0 = pNext0.y - pPrev0.y;
+                let nx0 = -ty0, ny0 = tx0;
+                const nl0 = Math.hypot(nx0, ny0) || 1;
+                nx0 /= nl0; ny0 /= nl0;
+                const towardCentroidX = cx - p0.x, towardCentroidY = cy - p0.y;
+                const sign = (nx0 * towardCentroidX + ny0 * towardCentroidY) > 0 ? -1 : 1;
+
+                const pts = [];
+                for (let i = 0; i < n; i++) {
+                    const body = loop[i];
+                    const prev = loop[(i - 1 + n) % n].position;
+                    const next = loop[(i + 1) % n].position;
+                    let tx = next.x - prev.x, ty = next.y - prev.y;
+                    let nx = -ty * sign, ny = tx * sign;
+                    const l = Math.hypot(nx, ny) || 1;
+                    nx /= l; ny /= l;
+                    const r = body.circleRadius;
+                    pts.push({ x: body.position.x + nx * r, y: body.position.y + ny * r });
+                }
+                return pts;
+            },
+            traceSmoothPath(pts) {
+                ctx.beginPath();
+                if (pts.length < 3) {
+                    for (let i = 0; i < pts.length; i++) {
+                        if (i === 0) ctx.moveTo(pts[i].x, pts[i].y);
+                        else ctx.lineTo(pts[i].x, pts[i].y);
+                    }
+                    return;
+                }
+                const start = {
+                    x: (pts[0].x + pts[pts.length - 1].x) / 2,
+                    y: (pts[0].y + pts[pts.length - 1].y) / 2
+                };
+                ctx.moveTo(start.x, start.y);
+                for (let i = 0; i < pts.length; i++) {
+                    const cur = pts[i];
+                    const next = pts[(i + 1) % pts.length];
+                    const mid = { x: (cur.x + next.x) / 2, y: (cur.y + next.y) / 2 };
+                    ctx.quadraticCurveTo(cur.x, cur.y, mid.x, mid.y);
+                }
+                ctx.closePath();
+            },
+            draw(cloth) {
+                const pts = this.computeOutlinePoints(cloth.bodies, cloth.numRows, cloth.numCols);
+                this.traceSmoothPath(pts);
+                ctx.fillStyle = "rgba(80,80,80,0.85)";
+                ctx.fill();
+                // ctx.beginPath();
+                // ctx.lineWidth = 1;
+                // ctx.strokeStyle = "rgba(255,255,255,0.1)";
+                // for (let i = 0, len = cloth.constraints.length; i < len; ++i) {
+                //     const c = cloth.constraints[i];
+                //     ctx.moveTo(c.bodyA.position.x, c.bodyA.position.y);
+                //     ctx.lineTo(c.bodyB.position.x, c.bodyB.position.y);
+                // }
+                // ctx.stroke();
             },
             clothOptions: {
                 frictionAir: 0.005,
@@ -23396,20 +23814,6 @@ const moreLevels = {
                     }
                 }
                 return false;
-            },
-            draw(cloth) {
-                ctx.beginPath();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "rgba(0,0,0,0.3)";
-                ctx.fillStyle = "black";
-                for (let i = 0, len = cloth.constraints.length; i < len; ++i) {
-                    const constraint = cloth.constraints[i];
-                    ctx.moveTo(constraint.bodyA.position.x, constraint.bodyA.position.y);
-                    ctx.lineTo(constraint.bodyB.position.x, constraint.bodyB.position.y);
-                }
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
             },
             addGravity(bodies, magnitude) {
                 for (var i = 0; i < bodies.length; i++) {
@@ -23447,8 +23851,67 @@ const moreLevels = {
                     const removeBody = cloth.bodies[i];
                     Composite.remove(engine.world, removeBody);
                 }
-                cloth.bodies.length = 0; // Clear the bodies array after removal
-            }
+                cloth.bodies.length = 0;
+            },
+            softRect(x, y, w, h) {
+                clothArray.push(soft.createCloth(x, y, 50, w, h, false, true, soft.clothOptions, true));
+            },
+            exit: {
+                x: 0,
+                y: 0,
+                drawAndCheck() {
+                    if ( //check
+                        player.position.x > level.exit.x &&
+                        player.position.x < level.exit.x + 100 &&
+                        player.position.y > level.exit.y - 250 &&
+                        player.position.y < level.exit.y + 35 &&
+                        player.velocity.y < 0.15
+                    ) {
+                        // level.exitCount += input.down ? 8 : 2
+                        level.exitCount += m.health < 0 ? 0.5 : 3
+                    } else if (level.exitCount > 0) {
+                        level.exitCount -= 3
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(level.exit.x, level.exit.y + 30);
+                    ctx.lineTo(level.exit.x, level.exit.y - 80);
+                    ctx.bezierCurveTo(level.exit.x, level.exit.y - 170, level.exit.x + 100, level.exit.y - 170, level.exit.x + 100, level.exit.y - 80);
+                    ctx.lineTo(level.exit.x + 100, level.exit.y + 30);
+                    ctx.lineTo(level.exit.x, level.exit.y + 30);
+                    ctx.fillStyle = "#0ff";
+                    ctx.fill();
+
+                    if (level.exitCount > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(level.exit.x, level.exit.y + 40);
+                        ctx.lineTo(level.exit.x, level.exit.y - 80);
+                        ctx.bezierCurveTo(level.exit.x, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148);
+                        ctx.moveTo(level.exit.x + 100, level.exit.y + 40);
+                        ctx.lineTo(level.exit.x + 100, level.exit.y - 80);
+                        ctx.bezierCurveTo(level.exit.x + 100, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148);
+                        ctx.setLineDash([200, 200]);
+                        ctx.lineDashOffset = Math.max(-15, 185 - 2.1 * level.exitCount)
+                        if (m.health < 0) {
+                            ctx.strokeStyle = "#f00"
+                            ctx.lineWidth = 6 + 0.1 * (level.exitCount)
+                        } else {
+                            ctx.strokeStyle = "#444"
+                            ctx.lineWidth = 2
+                        }
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        if (level.exitCount > 100) {
+                            level.exitCount = 0
+                            for (let i = 0; i < clothArray.length; i++) {
+                                soft.annihilate(clothArray[i])
+                            }
+                            level.nextLevel()
+                        }
+                    }
+                },
+            },
         }
         const clothArray = [];
         clothArray.push(soft.createCloth(-100, 0, 50, 1000, 300, false, true, soft.clothOptions, true))
@@ -23667,6 +24130,8 @@ const moreLevels = {
         level.setPosToSpawn(-350, 0);
         level.exit.x = 1075;
         level.exit.y = 20;
+        soft.exit.x = 1075;
+        soft.exit.y = 20;
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
         level.defaultZoom = 1800
@@ -23717,7 +24182,8 @@ const moreLevels = {
         const mapWithVertex = map[map.length - 1];
         let index1 = 0;
         level.custom = () => {
-            level.exit.drawAndCheck();
+            // level.exit.drawAndCheck();
+            soft.exit.drawAndCheck();
 
             level.enter.draw();
 
@@ -27042,7 +27508,7 @@ const moreLevels = {
         setTimeout(() => {
             simulation.inGameConsole(`Beat my <b>challenge</b>.<br>I'll give you <b>three</b> <span class='color-var'>tech</span>, and I'll let you leave.`);
             setTimeout(() => {
-                simulation.inGameConsole(`Use your <strong class="color-f">field</strong> to select your answer.`);
+                simulation.inGameConsole(`Use your <strong class="energy" data-help="energy">field</strong> to select your answer.`);
             }, 1000);
         }, 1000);
         level.setPosToSpawn(-400, -30);
@@ -29618,21 +30084,21 @@ const moreLevels = {
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
         let instruction = 0
-        level.trainingText(`activate your <strong class= 'color-f'> field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong> right mouse</strong>`)
+        level.trainingText(`activate your <strong class= 'energy'> field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong> right mouse</strong>`)
         level.announceTextTraining(750, 100, `activate your field with ${input.key.field.replace('Key', '').replace('Digit', '')} or right mouse`)
 
         level.custom = () => {
             if (instruction === 0 && input.field) {
                 instruction++
-                level.trainingText(`<s> activate your <strong class='color-f'> field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong></s><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up`)
+                level.trainingText(`<s> activate your <strong class='energy' data-help='energy'> field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong></s><br>release your <strong class='energy' data-help='energy'>field</strong> on a <strong class='block' data-help='block'>block</strong> to pick it up`)
                 level.announceTextTraining(750, 100, `release your field on a block to pick it up`)
             } else if (instruction === 1 && m.isHolding) {
                 instruction++
-                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up</s><br>drop the <strong class='color-block'>block</strong> on the red button to open the door`)
+                level.trainingText(`<s>activate your <strong class='energy' data-help='energy'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='energy' data-help='energy'>field</strong> on a <strong class='block' data-help='block'>block</strong> to pick it up</s><br>drop the <strong class='block' data-help='block'>block</strong> on the red button to open the door`)
                 level.announceTextTraining(750, 100, `drop the block on the red button to open the door`)
             } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
                 instruction++
-                level.trainingText(`<s>activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='color-f'>field</strong> on a <strong class='color-block'>block</strong> to pick it up<br>drop the <strong class='color-block'>block</strong> on the red button to open the door</s>`)
+                level.trainingText(`<s>activate your <strong class='energy' data-help='energy'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong><br>release your <strong class='energy' data-help='energy'>field</strong> on a <strong class='block' data-help='block'>block</strong> to pick it up<br>drop the <strong class='block' data-help='block'>block</strong> on the red button to open the door</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //exit room
@@ -29702,28 +30168,28 @@ const moreLevels = {
         const buttonDoor = level.button(1635, -400)
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
-        // activate your <strong class='color-f'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
+        // activate your <strong class='energy' data-help='energy'>field</strong> with <strong class="key-input-train">${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
         let instruction = 0
-        level.trainingText(`pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>`)
+        level.trainingText(`pick up the <strong class='block' data-help='block'>block</strong> with your <strong class='energy' data-help='energy'>field</strong>`)
         level.announceTextTraining(750, 100, `pick up the block with your field`)
         level.custom = () => {
             if (instruction === 0 && m.isHolding) {
                 instruction++
-                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong></s>
-                    <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong>`)
+                level.trainingText(`<s>pick up the <strong class='block' data-help='block'>block</strong> with your <strong class='energy' data-help='energy'>field</strong></s>
+                    <br>hold your <strong class='energy' data-help='energy'>field</strong> down to charge up then release to throw a <strong class='block' data-help='block'>block</strong>`)
                 level.announceTextTraining(750, 100, `hold your field down to charge then release to throw a block`)
             } else if (instruction === 1 && m.throwCharge > 2) {
                 instruction++
-                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
-                            <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong></s>
-                        <br>throw the <strong class='color-block'>block</strong> onto the button`)
+                level.trainingText(`<s>pick up the <strong class='block' data-help='block'>block</strong> with your <strong class='energy' data-help='energy'>field</strong>
+                            <br>hold your <strong class='energy' data-help='energy'>field</strong> down to charge up then release to throw a <strong class='block' data-help='block'>block</strong></s>
+                        <br>throw the <strong class='block' data-help='block'>block</strong> onto the button`)
                 level.announceTextTraining(750, 100, `throw the block onto the button`)
 
             } else if (instruction === 2 && !buttonDoor.isUp && Vector.magnitudeSquared(Vector.sub(body[0].position, buttonDoor.min)) < 10000) {
                 instruction++
-                level.trainingText(`<s>pick up the <strong class='color-block'>block</strong> with your <strong class='color-f'>field</strong>
-                                <br>hold your <strong class='color-f'>field</strong> down to charge up then release to throw a <strong class='color-block'>block</strong>
-                                    <br>throw the <strong class='color-block'>block</strong> onto the button</s>`)
+                level.trainingText(`<s>pick up the <strong class='block' data-help='block'>block</strong> with your <strong class='energy' data-help='energy'>field</strong>
+                                <br>hold your <strong class='energy' data-help='energy'>field</strong> down to charge up then release to throw a <strong class='block' data-help='block'>block</strong>
+                                    <br>throw the <strong class='block' data-help='block'>block</strong> onto the button</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //exit room
@@ -29793,13 +30259,13 @@ const moreLevels = {
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
 
         let instruction = 0
-        level.trainingText(`throw the <strong class='color-block'>block</strong> at the <strong>mobs</strong> to open the door`)
+        level.trainingText(`throw the <strong class='block' data-help='block'>block</strong> at the <strong>mobs</strong> to open the door`)
         level.announceTextTraining(750, 100, `throw the block at the mobs to open the door`)
 
         level.custom = () => {
             if (instruction === 0 && !mob.length) {
                 instruction++
-                level.trainingText(`<s>throw the <strong class='color-block'>block</strong> at the <strong>mobs</strong> to open the door</s>`)
+                level.trainingText(`<s>throw the <strong class='block' data-help='block'>block</strong> at the <strong>mobs</strong> to open the door</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //exit room
@@ -29873,34 +30339,34 @@ const moreLevels = {
         const buttonDoor = level.button(400, 0)
 
         let instruction = 0
-        level.trainingText(`use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}`)
+        level.trainingText(`use your <strong class='energy' data-help='energy'>field</strong> to pick up ${powerUps.orb.gun()}`)
         level.announceTextTraining(750, 100, `use your field to pick up the orb`)
 
         level.custom = () => {
             if (instruction === 0 && simulation.isChoosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}</s>
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up ${powerUps.orb.gun()}</s>
                                     <br>choose a <strong class='color-g'>gun</strong>`)
                 level.announceTextTraining(750, 100, `choose a gun`)
             } else if (instruction === 1 && !simulation.isChoosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up ${powerUps.orb.gun()}
                                             <br>choose a <strong class='color-g'>gun</strong></s>
                                         <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>`)
                 level.announceTextTraining(750, 100, `use the left mouse button to shoot the mobs`)
             } else if (instruction === 2 && mob.length < 2) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up ${powerUps.orb.gun()}
                                                 <br>choose a <strong class='color-g'>gun</strong>
                                                     <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong></s>
-                                                    <br>drop a <strong class='color-block'>block</strong> on the red button to open the door`)
+                                                    <br>drop a <strong class='block' data-help='block'>block</strong> on the red button to open the door`)
                 level.announceTextTraining(750, 100, `drop a block on the red button to open the door`)
             } else if (instruction === 3 && !door.isClosing) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up ${powerUps.orb.gun()}
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up ${powerUps.orb.gun()}
                                                             <br>choose a <strong class='color-g'>gun</strong>
                                                                 <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>
-                                                                    <br>put a <strong class='color-block'>block</strong> on the red button to open the door</s>`)
+                                                                    <br>put a <strong class='block' data-help='block'>block</strong> on the red button to open the door</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             if (!powerUp.length) {
@@ -29973,13 +30439,13 @@ const moreLevels = {
         document.body.style.backgroundColor = level.trainingBackgroundColor
 
         let instruction = 0
-        // activate your <strong class='color-f'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
-        level.trainingText(`use your <strong class='color-f'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong>`)
+        // activate your <strong class='energy' data-help='energy'>field</strong> with <strong>${input.key.field.replace('Key', '').replace('Digit', '')}</strong> or <strong>right mouse</strong>
+        level.trainingText(`use your <strong class='energy' data-help='energy'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong>`)
         level.announceTextTraining(950, 100, `use your field to deflect the mobs`)
         level.custom = () => {
             if (instruction === 0 && m.pos.x > 1350) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong></s>`)
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to <strong>deflect</strong> the <strong style="color:rgb(215,0,145);">mobs</strong></s>`)
                 level.announceTextTraining(950, 100, ``)
             }
             //teleport to start if hit
@@ -30056,13 +30522,13 @@ const moreLevels = {
 
         let instruction = 0
         level.trainingText(`your <strong>health</strong> is displayed in the top left corner
-                                                                    <br>use your <strong class='color-f'>field</strong> to pick up <div class="heal-circle" style="border: none;"></div> until your <strong>health</strong> is full`)
+                                                                    <br>use your <strong class='energy' data-help='energy'>field</strong> to pick up <div class="heal-circle" style="border: none;"></div> until your <strong>health</strong> is full`)
         level.announceTextTraining(750, 100, `pick up heal orbs until your health is full`)
 
         level.custom = () => {
             if (instruction === 0 && m.health === 1) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up <div class="heal-circle" style="border: none;"></div> until your <strong>health</strong> is full</s>`)
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up <div class="heal-circle" style="border: none;"></div> until your <strong>health</strong> is full</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //exit room
@@ -30122,18 +30588,18 @@ const moreLevels = {
 
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
         let instruction = 0
-        level.trainingText(`use your <strong class='color-f'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong>`)
+        level.trainingText(`use your <strong class='energy' data-help='energy'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong>`)
         level.announceTextTraining(750, 100, `use your field to pick up the ammo orbs`)
 
         level.custom = () => {
             if (instruction === 0 && b.inventory.length && b.guns[b.activeGun].ammo > 0) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong></s>
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong></s>
                                                                         <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong>`)
                 level.announceTextTraining(750, 100, `use the left mouse button to shoot at the mobs`)
             } else if (instruction === 1 && mob.length === 0) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong>
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to pick up <div class="ammo-circle" style="border: none;"></div> for your <strong class='color-g'>nail gun</strong>
                                                                                 <br>use the <strong>left mouse</strong> button to shoot the <strong>mobs</strong></s>`)
                 level.announceTextTraining(750, 100, ``)
             }
@@ -30484,13 +30950,13 @@ const moreLevels = {
         const door = level.door(1612.5, -175, 25, 190, 185, 3)
         door.isClosing = true
         let instruction = 0
-        level.trainingText(`use <strong class='color-g'>missiles</strong> to drop a <strong class='color-block'>block</strong> on the button`)
+        level.trainingText(`use <strong class='color-g'>missiles</strong> to drop a <strong class='block' data-help='block'>block</strong> on the button`)
         level.announceTextTraining(750, 100, `use missiles to drop a block on the button`)
 
         level.custom = () => {
             if (instruction === 0 && !door.isClosing) {
                 instruction++
-                level.trainingText(`<s>use <strong class='color-g'>missiles</strong> to drop a <strong class='color-block'>block</strong> on the button</s>`)
+                level.trainingText(`<s>use <strong class='color-g'>missiles</strong> to drop a <strong class='block' data-help='block'>block</strong> on the button</s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //spawn ammo if you run out
@@ -30570,14 +31036,14 @@ const moreLevels = {
         document.body.style.backgroundColor = level.trainingBackgroundColor
         b.resetAllGuns();
         let instruction = 0
-        level.trainingText(`use your <strong class='color-f'>field</strong> to stack the <strong class='color-block'>blocks</strong>`)
+        level.trainingText(`use your <strong class='energy' data-help='energy'>field</strong> to stack the <strong class='block' data-help='block'>blocks</strong>`)
         level.announceTextTraining(750, 100, `use your field to stack the blocks`)
 
 
         level.custom = () => {
             if (instruction === 0 && m.pos.x > 1635) {
                 instruction++
-                level.trainingText(`<s>use your <strong class='color-f'>field</strong> to stack the <strong class='color-block'>blocks</strong></s>`)
+                level.trainingText(`<s>use your <strong class='energy' data-help='energy'>field</strong> to stack the <strong class='block' data-help='block'>blocks</strong></s>`)
                 level.announceTextTraining(750, 100, ``)
             }
 
@@ -30636,15 +31102,15 @@ const moreLevels = {
         level.custom = () => {
             if (instruction === 0 && !button.isUp) {
                 instruction++
-                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong></s><br>turn the <strong>mobs</strong> into <strong class='color-block'>blocks</strong>`)
+                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong></s><br>turn the <strong>mobs</strong> into <strong class='block' data-help='block'>blocks</strong>`)
                 level.announceTextTraining(750, 100, `turn the mobs into blocks`)
             } else if (instruction === 1 && body.length > 2) {
                 instruction++
-                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong><br>turn the <strong>mobs</strong> into <strong class='color-block'>blocks</strong></s><br>use your <strong class='color-f'>field</strong> to stack the <strong class='color-block'>blocks</strong>`)
+                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong><br>turn the <strong>mobs</strong> into <strong class='block' data-help='block'>blocks</strong></s><br>use your <strong class='energy' data-help='energy'>field</strong> to stack the <strong class='block' data-help='block'>blocks</strong>`)
                 level.announceTextTraining(750, 100, `use your field to stack the blocks`)
             } else if (instruction === 2 && m.pos.x > 1635) {
                 instruction++
-                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong><br>turn the <strong>mobs</strong> into <strong class='color-block'>blocks</strong><br>use your <strong class='color-f'>field</strong> to stack the <strong class='color-block'>blocks</strong></s>`)
+                level.trainingText(`<s>press the red <strong>button</strong> to spawn a <strong>mob</strong><br>turn the <strong>mobs</strong> into <strong class='block' data-help='block'>blocks</strong><br>use your <strong class='energy' data-help='energy'>field</strong> to stack the <strong class='block' data-help='block'>blocks</strong></s>`)
                 level.announceTextTraining(750, 100, ``)
             }
             //spawn ammo if you run out
@@ -30729,16 +31195,16 @@ const moreLevels = {
             if (instruction === 0 && elevator1.isOn) {
                 instruction++
                 level.trainingText(`<s>flip the <strong>switch</strong> to turn on the <strong>elevator</strong></s>
-                                                                                        <br>put a <strong class='color-block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong>`)
+                                                                                        <br>put a <strong class='block' data-help='block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong>`)
                 level.announceTextTraining(1175, -810, `put a block on the button`)
             } else if (instruction === 1 && elevator2.isOn) {
                 instruction++
-                level.trainingText(`<s>flip the <strong>switch</strong> to turn on the <strong>elevator</strong><br>put a <strong class='color-block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong></s>
+                level.trainingText(`<s>flip the <strong>switch</strong> to turn on the <strong>elevator</strong><br>put a <strong class='block' data-help='block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong></s>
                                                                                             <br>hold <strong>jump</strong> before the <strong>elevator's</strong> <strong>apex</strong> to reach the <strong>exit</strong>`)
                 level.announceTextTraining(1250, -810, `hold jump at the elevator's apex`)
             } else if (instruction === 2 && m.pos.x > 1635) {
                 instruction++
-                level.trainingText(`<s>flip the <strong>switch</strong> to turn on the <strong>elevator</strong><br>put a <strong class='color-block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong><br>hold <strong>jump</strong> before the <strong>elevator's</strong> <strong>apex</strong> to reach the <strong>exit</strong></s>`)
+                level.trainingText(`<s>flip the <strong>switch</strong> to turn on the <strong>elevator</strong><br>put a <strong class='block' data-help='block'>block</strong> on the <strong>button</strong> to active the <strong>elevator</strong><br>hold <strong>jump</strong> before the <strong>elevator's</strong> <strong>apex</strong> to reach the <strong>exit</strong></s>`)
             }
             //exit room
             ctx.fillStyle = "#f2f2f2"
@@ -31435,4 +31901,4 @@ const moreLevels = {
         spawn.mapRect(1600, -1200, 500, 850); //exit roof
         spawn.mapRect(1600, -400, 50, 225); //exit room left upper wall
     },
-}
+})

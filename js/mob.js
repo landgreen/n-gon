@@ -23,9 +23,11 @@ const mobs = {
             for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
             ctx.lineTo(vertices[0].x, vertices[0].y);
             ctx.fillStyle = mob[i].fill;
-            ctx.strokeStyle = mob[i].stroke;
             ctx.fill();
-            ctx.stroke();
+            if (mob[i].stroke !== "transparent") {
+                ctx.strokeStyle = mob[i].stroke;
+                ctx.stroke();
+            }
         }
     },
     statusSlow(who, cycles = 60) {
@@ -372,14 +374,14 @@ const mobs = {
             },
             seePlayerByHistory(depth = 30) { //depth max 60?  limit of history
                 if (!(simulation.cycle % this.seePlayerFreq)) {
-                    if (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && !m.isCloak) {
+                    if (!Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) && !m.isCloak) {
                         this.foundPlayer();
                     } else if (this.seePlayer.recall) {
                         this.lostPlayer();
                         if (!m.isCloak) {
                             for (let i = 0; i < depth; i++) { //if lost player lock onto a player location in history
                                 let history = m.history[(simulation.cycle - 10 * i) % 600]
-                                if (Matter.Query.ray(map, this.position, history.position).length === 0) {
+                                if (!Matter.Query.rayAny(map, this.position, history.position)) {
                                     this.seePlayer.recall = this.memory + Math.round(this.memory * Math.random()); //cycles before mob falls a sleep
                                     this.seePlayer.position.x = history.position.x;
                                     this.seePlayer.position.y = history.position.y;
@@ -402,7 +404,7 @@ const mobs = {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
-                        Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                        !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                         // Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0 &&
                         !m.isCloak
                     ) {
@@ -424,7 +426,7 @@ const mobs = {
             seePlayerByDistOrLOS() {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     if (
-                        (this.distanceToPlayer2() < this.seeAtDistance2 || (Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0)) && //&& Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+                        (this.distanceToPlayer2() < this.seeAtDistance2 || (!Matter.Query.rayAny(map, this.position, this.playerPosRandomY()))) && //&& Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -452,7 +454,7 @@ const mobs = {
                 if (!(simulation.cycle % this.seePlayerFreq) && (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange))) {
                     if (
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
-                        Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 &&
+                        !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                         // Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0 &&
                         !m.isCloak
                     ) {
@@ -556,8 +558,7 @@ const mobs = {
                 ctx.fill();
 
                 //check for wing -> player damage
-                const hitPlayer = Matter.Query.ray([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius)
-                if (hitPlayer.length && m.immuneCycle < m.cycle) {
+                if (Matter.Query.rayAny([player], this.position, Vector.add(this.position, Vector.mult(perp, radius * 2.05)), minorRadius) && m.immuneCycle < m.cycle) {
                     if (!(m.cycle % 10)) m.takeDamage(10 * dmg * this.damageScale());
                     // if (m.immuneCycle < m.cycle + immuneTime) m.immuneCycle = m.cycle + immuneTime; //player is immune to damage
 
@@ -590,8 +591,8 @@ const mobs = {
                     if (
                         (this.seePlayer.recall || this.isLookingAtPlayer(this.lookRange)) &&
                         this.distanceToPlayer2() < this.seeAtDistance2 &&
-                        Matter.Query.ray(map, this.position, player.position).length === 0 &&
-                        Matter.Query.ray(body, this.position, player.position).length === 0 &&
+                        !Matter.Query.rayAny(map, this.position, player.position) &&
+                        !Matter.Query.rayAny(body, this.position, player.position) &&
                         !m.isCloak
                     ) {
                         this.foundPlayer();
@@ -603,7 +604,7 @@ const mobs = {
             springAttack() {
                 // set new values of the ends of the spring constraints
                 const stepRange = 600
-                if (this.seePlayer.recall && Matter.Query.ray(map, this.position, this.seePlayer.position).length === 0) {
+                if (this.seePlayer.recall && !Matter.Query.rayAny(map, this.position, this.seePlayer.position)) {
                     if (!(simulation.cycle % (this.seePlayerFreq * 2))) {
                         const unit = Vector.normalise(Vector.sub(this.seePlayer.position, this.position))
                         const goal = Vector.add(this.position, Vector.mult(unit, stepRange))
@@ -902,8 +903,8 @@ const mobs = {
                 if (
                     !(simulation.cycle % this.fireFreq) &&
                     Math.abs(this.position.x - this.seePlayer.position.x) < 400 && //above player
-                    Matter.Query.ray(map, this.position, this.playerPosRandomY()).length === 0 && //see player
-                    Matter.Query.ray(body, this.position, this.playerPosRandomY()).length === 0
+                    !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) && //see player
+                    !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
                 ) {
                     spawn.bomb(this.position.x, this.position.y + this.radius * 0.7, 9 + Math.ceil(this.radius / 15), 5);
                     //add spin and speed

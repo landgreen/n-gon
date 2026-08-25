@@ -24,6 +24,7 @@ const simulation = {
         m.draw();
         m.hold();
         level.customTopLayer();
+        simulation.draw.flushMapPathRebuild();
         simulation.draw.drawMapPath();
         b.fire();
         b.bulletRemove();
@@ -51,6 +52,7 @@ const simulation = {
         m.draw();
         m.hold();
         level.customTopLayer();
+        simulation.draw.flushMapPathRebuild();
         simulation.draw.wireFrame();
         if (input.fire && m.fireCDcycle < m.cycle) {
             m.fireCDcycle = m.cycle + 15; //fire cooldown       
@@ -93,6 +95,7 @@ const simulation = {
             b.bulletDo();
             simulation.runEphemera();
         }
+        simulation.draw.flushMapPathRebuild();
         simulation.isTimeSkipping = false;
     },
     timePlayerSkip(cycles = 60) {
@@ -191,6 +194,7 @@ const simulation = {
     fpsCap: null, //limits frames per second to 144/2=72,  on most monitors the fps is capped at 60fps by the hardware
     fpsCapDefault: 72, //use to change fpsCap back to normal after a hit from a mob
     isCommunityMaps: false,
+    isStartingGame: false,
     cyclePaused: 0,
     fallHeight: 6000, //below this y position the player will teleport to start, take damage, or teleport to the sky based on the value of  level.fallMode
     lastTimeStamp: 0, //tracks time stamps for measuring delta
@@ -774,7 +778,19 @@ const simulation = {
     },
     fpsInterval: 0, //set in startGame
     then: null,
-    startGame(isBuildRun = false, isTrainingRun = false) {
+    async startGame(isBuildRun = false, isTrainingRun = false) {
+        if (simulation.isStartingGame) return
+        simulation.isStartingGame = true
+        if (simulation.isCommunityMaps || isTrainingRun) {
+            try {
+                await level.loadMoreLevels()
+            } catch (error) {
+                simulation.isStartingGame = false
+                console.error(error)
+                return
+            }
+        }
+        simulation.isStartingGame = false
         if (localSettings.isHideHUD) {
             simulation.draw.body = function () {
                 ctx.beginPath();
@@ -1072,13 +1088,13 @@ const simulation = {
                     if (!(m.cycle % 420)) { //once every 7 seconds
                         //check if player is inside the map
 
-                        if (Matter.Query.ray(map, m.pos, player.position).length > 0) {
+                        if (Matter.Query.rayAny(map, m.pos, player.position)) {
                             // if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
                             //check for the next few seconds to see if being stuck continues
                             simulation.ephemera.push({
                                 count: 240, //cycles before it self removes
                                 do() {
-                                    if (Matter.Query.ray(map, m.pos, player.position).length > 0) {
+                                    if (Matter.Query.rayAny(map, m.pos, player.position)) {
                                         this.count--
 
                                         if (this.count < 0) {
@@ -1114,7 +1130,7 @@ const simulation = {
                         let i = body.length;
                         while (i--) {
                             if (body[i].position.y > simulation.fallHeight) {
-                                if (body[i].isInvulnerable) {
+                                if (body[i].isInvulnerable || body[i].isImmutable) {
                                     Matter.Body.setVelocity(body[i], { x: 0, y: 0 });
                                     if (level.fallMode === "position") {
                                         const posXClamped = Math.min(Math.max(level.fallModeBounds.left, body[i].position.x), level.fallModeBounds.right)
@@ -1416,7 +1432,10 @@ const simulation = {
             body[len] = Matter.Bodies.fromVertices(0, 0, holdTarget.vertices, {
                 friction: holdTarget.friction,
                 frictionAir: holdTarget.frictionAir,
-                frictionStatic: holdTarget.frictionStatic
+                frictionStatic: holdTarget.frictionStatic,
+                isKey: holdTarget.isKey,
+                isImmutable: holdTarget.isImmutable,
+                draw: holdTarget.draw
             });
             Matter.Body.setPosition(body[len], m.pos);
             m.isHolding = true
@@ -1532,12 +1551,156 @@ const simulation = {
             return intersections;
         },
 
+        appendMapIntersections(v1, v1End, excludedBodyIndex, target) {
+            const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
+            const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
+            const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
+            const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
+            const rayDx = v1End.x - v1.x;
+            const rayDy = v1End.y - v1.y;
+
+            for (let bodyIndex = 0; bodyIndex < map.length; bodyIndex++) {
+                if (bodyIndex === excludedBodyIndex) continue;
+                const obj = map[bodyIndex];
+                const bounds = obj.bounds;
+                if (rayMaxX < bounds.min.x || bounds.max.x < rayMinX ||
+                    rayMaxY < bounds.min.y || bounds.max.y < rayMinY) continue;
+
+                const vertices = obj.vertices;
+                for (let edgeIndex = 0; edgeIndex < vertices.length; edgeIndex++) {
+                    const edgeStart = vertices[edgeIndex];
+                    const edgeEnd = vertices[(edgeIndex + 1) % vertices.length];
+                    const edgeMinX = edgeStart.x < edgeEnd.x ? edgeStart.x : edgeEnd.x;
+                    const edgeMaxX = edgeStart.x > edgeEnd.x ? edgeStart.x : edgeEnd.x;
+                    const edgeMinY = edgeStart.y < edgeEnd.y ? edgeStart.y : edgeEnd.y;
+                    const edgeMaxY = edgeStart.y > edgeEnd.y ? edgeStart.y : edgeEnd.y;
+                    if (rayMaxX < edgeMinX || edgeMaxX < rayMinX ||
+                        rayMaxY < edgeMinY || edgeMaxY < rayMinY) continue;
+
+                    const edgeDx = edgeEnd.x - edgeStart.x;
+                    const edgeDy = edgeEnd.y - edgeStart.y;
+                    const denominator = edgeDy * rayDx - edgeDx * rayDy;
+                    if (denominator === 0) continue;
+                    const offsetY = v1.y - edgeStart.y;
+                    const offsetX = v1.x - edgeStart.x;
+                    const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator;
+                    const edgeFraction = (rayDx * offsetY - rayDy * offsetX) / denominator;
+                    if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) {
+                        target.push({
+                            x: v1.x + rayFraction * rayDx,
+                            y: v1.y + rayFraction * rayDy
+                        });
+                    }
+                }
+            }
+        },
+
+        circleLineCollisionsLegacy(a, b, c, radius) {
+            const angleOffset = Math.atan2(b.y - a.y, b.x - a.x);
+            const sideB = Math.sqrt((a.x - c.x) ** 2 + (a.y - c.y) ** 2);
+            const sideC = Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
+            const sideA = Math.sqrt((c.x - b.x) ** 2 + (c.y - b.y) ** 2);
+            const angleA = Math.acos((sideB ** 2 + sideC ** 2 - sideA ** 2) / (2 * sideB * sideC)) *
+                (a.x - c.x) / -Math.abs(a.x - c.x);
+            const sideAD = Math.cos(angleA) * sideB;
+            const d = {
+                x: Math.cos(angleOffset) * sideAD + a.x,
+                y: Math.sin(angleOffset) * sideAD + a.y
+            };
+            const distance = Math.sqrt((d.x - c.x) ** 2 + (d.y - c.y) ** 2);
+            if (distance == radius) return [d];
+            if (distance >= radius) return [];
+
+            const collisionAngle = Math.atan2(d.y - c.y, d.x - c.x);
+            const innerAngle = Math.acos(distance / radius);
+            const intersection1 = {
+                x: Math.cos(collisionAngle + innerAngle) * radius + c.x,
+                y: Math.sin(collisionAngle + innerAngle) * radius + c.y
+            };
+            const intersection2 = {
+                x: Math.cos(collisionAngle - innerAngle) * radius + c.x,
+                y: Math.sin(collisionAngle - innerAngle) * radius + c.y
+            };
+            const distance1A = Math.sqrt((intersection1.x - a.x) ** 2 + (intersection1.y - a.y) ** 2);
+            const distance1B = Math.sqrt((intersection1.x - b.x) ** 2 + (intersection1.y - b.y) ** 2);
+            const distance2A = Math.sqrt((intersection2.x - a.x) ** 2 + (intersection2.y - a.y) ** 2);
+            const distance2B = Math.sqrt((intersection2.x - b.x) ** 2 + (intersection2.y - b.y) ** 2);
+            const result = [];
+            if (Math.abs(sideC - (distance1A + distance1B)) < 0.01) {
+                result.push(intersection1);
+            } else if (distance1A < distance1B) {
+                if (sideB <= radius) result.push(a);
+            } else if (sideA <= radius) {
+                result.push(b);
+            }
+            if (Math.abs(sideC - (distance2A + distance2B)) < 0.01) {
+                result.push(intersection2);
+            } else if (distance2A <= distance2B) {
+                if (sideB <= radius) result.push(a);
+            } else if (sideA <= radius) {
+                result.push(b);
+            }
+            return result;
+        },
+
+        circleLineCollisions(a, b, c, radius) {
+            const edgeDx = b.x - a.x;
+            const edgeDy = b.y - a.y;
+            const edgeLengthSquared = edgeDx * edgeDx + edgeDy * edgeDy;
+            const centerDx = c.x - a.x;
+            const centerDy = c.y - a.y;
+            const side = edgeDx * centerDy - edgeDy * centerDx;
+            if (edgeLengthSquared === 0 || a.x === c.x || side === 0) {
+                return simulation.sight.circleLineCollisionsLegacy(a, b, c, radius);
+            }
+
+            const closestFraction = (centerDx * edgeDx + centerDy * edgeDy) / edgeLengthSquared;
+            const closestX = a.x + closestFraction * edgeDx;
+            const closestY = a.y + closestFraction * edgeDy;
+            const closestDx = closestX - c.x;
+            const closestDy = closestY - c.y;
+            const closestDistanceSquared = closestDx * closestDx + closestDy * closestDy;
+            const radiusSquared = radius * radius;
+            if (closestDistanceSquared === radiusSquared) return [{ x: closestX, y: closestY }];
+            if (closestDistanceSquared >= radiusSquared) return [];
+
+            const edgeLength = Math.sqrt(edgeLengthSquared);
+            const rootOffset = Math.sqrt(radiusSquared - closestDistanceSquared) / edgeLength;
+            const lowerFraction = closestFraction - rootOffset;
+            const upperFraction = closestFraction + rootOffset;
+            const firstFraction = side > 0 ? upperFraction : lowerFraction;
+            const secondFraction = side > 0 ? lowerFraction : upperFraction;
+            const fractionTolerance = 0.005 / edgeLength;
+            const aInside = centerDx * centerDx + centerDy * centerDy <= radiusSquared;
+            const bCenterDx = b.x - c.x;
+            const bCenterDy = b.y - c.y;
+            const bInside = bCenterDx * bCenterDx + bCenterDy * bCenterDy <= radiusSquared;
+            const result = [];
+
+            function appendCollision(fraction) {
+                if (fraction > -fractionTolerance && fraction < 1 + fractionTolerance) {
+                    result.push({
+                        x: a.x + fraction * edgeDx,
+                        y: a.y + fraction * edgeDy
+                    });
+                } else if (fraction < 0.5) {
+                    if (aInside) result.push(a);
+                } else if (bInside) {
+                    result.push(b);
+                }
+            }
+
+            appendCollision(firstFraction);
+            appendCollision(secondFraction);
+            return result;
+        },
+
         circleLoS(pos, radius) {
             function allCircleLineCollisions(c, radius, domain) {
                 var lines = [];
                 for (const obj of domain) {
-                    for (var i = 0; i < obj.vertices.length - 1; i++) lines.push(circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
-                    lines.push(circleLineCollisions(obj.vertices[obj.vertices.length - 1], obj.vertices[0], c, radius));
+                    for (var i = 0; i < obj.vertices.length - 1; i++) lines.push(simulation.sight.circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
+                    lines.push(simulation.sight.circleLineCollisions(obj.vertices[obj.vertices.length - 1], obj.vertices[0], c, radius));
                 }
                 const collisionLines = [];
                 for (const line of lines) {
@@ -1561,73 +1724,6 @@ const simulation = {
                 return collisionLines;
             }
 
-            function circleLineCollisions(a, b, c, radius) {
-                // calculate distances
-                const angleOffset = Math.atan2(b.y - a.y, b.x - a.x);
-                const sideB = Math.sqrt((a.x - c.x) ** 2 + (a.y - c.y) ** 2);
-                const sideC = Math.sqrt((b.x - a.x) ** 2 + (b.y - a.y) ** 2);
-                const sideA = Math.sqrt((c.x - b.x) ** 2 + (c.y - b.y) ** 2);
-
-                // calculate the closest point on line AB to point C
-                const angleA = Math.acos((sideB ** 2 + sideC ** 2 - sideA ** 2) / (2 * sideB * sideC)) * (a.x - c.x) / -Math.abs(a.x - c.x)
-                const sideAD = Math.cos(angleA) * sideB;
-                const d = { // closest point
-                    x: Math.cos(angleOffset) * sideAD + a.x,
-                    y: Math.sin(angleOffset) * sideAD + a.y
-                }
-                const distance = Math.sqrt((d.x - c.x) ** 2 + (d.y - c.y) ** 2);
-                if (distance == radius) {
-                    // tangent
-                    return [d];
-                } else if (distance < radius) {
-                    // secant
-                    const angleOffset = Math.atan2(d.y - c.y, d.x - c.x);
-                    const innerAngle = Math.acos(distance / radius);
-                    const intersection1 = {
-                        x: Math.cos(angleOffset + innerAngle) * radius + c.x,
-                        y: Math.sin(angleOffset + innerAngle) * radius + c.y
-                    }
-
-                    const intersection2 = {
-                        x: Math.cos(angleOffset - innerAngle) * radius + c.x,
-                        y: Math.sin(angleOffset - innerAngle) * radius + c.y
-                    }
-
-                    const distance1 = {
-                        a: Math.sqrt((intersection1.x - a.x) ** 2 + (intersection1.y - a.y) ** 2),
-                        b: Math.sqrt((intersection1.x - b.x) ** 2 + (intersection1.y - b.y) ** 2)
-                    }
-                    const distance2 = {
-                        a: Math.sqrt((intersection2.x - a.x) ** 2 + (intersection2.y - a.y) ** 2),
-                        b: Math.sqrt((intersection2.x - b.x) ** 2 + (intersection2.y - b.y) ** 2)
-                    }
-                    const result = [];
-                    if (Math.abs(sideC - (distance1.a + distance1.b)) < 0.01) {
-                        result.push(intersection1);
-                    } else {
-                        if (distance1.a < distance1.b) {
-                            if (sideB <= radius) result.push(a);
-                        } else {
-                            if (sideA <= radius) result.push(b)
-                        }
-                    }
-                    if (Math.abs(sideC - (distance2.a + distance2.b)) < 0.01) {
-                        result.push(intersection2);
-                    } else {
-                        if (distance2.a <= distance2.b) {
-                            if (sideB <= radius) result.push(a);
-                        } else {
-                            if (sideA <= radius) result.push(b)
-                        }
-                    }
-
-                    return result;
-                } else {
-                    // no intersection
-                    return [];
-                }
-            }
-
             var vertices = [];
             for (const obj of simulation.sight.intersectMap) {
                 for (var i = 0; i < obj.vertices.length; i++) {
@@ -1637,7 +1733,7 @@ const simulation = {
                     // const queryPoint = { x: Math.cos(angleToVertex) * (distanceToVertex - 1) + pos.x, y: Math.sin(angleToVertex) * (distanceToVertex - 1) + pos.y }
                     const queryPoint = { x: Math.cos(angleToVertex + Math.PI) + vertex.x, y: Math.sin(angleToVertex + Math.PI) + vertex.y }
 
-                    if (Matter.Query.ray(map, pos, queryPoint).length == 0) {
+                    if (!Matter.Query.segmentAny(map, pos, queryPoint)) {
                         var distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
                         var endPoint = { x: vertex.x, y: vertex.y }
 
@@ -1675,7 +1771,7 @@ const simulation = {
                     const distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2)
                     const angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                     const queryPoint = { x: Math.cos(angle + Math.PI) + vertex.x, y: Math.sin(angle + Math.PI) + vertex.y }
-                    if (Math.abs(distance - radius) < 1 && Matter.Query.ray(map, pos, queryPoint).length == 0) circleCollisions.push(vertex)
+                    if (Math.abs(distance - radius) < 1 && !Matter.Query.segmentAny(map, pos, queryPoint)) circleCollisions.push(vertex)
                 }
             }
             for (var i = 0; i < circleCollisions.length; i++) {
@@ -1715,6 +1811,18 @@ const simulation = {
     },
     draw: {
 
+        isMapPathRebuildPending: false,
+        requestMapPathRebuild() {
+            simulation.draw.isMapPathRebuildPending = true;
+        },
+        flushMapPathRebuild() {
+            if (!simulation.draw.isMapPathRebuildPending) return false;
+            simulation.draw.isMapPathRebuildPending = false;
+            simulation.draw.setPaths();
+            simulation.draw.lineOfSightPrecalculation();
+            return true;
+        },
+
         mapPath: null, //holds the path for the map to speed up drawing
         setPaths() {
             //runs at each new level to store the path for the map since the map doesn't change
@@ -1730,18 +1838,19 @@ const simulation = {
         },
         lineOfSightPrecalculation() {
             simulation.sight.intersectMap = [];
-            for (var i = 0; i < map.length; i++) {
+            for (let i = 0; i < map.length; i++) {
                 const obj = map[i];
                 const newVertices = [];
-                const restOfMap = [...map].slice(0, i).concat([...map].slice(i + 1))
-                for (var j = 0; j < obj.vertices.length - 1; j++) {
-                    var intersections = simulation.sight.getIntersections(obj.vertices[j], obj.vertices[j + 1], restOfMap);
-                    newVertices.push(obj.vertices[j]);
-                    for (const vertex of intersections) newVertices.push({ x: vertex.x, y: vertex.y });
+                for (let j = 0; j < obj.vertices.length; j++) {
+                    const vertex = obj.vertices[j];
+                    newVertices.push(vertex);
+                    simulation.sight.appendMapIntersections(
+                        vertex,
+                        obj.vertices[(j + 1) % obj.vertices.length],
+                        i,
+                        newVertices
+                    );
                 }
-                intersections = simulation.sight.getIntersections(obj.vertices[obj.vertices.length - 1], obj.vertices[0], restOfMap);
-                newVertices.push(obj.vertices[obj.vertices.length - 1]);
-                for (const vertex of intersections) newVertices.push({ x: vertex.x, y: vertex.y });
                 //draw the vertices as black circles for debugging
                 // for (const vertex of newVertices) {
                 //     ctx.beginPath();

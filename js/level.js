@@ -3,6 +3,7 @@ let map = []; //all static bodies
 let cons = []; //all constraints between a point and a body
 let consBB = []; //all constraints between two bodies
 let composite = [] //rotors and other map elements that don't fit 
+const moreLevels = {} //populated on demand by level2.js
 const level = {
     fallMode: "",
     defaultZoom: 1400,
@@ -11,15 +12,11 @@ const level = {
     isFlipped: false,
     isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
-    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"],
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal"],
+    playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"], //, "vault"
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
-    load(name) {
-        const mapCollection = typeof level.maps[name] === "function" ? level.maps : moreLevels
-        if (typeof mapCollection[name] !== "function") throw new Error(`unknown level: ${name}`)
-        mapCollection[name].call(level)
-    },
+    moreLevelsPromise: null,
     start() {
         spawn.randomMobPositions.length = 0
         level.setConstraints()
@@ -33,7 +30,7 @@ const level = {
                 // build.isExperimentRun = true
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
-                // simulation.isHorizontalFlipped = true
+                // simulation.isHorizontalFlipped = false
                 // level.levelsCleared = 13
                 // level.updateDifficulty()
                 // simulation.isCheating = true
@@ -44,7 +41,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
 
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
@@ -66,9 +63,9 @@ const level = {
                 // simulation.molecularMode = 2
                 // m.takeDamage(0.01);
 
-                // b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
                 // b.giveGuns(11)
-                // b.guns[b.inventory[0]].ammo = 100000
+                b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
@@ -80,14 +77,14 @@ const level = {
                 // for (let i = 0; i < 1; i++) tech.giveTech("eigenstate")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
-                level.levelsCleared = 2
+                // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                level.load("refinery")
-                // level.maps.testing()
+                // level.load("final")
+                level.maps.testing()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
-                // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 10); });
+                // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
                 // for (let i = 0; i < 4; i++) spawn.starter(1300 + 10 * i, -400)
@@ -316,6 +313,34 @@ const level = {
             simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
             document.title = "n-gon: " + level.levelAnnounce();
         }
+    },
+    loadMoreLevels() {
+        if (typeof moreLevels.walk === "function") return Promise.resolve(moreLevels)
+        if (level.moreLevelsPromise) return level.moreLevelsPromise
+
+        level.moreLevelsPromise = new Promise((resolve, reject) => {
+            const script = document.createElement("script")
+            script.src = "js/level2.js"
+            script.onload = () => {
+                if (typeof moreLevels.walk === "function") {
+                    resolve(moreLevels)
+                } else {
+                    level.moreLevelsPromise = null
+                    reject(new Error("level2.js loaded without registering its maps"))
+                }
+            }
+            script.onerror = () => {
+                level.moreLevelsPromise = null
+                reject(new Error("failed to load level2.js"))
+            }
+            document.head.appendChild(script)
+        })
+        return level.moreLevelsPromise
+    },
+    load(name) {
+        const mapCollection = typeof level.maps[name] === "function" ? level.maps : moreLevels
+        if (typeof mapCollection[name] !== "function") throw new Error(`unknown level: ${name}`)
+        mapCollection[name].call(level)
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
         //used for generalist and pigeonhole principle
@@ -674,7 +699,7 @@ const level = {
             remove() { }
         },
         {
-            description: "half fire rate",
+            description: "half <span class='color-fire-rate' data-help='fire-rate'>fire rate</span>",
             effect() {
                 level.isSlowFireRate = true
                 b.setFireCD()
@@ -697,11 +722,11 @@ const level = {
                             for (let i = 0; i < hits.length; i++) {
                                 //hits[i].bodyA.inertia !== Infinity checks if it's not the player
                                 let who = hits[i].bodyA
-                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isExplodingConstraintTimer) {
+                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isImmutable && !who.isExplodingConstraintTimer) {
                                     who.isExplodingConstraintTimer = 120
                                 }
                                 who = hits[i].bodyB
-                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isExplodingConstraintTimer) {
+                                if (who.inertia !== Infinity && !who.isNotHoldable && !who.isInvulnerable && !who.isImmutable && !who.isExplodingConstraintTimer) {
                                     who.isExplodingConstraintTimer = 120
                                 }
                             }
@@ -1366,7 +1391,16 @@ const level = {
                         document.getElementById("choose-grid").style.opacity = "1"
                         document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
                         document.getElementById("choose-grid").style.visibility = "visible"
-                        document.getElementById("choose-training").addEventListener("click", () => {
+                        document.getElementById("choose-training").addEventListener("click", async (event) => {
+                            const trainingChoice = event.currentTarget
+                            trainingChoice.style.pointerEvents = "none"
+                            try {
+                                await level.loadMoreLevels()
+                            } catch (error) {
+                                trainingChoice.style.pointerEvents = "auto"
+                                console.error(error)
+                                return
+                            }
                             level.unPause()
                             document.body.style.cursor = "none";
                             simulation.isTraining = true
@@ -1538,8 +1572,7 @@ const level = {
                     query(bullet)
                     query(powerUp)
                     //player collision
-                    const list = Matter.Query.ray([player], this.position, rayVector, 100)
-                    if (list.length > 0) {
+                    if (Matter.Query.rayAny([player], this.position, rayVector, 100)) {
                         Matter.Body.setVelocity(player, Vector.rotate({ x: 1.21 * Math.sqrt(Math.abs(speed)), y: 0 }, angle));
                         m.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
                         m.hardLandCD = 0 // disable hard landing
@@ -1591,8 +1624,8 @@ const level = {
                 query() {
                     // check for collisions
                     query = (who) => {
-                        if (Matter.Query.region(who, this.boostBounds).length > 0) {
-                            list = Matter.Query.region(who, this.boostBounds)
+                        const list = Matter.Query.region(who, this.boostBounds)
+                        if (list.length > 0) {
                             Matter.Body.setVelocity(list[0], {
                                 x: list[0].velocity.x + (Math.random() - 0.5) * 2.5, //add a bit of horizontal drift to reduce endless bounces
                                 y: -1.21 * Math.sqrt(Math.abs(speed)) //give a upwards velocity
@@ -1965,6 +1998,169 @@ const level = {
             },
         }
     },
+    keyColors: ["#FEF8A4", "#d688a8", "#3fb0a1"],
+    // keyColors: ["#FEF8A4", "#ba7491", "#76a49e"],
+    key(x, y, color = "#FEF8A4") {//color must be hex 6 long to work with opacity trick on glow
+        //turquoise "#4f9989"      wine "#b64373"     banana "#FEF8A4"
+        const keyVertices = Vertices.fromPath("37.5 0  25 21.65  -25 21.65  -37.5 0  -25 -21.65  25 -21.65")
+        const key = body[body.length] = Bodies.fromVertices(x, y, keyVertices, {
+            collisionFilter: {
+                category: cat.body,
+                mask: cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
+            },
+            friction: 0.05,
+            frictionAir: 0.001,
+            isKey: true,
+            isImmutable: true,
+            color: color,
+            draw() {
+                const vertices = this.vertices
+                ctx.beginPath()
+                ctx.moveTo(vertices[0].x, vertices[0].y)
+                for (let i = 1; i < vertices.length; i++) {
+                    ctx.lineTo(vertices[i].x, vertices[i].y)
+                }
+                ctx.closePath()
+                ctx.fillStyle = this.color
+                ctx.fill()
+                const glowAlpha = Math.floor(0x10 + 0x08 * Math.random()).toString(16).padStart(2, "0")
+                ctx.strokeStyle = this.color + glowAlpha
+                ctx.lineWidth = 10
+                ctx.stroke()
+                ctx.lineWidth = 25
+                ctx.stroke()
+                ctx.lineWidth = 60
+                ctx.stroke()
+                // ctx.lineWidth = 130
+                // ctx.stroke()
+            },
+            drawTop() {
+                //random vertices
+                const vertices = this.vertices
+                const unitVectorLength = 3
+                let unit = Vector.rotate({ x: unitVectorLength, y: 0 }, 2 * Math.PI * Math.random())
+                ctx.beginPath()
+                ctx.moveTo(vertices[0].x + unit.x, vertices[0].y + unit.y)
+                for (let i = 1; i < vertices.length; i++) {
+                    unit = Vector.rotate({ x: unitVectorLength, y: 0 }, 2 * Math.PI * Math.random())
+                    ctx.lineTo(vertices[i].x + unit.x, vertices[i].y + unit.y)
+                }
+                ctx.closePath()
+                // ctx.strokeStyle = this.color + "aa"
+                // ctx.lineWidth = 3
+                // ctx.stroke()
+                ctx.fillStyle = this.color + "99"
+                ctx.fill()
+            }
+        });
+        Composite.add(engine.world, key);
+        key.classType = "body"
+        return key
+    },
+    keyButton(x, y, color = "#FEF8A4") {
+        //turquoise "#4f9989"      wine "#b64373"     banana "#FEF8A4"
+        const width = 80
+        const setButtonMapProperties = () => {
+            map[map.length - 1].restitution = 0;
+            map[map.length - 1].friction = 1;
+            map[map.length - 1].frictionStatic = 1;
+        }
+        spawn.mapVertex(x + width / 2, y + 2, "70 10 -70 10 -70 -10 70 -10");
+        setButtonMapProperties();
+
+        const cradleCenterX = x + width / 2 + 2;
+        const cradleHalfGap = 30;
+        const cradleSideHalfWidth = 20;
+        const cradleY = y - 1;
+        spawn.mapVertex(cradleCenterX - cradleHalfGap - cradleSideHalfWidth, cradleY, "-45 10 -45 -10 -25 -40 1 -40 30 10");
+        setButtonMapProperties();
+        spawn.mapVertex(cradleCenterX + cradleHalfGap + cradleSideHalfWidth, cradleY, "45 10 45 -10 25 -40 -1 -40 -30 10");
+        setButtonMapProperties();
+
+        const buttonLeftX = x + 2;
+        const buttonCenterX = buttonLeftX + width / 2;
+        const sensorHalfWidth = 30;
+        return {
+            isUp: true,
+            color: color,
+            min: {
+                x: buttonCenterX - sensorHalfWidth,
+                y: y - 11
+            },
+            max: {
+                x: buttonCenterX + sensorHalfWidth,
+                y: y - 10
+            },
+            width: width,
+            query() {
+                const list = Matter.Query.region(body, this)
+                let key = null
+                for (let i = 0; i < list.length; i++) {
+                    if (list[i].isKey) {
+                        if (list[i].color === this.color) {
+                            if (key === null) key = list[i]
+                        } else {
+                            Matter.Body.setVelocity(list[i], {
+                                x: (Math.random() - 0.5) * 15,
+                                y: -8 - 10 * Math.random()
+                            })
+                        }
+                    }
+                }
+                if (key === null || key === m.holdingTarget) {
+                    this.isUp = true;
+                } else {
+                    if (this.isUp === true) {
+                        //snap into place
+                        if (key.bounds.max.x - key.bounds.min.x < 150 && key.bounds.max.y - key.bounds.min.y < 150) {
+                            Matter.Body.setPosition(key, {
+                                x: buttonCenterX,
+                                y: key.position.y
+                            })
+                            Matter.Body.setAngle(key, 0);
+                            Matter.Body.setAngularVelocity(key, 0);
+                        }
+                        Matter.Body.setVelocity(key, { x: 0, y: 0 });
+                    }
+                    this.isUp = false;
+                }
+            },
+            queryPlayer() {
+                if (Matter.Query.region([player], this).length === 0) {
+                    this.isUp = true;
+                } else {
+                    this.isUp = false;
+                }
+            },
+            draw() {
+                // ctx.fillStyle = this.color
+                // if (this.isUp) {
+                //     ctx.fillRect(buttonLeftX, this.min.y - 10, this.width, 20)
+                // } else {
+                //     // ctx.fillRect(buttonLeftX, this.min.y - 3, this.width, 25)
+                // }
+            },
+            buttonStatus() {
+                const flickerAlpha = Math.floor(0x20 + 0x30 * Math.random()).toString(16).padStart(2, "0")
+                const flickerColor = this.color + flickerAlpha
+                ctx.fillStyle = this.color + "bb"
+                if (this.isUp) ctx.fillRect(buttonLeftX, this.min.y - 15, this.width, 25)
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(buttonCenterX, this.min.y - 30, 64, 0, 2 * Math.PI);
+                if (this.isUp) {
+                    // ctx.strokeStyle = flickerColor;
+                    // ctx.lineWidth = 1;
+                    // ctx.stroke();
+                } else {
+                    ctx.fillStyle = flickerColor;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+    },
     button(x, y, width = 126, isSpawnBase = true, isInvertedVertical = false, color = "hsl(0, 100%, 70%)") {
         if (isSpawnBase) {
             if (isInvertedVertical) {
@@ -2017,7 +2213,7 @@ const level = {
                     } else {
                         if (this.isUp === true) {
                             const list = Matter.Query.region(body, this) //are any blocks colliding with this
-                            if (list.length > 0) {
+                            if (list.length > 0 && !list[0].isImmutable) {
                                 Matter.Composite.remove(engine.world, list[0]);
                                 for (let i = 0; i < body.length; i++) {
                                     if (body[i] === list[0]) {
@@ -2085,7 +2281,7 @@ const level = {
                     } else {
                         if (this.isUp === true) {
                             const list = Matter.Query.region(body, this) //are any blocks colliding with this
-                            if (list.length > 0) {
+                            if (list.length > 0 && !list[0].isImmutable) {
                                 //delete triggering block
                                 Matter.Composite.remove(engine.world, list[0]);
                                 for (let i = 0; i < body.length; i++) {
@@ -2249,7 +2445,7 @@ const level = {
                                 //delete any overlapping blocks
                                 const blocks = Matter.Query.collides(this, body)
                                 for (let i = 0; i < blocks.length; i++) {
-                                    if (blocks[i].bodyB !== this && blocks[i].bodyB !== m.holdingTarget) { //dont' delete yourself   <----- bug here maybe...
+                                    if (blocks[i].bodyB !== this && blocks[i].bodyB !== m.holdingTarget && !blocks[i].bodyB.isImmutable) { //dont' delete yourself   <----- bug here maybe...
                                         Matter.Composite.remove(engine.world, blocks[i].bodyB);
                                         blocks[i].bodyB.isRemoveMeNow = true
                                         for (let i = 1; i < body.length; i++) { //find which index in body array it is and remove from array
@@ -2305,19 +2501,13 @@ const level = {
                                 Matter.Query.collides(this, body).length < 2 &&
                                 Matter.Query.collides(this, mob).length === 0
                             ) {
-                                const position = {
-                                    x: this.position.x,
-                                    y: this.position.y + speed
-                                }
+                                const position = { x: this.position.x, y: this.position.y + speed }
                                 Matter.Body.setPosition(this, position)
                             }
                         }
                     } else {
                         if (this.position.y > y - distance) { //try to open 
-                            const position = {
-                                x: this.position.x,
-                                y: this.position.y - speed
-                            }
+                            const position = { x: this.position.x, y: this.position.y - speed }
                             Matter.Body.setPosition(this, position)
                         }
                     }
@@ -2371,8 +2561,7 @@ const level = {
                                 }
                                 Matter.Body.setPosition(this, position)
                                 if (isSetPaths) {
-                                    simulation.draw.setPaths()
-                                    simulation.draw.lineOfSightPrecalculation() //required precalculation for line of sight
+                                    simulation.draw.requestMapPathRebuild()
                                 }
                             }
                         }
@@ -2384,8 +2573,7 @@ const level = {
                             }
                             Matter.Body.setPosition(this, position)
                             if (isSetPaths) {
-                                simulation.draw.setPaths()
-                                simulation.draw.lineOfSightPrecalculation() //required precalculation for line of sight
+                                simulation.draw.requestMapPathRebuild()
                             }
                         }
                     }
@@ -2471,7 +2659,7 @@ const level = {
                     if (Matter.Query.collides(this, [body[i]]).length === 0) {
                         if (body[i].isInPortal === this) body[i].isInPortal = null
                     } else if (body[i].isInPortal !== this) { //touching this portal, but for the first time
-                        if (isRemoveBlocks && !body[i].isInvulnerable) {
+                        if (isRemoveBlocks && !body[i].isInvulnerable && !body[i].isImmutable) {
                             // console.log(body[i])
                             Matter.Composite.remove(engine.world, body[i]);
                             body.splice(i, 1);
@@ -2635,15 +2823,14 @@ const level = {
                 //push player
 
                 //push blocks, bullets, power ups, mobs
-                let hit = Matter.Query.ray([player], this.a, this.b, height)
-                if (hit.length) {
+                if (Matter.Query.rayAny([player], this.a, this.b, height)) {
                     //5 is normal player mass, so if player has more mass they are gonna go slower
                     player.force.x += this.velocity.x * 5 * (m.crouch ? 0.3 : 1) * (m.onGround ? 0.5 : 1)
                     player.force.y += this.velocity.y * 5 * (m.crouch ? 0.4 : 1)
                     if (this.isFloat) player.force.y -= 1.05 * player.mass * simulation.g
                     if (player.speed > 30) Matter.Body.setVelocity(player, Vector.mult(player.velocity, 0.97));
                 }
-                hit = Matter.Query.ray(body, this.a, this.b, height)
+                let hit = Matter.Query.ray(body, this.a, this.b, height)
                 for (let i = 0; i < hit.length; i++) {
                     hit[i].body.force.x += this.velocity.x * hit[i].body.mass
                     hit[i].body.force.y += this.velocity.y * hit[i].body.mass
@@ -2798,7 +2985,7 @@ const level = {
                     const hits = Matter.Query.ray(body, this.position, this.look, 25)
                     for (let i = hits.length - 1; i > -1; i--) {
                         const what = hits[i].bodyA
-                        if (!what.isInvulnerable && !what.isNotHoldable) {
+                        if (!what.isInvulnerable && !what.isNotHoldable && !what.isImmutable) {
                             // console.log(what)
                             simulation.drawList.push({ x: what.position.x, y: what.position.y, radius: 11, color: "rgba(0,160,255,0.7)", time: 10 });
                             if (what === m.holdingTarget) m.drop()
@@ -3931,7 +4118,50 @@ const level = {
             slime.height -= slime.maxHeight - 150 //start slime at zero
             slime.min.y += slime.maxHeight
             slime.max.y = slime.min.y + slime.height
+
+            // Match the cable-filled infrastructure of the initial level, scaled to this arena.
+            // Each route continues into a wall so the visible room feels like one section of a larger machine.
+            const wires = new Path2D()
+            const addWireBundle = (points, count = 3, spacing = 10) => {
+                const center = (count - 1) * 0.5
+                for (let i = 0; i < count; i++) {
+                    const offset = (i - center) * spacing
+                    wires.moveTo(points[0].x + offset, points[0].y + offset)
+                    for (let j = 1; j < points.length; j++) wires.lineTo(points[j].x + offset, points[j].y + offset)
+                }
+            }
+            addWireBundle([{ x: 720, y: -1190 }, { x: 900, y: -1190 }, { x: 900, y: -660 }, { x: 1580, y: -660 }, { x: 1580, y: 50 }], 4)
+            addWireBundle([{ x: 586, y: -500 }, { x: 586, y: -360 }, { x: 1230, y: -360 }, { x: 1230, y: 50 }], 3)
+            addWireBundle([{ x: 1780, y: -1600 }, { x: 1780, y: -1160 }, { x: 2440, y: -1160 }, { x: 2440, y: -762 }, { x: 2984, y: -762 }], 3)
+            addWireBundle([{ x: 2780, y: -1600 }, { x: 2780, y: -850 }, { x: 2984, y: -850 }, { x: 2984, y: -762 }], 3)
+            addWireBundle([{ x: 2984, y: -762 }, { x: 3860, y: -762 }, { x: 3860, y: -450 }], 3)
+            addWireBundle([{ x: 3860, y: 50 }, { x: 3860, y: -450 }, { x: 4540, y: -450 }, { x: 4540, y: -1600 }], 4)
+            addWireBundle([{ x: 5050, y: -1600 }, { x: 5050, y: -1110 }, { x: 5390, y: -1110 }], 3)
+            addWireBundle([{ x: 5390, y: -720 }, { x: 4800, y: -720 }, { x: 4800, y: 50 }], 3)
+            addWireBundle([{ x: 2100, y: 50 }, { x: 2100, y: -560 }, { x: 2984, y: -560 }, { x: 2984, y: -762 }], 3)
+
+            const drawInfrastructure = () => {
+                ctx.save()
+                if (simulation.isHorizontalFlipped) ctx.scale(-1, 1)
+                ctx.strokeStyle = "#ccc"
+                ctx.lineWidth = 5
+                ctx.stroke(wires)
+
+                //blocks that look like they clamp the wire bundles to the room
+                ctx.fillStyle = "#ccc"
+                ctx.fillRect(850, -1235, 100, 90)
+                ctx.fillRect(1535, -710, 90, 100)
+                ctx.fillRect(1735, -1230, 90, 100)
+                ctx.fillRect(2735, -905, 90, 105)
+                ctx.fillRect(2944, -802, 80, 80) //junction centered at (2984, -762)
+                ctx.fillRect(3815, -505, 90, 105)
+                ctx.fillRect(4495, -1210, 90, 105)
+                ctx.fillRect(4755, -770, 90, 105)
+                ctx.fillRect(5005, -1160, 90, 100)
+                ctx.restore()
+            }
             level.custom = () => {
+                drawInfrastructure()
                 level.exit.drawAndCheck();
                 level.enter.draw();
 
@@ -3997,6 +4227,7 @@ const level = {
 
                 level.setPosToSpawn(0, -250);
                 level.custom = () => {
+                    drawInfrastructure()
                     level.exit.drawAndCheck();
                     level.enter.draw();
 
@@ -5588,14 +5819,21 @@ const level = {
             color.map = "#303639";
             // powerUps.spawnStartingPowerUps(1475, -1175);
             // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-
+            const isCenter = Math.random() < 0.2 //20% chance to span the flock boss, which doesn't like the center block
             spawn.bodyRect(250, -70, 100, 70, 1);
             spawn.mapRect(-425, 0, 4500, 2100);
             spawn.mapRect(-475, -2825, 4500, 1025);
             // spawn.mapRect(1200, -1300, 600, 800);
             const a = 400 //side length
             const c = 100 //corner offset
-            spawn.mapVertex(1487, -900, `${-a} ${-a + c}  ${-a + c} ${-a}   ${a - c} ${-a}  ${a} ${-a + c}   ${a} ${a - c}  ${a - c} ${a}  ${-a + c} ${a}  ${-a} ${a - c}`); //square with edges cut off
+            if (isCenter) {
+                spawn.mapVertex(1487, -900, `${-a} ${-a + c}  ${-a + c} ${-a}   ${a - c} ${-a}  ${a} ${-a + c}   ${a} ${a - c}  ${a - c} ${a}  ${-a + c} ${a}  ${-a} ${a - c}`); //square with edges cut off
+            } else {
+                // spawn.flockBoss(1487, -900) //hard setting velocity
+                // spawn.flockBoss2(1487, -900)  //high air friction and forces
+                // spawn.flockBossChaos(1487, -900)  //targeting player
+                // spawn.flockBossLoop(1487, -900)  //loop
+            }
             //entrance
             spawn.mapRect(-2025, -2825, 1250, 4925);
             spawn.mapRect(-900, -2825, 1125, 1725);
@@ -5672,7 +5910,9 @@ const level = {
                                 for (let i = 0; i < 250; i++) spawn.starter(300 + 2400 * Math.random(), -1300 - 500 * Math.random())
                             } else {
                                 const count = Math.ceil(Math.pow(simulation.difficultyMode, 0.6))
-                                if (Math.random() < 0.2) {
+                                if (!isCenter) {
+                                    spawn.flockBossChaos(1487, -1100)  //targeting player
+                                } else if (Math.random() < 0.2) {
                                     // spawn.timeBoss(1487 + 200 * 0, -1525, 60, false);
                                     spawn.sprayBoss(1487 + 200 * 0, -1525, 30, false)
                                     if (count > 1) spawn.bounceBoss(1300 + 200 * 1, -1525, 80, false);
@@ -10495,6 +10735,239 @@ const level = {
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
 
         },
+        vault() {
+            level.setPosToSpawn(-200, -50); //original spawn
+            // level.setPosToSpawn(9813, -114); //testing spawn
+
+            level.exit.x = 10525
+            level.exit.y = -30
+            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20)
+            level.defaultZoom = 2000
+            simulation.zoomTransition(level.defaultZoom)
+            document.body.style.backgroundColor = "#c8c5c3"
+            color.map = "#474444"
+
+
+            const keys = []
+            keys.push(level.key(-400, -25, level.keyColors[0]))
+            keys.push(level.key(-400, -73, level.keyColors[1]))
+            keys.push(level.key(-400, -110, level.keyColors[2]))
+
+            //!!!!!!! for testing spawn keys into keyButtons  UNDO!!!!!!
+            // keys.push(level.key(42, -34, level.keyColors[2]))
+            // keys.push(level.key(4441, -17, level.keyColors[1]))
+            // keys.push(level.key(10041, -21, level.keyColors[0]))
+
+            const keyStartPositions = keys.map(key => ({ x: key.position.x, y: key.position.y }))
+
+            const keyButtons = []
+            keyButtons.push(level.keyButton(0, 0, level.keyColors[2]))
+            keyButtons.push(level.keyButton(4400, 0, level.keyColors[1]))
+            keyButtons.push(level.keyButton(10000, 0, level.keyColors[0]))
+
+            const doors = []
+            doors.push(level.door(193, -374, 40, 375, 280, 2))
+            doors.push(level.door(4622.5, -374, 80, 375, 280, 2))
+            doors.push(level.door(10217.5, -374, 40, 375, 280, 2))
+            const blackoutFadeCycles = 30
+            const blackoutZones = [
+                { x: 220, y: -1452, width: 4507, height: 1454, fade: 0, isFading: false },
+                { x: 4662.5, y: -2152, width: 5614.5, height: 2204, fade: 0, isFading: false },
+                { x: 10237.5, y: -502, width: 1789.5, height: 529, fade: 0, isFading: false }
+            ]
+            const playerBlackoutZone = { x: 10885, y: -500, width: 1200, height: 525, fade: 0, isFading: false }
+            for (let i = 0; i < doors.length; i++) doors[i].isClosing = true
+
+            const moverSpeed = 8
+            const movers = []
+            movers.push(level.mover(1375, -10, 2250, 75, -moverSpeed))
+            const moverButton = level.button(1200, 0)
+            const boosts = []
+            boosts.push(level.boost(5192, -10, 1000, 1.35))
+
+
+            const hangingHexagonRadius = 22.5
+            const hangingHexagonTorque = 0.0000005
+            const hangingLaserLength = 2000
+            const hangingLaserNozzleDistance = hangingHexagonRadius + 2
+            let isHangingLaserRigSpawned = false
+            let hangingHexagon = null
+            let hangingHexagonConstraint = null
+            let hangingLasers = []
+            function spawnHangingLaserRig() {
+                if (isHangingLaserRigSpawned) return
+                const hangingHexagonVertices = `${hangingHexagonRadius} 0  ${hangingHexagonRadius / 2} ${hangingHexagonRadius * Math.sqrt(3) / 2}  ${-hangingHexagonRadius / 2} ${hangingHexagonRadius * Math.sqrt(3) / 2}  ${-hangingHexagonRadius} 0  ${-hangingHexagonRadius / 2} ${-hangingHexagonRadius * Math.sqrt(3) / 2}  ${hangingHexagonRadius / 2} ${-hangingHexagonRadius * Math.sqrt(3) / 2}`
+                spawn.bodyVertex(11475, -289, hangingHexagonVertices, {
+                    density: 0.002,
+                    friction: 0.05,
+                    frictionAir: 0.01,
+                    restitution: 0.2,
+                    isNotHoldable: true
+                })
+                hangingHexagon = body[body.length - 1]
+                hangingHexagonConstraint = Constraint.create({
+                    pointA: { x: 11475, y: -475 },
+                    bodyB: hangingHexagon,
+                    length: 0,
+                    stiffness: 0.001,
+                    damping: 0.0001
+                })
+                cons.push(hangingHexagonConstraint)
+                Composite.add(engine.world, hangingHexagonConstraint)
+
+                hangingLasers = [
+                    { side: -1, laser: level.laser({ x: 0, y: 0 }, { x: 0, y: 0 }) },
+                    { side: 1, laser: level.laser({ x: 0, y: 0 }, { x: 0, y: 0 }) }
+                ]
+                for (let i = 0; i < hangingLasers.length; i++) hangingLasers[i].laser.emitterBody = hangingHexagon
+                isHangingLaserRigSpawned = true
+                updateHangingLasers()
+            }
+            function updateHangingLasers() {
+                if (!isHangingLaserRigSpawned) return
+                const cos = Math.cos(hangingHexagon.angle)
+                const sin = Math.sin(hangingHexagon.angle)
+                for (let i = 0; i < hangingLasers.length; i++) {
+                    const hangingLaser = hangingLasers[i]
+                    const directionX = hangingLaser.side * cos
+                    const directionY = hangingLaser.side * sin
+                    hangingLaser.laser.position.x = hangingHexagon.position.x + hangingLaserNozzleDistance * directionX
+                    hangingLaser.laser.position.y = hangingHexagon.position.y + hangingLaserNozzleDistance * directionY
+                    hangingLaser.laser.look.x = hangingLaser.laser.position.x + hangingLaserLength * directionX
+                    hangingLaser.laser.look.y = hangingLaser.laser.position.y + hangingLaserLength * directionY
+                }
+            }
+
+            level.custom = () => {
+                if (!isHangingLaserRigSpawned && m.pos.x >= 10900) spawnHangingLaserRig()
+                if (isHangingLaserRigSpawned && !m.isTimeDilated) hangingHexagon.torque += hangingHexagon.inertia * hangingHexagonTorque
+                let rightmostClosedDoor = null
+                for (let i = 0; i < doors.length; i++) {
+                    if (doors[i].isClosed() && (rightmostClosedDoor === null || doors[i].bounds.max.x > rightmostClosedDoor.bounds.max.x)) {
+                        rightmostClosedDoor = doors[i]
+                    }
+                }
+                if (rightmostClosedDoor !== null) {
+                    for (let i = 0; i < keys.length; i++) {
+                        if (keys[i].position.x > rightmostClosedDoor.bounds.max.x) {
+                            if (m.holdingTarget === keys[i]) m.drop()
+                            Matter.Body.setPosition(keys[i], keyStartPositions[i])
+                            Matter.Body.setVelocity(keys[i], { x: 0, y: 0 })
+                            Matter.Body.setAngle(keys[i], 0)
+                            Matter.Body.setAngularVelocity(keys[i], 0)
+                        }
+                    }
+                }
+                if (isHangingLaserRigSpawned) {
+                    ctx.beginPath()
+                    ctx.moveTo(hangingHexagonConstraint.pointA.x, hangingHexagonConstraint.pointA.y)
+                    ctx.lineTo(hangingHexagon.position.x, hangingHexagon.position.y)
+                    ctx.lineWidth = 2
+                    ctx.strokeStyle = "rgba(0,0,0,0.15)"
+                    ctx.stroke()
+                }
+                level.exit.drawAndCheck();
+                level.enter.draw();
+
+                for (let i = 0; i < keys.length; i++) keys[i].draw()
+
+                for (let i = 0; i < keyButtons.length; i++) {
+                    // if (keyButtons[i].isUp) 
+                    keyButtons[i].query()
+                    keyButtons[i].buttonStatus()
+                    keyButtons[i].draw()
+                }
+                moverButton.query()
+                movers[0].VxGoal = moverButton.isUp ? -moverSpeed : moverSpeed
+                movers[0].force = moverButton.isUp ? -0.0005 : 0.0005
+                moverButton.draw()
+                for (let i = 0; i < movers.length; i++) movers[i].push()
+                for (let i = 0; i < boosts.length; i++) boosts[i].query()
+            };
+            level.customTopLayer = () => {
+                //exit room glow
+                ctx.fillStyle = "rgba(0,255,255,0.1)"
+                ctx.fillRect(10200, -475, 1800, 475)
+
+                for (let i = 0; i < doors.length; i++) {
+                    if (!keyButtons[i].isUp) doors[i].isClosing = keyButtons[i].isUp
+                    doors[i].openClose()
+                    doors[i].draw()
+                }
+                for (let i = 0; i < keys.length; i++) {
+                    keys[i].drawTop()
+                }
+                for (let i = 0; i < movers.length; i++) movers[i].draw()
+                if (isHangingLaserRigSpawned) {
+                    updateHangingLasers()
+                    for (let i = 0; i < hangingLasers.length; i++) hangingLasers[i].laser.motionQuery()
+                }
+                for (let i = 0; i < blackoutZones.length; i++) {
+                    const zone = blackoutZones[i]
+                    if (!doors[i].isClosing || m.pos.x > zone.x) zone.isFading = true
+                    if (zone.isFading) zone.fade = Math.min(blackoutFadeCycles, zone.fade + 1)
+                    const coverAlpha = 1 - zone.fade / blackoutFadeCycles
+                    if (coverAlpha > 0) {
+                        ctx.save()
+                        ctx.globalAlpha = coverAlpha
+                        ctx.fillStyle = '#474444'//color.map
+                        ctx.fillRect(zone.x, zone.y, zone.width, zone.height)
+                        ctx.restore()
+                    }
+                }
+                if (m.pos.x >= 10900) playerBlackoutZone.isFading = true
+                if (playerBlackoutZone.isFading) {
+                    playerBlackoutZone.fade = Math.min(blackoutFadeCycles, playerBlackoutZone.fade + 1)
+                }
+                const playerCoverAlpha = 1 - playerBlackoutZone.fade / blackoutFadeCycles
+                if (playerCoverAlpha > 0) {
+                    ctx.save()
+                    ctx.globalAlpha = playerCoverAlpha
+                    ctx.fillStyle = color.map
+                    ctx.fillRect(playerBlackoutZone.x, playerBlackoutZone.y, playerBlackoutZone.width, playerBlackoutZone.height)
+                    ctx.restore()
+                }
+
+            };
+
+            //0th room entrance
+            spawn.mapRect(-4725, -3450, 4225, 5525);//roof
+            spawn.mapRect(-500, 0, 14825, 2075); //left wall
+            spawn.mapRect(-900, -3450, 1150, 3050);
+            spawn.mapRect(175, -475, 75, 175); //door cover
+            //1st room
+            spawn.mapRect(225, -3450, 4500, 2000);//roof
+            spawn.mapRect(4600, -1525, 125, 1225);
+
+            spawn.mapRect(1450, -250, 2075, 125); //mover roof
+
+            //2nd room
+            spawn.mapRect(4575, -3450, 5750, 1325);//roof
+            spawn.mapVertex(6000, 0, "625 0   75 0   200 -100   500 -100"); //ramp
+            spawn.mapVertex(7000, 0, "625 0   75 0   200 -100   500 -100"); //ramp
+
+            //3rd exit room
+            spawn.mapRect(10200, -500, 700, 150); //extra low roof
+            spawn.mapRect(10200, -3450, 4125, 2975);//roof
+            spawn.mapRect(10200, -525, 75, 225);//door wall
+
+
+            //4th vault room with power ups
+            spawn.mapRect(10875, -525, 100, 420);//door to vault
+            spawn.mapRect(12000, -775, 2325, 1375);//right wall
+            spawn.bodyRect(10876, -105, 80, 105); //block in doorway
+
+
+            powerUps.chooseRandomPowerUp(11900, -75);
+            powerUps.chooseRandomPowerUp(11750, -75);
+            powerUps.chooseRandomPowerUp(11650, -75);
+            powerUps.chooseRandomPowerUp(11550, -75);
+            powerUps.spawnStartingPowerUps(11450, -75)
+            powerUps.chooseRandomPowerUp(11350, -75);
+            powerUps.chooseRandomPowerUp(11250, -75);
+            powerUps.chooseRandomPowerUp(11150, -75);
+
+        },
         furnace() {
             level.announceMobTypes()
             if (simulation.isHorizontalFlipped) {
@@ -12159,16 +12632,20 @@ const level = {
             }
         },
         skyscrapers() {
+            let boost2
             if (simulation.isHorizontalFlipped) {
+                boost2 = level.boost(4650, -12, 1400, Math.PI / 2 - 0.15);
+                console.log(boost2)
                 level.announceText(50, 20, true)
             } else {
+                boost2 = level.boost(4650, -12, 1400, Math.PI / 2 + 0.15);
                 level.announceText(-50, 20, true)
             }
 
             level.announceMobTypes()
             level.fallMode = "start";
             const boost1 = level.boost(475, 0, 1300)
-            const boost2 = level.boost(4450, 0, 1300);
+
             level.custom = () => {
                 boost1.query();
                 boost2.query();
@@ -12277,8 +12754,8 @@ const level = {
                 level.flipHorizontal(); //only flips map,body,mob,powerUp,cons,consBB, exit
                 boost1.boostBounds.min.x = -boost1.boostBounds.min.x - 100
                 boost1.boostBounds.max.x = -boost1.boostBounds.max.x + 100
-                boost2.boostBounds.min.x = -boost2.boostBounds.min.x - 100
-                boost2.boostBounds.max.x = -boost2.boostBounds.max.x + 100
+                // boost2.boostBounds.min.x = -boost2.boostBounds.min.x - 100
+                // boost2.boostBounds.max.x = -boost2.boostBounds.max.x + 100
 
                 level.setPosToSpawn(50, -60); //-x
                 level.custom = () => {

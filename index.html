@@ -51,7 +51,7 @@
 
     <div id='info'>
         <div>
-            <details id='settings-details'>
+            <details id='settings-details' name="front-page-group">
                 <summary>settings</summary>
                 <div class="details-div" style="max-width: 24rem; line-height: 150%;">
                     <input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
@@ -90,7 +90,7 @@
             </details>
         </div>
         <div>
-            <details id="control-details">
+            <details id="control-details" name="front-page-group">
                 <summary>controls</summary>
                 <div class="details-div" style="max-width: 24rem;">
                     To change controls, click a box
@@ -164,13 +164,13 @@
             </details>
         </div>
         <div>
-            <details id="updates">
+            <details id="updates" name="front-page-group">
                 <summary>updates</summary>
                 <div id="updates-div" class="details-div" style="font-size: 70%;height: 400px;overflow: scroll;max-width: 50rem;"></div>
             </details>
         </div>
         <div>
-            <details>
+            <details name="front-page-group">
                 <summary>about</summary>
                 <div class="details-div" style="max-width: 24rem;padding:0.6em;font-size: 1.3rem;">
                     <span>a game about self-locating uncertainty</span>
@@ -340,7 +340,9 @@
             <text x="629" y="438">field</text>
         </g>
     </svg>
+    <div id="hover-help" popover="hint" role="tooltip"></div>
     <script src='lib/matter.min.js'></script>
+    <script src="js/query-ray-any.js"></script>
     <!-- <script src='lib/decomp.min.js'></script> -->
     <script src="js/simulation.js"></script>
     <script src="js/player.js"></script>
@@ -350,9 +352,10 @@
     <script src="js/mob.js"></script>
     <script src="js/spawn.js"></script>
     <script src="js/level.js"></script>
-    <script src="js/level2.js"></script>
+    <!-- <script src="js/level2.js"></script> -->
     <script src="js/lore.js"></script>
     <script src="js/engine.js"></script>
+    <script src="js/hover-help.js"></script>
     <script src="js/index.js"></script>
 </body>
 

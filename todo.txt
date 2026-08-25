@@ -1,32 +1,91 @@
+new boss - flockBossChaos
+  20% chance on reactor
+HVAC
+  central zone no longer has wind
+  fixed a rare soft lock with the exit button
+skyscrapers boost is angled inwards
+wire graphics on final level
+community maps
+  new map conduit
+  soft updated
 
-level: refinery
-constraint - mobs freeze area on death
-field tech: exchange operator - swap with the last block you touched
-  diamagnetism, assembler, pilot wave
-tech: positive feedback - 1.005x dmg per health or energy
+pop up tooltips for keywords and orbs
+added fire rates to gun descriptions
+  fire rate keyword and movement swapped colors
+pressing 'y' in testing mode opens experiment menu in the middle of a game
+you only open one details menu at a time in the home screen menu
+performance
+  the long file with community and tutorial maps only loads when enabled
+  ray query (1.1x faster)
+  laser intersection method (3x faster)
+  subway line of site (2x faster)
+  phonon (1.1x faster)
+  mob collision (0.01ms faster)
 
-active cooling and arsenal now count your current gun for description clarity
-  damage was reduce about 25% to balance
-1.1x damage to wave gun
-metamaterial absorber renamed commensalism
-  it and symbiosis are allowed for time dilation
-removed level Stereo Madness because it's just too hard
-    it's now a JUNK tech and it gives 1 extra tech on completion and more if you gather power ups
-    
-reworked the random mob spawn system for levels 
-  more predictable and accurate randomization of mob positions
-moved community maps and training maps to a new file to help with editor lag
-moved all other maps to inside level.maps to keep it tidy
+salvo no longer costs 2 research, and description was clarified
+nitinol 0.5->0.4x damage taken
+stimulated emission 20->22% duplication
+recloaking takes an extra 10 cycles after firing
 
 bug fixes
     cloaking no longer gives immunity to burning AoE effect in furnace and refinery
     quasiparticles now properly requires 2 research
     fixed the lingering phonon waves on next level
+    disabled eigen swap when paused
 
 *********************************************************** TODO *****************************************************
 
-make a new level.js for community maps
-maybe make one for tutorial
+make one face of a mob take 4x damage
+  color face red
+  how to check for damage hitting face
+    damage has a position for drawing the damage circles
+    check what face is closest to the damage position
+      loop through each vertex and check for distance and find closest 2
+      do something smart with trig
+
+mob non-combat behaviors, like Rain World
+  generic behaviors for different movement types
+    chasing/floating mobs - 
+      chase other mobs
+        eat them to get stronger?
+          upgrade into a high rank mob?
+        heal them
+      chase power ups
+        eat them to get stronger?
+    floating stationary mobs - probably best to have the not do anything
+      could drift towards player if player is not too far away
+    hopping mobs - already have some behaviors
+    constraint mobs - already have some behaviors
+  gathering
+    blocks
+      eating blocks to heal?
+    power ups
+      eating power ups and ejecting them on death
+  flocking
+    grouping near mobs
+    keeping distance from mobs
+    sharing velocity with other mobs: boids
+  wander
+    random walk with a bias towards the player
+  play
+  fight other mobs
+
+new map vault - 
+  color keys and keyButtons and doors
+  black out zones like HVAC
+  motion lasers
+  keep floor flat or mostly flat so keys can be pushed
+
+new level element - color keys and keyButtons
+  yellow key flashes too much
+    make it darker?
+
+
+
+consider button in pause menu to expand the tech list into a 2-D grid style array (like experiment mode)
+
+
+
 
 new map element - dynamically changing body
     use a body similar to how you did the spinners and the elevators
@@ -34,7 +93,7 @@ new map element - dynamically changing body
     must keep the body convex
         or just use multiple bodies
     specifics
-        circle shaped verticies that pulse out when the player hits any part of them
+        circle shaped vertices that pulse out when the player hits any part of them
             like the things in a pinball machine that bounce the ball, but for the player only
 
 do something with lightning bullets
@@ -62,7 +121,8 @@ new status effect - apply status effect to mobs that makes blocks attracted to t
 new status effect: weakness, mobs do 75% les damage
   graphic indication?
 
-css transition for pause menu
+plasma tech - Jacob's Ladder - an arc of electricity extends in the direction you are facing and grows longer with time and distance
+  this might be just a visual rework of the phonon wave code
 
 When invulnerable, also become intangible
 
@@ -145,8 +205,8 @@ add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D r
 make mob invulnerability more obvious
   flashing white?
   thicker stroke
-tech: Loitering munition - missile bot follows mouse?
 
+tech: Loitering munition - missile bot follows mouse?
 
 try to also allow players to unpause in choosing menu
 
@@ -651,21 +711,6 @@ tech: after a needle hits a mobs
   reset your fire CD?
   fire again for zero ammo
   2x damage for each consecutive mob hit?
-
-mob non-combat behaviors, like Rain World
-  gathering
-    blocks
-      eating blocks to heal?
-    power ups
-      eating power ups and ejecting them on death
-  flocking
-    grouping near mobs
-    keeping distance from mobs
-    sharing velocity with other mobs: boids
-  wander
-    random walk with a bias towards the player
-  play
-  fight other mobs
 
 make a lemming that walks until it hits a wall and then turns around robotically
   body or mob?
