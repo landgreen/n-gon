@@ -1,37 +1,10 @@
-new boss - flockBossChaos
-  20% chance on reactor
-HVAC
-  central zone no longer has wind
-  fixed a rare soft lock with the exit button
-skyscrapers boost is angled inwards
-wire graphics on final level
-community maps
-  new map conduit
-  soft updated
 
-pop up tooltips for keywords and orbs
-added fire rates to gun descriptions
-  fire rate keyword and movement swapped colors
-pressing 'y' in testing mode opens experiment menu in the middle of a game
-you only open one details menu at a time in the home screen menu
-performance
-  the long file with community and tutorial maps only loads when enabled
-  ray query (1.1x faster)
-  laser intersection method (3x faster)
-  subway line of site (2x faster)
-  phonon (1.1x faster)
-  mob collision (0.01ms faster)
-
-salvo no longer costs 2 research, and description was clarified
-nitinol 0.5->0.4x damage taken
-stimulated emission 20->22% duplication
-recloaking takes an extra 10 cycles after firing
+background wires on final boss level remove with each phase of fight
+cloaking reduces damage done
 
 bug fixes
-    cloaking no longer gives immunity to burning AoE effect in furnace and refinery
-    quasiparticles now properly requires 2 research
-    fixed the lingering phonon waves on next level
-    disabled eigen swap when paused
+  salvo was still had a 2 research cost
+  new flock boss chance is 80->20%
 
 *********************************************************** TODO *****************************************************
 

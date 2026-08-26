@@ -28,8 +28,8 @@ grappling hook: ammo power ups give 5% more ammo
     const definitions = {
         "orb-coupling": couplingDefinition,
         // coupling: couplingDefinition,
-        "orb-field": `// gives you a choice between 3 <strong class="energy">fields</strong>`,
-        "orb-gun": `// gives you a choice between 3 <strong class="color-g">guns</strong>`,
+        "orb-field": `// gives you a choice between 2 <strong class="energy">fields</strong>`,
+        "orb-gun": `// gives you a choice between 2 <strong class="color-g">guns</strong>`,
         "orb-tech": `// gives you a choice between 3 <strong class="color-var">tech</strong>`,
         "orb-field-tech": `// <strong class="energy">field tech</strong><br>upgrade your field`,
         "orb-gun-tech": `// <strong class="color-g">gun tech</strong><br>upgrade your guns`,

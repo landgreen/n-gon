@@ -6310,7 +6310,7 @@ const m = {
         },
         {
             name: "metamaterial cloaking",
-            description: `<strong>0.6x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong> while <strong class='color-cloaked' data-help='cloaking'>cloaked</strong><br>after <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong>4x</strong> <strong class='color-d' data-help='damage'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`,
+            description: `<strong>0.6x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong> and <strong class='color-d' data-help='damage'>damage</strong> while <strong class='color-cloaked' data-help='cloaking'>cloaked</strong><br>after <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong>4x</strong> <strong class='color-d' data-help='damage'>damage</strong> for <strong>2</strong> s<br><strong>6</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`,
             keyLog: [null, null, null, null, null],
             smallFieldRadius: 110,
             effect: () => {
@@ -6472,7 +6472,7 @@ const m = {
                         // m.drawCloakedM()
                         // ctx.globalCompositeOperation = "source-over";
                     } else {
-                        m.fieldDamage = 1
+                        m.fieldDamage = m.isCloak ? 0.6 : 1
                     }
                 }
             }

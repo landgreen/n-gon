@@ -1183,7 +1183,7 @@ const tech = {
     {
         name: "salvo",
         descriptionFunction() {
-            return `you <strong>fire</strong> all available ${powerUps.orb.gun()} in your <strong>inventory</strong> at once<br><em>(only longest <strong>cooldown</strong> applies)</em><span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>`
+            return `you <strong>fire</strong> all available ${powerUps.orb.gun()} in your <strong>inventory</strong> at once<br><em>(only longest <strong>cooldown</strong> applies)</em><span style ="float: right;">`//<span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>
         },
         maxCount: 1,
         count: 0,
@@ -1193,13 +1193,13 @@ const tech = {
         requires: "at least 2 guns, not pigeonhole principle, generalist",
         effect() {
             tech.isSecondShot = true;
-            powerUps.research.expend(2)
+            // powerUps.research.expend(2)
         },
         remove() {
             tech.isSecondShot = false;
-            if (this.count && m.alive) {
-                powerUps.research.changeRerolls(2)
-            }
+            // if (this.count && m.alive) {
+            //     powerUps.research.changeRerolls(2)
+            // }
         }
     },
     {

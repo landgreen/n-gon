@@ -41,7 +41,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
 
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
@@ -80,8 +80,9 @@ const level = {
                 // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                // level.load("final")
-                level.maps.testing()
+                level.load("final")
+                // level.load("initial")
+                // level.maps.testing()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
@@ -4118,46 +4119,86 @@ const level = {
             slime.height -= slime.maxHeight - 150 //start slime at zero
             slime.min.y += slime.maxHeight
             slime.max.y = slime.min.y + slime.height
+            let finalBoss = null
 
             // Match the cable-filled infrastructure of the initial level, scaled to this arena.
             // Each route continues into a wall so the visible room feels like one section of a larger machine.
-            const wires = new Path2D()
+            const wireBundles = []
             const addWireBundle = (points, count = 3, spacing = 10) => {
+                const wires = new Path2D()
                 const center = (count - 1) * 0.5
                 for (let i = 0; i < count; i++) {
                     const offset = (i - center) * spacing
                     wires.moveTo(points[0].x + offset, points[0].y + offset)
                     for (let j = 1; j < points.length; j++) wires.lineTo(points[j].x + offset, points[j].y + offset)
                 }
+                wireBundles.push(wires)
             }
             addWireBundle([{ x: 720, y: -1190 }, { x: 900, y: -1190 }, { x: 900, y: -660 }, { x: 1580, y: -660 }, { x: 1580, y: 50 }], 4)
             addWireBundle([{ x: 586, y: -500 }, { x: 586, y: -360 }, { x: 1230, y: -360 }, { x: 1230, y: 50 }], 3)
-            addWireBundle([{ x: 1780, y: -1600 }, { x: 1780, y: -1160 }, { x: 2440, y: -1160 }, { x: 2440, y: -762 }, { x: 2984, y: -762 }], 3)
+            addWireBundle([{ x: 1780, y: -1600 }, { x: 1780, y: -1160 }, { x: 2440, y: -1160 }, { x: 2440, y: -762 }, { x: 2984, y: -762 }], 5)
             addWireBundle([{ x: 2780, y: -1600 }, { x: 2780, y: -850 }, { x: 2984, y: -850 }, { x: 2984, y: -762 }], 3)
-            addWireBundle([{ x: 2984, y: -762 }, { x: 3860, y: -762 }, { x: 3860, y: -450 }], 3)
+            addWireBundle([{ x: 2984, y: -762 }, { x: 3860, y: -762 }, { x: 3860, y: -450 }], 5)
             addWireBundle([{ x: 3860, y: 50 }, { x: 3860, y: -450 }, { x: 4540, y: -450 }, { x: 4540, y: -1600 }], 4)
             addWireBundle([{ x: 5050, y: -1600 }, { x: 5050, y: -1110 }, { x: 5390, y: -1110 }], 3)
             addWireBundle([{ x: 5390, y: -720 }, { x: 4800, y: -720 }, { x: 4800, y: 50 }], 3)
-            addWireBundle([{ x: 2100, y: 50 }, { x: 2100, y: -560 }, { x: 2984, y: -560 }, { x: 2984, y: -762 }], 3)
+            addWireBundle([{ x: 2100, y: 50 }, { x: 2100, y: -560 }, { x: 2984, y: -560 }, { x: 2984, y: -762 }], 5)
+
+            //Keep the main junction route through the last phase and randomize the other eight.
+            const removableWireOrder = [0, 1, 3, 4, 5, 6, 7, 8]
+            for (let i = removableWireOrder.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1))
+                const swap = removableWireOrder[i]
+                removableWireOrder[i] = removableWireOrder[j]
+                removableWireOrder[j] = swap
+            }
+            const wireDrawOrder = [2, ...removableWireOrder]
+            const wireDrawRank = []
+            for (let i = 0; i < wireDrawOrder.length; i++) wireDrawRank[wireDrawOrder[i]] = i
 
             const drawInfrastructure = () => {
+                let visibleWireCount = wireBundles.length
+                if (finalBoss) {
+                    if (!finalBoss.alive || finalBoss.health <= 0) {
+                        visibleWireCount = 0
+                    } else if (finalBoss.health < 0.25) {
+                        visibleWireCount = 3
+                    } else if (finalBoss.health < 0.5) {
+                        visibleWireCount = 5
+                    } else if (finalBoss.health < 0.75) {
+                        visibleWireCount = 7
+                    }
+                }
+                const isWireVisible = index => wireDrawRank[index] < visibleWireCount
+
                 ctx.save()
                 if (simulation.isHorizontalFlipped) ctx.scale(-1, 1)
-                ctx.strokeStyle = "#ccc"
+                ctx.strokeStyle = "#d0d0d0"
                 ctx.lineWidth = 5
-                ctx.stroke(wires)
+                for (let i = 0; i < visibleWireCount; i++) ctx.stroke(wireBundles[wireDrawOrder[i]])
 
-                //blocks that look like they clamp the wire bundles to the room
-                ctx.fillStyle = "#ccc"
-                ctx.fillRect(850, -1235, 100, 90)
-                ctx.fillRect(1535, -710, 90, 100)
-                ctx.fillRect(1735, -1230, 90, 100)
-                ctx.fillRect(2735, -905, 90, 105)
-                ctx.fillRect(2944, -802, 80, 80) //junction centered at (2984, -762)
-                ctx.fillRect(3815, -505, 90, 105)
-                ctx.fillRect(4495, -1210, 90, 105)
-                ctx.fillRect(4755, -770, 90, 105)
-                ctx.fillRect(5005, -1160, 90, 100)
+                //Draw each bundle's clamps only while that bundle is still visible.
+                ctx.fillStyle = "#d0d0d0"
+                if (isWireVisible(0)) {
+                    ctx.fillRect(850, -1235, 100, 90)
+                    ctx.fillRect(1535, -710, 90, 100)
+                    ctx.fillRect(1163, -690, 10, 60)
+                    ctx.fillRect(1550, -188, 60, 10)
+                }
+                if (isWireVisible(2)) {
+                    ctx.fillRect(1735, -1230, 90, 100)
+                    ctx.fillRect(2109, -1190, 10, 60)
+                    ctx.fillRect(2944, -802, 80, 80) //junction centered at (2984, -762)
+                }
+                if (isWireVisible(3)) ctx.fillRect(2735, -905, 90, 105)
+                if (isWireVisible(4) || isWireVisible(5)) ctx.fillRect(3815, -505, 90, 105)
+                if (isWireVisible(5)) {
+                    ctx.fillRect(4495, -1210, 90, 105)
+                    ctx.fillRect(4097, -480, 10, 60)
+                }
+                if (isWireVisible(6)) ctx.fillRect(5005, -1160, 90, 100)
+                if (isWireVisible(7)) ctx.fillRect(4755, -770, 90, 105)
+                if (isWireVisible(8)) ctx.fillRect(2065, -210, 70, 10)
                 ctx.restore()
             }
             level.custom = () => {
@@ -4220,6 +4261,7 @@ const level = {
                 for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
             } else {
                 spawn.finalBoss(3000, -750)
+                finalBoss = mob[mob.length - 1]
             }
 
             if (simulation.isHorizontalFlipped) { //flip the map horizontally
@@ -5819,7 +5861,7 @@ const level = {
             color.map = "#303639";
             // powerUps.spawnStartingPowerUps(1475, -1175);
             // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-            const isCenter = Math.random() < 0.2 //20% chance to span the flock boss, which doesn't like the center block
+            const isCenter = 0.2 > Math.random() //20% chance to span the flock boss, which doesn't like the center block
             spawn.bodyRect(250, -70, 100, 70, 1);
             spawn.mapRect(-425, 0, 4500, 2100);
             spawn.mapRect(-475, -2825, 4500, 1025);
@@ -5828,11 +5870,6 @@ const level = {
             const c = 100 //corner offset
             if (isCenter) {
                 spawn.mapVertex(1487, -900, `${-a} ${-a + c}  ${-a + c} ${-a}   ${a - c} ${-a}  ${a} ${-a + c}   ${a} ${a - c}  ${a - c} ${a}  ${-a + c} ${a}  ${-a} ${a - c}`); //square with edges cut off
-            } else {
-                // spawn.flockBoss(1487, -900) //hard setting velocity
-                // spawn.flockBoss2(1487, -900)  //high air friction and forces
-                // spawn.flockBossChaos(1487, -900)  //targeting player
-                // spawn.flockBossLoop(1487, -900)  //loop
             }
             //entrance
             spawn.mapRect(-2025, -2825, 1250, 4925);

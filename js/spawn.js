@@ -10285,7 +10285,7 @@ const spawn = {
             ctx.setLineDash([]);
         }
     },
-    flockBossChaos(x, y, num = 210, isSpawnBossPowerUp = true) {
+    flockBossChaos(x, y, num = 210, isSpawnBossPowerUp = false) {
         const flockZone = { x: 225, y: -1800, width: 2525, height: 1800 }
         const flockZoneRight = flockZone.x + flockZone.width
         const flockZoneBottom = flockZone.y + flockZone.height
