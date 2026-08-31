@@ -10294,7 +10294,7 @@ const spawn = {
         const radius = 17
         const worldScale = 950
         const steeringGain = 0.0003
-        const maxSteeringAcceleration = 0.02
+        const maxSteeringAcceleration = 0.024 //this controls speed
         const flockFrictionAir = 0.9
         const gravitation = 0.02
         const softeningDistance = 0.005 * worldScale
@@ -10306,8 +10306,8 @@ const spawn = {
         const playerTargetRadiusScale = 2//1.35
         const playerTargetGrowthRate = 1.002
         const flockInvulnerabilityCycles = 100
-        const reducedInvulnerabilityFlockCount = 20
-        const noInvulnerabilityFlockCount = 10
+        const fullInvulnerabilityFlockCount = 100
+        const noInvulnerabilityFlockCount = 40
         const flockOrigin = { x: x, y: y }
         const flockFill = "#000"//"rgb(35, 167, 190)"
         const playerTargetFill = "#000"//"rgb(0, 124, 146)"
@@ -10386,10 +10386,11 @@ const spawn = {
         }
         const startFlockInvulnerability = () => {
             let duration = flockInvulnerabilityCycles
-            if (aliveFlock.length < noInvulnerabilityFlockCount) {
+            if (aliveFlock.length <= noInvulnerabilityFlockCount) {
                 duration = 0
-            } else if (aliveFlock.length < reducedInvulnerabilityFlockCount) {
-                duration = Math.ceil(flockInvulnerabilityCycles * 0.5)
+            } else if (aliveFlock.length < fullInvulnerabilityFlockCount) {
+                duration *= (aliveFlock.length - noInvulnerabilityFlockCount) /
+                    (fullInvulnerabilityFlockCount - noInvulnerabilityFlockCount)
             }
             flockInvulnerabilityEndCycle = Math.max(flockInvulnerabilityEndCycle, simulation.cycle + duration)
             if (flockInvulnerabilityEndCycle > simulation.cycle) {
@@ -10574,7 +10575,7 @@ const spawn = {
             me.flockPlayerFollowerTrain = -1
             if (me.isFlockPlayerTarget) playerTargetGroups[playerTargetGroupIndex].target = me
             me.collisionFilter.mask = cat.player | cat.body | cat.bullet //| cat.map
-            me.damageReduction = 0.25
+            me.damageReduction = 0.2
             me.startingDamageReduction = me.damageReduction
             me.isInvulnerable = false
             me.inertia = Infinity;

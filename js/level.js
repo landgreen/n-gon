@@ -31,17 +31,17 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = false
-                // level.levelsCleared = 13
+                // level.levelsCleared = 10
                 // level.updateDifficulty()
                 // simulation.isCheating = true
                 // tech.giveTech("performance")
                 // m.coyoteCycles = 120
-                // powerUps.research.changeRerolls(100000)
+                powerUps.research.changeRerolls(100000)
                 // tech.tech[297].frequency = 100
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(7) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
 
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
@@ -73,15 +73,15 @@ const level = {
                 // for (let i = 0; i < 1; ++i) tech.giveTech("working mass")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("additive manufacturing")
                 // for (let i = 0; i < 100; ++i) tech.giveTech("anti-shear topology")
-                // for (let i = 0; i < 1; i++) tech.giveTech("exchange operator")
-                // for (let i = 0; i < 1; i++) tech.giveTech("eigenstate")
+                for (let i = 0; i < 1; i++) tech.giveTech("filament")
+                // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                level.load("final")
-                // level.load("initial")
+                // level.load("final")
+                level.load("HVAC")
                 // level.maps.testing()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
@@ -700,7 +700,7 @@ const level = {
             remove() { }
         },
         {
-            description: "half <span class='color-fire-rate' data-help='fire-rate'>fire rate</span>",
+            description: "half fire rate",
             effect() {
                 level.isSlowFireRate = true
                 b.setFireCD()
@@ -5861,7 +5861,7 @@ const level = {
             color.map = "#303639";
             // powerUps.spawnStartingPowerUps(1475, -1175);
             // spawn.debris(750, -2200, 3700, 16); //16 debris per level
-            const isCenter = 0.2 > Math.random() //20% chance to span the flock boss, which doesn't like the center block
+            const isCenter = Math.random() > 0.2  //20% chance to span the flock boss, which doesn't like the center block
             spawn.bodyRect(250, -70, 100, 70, 1);
             spawn.mapRect(-425, 0, 4500, 2100);
             spawn.mapRect(-475, -2825, 4500, 1025);
@@ -6489,9 +6489,9 @@ const level = {
             }
 
             const wind = []
-            const startingDrawIndex = 3 //if adding new wind update wind[2].isFloat  and other hard index
+            const startingDrawIndex = 2 //if adding new wind update wind[2].isFloat  and other hard index
             wind.push(level.wind(2250, 750, 275, 250, { x: 0, y: -0.005 }))//vertical not drawn //middle in right junction merge
-            wind.push(level.wind(-600, -525, 1050, 1525, { x: 0, y: -0.0007 }))//vertical central area
+            // wind.push(level.wind(-600, -525, 1050, 1525, { x: 0, y: -0.0007 }))//vertical central area
             //left
             wind.push(level.wind(-2675, 550, 275, 225, { x: 0.02, y: -0.007 })) //corner not drawn
             wind.push(level.wind(-2650, -500, 250, 1050, { x: 0, y: 0.007 })) //vertical
@@ -6552,8 +6552,8 @@ const level = {
                             wind[i].velocity.y *= -1
                         }
                         for (let i = 0; i < windDir.length; i++) windDir[i].direction += Math.PI;
-                        wind[2].isFloat = true //vertical wind needs to flip float for good player movement
-                        wind[4].velocity.y = -0.002
+                        // wind[2].isFloat = true //vertical wind needs to flip float for good player movement
+                        wind[3].velocity.y = -0.002
                     }
                 } else if (buttons[2].isUp) {
                     buttons[2].query()
@@ -6567,8 +6567,8 @@ const level = {
                             wind[i].velocity.y *= -1
                         }
                         for (let i = 0; i < windDir.length; i++) windDir[i].direction += Math.PI;
-                        wind[2].isFloat = false //vertical wind needs to flip float for good player movement
-                        wind[4].velocity.y = -0.002
+                        // wind[2].isFloat = false //vertical wind needs to flip float for good player movement
+                        wind[3].velocity.y = -0.002
                     }
                 }
                 for (let i = 0; i < buttons.length; i++) {

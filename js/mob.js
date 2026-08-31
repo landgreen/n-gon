@@ -1404,7 +1404,7 @@ const mobs = {
                             for (let i = 0; i < amount; i++) b.spore(this.position)
                         }
                     }
-                    if (tech.isChitin) {
+                    if (tech.isChitin && tech.wire) {
                         // add new segment where the current tip is
                         for (let i = 0; i < 2; i++) {
                             if (tech.wire.segments.length < 200) { //cap max length at 200 for performance

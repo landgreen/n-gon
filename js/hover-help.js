@@ -91,8 +91,10 @@ grappling hook: ammo power ups give 5% more ammo
         slow: `// <strong class="color-s">slows</strong> reduce mob movement speed`,
         plasma: `// <strong class="color-plasma">plasma</strong> damages<br>and slows mobs it touches
         <br><br>// <em>plasma is an ionized state of matter containing freely moving charged particles</em>`,
-        laser: `// <strong class="color-laser">laser</strong> beams bounce<br>off walls and instantly<br>damage mobs
-        <br><br>// <em>lasers produce coherent light through amplification by stimulated emission</em>`,
+        laser: `<svg class="hover-help-laser-path" viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <polyline points="0,94 200,34 87,0 0,26 200,86"></polyline>
+        </svg><span class="hover-help-laser-copy">// <strong class="color-laser">laser</strong> beams bounce<br>off walls and instantly<br>damage mobs
+        <br><br>// <em>lasers produce coherent light through amplification by stimulated emission</em></span>`,
     }
     const showDelay = 250;
     const hideDelay = 250;

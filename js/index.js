@@ -463,37 +463,62 @@ ${fullscreenWarning}
 </div>
 
 <div class="pause-grid-module">
-<details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
-<summary>simulation variables</summary>
-<div class="pause-details">
-<strong class='color-d' data-help='damage'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
-<span style="float: right;">empty</span>
-<br><strong class='color-defense' data-help='defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
-<span style="float: right;">empty</span>
-<br><strong class='color-h' data-help='health'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
-<span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
-<br><strong class='energy' data-help='energy'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
-<span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
-<br><strong><span class='color-fire-rate' data-help='fire-rate'>fire rate</span></strong> ${(1 / b.fireCDscale).toFixed(2)}x
-<span style="float: right;">mass ${player.mass.toFixed(1)}</span>
-${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
-<br><strong class='color-dup' data-help='duplicate'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
-<span style="float: right;"><strong class='color-junk' data-help='junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
-${botText}
-<br>
-<br> ${level.levelAnnounce()}
-<span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
-<br>seed ${Math.initialSeed}
-<span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
-<br>cycles ${m.cycle - 600}
-<span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
-<br>bullets ${bullet.length}
-<span style="float: right;">power ups ${powerUp.length}</span>
-${mobText}
-
-${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
-</div>
-</details>
+    
+        <details id="pause-music-details" style="padding: 0 8px;line-height: 140%;">
+            <summary>music</summary>
+            <div class="pause-details" style="font-size: 100%;">
+                playlists
+                <br><a data-music-playlist="instrumental" href="https://music.youtube.com/watch?v=lDlU08RU7Tk&amp;list=PLea2HwrA4R0E" target="_blank" rel="noopener noreferrer">mostly instrumental</a> <span style="color:#aaa;">classical shoegaze</span>
+                <br><a data-music-playlist="old-stuff" href="https://music.youtube.com/watch?v=qumO-vBey2Q&amp;list=PLbjRnln-q160" target="_blank" rel="noopener noreferrer">old stuff</a> <span style="color:#aaa;">new wave indie motown</span>
+                <br>
+                <br>video game OST
+                <br><a data-music-playlist="hollow-knight" href="https://music.youtube.com/watch?v=NSlkW1fFkyo&amp;list=PLmOldskd2VbL7_t-NE9p6rEboq_v0AHko" target="_blank" rel="noopener noreferrer">Hollow Knight</a>
+                <a data-music-playlist="silksong" href="https://music.youtube.com/watch?v=yUfD7w5y3Ug&amp;list=PLbNT78Q7M14yC4iIN4RaQqGa6q6zY6bqc" target="_blank" rel="noopener noreferrer" style="float: right;">Silksong</a>
+                <br><a data-music-playlist="animal-well" href="https://music.youtube.com/watch?v=NI1Ni_cXrTU&amp;list=PLESFnlO3kNnq5TKtphEDyE4805PTLIKaa" target="_blank" rel="noopener noreferrer">Animal Well</a>
+                <a data-music-playlist="disco-elysium" href="https://music.youtube.com/watch?v=qMUoWTEIGx4&amp;list=OLAK5uy_n_Y491JJMFBAxR3v_o5LLTgu20URfxpuw" target="_blank" rel="noopener noreferrer" style="float: right;">Disco Elysium</a>
+                <br><a data-music-playlist="undertale" href="https://music.youtube.com/watch?v=3BR7-AzE2dQ&amp;list=OLAK5uy_ljXkQlhVlWyV7BxSxMMzgOLbzYS_-JPt4" target="_blank" rel="noopener noreferrer">UNDERTALE</a>
+                <a data-music-playlist="deltarune" href="https://music.youtube.com/watch?v=XEdoMoV4D6k&amp;list=OLAK5uy_kidGzGmzCUSJK1LAtIh7ngZwRF9MT3qjE" target="_blank" rel="noopener noreferrer" style="float: right;">deltarune</a>
+                <br>
+                <br><label>service:
+                    <select class="music-service-select" data-music-service>
+                        <option value="youtube">YouTube</option>
+                        <option value="spotify">Spotify</option>
+                        <option value="apple">Apple Music</option>
+                    </select>
+                </label>
+            </div>
+        </details>
+    
+    <details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
+    <summary>simulation variables</summary>
+        <div class="pause-details">
+            <strong class='color-d' data-help='damage'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
+            <span style="float: right;">empty</span>
+            <br><strong class='color-defense' data-help='defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
+            <span style="float: right;">empty</span>
+            <br><strong class='color-h' data-help='health'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
+            <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
+            <br><strong class='energy' data-help='energy'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
+            <span style="float: right;">${tech.totalCount} ${powerUps.orb.tech()}</span>
+            <br><strong><span class='color-fire-rate' data-help='fire-rate'>fire rate</span></strong> ${(1 / b.fireCDscale).toFixed(2)}x
+            <span style="float: right;">mass ${player.mass.toFixed(1)}</span>
+            ${m.coupling ? `<br><span style = 'font-size:90%;'>` + m.couplingDescription(m.coupling) + `</span> from ${(m.coupling).toFixed(0)} ${powerUps.orb.coupling(1)}` : ""}
+            <br><strong class='color-dup' data-help='duplicate'>duplication</strong> ${(tech.duplicationChance() * 100).toFixed(0)}%
+            <span style="float: right;"><strong class='color-junk' data-help='junk'>JUNK</strong> ${(100 * (tech.junkChance + level.junkAdded)).toFixed(0)}%</span>
+            ${botText}
+            <br>
+            <br> ${level.levelAnnounce()}
+            <span style="float: right;">position (${player.position.x.toFixed(0)}, ${player.position.y.toFixed(0)})</span>
+            <br>seed ${Math.initialSeed}
+            <span style="float: right;">mouse (${simulation.mouseInGame.x.toFixed(0)}, ${simulation.mouseInGame.y.toFixed(0)})</span>
+            <br>cycles ${m.cycle - 600}
+            <span style="float: right;">velocity (${player.velocity.x.toFixed(2)}, ${player.velocity.y.toFixed(2)})</span>
+            <br>bullets ${bullet.length}
+            <span style="float: right;">power ups ${powerUp.length}</span>
+            ${mobText}
+            ${simulation.isCheating ? "<br><br><em>lore disabled</em>" : ""}
+        </div>
+    </details>
 </div>`
 
         text += `<div class="pause-grid-module card-background" style="height:auto;">
@@ -536,12 +561,14 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+        updateMusicLinks()
         requestAnimationFrame(() => {
             if (localSettings.isAllowed) {
                 document.getElementById("simulation-variables-details").open = localSettings.pauseMenuDetailsOpen[0]
                 document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
                 document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
                 if (document.getElementById("constraints-details")) document.getElementById("constraints-details").open = localSettings.pauseMenuDetailsOpen[3]
+                document.getElementById("pause-music-details").open = localSettings.pauseMenuDetailsOpen[4]
             }
         });
     },
@@ -730,6 +757,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             if (document.getElementById("difficulty-parameters-details")) localSettings.pauseMenuDetailsOpen[1] = document.getElementById("difficulty-parameters-details").open
             if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
             if (document.getElementById("constraints-details")) localSettings.pauseMenuDetailsOpen[3] = document.getElementById("constraints-details").open
+            if (document.getElementById("pause-music-details")) localSettings.pauseMenuDetailsOpen[4] = document.getElementById("pause-music-details").open
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
@@ -2029,6 +2057,11 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = true
     document.getElementById("show-num").checked = localSettings.showDmgNumbers
 
+    if (!["youtube", "spotify", "apple"].includes(localSettings.musicService)) {
+        localSettings.musicService = "youtube"
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
+
     if (localSettings.difficultyCompleted === undefined) {
         localSettings.difficultyCompleted = [null, false, false, false, false, false, false, false] //null because there isn't a difficulty zero
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -2039,7 +2072,10 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     lore.setTechGoal()
 
     if (localSettings.pauseMenuDetailsOpen === undefined) {
-        localSettings.pauseMenuDetailsOpen = [true, false, false, true]
+        localSettings.pauseMenuDetailsOpen = [true, false, false, true, false]
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    } else if (localSettings.pauseMenuDetailsOpen[4] === undefined) {
+        localSettings.pauseMenuDetailsOpen[4] = false
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
     if (localSettings.techHistory === undefined) {
@@ -2067,7 +2103,8 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideHUD: false,
         showDmgNumbers: false,
-        pauseMenuDetailsOpen: [true, false, false, true],
+        musicService: "youtube",
+        pauseMenuDetailsOpen: [true, false, false, true, false],
         techHistory: [],
     };
     input.setDefault()
@@ -2112,6 +2149,129 @@ document.getElementById("community-maps").addEventListener("input", () => {
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     if (simulation.isCommunityMaps) level.loadMoreLevels().catch(error => console.error(error))
 });
+
+// Add the Spotify and Apple Music playlist URLs to the empty strings below.
+const musicPlaylists = {
+    "instrumental": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=lDlU08RU7Tk&list=PLea2HwrA4R0E",
+            spotify: "https://open.spotify.com/playlist/2omGOxvDtT9LD0MZIjy5dU?si=hyYkufc5RNehpEMY3kAZDg",
+            apple: ""
+        },
+        youtubePlaylistId: "PLea2HwrA4R0E",
+        trackIds: [
+            "lDlU08RU7Tk", "5Cblo3sEJ8Y", "Jz1gvBluvc8", "ypqHpzTeVAU", "3et63xTh2bE", "SEWALc6ySI8", "qYMsd6pDSTc", "ZhHocqvb-uE", "BlpbLX4dMCA", "ogzsMhPajgA",
+            "BzImHGz4R0M", "n4lGd0KVmZo", "5D2u3ASuelQ", "YdQz6NltncU", "sb7797FQG5Y", "XvvGYEjloOg", "ziSEJeTPfyU", "u1fWF8uD6pw", "uEVbyd-u2X4", "5qVaP7mNphA",
+            "PamBD5B2wXk", "wwXtPu-iA4Q", "TkiyWhETiJw", "NUnXxh5U25Y", "FM7ALFsOH4g", "pYHEpDnvVPk", "2Agt3XfmccM", "GGwrLidX0o4", "WKg_QOy6tRk", "aolhrxi6IKc",
+            "li7KsxPyiTk", "zR2KomIYg-k", "m_npTC0Rvgg"
+        ]
+    },
+    "old-stuff": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=qumO-vBey2Q&list=PLbjRnln-q160",
+            spotify: "https://open.spotify.com/playlist/4u5qJNiBofLl8hg2BPnmcU?si=sOOIr-hWT3-z8XWkhG69Nw",
+            apple: ""
+        },
+        youtubePlaylistId: "PLbjRnln-q160",
+        trackIds: [
+            "qumO-vBey2Q", "UR-B4tHmaF8", "yWQezjGjiqs", "r2cbOdNLQuQ", "8Nlbj1t99m8", "8Jtokmp8zoE", "uZj032MNIx4", "u2XoqyVfc8g", "OPoSuyu0dsY", "egqv1mtos6A",
+            "OvzJZTkWYoY", "tVdr_JWmnsA", "1MXAIKXsVdg", "lSDfCdycdvk", "1nAE38dulRk", "kMXapsSOCD0", "aYCshYyFzls", "fid78ktHTi8", "G_GxaoOJFTY", "n4lGd0KVmZo",
+            "NF9Pc2FvgQU", "Vd_nkokQwnQ", "EMeN_aGKtIY", "AH1gqeAq3jU", "3A8FK3C2OOk", "oMfjgQ8ptrE", "e0NVBfCyoAc", "yIDx6WvXayg", "n6x7GiV9JWA", "whfOqPwa264",
+            "PkwdtkULcmA", "5D2u3ASuelQ", "CZ4QLs2jSWg", "hns_lKWj4zM", "MXcjg9o9HJ8", "Mgk3oOOd1io", "Vs-eS6IwEAA", "d7DWBxxEdXw", "hTUAaW3oGGo", "gQjYgR_3UqQ",
+            "HVyUqxilaYY", "XRAk8hrtB3k", "15aa3WIHk5M", "nqhXgO1iA1I", "LfCm57XdpO0", "zuuyR7vrL6M", "MFHwrH3J57s", "Nt9bkgRQbLs", "FwNVTYwFXS0", "7vFGKHzY_38",
+            "KvaxYUfGHnk", "ZLLccZfVV20", "DD-5_lCEMHY", "-5yXN2hvkyg", "rHQrSx9LRN8", "FuJDNYT3n0w", "YdQz6NltncU", "sb7797FQG5Y", "XvvGYEjloOg", "ziSEJeTPfyU",
+            "5qVaP7mNphA", "GylmMVT5C8Q", "9zOKBvHNWus", "YLp2cW7ICCU", "2ObjtVdsV3I", "AB2yBmZi3yo", "LnDwBrm_jsY", "Enzxdvo8NOk", "I6OR9gOMyv0", "aBKEt3MhNMM",
+            "KMXNiw4H6qA", "_NywTcGOUkE", "bgJ-hyzl6jg", "f8_EpxhNEsA", "gQLvhLbs3X4", "wwXtPu-iA4Q", "CXHz_6qmHFg", "d6nNz9At9Tc", "DiHFk7ArzYc", "vEjRMVPydOQ",
+            "GGwrLidX0o4", "TkiyWhETiJw", "NUnXxh5U25Y", "FM7ALFsOH4g", "_fTWmUlTEqE", "pYHEpDnvVPk", "i0GC7Oo_Zo4", "g0az4OkM02Y", "2Agt3XfmccM"
+        ]
+    },
+    "hollow-knight": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=NSlkW1fFkyo&list=PLmOldskd2VbL7_t-NE9p6rEboq_v0AHko",
+            spotify: "https://open.spotify.com/album/2eWzQP7WEiAEhbg7HHIHR9",
+            apple: "https://music.apple.com/us/album/hollow-knight-original-soundtrack/1263341718"
+        }
+    },
+    "silksong": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=yUfD7w5y3Ug&list=PLbNT78Q7M14yC4iIN4RaQqGa6q6zY6bqc",
+            spotify: "https://open.spotify.com/album/2IsamtSh2nFGio5SnXmwWq",
+            apple: "https://music.apple.com/us/album/hollow-knight-silksong-original-soundtrack/1838949732"
+        }
+    },
+    "animal-well": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=NI1Ni_cXrTU&list=PLESFnlO3kNnq5TKtphEDyE4805PTLIKaa",
+            spotify: "",
+            apple: ""
+        }
+    },
+    "disco-elysium": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=qMUoWTEIGx4&list=OLAK5uy_n_Y491JJMFBAxR3v_o5LLTgu20URfxpuw",
+            spotify: "https://open.spotify.com/album/5IhBwGYrQotmDvfLcdIj8R",
+            apple: "https://music.apple.com/us/album/disco-elysium/1659525966"
+        }
+    },
+    "undertale": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=3BR7-AzE2dQ&list=OLAK5uy_ljXkQlhVlWyV7BxSxMMzgOLbzYS_-JPt4",
+            spotify: "https://open.spotify.com/album/2M2Ae2SvZe3fmzUtlVOV5Z",
+            apple: "https://music.apple.com/us/album/undertale-soundtrack/1528217465"
+        }
+    },
+    "deltarune": {
+        links: {
+            youtube: "https://music.youtube.com/watch?v=XEdoMoV4D6k&list=OLAK5uy_kidGzGmzCUSJK1LAtIh7ngZwRF9MT3qjE",
+            spotify: "https://open.spotify.com/album/6putGW0KxGMrgTZzplp2pF",
+            apple: "https://music.apple.com/us/album/deltarune-chapter-1-original-game-soundtrack/1443475587"
+        }
+    }
+}
+
+const musicServiceNames = {
+    youtube: "YouTube",
+    spotify: "Spotify",
+    apple: "Apple Music"
+}
+
+function updateMusicLinks() {
+    const service = localSettings.musicService
+    for (const select of document.querySelectorAll("[data-music-service]")) select.value = service
+    for (const link of document.querySelectorAll("[data-music-playlist]")) {
+        const playlist = musicPlaylists[link.dataset.musicPlaylist]
+        const url = playlist && playlist.links[service]
+        if (url) {
+            link.href = url
+            link.classList.remove("music-link-unavailable")
+            link.removeAttribute("aria-disabled")
+            link.removeAttribute("title")
+        } else {
+            link.removeAttribute("href")
+            link.classList.add("music-link-unavailable")
+            link.setAttribute("aria-disabled", "true")
+            link.title = `${musicServiceNames[service]} link not added yet`
+        }
+    }
+}
+
+document.addEventListener("input", event => {
+    if (!event.target.matches("[data-music-service]")) return
+    localSettings.musicService = event.target.value
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    updateMusicLinks()
+})
+
+document.addEventListener("click", event => {
+    const link = event.target.closest && event.target.closest("[data-music-playlist]")
+    if (!link || localSettings.musicService !== "youtube") return
+    const playlist = musicPlaylists[link.dataset.musicPlaylist]
+    if (!playlist || !playlist.trackIds) return
+    const trackId = playlist.trackIds[Math.floor(Math.random() * playlist.trackIds.length)]
+    link.href = `https://music.youtube.com/watch?v=${trackId}&list=${playlist.youtubePlaylistId}`
+})
+
+updateMusicLinks()
 
 document.getElementById("updates").addEventListener("toggle", function () {
     function loadJSON(path, success, error) { //generic function to get JSON

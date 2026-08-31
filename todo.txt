@@ -1,10 +1,13 @@
 
-background wires on final boss level remove with each phase of fight
-cloaking reduces damage done
+added a few music playlists
+
+flockBoss moves faster and has more durability
 
 bug fixes
-  salvo was still had a 2 research cost
-  new flock boss chance is 80->20%
+  removed html tags from constraint text that didn't parse as html
+  anthropic principle wasn't properly exiting pause at high max health.
+  losing filament while keeping chitin crashed the game
+  wind zone on HVAC wasn't actually removed
 
 *********************************************************** TODO *****************************************************
 
