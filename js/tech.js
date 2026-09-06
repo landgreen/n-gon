@@ -208,7 +208,7 @@ const tech = {
     setCheating() {
         if (!simulation.isCheating) {
             simulation.isCheating = true;
-            document.title = "n-gon:" + level.levelAnnounce();
+            document.title = "n-gon: " + level.levelAnnounce();
             lore.techCount = 0;
             for (let i = 0, len = tech.tech.length; i < len; i++) {
                 if (tech.tech[i].isLore) {
@@ -991,6 +991,29 @@ const tech = {
         }
     },
     {
+        name: "hyperpolarisation",
+        descriptionFunction() {
+            return `for <strong>${(tech.isDamageCooldownTime / 60).toFixed(1)}</strong> seconds after a mob <strong>dies</strong>,<br><strong>depolarization</strong> gives <strong>0.4x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        isSkinUpgrade: true,
+        allowed() {
+            return tech.isDamageCooldown
+        },
+        requires: "depolarization",
+        effect() {
+            tech.isHyperpolarisation = true;
+            m.skin.updatePolarDefense();
+        },
+        remove() {
+            tech.isHyperpolarisation = false;
+            m.skin.updatePolarDefense();
+        }
+    },
+    {
         name: "eigenstate",
         descriptionFunction() {
             return `quickly tap <strong>down</strong> <strong>3</strong> times to swap <strong class='block' data-help='block' style="border-radius: 0.35em;">eigenstates</strong><br><strong>4x</strong> <strong class='color-d' data-help='damage'>damage</strong> if near your other <strong class='block' data-help='block' style="border-radius: 0.35em;">eigenstate</strong>`
@@ -1525,8 +1548,15 @@ const tech = {
     },
     {
         name: "marginal utility",
+        chooseGun() {
+            const options = []
+            for (let i = 0; i < b.guns.length; i++) {
+                if (b.guns[i].ammoPack !== Infinity) options.push(i)
+            }
+            this.gun = options[Math.floor(Math.random() * options.length)]
+        },
         descriptionFunction() {
-            if (this.count === 0) this.gun = Math.floor(Math.random() * (b.guns.length - 1)) //don't pick laser
+            if (this.count === 0) this.chooseGun()
             return `<strong>2x</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)} for <strong class='color-g'>${b.guns[this.gun].name}</strong>`
         },
         maxCount: 1,
@@ -1537,7 +1567,7 @@ const tech = {
         requires: "",
         gun: undefined,
         effect() {
-            if (this.gun === undefined) this.gun = Math.floor(Math.random() * (b.guns.length - 1)) //don't pick laser
+            if (this.gun === undefined || b.guns[this.gun].ammoPack === Infinity) this.chooseGun()
 
             simulation.inGameConsole(`${b.guns[this.gun].ammoPack} → ${2 * b.guns[this.gun].ammoPack} average <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)} for <strong class='color-g'>${b.guns[this.gun].name}</strong>`)
             b.guns[this.gun].ammoPack *= 2
@@ -2178,7 +2208,7 @@ const tech = {
     {
         name: "anti-shear topology",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Topology' class="link">anti-shear topology</a>`,
-        description: "your bullets last <strong>1.3x</strong> <strong>longer</strong>", //<br><em style = 'font-size: 83%'>drone spore worm flea missile foam wave neutron ice</em>",
+        description: "your bullets and waves last <strong>1.3x</strong> <strong>longer</strong>", //<br><em style = 'font-size: 83%'>drone spore worm flea missile foam wave neutron ice</em>",
         maxCount: 3,
         count: 0,
         frequency: 1,
@@ -5878,18 +5908,17 @@ const tech = {
         descriptionFunction() {
             // return `<span style = 'font-size:93%;'><strong>+1</strong> segment from <strong>power ups</strong>, hitting mobs removes them<br><strong>+1%</strong> chance to <strong class='color-dup' data-help='duplicate'>duplicate</strong> <strong>power ups</strong> per segment</span>`
             // return `<strong>power ups</strong> give <strong>+1</strong> <strong class='color-dup' data-help='duplicate'>duplication</strong> / <strong class="color-wire" data-help="wire">wire</strong> length<br>mobs <strong>cut</strong> <strong class="color-wire" data-help="wire">wire</strong> / <strong class='color-dup' data-help='duplicate'>duplication</strong>`
-            return `<strong>power ups</strong> grow <strong class="color-wire" data-help="wire">filament</strong> by <strong>+1</strong>, mobs <strong>cut</strong> it<br><strong>+1%</strong> <strong class='color-dup' data-help='duplicate'>duplication</strong> per segment <em style ='float: right;'>(${tech.wire ? Math.min(100, tech.wire.segments.length).toFixed(0) : 10}%)</em>`
+            return `getting <strong>power ups</strong> grows <strong class="color-wire" data-help="wire">filament</strong> by <strong>+1</strong>, mobs <strong>cut</strong> it<br><strong>+1%</strong> <strong class='color-dup' data-help='duplicate'>duplication</strong> per segment <em>(${tech.wire ? Math.min(100, tech.wire.segments.length).toFixed(0) : 10}%)</em><span style="float:right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>`
         },
         maxCount: 1,
         count: 0,
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return !localSettings.isHideHUD
+            return !localSettings.isHideHUD && (powerUps.research.count > 1 || build.isExperimentSelection)
         },
-        requires: "not performance mode",
+        requires: "2 research, not performance mode",
         effect() {
-
             // class Scarf {
             //     constructor(length = 10, spacing = 20) {
             //         this.segments = [];
@@ -6282,6 +6311,7 @@ const tech = {
                 }
             }
             tech.wire = new Wire()
+            powerUps.research.expend(2)
             powerUps.setPowerUpMode();
             simulation.ephemera.push({
                 name: "filament",
@@ -6295,7 +6325,10 @@ const tech = {
         },
         remove() {
             tech.wire = null
-            if (this.count) simulation.removeEphemera("filament", true)
+            if (this.count) {
+                simulation.removeEphemera("filament", true)
+                powerUps.research.changeRerolls(2)
+            }
         }
     },
     {
@@ -10924,10 +10957,11 @@ const tech = {
                         for (let i = 1; i < vertices.length; i++) ctx.lineTo(vertices[i].x, vertices[i].y)
                         ctx.closePath()
                         ctx.lineJoin = "round"
-                        ctx.lineWidth = 10 + 10 * Math.sin(m.cycle * 0.08)
-                        ctx.strokeStyle = `rgba(130,190,215,${0.48 + 0.12 * Math.sin(m.cycle * 0.06)})`
-                        ctx.shadowBlur = 5
-                        ctx.shadowColor = "rgba(130,190,215,0.3)"
+                        ctx.lineWidth = 10 + 5 * Math.sin(m.cycle * 0.06)
+                        ctx.strokeStyle = `rgba(130,190,215,${0.48 + 0.10 * Math.sin(m.cycle * 0.06)})`
+                        ctx.stroke()
+                        ctx.lineWidth = 15
+                        ctx.strokeStyle = `rgba(130,190,215,${0.23})`
                         ctx.stroke()
                         ctx.restore()
                     }
@@ -12235,23 +12269,25 @@ const tech = {
         },
         remove() { }
     },
-    // {
-    //     name: "pocket dimension",
-    //     description: "rotate tech descriptions into a higher spacial dimension",
-    //     maxCount: 1,
-    //     count: 0,
-    //     frequency: 0,
-    //     isJunk: true,
-    //     isInstant: true,
-    //     allowed() {
-    //         return true
-    //     },
-    //     requires: "",
-    //     effect() {
-    // document.getElementById("choose-grid").classList.add("flipX");
-    //     },
-    //     remove() {}
-    // },
+    {
+        name: "rotation matrix",
+        description: `rotate gun, field, and tech descriptions <strong>90°</strong>`,
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isJunk: true,
+        isInstant: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            document.body.classList.add("sideways-descriptions")
+        },
+        remove() {
+            document.body.classList.remove("sideways-descriptions")
+        }
+    },
     {
         name: "random",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Special:Random' class="link">random</a>`,

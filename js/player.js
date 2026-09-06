@@ -895,7 +895,7 @@ const m = {
                         levelsCleared: level.levelsCleared,
                         do() {
                             m.timeStop(Math.random() < 0.1 ? "#00cccc55" : "#ccc")
-                            if (m.health > Math.min(0.7 * m.maxHealth, 99) || this.levelsCleared !== level.levelsCleared) {
+                            if (m.health > Math.min(0.7 * m.maxHealth, 0.7) || this.levelsCleared !== level.levelsCleared) {
                                 m.wakeCheck(false); //unpause time
                                 simulation.removeEphemera(this);
                                 simulation.wipe = function () { //set wipe to normal
@@ -1037,6 +1037,10 @@ const m = {
     draw() { },
     isAltSkin: false,
     resetSkin() {
+        if (m.skin.isPolarDefense) {
+            m.damageReduction /= 0.4
+            m.skin.isPolarDefense = false
+        }
         simulation.isAutoZoom = true;
         m.hardLandCDScale = 1
         m.yOffWhen.jump = 70
@@ -1477,6 +1481,18 @@ const m = {
                 ctx.restore();
             }
         },
+        isPolarDefense: false,
+        updatePolarDefense() {
+            const isActive = !!(tech.isHyperpolarisation && tech.isDamageCooldown && m.lastKillCycle + tech.isDamageCooldownTime > m.cycle)
+            if (isActive !== m.skin.isPolarDefense) {
+                if (isActive) {
+                    m.damageReduction *= 0.4
+                } else {
+                    m.damageReduction /= 0.4
+                }
+                m.skin.isPolarDefense = isActive
+            }
+        },
         polar() {
             m.isAltSkin = true
             // m.setFillColors();
@@ -1489,6 +1505,7 @@ const m = {
             m.bodyGradient = grd
 
             m.draw = function () {
+                m.skin.updatePolarDefense()
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
@@ -3717,6 +3734,17 @@ const m = {
         if (m.holdingTarget) {
             m.energy -= m.fieldRegen;
             if (m.energy < 0) m.energy = 0;
+            // The block was drawn before holding moves it; retain that pose for the charge overlay.
+            const vertices = m.holdingTarget.vertices;
+            let chargeVertices = m.holdingTarget.throwChargeVertices;
+            if (!chargeVertices || chargeVertices.length !== vertices.length) {
+                chargeVertices = m.holdingTarget.throwChargeVertices = vertices.map(v => ({ x: v.x, y: v.y }));
+            } else {
+                for (let i = 0; i < vertices.length; i++) {
+                    chargeVertices[i].x = vertices[i].x;
+                    chargeVertices[i].y = vertices[i].y;
+                }
+            }
             const r = 30 + 40 * player.scale
             Matter.Body.setPosition(m.holdingTarget, { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) });
             Matter.Body.setVelocity(m.holdingTarget, player.velocity);
@@ -3815,19 +3843,20 @@ const m = {
                         //draw charge            
                         const x = m.pos.x + eye * Math.cos(m.angle);
                         const y = m.pos.y + eye * Math.sin(m.angle);
-                        const len = m.holdingTarget.vertices.length - 1;
+                        const vertices = m.holdingTarget.throwChargeVertices || m.holdingTarget.vertices;
+                        const len = vertices.length - 1;
                         const opacity = m.throwCharge > 4 ? 0.65 : m.throwCharge * 0.06
                         ctx.fillStyle = `rgba(255,0,255,${opacity})`;
                         ctx.beginPath();
                         ctx.moveTo(x, y);
-                        ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
-                        ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                        ctx.lineTo(vertices[len].x, vertices[len].y);
+                        ctx.lineTo(vertices[0].x, vertices[0].y);
                         ctx.fill();
                         for (let i = 0; i < len; i++) {
                             ctx.beginPath();
                             ctx.moveTo(x, y);
-                            ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
-                            ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                            ctx.lineTo(vertices[i].x, vertices[i].y);
+                            ctx.lineTo(vertices[i + 1].x, vertices[i + 1].y);
                             ctx.fill();
                         }
                         if (tech.isTokamakFly && m.throwCharge > 4 && m.energy > 0.01) {
@@ -3904,24 +3933,27 @@ const m = {
                         //draw charge
                         const x = m.pos.x + eye * Math.cos(m.angle);
                         const y = m.pos.y + eye * Math.sin(m.angle);
-                        const len = m.holdingTarget.vertices.length - 1;
-                        const edge = m.throwCharge * m.throwCharge * m.throwCharge;
-                        const grd = ctx.createRadialGradient(x, y, edge, x, y, edge + 5);
-                        grd.addColorStop(0, "rgba(255,50,150,0.3)");
-                        grd.addColorStop(1, "transparent");
-                        ctx.fillStyle = grd;
+                        const vertices = m.holdingTarget.throwChargeVertices || m.holdingTarget.vertices;
+                        const len = vertices.length - 1;
+                        // Reveal the throw-charge shape inside an expanding circle.
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.arc(x, y, m.throwCharge * m.throwCharge * m.throwCharge, 0, 2 * Math.PI);
+                        ctx.clip();
+                        ctx.fillStyle = "rgba(255,50,150,0.3)";
                         ctx.beginPath();
                         ctx.moveTo(x, y);
-                        ctx.lineTo(m.holdingTarget.vertices[len].x, m.holdingTarget.vertices[len].y);
-                        ctx.lineTo(m.holdingTarget.vertices[0].x, m.holdingTarget.vertices[0].y);
+                        ctx.lineTo(vertices[len].x, vertices[len].y);
+                        ctx.lineTo(vertices[0].x, vertices[0].y);
                         ctx.fill();
                         for (let i = 0; i < len; i++) {
                             ctx.beginPath();
                             ctx.moveTo(x, y);
-                            ctx.lineTo(m.holdingTarget.vertices[i].x, m.holdingTarget.vertices[i].y);
-                            ctx.lineTo(m.holdingTarget.vertices[i + 1].x, m.holdingTarget.vertices[i + 1].y);
+                            ctx.lineTo(vertices[i].x, vertices[i].y);
+                            ctx.lineTo(vertices[i + 1].x, vertices[i + 1].y);
                             ctx.fill();
                         }
+                        ctx.restore();
                         //trajectory prediction
                         const cycles = 30
                         const charge = Math.min(m.throwCharge / 5, 1)

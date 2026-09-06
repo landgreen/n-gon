@@ -4222,18 +4222,16 @@ const b = {
                     this.lockedOn = null;
                     let closeDist = Infinity;
                     for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (mob[i].isBadTarget || mob[i].isInvulnerable) continue;
+                        const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+                        const DIST = Vector.magnitude(TARGET_VECTOR)
                         if (
-                            !mob[i].isBadTarget &&
+                            DIST < closeDist &&
                             !Matter.Query.rayAny(map, this.position, mob[i].position) &&
-                            !Matter.Query.rayAny(body, this.position, mob[i].position) &&
-                            !mob[i].isInvulnerable
+                            !Matter.Query.rayAny(body, this.position, mob[i].position)
                         ) {
-                            const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
-                            const DIST = Vector.magnitude(TARGET_VECTOR)
-                            if (DIST < closeDist) {
-                                closeDist = DIST;
-                                this.lockedOn = mob[i]
-                            }
+                            closeDist = DIST;
+                            this.lockedOn = mob[i]
                         }
                     }
                     //blink towards mobs
@@ -4444,18 +4442,16 @@ const b = {
                         this.lockedOn = null;
                         let closeDist = Infinity;
                         for (let i = 0, len = mob.length; i < len; ++i) {
+                            if (mob[i].isBadTarget || mob[i].isInvulnerable) continue;
+                            const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
+                            const DIST = Vector.magnitude(TARGET_VECTOR);
                             if (
-                                !mob[i].isBadTarget &&
+                                DIST < closeDist &&
                                 !Matter.Query.rayAny(map, this.position, mob[i].position) &&
-                                !Matter.Query.rayAny(body, this.position, mob[i].position) &&
-                                !mob[i].isInvulnerable
+                                !Matter.Query.rayAny(body, this.position, mob[i].position)
                             ) {
-                                const TARGET_VECTOR = Vector.sub(this.position, mob[i].position)
-                                const DIST = Vector.magnitude(TARGET_VECTOR);
-                                if (DIST < closeDist) {
-                                    closeDist = DIST;
-                                    this.lockedOn = mob[i]
-                                }
+                                closeDist = DIST;
+                                this.lockedOn = mob[i]
                             }
                         }
                         //power ups

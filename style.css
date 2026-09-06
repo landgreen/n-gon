@@ -448,6 +448,23 @@ summary {
     /* border-radius: 5px; */
 }
 
+.sideways-descriptions .card-text {
+    transform: rotate(90deg);
+    transform-origin: center;
+}
+
+.sideways-descriptions .card-background {
+    min-height: 374px;
+    margin-block: 0;
+    justify-content: center;
+}
+
+.sideways-descriptions .choose-grid-module,
+.sideways-descriptions .experiment-grid-module,
+.sideways-descriptions .pause-grid-module {
+    overflow: visible;
+}
+
 .cancel-card {
     text-align: center;
     font-size: 1.1em;
@@ -522,6 +539,10 @@ summary {
         height: 290px;
     }
 
+    .sideways-descriptions .card-background {
+        min-height: 330px;
+    }
+
     .card-text {
         min-height: 75px;
     }
@@ -549,6 +570,10 @@ summary {
 
     .card-background {
         height: 240px;
+    }
+
+    .sideways-descriptions .card-background {
+        min-height: 275px;
     }
 
     .card-text {

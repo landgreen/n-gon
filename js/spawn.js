@@ -6663,10 +6663,33 @@ const spawn = {
         me.startingDamageReduction = me.damageReduction
         me.isInvulnerable = false
         me.invulnerabilityCountDown = 0
+        me.drawMantisConstraints = function () {
+            ctx.beginPath();
+            ctx.moveTo(this.cons.pointA.x, this.cons.pointA.y)
+            ctx.lineTo(this.position.x, this.position.y)
+            ctx.moveTo(this.cons2.pointA.x, this.cons2.pointA.y)
+            ctx.lineTo(this.position.x, this.position.y)
+            for (let i = 0; i < this.babyList.length; i++) {
+                if (this.babyList[i].alive) {
+                    ctx.moveTo(this.position.x, this.position.y)
+                    ctx.lineTo(this.babyList[i].position.x, this.babyList[i].position.y)
+
+                    const next = this.babyList[(i + 1) % this.babyList.length]
+                    if (next.alive) {
+                        ctx.moveTo(this.babyList[i].position.x, this.babyList[i].position.y)
+                        ctx.lineTo(next.position.x, next.position.y)
+                    }
+                }
+            }
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#222";
+            ctx.stroke();
+        }
         me.do = function () {
             if (this.seePlayer.recall) this.healthBar3()
             this.checkStatus();
             this.gravity();
+            this.drawMantisConstraints()
             //draw the two dots on the end of the springs
             ctx.beginPath();
             ctx.arc(this.cons.pointA.x, this.cons.pointA.y, 6, 0, 2 * Math.PI);

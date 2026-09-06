@@ -256,11 +256,11 @@ function getUrlVars() {
     });
     return vars;
 }
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
     const set = getUrlVars()
     if (Object.keys(set).length !== 0) {
         // build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
-        openExperimentMenu();
+        await openExperimentMenu();
         //add experimental selections based on url
         for (const property in set) {
             set[property] = set[property].replace(/%20/g, " ")
@@ -1064,10 +1064,10 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
     nameLink(text) { //converts text into a clickable wikipedia search
         return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/' /g, '%27')}&title=Special:Search' class="link">${text}</a>`
     },
-    reset() {
+    async reset() {
         build.isExperimentSelection = true;
         build.isExperimentRun = true;
-        simulation.startGame(true); //starts game, but pauses it
+        await simulation.startGame(true); //starts game, but pauses it
         build.isExperimentSelection = true;
         build.isExperimentRun = true;
         simulation.paused = true;
@@ -1178,7 +1178,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
     }
 }
 
-function openExperimentMenu() {
+async function openExperimentMenu() {
     document.getElementById("experiment-button").style.display = "none";
     document.getElementById("training-button").style.display = "none";
     document.getElementById("start-button").style.display = "none";
@@ -1187,12 +1187,12 @@ function openExperimentMenu() {
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
-    build.reset();
+    await build.reset();
 
 }
 
 //record settings so they can be reproduced in the experimental menu
-document.getElementById("experiment-button").addEventListener("click", () => { //setup build run
+document.getElementById("experiment-button").addEventListener("click", async () => { //setup build run
     // let field = 0;
     // let inventory = [];
     // let techList = [];
@@ -1203,7 +1203,7 @@ document.getElementById("experiment-button").addEventListener("click", () => { /
     //         techList.push(tech.tech[i].count)
     //     }
     // }
-    openExperimentMenu();
+    await openExperimentMenu();
 });
 
 

@@ -174,11 +174,60 @@ const mobs = {
     },
     statusDoT(who, tickDamage, cycles = 180) {
         if (!who.isShielded && who.alive && who.damageReduction > 0) {
+            if (who.status.length >= 20) {
+                let dotCount = 0;
+                let lastDot = null;
+                let mergedDot = null;
+                for (let i = 0; i < who.status.length; i++) {
+                    const status = who.status[i];
+                    if (status.type === "dot") {
+                        dotCount++;
+                        lastDot = status;
+                        if (status.stacks > 1) mergedDot = status;
+                    }
+                }
+                if (dotCount >= 20) {
+                    const dot = mergedDot || lastDot;
+                    // checkStatus runs the effect before removing it, including on endCycle + 1.
+                    const incomingTicks = Math.max(0, Math.floor((cycles - 28) / 30) + 1);
+                    if (incomingTicks === 0) return;
+                    const incomingStart = simulation.cycle + 29;
+                    const incomingEnd = incomingStart + 30 * (incomingTicks - 1);
+                    let nextTick = dot.startCycle + 30 * Math.max(0, Math.ceil((simulation.cycle - dot.startCycle) / 30));
+                    if (nextTick === dot.lastTickCycle) nextTick += 30;
+                    const remainingTicks = Math.max(0, Math.floor((dot.endCycle + 1 - nextTick) / 30) + 1);
+                    const remainingDamage = remainingTicks > 0 ? dot.dmg * remainingTicks : 0;
+                    const incomingDamage = tickDamage * incomingTicks;
+                    const totalDamage = remainingDamage + incomingDamage;
+                    const oldStacks = remainingTicks > 0 ? dot.stacks : 0;
+                    const oldEnd = dot.mergeEndCycle ?? nextTick + 30 * (remainingTicks - 1);
+                    // Weight the finish time by unspent damage; retain the unrounded average across merges.
+                    const incomingWeight = remainingDamage === Infinity ? (incomingDamage === Infinity ? 0.5 : 0) :
+                        incomingDamage === Infinity ? 1 : totalDamage > 0 ? incomingDamage / totalDamage : 1 / (oldStacks + 1);
+                    const averageEnd = remainingTicks > 0 ? oldEnd + (incomingEnd - oldEnd) * incomingWeight : incomingEnd;
+                    // Keep the pending tick instead of postponing damage every time another hit arrives.
+                    if (remainingTicks === 0) nextTick = incomingStart;
+                    const ticks = Math.max(1, Math.round((averageEnd - nextTick) / 30) + 1);
+                    dot.dmg = totalDamage / ticks;
+                    dot.startCycle = nextTick;
+                    dot.endCycle = nextTick + 30 * (ticks - 1);
+                    dot.mergeEndCycle = averageEnd;
+                    dot.stacks = oldStacks + 1;
+                    return;
+                }
+            }
             who.status.push({
                 effect() {
-                    if ((simulation.cycle - this.startCycle) % 30 === 0) {
+                    if (simulation.cycle >= this.startCycle && (simulation.cycle - this.startCycle) % 30 === 0) {
+                        this.lastTickCycle = simulation.cycle;
                         let dmg = tech.radioactiveDamage * this.dmg
-                        if (tech.isRadStackDamage) dmg *= 1 + 0.07 * who.status.length
+                        if (tech.isRadStackDamage) {
+                            let stackCount = who.status.length;
+                            for (let i = 0; i < who.status.length; i++) {
+                                if (who.status[i].type === "dot") stackCount += who.status[i].stacks - 1;
+                            }
+                            dmg *= 1 + 0.07 * stackCount;
+                        }
                         if (who.damageReduction === 0) {
                             this.endCycle = 0 //invulnerability clears radiation
                             simulation.drawList.push({ //add dmg to draw queue
@@ -203,6 +252,9 @@ const mobs = {
                 },
                 endEffect() { },
                 dmg: tickDamage,
+                stacks: 1, //logical radiation stacks for decay chain, even when represented by one effect
+                lastTickCycle: -Infinity,
+                mergeEndCycle: null,
                 type: "dot",
                 endCycle: simulation.cycle + cycles,
                 startCycle: simulation.cycle + 29 //makes sure it doesn't tick on first application

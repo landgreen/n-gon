@@ -13,7 +13,7 @@ const level = {
     isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"], //, "vault"
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", "superNgonBros", "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
     moreLevelsPromise: null,
@@ -41,7 +41,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(2) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
 
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
@@ -70,25 +70,25 @@ const level = {
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
                 // tech.giveTech("transverse")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("working mass")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("additive manufacturing")
                 // for (let i = 0; i < 100; ++i) tech.giveTech("anti-shear topology")
-                for (let i = 0; i < 1; i++) tech.giveTech("filament")
-                // for (let i = 0; i < 1; i++) tech.giveTech("tungsten carbide")
+                // for (let i = 0; i < 1; i++) tech.giveTech("exchange operator")
+                // for (let i = 0; i < 1; i++) tech.giveTech("scale invariance")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                // level.load("final")
-                level.load("HVAC")
-                // level.maps.testing()
+                // level.load("null")
+                // level.load("vault")
+                level.maps.testing()
 
                 // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
-                // for (let i = 0; i < 4; i++) spawn.starter(1300 + 10 * i, -400)
+                // for (let i = 0; i < 4; i++) spawn.mantisBoss(1300 + 10 * i, -400)
                 // for (let i = 0; i < 1; i++) spawn.starter(1300 + 10 * i, -200, 100)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
@@ -641,6 +641,181 @@ const level = {
                 })
             }
         }
+    },
+    // direction names the adjacent source region. Left/right flip horizontally;
+    // above/below flip vertically. Coordinates and dimensions are world units.
+    // Optional reflection opacity and tint opacity range from 0 to 1.
+    // Tint covers the mirror rectangle; its color defaults to green.
+    // Only reflects source pixels currently on the canvas. Place mirrors where
+    // the camera keeps their source visible, with enough zoom-out that it cannot go past the player.
+    // another issue is with multiple mirrors we don't want them drawing each other, the call order of multiple level.mirrors in the level should fix it if it's one sided
+    mirror(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040") {
+        if (localSettings.isHideHUD) return; //performance mode: do not register a mirror
+        if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
+            throw new RangeError("mirror requires finite coordinates and positive dimensions");
+        }
+        if (!["right", "left", "above", "below"].includes(direction)) {
+            throw new RangeError('mirror direction must be "right", "left", "above", or "below"');
+        }
+        if (![opacity, tintOpacity].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
+            throw new RangeError("mirror opacity and tint opacity must be numbers between 0 and 1");
+        }
+        const horizontal = direction === "right" || direction === "left";
+        const sourceX = x + (direction === "right" ? width : direction === "left" ? -width : 0);
+        const sourceY = y + (direction === "below" ? height : direction === "above" ? -height : 0);
+        const effect = {
+            name: "mirror",
+            opacity,
+            tintOpacity,
+            onLevel: level.onLevel,
+            do() {
+                if (!m.alive || this.onLevel !== level.onLevel) {
+                    simulation.removeEphemera(this);
+                    return;
+                }
+                const { opacity, tintOpacity } = this;
+                if (simulation.isTimeSkipping) return;
+                if (opacity === 0 && tintOpacity === 0) return;
+
+                // The camera translates/scales world coordinates; the source
+                // rectangle for drawImage must use canvas bitmap pixels.
+                const camera = ctx.getTransform();
+                const pixelWidth = camera.a * width;
+                const pixelHeight = camera.d * height;
+                if (pixelWidth <= 0 || pixelHeight <= 0) return;
+                const pixelX = camera.a * x + camera.e;
+                const pixelY = camera.d * y + camera.f;
+                // Cull the destination, not the source. Keep the ephemera alive
+                // so drawing resumes as soon as the mirror reenters the camera.
+                if (pixelX >= canvas.width || pixelY >= canvas.height ||
+                    pixelX + pixelWidth <= 0 || pixelY + pixelHeight <= 0) return;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(x, y, width, height);
+                ctx.clip();
+                ctx.globalAlpha = opacity;
+                // Fade out the destination too: transparent reflected pixels must gradually replace the map.
+                if (opacity > 0 && opacity < 1) {
+                    ctx.globalCompositeOperation = "destination-out";
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(x, y, width, height);
+                    // Add the weighted reflection without attenuating the remaining destination a second time.
+                    ctx.globalCompositeOperation = "lighter";
+                } else {
+                    ctx.globalCompositeOperation = "copy";
+                }
+                ctx.translate(x + (horizontal ? width : 0), y + (horizontal ? 0 : height));
+                ctx.scale(horizontal ? -1 : 1, horizontal ? 1 : -1);
+                if (opacity > 0) {
+                    ctx.drawImage(canvas,
+                        camera.a * sourceX + camera.e, camera.d * sourceY + camera.f,
+                        pixelWidth, pixelHeight, 0, 0, width, height);
+                }
+                if (tintOpacity > 0) {
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.globalAlpha = tintOpacity;
+                    ctx.fillStyle = tintColor;
+                    ctx.fillRect(0, 0, width, height);
+                }
+                ctx.restore();
+                ctx.beginPath();
+            },
+        };
+        // Ephemera runs backwards, so mirrors draw after ordinary effects.
+        simulation.ephemera.unshift(effect);
+        return effect;
+    },
+    // Experimental pixelated mirror; keep the standard mirror implementation independent.
+    // Same parameters as mirror, followed by pixel block size in world units and
+    // glitch probability: 0 never skips a draw cycle, 1 always skips it.
+    mirrorPixel(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040", pixelSize = 8, glitch = 0) {
+        if (localSettings.isHideHUD) return; //performance mode: no ephemera or buffer allocation
+        if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
+            throw new RangeError("mirrorPixel requires finite coordinates and positive dimensions");
+        }
+        if (!["right", "left", "above", "below"].includes(direction)) {
+            throw new RangeError('mirrorPixel direction must be "right", "left", "above", or "below"');
+        }
+        if (![opacity, tintOpacity].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
+            throw new RangeError("mirrorPixel opacity and tint opacity must be numbers between 0 and 1");
+        }
+        if (!Number.isFinite(pixelSize) || pixelSize < 1) {
+            throw new RangeError("mirrorPixel pixel size must be at least 1 world unit");
+        }
+        if (!Number.isFinite(glitch) || glitch < 0 || glitch > 1) {
+            throw new RangeError("mirrorPixel glitch must be a number between 0 and 1");
+        }
+        // Allocate once per mirror. Each buffer pixel becomes a visible block;
+        // world-unit sizing keeps the block pattern stable as the camera zooms.
+        const buffer = document.createElement("canvas");
+        buffer.width = Math.max(1, Math.ceil(width / pixelSize));
+        buffer.height = Math.max(1, Math.ceil(height / pixelSize));
+        const bufferCtx = buffer.getContext("2d");
+        const horizontal = direction === "right" || direction === "left";
+        const sourceX = x + (direction === "right" ? width : direction === "left" ? -width : 0);
+        const sourceY = y + (direction === "below" ? height : direction === "above" ? -height : 0);
+        const effect = {
+            name: "mirrorPixel",
+            onLevel: level.onLevel,
+            do() {
+                if (!m.alive || this.onLevel !== level.onLevel) {
+                    simulation.removeEphemera(this);
+                    return;
+                }
+                if (simulation.isTimeSkipping) return;
+                if (opacity === 0 && tintOpacity === 0) return;
+
+                // The camera translates/scales world coordinates; the source
+                // rectangle for drawImage must use canvas bitmap pixels.
+                const camera = ctx.getTransform();
+                const pixelWidth = camera.a * width;
+                const pixelHeight = camera.d * height;
+                if (pixelWidth <= 0 || pixelHeight <= 0) return;
+                const pixelX = camera.a * x + camera.e;
+                const pixelY = camera.d * y + camera.f;
+                // Cull the destination, not the source. Keep the ephemera alive
+                // so drawing resumes as soon as the mirror reenters the camera.
+                if (pixelX >= canvas.width || pixelY >= canvas.height ||
+                    pixelX + pixelWidth <= 0 || pixelY + pixelHeight <= 0) return;
+
+                // A glitch cycle leaves the already-drawn map visible. Skip both
+                // reflection and tint, without updating the small canvas.
+                if (glitch > 0 && Math.random() < glitch) return;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(x, y, width, height);
+                ctx.clip();
+                ctx.globalAlpha = opacity;
+                // Opaque mirrors replace the map; translucent ones reveal it.
+                ctx.globalCompositeOperation = opacity < 1 ? "source-over" : "copy";
+                ctx.translate(x + (horizontal ? width : 0), y + (horizontal ? 0 : height));
+                ctx.scale(horizontal ? -1 : 1, horizontal ? 1 : -1);
+                if (opacity > 0) {
+                    // Clear first so clipped/offscreen source pixels never retain
+                    // an old frame. No pixel readback or per-pixel JavaScript loop.
+                    bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+                    bufferCtx.drawImage(canvas,
+                        camera.a * sourceX + camera.e, camera.d * sourceY + camera.f,
+                        pixelWidth, pixelHeight, 0, 0, buffer.width, buffer.height);
+                    ctx.imageSmoothingEnabled = false;
+                    ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height,
+                        0, 0, width, height);
+                }
+                if (tintOpacity > 0) {
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.globalAlpha = tintOpacity;
+                    ctx.fillStyle = tintColor;
+                    ctx.fillRect(0, 0, width, height);
+                }
+                ctx.restore();
+                ctx.beginPath();
+            },
+        };
+        // Ephemera runs backwards, so mirrors draw after ordinary effects.
+        simulation.ephemera.unshift(effect);
+        return effect;
     },
     announceTextTraining(x, y, text, color = `rgb(200, 200, 200)`) {  //max width around 900-1000
         let xAdjusted = x - text.length * 29 / 2
@@ -3575,6 +3750,15 @@ const level = {
         testing() {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
 
+            // level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#026", 8);
+            level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#632", 8, 0.02);
+            level.mirror(-150, -400, 1300, 550, "above", 0.3);
+            level.mirror(-150, -900, 900, 250, "below", 1, 0.1, "#040");
+
+
+            level.mirror(750, 0, 3750, 800, "above", 1, 0.1, "#040");
+
+
             document.body.style.backgroundColor = "#ddd";
             // color.map = "#444" //custom map color
             level.defaultZoom = 1500
@@ -3725,7 +3909,16 @@ const level = {
         },
         null() {
             level.levels.pop(); //remove lore level from rotation
-            // level.onLevel--
+
+            level.setPosToSpawn(0, -50); //normal spawn
+            // spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 10);
+            level.exit.x = 0;
+            level.exit.y = 40000;
+            level.defaultZoom = 1300
+            simulation.zoomTransition(level.defaultZoom)
+            // document.body.style.backgroundColor = "#aaa";
+            document.body.style.backgroundColor = "#ddd";
+            color.map = "transparent"//"#586363" //808f8f"
             // console.log(level.onLevel, level.levels)
             //start a conversation based on the number of conversations seen
             if (localSettings.loreCount > lore.conversation.length - 1) localSettings.loreCount = lore.conversation.length - 1; //repeat final conversation if lore count is too high
@@ -3737,6 +3930,19 @@ const level = {
                 localSettings.loreCount++ //hear the next conversation next time you win
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
             }
+
+            // mirrorPixel(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040", pixelSize = 8, glitch = 0) {
+            // level.mirrorPixel(-500, 0, 1000, 175, "above", 1, 0, "#fff", 16, 0.01);
+            // level.mirrorPixel(-1799, -1749, 3598, 950, "below", 1);
+            // level.mirrorPixel(-1799, 799, 3598, 950, "above", 1);
+            // level.mirrorPixel(-2749, -1749, 950, 3498, "right", 1); // Side mirrors span the ceiling and floor mirrors to fill the corners.
+            // level.mirrorPixel(1799, -1749, 950, 3498, "left", 1);
+            level.mirror(-500, 0, 1000, 175, "above", 1);
+            level.mirror(-1799, -1749, 3598, 950, "below", 1);
+            level.mirror(-1799, 799, 3598, 950, "above", 1);
+            level.mirror(-2749, -1749, 950, 3498, "right", 1);  // Side mirrors span the ceiling and floor mirrors to fill the corners.
+            level.mirror(1799, -1749, 950, 3498, "left", 1);
+
             // const hazardSlime = level.hazard(-1800, 150, 3600, 650, 0.004, "hsla(160, 100%, 35%,0.75)")
             level.isHazardRise = false //this is set to true to make the slime rise up
             const hazardSlime = level.hazard(-1800, -800, 3600, 1600, 0.004)
@@ -3759,8 +3965,8 @@ const level = {
                 ctx.stroke();
                 ctx.globalAlpha = 1;
                 //support pillar
-                ctx.fillStyle = "rgba(0,0,0,0.2)";
-                ctx.fillRect(-25, 0, 50, 1000);
+                // ctx.fillStyle = "rgba(0,0,0,0.2)";
+                // ctx.fillRect(-25, 175, 50, 1000);
 
                 //draw circles
                 ctx.beginPath();
@@ -3819,24 +4025,17 @@ const level = {
                 // ctx.strokeStyle = "#9aa";
                 // ctx.stroke();
             };
-            level.setPosToSpawn(0, -50); //normal spawn
-            spawn.mapRect(level.enter.x, level.enter.y + 25, 100, 10);
-            level.exit.x = 0;
-            level.exit.y = 40000;
-            level.defaultZoom = 1000
-            simulation.zoomTransition(level.defaultZoom)
-            // document.body.style.backgroundColor = "#aaa";
-            document.body.style.backgroundColor = "#ddd";
-            color.map = "#586363" //808f8f"
+
 
             spawn.mapRect(-3000, 800, 5000, 1200); //bottom
             spawn.mapRect(-2000, -2000, 5000, 1200); //ceiling
             spawn.mapRect(-3000, -2000, 1200, 3400); //left
             spawn.mapRect(1800, -1400, 1200, 3400); //right
 
-            spawn.mapRect(-500, 0, 1000, 50); //center platform
-            spawn.mapRect(-500, -25, 25, 50); //edge shelf
-            spawn.mapRect(475, -25, 25, 50); //edge shelf
+            // spawn.mapRect(-500, 0, 1000, 50);
+            spawn.mapRect(-500, 0, 1000, 175);//center platform
+            // spawn.mapRect(-500, -25, 25, 50); //edge shelf
+            // spawn.mapRect(475, -25, 25, 50); //edge shelf
         },
         initial() {
             if (level.levelsCleared === 0) { //if this is the 1st level of the game
@@ -5859,6 +6058,63 @@ const level = {
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#c3d6df" //"#d8dadf";
             color.map = "#303639";
+
+            // level.mirror(-325, -1800, 550, 700, "right", 1, 0.1, "#040");
+            // level.mirror(-325, -750, 550, 750, "right", 1, 0.1, "#040");
+            // level.mirror(2750, -1800, 550, 1425, "left", 1, 0.1, "#040");
+
+            // level.mirror(225, 0, 2525, 550, "above", 1, 0.1, "#040");
+            // level.mirror(225, -2350, 2525, 550, "below", 1, 0.1, "#040");
+            // //these go later to reflect the other mirrors
+            // level.mirror(-325, -2350, 550, 2900, "right", 1, 0.1, "#040");
+            // level.mirror(2750, -2350, 550, 2900, "left", 1, 0.1, "#040");
+
+
+            // Extend 800 beyond the arena floor and ceiling.
+            level.mirror(225, 0, 2525, 800, "above", 1, 0.15, "#040");
+            level.mirror(225, -2600, 2525, 800, "below", 1, 0.15, "#040");
+            // These draw later to reflect the other mirrors.
+            //left side mirrors
+            level.mirror(-775, -750, 1000, 1550, "right", 1, 0.15, "#040");
+            const doorMirror = level.mirror(-313, -1110, 525, 360, "right", 1, 0.15, "#040");
+            if (doorMirror) { // Mirrors are disabled in performance mode.
+                doorMirror.name = "mirrorDoor";
+                const drawMirror = doorMirror.do;
+                doorMirror.do = function () {
+                    ctx.save();
+                    // Move both the reflected source and destination with the door.
+                    ctx.translate(0, doorIn.position.y + 930);
+                    drawMirror.call(this);
+                    ctx.restore();
+                };
+            }
+            level.mirror(-775, -2600, 1000, 1500, "right", 1, 0.15, "#040");
+            //right side mirrors
+            const doorOutMirror = level.mirror(2762, -385, 525, 410, "left", 1, 0.15, "#040");
+            if (doorOutMirror) { // Mirrors are disabled in performance mode.
+                doorOutMirror.name = "mirrorDoor";
+                const drawMirror = doorOutMirror.do;
+                doorOutMirror.do = function () {
+                    ctx.save();
+                    ctx.translate(0, doorOut.position.y + 180);
+                    drawMirror.call(this);
+                    ctx.restore();
+                };
+            }
+            level.mirror(2750, -7, 1050, 807, "left", 1, 0.15, "#040");
+            level.mirror(2750, -2600, 1050, 2225, "left", 1, 0.15, "#040");
+            const reactorMirrors = simulation.ephemera.filter(effect => effect.name === "mirror" || effect.name === "mirrorDoor");
+            let mirrorFadeCycles = 0;
+            let isMirrorsFadingOut = false;
+            const setMirrorFade = () => {
+                for (const mirror of reactorMirrors) {
+                    mirror.opacity = mirrorFadeCycles / 60;
+                    mirror.tintOpacity = 0.15 * mirror.opacity;
+                }
+            };
+            setMirrorFade();
+
+
             // powerUps.spawnStartingPowerUps(1475, -1175);
             // spawn.debris(750, -2200, 3700, 16); //16 debris per level
             const isCenter = Math.random() > 0.2  //20% chance to span the flock boss, which doesn't like the center block
@@ -5875,21 +6131,27 @@ const level = {
             spawn.mapRect(-2025, -2825, 1250, 4925);
             spawn.mapRect(-900, -2825, 1125, 1725);
             spawn.mapRect(-900, -750, 1125, 2850);
-            spawn.mapRect(-325, -1250, 550, 300);
+            // spawn.mapRect(-325, -1250, 550, 300);
             //exit
             spawn.mapRect(3800, -2825, 1225, 4925);
             spawn.mapRect(2750, -2150, 1325, 1775);
-            spawn.mapRect(2750, -475, 550, 300);
+            // spawn.mapRect(2750, -475, 550, 300);
             spawn.mapRect(2750, -7, 1050, 150); //exit room floor
 
-            const doorIn = level.door(-313, -950, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
-            const doorOut = level.door(2762, -175, 525, 200, 190, 2) //x, y, width, height, distance, speed = 1
+            const doorIn = level.door(-313, -1110, 525, 360, 190, 2) //x, y, width, height, distance, speed = 1
+            const doorOut = level.door(2762, -385, 525, 410, 190, 2) //x, y, width, height, distance, speed = 1
             doorIn.collisionFilter.category = cat.map;
             doorOut.collisionFilter.category = cat.map; // to prevent boson composite from letting the player skip the level
             // doorOut.isClosing = true
             let isDoorsLocked = false
             let isFightOver = false
             let isSpawnedBoss = false
+            const removeMirrors = () => {
+                for (let i = simulation.ephemera.length - 1; i >= 0; i--) {
+                    if (simulation.ephemera[i].name === "mirror" || simulation.ephemera[i].name === "mirrorDoor") simulation.ephemera.splice(i, 1);
+                }
+                reactorMirrors.length = 0;
+            }
 
             level.setPosToSpawn(-550, -800); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
@@ -5915,12 +6177,13 @@ const level = {
                     if (player.position.x < -300) { //if player gets trapped inside starting room open up again
                         isDoorsLocked = false
                         doorIn.isClosing = false
+                        isMirrorsFadingOut = true;
                     }
                 }
                 doorIn.openClose();
                 doorOut.openClose();
                 ctx.fillStyle = "#d5ebef"
-                ctx.fillRect(2750, -375, 1050, 375)
+                ctx.fillRect(2765, -375, 1050, 375)
                 level.enter.draw();
                 level.exit.drawAndCheck();
                 button.draw();
@@ -5940,6 +6203,28 @@ const level = {
                         } else {
                             isSpawnedBoss = true
                             isDoorsLocked = true
+
+                            // // Extend 800 beyond the arena floor and ceiling.
+                            // level.mirror(225, 0, 2525, 800, "above", 1, 0.15, "#040");
+                            // level.mirror(225, -2600, 2525, 800, "below", 1, 0.15, "#040");
+                            // // These draw later to reflect the other mirrors.
+                            // // level.mirror(-775, -2600, 1000, 3400, "right", 1, 0.15, "#040");
+                            // // level.mirror(2750, -2600, 1050, 3400, "left", 1, 0.15, "#040");
+                            // level.mirror(-775, -2600, 1000, 1650, "right", 1, 0.15, "#040");
+                            // level.mirror(-775, -750, 1000, 1550, "right", 1, 0.15, "#040");
+                            // const doorMirror = level.mirror(-780, -950, 1000, 200, "right", 1, 0.15, "#040");
+                            // if (doorMirror) { // Mirrors are disabled in performance mode.
+                            //     doorMirror.name = "mirrorDoor";
+                            //     const drawMirror = doorMirror.do;
+                            //     doorMirror.do = function () {
+                            //         ctx.save();
+                            //         // Move both the reflected source and destination with the door.
+                            //         ctx.translate(0, doorIn.position.y + 850);
+                            //         drawMirror.call(this);
+                            //         ctx.restore();
+                            //     };
+                            // }
+
                             for (let i = 0; i < 9; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo")
                             for (let i = 0; i < 3; ++i) powerUps.spawn(1200 + 550 * Math.random(), -1700, "heal");
                             if (simulation.difficultyMode > 4) for (let i = 0; i < 8; i++) powerUps.spawn(1200 + 550 * Math.random(), -1700, "ammo"); //extra ammo on why difficulty
@@ -5985,6 +6270,7 @@ const level = {
                         isFightOver = true
                         doorIn.isClosing = false
                         doorOut.isClosing = false
+                        isMirrorsFadingOut = true;
                         // powerUps.spawnBossPowerUp(3600, -100)
                         powerUps.spawn(3650, -50, "tech")
                         powerUps.spawn(3650, -150, "tech")
@@ -5992,13 +6278,29 @@ const level = {
                         // if (player.position.x < 2760 && player.position.x > 210) {}
                     }
                 }
+                if (isMirrorsFadingOut) {
+                    mirrorFadeCycles = Math.max(0, mirrorFadeCycles - 1);
+                    setMirrorFade();
+                    if (mirrorFadeCycles === 0) {
+                        removeMirrors();
+                        isMirrorsFadingOut = false;
+                    }
+                } else if (reactorMirrors.length && !button.isUp && doorIn.isClosing && doorOut.isClosing) {
+                    if (mirrorFadeCycles < 60) {
+                        mirrorFadeCycles++;
+                        setMirrorFade();
+                    }
+                } else if (!isSpawnedBoss && mirrorFadeCycles > 0) {
+                    mirrorFadeCycles = 0;
+                    setMirrorFade();
+                }
             };
 
             level.customTopLayer = () => {
                 doorIn.draw();
                 doorOut.draw();
                 ctx.fillStyle = "rgba(0,0,0,0.1)"
-                ctx.fillRect(-775, -1100, 1000, 350);
+                ctx.fillRect(-775, -1100, 985, 350);
             };
             // }
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
@@ -10978,10 +11280,47 @@ const level = {
 
             spawn.mapRect(1450, -250, 2075, 125); //mover roof
 
+            // //Service ledges above the conveyor; leave its tunnel and switch accessible with a key.
+            // spawn.mapRect(600, -225, 350, 50);
+            // spawn.mapRect(1100, -450, 300, 50);
+            // spawn.mapRect(1600, -525, 425, 75);
+            // spawn.mapRect(2225, -800, 400, 75);
+            // spawn.mapRect(2775, -1050, 450, 75);
+            // spawn.mapRect(3375, -800, 350, 75);
+            // spawn.mapRect(3875, -525, 300, 75);
+            // spawn.mapRect(4250, -250, 175, 50);
+            // spawn.mapRect(2575, -500, 250, 250); //bulkhead on the conveyor roof
+            // spawn.mapRect(1800, -1450, 175, 250); //ceiling ribs
+            // spawn.mapRect(3800, -1450, 175, 300);
+
             //2nd room
             spawn.mapRect(4575, -3450, 5750, 1325);//roof
             spawn.mapVertex(6000, 0, "625 0   75 0   200 -100   500 -100"); //ramp
             spawn.mapVertex(7000, 0, "625 0   75 0   200 -100   500 -100"); //ramp
+
+            // //The boost clears the left edge of this landing on ascent and returns over its top.
+            // spawn.mapRect(5650, -700, 500, 75);
+            // //Upper gallery: short gaps and 250-275 high climbs, with a descending route to the lock.
+            // spawn.mapRect(6325, -975, 400, 75);
+            // spawn.mapRect(6875, -1250, 350, 75);
+            // spawn.mapRect(7425, -1525, 400, 75);
+            // spawn.mapRect(7975, -1775, 450, 75);
+            // spawn.mapRect(8575, -1500, 400, 75);
+            // spawn.mapRect(9175, -1225, 400, 75);
+            // spawn.mapRect(9700, -950, 300, 75);
+            // spawn.mapRect(9375, -650, 325, 75);
+            // spawn.mapRect(9700, -350, 200, 75);
+            // spawn.mapRect(6700, -2125, 175, 550); //hanging divider above the climb
+            // spawn.mapRect(8725, -2125, 175, 350);
+
+            // //A lower route rejoins the gallery, or lets a missed jump recover without returning to the boost.
+            // spawn.mapRect(6200, -350, 275, 50);
+            // spawn.mapRect(6650, -625, 400, 100);
+            // spawn.mapRect(7175, -900, 450, 100);
+            // //Wide 75-high treads stay climbable while carrying a key in either direction.
+            // spawn.mapRect(7650, -75, 1300, 75);
+            // spawn.mapRect(7875, -150, 850, 75);
+            // spawn.mapRect(8100, -225, 400, 75);
 
             //3rd exit room
             spawn.mapRect(10200, -500, 700, 150); //extra low roof

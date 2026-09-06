@@ -20186,6 +20186,749 @@ Object.assign(moreLevels, {
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    voltage() {
+        simulation.inGameConsole("voltage by Destiny")
+        level.setPosToSpawn(1300, -650);
+        level.exit.x = 3775;
+        level.exit.y = -1357;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        function toggle(x, y, isOn = false, isLockOn = false, side = "left") {
+            if (side === "right") {
+                spawn.mapVertex(x + 2, y + 65, "10 70 10 -70 -10 -40 -10 40");
+            } else {
+                spawn.mapVertex(x - 2, y + 65, "-10 70 -10 -70 10 -40 10 40");
+            }
+            map[map.length - 1].restitution = 0;
+            map[map.length - 1].friction = 1;
+            map[map.length - 1].frictionStatic = 1;
+            const width = 15;
+            const height = 120;
+            const hingeX = side === "left" ? x - 5 : x + 5;
+            const bodyX = side === "left"
+                ? x + width / 2
+                : x - width / 2;
+            body[body.length] = Bodies.rectangle(
+                bodyX,
+                y + height / 2,
+                width,
+                height,
+                {
+                    friction: 0.05,
+                    frictionAir: 0.01
+                }
+            );
+            let flip = body[body.length - 1];
+            flip.collisionFilter.category = cat.body;
+            flip.collisionFilter.mask = cat.player | cat.body;
+            flip.isNotHoldable = true;
+            flip.restitution = 0;
+            Matter.Body.setDensity(flip, 0.003);
+            const direction = side === "right" ? 1 : -1;
+            const limit = {
+                right: (-0.25 - 0.5) * Math.PI * direction,
+                left: (0.25 - 0.5) * Math.PI * direction
+            };
+            if (isOn) {
+                Matter.Body.setAngle(flip, limit.left);
+            } else {
+                Matter.Body.setAngle(flip, limit.right);
+            }
+            cons[cons.length] = Constraint.create({
+                pointA: {
+                    x: hingeX,
+                    y: y + 65
+                },
+                bodyB: flip,
+                stiffness: 1,
+                length: 0
+            });
+            Composite.add(engine.world, [cons[cons.length - 1]]);
+            Composite.add(engine.world, flip);
+            flip.classType = "body";
+            return {
+                flip: flip,
+                isOn: isOn,
+                query() {
+                    if (direction === 1) {
+                        if (flip.angle < limit.right) {
+                            Matter.Body.setAngle(flip, limit.right);
+                            Matter.Body.setAngularVelocity(flip, 0);
+                            if (!isLockOn) this.isOn = false;
+                        } else if (flip.angle > limit.left) {
+                            Matter.Body.setAngle(flip, limit.left);
+                            Matter.Body.setAngularVelocity(flip, 0);
+                            this.isOn = true;
+                        }
+                    } else {
+                        if (flip.angle > limit.right) {
+                            Matter.Body.setAngle(flip, limit.right);
+                            Matter.Body.setAngularVelocity(flip, 0);
+                            if (!isLockOn) this.isOn = false;
+                        } else if (flip.angle < limit.left) {
+                            Matter.Body.setAngle(flip, limit.left);
+                            Matter.Body.setAngularVelocity(flip, 0);
+                            this.isOn = true;
+                        }
+                    }
+
+                    if (this.isOn) {
+                        ctx.beginPath();
+                        ctx.moveTo(flip.vertices[0].x, flip.vertices[0].y);
+                        for (let j = 1; j < flip.vertices.length; j++) {
+                            ctx.lineTo(flip.vertices[j].x, flip.vertices[j].y);
+                        }
+                        ctx.lineTo(flip.vertices[0].x, flip.vertices[0].y);
+                        ctx.fillStyle = "#f00";
+                        ctx.fill();
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = color.blockS;
+                        ctx.stroke();
+                    }
+                }
+            };
+        }
+        let boost = level.boost(6850, -50, 2500, Math.PI - Math.PI / 3.5);
+        let wind = level.wind(3675, -4000, 600, 2675, { x: 0, y: -0.003 }, true);
+        let flip1 = toggle(1025, -4300, true)
+        let flip2 = toggle(6950, -4300, true, false, "right");
+
+        let wires = new Path2D();
+        wires.moveTo(1270, -600);
+        wires.lineTo(1270, -905);
+        wires.lineTo(2500, -905);
+        wires.lineTo(2999.61, -907.49);
+        wires.moveTo(3975, -4955);
+        wires.lineTo(4325, -4955);
+        wires.lineTo(5130, -4955);
+        wires.lineTo(5130, -4430);
+        wires.lineTo(5925, -4430);
+        wires.lineTo(6750, -4430);
+        wires.lineTo(6975, -4430);
+        wires.moveTo(6150, -830);
+        wires.lineTo(6400, -830);
+        wires.lineTo(6609.5, -832.41);
+        wires.lineTo(6609.5, -1500);
+        wires.moveTo(6640, 0);
+        wires.lineTo(6640, -1500);
+        wires.moveTo(3625, -3580);
+        wires.lineTo(3945, -3580);
+        wires.lineTo(3945, -4925);
+        wires.moveTo(1330, -325);
+        wires.lineTo(1330, -175);
+        wires.lineTo(1331.22, -27.5);
+        wires.lineTo(3992.5, -27.5);
+        wires.lineTo(3992.5, -132.5);
+        wires.lineTo(6007.5, -132.5);
+        wires.lineTo(6007.5, 0);
+        wires.moveTo(5650, -530);
+        wires.lineTo(5870, -530);
+        wires.lineTo(5870, -830);
+        wires.lineTo(6150, -830);
+        wires.moveTo(5680, -500);
+        wires.lineTo(5680, -345);
+        wires.lineTo(5325, -345);
+        wires.moveTo(5650, -470);
+        wires.lineTo(5445, -470);
+        wires.lineTo(5445, -830);
+        wires.lineTo(5620, -830);
+        wires.lineTo(5620, -1075);
+        wires.lineTo(5620, -1160);
+        wires.lineTo(5620, -1220);
+        wires.lineTo(5325, -1220);
+        wires.moveTo(3975, -1695);
+        wires.lineTo(3800, -1695);
+        wires.lineTo(3675, -1695);
+        wires.moveTo(3975, -4895);
+        wires.lineTo(2905, -4895);
+        wires.lineTo(2905, -4300);
+        wires.lineTo(2905, -4125);
+        wires.moveTo(2875, -4620);
+        wires.lineTo(2675, -4620);
+        wires.lineTo(1632.5, -4622.48);
+        wires.lineTo(1632.5, -4292.5);
+        wires.lineTo(1000, -4292.5);
+        wires.moveTo(1000, -5505);
+        wires.lineTo(2100, -5505);
+        wires.lineTo(6007.5, -5507.5);
+        wires.lineTo(6007.5, -5000);
+        wires.moveTo(5975, -4970);
+        wires.lineTo(5445, -4970);
+        wires.lineTo(5445, -5095);
+        wires.lineTo(4005, -5095);
+        wires.lineTo(4005, -4925);
+        wires.moveTo(6005, -5000);
+        wires.lineTo(6005, -4505);
+        wires.lineTo(6975, -4505);
+        wires.moveTo(4955, -4700);
+        wires.lineTo(4955, -4375);
+        wires.lineTo(4955, -4255);
+        wires.lineTo(6975, -4255);
+        wires.moveTo(4005, -5700);
+        wires.lineTo(4005, -5630);
+        wires.lineTo(6530, -5630);
+        wires.lineTo(6530, -5350);
+        wires.lineTo(6532.38, -5207.5);
+        wires.lineTo(6707.5, -5207.5);
+        wires.lineTo(6707.5, -5067.5);
+        wires.lineTo(6500, -5067.5);
+        wires.moveTo(1285, -600);
+        wires.lineTo(1285, -890);
+        wires.lineTo(2500, -890);
+        wires.lineTo(3000.39, -892.51);
+        wires.moveTo(3975, -4940);
+        wires.lineTo(4325, -4940);
+        wires.lineTo(5115, -4940);
+        wires.lineTo(5115, -4415);
+        wires.lineTo(5925, -4415);
+        wires.lineTo(6750, -4415);
+        wires.lineTo(6975, -4415);
+        wires.moveTo(6150, -815);
+        wires.lineTo(6400, -815);
+        wires.lineTo(6624.5, -817.59);
+        wires.lineTo(6624.5, -1500);
+        wires.moveTo(6655, 0);
+        wires.lineTo(6655, -1500);
+        wires.moveTo(3625, -3565);
+        wires.lineTo(3960, -3565);
+        wires.lineTo(3960, -4925);
+        wires.moveTo(1315, -325);
+        wires.lineTo(1315, -175);
+        wires.lineTo(1318.78, -12.5);
+        wires.lineTo(4007.5, -12.5);
+        wires.lineTo(4007.5, -117.5);
+        wires.lineTo(5992.5, -117.5);
+        wires.lineTo(5992.5, 0);
+        wires.moveTo(5650, -515);
+        wires.lineTo(5885, -515);
+        wires.lineTo(5885, -815);
+        wires.lineTo(6150, -815);
+        wires.moveTo(5665, -500);
+        wires.lineTo(5665, -360);
+        wires.lineTo(5325, -360);
+        wires.moveTo(5650, -485);
+        wires.lineTo(5460, -485);
+        wires.lineTo(5460, -815);
+        wires.lineTo(5635, -815);
+        wires.lineTo(5635, -1075);
+        wires.lineTo(5635, -1160);
+        wires.lineTo(5635, -1235);
+        wires.lineTo(5325, -1235);
+        wires.moveTo(3975, -1710);
+        wires.lineTo(3785, -1710);
+        wires.lineTo(3785, -2275);
+        wires.lineTo(3675, -2275);
+        wires.moveTo(3975, -4910);
+        wires.lineTo(2890, -4910);
+        wires.lineTo(2890, -4300);
+        wires.lineTo(2890, -4125);
+        wires.moveTo(2875, -4635);
+        wires.lineTo(2675, -4635);
+        wires.lineTo(1617.5, -4637.52);
+        wires.lineTo(1617.5, -4307.5);
+        wires.lineTo(1000, -4307.5);
+        wires.moveTo(1000, -5490);
+        wires.lineTo(2100, -5490);
+        wires.lineTo(5992.5, -5492.5);
+        wires.lineTo(5992.5, -5000);
+        wires.moveTo(5975, -4985);
+        wires.lineTo(5460, -4985);
+        wires.lineTo(5460, -5110);
+        wires.lineTo(3990, -5110);
+        wires.lineTo(3990, -4925);
+        wires.moveTo(5990, -5000);
+        wires.lineTo(5990, -4490);
+        wires.lineTo(6975, -4490);
+        wires.moveTo(4940, -4700);
+        wires.lineTo(4940, -4375);
+        wires.lineTo(4940, -4240);
+        wires.lineTo(6975, -4240);
+        wires.moveTo(3990, -5700);
+        wires.lineTo(3990, -5615);
+        wires.lineTo(6515, -5615);
+        wires.lineTo(6515, -5350);
+        wires.lineTo(6517.62, -5192.5);
+        wires.lineTo(6692.5, -5192.5);
+        wires.lineTo(6692.5, -5082.5);
+        wires.lineTo(6500, -5082.5);
+        wires.moveTo(1300, -600);
+        wires.lineTo(1300, -875);
+        wires.lineTo(2500, -875);
+        wires.lineTo(2500, -175);
+        wires.lineTo(6150, -175);
+        wires.lineTo(6150, -1400);
+        wires.lineTo(3975, -1400);
+        wires.lineTo(3975, -3000);
+        wires.lineTo(3972.54, -3492.5);
+        wires.lineTo(3500, -3492.5);
+        wires.moveTo(3975, -4925);
+        wires.lineTo(4325, -4925);
+        wires.lineTo(5100, -4925);
+        wires.lineTo(5100, -4400);
+        wires.lineTo(5925, -4400);
+        wires.lineTo(6750, -4400);
+        wires.lineTo(6975, -4400);
+        wires.moveTo(6150, -800);
+        wires.lineTo(6400, -800);
+        wires.lineTo(6625, -800);
+        wires.lineTo(6625, 25);
+        wires.moveTo(6670, 0);
+        wires.lineTo(6670, -1500);
+        wires.moveTo(3625, -3550);
+        wires.lineTo(3975, -3550);
+        wires.lineTo(3975, -4925);
+        wires.moveTo(1300, -325);
+        wires.lineTo(1300, -175);
+        wires.lineTo(350, -175);
+        wires.lineTo(50, -175);
+        wires.lineTo(50, -725);
+        wires.lineTo(350, -725);
+        wires.moveTo(5650, -500);
+        wires.lineTo(5900, -500);
+        wires.lineTo(5900, -800);
+        wires.lineTo(6150, -800);
+        wires.moveTo(5650, -500);
+        wires.lineTo(5650, -375);
+        wires.lineTo(5325, -375);
+        wires.moveTo(5650, -500);
+        wires.lineTo(5475, -500);
+        wires.lineTo(5475, -800);
+        wires.lineTo(5650, -800);
+        wires.lineTo(5650, -1075);
+        wires.lineTo(5650, -1160);
+        wires.lineTo(5650, -1250);
+        wires.lineTo(5325, -1250);
+        wires.moveTo(3975, -1725);
+        wires.lineTo(3800, -1725);
+        wires.lineTo(3800, -2275);
+        wires.lineTo(3800, -2725);
+        wires.lineTo(3675, -2725);
+        wires.moveTo(3975, -4925);
+        wires.lineTo(2875, -4925);
+        wires.lineTo(2875, -4300);
+        wires.lineTo(2875, -4125);
+        wires.moveTo(2875, -4650);
+        wires.lineTo(2675, -4650);
+        wires.lineTo(1825, -4650);
+        wires.lineTo(1825, -5175);
+        wires.moveTo(1000, -5475);
+        wires.lineTo(2100, -5475);
+        wires.lineTo(2575, -5475);
+        wires.lineTo(2575, -5250);
+        wires.lineTo(3650, -5250);
+        wires.lineTo(4999.93, -5262.5);
+        wires.moveTo(5975, -5000);
+        wires.lineTo(5475, -5000);
+        wires.lineTo(5475, -5125);
+        wires.lineTo(3975, -5125);
+        wires.lineTo(3975, -4925);
+        wires.moveTo(5975, -5000);
+        wires.lineTo(5975, -4475);
+        wires.lineTo(6975, -4475);
+        wires.moveTo(4925, -4700);
+        wires.lineTo(4925, -4375);
+        wires.lineTo(4925, -4225);
+        wires.lineTo(6975, -4225);
+        wires.moveTo(3975, -5700);
+        wires.lineTo(3975, -5600);
+        wires.lineTo(6500, -5600);
+        wires.lineTo(6500, -5350);
+        wires.lineTo(6500, -5075);
+        wires.moveTo(1315, -600);
+        wires.lineTo(1315, -860);
+        wires.lineTo(2485, -860);
+        wires.lineTo(2485, -160);
+        wires.lineTo(6165, -160);
+        wires.lineTo(6165, -1415);
+        wires.lineTo(3990, -1415);
+        wires.lineTo(3990, -3000);
+        wires.lineTo(3987.46, -3507.5);
+        wires.lineTo(3500, -3507.5);
+        wires.moveTo(3975, -4910);
+        wires.lineTo(4325, -4910);
+        wires.lineTo(4707.5, -4907.45);
+        wires.lineTo(4707.5, -4092.5);
+        wires.lineTo(4157.5, -4092.5);
+        wires.lineTo(4157.5, -2007.5);
+        wires.lineTo(4500, -2007.5);
+        wires.moveTo(6150, -785);
+        wires.lineTo(6400, -785);
+        wires.lineTo(6610, -785);
+        wires.lineTo(6610, 25);
+        wires.moveTo(6685, 0);
+        wires.lineTo(6685, -1500);
+        wires.moveTo(3625, -3535);
+        wires.lineTo(3990, -3535);
+        wires.lineTo(3990, -4925);
+        wires.moveTo(1285, -325);
+        wires.lineTo(1285, -190);
+        wires.lineTo(350, -190);
+        wires.lineTo(65, -190);
+        wires.lineTo(65, -710);
+        wires.lineTo(350, -710);
+        wires.moveTo(5650, -485);
+        wires.lineTo(5915, -485);
+        wires.lineTo(5915, -785);
+        wires.lineTo(6150, -785);
+        wires.moveTo(5635, -500);
+        wires.lineTo(5635, -390);
+        wires.lineTo(5325, -390);
+        wires.moveTo(5650, -515);
+        wires.lineTo(5490, -515);
+        wires.lineTo(5490, -785);
+        wires.lineTo(5665, -785);
+        wires.lineTo(5665, -1075);
+        wires.lineTo(5667.65, -1207.5);
+        wires.lineTo(6132.5, -1207.5);
+        wires.lineTo(6132.5, -800);
+        wires.moveTo(3975, -1740);
+        wires.lineTo(3815, -1740);
+        wires.lineTo(3815, -2275);
+        wires.lineTo(3815, -2725);
+        wires.lineTo(3815, -3240);
+        wires.lineTo(3675, -3240);
+        wires.moveTo(3975, -4940);
+        wires.lineTo(2860, -4940);
+        wires.lineTo(2860, -4300);
+        wires.lineTo(2860, -4125);
+        wires.moveTo(2875, -4665);
+        wires.lineTo(2675, -4665);
+        wires.lineTo(1840, -4665);
+        wires.lineTo(1840, -5175);
+        wires.moveTo(1000, -5460);
+        wires.lineTo(2100, -5460);
+        wires.lineTo(2560, -5460);
+        wires.lineTo(2560, -5235);
+        wires.lineTo(3650, -5235);
+        wires.lineTo(5000.07, -5247.5);
+        wires.moveTo(5975, -5015);
+        wires.lineTo(5490, -5015);
+        wires.lineTo(5490, -5140);
+        wires.lineTo(3960, -5140);
+        wires.lineTo(3960, -4925);
+        wires.moveTo(5960, -5000);
+        wires.lineTo(5960, -4460);
+        wires.lineTo(6975, -4460);
+        wires.moveTo(4910, -4700);
+        wires.lineTo(4910, -4375);
+        wires.lineTo(4907.5, -3999.95);
+        wires.moveTo(3960, -5700);
+        wires.lineTo(3960, -5585);
+        wires.lineTo(6485, -5585);
+        wires.lineTo(6485, -5350);
+        wires.lineTo(6482.38, -5192.5);
+        wires.lineTo(6307.5, -5192.5);
+        wires.lineTo(6307.5, -5082.5);
+        wires.lineTo(6500, -5082.5);
+        wires.moveTo(1330, -600);
+        wires.lineTo(1330, -845);
+        wires.lineTo(2470, -845);
+        wires.lineTo(2470, -145);
+        wires.lineTo(6180, -145);
+        wires.lineTo(6180, -1430);
+        wires.lineTo(4005, -1430);
+        wires.lineTo(4005, -3000);
+        wires.lineTo(4005, -4875);
+        wires.moveTo(3975, -4895);
+        wires.lineTo(4325, -4895);
+        wires.lineTo(4692.5, -4892.55);
+        wires.lineTo(4692.5, -4107.5);
+        wires.lineTo(4142.5, -4107.5);
+        wires.lineTo(4142.5, -1992.5);
+        wires.lineTo(4500, -1992.5);
+        wires.moveTo(6150, -770);
+        wires.lineTo(6400, -770);
+        wires.lineTo(6595, -770);
+        wires.lineTo(6595, 25);
+        wires.moveTo(6700, 0);
+        wires.lineTo(6700, -1500);
+        wires.moveTo(3625, -3550);
+        wires.lineTo(3375, -3550);
+        wires.lineTo(3375, -4100);
+        wires.lineTo(1000, -4100);
+        wires.moveTo(1270, -325);
+        wires.lineTo(1270, -205);
+        wires.lineTo(350, -205);
+        wires.lineTo(80, -205);
+        wires.lineTo(80, -695);
+        wires.lineTo(350, -695);
+        wires.moveTo(5650, -470);
+        wires.lineTo(5930, -470);
+        wires.lineTo(5930, -770);
+        wires.lineTo(6150, -770);
+        wires.moveTo(5620, -500);
+        wires.lineTo(5620, -405);
+        wires.lineTo(5325, -405);
+        wires.moveTo(5650, -530);
+        wires.lineTo(5505, -530);
+        wires.lineTo(5505, -770);
+        wires.lineTo(5680, -770);
+        wires.lineTo(5680, -1075);
+        wires.lineTo(5682.35, -1192.5);
+        wires.lineTo(6117.5, -1192.5);
+        wires.lineTo(6117.5, -800);
+        wires.moveTo(3975, -1755);
+        wires.lineTo(3830, -1755);
+        wires.lineTo(3830, -2275);
+        wires.lineTo(3830, -2725);
+        wires.lineTo(3830, -3255);
+        wires.lineTo(3675, -3255);
+        wires.moveTo(3975, -4955);
+        wires.lineTo(2845, -4955);
+        wires.lineTo(2845, -4300);
+        wires.lineTo(2845, -4125);
+        wires.moveTo(2875, -4680);
+        wires.lineTo(2675, -4680);
+        wires.lineTo(1855, -4680);
+        wires.lineTo(1855, -5175);
+        wires.moveTo(1000, -5445);
+        wires.lineTo(2100, -5445);
+        wires.lineTo(2545, -5445);
+        wires.lineTo(2545, -5220);
+        wires.lineTo(3650, -5220);
+        wires.lineTo(3945, -5220);
+        wires.lineTo(3945, -4925);
+        wires.moveTo(5975, -5000);
+        wires.moveTo(5945, -5000);
+        wires.lineTo(5945, -4445);
+        wires.lineTo(6975, -4445);
+        wires.moveTo(4895, -4700);
+        wires.lineTo(4895, -4375);
+        wires.lineTo(4892.5, -4000.05);
+        wires.moveTo(3945, -5700);
+        wires.lineTo(3945, -5570);
+        wires.lineTo(6470, -5570);
+        wires.lineTo(6470, -5350);
+        wires.lineTo(6467.62, -5207.5);
+        wires.lineTo(6292.5, -5207.5);
+        wires.lineTo(6292.5, -5067.5);
+        wires.lineTo(6500, -5067.5);
+        function drawLightningBolt(x1, y1, x2, y2, segments = 12, jaggedness = 40) {
+            const points = [{ x: x1, y: y1 }];
+            for (let i = 1; i < segments; i++) {
+                const t = i / segments;
+                const baseX = x1 + (x2 - x1) * t;
+                const baseY = y1 + (y2 - y1) * t;
+                const offset = (Math.random() - 0.5) * jaggedness;
+                const dx = x2 - x1, dy = y2 - y1;
+                const len = Math.sqrt(dx * dx + dy * dy) || 1;
+                const nx = -dy / len, ny = dx / len;
+                points.push({ x: baseX + nx * offset, y: baseY + ny * offset });
+            }
+            points.push({ x: x2, y: y2 });
+            const bolt = new Path2D();
+            bolt.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i++) bolt.lineTo(points[i].x, points[i].y);
+            ctx.save();
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = "white";
+            ctx.shadowColor = "rgba(220, 20, 60, 0.9)";
+            ctx.shadowBlur = 5;
+            ctx.stroke(bolt);
+            ctx.restore();
+
+            return points;
+        }
+        const lightningPoints = [
+            { x: 5000, y: -5275 },
+            { x: 5975, y: -5000 },
+            { x: 6500, y: -5075 },
+            { x: 2875, y: -4125 },
+            { x: 2875, y: -4650 },
+            { x: 1825, y: -5175 },
+            { x: 4925, y: -4700 },
+            { x: 3975, y: -4925 }
+        ]
+        let currentPointIndex = Math.floor(Math.random() * lightningPoints.length);
+        let currentBoltPair = null;
+        let boltTimer = 0;
+        function pickNextBoltPair() {
+            const a = lightningPoints[currentPointIndex];
+            let nextIndex = Math.floor(Math.random() * lightningPoints.length);
+            while (nextIndex === currentPointIndex) {
+                nextIndex = Math.floor(Math.random() * lightningPoints.length);
+            }
+            const b = lightningPoints[nextIndex];
+            currentPointIndex = nextIndex;
+            return { a, b };
+        }
+        function drawLightningArc(where, radius, lineWidth = 10) {
+            const numPoints = 16;
+            const slice = (2 * Math.PI) / numPoints;
+            ctx.save();
+            ctx.beginPath();
+            ctx.lineWidth = lineWidth;
+            ctx.lineJoin = "miter";
+            ctx.miterLimit = 100;
+            ctx.strokeStyle = "white";
+            ctx.shadowColor = "rgba(220, 20, 60, 0.9)";
+            ctx.shadowBlur = 5;
+            for (let i = 0; i < numPoints; i++) {
+                const angle = i * slice;
+                const dx = Math.cos(angle) * radius * 0.8;
+                const dy = Math.sin(angle) * radius * 0.8;
+                const newX = where.x + dx + Math.random() * radius * 0.4 - radius * 0.2;
+                const newY = where.y + dy + Math.random() * radius * 0.4 - radius * 0.2;
+                ctx.lineTo(newX, newY);
+            }
+            ctx.closePath();
+            ctx.stroke();
+            ctx.restore();
+        }
+        const windRect = { x: 3675, y: -4000, w: 600, h: 2675 };
+        const windParticles = [];
+        for (let i = 0; i < 80; i++) {
+            windParticles.push({
+                x: windRect.x + Math.random() * windRect.w,
+                y: windRect.y + Math.random() * windRect.h,
+                speed: 5 + Math.random() * 9,
+                drift: (Math.random() - 0.5) * 1.5,
+                size: 1.5 + Math.random() * 2.5,
+                alpha: 0.3 + Math.random() * 0.6
+            });
+        }
+        function buildPulseDash(count = 30, gapLength = 5000) {
+            const dash = [];
+            for (let i = 0; i < count; i++) {
+                const pulseLength = 100 + Math.random() * 500;
+                dash.push(pulseLength, gapLength);
+            }
+            return dash;
+        }
+        let pulseDash = buildPulseDash();
+        let pulseDashTotal = pulseDash.reduce((a, b) => a + b, 0);
+        const speed = 25;
+        level.custom = () => {
+            level.exit.drawAndCheck();
+            boost.query();
+            if (flip1.isOn || flip2.isOn) {
+                wind.do();
+
+                ctx.save();
+                ctx.strokeStyle = "#ccc";
+                ctx.lineWidth = 5;
+                ctx.stroke(wires);
+                ctx.lineWidth = 8;
+                ctx.strokeStyle = "rgba(255, 0, 0, 0.1)";
+                ctx.setLineDash(pulseDash);
+                ctx.lineDashOffset = -(simulation.cycle * speed) % pulseDashTotal;
+                ctx.stroke(wires);
+                ctx.setLineDash([]);
+                ctx.restore();
+
+                level.disableExit = true;
+            } else {
+                ctx.strokeStyle = "#ccc"
+                ctx.lineWidth = 5;
+                ctx.stroke(wires);
+                level.disableExit = false;
+            }
+            ctx.fillStyle = "#ccc";
+            ctx.fillRect(3925, -4975, 100, 100);
+            ctx.fillRect(6100, -850, 100, 100);
+            ctx.fillRect(2375, -925, 10, 100);
+            ctx.fillRect(1375, -925, 10, 100);
+            ctx.fillRect(3950, -3450, 75, 10);
+            ctx.fillRect(6575, -100, 140, 10);
+            ctx.fillRect(6600, -1425, 110, 10);
+            ctx.fillRect(6525, -850, 10, 100);
+            ctx.fillRect(4575, -4975, 10, 100);
+            ctx.fillRect(3875, -3600, 10, 125);
+            ctx.fillRect(1250, -275, 100, 10);
+            ctx.fillRect(350, -750, 100, 100);
+            ctx.fillRect(5925, -195, 10, 100);
+            ctx.fillRect(4050, -195, 10, 100);
+            ctx.fillRect(5600, -550, 100, 100);
+            ctx.fillRect(5600, -850, 100, 100);
+            ctx.fillRect(5600, -1125, 100, 100);
+            ctx.fillRect(3925, -1775, 100, 100);
+            ctx.fillRect(2825, -4175, 100, 100);
+            ctx.fillRect(2825, -4700, 100, 100);
+            ctx.fillRect(1775, -5225, 100, 100);
+            ctx.fillRect(4950, -5325, 100, 100);
+            ctx.fillRect(5925, -5050, 100, 100);
+            ctx.fillRect(6050, -4525, 10, 150);
+            ctx.fillRect(3925, -5050, 100, 10);
+            ctx.fillRect(2475, -5525, 10, 100);
+            ctx.fillRect(1900, -4700, 10, 100);
+            ctx.fillRect(4875, -4750, 100, 100);
+            ctx.fillRect(4875, -4325, 100, 10);
+            ctx.fillRect(6450, -5125, 100, 100);
+            ctx.fillRect(6450, -5300, 100, 10);
+            ctx.fillRect(3850, -1775, 10, 100);
+            ctx.fillRect(6100, -1150, 100, 10);
+            if (flip1.isOn || flip2.isOn) {
+                ctx.save();
+                for (const p of windParticles) {
+                    p.y -= p.speed;
+                    p.x += p.drift;
+                    if (p.y < windRect.y) {
+                        p.y = windRect.y + windRect.h;
+                        p.x = windRect.x + Math.random() * windRect.w;
+                    }
+                    if (p.x < windRect.x) p.x = windRect.x + windRect.w;
+                    if (p.x > windRect.x + windRect.w) p.x = windRect.x;
+                    ctx.beginPath();
+                    ctx.fillStyle = `rgba(255, 0, 0, ${p.alpha})`;
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+                if (!currentBoltPair || boltTimer <= 0) {
+                    currentBoltPair = pickNextBoltPair();
+                    boltTimer = 10;
+                }
+                boltTimer--;
+                const { a, b } = currentBoltPair;
+                drawLightningBolt(a.x, a.y, b.x, b.y);
+                drawLightningArc(a, 50)
+                const hit = Matter.Query.ray([player], { x: a.x, y: a.y }, { x: b.x, y: b.y });
+                if (hit.length > 0) {
+                    m.takeDamage(0.01);
+                }
+            }
+        };
+        level.customTopLayer = () => {
+            flip1.query();
+            flip2.query();
+        };
+
+        spawn.mapRect(-1525, -2250, 1425, 3450);
+        spawn.mapRect(-325, 0, 8375, 1200);
+        spawn.mapRect(-325, -2250, 4000, 1225);
+        spawn.mapRect(2675, -1325, 2650, 1025);
+        spawn.mapRect(6900, -2225, 1150, 2525);
+        spawn.mapRect(225, -600, 2125, 300);
+        spawn.mapRect(4275, -4000, 3775, 2525);
+        spawn.mapRect(-175, -4000, 3850, 2025);
+        spawn.mapRect(-175, -6000, 1200, 2500);
+        spawn.mapRect(-175, -7000, 8225, 1325);
+        spawn.mapRect(6950, -6000, 1100, 2200);
+
+        spawn.randomMob(-47.2, -184.6)
+        spawn.randomMob(812.5, -92.7)
+        spawn.randomMob(1643.8, 121.4)
+        spawn.randomMob(2497.1, -251.8)
+        spawn.randomMob(3378.6, 54.3)
+        spawn.randomMob(4219.7, -143.5)
+        spawn.randomMob(5210.4, 218.7)
+        spawn.randomMob(5517.3, -1086.2)
+        spawn.randomMob(5804.9, -421.6)
+        spawn.randomMob(6128.7, -1328.5)
+        spawn.randomMob(6457.2, -744.9)
+        spawn.randomMob(6789.6, -112.3)
+        spawn.randomMob(7042.8, -1379.4)
+        spawn.randomMob(7298.1, -604.7)
+        spawn.randomMob(6751.4, -146.1)
+        spawn.randomLevelBoss(5550, -4700);
+        spawn.secondaryBossChance(6150, -800);
+        spawn.debris(1400, -25, 6000, 25);
+        spawn.debris(4425, -4025, 2000, 7);
+        powerUps.addResearchToLevel()
+    },
     LaunchSite() {
         simulation.inGameConsole(`<strong>Launch Site</strong> by <span class='color-var'>Des Boot</span>`);
         simulation.inGameConsole(`The rain stopped...`);

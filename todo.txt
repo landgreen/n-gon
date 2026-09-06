@@ -1,15 +1,52 @@
+new community map voltage
 
-added a few music playlists
+developed new level element - mirror
+  added mirrors to reactor and null levels
 
-flockBoss moves faster and has more durability
+skin tech: hyperpolarisation - for 4.0 seconds after a mob dies, depolarization gives 0.4x damage taken
+JUNK tech: rotation matrix
+
+2 research cost to filament
 
 bug fixes
-  removed html tags from constraint text that didn't parse as html
-  anthropic principle wasn't properly exiting pause at high max health.
-  losing filament while keeping chitin crashed the game
-  wind zone on HVAC wasn't actually removed
+  added mantis constraint line stroke
+  anthropic soft lock on high health fixed again
+
 
 *********************************************************** TODO *****************************************************
+
+mirror exits and entrances
+  could exits/entrances be on the floors like the way it currently is
+    maybe the mirror rises up as you stand on it
+  exit
+    walk into mirror to exit level
+    instant exit, with no delay like doors
+    maybe only draw if player is nearby? (within 1000)
+  entrance
+    no mirror to show you can't go back?
+    a mirror, but you are outside the mirror
+      maybe black/remove entrance mirror after a few seconds
+      since all levels will have mirror exits and entrances this could be added to the game loop, that might improve performance over ephemera
+  keep backward compatibility for community maps, and other stuff
+  todo      
+    build a demo on the testing level
+    80% of levels have a wall in exit and entrance room
+      some levels will need a redesign
+
+
+
+new level element - color keys and keyButtons    
+!new map vault - 
+  color keys and keyButtons and doors
+  black out zones like HVAC
+  motion lasers
+  keep floor flat or mostly flat so keys can be pushed
+
+
+
+
+
+
 
 make one face of a mob take 4x damage
   color face red
@@ -45,18 +82,6 @@ mob non-combat behaviors, like Rain World
     random walk with a bias towards the player
   play
   fight other mobs
-
-new map vault - 
-  color keys and keyButtons and doors
-  black out zones like HVAC
-  motion lasers
-  keep floor flat or mostly flat so keys can be pushed
-
-new level element - color keys and keyButtons
-  yellow key flashes too much
-    make it darker?
-
-
 
 consider button in pause menu to expand the tech list into a 2-D grid style array (like experiment mode)
 
@@ -94,7 +119,7 @@ new status effect - apply status effect to mobs that makes blocks attracted to t
   only lasts a few cycles
   or zero cycles and it doesn't need to be a status
 
-new status effect: weakness, mobs do 75% les damage
+new status effect: weakness, mobs do 75% less damage
   graphic indication?
 
 plasma tech - Jacob's Ladder - an arc of electricity extends in the direction you are facing and grows longer with time and distance
@@ -164,7 +189,7 @@ tech: self locating uncertainty - players have some control over switchWorlds()
       or check 1-2 that will change
 
 
-?add code to merge DOTs if there are more than 20?
+
 
 
 add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D rectangles
