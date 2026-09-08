@@ -80,7 +80,7 @@ const level = {
                 // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
-                // level.load("null")
+                // level.load("interferometer")
                 // level.load("vault")
                 level.maps.testing()
 
@@ -711,6 +711,100 @@ const level = {
                     ctx.drawImage(canvas,
                         camera.a * sourceX + camera.e, camera.d * sourceY + camera.f,
                         pixelWidth, pixelHeight, 0, 0, width, height);
+                }
+                if (tintOpacity > 0) {
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.globalAlpha = tintOpacity;
+                    ctx.fillStyle = tintColor;
+                    ctx.fillRect(0, 0, width, height);
+                }
+                ctx.restore();
+                ctx.beginPath();
+            },
+        };
+        // Ephemera runs backwards, so mirrors draw after ordinary effects.
+        simulation.ephemera.unshift(effect);
+        return effect;
+    },
+    // Independent copy for testing new mirror techniques.
+    // reflectionScale below 1 shrinks the scene by sampling a larger adjacent area.
+    // verticalOffset shifts the image inside the fixed mirror: positive down, negative up (world units).
+    mirrorExperimental(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040", reflectionScale = 1, verticalOffset = 0) {
+        if (localSettings.isHideHUD) return; //performance mode: do not register a mirror
+        if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
+            throw new RangeError("mirrorExperimental requires finite coordinates and positive dimensions");
+        }
+        if (!["right", "left", "above", "below"].includes(direction)) {
+            throw new RangeError('mirrorExperimental direction must be "right", "left", "above", or "below"');
+        }
+        if (![opacity, tintOpacity].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
+            throw new RangeError("mirrorExperimental opacity and tint opacity must be numbers between 0 and 1");
+        }
+        if (!Number.isFinite(reflectionScale) || reflectionScale <= 0) {
+            throw new RangeError("mirrorExperimental reflectionScale must be a positive number");
+        }
+        if (!Number.isFinite(verticalOffset)) {
+            throw new RangeError("mirrorExperimental verticalOffset must be a finite number");
+        }
+        const horizontal = direction === "right" || direction === "left";
+        const sourceWidth = width / reflectionScale;
+        const sourceHeight = height / reflectionScale;
+        // Keep the sampled area against the mirror edge and centered along that edge.
+        const sourceX = horizontal
+            ? x + (direction === "right" ? width : -sourceWidth)
+            : x + (width - sourceWidth) / 2;
+        const sourceY = horizontal
+            ? y + (height - sourceHeight) / 2
+            : y + (direction === "below" ? height : -sourceHeight);
+        const effect = {
+            name: "mirrorExperimental",
+            opacity,
+            tintOpacity,
+            onLevel: level.onLevel,
+            do() {
+                if (!m.alive || this.onLevel !== level.onLevel) {
+                    simulation.removeEphemera(this);
+                    return;
+                }
+                const { opacity, tintOpacity } = this;
+                if (simulation.isTimeSkipping) return;
+                if (opacity === 0 && tintOpacity === 0) return;
+
+                // The camera translates/scales world coordinates; the source
+                // rectangle for drawImage must use canvas bitmap pixels.
+                const camera = ctx.getTransform();
+                const pixelWidth = camera.a * width;
+                const pixelHeight = camera.d * height;
+                if (pixelWidth <= 0 || pixelHeight <= 0) return;
+                const pixelX = camera.a * x + camera.e;
+                const pixelY = camera.d * y + camera.f;
+                // Cull the destination, not the source. Keep the ephemera alive
+                // so drawing resumes as soon as the mirror reenters the camera.
+                if (pixelX >= canvas.width || pixelY >= canvas.height ||
+                    pixelX + pixelWidth <= 0 || pixelY + pixelHeight <= 0) return;
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(x, y, width, height);
+                ctx.clip();
+                ctx.globalAlpha = opacity;
+                // Fade out the destination too: transparent reflected pixels must gradually replace the map.
+                if (opacity > 0 && opacity < 1) {
+                    ctx.globalCompositeOperation = "destination-out";
+                    ctx.fillStyle = "#000";
+                    ctx.fillRect(x, y, width, height);
+                    // Add the weighted reflection without attenuating the remaining destination a second time.
+                    ctx.globalCompositeOperation = "lighter";
+                } else {
+                    ctx.globalCompositeOperation = "copy";
+                }
+                ctx.translate(x + (horizontal ? width : 0), y + (horizontal ? 0 : height));
+                ctx.scale(horizontal ? -1 : 1, horizontal ? 1 : -1);
+                if (opacity > 0) {
+                    ctx.drawImage(canvas,
+                        camera.a * sourceX + camera.e, camera.d * sourceY + camera.f,
+                        camera.a * sourceWidth, camera.d * sourceHeight,
+                        0, horizontal ? verticalOffset : -verticalOffset, width, height);
                 }
                 if (tintOpacity > 0) {
                     ctx.globalCompositeOperation = "source-over";
@@ -1474,6 +1568,213 @@ const level = {
         }
         m.fieldAngle = m.angle
     },
+    // Optional mirror doors. Legacy enter/exit remain independent.
+    // mirrorDoors: {
+    //     enter: {
+    //         enabled: false,
+    //         x: 0, y: 0, width: 75, height: 175,
+    //         direction: "right",
+    //         isInsideMirror: true,
+    //         hasLaunchVelocity: false,
+    //         blocker: null,
+    //         fadeStartTime: null,
+    //         fadeTintOpacity: 0,
+    //         // Position is the door's top-left corner; spawn centered, 50 units above its bottom.
+    //         set(x, y, direction = "right", width = 75, height = 175, opacity = 0.95, tintOpacity = 0.1, tintColor = "#040", launchSpeed = 5) {
+    //             if (![x, y, width, height, launchSpeed].every(Number.isFinite) || width <= 0 || height <= 0 || launchSpeed < 0) {
+    //                 throw new RangeError("mirror entrance requires finite coordinates, positive dimensions, and nonnegative launch speed");
+    //             }
+    //             if (direction !== "left" && direction !== "right") throw new RangeError('mirror entrance direction must be "left" or "right"');
+    //             if (![opacity, tintOpacity].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
+    //                 throw new RangeError("mirror entrance opacities must be between 0 and 1");
+    //             }
+    //             if (this.blocker) {
+    //                 Matter.Composite.remove(engine.world, this.blocker);
+    //                 const index = map.indexOf(this.blocker);
+    //                 if (index !== -1) map.splice(index, 1);
+    //             }
+    //             Object.assign(this, {
+    //                 enabled: true, x, y, width, height, direction, opacity, tintOpacity, tintColor,
+    //                 isInsideMirror: true, hasLaunchVelocity: true, blocker: null,
+    //                 fadeStartTime: null, fadeTintOpacity: 0,
+    //             });
+    //             level.setPosToSpawn(x + width / 2, y + height - 50);
+    //             // const vx = (direction === "left" ? -1 : 1) * launchSpeed;
+    //             // Matter.Body.setVelocity(player, { x: vx, y: player.velocity.y });
+    //             // m.Vx = vx;
+    //             return this;
+    //         },
+    //         update() {
+    //             if (!this.enabled || !m.alive) return;
+    //             if (!this.isInsideMirror) {
+    //                 // Elapsed time keeps the fade at ten seconds regardless of frame rate.
+    //                 const remaining = Math.max(0, 1 - (performance.now() - this.fadeStartTime) / 10000);
+    //                 this.opacity = remaining;
+    //                 this.tintOpacity = this.fadeTintOpacity * remaining;
+    //                 if (remaining === 0) this.enabled = false;
+    //                 return;
+    //             }
+    //             // Wait until the whole compound player body clears the rectangle,
+    //             // rather than closing around the player's center or head.
+    //             const bounds = player.bounds;
+    //             const overlaps = bounds.max.x > this.x && bounds.min.x < this.x + this.width &&
+    //                 bounds.max.y > this.y && bounds.min.y < this.y + this.height;
+    //             if (overlaps) {
+    //                 if (!this.hasLaunchVelocity) {
+    //                     Matter.Body.setVelocity(player, {
+    //                         x: this.direction === "left" ? -5 : 5,
+    //                         y: player.velocity.y,
+    //                     });
+    //                     this.hasLaunchVelocity = true;
+    //                 }
+    //             } else {
+    //                 this.isInsideMirror = false;
+    //                 this.opacity = 1;
+    //                 this.fadeStartTime = performance.now();
+    //                 this.fadeTintOpacity = this.tintOpacity;
+    //                 // Add solid terrain and refresh the map drawing once, so the
+    //                 // closed doorway remains visible as the reflection fades away.
+    //                 spawn.mapRectNow(this.x, this.y, this.width, this.height);
+    //                 this.blocker = map[map.length - 1];
+    //             }
+    //         },
+    //         opacity: 0.95, tintOpacity: 0.1, tintColor: "#040",
+    //         draw() { level.mirrorDoors.drawDoor(this); },
+    //     },
+    //     exit: {
+    //         enabled: false,
+    //         x: 0, y: 0, width: 75, height: 175,
+    //         direction: "left",
+    //         isInsideMirror: false,
+    //         hasExited: false,
+    //         triggerPadding: 15,
+    //         blocker: null,
+    //         removeBlocker() {
+    //             if (!this.blocker) return;
+    //             Matter.Composite.remove(engine.world, this.blocker);
+    //             const index = composite.indexOf(this.blocker);
+    //             if (index !== -1) composite.splice(index, 1);
+    //             this.blocker = null;
+    //         },
+    //         // Like enter.set, but configuring an exit never moves the player.
+    //         set(x, y, direction = "left", width = 75, height = 175, opacity = 0.95, tintOpacity = 0.1, tintColor = "#040") {
+    //             if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
+    //                 throw new RangeError("mirror exit requires finite coordinates and positive dimensions");
+    //             }
+    //             if (direction !== "left" && direction !== "right") throw new RangeError('mirror exit direction must be "left" or "right"');
+    //             if (![opacity, tintOpacity].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
+    //                 throw new RangeError("mirror exit opacities must be between 0 and 1");
+    //             }
+    //             Object.assign(this, {
+    //                 enabled: true, x, y, width, height, direction, opacity, tintOpacity, tintColor,
+    //                 isInsideMirror: false, hasExited: false,
+    //             });
+    //             this.removeBlocker();
+    //             // Collision-only terrain: keep it out of map's draw path and
+    //             // addToWorld(), which would replace its special collision mask.
+    //             this.blocker = Matter.Bodies.rectangle(x + width / 2, y + height / 2, width, height, {
+    //                 isStatic: true,
+    //                 restitution: 1,
+    //                 collisionFilter: { category: cat.map, mask: 0xffffffff & ~cat.player },
+    //             });
+    //             composite.push(this.blocker);
+    //             Matter.Composite.add(engine.world, this.blocker);
+    //             return this;
+    //         },
+    //         update() {
+    //             if (!this.enabled || this.hasExited || !m.alive) return;
+    //             this.isInsideMirror = true;
+    //             // Ignore invisible sensors and allow some room around the visible
+    //             // mirror. Matter.js resting contact can leave the player's solid
+    //             // body slightly outside the exact doorway rectangle.
+    //             const padding = this.triggerPadding;
+    //             const parts = player.parts;
+    //             for (let i = parts.length > 1 ? 1 : 0; i < parts.length; i++) {
+    //                 const part = parts[i];
+    //                 if (part.isSensor) continue;
+    //                 const bounds = part.bounds;
+    //                 if (bounds.min.x < this.x - padding || bounds.max.x > this.x + this.width + padding ||
+    //                     bounds.min.y < this.y - padding || bounds.max.y > this.y + this.height + padding) {
+    //                     this.isInsideMirror = false;
+    //                     break;
+    //                 }
+    //             }
+    //             if (this.isInsideMirror && !level.disableExit && !level.isFlipping && !simulation.clearNow) {
+    //                 this.hasExited = true;
+    //                 level.nextLevel();
+    //             }
+    //         },
+    //         opacity: 0.95, tintOpacity: 0.1, tintColor: "#040",
+    //         draw() { level.mirrorDoors.drawDoor(this); },
+    //     },
+    //     reset() {
+    //         this.enter.enabled = false;
+    //         this.enter.isInsideMirror = true;
+    //         this.enter.hasLaunchVelocity = false;
+    //         this.enter.blocker = null;
+    //         this.enter.fadeStartTime = null;
+    //         this.enter.fadeTintOpacity = 0;
+    //         this.exit.enabled = false;
+    //         this.exit.removeBlocker();
+    //         this.exit.isInsideMirror = false;
+    //         this.exit.hasExited = false;
+    //     },
+    //     update() {
+    //         if (this.enter.enabled) this.enter.update();
+    //         if (this.exit.enabled) this.exit.update();
+    //     },
+    //     drawEntrance() { if (this.enter.enabled) this.enter.draw(); },
+    //     drawExit() { if (this.exit.enabled) this.exit.draw(); },
+    //     draw() {
+    //         if (localSettings.isHideHUD || simulation.isTimeSkipping) return;
+    //         this.drawEntrance();
+    //         this.drawExit();
+    //     },
+    //     drawDoor(door) {
+    //         if (!door.enabled || localSettings.isHideHUD || simulation.isTimeSkipping) return;
+    //         const { x, y, width, height, direction, opacity, tintOpacity, tintColor } = door;
+    //         if (width <= 0 || height <= 0 || (opacity === 0 && tintOpacity === 0)) return;
+    //         const camera = ctx.getTransform();
+    //         const pixelX = camera.a * x + camera.e;
+    //         const pixelY = camera.d * y + camera.f;
+    //         const pixelWidth = camera.a * width;
+    //         const pixelHeight = camera.d * height;
+    //         if (pixelWidth <= 0 || pixelHeight <= 0 || pixelX >= canvas.width ||
+    //             pixelY >= canvas.height || pixelX + pixelWidth <= 0 || pixelY + pixelHeight <= 0) return;
+
+    //         // Reflect the adjacent region on the door's outward-facing side.
+    //         // This is a direct draw pass: no ephemera, buffers, or cache.
+    //         ctx.save();
+    //         ctx.beginPath();
+    //         ctx.rect(x, y, width, height);
+    //         ctx.clip();
+    //         ctx.globalAlpha = opacity;
+    //         if (opacity > 0 && opacity < 1) {
+    //             ctx.globalCompositeOperation = "destination-out";
+    //             ctx.fillStyle = "#000";
+    //             ctx.fillRect(x, y, width, height);
+    //             ctx.globalCompositeOperation = "lighter";
+    //         } else {
+    //             ctx.globalCompositeOperation = "copy";
+    //         }
+    //         ctx.translate(x + width, y);
+    //         ctx.scale(-1, 1);
+    //         if (opacity > 0) {
+    //             ctx.globalAlpha = opacity;
+    //             ctx.drawImage(canvas, pixelX + (direction === "left" ? -pixelWidth : pixelWidth), pixelY, pixelWidth, pixelHeight,
+    //                 0, 0, width, height);
+    //         }
+    //         if (tintOpacity > 0) {
+    //             ctx.globalAlpha = tintOpacity;
+    //             ctx.globalCompositeOperation = "source-over";
+    //             ctx.fillStyle = tintColor;
+    //             ctx.fillRect(0, 0, width, height);
+    //         }
+    //         ctx.restore();
+    //         ctx.beginPath();
+    //     },
+    // },
+    // mirrorDoorsDraw() { level.mirrorDoors.draw(); },
     enter: {
         x: 0,
         y: 0,
@@ -1491,69 +1792,163 @@ const level = {
     exit: {
         x: 0,
         y: 0,
-        drawAndCheck() {
+        isDrawPending: false,
+        isInverted: false,
+        reflection: null,
+        mirrorOpacity: 1,
+        bottomOffset: 20, // Distance below exit.y to the drawn bottom edge.
+        chargeThreshold: 132,
+        fill: "rgba(0,180,180,0.2)",
+        drawAndCheck(isFinalPass = false, isInverted = false) {
+            // Level scripts request the exit early; render it after the world is drawn.
+            if (!isFinalPass) level.exit.isInverted = isInverted;
+            if (!isFinalPass && !simulation.isTimeSkipping) {
+                level.exit.isDrawPending = true;
+                return;
+            }
+            level.exit.isDrawPending = false;
+            const { x, y, bottomOffset } = level.exit;
+            const verticalSign = level.exit.isInverted ? -1 : 1;
             if ( //check
-                player.position.x > level.exit.x &&
-                player.position.x < level.exit.x + 100 &&
-                player.position.y > level.exit.y - 250 &&
-                player.position.y < level.exit.y + 35 &&
+                !level.exit.isInverted && // Inverted decorative exits keep their existing non-triggering behavior.
+                player.position.x > x &&
+                player.position.x < x + 100 &&
+                player.position.y > y - 250 &&
+                player.position.y < y + 35 &&
                 player.velocity.y < 0.15 &&
                 !level.isFlipping
             ) {
-                // level.exitCount += input.down ? 8 : 2
-                level.exitCount += m.health < 0 ? 0.5 : 3
+                level.exitCount += m.health < 0 ? 0.5 : 2
             } else if (level.exitCount > 0) {
-                level.exitCount -= 3
+                level.exitCount -= 2
             }
 
             ctx.beginPath();
-            ctx.moveTo(level.exit.x, level.exit.y + 30);
-            ctx.lineTo(level.exit.x, level.exit.y - 80);
-            ctx.bezierCurveTo(level.exit.x, level.exit.y - 170, level.exit.x + 100, level.exit.y - 170, level.exit.x + 100, level.exit.y - 80);
-            ctx.lineTo(level.exit.x + 100, level.exit.y + 30);
-            ctx.lineTo(level.exit.x, level.exit.y + 30);
-            ctx.fillStyle = "#0ff";
-            ctx.fill();
+            ctx.moveTo(x, y + verticalSign * bottomOffset);
+            ctx.lineTo(x, y - verticalSign * 80);
+            ctx.bezierCurveTo(x, y - verticalSign * 170, x + 100, y - verticalSign * 170, x + 100, y - verticalSign * 80);
+            ctx.lineTo(x + 100, y + verticalSign * bottomOffset);
+            ctx.lineTo(x, y + verticalSign * bottomOffset);
+            // Original exit fill (restore these two lines to undo the reflection test).
+            // ctx.fillStyle = "#0ff";
+            // ctx.fill();
 
-            if (level.exitCount > 0) { //stroke outline of door from 2 sides,  grows with count
-                ctx.beginPath();
-                ctx.moveTo(level.exit.x, level.exit.y + 40);
-                ctx.lineTo(level.exit.x, level.exit.y - 80);
-                ctx.bezierCurveTo(level.exit.x, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148);
-                ctx.moveTo(level.exit.x + 100, level.exit.y + 40);
-                ctx.lineTo(level.exit.x + 100, level.exit.y - 80);
-                ctx.bezierCurveTo(level.exit.x + 100, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148, level.exit.x + 50, level.exit.y - 148);
-                ctx.setLineDash([200, 200]);
-                ctx.lineDashOffset = Math.max(-15, 185 - 2.1 * level.exitCount)
-                if (m.health < 0) {
-                    ctx.strokeStyle = "#f00"
-                    ctx.lineWidth = 6 + 0.1 * (level.exitCount)
-                } else {
-                    ctx.strokeStyle = "#444"
-                    ctx.lineWidth = 2
+            const chargeProgress = Math.max(0, Math.min(1, level.exitCount / level.exit.chargeThreshold));
+            // Reflect an adjacent area on the player's side, zooming out as the exit charges.
+            // The final pass makes the current frame's player, map, and bullets available.
+            const transform = localSettings.isHideHUD ? null : ctx.getTransform();
+            if (!transform || transform.a <= 0 || transform.d === 0 || transform.b !== 0 || transform.c !== 0) {
+                level.exit.reflection = null; // Resume from the player's current side when reflections are enabled.
+                ctx.fillStyle = level.exit.fill;
+                ctx.fill();
+            } else {
+                const top = y - (level.exit.isInverted ? bottomOffset : 170);
+                const screenX = x * transform.a + transform.e;
+                const screenWidth = 100 * transform.a;
+                const height = 170 + bottomOffset;
+                // Canvas pixels run downward even when the world camera is vertically inverted.
+                const drawY = transform.d < 0 ? top + height : top;
+                const screenY = drawY * transform.d + transform.f;
+                const screenHeight = height * Math.abs(transform.d);
+                const side = player.position.x <= x + 50 ? -1 : 1;
+                let reflection = level.exit.reflection;
+                if (!reflection || reflection.x !== x || reflection.y !== top || reflection.onLevel !== level.onLevel) {
+                    reflection = level.exit.reflection = { x, y: top, onLevel: level.onLevel, side, nextSide: side, start: null };
                 }
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                if (level.exitCount > 100) {
-                    level.exitCount = 0
-
-                    //prompt an option to do the training levels or continue to the normal game
-                    if (!simulation.isChoosing && m.alive && !simulation.isTraining && !simulation.isCheating && b.inventory.length === 0 && level.levelsCleared === 0 && localSettings.isTrainingNotAttempted) {
-                        //pause
-                        if (!simulation.paused) {
-                            simulation.paused = true;
-                            simulation.isChoosing = true; //stops p from un pausing on key down
-
-                            document.body.style.cursor = "auto";
-                            document.getElementById("choose-grid").style.pointerEvents = "auto";
-                            document.getElementById("choose-grid").style.transitionDuration = "0s";
+                // Finish each fade before starting another, even if the player changes sides rapidly.
+                const fadeCycles = 9; // Entire side-switch transition: 0.15 seconds at 60 cycles/second.
+                if (level.exitCount > 0) {
+                    // Hold the currently displayed side while the player charges the exit.
+                    reflection.nextSide = reflection.side;
+                    reflection.start = null;
+                }
+                if (reflection.start !== null && simulation.cycle - reflection.start >= fadeCycles) {
+                    reflection.side = reflection.nextSide;
+                    reflection.start = null;
+                }
+                if (level.exitCount <= 0 && reflection.start === null && side !== reflection.side) {
+                    reflection.nextSide = side;
+                    reflection.start = simulation.cycle;
+                }
+                let opacity = Math.max(0, Math.min(1, level.exit.mirrorOpacity));
+                if (reflection.start !== null) {
+                    const progress = (simulation.cycle - reflection.start) / fadeCycles;
+                    opacity *= Math.abs(2 * progress - 1);
+                    if (progress >= 0.5) reflection.side = reflection.nextSide;
+                }
+                if (screenX < canvas.width && screenX + screenWidth > 0 && screenY < canvas.height && screenY + screenHeight > 0) {
+                    const reflectionScale = 1 - 0.9 * chargeProgress; // 1 normally, 0.1 at full charge.
+                    const sourceWidth = screenWidth / reflectionScale;
+                    const sourceHeight = screenHeight / reflectionScale;
+                    ctx.save();
+                    ctx.clip(); // Keep the reflection inside the original curved path.
+                    ctx.translate(x + 100, drawY);
+                    ctx.scale(-1, transform.d < 0 ? -1 : 1);
+                    if (opacity > 0) {
+                        ctx.globalAlpha = opacity;
+                        if (opacity < 1) {
+                            ctx.globalCompositeOperation = "destination-out";
+                            ctx.fillStyle = "#000";
+                            ctx.fillRect(0, 0, 100, height);
+                            ctx.globalCompositeOperation = "lighter";
+                        } else {
+                            ctx.globalCompositeOperation = "copy";
                         }
-                        //build level info
-                        document.getElementById("choose-grid").classList.add('choose-grid-no-images');
-                        document.getElementById("choose-grid").classList.remove('choose-grid');
-                        document.getElementById("choose-grid").style.gridTemplateColumns = "350px"
-                        let text = `
+                        ctx.drawImage(canvas,
+                            screenX + (reflection.side < 0 ? -sourceWidth : screenWidth),
+                            screenY + (screenHeight - sourceHeight) / 2, sourceWidth, sourceHeight,
+                            0, 0, 100, height);
+                    }
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.globalAlpha = 1; // Let the RGBA color alone control tint opacity.
+                    ctx.fillStyle = level.exit.fill;
+                    ctx.fillRect(0, 0, 100, height); // The same arch clip also bounds the cyan tint.
+                    ctx.restore();
+                }
+            }
+
+            if (level.exit.isInverted) return;
+
+            ctx.beginPath();
+            ctx.moveTo(x, y + bottomOffset);
+            ctx.lineTo(x, y - 80);
+            ctx.bezierCurveTo(x, y - 148, x + 50, y - 148, x + 50, y - 148);
+            ctx.moveTo(x + 100, y + bottomOffset);
+            ctx.lineTo(x + 100, y - 80);
+            ctx.bezierCurveTo(x + 100, y - 148, x + 50, y - 148, x + 50, y - 148);
+            ctx.setLineDash([]); // Solid sides reach the bottom edge without a dash gap.
+            if (m.health < 0) {
+                ctx.strokeStyle = "#f00"
+                ctx.lineWidth = 6 + 10 * chargeProgress
+            } else {
+                ctx.strokeStyle = "#033"
+                ctx.lineWidth = 2
+            }
+            ctx.stroke();
+
+            if (level.exitCount < level.exit.chargeThreshold) return;
+            level.exitCount = 0;
+
+            // First-run players without a weapon get the tutorial choice; otherwise advance.
+            if (simulation.isChoosing || !m.alive || simulation.isTraining || simulation.isCheating || b.inventory.length !== 0 || level.levelsCleared !== 0 || !localSettings.isTrainingNotAttempted) {
+                level.nextLevel();
+                return;
+            }
+            const grid = document.getElementById("choose-grid");
+            //pause
+            if (!simulation.paused) {
+                simulation.paused = true;
+                simulation.isChoosing = true; //stops p from un pausing on key down
+
+                document.body.style.cursor = "auto";
+                grid.style.pointerEvents = "auto";
+                grid.style.transitionDuration = "0s";
+            }
+            //build level info
+            grid.classList.add('choose-grid-no-images');
+            grid.classList.remove('choose-grid');
+            grid.style.gridTemplateColumns = "350px"
+            grid.innerHTML = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
                                 Begin the <strong>guided tutorial</strong> that shows how to use ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
@@ -1562,61 +1957,45 @@ const level = {
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
                                 Begin the <strong>standard game</strong> where you progress through <strong>13</strong> random levels and beat the final boss.
                             </div>`
-                        document.getElementById("choose-grid").innerHTML = text
-                        //show level info
-                        document.getElementById("choose-grid").style.opacity = "1"
-                        document.getElementById("choose-grid").style.transitionDuration = "0.25s"; //how long is the fade in on
-                        document.getElementById("choose-grid").style.visibility = "visible"
-                        document.getElementById("choose-training").addEventListener("click", async (event) => {
-                            const trainingChoice = event.currentTarget
-                            trainingChoice.style.pointerEvents = "none"
-                            try {
-                                await level.loadMoreLevels()
-                            } catch (error) {
-                                trainingChoice.style.pointerEvents = "auto"
-                                console.error(error)
-                                return
-                            }
-                            level.unPause()
-                            document.body.style.cursor = "none";
-                            simulation.isTraining = true
-                            level.levelsCleared--;
-                            level.onLevel--
-                            simulation.isHorizontalFlipped = false
-                            level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
-                            level.nextLevel()
-                            //reset hide image style
-                            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
-                            document.getElementById("choose-grid").classList.remove('choose-grid');
-                        });
-                        document.getElementById("choose-unPause").addEventListener("click", () => {
-                            level.unPause()
-                            document.body.style.cursor = "none";
-                            level.nextLevel()
-                            //reset hide image style
-                            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
-                            document.getElementById("choose-grid").classList.remove('choose-grid');
-                        });
-                        requestAnimationFrame(() => {
-                            ctx.fillStyle = `rgba(150,150,150,0.9)`; //`rgba(221,221,221,0.6)`;
-                            ctx.fillRect(0, 0, canvas.width, canvas.height);
-                        });
-                    } else { //advance to next level
-                        level.nextLevel()
-                    }
+            //show level info
+            grid.style.opacity = "1"
+            grid.style.transitionDuration = "0.25s"; //how long is the fade in on
+            grid.style.visibility = "visible"
+            document.getElementById("choose-training").addEventListener("click", async (event) => {
+                const trainingChoice = event.currentTarget
+                trainingChoice.style.pointerEvents = "none"
+                try {
+                    await level.loadMoreLevels()
+                } catch (error) {
+                    trainingChoice.style.pointerEvents = "auto"
+                    console.error(error)
+                    return
                 }
-            }
+                level.unPause()
+                document.body.style.cursor = "none";
+                simulation.isTraining = true
+                level.levelsCleared--;
+                level.onLevel--
+                simulation.isHorizontalFlipped = false
+                level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
+                level.nextLevel()
+                //reset hide image style
+                grid.classList.add('choose-grid-no-images');
+                grid.classList.remove('choose-grid');
+            });
+            document.getElementById("choose-unPause").addEventListener("click", () => {
+                level.unPause()
+                document.body.style.cursor = "none";
+                level.nextLevel()
+                //reset hide image style
+                grid.classList.add('choose-grid-no-images');
+                grid.classList.remove('choose-grid');
+            });
+            requestAnimationFrame(() => {
+                ctx.fillStyle = `rgba(150,150,150,0.9)`; //`rgba(221,221,221,0.6)`;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            });
         },
-        // draw() {
-        //     ctx.beginPath();
-        //     ctx.moveTo(level.exit.x, level.exit.y + 30);
-        //     ctx.lineTo(level.exit.x, level.exit.y - 80);
-        //     ctx.bezierCurveTo(level.exit.x, level.exit.y - 170, level.exit.x + 100, level.exit.y - 170, level.exit.x + 100, level.exit.y - 80);
-        //     ctx.lineTo(level.exit.x + 100, level.exit.y + 30);
-        //     ctx.lineTo(level.exit.x, level.exit.y + 30);
-        //     ctx.fillStyle = "#0ff";
-        //     ctx.fill();
-        // }
     },
     addToWorld() { //needs to be run to put bodies into the world
         for (let i = 0; i < map.length; i++) {
@@ -3749,14 +4128,22 @@ const level = {
         },
         testing() {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
+            level.setPosToSpawn(6172, -12); //original spawn
+            // level.setPosToSpawn(150, -450); //original spawn
+            level.exit.x = 6507
+            level.exit.y = -220
 
-            // level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#026", 8);
-            level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#632", 8, 0.02);
-            level.mirror(-150, -400, 1300, 550, "above", 0.3);
-            level.mirror(-150, -900, 900, 250, "below", 1, 0.1, "#040");
+            level.mirrorExperimental(-352, -650, 200, 250, "right", 1, 0.1, "#026", 0.5, 60);
+            // level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#632", 8, 0.02);
+            level.mirrorExperimental(-150, -400, 1300, 550, "above", 0.3, 0, "#040", 0.6, 0);
+            // level.mirror(-150, -900, 900, 250, "below", 1, 0.1, "#040");
+            // level.mirror(750, 0, 3750, 800, "above", 1, 0.1, "#040");
 
-
-            level.mirror(750, 0, 3750, 800, "above", 1, 0.1, "#040");
+            // spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
+            // level.mirrorDoors.exit.set(6700, -375);
+            //mirror entrance
+            spawn.mapRect(-150, -650, 75, 75);
+            // level.mirrorDoors.enter.set(-150, -575);
 
 
             document.body.style.backgroundColor = "#ddd";
@@ -3794,8 +4181,9 @@ const level = {
                 // ctx.fillRect(-150, -1000, 6875, 1000);
                 ctx.fillStyle = "rgba(0,255,255,0.1)";
                 ctx.fillRect(6400, -550, 300, 350);
-                level.exit.drawAndCheck();
+                // The mirror exit is checked by mirrorDoors.update().
                 level.enter.draw();
+                level.exit.drawAndCheck();
             };
             level.customTopLayer = () => {
                 train.draw()
@@ -3807,13 +4195,9 @@ const level = {
 
                 // for (let i = 0; i < wind.length; i++) wind[i].do()
             };
-            level.setPosToSpawn(0, -450); //normal spawn
-            spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-            level.exit.x = 6500;
-            level.exit.y = -230;
 
-            spawn.bodyRect(-150, -450, 100, 50);
-            spawn.bodyRect(-150, -600, 75, 150);
+            // spawn.bodyRect(-150, -450, 100, 50);
+            // spawn.bodyRect(-150, -600, 75, 150);
             spawn.bodyRect(775, -75, 50, 75);
             spawn.bodyRect(4250, -350, 250, 350); //about as a big a block as possible
 
@@ -3841,8 +4225,10 @@ const level = {
             spawn.mapRect(4500, -300, 200, 400); //right wall
             spawn.mapRect(6400, -1200, 400, 750); //right wall
             spawn.mapRect(6400, -200, 400, 300); //right wall
-            spawn.mapRect(6700, -1800, 800, 2600); //right wall
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
+            // Right wall with a walk-in mirror pocket (6700, -375, 75, 175).
+            spawn.mapRect(6700, -1800, 800, 1425); //above the mirror
+            spawn.mapRect(6775, -375, 725, 175); //back of the pocket
+            spawn.mapRect(6700, -200, 800, 1000); //below the mirror
 
             spawn.mapVertex(2600, 25, "-600 0  -150 -300  150 -300  600 0");
             spawn.mapVertex(2600, -35, "-300 0  -150 -300  150 -300  300 0");
@@ -4265,8 +4651,9 @@ const level = {
             level.setPosToSpawn(460, -100); //normal spawn
             // level.enter.x = -1000000; //hide enter graphic for first level by moving to the far left
             level.exit.x = 2800;
-            level.exit.y = -335;
-            spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+            level.exit.y = -325;
+            level.exit.bottomOffset = 25; // Match the exit-room floor at y = -300.
+            // spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
             simulation.zoomScale = 1000 //1400 is normal
             level.defaultZoom = 1600
             simulation.zoomTransition(level.defaultZoom, 1)
@@ -4430,7 +4817,6 @@ const level = {
 
             level.setPosToSpawn(0, -250); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-            spawn.mapRect(5500, -330 + 20, 100, 20); //spawn this because the real exit is in the wrong spot
             level.exit.x = 0;
             level.exit.y = -8000;
 
@@ -4454,7 +4840,6 @@ const level = {
             spawn.mapRect(5400, -1700, 400, 1150); //right wall
             spawn.mapRect(5400, -300, 400, 400); //right wall
             spawn.mapRect(5700, -3300, 1800, 5100); //right wall
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
             spawn.mapRect(5403, -650, 400, 450); //blocking exit
             if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) { //pacifist run
                 for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
@@ -4501,7 +4886,7 @@ const level = {
                 } else {
                     level.exit.x = 5500;
                 }
-                level.exit.y = -330;
+                level.exit.y = -320;
                 Matter.Composite.remove(engine.world, map[map.length - 1]);
                 map.splice(map.length - 1, 1);
                 simulation.draw.setPaths(); //redraw map draw path
@@ -4635,7 +5020,7 @@ const level = {
                         // console.log(stationNumber, stationsCleared, stationsCleared[Math.abs(stationNumber)])
                         if (isExitOpen) {
                             level.exit.x = x - 50;
-                            level.exit.y = -260;
+                            level.exit.y = -230;
                             var gateButton = level.button(x - 62, -736, 125, false) //x, y, width = 126, isSpawnBase = true
                             gateButton.isUp = true
                             if (stationNumber > 0) {
@@ -4657,7 +5042,7 @@ const level = {
                         spawn.mapRect(x + -1500, -210, 3000, 400);//station floor
                         // spawn.mapRect(x + -550, -220, 1125, 100); //floor
                         // spawn.mapRect(x + -475, -230, 975, 150);//floor
-                        spawn.mapVertex(x + 0, -200, "400 0  -400 0  -300 -80  300 -80"); //hexagon but wide
+                        if (!isExitOpen) spawn.mapVertex(x + 0, -200, "400 0  -400 0  -300 -80  300 -80"); //Keep the starting-station platform.
                         // spawn.mapRect(x + -1350, -550, 50, 150);
                         // spawn.mapRect(x + 1300, -550, 50, 150);
                         stationCustom = () => { };
@@ -5744,6 +6129,9 @@ const level = {
             level.customTopLayer = () => {
                 for (let i = 0; i < train.length; i++) train[i].draw()
                 stationCustomTopLayer()
+                // Subway's moving map doors are the only deferred map-path rebuild callers.
+                // Time skips batch their rebuild once after all skipped cycles.
+                if (!simulation.isTimeSkipping) simulation.draw.flushMapPathRebuild();
             };
             level.isProcedural = true //only used in generating text for the level builder
             simulation.draw.lineOfSightPrecalculation() //required precalculation for line of sight
@@ -5757,8 +6145,8 @@ const level = {
             }
             level.announceMobTypes()
             level.exit.x = 1700;
-            level.exit.y = -4510;
-            spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+            level.exit.y = -4500;
+            level.exit.bottomOffset = 25;
             level.setPosToSpawn(-500, 850); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.defaultZoom = 2300
@@ -6052,8 +6440,8 @@ const level = {
             // }
             level.announceText(-550, -725, true)
             level.exit.x = 3500;
-            level.exit.y = -42;
-            spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+            level.exit.y = -32;
+            level.exit.bottomOffset = 25;
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#c3d6df" //"#d8dadf";
@@ -6311,7 +6699,7 @@ const level = {
             level.setPosToSpawn(900, 1447);
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = -2610
-            level.exit.y = -1617
+            level.exit.y = -1605
             level.defaultZoom = 2500
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#c3c5c8" //"#d6d2d1"//"#d0d5d5";//"#dcdcde"
@@ -6665,7 +7053,6 @@ const level = {
             spawn.mapRect(-2825, -1585, 600, 50);//exit room floor
             spawn.mapRect(-2900, -2100, 675, 100); //exit room ceiling
             spawn.mapRect(-2900, -2100, 100, 550); //exit room left wall
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //exit door step
             spawn.mapRect(-2325, -2100, 100, 325);
             spawn.mapRect(-2900, -1575, 2550, 200);
 
@@ -6738,7 +7125,7 @@ const level = {
 
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = 4225
-            level.exit.y = 2320
+            level.exit.y = 2330
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#c3c5c8" //"#d6d2d1"//"#d0d5d5";
@@ -6927,7 +7314,6 @@ const level = {
             //floor and exit room
             spawn.mapRect(4725, 1000, 2275, 3000);
             spawn.mapRect(3825, 2350, 1000, 1650);
-            spawn.mapRect(4225, 2340, 100, 50); //exit door step
             spawn.mapVertex(3885, 2360, "-200 -200  200 200  -200 200");  //triangle
             spawn.mapVertex(-1056, 2500, "-9665 2800  -9665 -200   0 -200    225 -50   225 2800  0 2800");//floor and tiny left ramp into exit
             spawn.mapVertex(4375, 1510, "0 0   500 0    500 1000   -225 1000   -225 150");
@@ -7078,7 +7464,7 @@ const level = {
             if (isFlippedHorizontal) {
                 level.setPosToSpawn(9150 + 50, -2230 - 25);
                 level.exit.x = 400 - 50;
-                level.exit.y = -50 + 25;
+                level.exit.y = -20;
                 leftRoomColor = "#cff"
                 rightRoomColor = "rgba(0,0,0,0.13)"
             } else {
@@ -7097,7 +7483,6 @@ const level = {
             level.fallModeBounds = { left: level.enter.x, right: level.exit.x } //used with level.fallMode = "position";
             if (isFlippedHorizontal) level.fallModeBounds = { left: level.exit.x, right: level.enter.x } //used with level.fallMode = "position";
             simulation.fallHeight = 5000 //level.enter.y - 4000
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
             level.defaultZoom = 2300
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#cdd9df";
@@ -7297,6 +7682,7 @@ const level = {
 
             //4th zone   far right hollow square near exit
             spawn.mapVertex(9200, -2050, `${-a} ${-a + c}  ${-a + c} ${-a}     ${a - c} ${-a}  ${a} ${-a + c}       ${a} ${-600}          ${-a} ${-600}`); //square with edges cut off --- hollow top
+            if (!isFlippedHorizontal) level.exit.y = map[map.length - 1].bounds.min.y - level.exit.bottomOffset;
             spawn.mapVertex(9200, -550, `${-a} ${600}   ${a} ${600}      ${a} ${a - c}  ${a - c} ${a}  ${-a + c} ${a}  ${-a} ${a - c}`); //square with edges cut off --- hollow bottom
             spawn.mapRect(9800, -2100, 300, 1600);  //hollow left wall
             spawn.mapVertex(8175, -1425, "-1400 -90  350 -90 400 -40   400 40   350 90  -1400 90");
@@ -7410,9 +7796,8 @@ const level = {
             level.setPosToSpawn(2235, -1375); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
             level.exit.x = 7875;
-            level.exit.y = -2480;
+            level.exit.y = -2470;
 
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
             level.defaultZoom = 1500
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#d0d2d4";
@@ -7786,8 +8171,7 @@ const level = {
             exitOptions = [
                 (x = offset.x, y = offset.y) => {
                     level.exit.x = x + 1725;
-                    level.exit.y = y - 980;
-                    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+                    level.exit.y = y - 970;
                     spawn.mapRect(x + 1500, y - 950, 500, 25); //exit platform
                     spawn.mapRect(x + 1550, y - 1300, 25, 175); //exit side wall
                     spawn.mapVertex(x + 1300, y - 125, "-400 0   -250 -400  250 -400   400 0");
@@ -7843,8 +8227,7 @@ const level = {
                 },
                 (x = offset.x, y = offset.y) => {
                     level.exit.x = x + 1750;
-                    level.exit.y = y - 980;
-                    spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
+                    level.exit.y = y - 970;
                     spawn.mapRect(x + 1550, y - 950, 500, 25); //exit platform
                     spawn.mapRect(x + 1600, y - 1300, 25, 175); //exit side wall
                     spawn.bodyRect(x + 1275, y - 475, 125, 125, 0.25);
@@ -8843,8 +9226,8 @@ const level = {
             level.fallMode = "start";
             const vanish = []
             level.exit.x = -850;
-            level.exit.y = -1485;
-            spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 25);
+            level.exit.y = -1475;
+            level.exit.bottomOffset = 25;
             level.setPosToSpawn(-900, 225); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.defaultZoom = 1500
@@ -9003,10 +9386,9 @@ const level = {
             level.announceText(0, 20, true)
             level.announceMobTypes()
             level.setPosToSpawn(0, -50); //lower start
-            level.exit.y = level.enter.y - 550;
+            level.exit.y = level.enter.y - 540;
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = level.enter.x;
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
             level.defaultZoom = 2200
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#d0d5d5";
@@ -9274,7 +9656,7 @@ const level = {
             level.announceMobTypes()
             level.setPosToSpawn(-1825, 1950); //lower start
             level.exit.x = -1875
-            level.exit.y = 1355
+            level.exit.y = 1345
             level.defaultZoom = 2300
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#d0d5d5";
@@ -9423,7 +9805,6 @@ const level = {
                 //left side
                 //level entrance
                 spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-                spawn.mapRect(level.exit.x, level.exit.y - 40, 100, 20);
                 spawn.mapRect(-2025, 1650, 400, 50);
                 spawn.mapRect(-2100, -1600, 475, 2925);
                 spawn.mapRect(-1675, 1500, 50, 325);
@@ -9511,7 +9892,6 @@ const level = {
                 //left side
                 //level entrance
                 spawn.mapRect(level.enter.x, level.enter.y - 20 - 20, 100, 20);
-                spawn.mapRect(level.exit.x, level.exit.y + 40 - 20, 100, 20);
                 spawn.mapRect(-2025, -1650 - 50, 400, 50);
                 spawn.mapRect(-2100, +1600 - 2925, 475, 2925);
                 spawn.mapRect(-1675, -1500 - 325, 50, 325);
@@ -9708,14 +10088,7 @@ const level = {
                     //draw flipped exit
                     ctx.fillStyle = "#d4f4f4"
                     ctx.fillRect(-2000, 1325, 375, 350)
-                    ctx.beginPath();
-                    ctx.moveTo(level.exit.x, level.exit.y - 30);
-                    ctx.lineTo(level.exit.x, level.exit.y + 80);
-                    ctx.bezierCurveTo(level.exit.x, level.exit.y + 170, level.exit.x + 100, level.exit.y + 170, level.exit.x + 100, level.exit.y + 80);
-                    ctx.lineTo(level.exit.x + 100, level.exit.y - 30);
-                    ctx.lineTo(level.exit.x, level.exit.y - 30);
-                    ctx.fillStyle = "#0ff";
-                    ctx.fill();
+                    level.exit.drawAndCheck(false, true); // Render the inverted arch in the final mirror pass.
                     level.enter.draw();
                 }
             };
@@ -9854,6 +10227,7 @@ const level = {
             level.setPosToSpawn(-2375, 950);
             level.exit.x = 3750
             level.exit.y = 165
+            level.exit.bottomOffset = 23;
             level.defaultZoom = 2600
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#c3d6e1";
@@ -9937,8 +10311,8 @@ const level = {
                 spawn.mapRect(3575, -1050, 425, 60);
                 spawn.mapRect(3575, 990, 425, 50);
                 spawn.mapVertex(3840, 450, "-250 -300   250 -300   250 300   -250 100");
+                level.exit.y = map[map.length - 1].bounds.min.y - level.exit.bottomOffset;
                 spawn.mapVertex(3840, -450, "-250 300   250 300   250 -300   -250 -100");
-                spawn.mapRect(3750, 188, 100, 25);
             }
             let buildVerticalFLippedMap = function () { // flip Y with this -> spawn.mapRect(x, -y - h, w, h);
                 buttons.push(level.button(-3350, 985, 126, true, false, "hsl(330, 100%, 50%)"))
@@ -9999,7 +10373,7 @@ const level = {
                 spawn.mapRect(3575, -990 - 50, 425, 50);
                 spawn.mapVertex(3840, 450, "-250 -300   250 -300   250 300   -250 100");
                 spawn.mapVertex(3840, -450, "-250 300   250 300   250 -300   -250 -100");
-                spawn.mapRect(3750, -212, 100, 25);
+                level.exit.y = map[map.length - 1].bounds.max.y + level.exit.bottomOffset;
             }
             let flipAndRemove = function () {
 
@@ -10149,14 +10523,7 @@ const level = {
                     //draw flipped exit
                     ctx.fillStyle = "#d4f4f4"
                     // ctx.fillRect(-2000, 1325, 375, 350)
-                    ctx.beginPath();
-                    ctx.moveTo(level.exit.x, level.exit.y - 30);
-                    ctx.lineTo(level.exit.x, level.exit.y + 80);
-                    ctx.bezierCurveTo(level.exit.x, level.exit.y + 170, level.exit.x + 100, level.exit.y + 170, level.exit.x + 100, level.exit.y + 80);
-                    ctx.lineTo(level.exit.x + 100, level.exit.y - 30);
-                    ctx.lineTo(level.exit.x, level.exit.y - 30);
-                    ctx.fillStyle = "#0ff";
-                    ctx.fill();
+                    level.exit.drawAndCheck(false, true); // Render the inverted arch in the final mirror pass.
                 } else {
                     level.exit.drawAndCheck();
                     level.enter.draw();
@@ -10209,7 +10576,8 @@ const level = {
             level.announceMobTypes()
             level.setPosToSpawn(-3800, -750);
             level.exit.x = 3750
-            level.exit.y = -625
+            level.exit.y = -615
+            level.exit.bottomOffset = 15;
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#d0d5d5";
@@ -10364,7 +10732,6 @@ const level = {
             spawn.mapVertex(2375, -975, "-140 0    -8 150   8 150   140 0");  //laser mount
             //exit
             spawn.mapRect(3525, -600, 550, 1675);
-            spawn.mapRect(3750, -610, 100, 50);
             spawn.mapVertex(3535, -1013, "-140 0    -8 150   8 150   140 0"); //entrance door
             spawn.mapVertex(3975, -990, "0 0    100 0   100 100"); //triangle at corner
 
@@ -10427,12 +10794,13 @@ const level = {
                 level.announceText(-350, 580, true)
                 level.setPosToSpawn(-350, 475);
                 level.exit.x = 14025
-                level.exit.y = -600
+                level.exit.y = -590
+                level.exit.bottomOffset = 15;
                 spawn.bodyRect(-225, 475, 50, 50);
                 var color1 = "rgba(0,255,255,0.1)"
                 var color2 = "rgba(0,20,60,0.09)"
             }
-            spawn.mapRect(14015, -585, 120, 75); //exit/entrance platform
+            if (simulation.isHorizontalFlipped) spawn.mapRect(14015, -585, 120, 75); //Keep the entrance platform on the reversed route.
 
             const buttonLeft = level.button(-4100, 991)
             const buttonRight = level.button(4050, 991)
@@ -10569,6 +10937,7 @@ const level = {
             spawn.mapRect(-6000, -4300, 6020, 1950);
             spawn.mapRect(205, -4300, 15120, 1950);
             spawn.mapVertex(-250, 602.5, "-200 0  235 0 400 50  400 150  -200 150");
+            if (simulation.isHorizontalFlipped) level.exit.bottomOffset = map[map.length - 1].bounds.min.y - level.exit.y;
             spawn.mapVertex(-3675, -2275, "0 0  500 0  0 500");
             spawn.mapVertex(13275, -2275, "0 0  -500 0  0 500");
             spawn.mapRect(-525, -1175, 525, 1450);
@@ -10688,6 +11057,7 @@ const level = {
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
         },
         refinery() {
+            level.exit.bottomOffset = simulation.isHorizontalFlipped ? 25 : 20;
             if (simulation.isHorizontalFlipped) {
                 level.announceText(4350, 325, true)
                 level.setPosToSpawn(4350, 250);
@@ -10697,7 +11067,7 @@ const level = {
                 level.announceText(-4325, 175, true)
                 level.setPosToSpawn(-4325, 100);
                 level.exit.x = 4300
-                level.exit.y = 270
+                level.exit.y = 280
             }
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
@@ -11006,7 +11376,7 @@ const level = {
             spawn.mapRect(-3825, 120, 225, 100);
 
             //exit
-            spawn.mapRect(4300, 290, 100, 25);
+            if (simulation.isHorizontalFlipped) spawn.mapRect(4300, 290, 100, 25); //Entrance step on the reversed route.
             spawn.mapRect(4050, 300, 475, 700);
             spawn.mapRect(3550, -1025, 1000, 900);
             spawn.mapRect(3550, 150, 625, 900);
@@ -11345,6 +11715,7 @@ const level = {
 
         },
         furnace() {
+            level.exit.bottomOffset = simulation.isHorizontalFlipped ? 25 : 20;
             level.announceMobTypes()
             if (simulation.isHorizontalFlipped) {
                 level.announceText(4350, 325, true)
@@ -11355,7 +11726,7 @@ const level = {
                 level.announceText(-4325, 175, true)
                 level.setPosToSpawn(-4325, 100);
                 level.exit.x = 4300
-                level.exit.y = 270
+                level.exit.y = 280
             }
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
@@ -11609,7 +11980,7 @@ const level = {
             //exit
             // spawn.mapRect(3550, 150, 500, 900);
             // spawn.mapRect(3550, -1020, 500, 900);
-            spawn.mapRect(4300, 290, 100, 25);
+            if (simulation.isHorizontalFlipped) spawn.mapRect(4300, 290, 100, 25); //Entrance step on the reversed route.
             spawn.mapRect(4050, 300, 475, 700);
             spawn.mapRect(3550, -1025, 1000, 900);
             spawn.mapRect(3550, 150, 625, 900);
@@ -11659,9 +12030,8 @@ const level = {
             level.announceMobTypes()
             level.setPosToSpawn(0, -65); //lower start
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-            level.exit.y = 2010;
+            level.exit.y = 2020;
             level.exit.x = 2625;
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
             level.defaultZoom = 2200
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "hsl(138, 5%, 82%)";
@@ -11934,7 +12304,7 @@ const level = {
 
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = 9700;
-            level.exit.y = 2560;
+            level.exit.y = 2570;
             level.defaultZoom = 1800
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
@@ -11998,7 +12368,6 @@ const level = {
             spawn.mapRect(9900, 1700, 200, 1400); //back wall
             // spawn.mapRect(9300, 2150, 50, 250);
             spawn.mapRect(9300, 2590, 650, 25);
-            spawn.mapRect(9700, 2580, 100, 50);
 
 
             spawn.randomGroup(1300, 2100, 0.1);
@@ -12183,7 +12552,8 @@ const level = {
             level.setPosToSpawn(0, -50); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = 7800;
-            level.exit.y = 2865;
+            level.exit.y = 2875;
+            level.exit.bottomOffset = 15;
             const exitDoor = level.door(7637, 2680, 25, 225, 195, 5)
 
             level.defaultZoom = 1800
@@ -12249,7 +12619,6 @@ const level = {
             spawn.mapRect(7625, 1825, 450, 825);
             spawn.mapRect(7625, 2625, 50, 75);
             spawn.mapRect(7625, 2890, 400, 25);
-            spawn.mapRect(7800, 2880, 100, 25);
 
             spawn.randomMobPositions = [
                 [2450, 250],
@@ -12388,8 +12757,8 @@ const level = {
             level.setPosToSpawn(-100, 210); //normal spawn
             spawn.mapRect(-150, 240, 100, 30);
             level.exit.x = -100;
-            level.exit.y = -425;
-            spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 50); //exit bump
+            level.exit.y = -415;
+            level.exit.bottomOffset = 15;
 
             level.defaultZoom = 1700 // 4500 // 1400
             simulation.zoomTransition(level.defaultZoom)
@@ -12601,8 +12970,7 @@ const level = {
                 //normal direction start in top left
                 level.setPosToSpawn(-450, -2060);
                 level.exit.x = 4225;
-                level.exit.y = -30;
-                spawn.mapRect(4225, -10, 100, 50); //ground bump wall
+                level.exit.y = -20;
                 //mobs that spawn in exit room
                 spawn.bodyRect(4850, -750, 300, 25, 0.6); //
             } else {
@@ -12615,8 +12983,8 @@ const level = {
                 //reverse direction, start in bottom right
                 level.setPosToSpawn(4225, -50);
                 level.exit.x = -550;
-                level.exit.y = -2030;
-                spawn.mapRect(-550, -2015, 100, 50); //ground bump wall
+                level.exit.y = -2025;
+                level.exit.bottomOffset = 15;
             }
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
@@ -12757,6 +13125,7 @@ const level = {
             }
         },
         aerie() {
+            level.exit.bottomOffset = 15;
             level.announceMobTypes()
             level.fallMode = "start";
             const boost1 = level.boost(-425, 100, 1400)
@@ -12814,7 +13183,7 @@ const level = {
             if (backwards) {
                 level.setPosToSpawn(4300, -3300); //normal spawn
                 level.exit.x = -100;
-                level.exit.y = -1025;
+                level.exit.y = -1015;
                 if (simulation.isHorizontalFlipped) {
                     level.announceText(-4300, -3223, true)
                 } else {
@@ -12823,7 +13192,7 @@ const level = {
             } else {
                 level.setPosToSpawn(-50, -1050); //normal spawn
                 level.exit.x = 4250;
-                level.exit.y = -3275;
+                level.exit.y = -3265;
                 if (simulation.isHorizontalFlipped) {
                     level.announceText(-975, -975, true)
                 } else {
@@ -12832,7 +13201,6 @@ const level = {
             }
 
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
-            spawn.mapRect(level.exit.x, level.exit.y + 15, 100, 20);
 
             powerUps.spawnStartingPowerUps(1075, -550);
             document.body.style.backgroundColor = "#dcdcde";
@@ -13047,7 +13415,7 @@ const level = {
             level.setPosToSpawn(-50, -60); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = 1500;
-            level.exit.y = -1875;
+            level.exit.y = -1865;
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
             powerUps.spawnStartingPowerUps(1475, -1175);
@@ -13067,7 +13435,7 @@ const level = {
             spawn.mapRect(1300, -1850, 800, 50); //left higher platform
             spawn.mapRect(1300, -2150, 50, 350); //left higher platform left edge wall
             spawn.mapRect(1300, -2150, 450, 50); //left higher platform roof
-            spawn.mapRect(1500, -1860, 100, 50); //ground bump wall
+            level.exit.bottomOffset = 15;
             spawn.mapRect(2400, -850, 600, 300); //center floating large square
             //spawn.bodyRect(2500, -1100, 25, 250); //wall before chasers
             spawn.mapRect(2500, -1450, 450, 350); //higher center floating large square
@@ -13165,8 +13533,7 @@ const level = {
             level.announceMobTypes()
             level.setPosToSpawn(0, 930);
             level.exit.x = 600
-            level.exit.y = -2080
-            spawn.mapRect(600, -2060, 100, 25);
+            level.exit.y = -2070
 
             level.defaultZoom = 2400
             simulation.zoomTransition(level.defaultZoom)
@@ -13521,7 +13888,7 @@ const level = {
             level.setPosToSpawn(-300, -700); //normal spawn
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             level.exit.x = -4275;
-            level.exit.y = -2805;
+            level.exit.y = -2795;
 
             level.defaultZoom = 1500
             simulation.zoomTransition(level.defaultZoom)
@@ -13613,7 +13980,6 @@ const level = {
             spawn.mapRect(-4450, -3075, 25, 300);
             spawn.mapRect(-4450, -3075, 450, 25);
             spawn.mapRect(-4025, -3075, 25, 100);
-            spawn.mapRect(-4275, -2785, 100, 25);
             spawn.bodyRect(-3900, -2400, 50, 50);
 
             //mobs
@@ -13726,6 +14092,7 @@ const level = {
             }
         },
         warehouse() {
+            level.exit.bottomOffset = 10;
             if (simulation.isHorizontalFlipped) {
                 level.announceText(-25, 20, true)
             } else {
@@ -13790,7 +14157,7 @@ const level = {
 
             level.setPosToSpawn(25, -55); //normal spawn
             level.exit.x = 425;
-            level.exit.y = -30;
+            level.exit.y = -20;
 
             level.defaultZoom = 1300
             simulation.zoomTransition(level.defaultZoom)
@@ -13814,7 +14181,6 @@ const level = {
             spawn.mapRect(300, -10, 350, 50);
             spawn.mapRect(-150, -350, 800, 100);
             spawn.mapRect(600, -275, 50, 75);
-            spawn.mapRect(425, -20, 100, 25);
             // spawn.mapRect(-1900, 600, 2700, 100);
             spawn.mapRect(1100, 0, 150, 1500);
             spawn.mapRect(-3150, 1400, 4400, 100);
@@ -14100,7 +14466,7 @@ const level = {
                 door = level.door(1362, -400, 25, 400, 355, 1.5) //door(x, y, width, height, distance, speed = 1) {
                 level.setPosToSpawn(1200, -1550); //normal spawn
                 level.exit.x = 3088;
-                level.exit.y = -630;
+                level.exit.y = -620;
             } else { //reverse direction, start in bottom right
                 if (simulation.isHorizontalFlipped) {
                     level.announceText(-3135, 30, true)
@@ -14112,7 +14478,7 @@ const level = {
                 door = level.door(3012, -400, 25, 400, 355, 1.5)
                 level.setPosToSpawn(3137, -650); //normal spawn
                 level.exit.x = 1375;
-                level.exit.y = -1530;
+                level.exit.y = -1520;
             }
             level.custom = () => {
                 button.query();
@@ -14147,7 +14513,6 @@ const level = {
             };
             level.defaultZoom = 1400
             simulation.zoomTransition(level.defaultZoom)
-            spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 50); //ground bump wall
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             document.body.style.backgroundColor = "#e0e5e0";
 

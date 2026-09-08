@@ -1,16 +1,7 @@
-new community map voltage
-
-developed new level element - mirror
-  added mirrors to reactor and null levels
-
-skin tech: hyperpolarisation - for 4.0 seconds after a mob dies, depolarization gives 0.4x damage taken
-JUNK tech: rotation matrix
-
-2 research cost to filament
+added mirrors to exit doors
 
 bug fixes
-  added mantis constraint line stroke
-  anthropic soft lock on high health fixed again
+  
 
 
 *********************************************************** TODO *****************************************************

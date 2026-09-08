@@ -3,7 +3,9 @@
 const simulation = {
     loop() { }, //main game loop, gets set to normal or testing loop
     normalLoop() {
+        level.exit.isDrawPending = false;
         simulation.gravity();
+        // level.mirrorDoors.update();
         Engine.update(engine, simulation.delta);
         simulation.wipe();
         simulation.textLog();
@@ -24,7 +26,6 @@ const simulation = {
         m.draw();
         m.hold();
         level.customTopLayer();
-        simulation.draw.flushMapPathRebuild();
         simulation.draw.drawMapPath();
         b.fire();
         b.bulletRemove();
@@ -32,11 +33,15 @@ const simulation = {
         if (!m.isTimeDilated) b.bulletDo();
         simulation.drawCircle();
         simulation.runEphemera();
+        // level.mirrorDoorsDraw();
+        if (level.exit.isDrawPending) level.exit.drawAndCheck(true);
         ctx.restore();
         simulation.drawCursor();
     },
     testingLoop() {
+        level.exit.isDrawPending = false;
         simulation.gravity();
+        // level.mirrorDoors.update();
         Engine.update(engine, simulation.delta);
         simulation.wipe();
         simulation.textLog();
@@ -52,8 +57,8 @@ const simulation = {
         m.draw();
         m.hold();
         level.customTopLayer();
-        simulation.draw.flushMapPathRebuild();
         simulation.draw.wireFrame();
+        // level.mirrorDoorsDraw();
         if (input.fire && m.fireCDcycle < m.cycle) {
             m.fireCDcycle = m.cycle + 15; //fire cooldown       
             for (let i = 0, len = mob.length; i < len; i++) {
@@ -67,6 +72,7 @@ const simulation = {
         simulation.drawCircle();
         simulation.runEphemera();
         simulation.constructCycle()
+        if (level.exit.isDrawPending) level.exit.drawAndCheck(true);
         ctx.restore();
         simulation.testingOutput();
         simulation.drawCursor();
@@ -78,6 +84,7 @@ const simulation = {
             simulation.cycle++;
             m.cycle++;
             simulation.gravity();
+            // level.mirrorDoors.update();
             Engine.update(engine, simulation.delta);
             if (m.onGround) {
                 m.groundControl()
@@ -104,6 +111,7 @@ const simulation = {
             simulation.cycle++;
             // m.walk_cycle += (m.flipLegs * m.Vx) * 0.5; //makes the legs look like they are moving fast this is just gonna run for each method call since it needs some tweaking
             simulation.gravity();
+            // level.mirrorDoors.update();
             Engine.update(engine, simulation.delta);
             // level.custom();
             // level.customTopLayer();
@@ -1191,6 +1199,10 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
+        // level.mirrorDoors.reset();
+        level.exit.reflection = null;
+        level.exit.isInverted = false;
+        level.exit.bottomOffset = 20;
         level.isVerticalFLipLevel = false
         level.isProcedural = false;
         level.fallMode = "";

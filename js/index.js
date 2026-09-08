@@ -474,7 +474,7 @@ ${fullscreenWarning}
                 <br>video game OST
                 <br><a data-music-playlist="hollow-knight" href="https://music.youtube.com/watch?v=NSlkW1fFkyo&amp;list=PLmOldskd2VbL7_t-NE9p6rEboq_v0AHko" target="_blank" rel="noopener noreferrer">Hollow Knight</a>
                 <a data-music-playlist="silksong" href="https://music.youtube.com/watch?v=yUfD7w5y3Ug&amp;list=PLbNT78Q7M14yC4iIN4RaQqGa6q6zY6bqc" target="_blank" rel="noopener noreferrer" style="float: right;">Silksong</a>
-                <br><a data-music-playlist="animal-well" href="https://music.youtube.com/watch?v=NI1Ni_cXrTU&amp;list=PLESFnlO3kNnq5TKtphEDyE4805PTLIKaa" target="_blank" rel="noopener noreferrer">Animal Well</a>
+                <br><a data-music-playlist="animal-well" href="https://music.youtube.com/watch?v=yccb86YuwXs&amp;list=PLS7HzNXh-PwozVLyFxG3a7-0HplJwKPY2" target="_blank" rel="noopener noreferrer">Animal Well</a>
                 <a data-music-playlist="disco-elysium" href="https://music.youtube.com/watch?v=qMUoWTEIGx4&amp;list=OLAK5uy_n_Y491JJMFBAxR3v_o5LLTgu20URfxpuw" target="_blank" rel="noopener noreferrer" style="float: right;">Disco Elysium</a>
                 <br><a data-music-playlist="undertale" href="https://music.youtube.com/watch?v=3BR7-AzE2dQ&amp;list=OLAK5uy_ljXkQlhVlWyV7BxSxMMzgOLbzYS_-JPt4" target="_blank" rel="noopener noreferrer">UNDERTALE</a>
                 <a data-music-playlist="deltarune" href="https://music.youtube.com/watch?v=XEdoMoV4D6k&amp;list=OLAK5uy_kidGzGmzCUSJK1LAtIh7ngZwRF9MT3qjE" target="_blank" rel="noopener noreferrer" style="float: right;">deltarune</a>
@@ -2201,7 +2201,7 @@ const musicPlaylists = {
     },
     "animal-well": {
         links: {
-            youtube: "https://music.youtube.com/watch?v=NI1Ni_cXrTU&list=PLESFnlO3kNnq5TKtphEDyE4805PTLIKaa",
+            youtube: "https://music.youtube.com/watch?v=yccb86YuwXs&list=PLS7HzNXh-PwozVLyFxG3a7-0HplJwKPY2",
             spotify: "",
             apple: ""
         }

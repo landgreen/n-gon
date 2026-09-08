@@ -5029,7 +5029,7 @@ Object.assign(moreLevels, {
                     player.position.y > level.exit.y - 150 &&
                     player.position.y < level.exit.y - 40 &&
                     player.velocity.y < 0.1 &&
-                    level.exitCount + (input.down ? 8 : 2) > 100) {
+                    level.exitCount + (m.health < 0 ? 0.5 : 3) >= level.exit.chargeThreshold) {
                     if (templePlayer.stage === 1) {
                         templePlayer.drawExit = false;
                         level.exitCount = 0;
@@ -5039,7 +5039,7 @@ Object.assign(moreLevels, {
                         templePlayer.room2ToRoom3Anim = 1;
                         level.exitCount = 0;
                     } else {
-                        level.exitCount = 99 - (input.down ? 8 : 2);
+                        level.exitCount = level.exit.chargeThreshold - 1 - (m.health < 0 ? 0.5 : 3);
                         if (!templePlayer.clearedCycle) templePlayer.clearedCycle = simulation.cycle;
                     }
                 }

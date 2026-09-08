@@ -1340,7 +1340,7 @@ const spawn = {
                     } else {
                         level.exit.x = 5500;
                     }
-                    level.exit.y = -330;
+                    level.exit.y = -320;
                     Matter.Composite.remove(engine.world, map[map.length - 1]);
                     map.splice(map.length - 1, 1);
                     simulation.draw.setPaths(); //redraw map draw path
