@@ -630,143 +630,194 @@ const powerUps = {
     difficulty: {
         name: "difficulty",
         color: "#000",
+        options: [
+            { key: "isHalfDamage", required: true, text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
+            { key: "isDoubleDamageTaken", required: true, text: '<strong>2x</strong> <strong class="color-defense" data-help="defense">damage taken</strong>' },
+            { key: "isMobTier4", required: true, text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong><br>after every <strong>4</strong> levels' },
+            { key: "isSecondBoss", required: true, get text() { return `spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}`; } },
+            { key: "isMobTier3", text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong> faster' },
+            { key: "isDoubleMobs", text: '<strong>2x</strong> mobs' },
+            { key: "isNoInitialPowerUps", get text() { return `no initial ${powerUps.orb.research()} ${powerUps.orb.heal()} ${powerUps.orb.ammo()}`; } },
+            { key: "isLateEquipment", get text() { return `${powerUps.orb.gun()} and ${powerUps.orb.field()} spawn later`; } },
+            { key: "isFewerResearch", get text() { return `1 fewer ${powerUps.orb.research()} per level`; } },
+            { key: "isFewerTech", get text() { return `4 fewer ${powerUps.orb.tech()} spawn`; } },
+            { key: "isConstraint", text: 'random <strong class="constraint" data-help="constraint">constraint</strong> each level' },
+            { key: "isStrongerConstraints", requires: "isConstraint", text: 'stronger <strong class="constraint" data-help="constraint">constraints</strong>' },
+            { key: "isExtraHalfDamage", text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
+            { key: "isExtraDoubleDamageTaken", text: '<strong>2x</strong> <strong class="color-defense" data-help="defense">damage taken</strong>' },
+        ],
+        requiredSelected(options) {
+            return this.options.every(option => !option.required || options[option.key]);
+        },
+        allowed(option, options) {
+            return (option.required || this.requiredSelected(options)) && (!option.requires || options[option.requires]);
+        },
+        normalize(options = {}) {
+            const result = {};
+            for (const option of this.options) result[option.key] = options?.[option.key] === true;
+            for (const option of this.options) if (!this.allowed(option, result)) result[option.key] = false;
+            return result;
+        },
+        fromLegacy(mode = 2) {
+            const n = Number(mode);
+            return this.normalize({
+                isMobTier4: true,
+                isHalfDamage: n > 1,
+                isDoubleDamageTaken: n > 1,
+                isSecondBoss: n > 2,
+                isMobTier3: n > 3,
+                isNoInitialPowerUps: n > 5,
+                isLateEquipment: n > 4,
+                isFewerTech: n > 5,
+                isConstraint: n > 4,
+                isStrongerConstraints: n > 5,
+            });
+        },
+        updateScale() {
+            //Retain a separate scale for legacy continuous enemy/healing formulas.
+            //The named gameplay effects below always use the individual flags.
+            const o = simulation.difficultyOptions;
+            simulation.difficultyMode = 1 + 0.5 * (Number(o.isHalfDamage) + Number(o.isDoubleDamageTaken)) + Number(o.isSecondBoss) + Number(o.isMobTier3)
+                + 0.5 * (Number(o.isNoInitialPowerUps) + Number(o.isLateEquipment) + Number(o.isConstraint))
+                + 0.5 * (Number(o.isFewerTech) + Number(o.isStrongerConstraints));
+        },
+        signature(options = simulation.difficultyOptions) {
+            return 'v2:' + this.options.map(option => options[option.key] ? "1" : "0").join("");
+        },
+        highestCompleted() {
+            let highest = Number.isInteger(localSettings.highestDifficultyCompleted) && localSettings.highestDifficultyCompleted >= 0 ? localSettings.highestDifficultyCompleted : null;
+            for (const [signature, won] of Object.entries(localSettings.difficultyOptionsCompleted || {})) {
+                if (won && /^[01]+$/.test(signature)) highest = Math.max(highest ?? 0, signature.replaceAll('0', '').length);
+            }
+            //Translate old slider wins to the equivalent selection count.
+            for (let mode = 1; mode <= 7; mode++) {
+                if (localSettings.difficultyCompleted?.[mode]) {
+                    const options = this.fromLegacy(mode);
+                    highest = Math.max(highest ?? 0, this.options.filter(option => options[option.key]).length);
+                }
+            }
+            return highest;
+        },
+        recordWin() {
+            if (simulation.isCheating) return;
+            const count = this.options.filter(option => simulation.difficultyOptions[option.key]).length;
+            localSettings.highestDifficultyCompleted = Math.max(this.highestCompleted() ?? 0, count);
+            if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings));
+        },
+        fromSignature(signature) {
+            const options = {};
+            const isCurrent = signature.startsWith('v2:');
+            if (isCurrent) signature = signature.slice(3);
+            //Discard the removed two-level delay from older shared builds.
+            if (!isCurrent && signature.length === 13) signature = signature.slice(0, 7) + signature.slice(8);
+            const keys = !isCurrent && signature.length === 11
+                ? ["isMobTier4", "isHalfDamage", "isDoubleDamageTaken", "isSecondBoss", "isMobTier3", "isNoInitialPowerUps", "isLateEquipment", null, "isFewerTech", "isConstraint", "isStrongerConstraints"]
+                : this.options.map(option => option.key);
+            keys.forEach((key, i) => { if (key) options[key] = signature[i] === "1"; });
+            return this.normalize(options);
+        },
+        equipmentDelay() {
+            return Number(simulation.difficultyOptions.isLateEquipment);
+        },
+        pauseText() {
+            return this.options.filter(option => simulation.difficultyOptions[option.key]).map(option => `<div class="pause-difficulty-row">${option.text}</div>`).join("") || 'no difficulty options selected';
+        },
         size() {
-            return 80 / Math.pow(localSettings.difficultyMode, 1.5);
+            return 80 / Math.pow(simulation.difficultyMode, 1.5);
         },
         damageDone: 1,
         damageReduction: 1,
-        setDamageAndDefense() {
-            if (simulation.difficultyMode > 5) {
-                this.damageReduction = 2
-                this.damageDone = 0.5
-            } else if (simulation.difficultyMode === 1) {
-                this.damageReduction = 0.5
-                this.damageDone = 2
-            } else {
-                this.damageReduction = 1
-                this.damageDone = 1
-            }
-            spawn.setMobTypeSpawnOrder();
+        setDamageAndDefense(resetSpawnOrder = true) {
+            this.damageDone = simulation.difficultyOptions.isHalfDamage ? 1 : 2;
+            this.damageReduction = simulation.difficultyOptions.isDoubleDamageTaken ? 1 : 0.5;
+            if (simulation.difficultyOptions.isExtraHalfDamage) this.damageDone *= 0.5;
+            if (simulation.difficultyOptions.isExtraDoubleDamageTaken) this.damageReduction *= 2;
+            if (resetSpawnOrder) spawn.setMobTypeSpawnOrder();
         },
         effect() {
-            const initialDifficultyMode = simulation.difficultyMode
-            requestAnimationFrame(() => { //add a background behind the power up menu
-                ctx.fillStyle = `rgba(150,150,150,0.9)`;
+            const difficulty = powerUps.difficulty;
+            const initial = { ...simulation.difficultyOptions };
+            let selected = { ...initial };
+            const highestCompleted = difficulty.highestCompleted();
+            const optionalOptions = difficulty.options.filter(option => !option.required);
+            const completedProgress = Math.max(0, Math.min(highestCompleted, difficulty.options.length));
+            requestAnimationFrame(() => {
+                ctx.fillStyle = "rgba(150,150,150,0.9)";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             });
-            powerUps.animatePowerUpGrab('rgba(0, 0, 0,0.6)')
-
-            if (!simulation.paused) {
-                simulation.paused = true;
-                simulation.isChoosing = true; //stops p from un pausing on key down
-                document.body.style.cursor = "auto";
-                document.getElementById("choose-grid").style.pointerEvents = "auto";
-                document.getElementById("choose-grid").style.transitionDuration = "0s";
-            }
-            //build level info
-            document.getElementById("choose-grid").classList.add('choose-grid-no-images');
-            document.getElementById("choose-grid").classList.remove('choose-grid');
-            document.getElementById("choose-grid").style.gridTemplateColumns = "340px" //adjust this to increase the width of the whole menu, but mostly the center column
-
-            let text = `
-        <div>
-            <div class="grid-container">
-                <div class="left-column">
-                    <input type="range" id="difficulty-slider" name="temp" type="range" step="1" value="1" min="1" max="7" list="values" dir="ltr"/>
-                    <datalist id="values">
-                        <option value="1"></option>
-                        <option value="2"></option>
-                        <option value="3"></option>
-                        <option value="4"></option>
-                        <option value="5"></option>
-                        <option value="6"></option>
-                        <option value="7"></option>
-                    </datalist>
+            powerUps.animatePowerUpGrab('rgba(0, 0, 0,0.6)');
+            simulation.paused = true;
+            simulation.isChoosing = true;
+            document.body.style.cursor = "auto";
+            const grid = document.getElementById("choose-grid");
+            grid.style.pointerEvents = "auto";
+            grid.classList.add('choose-grid-no-images');
+            grid.classList.remove('choose-grid');
+            grid.style.gridTemplateColumns = "min(500px, calc(100vw - 40px))";
+            grid.innerHTML = `<div class="difficulty-options-grid">
+                <div class="difficulty-readout" id="difficulty-readout" role="meter" aria-label="selected difficulty options" aria-valuemin="0" aria-valuemax="${difficulty.options.length}"${highestCompleted === null ? '' : ` title="highest completed difficulty: ${highestCompleted} selected options"`}>
+                  <span class="difficulty-readout-fill" id="difficulty-readout-fill" aria-hidden="true"></span>${highestCompleted === null ? '' : `<span class="difficulty-readout-record" style="left: clamp(10px, ${100 * completedProgress / difficulty.options.length}%, calc(100% - 10px))" aria-hidden="true"></span>`}
                 </div>
-                <div class="right-column">
-                    <div class="row" id="constraint-1">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>4</strong> levels</div>
-                    <div class="row" id="constraint-2"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
-                    <div class="row" id="constraint-3">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>
-                    <div class="row" id="constraint-4">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>3</strong> levels</div>
-                    <div class="row" id="constraint-5"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>
-                    <div class="row" id="constraint-6"><strong>0.5x</strong> <strong class='color-d'>damage</strong><br><strong>2x</strong> <strong class='color-defense'>damage taken</strong></div>
-                    <div class="row" id="constraint-7"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>
-                </div>
-                <div class="far-right-column">
-                    <div id = "constraint-1-record">${localSettings.difficultyCompleted[1] ? "⚆" : " "}</div>
-                    <div id = "constraint-2-record">${localSettings.difficultyCompleted[2] ? "⚆" : " "}</div>
-                    <div id = "constraint-3-record">${localSettings.difficultyCompleted[3] ? "⚆" : " "}</div>
-                    <div id = "constraint-4-record">${localSettings.difficultyCompleted[4] ? "⚆" : " "}</div>
-                    <div id = "constraint-5-record">${localSettings.difficultyCompleted[5] ? "⚆" : " "}</div>
-                    <div id = "constraint-6-record">${localSettings.difficultyCompleted[6] ? "⚇" : " "}</div>
-                    <div id = "constraint-6-record">${localSettings.difficultyCompleted[7] ? "⚇" : " "}</div>
-                </div>
-            </div>
-            <div class="choose-grid-module" id="choose-difficulty">confirm difficulty parameters</div>
-        </div>`
-            document.getElementById("choose-grid").innerHTML = text
-            //show level info
-            document.getElementById("choose-grid").style.opacity = "1"
-            document.getElementById("choose-grid").style.transitionDuration = "0.5s"; //how long is the fade in on
-            document.getElementById("choose-grid").style.visibility = "visible"
-            document.getElementById("choose-difficulty").addEventListener("click", () => {
-                level.unPause()
-                document.body.style.cursor = "none";
-                //reset hide image style
-                document.getElementById("choose-grid").classList.add('choose-grid-no-images');
-                document.getElementById("choose-grid").classList.remove('choose-grid');
-                if (level.levelsCleared === 0 && initialDifficultyMode !== simulation.difficultyMode) {
-                    powerUps.difficulty.setDamageAndDefense()
-                    //remove and respawn all power ups if difficulty mode was changed
-                    for (let i = 0; i < powerUp.length; ++i) Matter.Composite.remove(engine.world, powerUp[i]);
-                    powerUp = [];
-                    level.initialPowerUps()
-                    simulation.trails(30)
+                ${[difficulty.options.filter(option => option.required), optionalOptions].map(options => `<div class="difficulty-option-section">${options.map(option => `<button type="button" id="difficulty-${option.key}" class="difficulty-option" role="checkbox" aria-checked="false"><span>${option.text}</span></button>`).join('')}</div>`).join('')}
+                <button type="button" class="difficulty-confirm" id="choose-difficulty">confirm difficulty parameters</button>
+            </div>`;
+            const render = () => {
+                const selectedCount = difficulty.options.filter(option => selected[option.key]).length;
+                document.getElementById('difficulty-readout-fill').style.width = `${100 * selectedCount / difficulty.options.length}%`;
+                document.getElementById('difficulty-readout').setAttribute('aria-valuenow', selectedCount);
+                for (const option of difficulty.options) {
+                    const button = document.getElementById(`difficulty-${option.key}`);
+                    button.disabled = !difficulty.allowed(option, selected);
+                    button.classList.toggle('difficulty-option-selected', selected[option.key]);
+                    button.setAttribute('aria-checked', String(selected[option.key]));
+                    button.title = button.disabled ? (option.requires ? 'requires random constraint' : 'requires all four starting options') : '';
                 }
-                // if (document.fullscreenElement) mouseMove.isLockPointer = true//this interacts with the mousedown event listener to exit pointer lock
-            });
-
-            if (document.fullscreenElement) {
-                // mouseMove.isLockPointer = true
-                document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
-
-                document.exitPointerLock()
-                mouseMove.isPointerLocked = false
-                mouseMove.reset()
+            };
+            for (const option of difficulty.options) {
+                document.getElementById(`difficulty-${option.key}`).addEventListener('click', () => {
+                    if (!difficulty.allowed(option, selected)) return;
+                    selected[option.key] = !selected[option.key];
+                    selected = difficulty.normalize(selected);
+                    render();
+                });
             }
-
-            let setDifficultyText = function (isReset = true) {
-                for (let i = 1; i < 8; i++) {
-                    const id = document.getElementById("constraint-" + i)
-                    if (simulation.difficultyMode < i) {
-                        id.style.opacity = "0.15"
-                    } else {
-                        id.style.opacity = "1"
+            render();
+            grid.style.opacity = "1";
+            grid.style.transitionDuration = "0.5s";
+            grid.style.visibility = "visible";
+            document.getElementById("choose-difficulty").addEventListener("click", () => {
+                if (difficulty.signature(initial) !== difficulty.signature(selected)) {
+                    simulation.difficultyOptions = difficulty.normalize(selected);
+                    difficulty.updateScale();
+                    const tierChanged = initial.isMobTier4 !== selected.isMobTier4 || initial.isMobTier3 !== selected.isMobTier3;
+                    difficulty.setDamageAndDefense(tierChanged);
+                    if (tierChanged && level.levelsCleared > 0) {
+                        spawn.mobTypeSpawnIndex = level.levelsCleared + 1;
+                        spawn.pickList = [spawn.mobTypeSpawnOrder[Math.min(level.levelsCleared - 1, 13)], spawn.mobTypeSpawnOrder[Math.min(level.levelsCleared, 13)]];
+                    }
+                    level.updateDifficulty();
+                    if (initial.isConstraint !== selected.isConstraint || initial.isStrongerConstraints !== selected.isStrongerConstraints) level.setConstraints();
+                    lore.setTechGoal();
+                    localSettings.difficultyOptions = { ...simulation.difficultyOptions };
+                    localSettings.difficultyMode = simulation.difficultyMode; //compatibility with older saves
+                    localSettings.levelsClearedLastGame = 0;
+                    localSettings.entanglement = undefined;
+                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings));
+                    if (level.levelsCleared === 0) {
+                        for (const item of powerUp) Matter.Composite.remove(engine.world, item);
+                        powerUp = [];
+                        level.initialPowerUps();
+                        simulation.trails(30);
                     }
                 }
-                if (isReset) {
-                    lore.setTechGoal()
-                    localSettings.difficultyMode = simulation.difficultyMode
-                    powerUps.difficulty.setDamageAndDefense()
-                    localSettings.levelsClearedLastGame = 0 //after changing difficulty, reset run history
-                    localSettings.entanglement = undefined //after changing difficulty, reset stored tech
-                    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-                }
-            }
-            setDifficultyText(false)
-            document.getElementById("difficulty-slider").value = simulation.difficultyMode
-            document.getElementById("difficulty-slider").addEventListener("input", () => {
-                simulation.difficultyMode = document.getElementById("difficulty-slider").value
-                setDifficultyText()
-                level.setConstraints()
-            });
-            for (let i = 1; i < 8; i++) {
-                document.getElementById("constraint-" + i).addEventListener("click", () => {
-                    simulation.difficultyMode = i
-                    document.getElementById("difficulty-slider").value = simulation.difficultyMode
-                    setDifficultyText()
-                    level.setConstraints()
-                });
+                level.unPause();
+                document.body.style.cursor = "none";
+            }, { once: true });
+            if (document.fullscreenElement) {
+                document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });
+                document.exitPointerLock();
+                mouseMove.isPointerLocked = false;
+                mouseMove.reset();
             }
         },
     },
@@ -1096,6 +1147,7 @@ const powerUps = {
         //     }
         // },
         effect() {
+            if (tech.isEnergyNoAmmo) return;
             const couplingExtraAmmo = (m.fieldMode === 10 || m.fieldMode === 0) ? 1 + 0.05 * m.coupling : 1
             if (b.inventory.length > 0) {
                 let animateGrabRadius = 0
@@ -1238,40 +1290,40 @@ const powerUps = {
     },
     hideStyle: `style="height:auto; border: none; background-color: transparent;"`,
     constraintText(choose, click) {
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
     },
     gunText(choose, click) {
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}" ${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}" ${powerUps.hideStyle}>
             <div class="card-text">
             <div class="grid-title"><div class="circle-grid-title gun"></div> &nbsp; ${b.guns[choose].name}</div>
             ${b.guns[choose].descriptionFunction()}</div></div>`
     },
     fieldText(choose, click) {
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
         ${m.fieldUpgrades[choose].description}</div></div>`
     },
     techText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid-title tech"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     instantTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title"> <div class="circle-grid-instant"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
     },
     skinTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title">         
                 <span style="position:relative;">
@@ -1283,7 +1335,7 @@ const powerUps = {
     },
     skinTechUpgradeText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title">
                 <span style="position:relative;">
@@ -1300,7 +1352,7 @@ const powerUps = {
     },
     fieldTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title">
                 <span style="position:relative;">
@@ -1312,7 +1364,7 @@ const powerUps = {
     },
     gunTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title">         
                 <span style="position:relative;">
@@ -1324,7 +1376,7 @@ const powerUps = {
     },
     junkTechText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-        return `<div id = "junk-${choose}" class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
+        return `<div id = "junk-${choose}" class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
                 <div class="card-text">
                 <div class="grid-title"><div class="circle-grid-title junk"></div> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                 ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1356,6 +1408,7 @@ const powerUps = {
                         tech.cancelTechCount++
                     }
                     if (tech.isDeterminism) totalChoices = 1
+                    totalChoices = Math.max(totalChoices, 1)
                     totalChoices = Math.min(totalChoices, options.length)
                     function removeOption(index) {
                         for (let i = 0; i < options.length; i++) {
@@ -1390,7 +1443,7 @@ const powerUps = {
                         if (botTech.length > 0) { //pick random bot tech
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1456,7 +1509,7 @@ const powerUps = {
                         if (botTech.length > 0) { //pick random bot tech
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1592,7 +1645,7 @@ const powerUps = {
                             // text += `<div class="choose-grid-module" onclick="powerUps.choose('tech',${choose})"><div class="grid-title">          <span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span>  &nbsp; ${tech.tech[choose].name} ${isCount}</div>          ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div>`
                             const choose = botTech[Math.floor(Math.random() * botTech.length)];
                             const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
-                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
+                            text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${choose})" ${powerUps.hideStyle}>
                                     <div class="card-text">
                                     <div class="grid-title"><span  style = "font-size: 150%;font-family: 'Courier New', monospace;">⭓▸●■</span> &nbsp; ${tech.tech[choose].name} ${techCountText}</div>
                                     ${tech.tech[choose].descriptionFunction ? tech.tech[choose].descriptionFunction() : tech.tech[choose].description}</div></div>`
@@ -1601,7 +1654,7 @@ const powerUps = {
                     if (tech.isMassProduction) {
                         for (let i = 0, len = tech.tech.length; i < len; i++) {
                             if (tech.tech[i].isMassProduction) {
-                                text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < 0.6 ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${i})" ${powerUps.hideStyle}>
+                                text += `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="powerUps.choose('tech',${i})" ${powerUps.hideStyle}>
                                         <div class="card-text">
                                         <div class="grid-title">${tech.tech[i].name}</div>
                                         ${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div></div>`
@@ -1837,7 +1890,7 @@ const powerUps = {
     isFieldSpawned: false, //makes it so a field spawns once but not more times
     spawnBossPowerUp(x, y) { //boss spawns field and gun tech upgrades
         if (level.levels[level.onLevel] !== "final") {
-            if (!powerUps.isFieldSpawned) {
+            if (!powerUps.isFieldSpawned && (level.levelsCleared >= 1 + powerUps.difficulty.equipmentDelay())) {
                 powerUps.isFieldSpawned = true
                 powerUps.spawn(x, y, "field")
             } else {
@@ -1847,7 +1900,7 @@ const powerUps = {
                     powerUps.spawn(x, y, "gun")
                 }
             }
-            if (simulation.difficultyMode < 3) {//don't spawn 2nd or 3rd power up on difficulties with a second boss
+            if (!simulation.difficultyOptions.isSecondBoss) { //second bosses split the tech rewards
                 if (Math.random() < 0.97) {
                     powerUps.spawn(x, y, "tech")
                 } else {
@@ -1855,7 +1908,7 @@ const powerUps = {
                 }
             }
             powerUps.spawn(x + 25, y - 25, "ammo", false);
-            if (simulation.difficultyMode > 5) powerUps.spawn(x - 25, y - 50, "ammo", false);
+            if (simulation.difficultyMode > 6) powerUps.spawn(x - 25, y - 50, "ammo", false);
             if (tech.isAddRemoveMaxHealth) {
                 powerUps.spawn(x + 20, y, "tech", false)
                 // powerUps.spawn(x - 20, y, "research", false)
@@ -1867,9 +1920,8 @@ const powerUps = {
                 powerUps.spawn(x, y - 40, "heal", false)
             }
             if (tech.isResearchReality) powerUps.spawnDelay("research", 6, 2, { x: x, y: y })
-            if (tech.isBanish) powerUps.spawnDelay("research", simulation.difficultyMode > 2 ? 2 : 4, 2, { x: x, y: y })
+            if (tech.isBanish) powerUps.spawnDelay("research", simulation.difficultyOptions.isSecondBoss ? 2 : 4, 2, { x: x, y: y })
             if (tech.isCouplingNoHit) powerUps.spawnDelay("coupling", 9, 2, { x: x, y: y })
-            // if (tech.isRerollDamage) powerUps.spawnDelay("research", 1)
         }
     },
     chooseRandomPowerUp(x, y) { //100% chance to drop a random power up    //used in spawn.debris
@@ -1880,20 +1932,21 @@ const powerUps = {
         }
     },
     addResearchToLevel() { //add a random power up to a location that has a mob,  mostly used to give each level a research
+        if (simulation.difficultyOptions.isFewerResearch) return;
         if ((level.levelsCleared < 17 - simulation.difficultyMode * 3) && mob.length) { //don't spawn late game
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
         }
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
-        if (level.levelsCleared < 4 || simulation.difficultyMode < 2) { //runs on first 4 levels on all difficulties
-            if (level.levelsCleared > 1 && simulation.difficultyMode < 7) powerUps.spawn(x, y, "tech")
-            if (b.inventory.length === 0) {
+        if (level.levelsCleared <= 4 || simulation.difficultyMode < 2) { //early level rewards
+            if (level.levelsCleared > 1 && level.levelsCleared <= 4 && !simulation.difficultyOptions.isFewerTech) powerUps.spawn(x, y, "tech")
+            if (b.inventory.length === 0 && level.levelsCleared >= powerUps.difficulty.equipmentDelay()) {
                 powerUps.spawn(x, y, "gun", false); //first gun
             } else if (tech.totalCount === 0) { //first tech
                 powerUps.spawn(x - 22, y - 50, "ammo", false); //some ammo
                 powerUps.spawn(x, y, "tech", false);
-            } else if (b.inventory.length === 1) { //second gun or extra ammo
+            } else if (b.inventory.length === 1 && level.levelsCleared >= powerUps.difficulty.equipmentDelay()) { //second gun or extra ammo
                 if (Math.random() < 0.4) {
                     powerUps.spawn(x, y, "gun", false);
                 } else {
@@ -2153,6 +2206,7 @@ const powerUps = {
         powerUp[index] = Matter.Bodies.polygon(x, y, polygonSides, size, properties);
         if (moving) Matter.Body.setVelocity(powerUp[index], { x: (Math.random() - 0.5) * 15, y: Math.random() * -9 - 3 });
         Composite.add(engine.world, powerUp[index]);
+        if (name === "field") powerUps.isFieldSpawned = true;
     },
     powerUpStorage: [],//used when power ups are sent to the next level (for the constraint, level.isNextLevelPowerUps)
 };

@@ -1297,14 +1297,14 @@ const mobs = {
                 if (this.isDropPowerUp) {
                     if (m.alive && level.isMobDeathFreeze && !this.isFreezeAuraOnDeath) {
                         requestAnimationFrame(() => {
-                            spawn.freezeGrenade(this.position.x, this.position.y, this.tier, 60) //freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
+                            spawn.freezeGrenade(this.position.x, this.position.y, this.tier, 55, (simulation.difficultyOptions.isStrongerConstraints) ? 333 : 200) //freezeGrenade(x, y, tier = null, lifeSpan = 90, pulseRadius = 230 + 10 * tier, size = 3) {
                         });
                     }
                     if (level.isMobDeathHeal) {
                         for (let i = 0; i < mob.length; i++) {
                             if (Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < 500000 && mob[i].alive) { //700
                                 if (mob[i].health < 1) {
-                                    mob[i].health += 0.33
+                                    mob[i].health += (simulation.difficultyOptions.isStrongerConstraints) ? 0.6 : 0.3
                                     if (mob[i].health > 1) mob[i].health = 1
                                     simulation.drawList.push({
                                         x: mob[i].position.x,
@@ -1346,7 +1346,7 @@ const mobs = {
                             });
                         }
                     }
-                    if (level.isMobRespawn && !this.isBoss && 0.25 > Math.random()) {
+                    if (level.isMobRespawn && !this.isBoss && (simulation.difficultyOptions.isStrongerConstraints ? 0.4 : 0.25) > Math.random()) {
                         simulation.drawList.push({
                             x: this.position.x,
                             y: this.position.y,

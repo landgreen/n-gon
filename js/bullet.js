@@ -229,13 +229,19 @@ const b = {
         if (tech.crouchAmmoCount && m.crouch) {
             if (tech.crouchAmmoCount % 2) {
                 b.guns[b.activeGun].ammo--;
-                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) b.guns[b.activeGun].ammo--;
+                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) {
+                    b.guns[b.activeGun].ammo--;
+                    if (simulation.difficultyOptions.isStrongerConstraints && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+                }
                 simulation.updateGunHUD();
             }
             tech.crouchAmmoCount++ //makes the no ammo toggle off and on
         } else {
             b.guns[b.activeGun].ammo--;
-            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) b.guns[b.activeGun].ammo--;
+            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) {
+                b.guns[b.activeGun].ammo--;
+                if (simulation.difficultyOptions.isStrongerConstraints && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+            }
             simulation.updateGunHUD();
         }
         if (tech.isSecondShot && b.inventory.length > 1) {
@@ -252,12 +258,18 @@ const b = {
                         if (tech.crouchAmmoCount && m.crouch) {
                             if (tech.crouchAmmoCount % 2) {
                                 b.guns[b.activeGun].ammo--;
-                                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) b.guns[b.activeGun].ammo--;
+                                if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) {
+                                    b.guns[b.activeGun].ammo--;
+                                    if (simulation.difficultyOptions.isStrongerConstraints && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+                                }
                             }
                             tech.crouchAmmoCount++ //makes the no ammo toggle off and on
                         } else {
                             b.guns[b.activeGun].ammo--;
-                            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) b.guns[b.activeGun].ammo--;
+                            if (level.is2xAmmo && b.guns[b.activeGun].ammo > 0 && (b.guns[b.activeGun].name !== "harpoon" || tech.isRailGun)) {
+                                b.guns[b.activeGun].ammo--;
+                                if (simulation.difficultyOptions.isStrongerConstraints && b.guns[b.activeGun].ammo > 0) b.guns[b.activeGun].ammo--;
+                            }
                         }
                         if (m.fireCDcycle > CD) CD = m.fireCDcycle
                     }
@@ -463,7 +475,7 @@ const b = {
     fireCDscale: 1,
     setFireCD() {
         b.fireCDscale = tech.fireRate * tech.slowFire * tech.researchHaste * tech.slowFireDamage * tech.fastTimeFire / tech.inverseFireRate
-        if (level.isSlowFireRate) b.fireCDscale *= 2
+        if (level.isSlowFireRate) b.fireCDscale *= (simulation.difficultyOptions.isStrongerConstraints) ? 3 : 2
         if (m.fieldMode === 6) b.fireCDscale *= 0.8
         if (tech.isGrabFireRate && m.ledgeCoyote !== 0) b.fireCDscale *= 0.25
         if (tech.isFireRateForGuns) b.fireCDscale *= 1 / (1 + 0.3 * Math.max(0, b.inventory.length)) //CDscale = 1 / (1 + (0.3 * count)); // Math.pow(0.76923, Math.max(0, b.inventory.length - 1))
@@ -1571,7 +1583,7 @@ const b = {
                 friction: 1,
                 frictionAir: 0.4,
                 thrustMag: 0.17,
-                dmg: 7, //damage done in addition to the damage from momentum
+                dmg: 11.2, //damage done in addition to the damage from momentum
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,

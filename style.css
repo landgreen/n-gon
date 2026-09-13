@@ -642,6 +642,7 @@ summary {
 }
 
 #info {
+    pointer-events: none;
     position: absolute;
     bottom: 3px;
     left: 3px;
@@ -653,6 +654,15 @@ summary {
     /* border: 1.5px #333 solid; */
     /* border-radius: 8px; */
     /* background-color: #fff; */
+}
+
+#info summary {
+    width: fit-content;
+    pointer-events: auto;
+}
+
+#info .details-div {
+    pointer-events: auto;
 }
 
 .details-div {
@@ -1854,28 +1864,148 @@ summary {
     border-radius: 5px;
 }
 
-.far-right-column {
+.difficulty-options-grid {
     display: grid;
-    grid-template-rows: repeat(7, 1fr);
-    font-size: 2rem;
-    font-family: monospace;
-    align-self: center;
-    justify-self: center;
-    width: 22px;
-    /* padding: 0rem; */
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
 }
 
-.far-right-column>div {
-    padding-top: 50px;
+.difficulty-options-heading {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    color: #fff;
+    text-align: center;
+    padding: 4px;
 }
 
-#difficulty-slider {
-    margin-top: 2.3rem;
-    /* height: 26.3rem; */
-    height: 31.4rem;
-    width: 2rem;
-    writing-mode: vertical-lr;
-    direction: ltr;
+.difficulty-option,
+.difficulty-confirm {
+    border: 1px solid #444;
+    border-radius: 0;
+    margin-top: -1px;
+    margin-right: -1px;
+    padding: 12px;
+    color: #222;
+    background-color: #fff;
+    font: inherit;
+    font-size: 0.8em;
+    line-height: 140%;
+    cursor: pointer;
+}
+
+.difficulty-option {
+    display: flex;
+    align-items: center;
+    text-align: left;
+}
+
+.difficulty-option-selected {
+    /* background-color: rgb(201, 227, 240); */
+    background-color: hsl(261, 30%, 88%);
+}
+
+.difficulty-option:hover:not(:disabled),
+.difficulty-confirm:hover:not(:disabled) {
+    background-color: #f3f3f3;
+}
+
+.difficulty-option-selected:hover:not(:disabled) {
+    background-color: hsl(261, 30%, 84%);
+}
+
+.difficulty-option-section {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.difficulty-option-section+.difficulty-option-section {
+    margin-top: 5px;
+}
+
+/*Round the exposed corners of each section, including an incomplete last row.*/
+.difficulty-option:first-child {
+    border-top-left-radius: 10px;
+}
+
+.difficulty-option:nth-child(2) {
+    border-top-right-radius: 10px;
+}
+
+.difficulty-option:nth-child(odd):nth-last-child(-n+2) {
+    border-bottom-left-radius: 10px;
+}
+
+.difficulty-option:last-child,
+.difficulty-option:nth-child(even):nth-last-child(2) {
+    border-bottom-right-radius: 10px;
+}
+
+.difficulty-option:disabled {
+    background-color: #eee;
+    cursor: default;
+}
+
+.difficulty-option:disabled>span {
+    opacity: 0.2;
+}
+
+.difficulty-confirm {
+    grid-column: 1 / -1;
+    position: relative;
+    overflow: visible;
+    /* justify-self: center; */
+    /* width: 450px; */
+    margin-top: 5px;
+    font-size: 1em;
+    border-radius: 10px;
+}
+
+.difficulty-readout {
+    grid-column: 1 / -1;
+    position: relative;
+    height: 18px;
+    margin-bottom: 5px;
+    background-color: #fff;
+    border: 1px solid #444;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.difficulty-readout-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    /* background-color: rgb(236, 230, 234); */
+    background-color: hsl(261, 30%, 88%);
+    /* background-color: rgb(0, 0, 0); */
+    transition: width 200ms ease;
+    pointer-events: none;
+}
+
+.difficulty-readout-record {
+    position: absolute;
+    top: -4px;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.difficulty-readout-record::before {
+    content: "⚆";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translate(-50%, -50%);
+    font-size: 33px;
+    line-height: 1;
+    color: #666;
+}
+
+.difficulty-option:focus-visible,
+.difficulty-confirm:focus-visible {
+    outline: 3px solid #58f;
+    outline-offset: -3px;
 }
 
 .tech-slider {
@@ -1890,111 +2020,12 @@ summary {
     margin-right: auto;
 }
 
-.left-column {
-    grid-row: 1 / span 7
-}
-
-.right-column {
-    display: grid;
-    grid-template-rows: repeat(7, 1fr);
-    /* to adjust the width of this column edit the "gridTemplateColumns" in the difficulty power up js code*/
-}
-
-.row {
-    transition: opacity 0.5s ease-out;
-    /* border: 2px #444 solid; */
-    /* margin-top: -2px; */
-    font-size: 1.2rem;
-    padding: 10px;
-}
-
 .pause-difficulty-row {
     line-height: 130%;
     font-size: 1em;
     padding: 7px 0px 7px 0px;
     /* top | right | bottom | left */
     margin: -5px 0;
-}
-
-#constraint-1 {
-    background-color: hsl(240, 18%, 95%);
-    border-radius: 7px 7px 0 0;
-}
-
-#constraint-2 {
-    background-color: hsl(240, 18%, 93%);
-}
-
-#constraint-3 {
-    background-color: hsl(240, 18%, 89%);
-}
-
-#constraint-4 {
-    background-color: hsl(240, 18%, 85%);
-}
-
-#constraint-5 {
-    background-color: hsl(240, 18%, 81%);
-}
-
-#constraint-6 {
-    background-color: hsl(240, 18%, 77%);
-}
-
-#constraint-7 {
-    background-color: hsl(240, 18%, 73%);
-    border-radius: 0 0 7px 7px;
-}
-
-#constraint-1:hover {
-    background-color: hsl(240, 18%, 93%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-2:hover {
-    background-color: hsl(240, 18%, 91%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-3:hover {
-    background-color: hsl(240, 18%, 87%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-4:hover {
-    background-color: hsl(240, 18%, 83%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-5:hover {
-    background-color: hsl(240, 18%, 79%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-6:hover {
-    background-color: hsl(240, 18%, 75%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#constraint-7:hover {
-    background-color: hsl(240, 18%, 71%);
-    border: 1px #444 solid;
-    padding: 9px;
-}
-
-#choose-difficulty {
-    text-align: center;
-    font-size: 1.1em;
-    padding: 5px;
-    margin-top: 10px;
-    color: #333;
-    border-radius: 5px;
 }
 
 .pause-details {

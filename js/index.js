@@ -261,6 +261,15 @@ window.addEventListener('load', async () => {
     if (Object.keys(set).length !== 0) {
         // build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
         await openExperimentMenu();
+        //Restore custom options before applying the shared build.
+        if (/^(?:v2:[01]{13,14}|[01]{11,13})$/.test(set.difficultyOptions || '')) {
+            simulation.difficultyOptions = powerUps.difficulty.fromSignature(set.difficultyOptions);
+        } else if (set.difficulty !== undefined) {
+            simulation.difficultyOptions = powerUps.difficulty.fromLegacy(set.difficulty);
+        }
+        localSettings.difficultyOptions = { ...simulation.difficultyOptions };
+        powerUps.difficulty.updateScale();
+        powerUps.difficulty.setDamageAndDefense();
         //add experimental selections based on url
         for (const property in set) {
             set[property] = set[property].replace(/%20/g, " ")
@@ -525,16 +534,10 @@ ${fullscreenWarning}
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
 <div class="pause-details">
-        ${simulation.difficultyMode > 0 ? `<div class="pause-difficulty-row">spawn higher <strong class="color-tier">TIER</strong> mobs<br>after every <strong>4</strong> levels</div>` : " "}
-        ${simulation.difficultyMode > 1 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>2x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong></div>` : " "}
-        ${simulation.difficultyMode > 2 ? `<div class="pause-difficulty-row">spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}</div>` : " "}
-        ${simulation.difficultyMode > 3 ? `<div class="pause-difficulty-row">increase mob <strong class="color-tier">TIER</strong><br>after every <strong>3</strong> levels</div>` : " "}
-        ${simulation.difficultyMode > 4 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer initial <strong>power ups</strong></div>` : " "}
-        ${simulation.difficultyMode > 5 ? `<div class="pause-difficulty-row"><strong>0.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>2x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong></div>` : " "}
-        ${simulation.difficultyMode > 6 ? `<div class="pause-difficulty-row"><strong>+1</strong> random <strong class="constraint">constraint</strong><br>fewer ${powerUps.orb.tech()} spawn</div>` : " "}
+        ${powerUps.difficulty.pauseText()}
 </div>
 </details>
-${simulation.difficultyMode > 4 ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraints</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}<br>${level.constraintDescription2}</span></div></details>` : ""}
+${simulation.difficultyOptions.isConstraint ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraint</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}</span></div></details>` : ""}
 </div>`
         text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id = "console-log-details" style="padding: 0 8px;">
@@ -1113,7 +1116,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         // }
 
         url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`
-        url += `&difficulty=${simulation.difficultyMode}`
+        url += `&difficultyOptions=${powerUps.difficulty.signature()}`
         if (isCustom) {
             // url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
             // alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
@@ -1571,7 +1574,7 @@ window.addEventListener("keydown", function (event) {
             break
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
-                if (simulation.difficultyMode > 5) {
+                if (simulation.difficultyMode > 6) {
                     simulation.inGameConsole("<em>testing mode disabled for this difficulty</em>");
                     break
                 }
@@ -2068,8 +2071,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     }
 
     if (localSettings.difficultyMode === undefined) localSettings.difficultyMode = "2"
-    simulation.difficultyMode = localSettings.difficultyMode
-    lore.setTechGoal()
+    //Individual selections are restored below, after default settings are initialized.
 
     if (localSettings.pauseMenuDetailsOpen === undefined) {
         localSettings.pauseMenuDetailsOpen = [true, false, false, true, false]
@@ -2114,6 +2116,10 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
     document.getElementById("banned").value = localSettings.banList
 }
+simulation.difficultyOptions = localSettings.difficultyOptions ? powerUps.difficulty.normalize(localSettings.difficultyOptions) : powerUps.difficulty.fromLegacy(localSettings.difficultyMode);
+localSettings.difficultyOptions = { ...simulation.difficultyOptions };
+powerUps.difficulty.updateScale();
+lore.setTechGoal();
 document.getElementById("control-testing").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 // document.getElementById("experiment-button").style.visibility = (localSettings.loreCount === 0) ? "hidden" : "visible"
 input.controlTextUpdate()

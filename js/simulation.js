@@ -210,7 +210,8 @@ const simulation = {
     buttonCD: 0,
     isHorizontalFlipped: false, //makes some maps flipped horizontally
     levelsCleared: 0,
-    difficultyMode: 2, //normal difficulty is 2
+    difficultyOptions: {}, //individual difficulty effects; initialized from saved settings
+    difficultyMode: 2, //derived numeric scale for legacy enemy tuning and community maps
     difficulty: 0,
     constraint: 0,
     healScale: 1,
@@ -827,6 +828,8 @@ const simulation = {
         } else {
             simulation.isTraining = false
         }
+        simulation.difficultyOptions = powerUps.difficulty.normalize(simulation.isTraining ? {} : localSettings.difficultyOptions)
+        powerUps.difficulty.updateScale()
         simulation.onTitlePage = false;
         // document.getElementById("choose-grid").style.display = "none"
         document.getElementById("choose-grid").style.visibility = "hidden"
@@ -984,7 +987,6 @@ const simulation = {
         }
         simulation.ephemera.push({
             name: "checks", count: 0, do() {
-
                 if (localSettings.showDmgNumbers && !(m.cycle % 30)) {
                     for (let i = 0; i < mob.length; i++) {
                         if (mob[i].dmgLog) {

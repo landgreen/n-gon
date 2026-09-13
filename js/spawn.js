@@ -61,78 +61,23 @@ const spawn = {
         spawn.mobTypeSpawnOrder = []
         spawn.mobTierSpawnOrder = []
         spawn.pickList = ["starter", "starter",]
-        if (simulation.difficultyMode > 3) {
-            let tier = 1
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 3; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 3; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 4; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 4; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-        } else { //easier tier progression
-            spawn.mobTypeSpawnOrder.push("starter")
-            spawn.mobTierSpawnOrder.push(0)
-
-            let tier = 1
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 3; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 4; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            seededShuffle(spawn.bossTier[tier])
-            for (let i = 0; i < 4; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
-
-            tier++
-            seededShuffle(spawn.tier[tier])
-            for (let i = 0; i < 2; i++) {
-                spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i])
-                spawn.mobTierSpawnOrder.push(tier)
-            }
+        const options = simulation.difficultyOptions;
+        const interval = options.isMobTier3 ? 3 : 4;
+        for (let tier = 1; tier <= 4; tier++) {
+            seededShuffle(spawn.tier[tier]);
+            seededShuffle(spawn.bossTier[tier]);
+        }
+        for (let i = 0; i < 14; i++) {
+            const tier = options.isMobTier4 ? Math.min(4, 1 + Math.floor(i / interval)) : 1;
+            const isStarter = options.isMobTier4 && !options.isMobTier3 && i === 0;
+            spawn.mobTypeSpawnOrder.push(isStarter ? "starter" : spawn.tier[tier][i % spawn.tier[tier].length]);
+            spawn.mobTierSpawnOrder.push(isStarter ? 0 : tier);
         }
         spawn.setSpawnList()
     },
     setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
         spawn.pickList.splice(0, 1);
-        if (level.levelsCleared > 13) {
+        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier4) {
             const push = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
             spawn.pickList.push(push);
         } else {
@@ -142,7 +87,7 @@ const spawn = {
     },
     randomizeSpawnList(tier) { //used in subway to get new random mobs at current tier level
         spawn.pickList.splice(0, 1);
-        if (level.levelsCleared > 13) {
+        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier4) {
             const push = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
             spawn.pickList.push(push);
         } else {
@@ -152,11 +97,11 @@ const spawn = {
         }
     },
     randomMobByLevelsCleared(x, y) {
-        if (level.levelsCleared > 13) {
+        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier4) {
             const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
             spawn[pick](x, y);
         } else {
-            const t = spawn.mobTierSpawnOrder[level.levelsCleared]
+            const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
             const pickFrom = spawn.tier[t]
             const pick = pickFrom[Math.floor(Math.random() * pickFrom.length)];
             spawn[pick](x, y);
@@ -235,7 +180,7 @@ const spawn = {
         seededShuffle(spawn.randomMobPositions)
         const maxMobs = (simulation.difficultyMode === 1) ? 2 : Math.ceil(5 * Math.log(level.levelsCleared + 1))
         const mobsInLevel = mob.filter(who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet).length
-        const mobsToSpawn = Math.min(spawn.randomMobPositions.length, Math.max(0, maxMobs - mobsInLevel))
+        const mobsToSpawn = Math.min(spawn.randomMobPositions.length, Math.max(0, maxMobs - mobsInLevel) * (simulation.difficultyOptions.isDoubleMobs ? 2 : 1))
         for (let i = 0; i < mobsToSpawn; i++) {
             const position = spawn.randomMobPositions[i]
             if (position.isSmall) {
@@ -287,7 +232,7 @@ const spawn = {
     ],
     randomGroup(x, y, chance = 1) {
         if ((spawn.spawnChance(chance) && simulation.difficulty > 2) || chance === Infinity) {
-            if (level.levelsCleared > 13) {
+            if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier4) {
                 function pickRandom(arr) {
                     const group = arr[Math.floor(Math.random() * arr.length)];
                     return group[Math.floor(Math.random() * group.length)];
@@ -299,7 +244,7 @@ const spawn = {
                     spawn.lineGroup(x, y, pick);
                 }
             } else {
-                const t = spawn.mobTierSpawnOrder[level.levelsCleared]
+                const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
                 let pick = spawn.allowedGroupList[t][Math.floor(Math.random() * spawn.allowedGroupList[t].length)];
                 if (Math.random() < 0.55) {
                     spawn.nodeGroup(x, y, pick);
@@ -310,13 +255,13 @@ const spawn = {
         }
     },
     randomLevelBoss(x, y, options = []) {
-        if (level.levelsCleared > 13) {
+        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier4) {
             const pick = spawn.randomBossList[Math.floor(Math.random() * spawn.randomBossList.length)]
             spawn[pick](x, y)
         } else {
             if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
                 if (options.length === 0) {
-                    const t = spawn.mobTierSpawnOrder[level.levelsCleared]
+                    const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
                     const name = spawn.bossTier[t][spawn.bossTierIndex[t]]
                     if (!name) { //not sure if this is needed, but I'm trying to fix a rare bug
                         const pick = spawn.randomBossList[Math.floor(Math.random() * spawn.randomBossList.length)]
@@ -335,7 +280,7 @@ const spawn = {
         }
     },
     secondaryBossChance(x, y, options = []) {
-        if (simulation.difficultyMode > 2) {
+        if (simulation.difficultyOptions.isSecondBoss) {
             spawn.randomLevelBoss(x, y, options);
             powerUps.spawn(x - 30, y, "ammo");
             powerUps.spawn(x + 30, y, "ammo");
@@ -344,8 +289,8 @@ const spawn = {
         }
     },
     randomHigherTierMob(x, y) { //not in use currently
-        if (simulation.difficultyMode > 3) {
-            const t = spawn.mobTierSpawnOrder[level.levelsCleared]
+        if (simulation.difficultyOptions.isMobTier3) {
+            const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
             const pickFrom = spawn.tier[t]
             const pick = pickFrom[Math.floor(Math.random() * pickFrom.length)];
             spawn[pick](x, y)
@@ -1310,11 +1255,7 @@ const spawn = {
             }
             if (!this.hasRunDeathScript) {
                 this.hasRunDeathScript = true
-                //record win on this difficulty level to show up in the difficulty settings as a
-                if (!simulation.isCheating) {
-                    localSettings.difficultyCompleted[simulation.difficultyMode] = true
-                    localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-                }
+                powerUps.difficulty.recordWin();
 
                 //make a block body to replace this one
                 //this body is too big to leave behind in the normal way mobs.replace()
@@ -15222,7 +15163,7 @@ const spawn = {
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.stroke = "transparent";
             me.shield = true;
-            me.damageReduction = 0.073
+            me.damageReduction = 0.073 * (simulation.difficultyOptions.isStrongerConstraints ? 0.5 : 1)
             me.torqueMag = (0.00000005 + 0.00000001 * (Math.random() - 0.5)) * me.inertia
             me.isUnblockable = true
             me.collisionFilter.category = cat.mobShield

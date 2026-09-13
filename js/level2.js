@@ -32165,6 +32165,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(125, -9575); //normal spawn
         level.exit.x = -1825;
         level.exit.y = 50;
+        powerUps.spawn(level.exit.x + 50, level.exit.y - 40, "tech", false);
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
         level.defaultZoom = 1800

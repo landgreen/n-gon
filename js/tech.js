@@ -250,7 +250,7 @@ const tech = {
         if (tech.proportionality !== null) dmg *= tech.proportionality
         if (tech.isEigenstate && m.eigen.count > 0) dmg *= 4
         if (tech.isLaserWire && tech.wire && tech.wire.segments.length) dmg *= 1 + 0.01 * tech.wire.segments.length
-        if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= 0.3
+        if (level.isNoDamage && (m.cycle - 180 < level.noDamageCycle)) dmg *= (simulation.difficultyOptions.isStrongerConstraints) ? 0.1 : 0.3
         if (tech.isMaxHealthDamage && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 2
         if (tech.isHealthDamage) dmg *= 1 + 0.5 * Math.max(0, tech.isEnergyHealth ? m.energy : m.health)
         if (tech.isNoDeath && m.health < 0) dmg *= 3
@@ -282,7 +282,6 @@ const tech = {
         if (tech.isAxion && tech.isHarmDarkMatter) dmg *= ((tech.isMoveDarkMatter || tech.isNotDarkMatter) ? 3.2 : 2)
         if (tech.isHarmDamage && m.lastHarmCycle + 240 > m.cycle) dmg *= 4;
         if (tech.lastHitDamage && m.lastHit) dmg *= 1 + tech.lastHitDamage * m.lastHit
-        // if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, 1 - (tech.isEnergyHealth ? m.energy : m.health))
         if (tech.isLowHealthDmg) dmg *= 1 + 0.6 * Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health))
         if (tech.isJunkDNA) dmg *= 1 + 2 * (tech.junkChance + level.junkAdded)
         if (tech.isDemineralize) {
@@ -1316,7 +1315,8 @@ const tech = {
     },
     {
         name: "amalgamation",
-        description: `<span class='color-remove' data-help='remove'>remove</span> your most recent ${powerUps.orb.gun()} and build<br><strong>3</strong> <strong class='color-bot' data-help='bot'>bots</strong> on entering a new <strong>level</strong>`,
+        description: `<span class='color-remove' data-help='remove'>remove</span> your most recent ${powerUps.orb.gun()}<br>and build <strong>3</strong> <strong class='color-bot' data-help='bot'>bots</strong> on entering a new <strong>level</strong>`,
+        // description: `each <strong>level</strong> while you have at least 2 ${powerUps.orb.gun()}<br><span class='color-remove' data-help='remove'>remove</span> your most recent ${powerUps.orb.gun()} and build <strong>3</strong> <strong class='color-bot' data-help='bot'>bots</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4125,7 +4125,7 @@ const tech = {
         descriptionFunction() {
             const value = Math.max(0, tech.isEnergyHealth ? m.energy : m.health)
             const resource = tech.isEnergyHealth ? "<strong class='energy' data-help='energy'>energy</strong>" : "<strong class='color-h' data-help='health'>health</strong>"
-            return `<strong>1.005x</strong> <strong class='color-d' data-help='damage'>damage</strong> for each ${resource}<br><em style ="float: right;">(${(1 + 0.5 * value).toFixed(2)}x)</em>`
+            return `<strong>1.05x</strong> <strong class='color-d' data-help='damage'>damage</strong> for each 10 ${resource}<br><em style ="float: right;">(${(1 + 0.5 * value).toFixed(2)}x)</em>`
         },
         maxCount: 1,
         count: 0,
@@ -4225,7 +4225,7 @@ const tech = {
     {
         name: "negative feedback",
         descriptionFunction() {
-            return `<strong>1.006x</strong> <strong class='color-d' data-help='damage'>damage</strong> for each missing ${tech.isEnergyHealth ? "<strong class='energy' data-help='energy'>energy</strong>" : "<strong class='color-h' data-help='health'>health</strong>"}<br><em style ="float: right;">(${(1 + 0.6 * Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health))).toFixed(2)}x)</em>` //1 + 0.6 * Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health))
+            return `<strong>1.06x</strong> <strong class='color-d' data-help='damage'>damage</strong> for each missing 10 ${tech.isEnergyHealth ? "<strong class='energy' data-help='energy'>energy</strong>" : "<strong class='color-h' data-help='health'>health</strong>"}<br><em style ="float: right;">(${(1 + 0.6 * Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health))).toFixed(2)}x)</em>` //1 + 0.6 * Math.max(0, (tech.isEnergyHealth ? m.maxEnergy - m.energy : m.maxHealth - m.health))
         },
         maxCount: 1,
         count: 0,
@@ -4769,7 +4769,7 @@ const tech = {
     {
         name: "decoherence",
         descriptionFunction() {
-            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${simulation.difficultyMode > 2 ? powerUps.orb.research(2) : powerUps.orb.research(4)}<br>${powerUps.orb.tech()} options you don't <strong class='color-choice' data-help='choice'><span>ch</span><span>oo</span><span>se</span></strong> won't <strong>reoccur</strong>`
+            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${simulation.difficultyOptions.isSecondBoss ? powerUps.orb.research(2) : powerUps.orb.research(4)}<br>${powerUps.orb.tech()} options you don't <strong class='color-choice' data-help='choice'><span>ch</span><span>oo</span><span>se</span></strong> won't <strong>reoccur</strong>`
         },
         // description: `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(2)}<br>${powerUps.orb.tech()} options you don't <strong class='color-choice' data-help='choice'><span>ch</span><span>oo</span><span>se</span></strong> won't <strong>reoccur</strong>`,
         maxCount: 1,
@@ -10926,7 +10926,7 @@ const tech = {
     },
     {
         name: "exchange operator",
-        description: `quickly tap <strong>down</strong> <strong>3</strong> times to <strong>swap</strong> places<br>with the last <strong class='block' data-help='block'>block</strong> you touched`,
+        description: `quickly tap <strong>down</strong> <strong>3</strong> times to <strong>swap</strong> places with the<br>last <strong class='block' data-help='block'>block</strong> you touched and generate <strong>100</strong> <strong class='energy' data-help='energy'>energy</strong>`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -10971,7 +10971,7 @@ const tech = {
                 if (event.repeat) return
 
                 const sub = m.cycle - transposition.keyLogCycle[transposition.keyLogCycle.length - 1]
-                if (sub < 35 || transposition.keyLogCycle[transposition.keyLogCycle.length - 1] === 0) {
+                if (sub < 60 || transposition.keyLogCycle[transposition.keyLogCycle.length - 1] === 0) {
                     transposition.keyLogCycle.shift()
                     transposition.keyLogCycle.push(m.cycle)
                     transposition.keyLog.shift()
@@ -12239,6 +12239,24 @@ const tech = {
         requires: "",
         effect() {
             level.levels.splice(level.onLevel + 1, 0, "stereoMadness")
+            level.nextLevel()
+        },
+        remove() { }
+    },
+    {
+        name: "diamagnetism",
+        description: "play diamagnetism",
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isInstant: true,
+        isJunk: true,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            level.levels.splice(level.onLevel + 1, 0, "diamagnetism")
             level.nextLevel()
         },
         remove() { }

@@ -295,6 +295,7 @@ function collisionChecks(event) {
                         if (tech.isStimulatedEmission) powerUps.ejectTech()
                         if (who.onHit) who.onHit();
                         if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
+                        if (tech.isExplodeContact) b.explosion(player.position, 300);
                         //extra kick between player and mob              //this section would be better with forces but they don't work...
                         let angle = Math.atan2(player.position.y - who.position.y, player.position.x - who.position.x);
                         Matter.Body.setVelocity(player, { x: player.velocity.x + 8 * Math.cos(angle), y: player.velocity.y + 8 * Math.sin(angle) });

@@ -26,6 +26,8 @@ wormhole: +3 energy after eating a block<br>
 grappling hook: ammo power ups give 5% more ammo
 <br><br>// <em>in physics, coupled systems interact so a change in one can influence the other</em>`
     const definitions = {
+        tier: `// higher <strong class="color-tier">TIER</strong> mobs and bosses are tougher enemies with stronger abilities<br><br>// there are a total of 4 tiers that are introduced as you clear levels`,
+        constraint: `// <strong class="constraint">constraints</strong> randomly add a unique challenge per level`,//<br><br>// the <strong class="constraint">constraint</strong> changes each level
         "orb-coupling": couplingDefinition,
         // coupling: couplingDefinition,
         "orb-field": `// gives you a choice between 2 <strong class="energy">fields</strong>`,
@@ -35,7 +37,7 @@ grappling hook: ammo power ups give 5% more ammo
         "orb-gun-tech": `// <strong class="color-g">gun tech</strong><br>upgrade your guns`,
         "orb-skin": `// a <strong>skin</strong> changes the player appearance and gives an extra strong upgrade<br><br>// you can only have one`,
         "orb-skin-upgrade": `// <strong>skin tech</strong><br>upgrades your skin`,
-        "orb-ammo": `// adds ammunition<br>to all you guns`,
+        "orb-ammo": `// adds ammunition<br>to all your guns`,
         "orb-research": `// used to <strong class="color-r">research</strong> (reroll) gun, field, and tech choices
         <br><br>// also expended<br>for certain tech`,
         "orb-heal": `// <strong class="color-h">heal</strong> power ups<br>restore health`,
