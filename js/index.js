@@ -262,7 +262,7 @@ window.addEventListener('load', async () => {
         // build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
         await openExperimentMenu();
         //Restore custom options before applying the shared build.
-        if (/^(?:v2:[01]{13,14}|[01]{11,13})$/.test(set.difficultyOptions || '')) {
+        if (/^(?:v2:[01]{13,15}|[01]{11,13})$/.test(set.difficultyOptions || '')) {
             simulation.difficultyOptions = powerUps.difficulty.fromSignature(set.difficultyOptions);
         } else if (set.difficulty !== undefined) {
             simulation.difficultyOptions = powerUps.difficulty.fromLegacy(set.difficulty);
@@ -310,10 +310,9 @@ window.addEventListener('load', async () => {
             if (property === "molMode") {
                 simulation.molecularMode = Number(set[property])
                 const i = 4 //update experiment text
-                m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
                 <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
-                ${m.fieldUpgrades[i].description}</div>`
+                ${m.fieldUpgrades[i].descriptionFunction()}</div>`
             }
             requestAnimationFrame(() => { build.sortTech('have', true) });
 
@@ -551,7 +550,7 @@ ${simulation.difficultyOptions.isConstraint ? `<details id="constraints-details"
         text += `<div class="pause-grid-module card-background" id="pause-field" ${style}>
 <div class="card-text">
 <div class="grid-title"><div class="circle-grid-title field" onclick="speechHandler.speech('${m.fieldUpgrades[m.fieldMode].name}')"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[m.fieldMode].name)}</div>
-${m.fieldUpgrades[m.fieldMode].description}</div> </div>`
+${m.fieldUpgrades[m.fieldMode].descriptionFunction()}</div> </div>`
         // }
         for (let i = 0, len = b.inventory.length; i < len; i++) {
             const style = `style="height:auto;"`
@@ -881,10 +880,9 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                 const i = 4 //update experiment text
                 simulation.molecularMode++
                 if (simulation.molecularMode > i - 1) simulation.molecularMode = 0
-                m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
                                 <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
-                                ${m.fieldUpgrades[i].description}</div>`
+                                ${m.fieldUpgrades[i].descriptionFunction()}</div>`
             }
         } else if (type === "tech") {
             if (tech.tech[index].count < tech.tech[index].maxCount) {
@@ -1009,7 +1007,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             text += `<div id="field-${i}" class="experiment-grid-module card-background ${m.fieldMode === i ? " build-field-selected" : ""}" onclick="build.choosePowerUp(${i},'field');" ${hideStyle} >
                             <div class="card-text">
                                 <div class="grid-title"><div class="circle-grid-title field" onclick="speechHandler.speech('${m.fieldUpgrades[i].name}')"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
-                                ${m.fieldUpgrades[i].description}</div> </div>`
+                                ${m.fieldUpgrades[i].descriptionFunction()}</div> </div>`
         }
         for (let i = 0, len = b.guns.length; i < len; i++) {
             text += `<div id="gun-${i}" class="experiment-grid-module card-background ${b.guns[i].have ? " build-gun-selected" : ""}" onclick="build.choosePowerUp(${i},'gun')" ${hideStyle} >
@@ -1111,8 +1109,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         url += `&molMode=${encodeURIComponent(simulation.molecularMode)}`
         // if (property === "molMode") {
         //     simulation.molecularMode = Number(set[property])
-        //     m.fieldUpgrades[i].description = m.fieldUpgrades[i].setDescription()
-        //     document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].description}`
+        //     document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].descriptionFunction()}`
         // }
 
         url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`
@@ -2015,6 +2012,7 @@ if (localStorageCheck()) {
     }
 }
 
+const hadSavedFpsPreference = localSettings.fpsCapDefault !== undefined
 if (localSettings.isAllowed && !localSettings.isEmpty) {
     console.log('restoring previous settings')
 
@@ -2096,6 +2094,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         difficultyMode: '2',
         difficultyCompleted: [null, false, false, false, false, false, false, false],
         fpsCapDefault: 'max',
+        estimatedDisplayFps: null,
         runCount: 0,
         isTrainingNotAttempted: true,
         levelsClearedLastGame: 0,
@@ -2133,7 +2132,54 @@ if (simulation.isCommunityMaps) {
 // settings
 //**********************************************************************
 
+let hasExplicitFpsPreference = hadSavedFpsPreference
+function detectDisplayFps() {
+    if (Number.isFinite(localSettings.estimatedDisplayFps) && localSettings.estimatedDisplayFps > 0) return
+    localSettings.estimatedDisplayFps = null
+    let previous
+    let warmup = 5
+    const intervals = []
+    function sample(timestamp) {
+        if (!simulation.onTitlePage) return
+        if (document.hidden) {
+            previous = undefined
+            warmup = 5
+            intervals.length = 0
+        } else {
+            if (previous !== undefined) {
+                const interval = timestamp - previous
+                if (warmup > 0) {
+                    warmup--
+                } else if (interval > 0) {
+                    intervals.push(interval)
+                }
+            }
+            previous = timestamp
+            if (intervals.length === 30) {
+                intervals.sort((a, b) => a - b)
+                const median = (intervals[14] + intervals[15]) / 2
+                localSettings.estimatedDisplayFps = Math.round(1000 / median)
+                if (!hasExplicitFpsPreference) {
+                    localSettings.fpsCapDefault = median < 15 ? '60' : 'max'
+                    simulation.fpsCapDefault = median < 15 ? 60 : 999999999
+                    document.getElementById("fps-select").value = localSettings.fpsCapDefault
+                }
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings))
+                return
+            }
+        }
+        requestAnimationFrame(sample)
+    }
+    requestAnimationFrame(sample)
+}
+if (document.readyState === 'complete') {
+    detectDisplayFps()
+} else {
+    window.addEventListener('load', detectDisplayFps, { once: true })
+}
+
 document.getElementById("fps-select").addEventListener("input", () => {
+    hasExplicitFpsPreference = true
     let value = document.getElementById("fps-select").value
     if (value === 'max') {
         simulation.fpsCapDefault = 999999999;

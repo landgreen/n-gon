@@ -355,7 +355,7 @@ function collisionChecks(event) {
                                 }
                                 who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
 
-                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp && Math.random() < 0.5) {
+                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp && Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 2 : 1)) {
                                     options = ["coupling", "boost", "heal", "research", "ammo"]
                                     powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
                                 }

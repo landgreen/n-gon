@@ -1,29 +1,35 @@
 
-difficulty options after the first 4 is now a la carte
-  pick any combination you want
+tech: crystallography - if there are no power ups on the level
+  mobs have a 2x chance to drop small power ups
+tech: regular tiling - mobs are invulnerable to initial damage,  1.8x damage
+tech: aperiodic tiling - mobs are invulnerable until 2 s after initial damage,  1.8x damage
+  requires regular tiling
+unified mob invulnerable system as a mob status effect
+  but kept the legacy invincibility system for some bosses
 
-exit mirror holds you in place as you enter unless you jump
-extended reactor mirrors on doors to match wall mirrors
-grappling hook weapon does 1.4x more dmg
+for new players the game will run a short test for fps to decided what the best FPS setting is based on their monitor's fps
+  this only happens once and after that you can adjust the setting manually.
+  note: I can't test this feature
 
 bug fixes
-  contact explosive somehow got erased
-  wording on time dilation move speed
-  exchange operator word on energy regen added and longer CD
-  wormhole was picking up ammo with non-renewables
-  the details menus at the start were blocking clicking on the background to start
-  removing negative mass while flying left a lasting reduced ability to move in the air
+  training pop up option was clipping the text
 
 *********************************************************** TODO *****************************************************
 
-  add more stronger constraints
-    slow bots
-    is2xAmmo
-      3x ammo?
-    isNoDuplicate
-      maybe the duplication chance becomes chance to spawn nothing?
-      maybe it's the chance to spawn the wrong thing?
+laser tech: A pause tech to let you switch between infrared diode, free electron laser, and dye laser in a drop down menu
+    maybe 2 research cost
+    and requires not having infrared diode, free electron laser, and dye laser
 
+foam tech: adhesive - foam makes mob stick together
+  maybe foam damage increases and foam lasts 3x longer for each mob stuck together.
+
+add more stronger constraints
+  slow bots
+  is2xAmmo
+    3x ammo?
+  isNoDuplicate
+    maybe the duplication chance becomes chance to spawn nothing?
+    maybe it's the chance to spawn the wrong thing?
 
 new difficulty ideas
   much fewer tech spawn
@@ -34,10 +40,34 @@ new difficulty ideas
     make a few mobs at T5
   randomly disable 10% of your tech each level
     better as a constraint?
-  mobs and bosses take no damage from your first attack
-    better as a constraint?
-  fewer choices
+  1 fewer choice
     if chosen, remove it's constraint
+  2x boss health
+  2x mob health
+  convert all constraints into coupling?
+    pros
+      extreme customization
+        gain ~10 new difficulty options
+      some constraints are annoying to people and can be skipped
+      other constraints don't have space to really develop
+    cons
+      loss of current constraint and stronger constraint difficulty options
+      too many options overwhelming complexity watered down difficulty
+      lack of clear "hardest" difficulty
+      UI changes
+        rework rainbow color
+      many constraints are incompatible for a full game
+        could use the incompatible constraints for JUNK or normal tech 
+        slow bots
+        hallucinations
+        no health bar? maybe
+      maybe adapt these
+        power ups in stasis
+          only push power ups the moment they spawn, but not when added to new level
+        no duplication (0.5x dup?)
+        field drains energy (just reduce effect)
+        
+
 
 new level element - color keys and keyButtons    
 !new map vault - 
@@ -46,6 +76,18 @@ new level element - color keys and keyButtons
   motion lasers
   keep floor flat or mostly flat so keys can be pushed
 
+
+
+stats -
+  record
+    dmg done from each source
+    dmg taken from each source
+    healing from source
+    energy from source
+  show to player in pause menu
+    or in settings in between runs
+  will this effect performance?
+  have to rework to add source in function calls
 
 
 

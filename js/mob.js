@@ -30,6 +30,52 @@ const mobs = {
             }
         }
     },
+    statusInvincible(who, cycles = 30) {
+        if (!who.alive || cycles <= 0) return;
+        mobs.initializeInvulnerability(who);
+        const endCycle = simulation.cycle + cycles;
+        for (const status of who.status) {
+            if (status.type === "immune") {
+                status.endCycle = Math.max(status.endCycle, endCycle);
+                who.statusImmuneUntilCycle = status.endCycle;
+                return;
+            }
+        }
+        who.statusImmuneUntilCycle = endCycle;
+        who.status.push({
+            type: "immune",
+            endCycle,
+            effect() {
+                if (!who.alive || who.isPhaseInvulnerable || simulation.cycle >= this.endCycle) return;
+                // Scripted boss phases retain their own outline until migrated.
+                ctx.beginPath();
+                const vertices = who.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let i = 1; i < vertices.length; i++) ctx.lineTo(vertices[i].x, vertices[i].y);
+                ctx.closePath();
+                ctx.lineWidth = 13 + 5 * Math.random();
+                ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.2 * Math.random()})`;
+                ctx.stroke();
+            },
+            endEffect() {
+                if (who.statusImmuneUntilCycle === this.endCycle) who.statusImmuneUntilCycle = 0;
+            },
+        });
+    },
+    // Keep scripted boss phases independent of temporary status immunity.
+    // Leave damageReduction writable: regression and other effects multiply it during immunity.
+    initializeInvulnerability(who) {
+        if (Object.hasOwn(who, "isPhaseInvulnerable")) return;
+        who.isPhaseInvulnerable = !!who.isInvulnerable;
+        Object.defineProperties(who, {
+            isInvulnerable: {
+                configurable: true,
+                enumerable: true,
+                get() { return this.isPhaseInvulnerable || simulation.cycle < this.statusImmuneUntilCycle; },
+                set(value) { this.isPhaseInvulnerable = value; },
+            },
+        });
+    },
     statusSlow(who, cycles = 60) {
         applySlow(who)
         //look for mobs near the target
@@ -48,7 +94,7 @@ const mobs = {
         }
 
         function applySlow(whom) {
-            if (!whom.shield && !whom.isShielded && whom.alive) {
+            if (!whom.shield && !whom.isShielded && !whom.isInvulnerable && whom.alive) {
                 if (tech.isIceMaxHealthLoss && whom.health > 0.66 && whom.damageReduction > 0) whom.health = 0.66
                 if (tech.isIceKill && whom.health < 0.34 && whom.damageReduction > 0 && whom.alive) {
                     whom.damage(Infinity)
@@ -113,7 +159,7 @@ const mobs = {
         }
     },
     statusStun(who, cycles = 180) {
-        if (!who.shield && !who.isShielded) {
+        if (!who.shield && !who.isShielded && !who.isInvulnerable) {
             if (who.speed > 3) {
                 Matter.Body.setVelocity(who, {
                     x: who.velocity.x * 0.8,
@@ -173,7 +219,7 @@ const mobs = {
         }
     },
     statusDoT(who, tickDamage, cycles = 180) {
-        if (!who.isShielded && who.alive && who.damageReduction > 0) {
+        if (!who.isShielded && !who.isInvulnerable && who.alive && who.damageReduction > 0) {
             if (who.status.length >= 20) {
                 let dotCount = 0;
                 let lastDot = null;
@@ -228,7 +274,7 @@ const mobs = {
                             }
                             dmg *= 1 + 0.07 * stackCount;
                         }
-                        if (who.damageReduction === 0) {
+                        if (who.isInvulnerable || who.damageReduction === 0) {
                             this.endCycle = 0 //invulnerability clears radiation
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
@@ -1053,7 +1099,18 @@ const mobs = {
             dmgLog: 0, //used to record damage done to mob for producing damage numbers
             damage(dmg, isBypassShield = false, where = this.position, isDmgText = false) { //damage taken by this mob 
                 if ((!this.isShielded || isBypassShield) && this.alive) {
+                    //Temporary immunity also blocks damage callbacks and first-hit side effects.
+                    if (dmg !== Infinity && simulation.cycle < this.statusImmuneUntilCycle) return;
                     if (dmg !== Infinity) {
+                        if (
+                            tech.aperiodicTiling > 0 && !this.hasBlockedFirstHit &&
+                            (this.isDropPowerUp || this.isBoss) && !this.shield && !this.isMobBullet &&
+                            !this.isInvulnerable && this.damageReduction > 0 && dmg > 0 && Number.isFinite(dmg)
+                        ) {
+                            this.hasBlockedFirstHit = true;
+                            mobs.statusInvincible(this, tech.aperiodicTiling);
+                            return;
+                        }
                         dmg *= tech.damageAdjustments()
                         if (this.isDropPowerUp) {
                             if (this.health === 1) {
@@ -1372,7 +1429,7 @@ const mobs = {
                             spawn.randomMobByLevelsCleared(this.position.x, this.position.y);
                         }, 1000);
                     }
-                    if (tech.healSpawn && Math.random() < tech.healSpawn) {
+                    if (tech.healSpawn && Math.random() < tech.healSpawn * (tech.isCrystallography && powerUp.length === 0 ? 2 : 1)) {
                         powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
                         simulation.drawList.push({
                             x: this.position.x,
@@ -1492,7 +1549,7 @@ const mobs = {
                     }
                     if (tech.isAddRemoveMaxHealth) {
                         if (!this.isBoss) {
-                            const amount = 0.005
+                            const amount = 0.01
                             if (tech.isEnergyHealth) {
                                 if (m.maxEnergy > amount) {
                                     tech.healMaxEnergyBonus -= amount
@@ -1670,6 +1727,7 @@ const mobs = {
             }
         });
         mob[i].alertRange2 = Math.pow(mob[i].radius * 3 + 550, 2);
+        mobs.initializeInvulnerability(mob[i]);
         Composite.add(engine.world, mob[i]); //add to world
     }
 };

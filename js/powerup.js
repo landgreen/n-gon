@@ -633,15 +633,16 @@ const powerUps = {
         options: [
             { key: "isHalfDamage", required: true, text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
             { key: "isDoubleDamageTaken", required: true, text: '<strong>2x</strong> <strong class="color-defense" data-help="defense">damage taken</strong>' },
-            { key: "isMobTier4", required: true, text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong><br>after every <strong>4</strong> levels' },
-            { key: "isSecondBoss", required: true, get text() { return `spawn a <strong>2nd boss</strong><br>bosses spawn <strong>fewer</strong> ${powerUps.orb.tech()}`; } },
-            { key: "isMobTier3", text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong> faster' },
+            // { key: "isMobTier23", required: true, text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong><br>after every <strong>4</strong> levels' },
+            { key: "isMobTier23", required: true, text: '<strong class="color-tier" data-help="tier">TIER</strong> <strong>2</strong> and <strong class="color-tier" data-help="tier">TIER</strong> <strong>3</strong> mobs' },
+            { key: "isSecondBoss", required: true, get text() { return `<strong>2 bosses</strong> per level`; } },
+            { key: "isMobTier4", text: '<strong class="color-tier" data-help="tier">TIER</strong> <strong>4</strong> mobs' },
             { key: "isDoubleMobs", text: '<strong>2x</strong> mobs' },
-            { key: "isNoInitialPowerUps", get text() { return `no initial ${powerUps.orb.research()} ${powerUps.orb.heal()} ${powerUps.orb.ammo()}`; } },
-            { key: "isLateEquipment", get text() { return `${powerUps.orb.gun()} and ${powerUps.orb.field()} spawn later`; } },
-            { key: "isFewerResearch", get text() { return `1 fewer ${powerUps.orb.research()} per level`; } },
+            { key: "isFewerAmmoHeal", get text() { return `2 fewer ${powerUps.orb.heal()} ${powerUps.orb.ammo()} each level`; } },
+            { key: "isLateEquipment", get text() { return `${powerUps.orb.gun()} ${powerUps.orb.field()} spawn later`; } },
+            { key: "isFewerResearch", get text() { return `1 fewer ${powerUps.orb.research()} each level`; } },
             { key: "isFewerTech", get text() { return `4 fewer ${powerUps.orb.tech()} spawn`; } },
-            { key: "isConstraint", text: 'random <strong class="constraint" data-help="constraint">constraint</strong> each level' },
+            { key: "isConstraint", text: 'random <strong class="constraint" data-help="constraint">constraints</strong>' },
             { key: "isStrongerConstraints", requires: "isConstraint", text: 'stronger <strong class="constraint" data-help="constraint">constraints</strong>' },
             { key: "isExtraHalfDamage", text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
             { key: "isExtraDoubleDamageTaken", text: '<strong>2x</strong> <strong class="color-defense" data-help="defense">damage taken</strong>' },
@@ -661,12 +662,12 @@ const powerUps = {
         fromLegacy(mode = 2) {
             const n = Number(mode);
             return this.normalize({
-                isMobTier4: true,
+                isMobTier23: true,
                 isHalfDamage: n > 1,
                 isDoubleDamageTaken: n > 1,
                 isSecondBoss: n > 2,
-                isMobTier3: n > 3,
-                isNoInitialPowerUps: n > 5,
+                isMobTier4: n > 3,
+                isFewerAmmoHeal: n > 5,
                 isLateEquipment: n > 4,
                 isFewerTech: n > 5,
                 isConstraint: n > 4,
@@ -677,8 +678,8 @@ const powerUps = {
             //Retain a separate scale for legacy continuous enemy/healing formulas.
             //The named gameplay effects below always use the individual flags.
             const o = simulation.difficultyOptions;
-            simulation.difficultyMode = 1 + 0.5 * (Number(o.isHalfDamage) + Number(o.isDoubleDamageTaken)) + Number(o.isSecondBoss) + Number(o.isMobTier3)
-                + 0.5 * (Number(o.isNoInitialPowerUps) + Number(o.isLateEquipment) + Number(o.isConstraint))
+            simulation.difficultyMode = 1 + 0.5 * (Number(o.isHalfDamage) + Number(o.isDoubleDamageTaken)) + Number(o.isSecondBoss) + Number(o.isMobTier4)
+                + 0.5 * (Number(o.isFewerAmmoHeal) + Number(o.isLateEquipment) + Number(o.isConstraint))
                 + 0.5 * (Number(o.isFewerTech) + Number(o.isStrongerConstraints));
         },
         signature(options = simulation.difficultyOptions) {
@@ -711,7 +712,7 @@ const powerUps = {
             //Discard the removed two-level delay from older shared builds.
             if (!isCurrent && signature.length === 13) signature = signature.slice(0, 7) + signature.slice(8);
             const keys = !isCurrent && signature.length === 11
-                ? ["isMobTier4", "isHalfDamage", "isDoubleDamageTaken", "isSecondBoss", "isMobTier3", "isNoInitialPowerUps", "isLateEquipment", null, "isFewerTech", "isConstraint", "isStrongerConstraints"]
+                ? ["isMobTier23", "isHalfDamage", "isDoubleDamageTaken", "isSecondBoss", "isMobTier4", "isFewerAmmoHeal", "isLateEquipment", null, "isFewerTech", "isConstraint", "isStrongerConstraints"]
                 : this.options.map(option => option.key);
             keys.forEach((key, i) => { if (key) options[key] = signature[i] === "1"; });
             return this.normalize(options);
@@ -761,8 +762,11 @@ const powerUps = {
                 ${[difficulty.options.filter(option => option.required), optionalOptions].map(options => `<div class="difficulty-option-section">${options.map(option => `<button type="button" id="difficulty-${option.key}" class="difficulty-option" role="checkbox" aria-checked="false"><span>${option.text}</span></button>`).join('')}</div>`).join('')}
                 <button type="button" class="difficulty-confirm" id="choose-difficulty">confirm difficulty parameters</button>
             </div>`;
+            const difficultyGrid = grid.querySelector('.difficulty-options-grid');
             const render = () => {
                 const selectedCount = difficulty.options.filter(option => selected[option.key]).length;
+                const hue = 150 + 165 * Math.max(0, selectedCount - 1) / Math.max(1, difficulty.options.length - 1);
+                difficultyGrid.style.setProperty('--difficulty-hue', hue);
                 document.getElementById('difficulty-readout-fill').style.width = `${100 * selectedCount / difficulty.options.length}%`;
                 document.getElementById('difficulty-readout').setAttribute('aria-valuenow', selectedCount);
                 for (const option of difficulty.options) {
@@ -789,7 +793,7 @@ const powerUps = {
                 if (difficulty.signature(initial) !== difficulty.signature(selected)) {
                     simulation.difficultyOptions = difficulty.normalize(selected);
                     difficulty.updateScale();
-                    const tierChanged = initial.isMobTier4 !== selected.isMobTier4 || initial.isMobTier3 !== selected.isMobTier3;
+                    const tierChanged = initial.isMobTier23 !== selected.isMobTier23 || initial.isMobTier4 !== selected.isMobTier4;
                     difficulty.setDamageAndDefense(tierChanged);
                     if (tierChanged && level.levelsCleared > 0) {
                         spawn.mobTypeSpawnIndex = level.levelsCleared + 1;
@@ -1293,7 +1297,7 @@ const powerUps = {
         return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
-        ${m.fieldUpgrades[choose].description}</div></div>`
+        ${m.fieldUpgrades[choose].descriptionFunction()}</div></div>`
     },
     gunText(choose, click) {
         return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}" ${powerUps.hideStyle}>
@@ -1305,7 +1309,7 @@ const powerUps = {
         return `<div class="choose-grid-module card-background ${level.blurryChoices && Math.random() < (simulation.difficultyOptions.isStrongerConstraints ? 1 : 0.55) ? "blurry-text" : ""}" onclick="${click}" onauxclick="${click}"${powerUps.hideStyle}>
         <div class="card-text">
         <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div>
-        ${m.fieldUpgrades[choose].description}</div></div>`
+        ${m.fieldUpgrades[choose].descriptionFunction()}</div></div>`
     },
     techText(choose, click) {
         const techCountText = tech.tech[choose].count > 0 ? `(${tech.tech[choose].count + 1}x)` : "";
@@ -1495,7 +1499,7 @@ const powerUps = {
                     let text = powerUps.buildColumns(totalChoices, "field")
                     for (let i = 0; i < totalChoices; i++) {
                         const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
-                        //text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choose})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div> ${m.fieldUpgrades[choose].description}</div>`                         //default
+                        //text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${choose})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[choose].name}</div> ${m.fieldUpgrades[choose].descriptionFunction()}</div>`                         //default
                         text += powerUps.fieldText(choose, `powerUps.choose('field',${choose})`)
                         m.fieldUpgrades[choose].isRecentlyShown = true
                         removeOption(choose)
@@ -1676,7 +1680,7 @@ const powerUps = {
                                 if (i !== m.fieldMode) fieldOptions.push(i);
                             }
                             const pick = fieldOptions[Math.floor(Math.seededRandom(0, fieldOptions.length))] //pick an element from the array of options
-                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${pick})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[pick].name}</div> ${m.fieldUpgrades[pick].description}</div>`
+                            // text += `<div class="choose-grid-module" onclick="powerUps.choose('field',${pick})"><div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${m.fieldUpgrades[pick].name}</div> ${m.fieldUpgrades[pick].descriptionFunction()}</div>`
                             text += powerUps.fieldText(pick, `powerUps.choose('field',${pick})`)
                         }
                     }
@@ -1853,17 +1857,18 @@ const powerUps = {
         if (level.isNoDamage) level.noDamageCycle = m.cycle
     },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
-        if (tech.coupling && Math.random() < tech.coupling) {
+        const dropScale = tech.isCrystallography && powerUp.length === 0 ? 2 : 1;
+        if (tech.coupling && Math.random() < tech.coupling * dropScale) {
             powerUps.spawn(x + 10, y - 1, "coupling");
         }
-        if (tech.Casimir && Math.random() < tech.Casimir) {
+        if (tech.Casimir && Math.random() < tech.Casimir * dropScale) {
             powerUps.spawn(x - 10, y + 1, "Casimir");
         }
         if (tech.isCrystalLattice && powerUps.boost.endCycle > simulation.cycle) {
             const options = ["boost", "coupling", "Casimir"]
             powerUps.spawn(x, y, options[Math.floor(Math.random() * options.length)]);
         }
-        if (!tech.isEnergyHealth && (Math.random() * Math.random() - 0.3 > Math.sqrt(m.health)) || Math.random() < 0.04) { //spawn heal chance is higher at low health
+        if (!tech.isEnergyHealth && (Math.random() * Math.random() - 0.3 > Math.sqrt(m.health)) || Math.random() < 0.04 * dropScale) { //spawn heal chance is higher at low health
             powerUps.spawn(x, y, "heal");
             return;
         }
@@ -1876,12 +1881,12 @@ const powerUps = {
             return;
         }
         // 0.03 * (level.levelsCleared > 7) + 0.05 * (level.levelsCleared > 10)
-        if ((Math.random() < 0.15 + 0.002 * level.levelsCleared) && b.inventory.length > 0) {
+        if ((Math.random() < (0.15 + 0.002 * level.levelsCleared) * dropScale) && b.inventory.length > 0) {
             powerUps.spawn(x, y, "ammo");
             if (Math.random() < 0.2 * (simulation.difficultyMode - 4)) powerUps.spawn(x + 20, y, "ammo");
             return;
         }
-        if (tech.isBoostPowerUps && Math.random() < 0.14) {
+        if (tech.isBoostPowerUps && Math.random() < 0.14 * dropScale) {
             powerUps.spawn(x, y, "boost");
             return;
         }
@@ -1955,7 +1960,7 @@ const powerUps = {
             } else {
                 for (let i = 0; i < 4; i++) powerUps.spawnRandomPowerUp(x, y);
             }
-        } else { //after the first 4 levels just spawn a random power up
+        } else if (!simulation.difficultyOptions.isFewerAmmoHeal) { //after the first 4 levels just spawn random power ups
             for (let i = 0; i < 3; i++) powerUps.spawnRandomPowerUp(x, y);
         }
     },

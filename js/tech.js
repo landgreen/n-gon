@@ -1,6 +1,7 @@
 const tech = {
     totalCount: null,
     removeCount: 0,
+    aperiodicTiling: 0,
     resetAllTech() {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].isLost = false
@@ -1904,6 +1905,59 @@ const tech = {
         }
     },
     {
+        name: "regular tiling",
+        descriptionFunction() {
+            return `<strong>${this.damage}x</strong> <strong class='color-d' data-help='damage'>damage</strong><br>mobs are <strong class="color-invulnerable" data-help="invulnerability">invulnerable</strong> to your initial attack`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed: () => true,
+        requires: "",
+        damage: 1.8,
+        trackCycles: 0,
+        effect() {
+            m.damageDone *= this.damage
+            tech.aperiodicTiling += 10
+            this.trackCycles += 10
+        },
+        remove() {
+            this.trackCycles = 0
+            if (this.count && m.alive) {
+                tech.aperiodicTiling -= this.trackCycles
+                m.damageDone /= this.damage ** this.count
+            }
+        }
+    },
+    {
+        name: "aperiodic tiling",
+        descriptionFunction() {
+            return `<strong>${this.damage}x</strong> <strong class='color-d' data-help='damage'>damage</strong>, but mobs are <strong class="color-invulnerable" data-help="invulnerability">invulnerable</strong><br>until <strong>${(this.cycles / 60).toFixed(1)}</strong> seconds after your initial attack `
+        },
+        maxCount: 9,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed: () => tech.aperiodicTiling, //tech.tech.some(t => t.name === "aperiodic tiling" && t.count > 0)
+        requires: "regular tiling",
+        damage: 1.8,
+        trackCycles: 0,
+        cycles: 120,
+        effect() {
+            m.damageDone *= this.damage
+            tech.aperiodicTiling += this.cycles
+            this.trackCycles += this.cycles
+        },
+        remove() {
+            tech.aperiodicTiling -= this.trackCycles
+            this.trackCycles = 0
+            if (this.count && m.alive) {
+                m.damageDone /= this.damage ** this.count
+            }
+        }
+    },
+    {
         name: "simulated annealing",
         description: "<strong>1.3x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>0.8x</strong> <span class='color-fire-rate' data-help='fire-rate'>fire rate</span>",
         maxCount: 1,
@@ -2358,7 +2412,7 @@ const tech = {
     {
         name: "exciton",
         descriptionFunction() {
-            return `<span style = 'font-size:94%;'><strong>+14%</strong> chance to spawn ${powerUps.orb.boost(1)} after mobs <strong>die</strong><br>${powerUps.orb.boost(1)} give <strong>${(1 + powerUps.boost.damage).toFixed(2)}x</strong> <strong class='color-d' data-help='damage'>damage</strong> for <strong>${(powerUps.boost.duration / 60).toFixed(0)}</strong> seconds</span>`
+            return `<span style = 'font-size:94%;'><strong>+${tech.isCrystallography && powerUp.length === 0 ? 28 : 14}%</strong> chance to spawn ${powerUps.orb.boost(1)} after mobs <strong>die</strong><br>${powerUps.orb.boost(1)} give <strong>${(1 + powerUps.boost.damage).toFixed(2)}x</strong> <strong class='color-d' data-help='damage'>damage</strong> for <strong>${(powerUps.boost.duration / 60).toFixed(0)}</strong> seconds</span>`
         },
         maxCount: 1,
         count: 0,
@@ -2478,7 +2532,7 @@ const tech = {
     {
         name: "enthalpy",
         descriptionFunction() {
-            return `<strong>8%</strong> chance to spawn ${powerUps.orb.heal(1)} after mobs <strong>die</strong>`
+            return `<strong>${tech.isCrystallography && powerUp.length === 0 ? 16 : 8}%</strong> chance to spawn ${powerUps.orb.heal(1)} after mobs <strong>die</strong>`
         },
         maxCount: 9,
         count: 0,
@@ -3486,7 +3540,7 @@ const tech = {
     {
         name: "buckling",
         descriptionFunction() {
-            return `if a <strong class='block' data-help='block'>block</strong> kills a mob there's a <strong>50%</strong> chance to<br>randomly spawn one of [${powerUps.orb.coupling(1)} ${powerUps.orb.boost(1)} ${powerUps.orb.heal()} ${powerUps.orb.research(1)} ${powerUps.orb.ammo()}]`
+            return `if a <strong class='block' data-help='block'>block</strong> kills a mob there's a <strong>${tech.isCrystallography && powerUp.length === 0 ? 100 : 50}%</strong> chance to<br>randomly spawn one of [${powerUps.orb.coupling(1)} ${powerUps.orb.boost(1)} ${powerUps.orb.heal()} ${powerUps.orb.research(1)} ${powerUps.orb.ammo()}]`
         },
         maxCount: 1,
         count: 0,
@@ -5608,7 +5662,7 @@ const tech = {
     {
         name: "virtual particles",
         descriptionFunction() {
-            return `<strong>15%</strong> chance after mobs <strong>die</strong> to spawn ${powerUps.orb.coupling(1)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
+            return `<strong>${tech.isCrystallography && powerUp.length === 0 ? 30 : 15}%</strong> chance after mobs <strong>die</strong> to spawn ${powerUps.orb.coupling(1)}<br><em>${m.couplingDescription(1)} per ${powerUps.orb.coupling(1)}</em>`
 
         },
         maxCount: 6,
@@ -5627,7 +5681,7 @@ const tech = {
     {
         name: "Casimir effect",
         descriptionFunction() {
-            return `<strong>10%</strong> chance after mobs <strong>die</strong> to spawn ${powerUps.orb.Casimir(1)}<br><em>${powerUps.Casimir.descriptionFunction()}</em>`
+            return `<strong>${tech.isCrystallography && powerUp.length === 0 ? 20 : 10}%</strong> chance after mobs <strong>die</strong> to spawn ${powerUps.orb.Casimir(1)}<br><em>${powerUps.Casimir.descriptionFunction()}</em>`
         },
         maxCount: 9,
         count: 0,
@@ -5707,6 +5761,24 @@ const tech = {
         remove() {
             tech.mergedList = []
             this.list = ["coupling", "boost", "research", "ammo"]
+        }
+    },
+    {
+        name: "crystallography",
+        descriptionFunction() {
+            return `if there are no <strong>power ups</strong> on the level<br>mobs have a <strong>2x</strong> chance to spawn [${powerUps.orb.coupling(1)} ${powerUps.orb.ammo(1)} ${powerUps.orb.boost(1)} ${powerUps.orb.heal(1)} ${powerUps.orb.Casimir(1)}]`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed: () => tech.Casimir > 0 || tech.coupling > 0 || tech.isBoostPowerUps || tech.healSpawn > 0 || tech.isBlockPowerUps,
+        requires: "Casimir effect, virtual particles, exciton, enthalpy, or buckling",
+        effect() {
+            tech.isCrystallography = true
+        },
+        remove() {
+            tech.isCrystallography = false
         }
     },
     {
@@ -9907,7 +9979,7 @@ const tech = {
         allowed() {
             return (tech.haveGunCheck("wave") || tech.haveGunCheck("laser") || (tech.haveGunCheck("harpoon") && !tech.isRailGun)) && powerUps.research.count > 1
         },
-        requires: "harpoon, laser, wave, frequency, not railgun, non-renewables",
+        requires: "harpoon, laser, wave, not railgun, non-renewables",
         effect() {
             powerUps.research.expend(this.cost)
             tech.isBoostReplaceAmmo = true
@@ -11678,7 +11750,7 @@ const tech = {
     {
         name: "symbiosis",
         descriptionFunction() {
-            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(2)}${powerUps.orb.heal(3)}${powerUps.orb.tech()}<br>after a mob <strong>dies</strong> <strong>–0.5</strong> max ${tech.isEnergyHealth ? "<strong class='energy' data-help='energy'>energy</strong>" : "<strong class='color-h' data-help='health'>health</strong>"}`
+            return `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(2)}${powerUps.orb.heal(3)}${powerUps.orb.tech()}<br>after a mob <strong>dies</strong> <strong>–1</strong> max ${tech.isEnergyHealth ? "<strong class='energy' data-help='energy'>energy</strong>" : "<strong class='color-h' data-help='health'>health</strong>"}`
         },
         isFieldTech: true,
         maxCount: 1,

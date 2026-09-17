@@ -25,29 +25,32 @@ pilot wave: 1.05x block collision damage<br>
 wormhole: +3 energy after eating a block<br>
 grappling hook: ammo power ups give 5% more ammo
 <br><br>// <em>in physics, coupled systems interact so a change in one can influence the other</em>`
+    const dropScale = () => tech.isCrystallography && powerUp.length === 0 ? 2 : 1
+    const dropPercent = chance => `${Number((100 * Math.min(1, Math.max(0, chance || 0))).toFixed(2))}%`
+    const spawnLine = (chance, qualifier = "") => `<br><br>// ${dropPercent(chance)} chance per mob to spawn${qualifier}`
     const definitions = {
         tier: `// higher <strong class="color-tier">TIER</strong> mobs and bosses are tougher enemies with stronger abilities<br><br>// there are a total of 4 tiers that are introduced as you clear levels`,
         constraint: `// <strong class="constraint">constraints</strong> randomly add a unique challenge per level`,//<br><br>// the <strong class="constraint">constraint</strong> changes each level
-        "orb-coupling": couplingDefinition,
+        "orb-coupling": () => couplingDefinition + spawnLine(tech.coupling * dropScale()),
         // coupling: couplingDefinition,
-        "orb-field": `// gives you a choice between 2 <strong class="energy">fields</strong>`,
-        "orb-gun": `// gives you a choice between 2 <strong class="color-g">guns</strong>`,
-        "orb-tech": `// gives you a choice between 3 <strong class="color-var">tech</strong>`,
+        "orb-field": () => `// gives you a choice between 2 <strong class="energy">fields</strong>` + spawnLine(0.0016, " if the heal and gun rolls did not spawn a drop"),
+        "orb-gun": () => `// gives you a choice between 2 <strong class="color-g">guns</strong>` + spawnLine(0.0007 * (3 - b.inventory.length), " if the heal roll did not spawn a drop") + `<br><br>// 3% chance per boss tech/gun reward roll`,
+        "orb-tech": `// gives you a choice between 3 <strong class="color-var">tech</strong><br><br>// 97% chance per boss tech/gun reward roll`,
         "orb-field-tech": `// <strong class="energy">field tech</strong><br>upgrade your field`,
         "orb-gun-tech": `// <strong class="color-g">gun tech</strong><br>upgrade your guns`,
         "orb-skin": `// a <strong>skin</strong> changes the player appearance and gives an extra strong upgrade<br><br>// you can only have one`,
         "orb-skin-upgrade": `// <strong>skin tech</strong><br>upgrades your skin`,
-        "orb-ammo": `// adds ammunition<br>to all your guns`,
+        "orb-ammo": () => `// adds ammunition<br>to all your guns` + spawnLine(b.inventory.length ? (0.15 + 0.002 * level.levelsCleared) * dropScale() : 0),
         "orb-research": `// used to <strong class="color-r">research</strong> (reroll) gun, field, and tech choices
         <br><br>// also expended<br>for certain tech`,
-        "orb-heal": `// <strong class="color-h">heal</strong> power ups<br>restore health`,
-        "orb-energy": `// increases max energy`,
-        "orb-boost": `// temporarily increases damage`,
+        "orb-heal": () => `// <strong class="color-h">heal</strong> power ups<br>restore health` + spawnLine(0.04 * dropScale(), " from the base roll; but higher at low health") + (tech.healSpawn > 0 ? spawnLine(tech.healSpawn * dropScale(), " an additional heal from enthalpy") : ""),
+        "orb-energy": () => `// increases max energy` + spawnLine(tech.Casimir * dropScale()),
+        "orb-boost": () => `// temporarily increases damage` + spawnLine(tech.isBoostPowerUps ? 0.14 * dropScale() : 0, " if the heal, gun, field, and ammo rolls did not spawn a drop"),
         "dark-matter": `// <strong class="color-dark-matter">dark matter</strong> follows you and reduces damage taken when you are inside it
         <br><br>// <em>dark matter is hypothetical invisible matter inferred from unexplained gravity</em>`,
         "alternate-reality": `// entering an <strong class="alt">alternate reality</strong> randomizes guns, ammo, field, tech, health, research, and coupling
         <br><br>// <em>in the many-worlds interpretation, quantum events form non-interacting branches with internally consistent histories</em>`,
-        "fire-rate": `// <span class="color-fire-rate">fire rate</span> controls how often a weapon fires<br><br>// higher <span class="color-fire-rate">fire rate</span> means less delay between shots`,
+        "fire-rate": `// <span class="color-fire-rate">fire rate</span> controls how often a weapon fires (doesn't affect bots)<br><br>// higher <span class="color-fire-rate">fire rate</span> means less delay between shots`,
         block: `// <strong class="block">blocks</strong> are grey polygons
         <br><br>// throw <strong class="block">blocks</strong> to do high collision damage to mobs
         <strong class="block" style="display: inline-block; width: 30px; height: 60px;margin-right:10px;"></strong><strong class="block" style="display: inline-block; width: 50px; height: 30px;margin-right:3px;"> </strong><strong class="block" style="display: inline-block; width: 10px; height: 10px;"> </strong>`,

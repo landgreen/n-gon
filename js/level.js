@@ -71,10 +71,10 @@ const level = {
                 // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
                 // tech.giveTech("transverse")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
-                for (let i = 0; i < 1; ++i) tech.giveTech("additive manufacturing")
-                for (let i = 0; i < 100; ++i) tech.giveTech("anti-shear topology")
-                for (let i = 0; i < 1; i++) tech.giveTech("contact explosive")
-                // for (let i = 0; i < 1; i++) tech.giveTech("scale invariance")
+                for (let i = 0; i < 1; ++i) tech.giveTech("crystallography")
+                // for (let i = 0; i < 100; ++i) tech.giveTech("anti-shear topology")
+                for (let i = 0; i < 1; i++) tech.giveTech("aperiodic tiling")
+                for (let i = 0; i < 1; i++) tech.giveTech("regular tiling")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 2
@@ -84,7 +84,7 @@ const level = {
                 // level.load("vault")
                 level.maps.testing()
 
-                // powerUps.spawn(m.pos.x, m.pos.y, "heal", false);
+                powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
@@ -1925,11 +1925,14 @@ const level = {
             grid.innerHTML = `
                             <div class="choose-grid-module" id = "choose-training" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center;letter-spacing: 5px;">training</h2>
-                                Begin the <strong>guided tutorial</strong> that shows how to use ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
+                                Begin the <strong>tutorial</strong> where you learn
+                                <br>how to use ${powerUps.orb.field()} and ${powerUps.orb.gun()}.
                             </div>
                             <div class="choose-grid-module" id = "choose-unPause" style = "font-size: 1em; padding:10px;color:#333;">
                                 <h2 style="text-align: center; letter-spacing: 7px;">play</h2>
-                                Begin the <strong>standard game</strong> where you progress through <strong>13</strong> random levels and beat the final boss.
+                                Begin the <strong>standard game</strong> where
+                                <br>you progress through <strong>13</strong> random 
+                                <br>levels and beat the final boss.
                             </div>`
             //show level info
             grid.style.opacity = "1"
@@ -4036,25 +4039,26 @@ const level = {
         const goal = simulation.cycle + 10
         function cycle() {
             if (simulation.cycle > goal) {
-                if (!simulation.difficultyOptions.isNoInitialPowerUps) {
-                    if (localSettings.loreCount === 6 && !powerUps.difficulty.equipmentDelay()) {
-                        powerUps.spawn(2095 + 20 * (Math.random() - 0.5), -2170, "field", false);
-                    } else {
-                        powerUps.spawnStartingPowerUps(2095 + 20 * (Math.random() - 0.5), -2200);
-                    }
+                if (localSettings.loreCount === 6 && !powerUps.difficulty.equipmentDelay()) {
+                    powerUps.spawn(2095 + 20 * (Math.random() - 0.5), -2170, "field", false);
+                } else {
+                    powerUps.spawnStartingPowerUps(2095 + 20 * (Math.random() - 0.5), -2200);
+                }
+                if (!simulation.difficultyOptions.isFewerAmmoHeal) {
                     powerUps.spawn(2095, -2300, "heal", false);
                     powerUps.spawn(2095, -2100, "heal", false);
-                    powerUps.spawn(2095, -2060, "research", false);
                     if (simulation.difficultyMode <= 2) {
                         powerUps.spawn(2095, -2400, "heal", false);
                         powerUps.spawn(2095, -2550, "ammo", false);
-                        powerUps.spawn(2095, -2075, "research", false);
+                        powerUps.spawn(2095, -2120, "research", false);
                     }
                     if (simulation.difficultyMode === 1) {
                         powerUps.spawn(2095, -2600, "ammo", false);
                         powerUps.spawn(2095, -2120, "research", false);
-                        powerUps.spawn(2095, -2070, "research", false);
                     }
+                }
+                if (!simulation.difficultyOptions.isFewerResearch) {
+                    powerUps.spawn(2095, -2060, "research", false);
                 }
                 //spin the power ups to prevent them from stacking awkwardly
                 for (let i = 0; i < powerUp.length; i++) {
