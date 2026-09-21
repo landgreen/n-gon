@@ -345,7 +345,7 @@ const spawn = {
                         ctx.lineWidth = 10;
                         ctx.stroke();
                         if (tech.isDarkEnergy) {
-                            m.energy += 0.00255 * scale
+                            m.addEnergy(0.00255 * scale)
                             if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
                         }
                     }
@@ -359,7 +359,7 @@ const spawn = {
                         ctx.lineWidth = 10;
                         ctx.stroke();
                         if (tech.isDarkEnergy) {
-                            m.energy += 0.00255 * scale
+                            m.addEnergy(0.00255 * scale)
                             if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
                         }
                     } else {
@@ -1866,7 +1866,7 @@ const spawn = {
                                 ctx.strokeStyle = `rgba(0,0,255,0.2)`;
                                 ctx.lineWidth = 8
                                 ctx.stroke();
-                                if (m.immuneCycle < m.cycle) m.takeDamage(0.00023 * spawn.dmgToPlayerByLevelsCleared());
+                                if (!(m.cycle % 10) && m.immuneCycle < m.cycle) m.takeDamage(0.0023 * spawn.dmgToPlayerByLevelsCleared());
                             }
                             for (let i = 0; i < bullet.length; i++) {
                                 if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) < this.radius + 40) {
@@ -2001,7 +2001,7 @@ const spawn = {
                             ctx.strokeStyle = `rgba(0,0,255,0.2)`;
                             ctx.lineWidth = 8
                             ctx.stroke();
-                            if (m.immuneCycle < m.cycle) m.takeDamage(0.00023 * spawn.dmgToPlayerByLevelsCleared());
+                            if (!(m.cycle % 10) && m.immuneCycle < m.cycle) m.takeDamage(0.0023 * spawn.dmgToPlayerByLevelsCleared());
                         }
                         for (let i = 0; i < bullet.length; i++) {
                             if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) < this.radius + 40) {
@@ -13687,7 +13687,7 @@ const spawn = {
                         ctx.strokeStyle = `rgba(0,0,255,0.2)`;
                         ctx.lineWidth = 8
                         ctx.stroke();
-                        if (m.immuneCycle < m.cycle) m.takeDamage(0.00023 * spawn.dmgToPlayerByLevelsCleared());
+                        if (!(m.cycle % 10) && m.immuneCycle < m.cycle) m.takeDamage(0.0023 * spawn.dmgToPlayerByLevelsCleared());
                     }
                     for (let i = 0; i < bullet.length; i++) {
                         if (Vector.magnitude(Vector.sub(bullet[i].position, this.position)) < this.radius + 40) {

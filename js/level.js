@@ -25,13 +25,13 @@ const level = {
             if (true) {
                 level.load(simulation.isTraining ? "walk" : "initial") //normal starting level **************************************************
             } else {
-                simulation.enableConstructMode()  //used to build maps in testing mode
+                // simulation.enableConstructMode()  //used to build maps in testing mode
                 // simulation.difficultyMode = 1
                 // build.isExperimentRun = true
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = false
-                // level.levelsCleared = 10
+                // level.levelsCleared = 7
                 // level.updateDifficulty()
                 // simulation.isCheating = true
                 // tech.giveTech("performance")
@@ -41,8 +41,8 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                m.setField(3) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
-
+                m.setField(9) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook
+                simulation.molecularMode = 4;
                 // m.energy = m.maxEnergy = 12.2
                 // m.energy += 1
                 // m.couplingChange(1000)
@@ -52,7 +52,7 @@ const level = {
                 // m.wakeCheck();
                 // m.damageDone *= 10
 
-                m.maxHealth = m.health = 10
+                m.maxHealth = m.health = 100
                 // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
@@ -63,25 +63,25 @@ const level = {
                 // simulation.molecularMode = 2
                 // m.takeDamage(0.01);
 
-                b.giveGuns(0) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
+                b.giveGuns(1) //0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores  7 drones  8 foam  9 harpoon  10 mine  11 laser
                 // b.giveGuns(11)
                 b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("Higgs mechanism")
-                // tech.giveTech("transverse")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("plasma ball")
-                for (let i = 0; i < 1; ++i) tech.giveTech("crystallography")
-                // for (let i = 0; i < 100; ++i) tech.giveTech("anti-shear topology")
-                for (let i = 0; i < 1; i++) tech.giveTech("aperiodic tiling")
-                for (let i = 0; i < 1; i++) tech.giveTech("regular tiling")
+                for (let i = 0; i < 1; ++i) tech.giveTech("spaghettification")
+                // tech.giveTech("8-bit")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("semi-automatic")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("pulse")
+                // for (let i = 0; i < 1; i++) tech.giveTech("Brownian ratchet")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("tunable laser")
+                // for (let i = 0; i < 1; i++) tech.giveTech("iridescence")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 2
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
-                // level.load("vault")
+                // level.load("HVAC")
                 level.maps.testing()
 
                 powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
@@ -89,7 +89,7 @@ const level = {
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
                 // for (let i = 0; i < 4; i++) spawn.mantisBoss(1300 + 10 * i, -400)
-                // for (let i = 0; i < 1; i++) spawn.starter(1300 + 10 * i, -200, 100)
+                for (let i = 0; i < 10; i++) spawn.starter(1300 + 200 * i, -200)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
@@ -641,6 +641,42 @@ const level = {
     },
     constraintDescription1: "", //used in pause menu and console
     constraint: [ //harder when (simulation.difficultyOptions.isStrongerConstraints)
+        {
+            description: "blocks attack",
+            effect() {
+                this.remove();
+                this.blockAttackEffect = {
+                    name: "blocks attack",
+                    nextCycle: 0,
+                    do() {
+                        if (!m.alive || m.isTimeDilated || simulation.cycle < this.nextCycle) return;
+                        this.nextCycle = simulation.cycle + 30;
+                        if (!body.length) return;
+                        const attached = new Set();
+                        for (const constraint of Matter.Composite.allConstraints(engine.world)) {
+                            if (constraint.bodyA) attached.add(constraint.bodyA);
+                            if (constraint.bodyB) attached.add(constraint.bodyB);
+                        }
+                        for (let i = body.length - 1; i >= 0; i--) {
+                            const block = body[i];
+                            if (block.isNotHoldable || block.isInvulnerable || block.isImmutable || block.isStatic || attached.has(block)) continue;
+                            if (block === m.holdingTarget) m.drop();
+                            Matter.Composite.remove(engine.world, block);
+                            spawn.blockMob(block.position.x, block.position.y, block, 0, simulation.difficultyOptions.isStrongerConstraints);
+                            body.splice(i, 1);
+                        }
+                    }
+                };
+                // First runs after the map is built, then checks new blocks twice a second.
+                simulation.ephemera.push(this.blockAttackEffect);
+            },
+            remove() {
+                if (this.blockAttackEffect) {
+                    simulation.removeEphemera(this.blockAttackEffect);
+                    this.blockAttackEffect = null;
+                }
+            }
+        },
         {
             description: `field drains energy`,
             effect() {
@@ -4104,16 +4140,16 @@ const level = {
         },
         testing() {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
-            level.setPosToSpawn(6172, -12); //original spawn
-            // level.setPosToSpawn(150, -450); //original spawn
+            // level.setPosToSpawn(6172, -12); //near exit spawn
+            level.setPosToSpawn(150, -450); //original spawn
             level.exit.x = 6507
             level.exit.y = -220
 
-            level.mirrorExperimental(-352, -650, 200, 250, "right", 1, 0.1, "#026", 0.5, 60);
-            // level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#632", 8, 0.02);
-            level.mirrorExperimental(-150, -400, 1300, 550, "above", 0.3, 0, "#040", 0.6, 0);
-            // level.mirror(-150, -900, 900, 250, "below", 1, 0.1, "#040");
-            // level.mirror(750, 0, 3750, 800, "above", 1, 0.1, "#040");
+            // level.mirrorExperimental(-352, -650, 200, 250, "right", 1, 0.1, "#026", 0.5, 60);
+            // level.mirrorExperimental(-150, -400, 1300, 550, "above", 0.3, 0, "#040", 0.6, 0);
+            level.mirrorPixel(-352, -650, 200, 250, "right", 1, 0.1, "#632", 8, 0.02);
+            level.mirror(-150, -900, 900, 250, "below", 1, 0.1, "#040");
+            level.mirror(750, 0, 3750, 800, "above", 1, 0.1, "#040");
 
             // spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
             // level.mirrorDoors.exit.set(6700, -375);
@@ -7138,17 +7174,13 @@ const level = {
                     ctx.restore()
                 }
             }
-            let pushBlocksAway = function (button) {
-                //push away blocks near button
-                for (let i = body.length - 1; i > -1; i--) {
-                    if (!body[i].isNotHoldable) {
-                        sub = Vector.sub({ x: button.min.x + button.width / 2, y: button.min.y }, body[i].position);
-                        dist = Vector.magnitude(sub);
-                        if (dist < 300) {
-                            knock = Vector.mult(Vector.normalise(sub), -0.1 * body[i].mass);
-                            body[i].force.x += knock.x + 0.1 * (Math.random() - 0.5);
-                            body[i].force.y += knock.y;
-                        }
+            const clearButtonBlocks = function (button) {
+                for (const block of Matter.Query.region(body, button)) {
+                    if (!block.isImmutable) {
+                        if (m.holdingTarget === block) m.drop()
+                        Matter.Composite.remove(engine.world, block);
+                        const index = body.indexOf(block)
+                        if (index !== -1) body.splice(index, 1);
                     }
                 }
             }
@@ -7204,10 +7236,16 @@ const level = {
             level.custom = () => {
                 //one button going up makes the other go down, and flips wind directions
                 if (buttons[0].isUp || buttons[1].isUp) {
-                    buttons[0].query()
-                    buttons[1].query()
+                    for (let i = 0; i < 2; i++) {
+                        buttons[i].query()
+                        if (buttons[i].waitForRelease) {
+                            if (buttons[i].isUp) buttons[i].waitForRelease = false
+                            //Keep intake active until this button clears and is pressed again.
+                            buttons[i].isUp = true
+                        }
+                    }
                     if (!buttons[0].isUp || !buttons[1].isUp) {
-                        pushBlocksAway(buttons[2])
+                        clearButtonBlocks(buttons[2])
                         buttons[0].isUp = false
                         buttons[1].isUp = false
                         buttons[2].isUp = true //flip the other button up
@@ -7223,7 +7261,10 @@ const level = {
                 } else if (buttons[2].isUp) {
                     buttons[2].query()
                     if (!buttons[2].isUp) {
-                        pushBlocksAway(buttons[0])
+                        clearButtonBlocks(buttons[0])
+                        clearButtonBlocks(buttons[1])
+                        buttons[0].waitForRelease = true
+                        buttons[1].waitForRelease = true
                         buttons[0].isUp = true //flip the other buttons up
                         buttons[1].isUp = true //flip the other buttons up
                         level.inGameText(4390, -1880, 'intake', 180)
@@ -9239,7 +9280,7 @@ const level = {
             spawn.mapRect(2475, -1800, 250, 2300);
             spawn.mapRect(1200, -750, 100, 450);
             spawn.mapRect(1200, -375, 250, 75);
-            powerUps.spawnStartingPowerUps(550, -100);
+            powerUps.spawnStartingPowerUps(768, -1850);
             spawn.mapRect(125, -10, 850, 50);
             spawn.mapRect(175, -20, 750, 50);
             spawn.bodyRect(1350, -175, 150, 175, 0.5);
@@ -9460,7 +9501,7 @@ const level = {
                 portal3[2].draw();
                 portal3[3].draw();
             };
-            powerUps.spawnStartingPowerUps(1875, -3075);
+            powerUps.spawnStartingPowerUps(-130, -1766);
 
             const powerUpPos = [{ //no debris on this level but 2 random spawn instead
                 x: -150,
@@ -10542,7 +10583,7 @@ const level = {
             ].map(([x, y, isSmall = false]) => ({ x, y, isSmall }));
             spawn.randomMobFromArray()
             //spawn.randomHigherTierMob(-1296, 407)
-            powerUps.spawnStartingPowerUps(-825, -600);
+            powerUps.spawnStartingPowerUps(1906, 526);
             spawn.randomLevelBoss(1550, 200);
             spawn.secondaryBossChance(2675, -125)
             powerUps.addResearchToLevel() //needs to run after mobs are spawned
@@ -11347,8 +11388,8 @@ const level = {
             //entrance
             spawn.mapRect(-4550, -1050, 950, 925);
             spawn.mapRect(-4550, 140, 950, 900);
-            spawn.mapRect(-4550, 130, 175, 25);
-            spawn.mapRect(-4275, 130, 525, 100);
+            // spawn.mapRect(-4550, 130, 175, 25);
+            spawn.mapRect(-4200, 130, 525, 100);
             spawn.mapRect(-3825, 120, 225, 100);
 
             //exit
@@ -11864,8 +11905,8 @@ const level = {
             //entrance
             spawn.mapRect(-4550, -1050, 950, 925);
             spawn.mapRect(-4550, 140, 950, 900);
-            spawn.mapRect(-4550, 130, 175, 25);
-            spawn.mapRect(-4275, 130, 225, 100);
+            // spawn.mapRect(-4550, 130, 175, 25);
+            spawn.mapRect(-4200, 130, 225, 100);
             spawn.mapRect(-4050, 120, 225, 100);
             spawn.mapRect(-3825, 110, 225, 100);
             spawn.bodyRect(-3780, -125, 50, 235);
@@ -12285,7 +12326,7 @@ const level = {
             simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "hsl(138, 3%, 74%)";
             color.map = "#3d4240"
-            powerUps.spawnStartingPowerUps(3475, 1775);
+            powerUps.spawnStartingPowerUps(6350, 2600);
             spawn.debris(4575, 2550, 1600, 9); //16 debris per level
             spawn.debris(7000, 2550, 2000, 7); //16 debris per level
 
@@ -12739,7 +12780,7 @@ const level = {
             level.defaultZoom = 1700 // 4500 // 1400
             simulation.zoomTransition(level.defaultZoom)
 
-            powerUps.spawnStartingPowerUps(4900, -500); //1 per level
+            powerUps.spawnStartingPowerUps(4756, -1381); //1 per level
             spawn.debris(1000, 20, 1800, 6); //16 debris per level
             // spawn.debris(4830, -1330, 850, 3); //16 debris per level
             // spawn.debris(3035, -3900, 1500, 3); //16 debris per level
@@ -12965,7 +13006,7 @@ const level = {
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
             spawn.debris(1650, -1800, 3800, 16); //16 debris per level
-            powerUps.spawnStartingPowerUps(2450, -1675);
+            powerUps.spawnStartingPowerUps(3700, -1675);
 
             //spawn.mapRect(-700, 0, 6250, 100); //ground
             spawn.mapRect(3400, 0, 2150, 100); //ground
@@ -13178,7 +13219,7 @@ const level = {
 
             spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
 
-            powerUps.spawnStartingPowerUps(1075, -550);
+            powerUps.spawnStartingPowerUps(5723, 239);
             document.body.style.backgroundColor = "#dcdcde";
 
             // starting room
@@ -13394,7 +13435,7 @@ const level = {
             level.exit.y = -1865;
             level.defaultZoom = 2000
             simulation.zoomTransition(level.defaultZoom)
-            powerUps.spawnStartingPowerUps(1475, -1175);
+            powerUps.spawnStartingPowerUps(2625, -1525);
             spawn.debris(750, -2200, 3700, 16); //16 debris per level
             document.body.style.backgroundColor = "#dcdcde";
 
@@ -13869,7 +13910,7 @@ const level = {
             level.defaultZoom = 1500
             simulation.zoomTransition(level.defaultZoom)
 
-            powerUps.spawnStartingPowerUps(-2550, -700);
+            powerUps.spawnStartingPowerUps(-3906, -2467);
             document.body.style.backgroundColor = "#dcdcde" //"#fafcff";
 
             spawn.debris(-2325, -1825, 2400); //16 debris per level
@@ -14141,7 +14182,8 @@ const level = {
             spawn.debris(-2250, 1330, 3000, 6); //16 debris per level
             spawn.debris(-3000, -800, 3280, 6); //16 debris per level
             spawn.debris(-1400, 410, 2300, 5); //16 debris per level
-            powerUps.spawnStartingPowerUps(25, 500);
+            // powerUps.spawnStartingPowerUps(25, 500);
+            powerUps.spawnStartingPowerUps(-2000, 350);
             document.body.style.backgroundColor = "#dcdcde" //"#f2f5f3";
 
             spawn.mapRect(-1500, 0, 2750, 100);

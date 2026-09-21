@@ -879,7 +879,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             } else if (m.fieldMode === 4) {
                 const i = 4 //update experiment text
                 simulation.molecularMode++
-                if (simulation.molecularMode > i - 1) simulation.molecularMode = 0
+                if (simulation.molecularMode > 4) simulation.molecularMode = 0
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
                                 <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                                 ${m.fieldUpgrades[i].descriptionFunction()}</div>`
@@ -1448,7 +1448,11 @@ window.addEventListener("keydown", function (event) {
                 input.isPauseKeyReady = false
                 setTimeout(function () { input.isPauseKeyReady = true }, 300);
                 if (simulation.isChoosing) {
-                    build.pauseGrid()
+                    if (document.getElementById("pause-grid-left").style.display === "none") {
+                        build.pauseGrid()
+                    } else {
+                        build.unPauseGrid()
+                    }
                 } else if (simulation.paused) {
                     if (document.activeElement !== document.getElementById('sort-input')) {
                         build.unPauseGrid()
@@ -1760,6 +1764,12 @@ window.addEventListener("keydown", function (event) {
                 m.energy = m.maxEnergy
                 break
             case "y":
+                if (simulation.testing) {
+                    simulation.testing = false;
+                    simulation.loop = simulation.normalLoop
+                    if (simulation.isConstructionMode) document.getElementById("construct").style.display = 'none'
+                    simulation.inGameConsole("", 0);
+                }
                 simulation.paused = true;
                 build.isExperimentSelection = true;
                 build.populateGrid();

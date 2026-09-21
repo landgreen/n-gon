@@ -44,6 +44,7 @@ grappling hook: ammo power ups give 5% more ammo
         "orb-research": `// used to <strong class="color-r">research</strong> (reroll) gun, field, and tech choices
         <br><br>// also expended<br>for certain tech`,
         "orb-heal": () => `// <strong class="color-h">heal</strong> power ups<br>restore health` + spawnLine(0.04 * dropScale(), " from the base roll; but higher at low health") + (tech.healSpawn > 0 ? spawnLine(tech.healSpawn * dropScale(), " an additional heal from enthalpy") : ""),
+        "orb-qubit": () => `// permanently multiplies damage taken by 0.97 for this run${tech.isQubitDamage ? " and damage by 1.03" : ""}` + spawnLine(tech.qubit * dropScale()),
         "orb-energy": () => `// increases max energy` + spawnLine(tech.Casimir * dropScale()),
         "orb-boost": () => `// temporarily increases damage` + spawnLine(tech.isBoostPowerUps ? 0.14 * dropScale() : 0, " if the heal, gun, field, and ammo rolls did not spawn a drop"),
         "dark-matter": `// <strong class="color-dark-matter">dark matter</strong> follows you and reduces damage taken when you are inside it

@@ -1,27 +1,44 @@
 
-tech: crystallography - if there are no power ups on the level
-  mobs have a 2x chance to drop small power ups
-tech: regular tiling - mobs are invulnerable to initial damage,  1.8x damage
-tech: aperiodic tiling - mobs are invulnerable until 2 s after initial damage,  1.8x damage
-  requires regular tiling
-unified mob invulnerable system as a mob status effect
-  but kept the legacy invincibility system for some bosses
+molecular assembler option: needles - float above your head and fire at nearby mobs
+new constraint - "blocks attack"
+moved a few starting power ups to a bit later in each level
+missiles don't explode at their end of life if they never found a target
 
-for new players the game will run a short test for fps to decided what the best FPS setting is based on their monitor's fps
-  this only happens once and after that you can adjust the setting manually.
-  note: I can't test this feature
+tech: qubit - 10% chance to spawn a power up that gives 0.97x dmg taken
+tech: interference - qubit also gives 1.03x dmg
+tech: spaghettification - tunneling through mobs with a wormhole deals instant damage proportional to its length
+tech: tunable laser - when paused pick a laser type
+pulse has compatibility with more laser tech
+  reflection,  iridescence, diffuse, relativistic momentum grants 0.1x explosion damage
+tech: Brownian ratchet - heals trigger a zone that will heal anything inside to full health after 4s
+  and 6% JUNK
+tech: adhesive - foam makes mobs stick together and foam lasts 2x longer
+tech: semi-automatic - 2x shotgun dmg if you fire just after cooldown
 
 bug fixes
+  entering experiment mode from testing mode exits testing to prevent stray key presses
   training pop up option was clipping the text
+  new m.addEnergy checks properly for player immunity before allowing energy regen
+  mutualism only takes player health if above 50,
+    also fixed issue with not returning health on new level
+  pressing P now toggles the pause menus in choosing menu
+
 
 *********************************************************** TODO *****************************************************
 
-laser tech: A pause tech to let you switch between infrared diode, free electron laser, and dye laser in a drop down menu
-    maybe 2 research cost
-    and requires not having infrared diode, free electron laser, and dye laser
 
-foam tech: adhesive - foam makes mob stick together
-  maybe foam damage increases and foam lasts 3x longer for each mob stuck together.
+another tech that makes followNeedles?
+
+
+gun tech upgrade that rewards pressing fire with a precise rhythm
+  press fire every 2-3 seconds and each time you get a "perfect" rhythm
+    gain 1.5x damage for that gun, but lose the bonus if you miss the timing
+    refund ammo cost for each perfect
+  gun:
+    shotgun: time it so you press fire right after CD ends
+  need to draw an on screen animation to help with timing
+
+
 
 add more stronger constraints
   slow bots
@@ -29,10 +46,11 @@ add more stronger constraints
     3x ammo?
   isNoDuplicate
     maybe the duplication chance becomes chance to spawn nothing?
-    maybe it's the chance to spawn the wrong thing?
+    maybe it's a chance to spawn the wrong thing?
 
 new difficulty ideas
   much fewer tech spawn
+    how?
   field never spawns
     wording to mean that they can still spawn from tech
       (field) don't normally spawn
@@ -91,10 +109,12 @@ stats -
 
 
 
-tech: second derivative - 0.85x damage taken after switching fields, and fields get switched randomly at the start of a level and converts fieldtech. your field and fieldtech are not randomised when going into an alternate reality. (needs first derivative, no unified field theory)
-  rename
-tech: third derivative - 0.8x damage taken after collecting a skin, have your skin get switched to a random one and convert skintech upon starting a level. your skin and skintech are not randomised when going into an alternate reality. (needs first derivative and a skin)
-  rename
+tech:  - 0.85x damage taken after switching fields, and fields get switched randomly at the start of a level
+  converts fieldtech.
+  your field and fieldtech are not randomised when going into an alternate reality
+tech:  - 0.8x damage taken after collecting a skin, have your skin get switched to a random one and convert skintech upon starting a level
+  your skin and skintech are not randomised when going into an alternate reality.
+
 
 
 make one face of a mob take 4x damage
@@ -256,9 +276,6 @@ make mob invulnerability more obvious
   flashing white?
   thicker stroke
 
-tech: Loitering munition - missile bot follows mouse?
-
-try to also allow players to unpause in choosing menu
 
 tech:   - your next bullet has 5x mass    <br>5 second cooldown
   does this work for all bullets?
@@ -307,12 +324,7 @@ do something with powerUps.totalUsed
   give dmg for each power up used this game?
 
 make a new power up that is
-  small and white
   large and orange or red
-  unlock with a tech
-  effect?
-    temporary buff, like boost
-    something that you collect and build up and effect, like coupling
 
 mob attack - crash on top of player when above
   mob flies towards player, but aims for a space above the player (if there is no map of body elements int the way)
@@ -324,13 +336,6 @@ make more Cordyceps/zombie tech?
     zombies move with you to next zone?
       this is tricky because zombies hurt you when they touch, so where should they spawn?
 
-constraint ideas
-  0.66x fire rate
-  blocks are converted to mobs
-    similar to blockBoss code
-  no pause while choosing?
-    this was removed because it had issues with full screen
-
 Boltzmann brain
   do something with a low probability to occur.
     remove the level and get rid of player legs?
@@ -338,25 +343,6 @@ Boltzmann brain
     chance to spawn something good?
   JUNK tech?
 
-gun tech upgrade that rewards pressing fire with a precise rhythm
-  press fire every 2-3 seconds and each time you get a "perfect" rhythm
-    gain 1.5x damage for that gun, but lose the bonus if you miss the timing
-    refund ammo cost for each perfect
-  gun:
-    shotgun: time it so you press fire right after CD ends
-  need to draw an on screen animation to help with timing
-
-persistent effects: effects that carry over to your next game: "for the next 3 runs of n-gon"
-  offer a research donation and get a random effect
-  new power up type
-    reward for completing reactor
-    large yellow?
-  effects
-    start with ____ power ups
-    the first research is free
-    start with ____ duplication
-    start with ____ damage
-    start with ____ damage reduction
 challenges
   names: Epistemic logic, Temporal logic, relational semantics, Axiomatic systems, Modal realism
   if you ______ for a level
@@ -376,14 +362,6 @@ challenges
     leave a boss alive
     leave __ power ups
 
-new boss - murmuration of small mobs (maybe 30-50)
-  first mob of this type in mob array controls the others
-    commands
-      every 5 seconds have %5 mobs fire at player (if in line of sight)
-      use seePlayerByHistory to set goal for the murmuration
-        if one mob can't see goal have them target other mobs in the murmuration
-    if no more mobs left on death spawn power ups
-
 tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
   so you can't heal if you take damage twice before doing enough damage
     should work similar to the cloaking heal tech
@@ -394,9 +372,6 @@ tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
 
 super balls tech - that hit blocks produce 10 balls?
   destroy the block after 3 hits?
-
-nail gun guntech - needles follow you around until you get close to a mob and then they all fire
-  like the spell in eldin ring with the 3 swords
 
 tech:   -  scale max energy with current health
   nonrefundable
@@ -1009,8 +984,6 @@ look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
 
 possible names for tech
   sidereal - with respect to the stars  (an extra rotation for time keeping)
-  entropic gravity - gravity is emergent in a holographic way
-    (maybe a field tech for negative mass)
   hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
   swarm intelligence - for a drone tech
   metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity

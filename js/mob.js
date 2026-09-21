@@ -218,15 +218,15 @@ const mobs = {
             })
         }
     },
-    statusDoT(who, tickDamage, cycles = 180) {
-        if (!who.isShielded && !who.isInvulnerable && who.alive && who.damageReduction > 0) {
+    statusDoT(who, tickDamage, cycles = 180, isBypassShield = false) {
+        if ((!who.isShielded || isBypassShield) && !who.isInvulnerable && who.alive && who.damageReduction > 0) {
             if (who.status.length >= 20) {
                 let dotCount = 0;
                 let lastDot = null;
                 let mergedDot = null;
                 for (let i = 0; i < who.status.length; i++) {
                     const status = who.status[i];
-                    if (status.type === "dot") {
+                    if (status.type === "dot" && !!status.isBypassShield === !!isBypassShield) {
                         dotCount++;
                         lastDot = status;
                         if (status.stacks > 1) mergedDot = status;
@@ -263,6 +263,7 @@ const mobs = {
                 }
             }
             who.status.push({
+                isBypassShield,
                 effect() {
                     if (simulation.cycle >= this.startCycle && (simulation.cycle - this.startCycle) % 30 === 0) {
                         this.lastTickCycle = simulation.cycle;
@@ -285,7 +286,7 @@ const mobs = {
                             });
                         } else {
                             // requestAnimationFrame(() => { who.damage(dmg) });
-                            who.damage(dmg);
+                            who.damage(dmg, this.isBypassShield);
                             simulation.drawList.push({ //add dmg to draw queue
                                 x: who.position.x + (Math.random() - 0.5) * who.radius * 0.5,
                                 y: who.position.y + (Math.random() - 0.5) * who.radius * 0.5,
@@ -1249,11 +1250,11 @@ const mobs = {
                         }
                         if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
                         //energy and heal drain should be calculated after damage boosts and before mass reduction
-                        if (tech.energySiphon && this.isDropPowerUp && m.immuneCycle < m.cycle) {
+                        if (tech.energySiphon && this.isDropPowerUp) {
                             //dmg !== Infinity &&
                             const regen = Math.min(this.health, dmg) * tech.energySiphon * level.isReducedRegen
                             if (!isNaN(regen) && regen !== Infinity) {
-                                m.energy += regen //max regen is 0.04 with one stack of tech.energySiphon
+                                m.addEnergy(regen) //max regen is 0.04 with one stack of tech.energySiphon
                                 let cycles = Math.min(40, Math.floor(200 * regen))
                                 if (cycles > 0) {
                                     for (let i = 0; i < cycles; i++) simulation.energyGenGraphic()
@@ -1429,7 +1430,7 @@ const mobs = {
                             spawn.randomMobByLevelsCleared(this.position.x, this.position.y);
                         }, 1000);
                     }
-                    if (tech.healSpawn && Math.random() < tech.healSpawn * (tech.isCrystallography && powerUp.length === 0 ? 2 : 1)) {
+                    if (tech.healSpawn && Math.random() < tech.healSpawn * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
                         powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
                         simulation.drawList.push({
                             x: this.position.x,

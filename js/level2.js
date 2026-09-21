@@ -4631,7 +4631,7 @@ Object.assign(moreLevels, {
                 logic() {
                     if (!this.isActive) return;
                     if (this.isHeal) {
-                        m.energy += 0.005;
+                        m.addEnergy(0.005);
                     } else {
                         m.energy = Math.max(m.energy - 0.006, 0);
                         if (m.energy <= 0.01 && m.immuneCycle < m.cycle) m.takeDamage(0.002);
@@ -4763,7 +4763,7 @@ Object.assign(moreLevels, {
                     const playerbounds = Rect.fromBounds(player.bounds.min, player.bounds.max);
                     if (playerbounds.hasLine(this.oneEq) || playerbounds.hasLine(this.twoEq)) {
                         if (this.isHeal) {
-                            m.energy += 0.003;
+                            m.addEnergy(0.003);
                         } else if (m.immuneCycle < m.cycle) {
                             m.energy -= 0.003;
                         }
@@ -23539,14 +23539,14 @@ Object.assign(moreLevels, {
                                 if (!tech.soundSword) {
                                     if (m.health < m.maxHealth) {
                                         if (tech.isEnergyHealth) {
-                                            m.energy += 0.04;
+                                            m.addEnergy(0.04);
                                         } else {
                                             m.health += 0.01 * (dmg - mob[i].health);
                                             m.displayHealth();
                                         }
                                     } else {
                                         if (tech.isEnergyHealth) {
-                                            m.energy += 0.04;
+                                            m.addEnergy(0.04);
                                         } else {
                                             m.health = m.maxHealth;
                                             m.displayHealth();

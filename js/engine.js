@@ -186,7 +186,7 @@ function playerOffGroundCheck(event) {
                 if (m.crouch && m.checkHeadClear()) {
                     m.undoCrouch();
                 }
-                m.yOffGoal = m.yOffWhen.jump;
+                m.yOffGoal = m.crouch ? m.yOffWhen.crouch : m.yOffWhen.jump;
             }
         }
     }
@@ -223,7 +223,7 @@ function collisionChecks(event) {
                     ) {
                         let dmg = Math.min(Math.max(0.025 * Math.sqrt(who.mass), 0.05), 0.3) * who.damageScale();
                         who.foundPlayer();
-                        if (tech.isRewindAvoidDeath && m.energy > 0.85 * Math.min(1, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
+                        if (m.canRewindDamage(dmg)) { //CPT reversal runs in m.takeDamage, but it stops the rest of the collision code here too
                             m.takeDamage(dmg);
                             return
                         }
@@ -235,7 +235,7 @@ function collisionChecks(event) {
                             simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
                         }
                         if (tech.isPiezo) {
-                            m.energy += 20.48 * level.isReducedRegen;
+                            m.addEnergy(20.48 * level.isReducedRegen);
                             for (let i = 0; i < 9; i++)simulation.energyGenGraphic()
                         }
                         if (tech.isConchoidal) {
@@ -355,7 +355,7 @@ function collisionChecks(event) {
                                 }
                                 who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
 
-                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp && Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 2 : 1)) {
+                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp && Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
                                     options = ["coupling", "boost", "heal", "research", "ammo"]
                                     powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
                                 }

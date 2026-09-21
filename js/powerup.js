@@ -137,6 +137,21 @@ const powerUps = {
             }
             return text
         },
+        qubit(num = 1) {
+            switch (num) {
+                case 1:
+                    return `<div class="qubit-circle" data-help="orb-qubit"></div>`
+            }
+            let text = '<span data-help="orb-qubit" style="position:relative;">'
+            for (let i = 0; i < num; i++) {
+                text += `<div class="qubit-circle" style="position:absolute; top:1.5px; left:${i * 0.5}em;"></div>`
+            }
+            text += '</span> &nbsp; &nbsp;'
+            for (let i = 0; i < num; i++) {
+                text += '&thinsp; '
+            }
+            return text
+        },
         Casimir(num = 1) {
             switch (num) {
                 case 1:
@@ -825,6 +840,24 @@ const powerUps = {
             }
         },
     },
+    qubit: {
+        name: "qubit",
+        color: "#fff",
+        size() {
+            return 13;
+        },
+        descriptionFunction() {
+            return `${powerUps.orb.qubit(1)} give <strong>0.97x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>${tech.isQubitDamage ? ` and <strong>1.03x</strong> <strong class='color-d' data-help='damage'>damage</strong>` : ""}`;
+        },
+        effect() {
+            powerUps.animatePowerUpGrab('rgba(255,255,255,0.7)');
+            m.damageReduction *= 0.97;
+            if (tech.isQubitDamage) m.damageDone *= 1.03;
+            simulation.inGameConsole(`${powerUps.orb.qubit(1)} <span class='color-var'>m</span>.<span class='color-defense'>damageReduction</span> <span class='color-symbol'>*=</span> 0.97 <em>//qubit</em>${tech.isQubitDamage ? `<br><span class='color-var'>m</span>.<span class='color-d'>damageDone</span> <span class='color-symbol'>*=</span> 1.03 <em>//interference</em>` : ""}`);
+            m.displayHealth();
+            powerUps.Casimir.random();
+        }
+    },
     Casimir: {
         name: "Casimir", //max energy
         color: "#ff0", //"#0cf",
@@ -842,7 +875,7 @@ const powerUps = {
                 if (Math.random() < 0.25) {
                     m.energy = 0.001
                 } else if (m.energy < m.maxEnergy) {
-                    m.energy = m.maxEnergy * 4
+                    m.addEnergy(m.maxEnergy * 4 - m.energy)
                     for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
                 }
             }
@@ -851,7 +884,7 @@ const powerUps = {
             powerUps.animatePowerUpGrab('rgba(255, 255, 0,0.7)')
             const amount = powerUps.Casimir.amount()
             tech.healMaxEnergyBonus += amount
-            m.energy += amount
+            m.addEnergy(amount)
             m.setMaxEnergy();
             if (tech.isCasimirHealth) {
                 tech.extraMaxHealth += amount
@@ -1043,7 +1076,53 @@ const powerUps = {
         size() {
             return Math.sqrt(0.1 + 0.25) * 40 * (simulation.healScale ** 0.25) * Math.sqrt(tech.largerHeals * (tech.isHalfHeals ? 0.5 : 1)); //(simulation.healScale ** 0.25)  gives a smaller radius as heal scale goes down
         },
+        spawnHealingZone(position) {
+            const x = position.x, y = position.y;
+            simulation.ephemera.push({
+                name: "healingZone",
+                endCycle: simulation.cycle + 240,
+                do() {
+                    const progress = Math.max(0, Math.min(1, 1 - (this.endCycle - simulation.cycle) / 240));
+                    ctx.save();
+                    ctx.fillStyle = powerUps.heal.color;
+                    ctx.globalAlpha = 0.1;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 220, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.globalAlpha = 0.5;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.arc(x, y, 220, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * progress);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(x, y, 220, 0, 2 * Math.PI);
+                    ctx.strokeStyle = powerUps.heal.color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    ctx.restore();
+                    if (simulation.cycle >= this.endCycle) {
+                        if (m.alive && !tech.isEnergyHealth && (m.pos.x - x) ** 2 + (m.pos.y - y) ** 2 <= 220 ** 2) {
+                            m.health = m.maxHealth;
+                            m.displayHealth();
+                        }
+                        for (const who of mob) {
+                            if (who.alive && (who.position.x - x) ** 2 + (who.position.y - y) ** 2 <= 220 ** 2) {
+                                who.health = Math.max(who.health, 1);
+                            }
+                        }
+                        simulation.removeEphemera(this);
+                    }
+                },
+            });
+        },
         effect() {
+            if (tech.isHealingZone && m.alive) {
+                powerUps.heal.spawnHealingZone(this.position || m.pos);
+                simulation.inGameConsole(`<div class="circle-grid heal"></div> <span class='color-var'>healingZone</span>.<span class='color-h'>restoreAll</span>({radius: <span class='color-symbol'>220</span>, delay: <span class='color-symbol'>4</span>s}) <em>//Brownian ratchet: heals you and mobs</em>`);
+                powerUps.Casimir.random();
+                return;
+            }
             if (!tech.isEnergyHealth && m.alive) {
                 powerUps.animatePowerUpGrab('rgba(0, 238, 187,0.25)')
                 let heal = (this.size / 40 / (simulation.healScale ** 0.25)) ** 2 //simulation.healScale is undone here because heal scale is already properly affected on m.addHealth()
@@ -1835,7 +1914,7 @@ const powerUps = {
                 requestAnimationFrame(() => {
                     simulation.timePlayerSkip(15)
                     simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
-                    m.energy += 2 * level.isReducedRegen;
+                    m.addEnergy(2 * level.isReducedRegen);
                     for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
                 }); //wrapping in animation frame prevents errors, probably
                 if (tech.isBarycenter) {
@@ -1843,7 +1922,7 @@ const powerUps = {
                     bullet[bullet.length - 1].endCycle = simulation.cycle + 1440 //extra time to wait for pair production to end
                 }
             } else {
-                m.energy += 2 * level.isReducedRegen;
+                m.addEnergy(2 * level.isReducedRegen);
                 for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
             }
         }
@@ -1857,15 +1936,18 @@ const powerUps = {
         if (level.isNoDamage) level.noDamageCycle = m.cycle
     },
     spawnRandomPowerUp(x, y) { //mostly used after mob dies,  doesn't always return a power up
-        const dropScale = tech.isCrystallography && powerUp.length === 0 ? 2 : 1;
+        const dropScale = tech.isCrystallography && powerUp.length === 0 ? 3 : 1;
         if (tech.coupling && Math.random() < tech.coupling * dropScale) {
             powerUps.spawn(x + 10, y - 1, "coupling");
         }
         if (tech.Casimir && Math.random() < tech.Casimir * dropScale) {
             powerUps.spawn(x - 10, y + 1, "Casimir");
         }
+        if (tech.qubit && Math.random() < tech.qubit * dropScale) {
+            powerUps.spawn(x, y - 10, "qubit");
+        }
         if (tech.isCrystalLattice && powerUps.boost.endCycle > simulation.cycle) {
-            const options = ["boost", "coupling", "Casimir"]
+            const options = ["boost", "coupling", "Casimir", "qubit"]
             powerUps.spawn(x, y, options[Math.floor(Math.random() * options.length)]);
         }
         if (!tech.isEnergyHealth && (Math.random() * Math.random() - 0.3 > Math.sqrt(m.health)) || Math.random() < 0.04 * dropScale) { //spawn heal chance is higher at low health
@@ -1991,6 +2073,7 @@ const powerUps = {
                     tech.tech[choose].remove();
                     tech.totalCount -= tech.tech[choose].count
                     tech.tech[choose].count = 0;
+                    if (tech.zeitgeistRemoveName === tech.tech[choose].name) tech.zeitgeistRemoveName = null
                     tech.tech[choose].isLost = true;
                     simulation.updateTechHUD();
                     m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
@@ -2009,6 +2092,7 @@ const powerUps = {
                 tech.totalCount -= tech.tech[choose].count
                 tech.removeCount += tech.tech[choose].count
                 tech.tech[choose].count = 0;
+                if (tech.zeitgeistRemoveName === tech.tech[choose].name) tech.zeitgeistRemoveName = null
                 tech.tech[choose].isLost = true;
                 simulation.updateTechHUD();
                 m.fieldCDcycle = m.cycle + 30; //disable field so you can't pick up the ejected tech
@@ -2087,7 +2171,7 @@ const powerUps = {
         if (smallIndexes.length > 2 && Math.random() < 0.66) {             // console.log("no big, at least 3 small can combine")
             for (let j = 0; j < 3; j++) {
                 for (let i = 0; i < powerUp.length; i++) {
-                    if (powerUp[i].name === "heal" || powerUp[i].name === "research" || powerUp[i].name === "ammo" || powerUp[i].name === "coupling" || powerUp[i].name === "boost" || powerUp[i].name === "Casimir") {
+                    if (powerUp[i].name === "heal" || powerUp[i].name === "research" || powerUp[i].name === "ammo" || powerUp[i].name === "coupling" || powerUp[i].name === "boost" || powerUp[i].name === "Casimir" || powerUp[i].name === "qubit") {
                         Matter.Composite.remove(engine.world, powerUp[i]);
                         powerUp.splice(i, 1);
                         break
@@ -2096,7 +2180,12 @@ const powerUps = {
             }
 
             options = ["tech", "tech", "tech", "gun", "gun", "field"]
-            powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
+            const name = options[Math.floor(Math.random() * options.length)]
+            if (tech.isGUT && (name === "gun" || name === "field")) {
+                powerUps.spawn(where.x, where.y, name, false)
+            } else {
+                powerUps.directSpawn(where.x, where.y, name, false)
+            }
         } else if (bigIndexes.length > 0 && Math.random() < 0.5) { // console.log("at least 1 big can spilt")
             const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
             for (let i = 0; i < 3; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
@@ -2114,7 +2203,7 @@ const powerUps = {
     spawn(x, y, name, moving = true, size = powerUps[name].size()) {
         if ((!tech.isSuperDeterminism || (name !== 'research'))) {
             if (tech.isBoostReplaceAmmo && name === 'ammo') {
-                const items = ["coupling", "boost", "Casimir", "research", "heal"]
+                const items = ["coupling", "boost", "Casimir", "research", "heal", "qubit"]
                 name = items[Math.floor(Math.random() * items.length)]
                 size = powerUps[name].size()
             }

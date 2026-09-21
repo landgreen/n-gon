@@ -292,6 +292,10 @@ const m = {
         m.moverX = 0 //reset the level mover offset
     },
     airControl() {
+        if (m.crouch && m.cycle % 30 === 0 && m.checkHeadClear()) {
+            m.undoCrouch();
+            m.yOffGoal = m.yOffWhen.jump;
+        }
         //check for coyote time jump
         if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
             // console.log("air", m.groundCount, player.speed, player.velocity)
@@ -411,6 +415,7 @@ const m = {
                 powerUps.spawn(m.pos.x, m.pos.y, tech.isBoostReplaceAmmo ? "boost" : "ammo", false)
                 powerUps.spawn(m.pos.x + 10, m.pos.y, "research", false)
                 powerUps.spawn(m.pos.x + 20, m.pos.y, "Casimir", false)
+                powerUps.spawn(m.pos.x + 30, m.pos.y, "qubit", false)
                 //random bullets
 
                 const where = m.pos
@@ -786,8 +791,11 @@ const m = {
         simulation.cycle--; //pause all functions that depend on game cycle increasing
     },
     collisionImmuneCycles: 30,
+    canRewindDamage(dmg) {
+        return tech.isRewindAvoidDeath && m.energy > 0.85 * Math.min(1, m.maxEnergy) && dmg > 0;
+    },
     takeDamage(dmg, isDefense = true) {
-        if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) {
+        if (m.canRewindDamage(dmg)) {
             const steps = Math.floor(Math.min(299, 150 * m.energy)) //150 * m.energy
             simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)
             m.rewind(steps)
@@ -1408,7 +1416,7 @@ const m = {
                 }
 
                 if (tech.isGrabEnergy && m.ledgeCoyote !== 0) {
-                    m.energy += 0.0068 * level.isReducedRegen * tech.isGrabEnergy
+                    m.addEnergy(0.0068 * level.isReducedRegen * tech.isGrabEnergy)
                     if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
                 }
             }
@@ -3659,12 +3667,15 @@ const m = {
             m.fieldRegen *= 0.66
         }
     },
+    addEnergy(amount) {
+        if (m.immuneCycle < m.cycle && !m.isTimeDilated) m.energy += amount;
+    },
     regenEnergy() { //used in drawRegenEnergy  // rewritten by some tech
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
+        if (m.fieldCDcycle < m.cycle) m.addEnergy(m.fieldRegen * level.isReducedRegen);
         if (m.energy < 0) m.energy = 0
     },
     regenEnergyDefault() {
-        if (m.immuneCycle < m.cycle && m.fieldCDcycle < m.cycle) m.energy += m.fieldRegen * level.isReducedRegen;
+        if (m.fieldCDcycle < m.cycle) m.addEnergy(m.fieldRegen * level.isReducedRegen);
         if (m.energy < 0) m.energy = 0
     },
     lookingAt(who) {
@@ -4083,10 +4094,8 @@ const m = {
                 if (tech.isTokamak && m.throwCharge > 4 && !m.holdingTarget.isInvulnerable && !m.holdingTarget.isImmutable) { //remove the block body and pulse  in the direction you are facing
                     //m.throwCharge > 5 seems to be when the field full colors in a block you are holding
                     m.throwCycle = m.cycle + 180 //used to detect if a block was thrown in the last 3 seconds
-                    if (m.immuneCycle < m.cycle) {
-                        m.energy += 0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge) * level.isReducedRegen
-                        for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
-                    }
+                    m.addEnergy(0.25 * Math.sqrt(m.holdingTarget.mass) * Math.min(5, m.throwCharge) * level.isReducedRegen)
+                    for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
                     m.throwCharge = 0;
                     m.definePlayerMass() //return to normal player mass
                     //remove block before pulse, so it doesn't get in the way
@@ -4574,7 +4583,7 @@ const m = {
                 m.pushMass(mob[i]);
 
                 if (tech.deflectEnergy && !mob[i].isInvulnerable && !mob[i].isShielded) {
-                    m.energy += tech.deflectEnergy * level.isReducedRegen
+                    m.addEnergy(tech.deflectEnergy * level.isReducedRegen)
                     simulation.energyGenGraphic()
                     simulation.energyGenGraphic()
                 }
@@ -5163,10 +5172,8 @@ const m = {
                             }
                             Matter.Body.setVelocity(player, { x: player.velocity.x, y: 0.98 * player.velocity.y });
                             if (tech.isFloatEnergy) {
-                                if (m.immuneCycle < m.cycle) {
-                                    m.energy += 12 * m.fieldRegen * level.isReducedRegen;
-                                    if (!(simulation.cycle % 6)) simulation.energyGenGraphic()
-                                }
+                                m.addEnergy(12 * m.fieldRegen * level.isReducedRegen);
+                                if (!(simulation.cycle % 6)) simulation.energyGenGraphic()
                             }
                         }
 
@@ -5218,9 +5225,9 @@ const m = {
                                         m.pickUp();
                                         m.throwCharge = 4//pre charge so player can throw immediately
 
-                                        if (tech.isReel && m.immuneCycle < m.cycle) {
+                                        if (tech.isReel) {
                                             const regen = Math.min(0.003 * m.holdingTarget.speed * m.holdingTarget.mass, 1) * level.isReducedRegen
-                                            m.energy += regen
+                                            m.addEnergy(regen)
                                             for (let i = 0; i < 2; i++)simulation.energyGenGraphic()
                                         }
                                         break
@@ -5500,10 +5507,10 @@ const m = {
         {
             name: "molecular assembler",
             modeText() {
-                return `${simulation.molecularMode === 0 ? "<strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s' data-help='slow'>ice IX" : "<strong>drones"}</strong>`
+                return `${simulation.molecularMode === 0 ? "<strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s' data-help='slow'>ice IX" : simulation.molecularMode === 3 ? "<strong>drones" : "<strong>needles"}</strong>`
             },
             descriptionFunction() {
-                return `use <strong class='energy' data-help='energy'>energy</strong> to <strong>deflect</strong> mobs<br>excess <strong class='energy' data-help='energy'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s' data-help='slow'>ice IX" : "<strong>drones"}</strong><br><strong>12</strong> <strong class='energy' data-help='energy'>energy</strong> per second <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓→↓←↑↑↓</em>`
+                return `use <strong class='energy' data-help='energy'>energy</strong> to <strong>deflect</strong> mobs<br>excess <strong class='energy' data-help='energy'>energy</strong> used to <strong class='color-print'>print</strong> ${simulation.molecularMode === 0 ? "<strong class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<strong>missiles" : simulation.molecularMode === 2 ? "<strong class='color-s' data-help='slow'>ice IX" : simulation.molecularMode === 3 ? "<strong>drones" : "<strong>needles"}</strong><br><strong>12</strong> <strong class='energy' data-help='energy'>energy</strong> per second <em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↓→↓←↑↑↓</em>`
             },
             endoThermic(drain) {
                 if (tech.isEndothermic) {
@@ -5526,8 +5533,8 @@ const m = {
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[4].keyLog, patternA) || arraysEqual(m.fieldUpgrades[4].keyLog, patternB)) {
                         //cycle to next molecular mode
-                        simulation.molecularMode = simulation.molecularMode < 3 ? simulation.molecularMode + 1 : 0
-                        const name = `${simulation.molecularMode === 0 ? "<em class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<em>missiles" : simulation.molecularMode === 2 ? "<em class='color-s' data-help='slow'>ice IX" : "<em>drones"}</em>`
+                        simulation.molecularMode = simulation.molecularMode < 4 ? simulation.molecularMode + 1 : 0
+                        const name = `${simulation.molecularMode === 0 ? "<em class='spore' data-help='spore' style='letter-spacing: 2px;'>spores" : simulation.molecularMode === 1 ? "<em>missiles" : simulation.molecularMode === 2 ? "<em class='color-s' data-help='slow'>ice IX" : simulation.molecularMode === 3 ? "<em>drones" : "<em>needles"}</em>`
                         simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${simulation.molecularMode} // ${name} &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↓→↓←↑↑↓</em>`);
                     }
                     // console.log(event.code, m.fieldUpgrades[4].keyLog)
@@ -5604,6 +5611,17 @@ const m = {
                             m.energy -= drain;
                             b.iceIX(1)
                             m.fieldUpgrades[4].endoThermic(drain)
+                        } else if (simulation.molecularMode === 4) {
+                            const occupied = new Set();
+                            for (const shot of bullet) if (shot.isFollowingNeedle) occupied.add(shot.needleSlot);
+                            let slot = 0;
+                            while (occupied.has(slot)) slot++;
+                            const drain = 0.06 * (1 + Math.pow(2, 2.2 * Math.floor(slot / 9)));
+                            if (occupied.size < 36 && m.energy > drain) {
+                                m.energy -= drain;
+                                b.followingNeedle();
+                                m.fieldUpgrades[4].endoThermic(drain);
+                            }
                         } else if (simulation.molecularMode === 3) {
                             if (tech.isDroneRadioactive) {
                                 const drain = 0.9// + (Math.max(bullet.length, 150) - 150) * 0.01
@@ -5725,7 +5743,7 @@ const m = {
                                                     } else if (this.who) {
                                                         this.isReady = false
                                                         // requestAnimationFrame(() => {
-                                                        m.energy += 0.08
+                                                        m.addEnergy(0.08)
                                                         simulation.energyGenGraphic()
                                                         const dmg = 0.08
                                                         this.who.damage(dmg);
@@ -7004,8 +7022,8 @@ const m = {
                                                 Matter.Composite.remove(engine.world, body[i]);
                                                 body.splice(i, 1);
                                                 m.fieldRange *= 0.8
-                                                if (m.immuneCycle < m.cycle && m.coupling > 0) {
-                                                    m.energy += 0.03 * m.coupling * level.isReducedRegen
+                                                if (m.coupling > 0) {
+                                                    m.addEnergy(0.03 * m.coupling * level.isReducedRegen)
                                                     for (let i = 0, len = Math.min(15, m.coupling / 5); i < len; i++)simulation.energyGenGraphic()
                                                 }
                                                 if (tech.isWormholeWorms) { //pandimensional spermia
@@ -7038,10 +7056,8 @@ const m = {
                                             Matter.Composite.remove(engine.world, body[i]);
                                             body.splice(i, 1);
                                             m.fieldRange *= 0.8
-                                            if (m.immuneCycle < m.cycle) {
-                                                m.energy += 0.03 * m.coupling * level.isReducedRegen
-                                                for (let i = 0, len = Math.min(15, m.coupling / 5); i < len; i++)simulation.energyGenGraphic()
-                                            }
+                                            m.addEnergy(0.03 * m.coupling * level.isReducedRegen)
+                                            for (let i = 0, len = Math.min(15, m.coupling / 5); i < len; i++)simulation.energyGenGraphic()
                                             if (tech.isWormholeWorms) { //pandimensional spermia
                                                 for (let i = 0, len = 1 + Math.floor(4 * Math.random()); i < len; i++) {
                                                     b.worm(Vector.add(m.hole.pos2, Vector.rotate({ x: m.fieldRange * 0.4, y: 0 }, 2 * Math.PI * Math.random())))
@@ -7204,12 +7220,18 @@ const m = {
                                 m.hole.angle = Math.atan2(sub.y, sub.x)
                                 m.hole.unit = Vector.perp(Vector.normalise(sub))
 
-                                if (tech.isWormholeDamage) {
-                                    who = Matter.Query.ray(mob, m.pos, simulation.mouseInGame, 100)
-                                    for (let i = 0; i < who.length; i++) {
-                                        if (who[i].body.alive) {
-                                            mobs.statusDoT(who[i].body, 1, 420)
-                                            mobs.statusStun(who[i].body, 360)
+                                if (tech.isWormholeDamage || tech.isSpaghettification) {
+                                    const hits = Matter.Query.ray(mob, m.pos, simulation.mouseInGame, 100);
+                                    // Cosmic string's 420 cycles produce 14 base radiation ticks.
+                                    for (let i = 0; i < hits.length; i++) {
+                                        const target = hits[i].body;
+                                        if (target.alive) {
+                                            if (tech.isSpaghettification) {
+                                                if (!target.isInvulnerable) target.damage(16 * Vector.magnitude(sub) / 1000);
+                                            } else {
+                                                mobs.statusDoT(target, 1, 420);
+                                                mobs.statusStun(target, 360);
+                                            }
                                         }
                                     }
                                 }
@@ -7755,13 +7777,13 @@ const m = {
                                 ) {
                                     mob[k].foundPlayer();
                                     let dmg = Math.min(Math.max(0.025 * Math.sqrt(mob[k].mass), 0.05), 0.3) * mob[k].damageScale();
-                                    if (tech.isRewindAvoidDeath && (m.energy + 0.05) > Math.min(0.95, m.maxEnergy) && dmg > 0.01) { //CPT reversal runs in m.damage, but it stops the rest of the collision code here too
+                                    if (m.canRewindDamage(dmg)) { //CPT reversal runs in m.takeDamage, but it stops the rest of the collision code here too
                                         m.takeDamage(dmg);
                                         return
                                     }
                                     m.takeDamage(dmg);
                                     if (tech.isPiezo) {
-                                        m.energy += 20.48 * level.isReducedRegen;
+                                        m.addEnergy(20.48 * level.isReducedRegen);
                                         for (let i = 0; i < 6; i++)simulation.energyGenGraphic()
                                     }
                                     if (tech.isStimulatedEmission) powerUps.ejectTech()
