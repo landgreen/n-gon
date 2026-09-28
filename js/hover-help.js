@@ -12,8 +12,15 @@
         '"': "&quot;"
     })[character])
     const keyLabel = code => escapeHTML(code).replace("Key", "").replace("Digit", "")
-    const couplingDefinition = `// <strong class="color-coupling">coupling</strong> improves every field differently
-<br><br>// field emitter: all applicable effects<br>
+    //field emitter gets part of several other fields' coupling effects, see m.setMaxEnergy, m.setFieldRegen, m.defense, tech.damageAdjustments, powerUps ammo, block collisions, m.pushMass
+    const fieldEmitterCoupling = `field emitter, per coupling:<br>
+&nbsp; +1 max energy, +0.18 energy per second<br>
+&nbsp; 0.99x damage taken, 1.002x damage<br>
+&nbsp; ammo power ups give 5% more ammo<br>
+&nbsp; 1.05x block collision damage<br>
+&nbsp; 2% chance deflecting makes ice IX<br>`
+    const couplingDefinition = () => `// <strong class="color-coupling">coupling</strong> improves every field differently
+<br><br>// ${m.fieldMode === 0 ? fieldEmitterCoupling : "field emitter: all applicable effects<br>"}
 standing wave: +5 max energy<br>
 perfect diamagnetism: deflecting makes ice IX<br>
 negative mass: 0.977x damage taken<br>
@@ -25,13 +32,13 @@ pilot wave: 1.05x block collision damage<br>
 wormhole: +3 energy after eating a block<br>
 grappling hook: ammo power ups give 5% more ammo
 <br><br>// <em>in physics, coupled systems interact so a change in one can influence the other</em>`
-    const dropScale = () => tech.isCrystallography && powerUp.length === 0 ? 2 : 1
+    const dropScale = () => tech.isCrystallography && powerUp.length === 0 ? 3 : 1
     const dropPercent = chance => `${Number((100 * Math.min(1, Math.max(0, chance || 0))).toFixed(2))}%`
     const spawnLine = (chance, qualifier = "") => `<br><br>// ${dropPercent(chance)} chance per mob to spawn${qualifier}`
     const definitions = {
         tier: `// higher <strong class="color-tier">TIER</strong> mobs and bosses are tougher enemies with stronger abilities<br><br>// there are a total of 4 tiers that are introduced as you clear levels`,
         constraint: `// <strong class="constraint">constraints</strong> randomly add a unique challenge per level`,//<br><br>// the <strong class="constraint">constraint</strong> changes each level
-        "orb-coupling": () => couplingDefinition + spawnLine(tech.coupling * dropScale()),
+        "orb-coupling": () => couplingDefinition() + spawnLine(tech.coupling * dropScale()),
         // coupling: couplingDefinition,
         "orb-field": () => `// gives you a choice between 2 <strong class="energy">fields</strong>` + spawnLine(0.0016, " if the heal and gun rolls did not spawn a drop"),
         "orb-gun": () => `// gives you a choice between 2 <strong class="color-g">guns</strong>` + spawnLine(0.0007 * (3 - b.inventory.length), " if the heal roll did not spawn a drop") + `<br><br>// 3% chance per boss tech/gun reward roll`,
@@ -45,7 +52,7 @@ grappling hook: ammo power ups give 5% more ammo
         <br><br>// also expended<br>for certain tech`,
         "orb-heal": () => `// <strong class="color-h">heal</strong> power ups<br>restore health` + spawnLine(0.04 * dropScale(), " from the base roll; but higher at low health") + (tech.healSpawn > 0 ? spawnLine(tech.healSpawn * dropScale(), " an additional heal from enthalpy") : ""),
         "orb-qubit": () => `// permanently multiplies damage taken by 0.97 for this run${tech.isQubitDamage ? " and damage by 1.03" : ""}` + spawnLine(tech.qubit * dropScale()),
-        "orb-energy": () => `// increases max energy` + spawnLine(tech.Casimir * dropScale()),
+        "orb-energy": () => `// increases max energy` + spawnLine(tech.Casimir * dropScale()) + (powerUps.healGiveMaxEnergy && tech.healSpawn > 0 ? spawnLine(tech.healSpawn * dropScale(), " an additional Casimir from enthalpy") : ""),
         "orb-boost": () => `// temporarily increases damage` + spawnLine(tech.isBoostPowerUps ? 0.14 * dropScale() : 0, " if the heal, gun, field, and ammo rolls did not spawn a drop"),
         "dark-matter": `// <strong class="color-dark-matter">dark matter</strong> follows you and reduces damage taken when you are inside it
         <br><br>// <em>dark matter is hypothetical invisible matter inferred from unexplained gravity</em>`,
@@ -95,6 +102,16 @@ grappling hook: ammo power ups give 5% more ammo
         <br><br>// sporangium attach to surfaces and grow <strong class="spore">spores</strong>, <strong class="spore">fleas</strong>, or <strong class="spore">worms</strong>
         <br><br>// <em>a sporangium is an enclosure where biological spores are grown</em>`,
         slow: `// <strong class="color-s">slows</strong> reduce mob movement speed`,
+        checkpoint: () => {
+            const save = typeof saveGame !== "undefined" ? saveGame.latest : null
+            const current = save ? `<br><br>// this checkpoint is from the start of level ${save.state.level.levelsCleared}: <strong>${save.state.level.levels[save.state.level.onLevel] ?? ""}</strong>` : ""
+            return `// a <strong>checkpoint</strong> is saved automatically at the start of every level after the first
+        <br><br>// it keeps your field, guns, ammo, tech, health, energy, research, difficulty, seed, and level order
+        <br><br>// it doesn't keep progress inside a level, like mobs, blocks, power ups on the map, or bullets
+        <br><br>// <strong>copy code</strong> puts the checkpoint on your clipboard and <strong>download file</strong> saves it as a .ngon file
+        <br><br>// on the title screen press <strong>continue</strong> for your latest checkpoint, or open <strong>settings</strong> and use <strong>import checkpoint</strong> with a code or file
+        <br><br>// your latest checkpoint is cleared when you die or win, but exported copies can be loaded again${current}`
+        },
         plasma: `// <strong class="color-plasma">plasma</strong> damages<br>and slows mobs it touches
         <br><br>// <em>plasma is an ionized state of matter containing freely moving charged particles</em>`,
         laser: `<svg class="hover-help-laser-path" viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">

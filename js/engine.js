@@ -1,3 +1,4 @@
+"use strict";
 //matter.js ***********************************************************
 // module aliases
 const Engine = Matter.Engine,
@@ -122,7 +123,7 @@ function playerOnGroundCheck(event) {
                             do() {
                                 this.count--
                                 if (this.count < 0) simulation.removeEphemera(this)
-                                b.isoWave360Solo(this.where, 39 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(this.where, 39 * Math.sqrt(tech.bulletsLastLonger), tech.waveBeamSpeed, true)
                             },
                         })
                     }
@@ -141,7 +142,7 @@ function playerOnGroundCheck(event) {
                             do() {
                                 this.count--
                                 if (this.count < 0) simulation.removeEphemera(this)
-                                b.isoWave360Solo(this.where, 333 * Math.sqrt(tech.bulletsLastLonger))
+                                b.isoWave360Solo(this.where, 333 * Math.sqrt(tech.bulletsLastLonger), tech.waveBeamSpeed, true)
                             },
                         })
                     }
@@ -215,6 +216,7 @@ function collisionChecks(event) {
     }
 
     function collideMob(who, obj, pair) {
+                    let options
                     //player + mob collision
                     if (
                         m.immuneCycle < m.cycle &&

@@ -1,46 +1,39 @@
+"use strict";
 const speechHandler = {
     voices: [],
     init: function () {
+        if (!window.speechSynthesis) return //some browsers don't have speech
         const load = () => { this.voices = window.speechSynthesis.getVoices(); };
         window.speechSynthesis.onvoiceschanged = load;
         load();
     },
+    //voice names in order of quality for each accent
+    library: {
+        'us': { lang: 'en-US', names: ['Jenny', 'Aria', 'Guy', 'Google US English', 'Samantha'] },
+        'uk': { lang: 'en-GB', names: ['Sonia', 'Libby', 'Ryan', 'Google UK English', 'Serena'] },
+        'au': { lang: 'en-AU', names: ['Natasha', 'William', 'Google Australian English', 'Karen'] },
+        'in': { lang: 'en-IN', names: ['Neerja', 'Prabhat', 'Google India English', 'Rishi', 'Veena'] },
+        'ca': { lang: 'en-CA', names: ['Clara', 'Liam', 'Google Canada English', 'Linda', 'Moira'] },
+    },
+    pickVoice(type = 'uk') { //best named voice for the accent, then any voice with the same language, or undefined for the system default
+        if (this.voices.length === 0 && window.speechSynthesis) this.voices = window.speechSynthesis.getVoices();
+        const config = this.library[type] || this.library['uk'];
+        for (let name of config.names) {
+            const voice = this.voices.find(v => v.name.includes(name));
+            if (voice) return voice
+        }
+        return this.voices.find(v => v.lang.startsWith(config.lang));
+    },
     /**
      * @param {string} say - The text to speak
-     * @param {string} type - us, uk, au, in, ca, ie
+     * @param {string} type - us, uk, au, in, ca
      */
-    // if (true) {
-    //     speechHandler.speech(tech.tech[index].name)
-    // }
     speech: function (say, type = 'uk') {
-        if (this.voices.length === 0) this.voices = window.speechSynthesis.getVoices();
+        if (!window.speechSynthesis) return
         const utterance = new SpeechSynthesisUtterance(say);
         utterance.rate = 0.95;
         utterance.volume = 0.5;
-        const library = {
-            'us': { lang: 'en-US', names: ['Jenny', 'Aria', 'Guy', 'Google US English', 'Samantha'] },
-            'uk': { lang: 'en-GB', names: ['Sonia', 'Libby', 'Ryan', 'Google UK English', 'Serena'] },
-            'au': { lang: 'en-AU', names: ['Natasha', 'William', 'Google Australian English', 'Karen'] },
-            'in': { lang: 'en-IN', names: ['Neerja', 'Prabhat', 'Google India English', 'Rishi', 'Veena'] },
-            'ca': { lang: 'en-CA', names: ['Clara', 'Liam', 'Google Canada English', 'Linda', 'Moira'] },
-        };
-        const config = library[type] || library['uk'];
-
-        // It looks for names in order of quality
-        let selectedVoice = null;
-        for (let name of config.names) {
-            selectedVoice = this.voices.find(v => v.name.includes(name));
-            if (selectedVoice) break;
-        }
-
-        // Fallback: If no premium name is found, take ANY voice matching the language code
-        utterance.voice = selectedVoice || this.voices.find(v => v.lang.startsWith(config.lang));
-        // if (utterance.voice) {
-        //     console.log(`%c[Speech] Using Voice: ${utterance.voice.name} (${utterance.voice.lang})`, "color: #00ff00; font-weight: bold;");
-        // } else {
-        //     console.log("%c[Speech] No specific voice found, using system default.", "color: #ff9900;");
-        // }
-
+        utterance.voice = this.pickVoice(type)
         window.speechSynthesis.speak(utterance);
     }
 };
@@ -55,26 +48,8 @@ const lore = {
     talkingColor: "#dff", //set color of graphic on level.maps.null
     isSpeech: false,
     testSpeechAPI() {
-        if ('speechSynthesis' in window) { // Synthesis support. Make your web apps talk!
-            lore.isSpeech = true
-            // const utterance = new SpeechSynthesisUtterance("test");
-            // utterance.volume = 0; // 0 to 1
-            // speechSynthesis.speak(utterance);
-            // utterance.onerror = () => { //if speech doesn't work
-            //     lore.isSpeech = false
-            // }
-            // speechFrozen = setTimeout(() => { // speech frozen after 15 seconds of no end
-            //     console.log('speech frozen')
-            //     lore.isSpeech = false
-            // }, 5000);
-            // utterance.onend = () => {
-            //     clearTimeout(speechFrozen);
-            // }
-        } else {
-            lore.isSpeech = false
-        }
+        lore.isSpeech = 'speechSynthesis' in window //lore.say turns this off if speech errors or freezes
     },
-    rate: 1, //   //utterance.rate = 1; // 0.1 to 10
     nextSentence() {
         if (m.alive && !simulation.isCheating) {
             lore.sentence++
@@ -92,152 +67,64 @@ const lore = {
         sound.portamento(83.333)
         sound.portamento(166.666)
     },
-    // trainer: {
-    //     color: "#f20",
-    //     voice: undefined,
-    //     text: function (say) {
-    //         simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-    //         lore.talkingColor = this.color
-    //         const utterance = new SpeechSynthesisUtterance(say);
-    //         utterance.lang = "en-AU" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
-    //         utterance.volume = 0.2; // 0 to 1
-    //         speechSynthesis.speak(utterance);
-    //     },
-    // },
-    // speech: function (say) {
-    //     const utterance = new SpeechSynthesisUtterance();
-    //     utterance.text = say;
-    //     utterance.rate = 0.9; // Slightly slower helps with clarity
-    //     utterance.pitch = 1;
-    //     utterance.lang = "en-GB" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
-    //     utterance.volume = 0.2; // 0 to 1
-    //     const voices = window.speechSynthesis.getVoices();
-    //     utterance.voice = voices.find(v => v.name.includes('Google US English')) || voices[0];
-
-    //     window.speechSynthesis.speak(utterance);
-    // },
+    say(speaker, say) { //show and speak one sentence, then move on to the next sentence
+        if (level.levels[level.onLevel] !== undefined) return //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
+        simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${speaker.color};">${say}</span>"`, Infinity);
+        lore.talkingColor = speaker.color
+        if (!lore.isSpeech) {
+            setTimeout(() => { lore.nextSentence() }, speaker.silentDelay);
+            return
+        }
+        const utterance = new SpeechSynthesisUtterance(say);
+        utterance.volume = 0.8; // 0 to 1
+        utterance.voice = speechHandler.pickVoice(speaker.accent)
+        let isDone = false
+        const next = (delay) => { //move on only once per sentence, even if speech errors, freezes, and then ends late
+            if (isDone) return
+            isDone = true
+            clearTimeout(speechFrozen)
+            if (delay) {
+                setTimeout(() => { lore.nextSentence() }, delay);
+            } else {
+                lore.nextSentence()
+            }
+        }
+        const speechFrozen = setTimeout(() => { // speech frozen after 20 seconds of no end
+            console.log('speech frozen')
+            lore.isSpeech = false
+            next(0)
+        }, 20000);
+        utterance.onerror = () => { //if speech doesn't work
+            lore.isSpeech = false
+            next(2000)
+        }
+        const startTime = Date.now();
+        utterance.onend = () => next(Date.now() - startTime < 100 ? 2000 : 0) //ending in under 100ms means it was likely skipped or muted
+        speechSynthesis.speak(utterance);
+    },
+    repeatOnLoreLevel(cycles, action) { //run action every few cycles until the player leaves the lore level or dies
+        simulation.ephemera.push({
+            count: 0,
+            do() {
+                if (level.levels[level.onLevel] !== undefined || !m.alive) {
+                    simulation.removeEphemera(this)
+                } else if (++this.count % cycles === 0) {
+                    action()
+                }
+            },
+        })
+    },
     anand: {
         color: "#e0c",
-        voice: undefined,
-        text: function (say) {
-            if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-                simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-                lore.talkingColor = this.color
-                if (lore.isSpeech) {
-                    const utterance = new SpeechSynthesisUtterance(say);
-                    // utterance.voice = lore.anand.voice
-                    // utterance.lang = "en-GB" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
-                    utterance.volume = 0.8; // 0 to 1
-
-                    const library = {
-                        // 'us': { lang: 'en-US', names: ['Jenny', 'Aria', 'Guy', 'Google US English', 'Samantha'] },
-                        // 'uk': { lang: 'en-GB', names: ['Sonia', 'Libby', 'Ryan', 'Google UK English', 'Serena'] },
-                        // 'au': { lang: 'en-AU', names: ['Natasha', 'William', 'Google Australian English', 'Karen'] },
-                        'in': { lang: 'en-IN', names: ['Neerja', 'Prabhat', 'Google India English', 'Rishi', 'Veena'] },
-                        // 'ca': { lang: 'en-CA', names: ['Clara', 'Liam', 'Google Canada English', 'Linda', 'Moira'] },
-                    };
-                    const config = library['in'];
-
-                    let selectedVoice = null;
-                    for (let name of config.names) {
-                        selectedVoice = speechHandler.voices.find(v => v.name.includes(name));
-                        if (selectedVoice) break;
-                    }
-                    utterance.voice = selectedVoice || speechHandler.voices.find(v => v.lang.startsWith(config.lang));
-
-                    const startTime = Date.now(); // Track when speech starts
-                    speechSynthesis.speak(utterance);
-                    utterance.onerror = () => { //if speech doesn't work
-                        lore.isSpeech = false
-                        setTimeout(() => { lore.nextSentence(); }, 2000);
-                    }
-                    speechFrozen = setTimeout(() => { // speech frozen after 20 seconds of no end
-                        console.log('speech frozen')
-                        lore.isSpeech = false
-                        lore.nextSentence()
-                    }, 20000);
-                    utterance.onend = () => {
-                        clearTimeout(speechFrozen);
-
-                        const elapsed = Date.now() - startTime;
-                        // If the speech "finished" in less than 100ms, it was likely skipped/muted.
-                        if (elapsed < 100) {
-                            setTimeout(() => {
-                                lore.nextSentence();
-                            }, 2000);
-                        } else {
-                            lore.nextSentence();
-                        }
-                    };
-                    // utterance.onend = () => {
-                    //     clearTimeout(speechFrozen);
-                    //     lore.nextSentence()
-                    // }
-                } else {
-                    setTimeout(() => { lore.nextSentence() }, 2000);
-                }
-            }
-        },
+        accent: "in",
+        silentDelay: 2000, //time between sentences without speech
+        text(say) { lore.say(this, say) },
     },
     miriam: {
         color: "#f20",
-        text: function (say) {
-            if (level.levels[level.onLevel] === undefined) { //only talk if on the lore level (which is undefined because it is popped out of the level.levels array)
-                simulation.inGameConsole(`input.audio(<span style="color:#888; font-size: 70%;">${(Date.now() / 1000).toFixed(0)} s</span>)<span class='color-symbol'>:</span> "<span style="color:${this.color};">${say}</span>"`, Infinity);
-                lore.talkingColor = this.color
-                if (lore.isSpeech) {
-                    const utterance = new SpeechSynthesisUtterance(say);
-                    // utterance.voice = lore.anand.voice
-                    // utterance.lang = "en-GB" //"en-IN"; //de-DE  en-GB  fr-FR  en-US en-AU
-                    utterance.volume = 0.8; // 0 to 1
-
-                    const library = {
-                        // 'us': { lang: 'en-US', names: ['Jenny', 'Aria', 'Guy', 'Google US English', 'Samantha'] },
-                        'uk': { lang: 'en-GB', names: ['Sonia', 'Libby', 'Ryan', 'Google UK English', 'Serena'] },
-                        // 'au': { lang: 'en-AU', names: ['Natasha', 'William', 'Google Australian English', 'Karen'] },
-                        // 'in': { lang: 'en-IN', names: ['Neerja', 'Prabhat', 'Google India English', 'Rishi', 'Veena'] },
-                        // 'ca': { lang: 'en-CA', names: ['Clara', 'Liam', 'Google Canada English', 'Linda', 'Moira'] },
-                    };
-                    const config = library['uk'];
-
-                    let selectedVoice = null;
-                    for (let name of config.names) {
-                        selectedVoice = speechHandler.voices.find(v => v.name.includes(name));
-                        if (selectedVoice) break;
-                    }
-                    utterance.voice = selectedVoice || speechHandler.voices.find(v => v.lang.startsWith(config.lang));
-
-                    const startTime = Date.now(); // Track when speech starts
-                    speechSynthesis.speak(utterance);
-                    utterance.onerror = () => { //if speech doesn't work
-                        lore.isSpeech = false
-                        setTimeout(() => { lore.nextSentence(); }, 2000);
-                    }
-                    speechFrozen = setTimeout(() => { // speech frozen after 20 seconds of no end
-                        console.log('speech frozen')
-                        lore.isSpeech = false
-                        lore.nextSentence()
-                    }, 20000);
-                    utterance.onend = () => {
-                        clearTimeout(speechFrozen);
-
-                        const elapsed = Date.now() - startTime;
-                        // If the speech "finished" in less than 100ms, it was likely skipped/muted.
-                        if (elapsed < 100) {
-                            setTimeout(() => {
-                                lore.nextSentence();
-                            }, 2000);
-                        } else {
-                            lore.nextSentence();
-                        }
-                    };
-                } else {
-                    setTimeout(() => {
-                        lore.nextSentence()
-                    }, 3000);
-                }
-            }
-        },
+        accent: "uk",
+        silentDelay: 3000,
+        text(say) { lore.say(this, say) },
     },
     chapter: 0, //what part of the conversation is playing
     sentence: 0, //what part of the conversation is playing
@@ -469,13 +356,13 @@ const lore = {
             () => {
                 lore.miriam.text("Do we all just do things because we are-")
                 spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
-                setInterval(() => {
+                lore.repeatOnLoreLevel(420, () => { //every 7 seconds
                     if (Math.random() < 0.5) {
                         spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
                     } else {
                         spawn.randomLevelBoss(500 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5))
                     }
-                }, 7000); //every 6 seconds
+                })
             },
             () => {
                 setTimeout(() => {
@@ -703,9 +590,6 @@ const lore = {
                 }, 3000);
             },
             () => {
-                lore.miriam.text("So, we communicate and send power to your satellite with ground based lasers.")
-            },
-            () => {
                 lore.anand.text("During your last attack we analyzed our communications.")
             },
             () => {
@@ -803,9 +687,9 @@ const lore = {
             },
             () => {
                 lore.miriam.text("Mystery solved!")
-                setInterval(() => {
+                lore.repeatOnLoreLevel(30, () => { //every 1/2 seconds
                     spawn[spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]](1000 * (Math.random() - 0.5), -500 + 200 * (Math.random() - 0.5));
-                }, 500); //every 1/2 seconds
+                })
             },
             () => {
                 lore.talkingColor = "#dff";
@@ -989,6 +873,7 @@ const lore = {
                             for (let i = 0; i < 25; i++) spawn.springer(1500, -750 + 30 * i)
                         }, 4000);
                         setTimeout(() => {
+                            let addMapToLevelInProgress
                             const addMapNumber = 3
                             spawn.mapRect(-500, -850, 300, 900);
                             spawn.mapRect(200, -850, 300, 900);

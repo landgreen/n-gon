@@ -47,6 +47,10 @@
     <svg class="SVG-button SVG-button-splash" id="experiment-button" width="170" height="45">
         <text stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif" x="10" y="32">experiment</text>
     </svg>
+    <svg class="SVG-button SVG-button-splash" id="continue-button" width="135" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="saveGame.continueRun()">
+        <title>continue</title>
+        <text x="10" y="32">continue</text>
+    </svg>
 
 
     <div id='info'>
@@ -59,6 +63,9 @@
                     <br>
                     <input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" style="width:17px; height:17px;">
                     <label for="show-num" title="show in game combat text">damage numbers</label>
+                    <br>
+                    <input type="checkbox" id="auto-fullscreen" name="auto-fullscreen" style="width:17px; height:17px;">
+                    <label for="auto-fullscreen" title="enter fullscreen when you start a run">auto fullscreen</label>
                     <br>
                     <label for="fps-select" title="use this to slow the game down">limit frames per second:</label>
                     <select name="fps-select" id="fps-select">
@@ -79,6 +86,15 @@
                     <label for="seed" title="the seed determines level order, tech choices, and mob types">randomization seed:</label>
                     <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
                     <br><span id="previous-seed" style="color:#bbb"></span>
+                    <br>
+                    <label for="import-save-text" data-help="checkpoint">import checkpoint:</label>
+                    <button onclick="document.getElementById('import-save-file').click()" class='sort-button' style="font-size:1em;">load file</button>
+                    <input type="file" id="import-save-file" accept=".ngon,.txt,text/plain" style="display: none;" onchange="saveGame.importFromFile(this)">
+                    <br>
+                    <input id="import-save-text" name="import-save-text" placeholder="paste checkpoint code" autocomplete="off" spellcheck="false" style="width: 192px;" onkeydown="if (event.key === 'Enter') saveGame.importFromBox()" />:
+                    <button onclick="saveGame.importFromBox()" class='sort-button' style="font-size:1em;">load code</button>
+                    <br>
+                    <br>
                     <br>
                     <svg class="SVG-button SVG-button-splash" id="enable-gamepad" width="300" height="60" stroke='none' fill='#333' font-family="Arial, sans-serif" onclick="javascript: (async () => { const scriptText = await (await fetch('https://raw.githubusercontent.com/kgurchiek/n-gon-controller/main/main.js')).text(); var script = document.createElement('script'); script.type = 'text/javascript'; script.textContent = scriptText; document.head.appendChild(script); document.getElementById('enable-gamepad').style.stroke = '#0b5';})();">
                         <text x="39" y="19" font-size="22px">load gamepad support</text>
@@ -358,7 +374,7 @@
                 <!-- <text x="165.5" y="422">switch</text> -->
                 <text x="169.5" y="438">guns</text>
                 <text x="292" y="596">fullscreen</text>
-                <text x="304" y="613" font-size="12px">(beta)</text>
+                <!-- <text x="304" y="613" font-size="12px">(beta)</text> -->
                 <text x="356" y="566">pause</text>
             </g>
             <text x="165" y="638">move</text>
@@ -380,6 +396,7 @@
     <!-- <script src="js/level2.js"></script> -->
     <script src="js/lore.js"></script>
     <script src="js/engine.js"></script>
+    <script src="js/save.js"></script>
     <script src="js/hover-help.js"></script>
     <script src="js/index.js"></script>
 </body>

@@ -235,89 +235,8 @@ let color = { //light
 // }
 
 
-//**********************************************************************
-// check for URL parameters to load an experimental game
-//**********************************************************************
-
-//example  https://landgreen.github.io/n-gon/index.html?
-//          &gun1=minigun&gun2=laser
-//          &tech1=laser-bot&tech2=mass%20driver&tech3=overcharge&tech4=laser-bot&tech5=laser-bot&field=phase%20decoherence%20field&difficulty=2
-//add ? to end of url then for each power up add
-// &gun1=name&gun2=name
-// &tech1=laser-bot&tech2=mass%20driver&tech3=overcharge&tech4=laser-bot&tech5=laser-bot
-// &field=phase%20decoherence%20field
-// &difficulty=2
-//use %20 for spaces
-//difficulty is 0 easy, 1 normal, 2 hard, 4 why
-function getUrlVars() {
-    let vars = {};
-    window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, k, v) {
-        vars[k] = v;
-    });
-    return vars;
-}
-window.addEventListener('load', async () => {
-    const set = getUrlVars()
-    if (Object.keys(set).length !== 0) {
-        // build.populateGrid() //trying to solve a bug with this, but maybe it doesn't help
-        await openExperimentMenu();
-        //Restore custom options before applying the shared build.
-        if (/^(?:v2:[01]{13,15}|[01]{11,13})$/.test(set.difficultyOptions || '')) {
-            simulation.difficultyOptions = powerUps.difficulty.fromSignature(set.difficultyOptions);
-        } else if (set.difficulty !== undefined) {
-            simulation.difficultyOptions = powerUps.difficulty.fromLegacy(set.difficulty);
-        }
-        localSettings.difficultyOptions = { ...simulation.difficultyOptions };
-        powerUps.difficulty.updateScale();
-        powerUps.difficulty.setDamageAndDefense();
-        //add experimental selections based on url
-        for (const property in set) {
-            set[property] = set[property].replace(/%20/g, " ")
-            set[property] = set[property].replace(/%27/g, "'")
-            set[property] = set[property].replace(/%CE%A8/g, "Ψ")
-            if (property === "field") {
-                let found = false
-                let index
-                for (let i = 0; i < m.fieldUpgrades.length; i++) {
-                    if (set[property] === m.fieldUpgrades[i].name) {
-                        index = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) build.choosePowerUp(index, 'field')
-            }
-            if (property.substring(0, 3) === "gun") {
-                let found = false
-                let index
-                for (let i = 0; i < b.guns.length; i++) {
-                    if (set[property] === b.guns[i].name) {
-                        index = i;
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) build.choosePowerUp(index, 'gun')
-            }
-            if (property.substring(0, 4) === "tech") {
-                for (let i = 0; i < tech.tech.length; i++) {
-                    if (set[property] === tech.tech[i].name) {
-                        build.choosePowerUp(i, 'tech', true)
-                        break;
-                    }
-                }
-            }
-            if (property === "molMode") {
-                simulation.molecularMode = Number(set[property])
-                const i = 4 //update experiment text
-                document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
-                <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
-                ${m.fieldUpgrades[i].descriptionFunction()}</div>`
-            }
-            requestAnimationFrame(() => { build.sortTech('have', true) });
-
-        }
-    } else if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
+window.addEventListener('load', () => {
+    if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
         // document.getElementById("training-button").style.border = "0px #333 solid";
         // document.getElementById("training-button").style.fill = "rgb(0, 150, 235)" //"#fff";
         // document.getElementById("training-button").style.background = "rgb(0, 200, 255)";
@@ -461,7 +380,7 @@ const build = {
 <em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
 <br>
 ${fullscreenWarning}
-<button onclick="build.shareURL(false)" class='sort-button' style="font-size:1em;float: right;">copy build URL</button>
+${saveGame.exportHTML()}
 <input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
 <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks" style="font-size:1.15em;">performance mode</label>
 <br>
@@ -649,6 +568,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         // requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
     },
     sortTech(find, isExperiment = false) {
+        if (find === 'input') find = document.getElementById("sort-input").value.trim() //use the text typed into the sort by field
         const sortKeyword = (a, b) => {
             let aHasKeyword = (a.descriptionFunction ? a.descriptionFunction() : a.description).includes(find) || a.name.includes(find)
             let bHasKeyword = (b.descriptionFunction ? b.descriptionFunction() : b.description).includes(find) || b.name.includes(find)
@@ -740,6 +660,8 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         } else if (find === 'duplic') {
             tech.tech.sort(sortKeyword);
         } else if (find === 'PAUSE') {
+            tech.tech.sort(sortKeyword);
+        } else if (find !== '') {
             tech.tech.sort(sortKeyword);
         }
         if (isExperiment) {
@@ -878,8 +800,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                 document.getElementById("tech-150").focus();
             } else if (m.fieldMode === 4) {
                 const i = 4 //update experiment text
-                simulation.molecularMode++
-                if (simulation.molecularMode > 4) simulation.molecularMode = 0
+                m.fieldUpgrades[4].nextMode()
                 document.getElementById(`field-${i}`).innerHTML = `<div class="card-text">
                                 <div class="grid-title"><div class="circle-grid-title field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
                                 ${m.fieldUpgrades[i].descriptionFunction()}</div>`
@@ -992,13 +913,6 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                     </g>
                 </svg>
             </div>
-            <div style="grid-column: 2;grid-row: 3/4;">
-                <svg class="SVG-button" onclick="build.shareURL(true)" width="52" height="25">
-                    <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
-                        <text x="5" y="18">share</text>
-                    </g>
-                </svg>
-            </div>
         </div>
     </div>
 </div>`
@@ -1087,59 +1001,6 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         document.getElementById("field-0").classList.add("build-field-selected");
         document.getElementById("experiment-grid").style.display = "grid"
     },
-    shareURL(isCustom = false) {
-        let url = "https://landgreen.github.io/n-gon/index.html?"
-        url += `&seed=${Math.initialSeed}`
-        let count = 0;
-        for (let i = 0; i < b.inventory.length; i++) {
-            if (b.guns[b.inventory[i]].have) {
-                url += `&gun${count}=${encodeURIComponent(b.guns[b.inventory[i]].name.trim())}`
-                count++
-            }
-        }
-        count = 0;
-        for (let i = 0; i < tech.tech.length; i++) {
-            for (let j = 0; j < tech.tech[i].count; j++) {
-                if (!tech.tech[i].isLore && !tech.tech[i].isJunk && !tech.tech[i].isInstant) {
-                    url += `&tech${count}=${encodeURIComponent(tech.tech[i].name.trim())}`
-                    count++
-                }
-            }
-        }
-        url += `&molMode=${encodeURIComponent(simulation.molecularMode)}`
-        // if (property === "molMode") {
-        //     simulation.molecularMode = Number(set[property])
-        //     document.getElementById(`field-${i}`).innerHTML = `<div class="grid-title"><div class="circle-grid field"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div> ${m.fieldUpgrades[i].descriptionFunction()}`
-        // }
-
-        url += `&field=${encodeURIComponent(m.fieldUpgrades[m.fieldMode].name.trim())}`
-        url += `&difficultyOptions=${powerUps.difficulty.signature()}`
-        if (isCustom) {
-            // url += `&level=${Math.abs(Number(document.getElementById("starting-level").value))}`
-            // alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-        } else {
-            simulation.inGameConsole("n-gon build URL copied to clipboard.<br>Paste into browser address bar.")
-        }
-        console.log('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-        console.log(url)
-        navigator.clipboard.writeText(url).then(function () {
-            /* clipboard successfully set */
-            if (isCustom) {
-                setTimeout(function () {
-                    alert('n-gon build URL copied to clipboard.\nPaste into browser address bar.')
-                }, 300);
-            }
-        }, function () {
-            /* clipboard write failed */
-            if (isCustom) {
-                setTimeout(function () {
-                    alert('copy failed')
-                }, 300);
-            }
-            console.log('copy failed')
-        });
-
-    },
     hasExperimentalMode: false,
     startExperiment() { //start playing the game after exiting the experiment menu
         build.isExperimentSelection = false;
@@ -1175,6 +1036,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         document.getElementById("experiment-grid").style.display = "none"
         simulation.paused = false;
         requestAnimationFrame(cycle);
+        mouseMove.lock()
     }
 }
 
@@ -1460,119 +1322,31 @@ window.addEventListener("keydown", function (event) {
                         // level.levelAnnounce();
                         document.body.style.cursor = "none";
                         requestAnimationFrame(cycle); //restart time
-
-                        if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.isChoosing) {
-                            canvas.requestPointerLock();
-                            mouseMove.isPointerLocked = true
-                            mouseMove.reset()
-                        }
+                        mouseMove.lock()
                     }
                 } else {
                     simulation.paused = true;
                     build.pauseGrid()
                     document.body.style.cursor = "auto";
-                    if (document.fullscreenElement) {
-                        document.exitPointerLock();
-                        mouseMove.isPointerLocked = false
-                        mouseMove.reset()
-                    }
+                    mouseMove.unlock()
                 }
             }
             break
-        case input.key.fullscreen:
-            // Escape key will also automatically exit pointer lock and fullscreen
-            // console.log(document.activeElement !== document.getElementById('sort-input'), document.activeElement)
-
-
-            // const onFullscreenChange = () => {
-            //     if (document.fullscreenElement) { // Make sure we entered, not exited
-            //         input.reset();
-
-            //         if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
-            //             canvas.requestPointerLock();
-            //             mouseMove.isPointerLocked = true;
-            //             mouseMove.reset();
-            //         } else {
-            //             mouseMove.isLockPointer = true;
-            //             document.body.addEventListener('mousedown', mouseMove.pointerUnlock);
-            //         }
-            //     }
-            // };
-
-            // // Add the listener that runs only once.
-            // document.addEventListener('fullscreenchange', onFullscreenChange, { once: true });
-
-            // // Now, request fullscreen.
-            // document.documentElement.requestFullscreen().catch(err => {
-            //     // If the request fails, the 'fullscreenchange' event will never fire,
-            //     // so the listener we added will just be garbage collected. No cleanup needed.
-            //     console.error('Error attempting to enable fullscreen:', err);
-            // });
-            const hasPointerLock = () => {
-                return 'pointerLockElement' in document ||
-                    'mozPointerLockElement' in document ||
-                    'webkitPointerLockElement' in document;
-            };
-
-            if (document.activeElement !== document.getElementById('sort-input') && hasPointerLock()) {//not typing "o" in the sort text menu
-                if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen
-                    document.exitPointerLock();
-                    mouseMove.isPointerLocked = false
-                    mouseMove.reset()
-                    document.exitFullscreen();
-                    input.reset(); //to prevent key ghosting reset all input keys
-
-
-
-                } else if (mouseMove.isMouseInWindow) { //if mouse is in the window enter fullscreen
-                    document.documentElement.requestFullscreen().then(() => {//wait for fullscreen to be ready
-                        input.reset(); //to prevent key ghosting reset all input keys
-                        //request pointer lock, but not if in a game situation that needs the traditional mouse
-                        if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
-                            canvas.requestPointerLock();
-                            mouseMove.isPointerLocked = true
-                            mouseMove.reset()
-                        } else {
-                            // mouseMove.isLockPointer = true
-                            // document.body.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true });//watches for mouse clicks that exit draft mode and self removes
-                            document.addEventListener('mousedown', mouseMove.pointerUnlock, { once: true })
-                        }
-                    }).catch(err => {
-                        console.error('Error attempting to enable fullscreen:', err);
-                    });
-                }
+        case input.key.fullscreen: {
+            //don't toggle fullscreen when typing an "o" into a text box like seed, banned levels, or sort
+            const isTyping = document.activeElement && document.activeElement.matches("textarea, input:not([type]), input[type='text'], input[type='search']")
+            if (event.repeat || isTyping || !("pointerLockElement" in document)) break
+            //the fullscreenchange event handles pointer lock and input reset
+            if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen
+                mouseMove.unlock()
+                document.exitFullscreen();
+            } else if (mouseMove.isMouseInWindow) { //if mouse is in the window enter fullscreen
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.error('Error attempting to enable fullscreen:', err);
+                });
             }
-
-
-
-
-
-            // if (document.fullscreenElement && document.activeElement !== document.getElementById('sort-input')) {
-            //     document.exitPointerLock();
-            //     mouseMove.isPointerLocked = false
-            //     mouseMove.reset()
-            //     document.exitFullscreen();
-            //     input.reset(); //to prevent key ghosting reset all input keys
-            // } else if (document.activeElement !== document.getElementById('sort-input') && mouseMove.isMouseInWindow) {
-            //     document.documentElement.requestFullscreen().then(() => {
-            //         input.reset(); //to prevent key ghosting reset all input keys
-
-            //         // Small delay to ensure fullscreen is established, then lock pointer to canvas
-            //         if (!simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing) {
-            //             setTimeout(() => {
-            //                 canvas.requestPointerLock();
-            //                 mouseMove.isPointerLocked = true
-            //                 mouseMove.reset()
-            //             }, 100);
-            //         } else {
-            //             mouseMove.isLockPointer = true
-            //             document.body.addEventListener('mousedown', mouseMove.pointerUnlock);//watches for mouse clicks that exit draft mode and self removes
-            //         }
-            //     }).catch(err => {
-            //         console.error('Error attempting to enable fullscreen:', err);
-            //     });
-            // }
             break
+        }
         case input.key.testing:
             if (m.alive && localSettings.loreCount > 0 && !simulation.paused && !build.isExperimentSelection) {
                 if (simulation.difficultyMode > 6) {
@@ -1775,7 +1549,7 @@ window.addEventListener("keydown", function (event) {
                 build.populateGrid();
                 document.getElementById("experiment-grid").style.display = "grid";
                 Object.assign(document.body.style, { overflowY: "scroll", overflowX: "hidden", cursor: "auto" });
-                if (document.pointerLockElement) document.exitPointerLock();
+                mouseMove.unlock()
                 break
             case "b":
                 tech.isRerollDamage = true
@@ -1855,22 +1629,19 @@ const mouseMove = {
         if (simulation.mouse.y < 0) simulation.mouse.y = 0
         if (simulation.mouse.y > canvas.height) simulation.mouse.y = canvas.height
     },
-    // isLockPointer: false,//use to lock pointer in the mousedown eventlistener
-    isPointerLocked: false, //tracks the pointer locked state
+    isPointerLocked: false, //tracks the pointer locked state, only set by the pointerlockchange event
     isMouseInWindow: true,
-    pointerUnlock() { //event
-        setTimeout(() => {
-            if (document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
-                // mouseMove.isLockPointer = false
-                canvas.requestPointerLock();
-                mouseMove.isPointerLocked = true
-                mouseMove.reset()
-            }
-            // else if (!mouseMove.isLockPointer || !document.fullscreenElement) {
-            //     mouseMove.isLockPointer = false
-            // }
-            // document.body.removeEventListener('mousedown', mouseMove.pointerUnlock); //remove self so it can't trigger
-        }, 100);
+    wantsLock() { //pointer lock is only used in fullscreen during gameplay, menus need the normal mouse
+        return !!document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing
+    },
+    lock() { //call after anything that resumes gameplay, browsers only allow this after a click or key press
+        if (mouseMove.wantsLock() && !document.pointerLockElement) {
+            const request = canvas.requestPointerLock()
+            if (request) request.catch(() => { }) //browsers can refuse, the next click in game tries again
+        }
+    },
+    unlock() { //call when opening a menu
+        if (document.pointerLockElement) document.exitPointerLock();
     },
     reset() {//sets mouseMove.active based on inverted and pointer lock
         if (simulation.isInvertedVertical) {
@@ -1907,6 +1678,20 @@ mouseMove.reset()
 document.body.addEventListener("mousemove", (e) => {
     mouseMove.active(e)
 });
+//the browser can grant, refuse, or drop pointer lock on its own (ESC, switching programs), so only trust these events
+document.addEventListener("pointerlockchange", () => {
+    mouseMove.isPointerLocked = document.pointerLockElement === canvas
+    mouseMove.reset()
+    if (mouseMove.isPointerLocked && !mouseMove.wantsLock()) mouseMove.unlock() //a slow lock request finished after a menu opened
+});
+document.addEventListener("fullscreenchange", () => {
+    input.reset(); //to prevent key ghosting reset all input keys
+    if (document.fullscreenElement) {
+        mouseMove.lock()
+    } else {
+        mouseMove.unlock()
+    }
+});
 
 document.body.addEventListener("mouseup", (e) => {
     // input.fire = false;
@@ -1924,16 +1709,7 @@ document.body.addEventListener("mousedown", (e) => {
     } else if (e.button === 2) {
         input.field = true;
     }
-    //reenable pointer lock after choosing
-    // mouseMove.isLockPointer = true
-    // setTimeout(() => {
-    //     if (mouseMove.isLockPointer && document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused) {
-    //         mouseMove.isLockPointer = false
-    //         canvas.requestPointerLock();
-    //         mouseMove.isPointerLocked = true
-    //         mouseMove.reset()
-    //     }
-    // }, 100);
+    mouseMove.lock() //backup in case pointer lock was lost or refused, does nothing in menus
 });
 
 document.body.addEventListener("mouseenter", (e) => { //prevents mouse getting stuck when leaving the window
@@ -2068,6 +1844,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = true
     document.getElementById("show-num").checked = localSettings.showDmgNumbers
 
+    if (localSettings.isAutoFullscreen === undefined) localSettings.isAutoFullscreen = false
+    document.getElementById("auto-fullscreen").checked = localSettings.isAutoFullscreen
+
     if (!["youtube", "spotify", "apple"].includes(localSettings.musicService)) {
         localSettings.musicService = "youtube"
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -2114,6 +1893,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideHUD: false,
         showDmgNumbers: false,
+        isAutoFullscreen: false,
         musicService: "youtube",
         pauseMenuDetailsOpen: [true, false, false, true, false],
         techHistory: [],
@@ -2124,6 +1904,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
     document.getElementById("banned").value = localSettings.banList
+    document.getElementById("auto-fullscreen").checked = localSettings.isAutoFullscreen
 }
 simulation.difficultyOptions = localSettings.difficultyOptions ? powerUps.difficulty.normalize(localSettings.difficultyOptions) : powerUps.difficulty.fromLegacy(localSettings.difficultyMode);
 localSettings.difficultyOptions = { ...simulation.difficultyOptions };
@@ -2202,6 +1983,11 @@ document.getElementById("fps-select").addEventListener("input", () => {
 
 document.getElementById("banned").addEventListener("input", () => {
     localSettings.banList = document.getElementById("banned").value
+    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+});
+
+document.getElementById("auto-fullscreen").addEventListener("input", () => {
+    localSettings.isAutoFullscreen = document.getElementById("auto-fullscreen").checked
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
@@ -2454,6 +2240,7 @@ function cycle() {
 
         simulation.cycle++; //tracks game cycles
         m.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
+        if (input.fire || input.field) m.lastFireFieldCycle = m.cycle
         if (simulation.clearNow) {
             simulation.clearNow = false;
             simulation.clearMap();
@@ -2462,3 +2249,5 @@ function cycle() {
         simulation.loop();
     }
 }
+
+saveGame.updateContinueButton() //show continue on the title page when there is an autosave

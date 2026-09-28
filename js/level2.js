@@ -1,3 +1,4 @@
+"use strict";
 Object.assign(moreLevels, {
     gauntlet() {
         level.custom = () => {
@@ -855,7 +856,8 @@ Object.assign(moreLevels, {
     //         }
     //     }
     // },
-    house() { //by Francois from discord
+    house() {
+        let chair, chair2 //by Francois from discord
         simulation.inGameConsole(`<strong>house</strong> by <span class='color-var'>Francois</span>`);
         const rotor = level.rotor(4251, -325, 120, 20, 200, 0, 0.01, 0, -0.0001);
         const hazard = level.hazard(4350, -1000, 300, 110);
@@ -2070,6 +2072,7 @@ Object.assign(moreLevels, {
         const boost1 = level.boost(4400, -1385, 1200)
 
         level.custom = () => {
+            let i
             boost1.query();
             buttonGreen.query()
             buttonYellow.query()
@@ -3091,6 +3094,7 @@ Object.assign(moreLevels, {
 
         // canvas stuff
         function drawFlame(x, y, color = "#f81", angle = Math.PI / 2) {
+            let randLen
             ctx.beginPath();
             ctx.moveTo(x, y);
             ctx.strokeStyle = color;
@@ -3155,6 +3159,7 @@ Object.assign(moreLevels, {
         }
     },
     run() {
+        let addPartToMap, anotherBoss
         simulation.inGameConsole(`<strong>run</strong> by <span class='color-var'>iNoobBoi</span>`);
 
         addPartToMap = (len) => { //adds new map elements to the level while the level is already running  //don't forget to run simulation.draw.setPaths() after you all the elements so they show up visually
@@ -3193,6 +3198,7 @@ Object.assign(moreLevels, {
         let removeList = [];
 
         level.custom = () => {
+            let i
             level.exit.drawAndCheck();
 
             level.enter.draw();
@@ -3829,6 +3835,7 @@ Object.assign(moreLevels, {
         powerUps.spawn(3000, -230, "heal");
     },
     temple() {
+        let addPartToMap
         simulation.inGameConsole(`<strong>temple</strong> by <span class='color-var'>Scar1337</span>`);
 
         const V = Vector;
@@ -4537,6 +4544,7 @@ Object.assign(moreLevels, {
         for (let i = 0; i < 2; i++) spawn.mapRect(-250, -8400 + 150 * i, 500, 60);
         const room2SlimePit = level.hazard(-400, -8410, 800, 1090);
         room2SlimePit.logic = function () {
+            let powerUpCollide
             if (this.height > 0 && Matter.Query.region([player], this).length) {
                 if (m.immuneCycle < m.cycle) {
                     // Trolled
@@ -7387,6 +7395,7 @@ Object.assign(moreLevels, {
 
 
         level.custom = () => {
+            let waterFalSmoothlX
             //spawn.mapRect(22330, -2688.75, 400, 800);
             //spawn.mapRect(22330, -1793.5, 400, 800);//-46.25*2=-92.5
             //spawn.mapRect(22330, -804.25, 400, 800);//-46.25*3
@@ -7952,6 +7961,7 @@ Object.assign(moreLevels, {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     clock() {
+        let pendulum1
         simulation.inGameConsole(`<strong>clock</strong> by <span class='color-var'>Cornbread 2100</span>`);
 
         function drawBackgroundGear(x, y, r1, r2, rot, color, speed, numTeeth = 5, toothWidth = 75, linew = 2) {
@@ -8102,6 +8112,7 @@ Object.assign(moreLevels, {
         }
 
         function mapGear(x, y, r1, r2, rot, speed, numTeeth = 5, toothWidth = 50, additionalCircleRadius = 10) {
+            let distanceToCenter, gearToothSlope
             const part1 = body[body.length] = Bodies.polygon(x, y, 0, r1 + additionalCircleRadius, {
                 collisionFilter: {
                     category: cat.body,
@@ -8606,6 +8617,7 @@ Object.assign(moreLevels, {
         }
 
         function getIntersections(v1, v1End, domain) {
+            let results
             const intersections = [];
 
             for (const obj of domain) {
@@ -8621,6 +8633,7 @@ Object.assign(moreLevels, {
         }
 
         function circleLoS(pos, radius, domain) {
+            let test
 
             function allCircleLineCollisions(c, radius, domain) {
                 var lines = [];
@@ -9796,6 +9809,7 @@ Object.assign(moreLevels, {
         spawn.randomLevelBoss(1840, 675)
     },
     movers() {
+        let bosses
         simulation.inGameConsole(`<strong>movers</strong> by <span class='color-var'>ryanbear</span>`);
         level.custom = () => {
             level.exit.drawAndCheck();
@@ -11039,6 +11053,7 @@ Object.assign(moreLevels, {
         }
     },
     dungeon() {
+        let best, dong
         let destroyed = false;
         const door = level.door(2650, -825, 50, 250, 250, 10);
         const elevator = level.elevator(-11050, -650, 450, 75, -2975, 0.003, { up: 0.1, down: 0.1 })
@@ -12075,6 +12090,7 @@ Object.assign(moreLevels, {
         }
         Object.assign(powerUps, loadOut)
         const restoreBoss = function (x, y, radius = 30) {
+            let results, sides
             mobs.spawn(x, y, 8, radius, 'transparent');
             let me = mob[mob.length - 1];
             me.stroke = 'transparent';
@@ -13134,9 +13150,7 @@ Object.assign(moreLevels, {
                         me.lasers(this.vertices[1], this.angle + Math.PI);
                         me.lasers(this.vertices[2], this.angle - Math.PI / 3);
                     }
-                    ctx.strokeStyle = randomColor({
-                        hue: "#FF00FF"
-                    });
+                    ctx.strokeStyle = `hsl(${300 + 30 * (Math.random() - 0.5)}, 100%, ${40 + 30 * Math.random()}%)`; //random magenta
                     ctx.stroke();
                     ctx.save()
                     ctx.beginPath();
@@ -13291,6 +13305,7 @@ Object.assign(moreLevels, {
         // const obj = { restoreBoss };
         // Object.assign(spawn, obj); //ez
     },
+    /* Retired at the map author's request; keep the level here for a possible revision.
     superNgonBros() {
         simulation.inGameConsole(`<strong>Super N-gon Bros</strong> by <span class='color-var'>DesBoot</span>`);
 
@@ -13810,7 +13825,9 @@ Object.assign(moreLevels, {
         // spawn.secondaryBossChance(100, -1500)
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    */
     underpass() {
+        let best, dong, results
         simulation.inGameConsole(`<strong>underpass</strong> by <span class='color-var'>Richard0820</span>`);
 
         let key = false;
@@ -15075,7 +15092,8 @@ Object.assign(moreLevels, {
                 ctx.setLineDash([]);
             }
         };
-        const restoreBoss = function (x, y, radius = 30) { //ATTENTION LANDGREEN: RESTOREBOSS WILL NOT DROP ANY TECH, NOR WILL THERE BE ANY IN THE MAP. DO NOT ADD ANY TECH TO MY MAP
+        const restoreBoss = function (x, y, radius = 30) {
+            let sides //ATTENTION LANDGREEN: RESTOREBOSS WILL NOT DROP ANY TECH, NOR WILL THERE BE ANY IN THE MAP. DO NOT ADD ANY TECH TO MY MAP
             mobs.spawn(x, y, 8, radius, 'transparent');
             let me = mob[mob.length - 1];
             me.stroke = 'transparent';
@@ -16958,7 +16976,8 @@ Object.assign(moreLevels, {
                 spawn.mapRect(i - n, p - s, n * a, s), spawn.mapRect(i - n, p - s, n, s * a), spawn.mapRect(i + (a - 1) * n, p - s, n, s * (a + 1)), spawn.mapRect(i - n, p + (a - 1) * s, n * (a + 1), s)
             }(1e4, -1e3, 1e4, 1e4, 50);
     },
-    ruins() { // by SiddhUPe
+    ruins() {
+        let bigpool, mover, mover1, mover2, pool, pooldunker, thirdpool, wastepool // by SiddhUPe
         // simulation.enableConstructMode()
         simulation.inGameConsole(`<strong>ruins</strong> by <span class='color-var'>SiddhUPe</span>`);
 
@@ -18019,6 +18038,7 @@ Object.assign(moreLevels, {
 
         pooldunker = level.mover(7175, 425, 50, 25);
         level.custom = () => {
+            let i
             level.exit.drawAndCheck();
             pooldunker.VxGoal = 90;
             pooldunker.push();
@@ -18041,6 +18061,7 @@ Object.assign(moreLevels, {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     ace() {
+        let best, results, wasd
         simulation.inGameConsole(`<strong>ace</strong> by <span class='color-var'>Richard0820</span>`);
         let isDestroyed = false;
         const ace = {
@@ -19611,11 +19632,14 @@ Object.assign(moreLevels, {
                 };
             }
         };
+        const spawnRegions = [] //used by waveSpawner
         function spawner(x, y, w, h, d = 100000) {
+            const region = { sx: x, sy: y, sw: w, sh: h }
+            spawnRegions.push(region)
             for (let i = 0; i < Math.floor(w * h / d); i++) {
                 spider.spawn(x + Math.random() * w, y + Math.random() * h);
                 const newest = mob[mob.length - 1];
-                if (newest) newest.spawnRegion = { sx: x, sy: y, sw: w, sh: h };
+                if (newest) newest.spawnRegion = region;
             }
         }
         const waveSpawner = {
@@ -22622,8 +22646,8 @@ Object.assign(moreLevels, {
             setMovement() {
                 // g.Fx = 0.08 / mass * tech.squirrelFx 
                 // g.FxAir = 0.4 / mass / mass 
-                g.Fx = tech.baseFx * g.fieldFx * tech.squirrelFx * tech.fastTime / genisis.mass //base genisis mass is 5
-                g.jumpForce = tech.baseJumpForce * g.fieldJump * tech.squirrelJump * tech.fastTimeJump / genisis.mass / genisis.mass //base genisis mass is 5
+                g.Fx = tech.baseFx * g.fieldFx * m.squirrelFx * tech.fastTime / genisis.mass //base genisis mass is 5
+                g.jumpForce = tech.baseJumpForce * g.fieldJump * m.squirrelJump * tech.fastTimeJump / genisis.mass / genisis.mass //base genisis mass is 5
             },
             FxAir: 0.032, // 0.4/5/5  run Force in Air
             yOff: 70,
@@ -24336,6 +24360,7 @@ Object.assign(moreLevels, {
         }
     },
     soft() {
+        let best, results
         simulation.inGameConsole(`<strong>soft</strong> by <span class='color-var'>Destiny</span>`);
         simulation.inGameConsole("<em>The lasers deal less damage the higher level you are</em>")
         const portals = [];
@@ -26797,6 +26822,7 @@ Object.assign(moreLevels, {
                 isOn: true,
 
                 query() {
+                    let powerUpCollide
                     if (!this.isOn) return;
 
                     ctx.beginPath();
@@ -27458,6 +27484,7 @@ Object.assign(moreLevels, {
         powerUps.addResearchToLevel();
     },
     turbine() {
+        let bossPlace, checkCounter, inhiddenroom, intoHiddenRoom, leverX, leverY, randList1, randList2, randList3, randList4, randListCount, turbineSwitchOption, windBoxState, windBoxTransition
         randList1 = Array.from({ length: 40 }, () => Math.random());
         randList2 = Array.from({ length: 40 }, () => Math.random());
         randList3 = Array.from({ length: 40 }, () => Math.random());
@@ -27554,6 +27581,7 @@ Object.assign(moreLevels, {
 
 
         level.custom = () => {
+            let rand1, rand2, rand3, rand4, rand5
             if (checkCounter < 10) {
                 ++checkCounter
             } else {
@@ -29012,6 +29040,7 @@ Object.assign(moreLevels, {
             Composite.add(engine.world, me.constraint);
         }
         function drawStar(cx, cy, spikes, outerRadius, innerRadius) {
+            let i
             outerRadius *= (1 + 0.1 * Math.sin(simulation.cycle * 0.15));
             innerRadius *= (1 + 0.1 * Math.sin(simulation.cycle * 0.15));
             var rot = Math.PI / 2 * 3;
@@ -32423,6 +32452,7 @@ Object.assign(moreLevels, {
             }
         }
         function portall(centerA, angleA, centerB, angleB) {
+            let draw, query
             const width = 50
             const height = 150
             const mapWidth = 200

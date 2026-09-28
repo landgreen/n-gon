@@ -182,6 +182,23 @@ summary {
     /* border-radius: 8px 0 8px 8px; */
 }
 
+#continue-button {
+    display: none;
+    position: absolute;
+    bottom: 56px;
+    right: 4px;
+    z-index: 12;
+}
+
+/* an autosave adds continue above experiment and moves training and start up one slot */
+body.has-autosave #training-button {
+    bottom: 108px;
+}
+
+body.has-autosave #start-button {
+    bottom: 160px;
+}
+
 
 
 
