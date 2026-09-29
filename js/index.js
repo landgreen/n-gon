@@ -6,11 +6,6 @@ Math.hash = s => {
     return h ^ h >>> 9
 }
 
-// simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${error.message}  <u>${error.filename}:${error.lineno}</u>`)
-window.addEventListener('error', error => {
-    simulation.inGameConsole(`<strong style='color:red;'>ERROR:</strong> ${(error.stack && error.stack.replace(/\n/g, "<br>")) || (error.message + ` <u>${error.filename}:${error.lineno}</u>`)}`);
-});
-
 document.getElementById("seed").placeholder = Math.initialSeed = String(Math.floor(Date.now() % 100000))
 Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed in case the player changed it
 Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed' must NOT be undefined
@@ -462,6 +457,7 @@ ${simulation.difficultyOptions.isConstraint ? `<details id="constraints-details"
 <summary>console log</summary>
 <div class="pause-details">
     <div class="pause-grid-module" style="background-color: #e2e9ec;font-size: 0.85em; font-family: monospace;">${document.getElementById("text-log").innerHTML}</div>
+    ${pauseConsole.html}
 </div>
 </details>
 </div>`
@@ -482,6 +478,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         let el = document.getElementById("pause-grid-left")
         el.style.display = "grid"
         el.innerHTML = text
+        pauseConsole.setup()
         updateMusicLinks()
         requestAnimationFrame(() => {
             if (localSettings.isAllowed) {
@@ -2241,12 +2238,19 @@ function cycle() {
         simulation.cycle++; //tracks game cycles
         m.cycle++; //tracks player cycles  //used to alow time to stop for everything, but the player
         if (input.fire || input.field) m.lastFireFieldCycle = m.cycle
-        if (simulation.clearNow) {
-            simulation.clearNow = false;
-            simulation.clearMap();
-            level.start();
+        try {
+            if (simulation.clearNow) {
+                simulation.clearNow = false;
+                simulation.clearMap();
+                level.start();
+                consoleMirror.showTitleLogs()
+            }
+            simulation.loop();
+        } catch (error) {
+            consoleMirror.showError(error)
+            consoleMirror.isShownByLoop = true
+            throw error //keep the crash and the browser console error
         }
-        simulation.loop();
     }
 }
 

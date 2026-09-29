@@ -348,6 +348,26 @@ body.has-autosave #start-button {
     overflow: hidden;
 }
 
+#pause-console {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    font-family: monospace;
+}
+
+#pause-console-input {
+    flex: 1;
+    min-width: 0;
+    padding: 3px 6px;
+    font-family: monospace;
+    font-size: 0.85em;
+    color: #000;
+    background-color: #fff;
+    border: 1px solid #999;
+    border-radius: 3px;
+}
+
 .sort {
     padding: 0.1em 0.3em;
     border: 1px solid #444;
@@ -1541,6 +1561,44 @@ body.has-autosave #start-button {
         text-shadow: -3px 0px 0px;
     }
 
+}
+
+/* quantum non-demolition drop down, a details element because select options can't show orbs */
+.non-demolition-menu {
+    float: right;
+    border: 1px #333 solid;
+    border-radius: 6px;
+    background-color: #fff;
+    cursor: pointer;
+}
+
+.non-demolition-menu summary {
+    list-style: none;
+    padding: 0 0.3em;
+}
+
+.non-demolition-menu summary::-webkit-details-marker {
+    display: none;
+}
+
+.non-demolition-menu summary::after {
+    content: " \25BE";
+}
+
+.non-demolition-menu[open] summary {
+    border-bottom: 1px #333 solid;
+}
+
+.non-demolition-option {
+    padding: 0.1em 0.3em;
+}
+
+.non-demolition-option:hover {
+    background-color: var(--hover-card-color);
+}
+
+.non-demolition-option-selected {
+    background-color: #e2e9ec;
 }
 
 .flicker {

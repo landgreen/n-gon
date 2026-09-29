@@ -354,56 +354,79 @@ const m = {
     switchWorlds(giveTech = "") {
         if (!m.isSwitchingWorlds) {
             let totalTech = 0;
-            const addBack = []
-            for (let i = tech.tech.length - 1; i > -1; i--) {
-                if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isNonRefundable) {
-                    if (tech.tech[i].isAltRealityTech) {
-                        addBack.push(tech.tech[i].name)
-                    } else {
-                        totalTech += tech.tech[i].count
-                    }
-                }
-            }
+            const keep = tech.nonDemolition //quantum non-demolition: your "field", "gun", or other "tech" don't change
             powerUps.boost.endCycle = 0
             simulation.isTextLogOpen = false; //prevent console spam
-            tech.resetAllTech()
-            // if (giveTech) tech.giveTech(giveTech) //give many worlds back
-            for (let i = 0; i < addBack.length; i++) tech.giveTech(addBack[i])
+            if (keep) {
+                //only remove the tech that aren't kept, giving kept tech back would repeat their one time effects
+                for (const t of tech.tech.slice()) {
+                    if (t.count > 0 && (t.isLore || (!t.isAltRealityTech && !tech.isNonDemolitionKept(t)))) {
+                        if (!t.isLore && !t.isNonRefundable) totalTech += t.count
+                        t.remove()
+                        if (!t.isInstant) tech.totalCount -= t.count
+                        t.count = 0
+                        if (tech.zeitgeistRemoveName === t.name) tech.zeitgeistRemoveName = null
+                    }
+                }
+                lore.techCount = 0
+                if (keep !== "tech") { //other tech are randomized, so also reset what they leave behind like resetAllTech does
+                    tech.duplication = 0
+                    tech.pauseEjectTech = 2
+                    powerUps.retainList = []
+                    powerUps.setPowerUpMode()
+                }
+            } else {
+                const addBack = []
+                for (let i = tech.tech.length - 1; i > -1; i--) {
+                    if (tech.tech[i].count > 0 && !tech.tech[i].isLore && !tech.tech[i].isNonRefundable) {
+                        if (tech.tech[i].isAltRealityTech) {
+                            addBack.push(tech.tech[i].name)
+                        } else {
+                            totalTech += tech.tech[i].count
+                        }
+                    }
+                }
+                tech.resetAllTech()
+                // if (giveTech) tech.giveTech(giveTech) //give many worlds back
+                for (let i = 0; i < addBack.length; i++) tech.giveTech(addBack[i])
+            }
 
             //remove all bullets
             for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
             bullet = [];
 
             //randomize
-            powerUps.research.count = Math.floor(powerUps.research.count * (0.5 + 1.5 * Math.random()))
-            m.coupling = Math.floor(m.coupling * (0.5 + 1.5 * Math.random()))
+            if (keep !== "tech") powerUps.research.count = Math.floor(powerUps.research.count * (0.5 + 1.5 * Math.random()))
+            if (keep !== "field") m.coupling = Math.floor(m.coupling * (0.5 + 1.5 * Math.random()))
             //randomize health
             m.health = m.health * (1 + 0.5 * (Math.random() - 0.5))
             if (m.health > 1) m.health = 1;
             //randomize field
-            m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
-            //removes guns and ammo  
-            b.inventory = [];
-            b.activeGun = null;
-            b.inventoryGun = 0;
-            for (let i = 0, len = b.guns.length; i < len; ++i) {
-                b.guns[i].have = false;
-                if (b.guns[i].ammo !== Infinity) {
-                    b.guns[i].ammo = 0;
-                    b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+            if (keep !== "field") m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
+            if (keep !== "gun") {
+                //removes guns and ammo
+                b.inventory = [];
+                b.activeGun = null;
+                b.inventoryGun = 0;
+                for (let i = 0, len = b.guns.length; i < len; ++i) {
+                    b.guns[i].have = false;
+                    if (b.guns[i].ammo !== Infinity) {
+                        b.guns[i].ammo = 0;
+                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                    }
+                }
+                //give random guns
+                // const totalGuns = 1 + Math.floor(b.inventory.length * (0.5 + 1.5 * Math.random()))
+                const totalGuns = 1 + Math.floor(Math.random() * Math.random() * 7)
+                for (let i = 0; i < totalGuns; i++) b.giveGuns()
+
+                //randomize ammo based on ammo/ammoPack count
+                for (let i = 0, len = b.inventory.length; i < len; i++) {
+                    if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.floor(b.guns[b.inventory[i]].ammo * (0.25 + Math.random() + Math.random() + Math.random()))
                 }
             }
-            //give random guns
-            // const totalGuns = 1 + Math.floor(b.inventory.length * (0.5 + 1.5 * Math.random()))
-            const totalGuns = 1 + Math.floor(Math.random() * Math.random() * 7)
-            for (let i = 0; i < totalGuns; i++) b.giveGuns()
 
-            //randomize ammo based on ammo/ammoPack count
-            for (let i = 0, len = b.inventory.length; i < len; i++) {
-                if (b.guns[b.inventory[i]].ammo !== Infinity) b.guns[b.inventory[i]].ammo = Math.floor(b.guns[b.inventory[i]].ammo * (0.25 + Math.random() + Math.random() + Math.random()))
-            }
-
-            simulation.queueAction({ type: "reality tech", remaining: totalTech })
+            simulation.queueAction({ type: "reality tech", remaining: totalTech, keep })
 
             if (tech.isAltRealitySpawn) {
                 // powerUps.spawn(m.pos.x - 10, m.pos.y, powerUps.healGiveMaxEnergy ? "Casimir" : "heal", false)
@@ -472,6 +495,12 @@ const m = {
             // m.addHealth(1)
             for (let i = 0; i < tech.tech.length; i++) {
                 if (tech.tech[i].name === "eigenstate") {
+                    powerUps.ejectTech(i, true)
+                    break
+                }
+            }
+            for (let i = 0; i < tech.tech.length; i++) { //stops optimization from swapping back to eigenstate to revive your other state
+                if (tech.tech[i].name === "optimization") {
                     powerUps.ejectTech(i, true)
                     break
                 }
@@ -4953,6 +4982,18 @@ const m = {
             range() { //field size while drifting, used by negative pressure even when the field is off
                 return this.flightMode().drift.radius
             },
+            drawRange(x, y, radius) { //zero-G range
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fillStyle = "#f5f5ff";
+                ctx.globalCompositeOperation = "difference";
+                ctx.fill();
+                ctx.globalCompositeOperation = "source-over";
+            },
+            warmUp() { //see simulation.warmShaders
+                m.draw() //the range is drawn after other things in the same frame, which is a different shader than drawing it first
+                this.drawRange(m.pos.x, m.pos.y, 400)
+            },
             zeroG(who, range, mag) { //lift nearby objects, and move them horizontally with the same force as the player
                 const range2 = range * range
                 for (let i = 0, len = who.length; i < len; ++i) {
@@ -5037,15 +5078,7 @@ const m = {
                             }
                             //add extra friction
                             Matter.Body.setVelocity(player, { x: player.velocity.x * 0.99, y: player.velocity.y * 0.98 });
-                            //draw zero-G range
-                            if (!simulation.isTimeSkipping) {
-                                ctx.beginPath();
-                                ctx.arc(m.pos.x, m.pos.y, m.fieldDrawRadius, 0, 2 * Math.PI);
-                                ctx.fillStyle = "#f5f5ff";
-                                ctx.globalCompositeOperation = "difference";
-                                ctx.fill();
-                                ctx.globalCompositeOperation = "source-over";
-                            }
+                            if (!simulation.isTimeSkipping) field.drawRange(m.pos.x, m.pos.y, m.fieldDrawRadius)
                         } else {
                             m.fieldDrawRadius = 0 //out of energy
                         }
@@ -5747,6 +5780,7 @@ const m = {
                     m.fieldFire = true;
                     m.isTimeDilated = false;
                     m.hold = function () {
+                        if (input.field && !m.isHolding) m.grabPowerUp(); //grab power ups even while out of energy or on cooldown
                         if (m.isHolding) {
                             m.wakeCheck();
                             m.drawHold(m.holdingTarget);
@@ -5755,7 +5789,6 @@ const m = {
                         } else if (input.field && m.fieldCDcycle < m.cycle) {
                             const drain = 0.0026 / (1 + 0.05 * m.coupling)
                             if (m.energy > drain) m.energy -= drain
-                            m.grabPowerUp();
                             m.lookForBlock();
                             if (m.energy > drain) {
                                 m.timeStop();

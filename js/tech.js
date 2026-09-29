@@ -494,6 +494,51 @@ const tech = {
         zeitgeist(value) {
             tech.zeitgeistRemoveName = value
         },
+        nonDemolition(value) {
+            const entry = tech.tech.find(item => item.name === "quantum non-demolition");
+            if (!entry.count || !simulation.paused || simulation.isChoosing || !["field", "gun", "tech"].includes(value)) return;
+            tech.nonDemolition = value
+            build.generatePauseRight()
+        },
+        optimization(value) {
+            const entry = tech.tech.find(item => item.name === "optimization");
+            if (!entry || !entry.count || !simulation.paused || simulation.isChoosing) return;
+            const oldSkin = tech.tech.find(item => item.isSkin && item.count > 0)
+            const newSkin = tech.tech.find(item => item.isSkin && !item.isJunk && item.name === value)
+            if ((oldSkin && oldSkin === newSkin) || (!newSkin && value !== "none")) return;
+            //skin tech add or reset health and energy, so keep them the same through the swap
+            const health = m.health
+            const energy = m.energy
+            const wasEnergyHealth = tech.isEnergyHealth
+            if (oldSkin) tech.removeTech(oldSkin.name, false)
+            if (newSkin) {
+                if (newSkin.allowed()) {
+                    tech.giveTech(newSkin.name)
+                } else {
+                    simulation.inGameConsole(`<strong>${newSkin.name}</strong> requires: ${newSkin.requires}`)
+                    if (oldSkin) tech.giveTech(oldSkin.name)
+                }
+            }
+            m.energy = energy
+            if (!tech.isEnergyHealth) {
+                if (wasEnergyHealth) { //leaving mass-energy equivalence converts energy back into health
+                    m.health = Math.max(Math.min(m.maxHealth, energy), 0.1)
+                    m.energy = Math.max(0, energy - m.health)
+                } else {
+                    m.health = Math.min(m.maxHealth, health)
+                }
+                m.displayHealth();
+            }
+            build.generatePauseRight()
+            build.generatePauseLeft()
+        },
+    },
+    nonDemolition: null, //quantum non-demolition: "field", "gun", or "tech" stay the same when switching worlds
+    isNonDemolitionKept(t, mode = tech.nonDemolition) { //t is a tech.tech entry
+        if (mode === "field") return !!t.isFieldTech
+        if (mode === "gun") return !!t.isGunTech
+        if (mode === "tech") return !t.isFieldTech && !t.isGunTech
+        return false
     },
     tech: [{
         name: "tungsten carbide",
@@ -510,6 +555,16 @@ const tech = {
             return !m.isAltSkin
         },
         requires: "not skin",
+        warmUp() { //see simulation.warmShaders
+            const immuneCycle = m.immuneCycle
+            const walkCycle = m.walk_cycle
+            m.immuneCycle = 0
+            m.draw()
+            m.immuneCycle = Infinity //see-through while immune
+            m.draw()
+            m.immuneCycle = immuneCycle
+            m.walk_cycle = walkCycle
+        },
         effect() {
             tech.isFallingDamage = true;
             m.setMaxHealth();
@@ -1082,6 +1137,30 @@ const tech = {
         remove() {
             tech.isRewindGrenade = false;
         }
+    },
+    {
+        name: "optimization",
+        descriptionFunction() {
+            let menu = ''
+            if (this.count > 0 && !this.isLost && !build.isExperimentSelection) {
+                const current = tech.tech.find(item => item.isSkin && item.count > 0)
+                const skins = tech.tech.filter(item => item.isSkin && !item.isJunk).map(item => item.name).sort((a, b) => a.localeCompare(b))
+                menu = `<select aria-label="skin" onclick="event.stopPropagation()" onchange="tech.inputHTML.optimization(this.value)" style="float: right;"><option value="none" ${current ? '' : 'selected'}>none</option>${skins.map(name => `<option value="${name}" ${current && current.name === name ? 'selected' : ''}>${name}</option>`).join('')}</select>`;
+            }
+            return `when <span class="color-paused" data-help="pause">PAUSED</span> you can select your &nbsp; ${powerUps.orb.skin()}<br>${menu}`;
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        isSkinUpgrade: true,
+        isInput: true,
+        allowed() {
+            return m.isAltSkin
+        },
+        requires: "skinned",
+        effect() { },
+        remove() { }
     },
     {
         name: "ternary", //"divisor",
@@ -4760,6 +4839,46 @@ const tech = {
         remove() {
             tech.isResearchReality = false;
             // if (this.count > 0) powerUps.research.changeRerolls(-this.bonusResearch)
+        }
+    },
+    {
+        name: "quantum non-demolition",
+        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Quantum_nondemolition_measurement' class="link">quantum non-demolition</a>`,
+        descriptionFunction() {
+            const modes = {
+                field: `${powerUps.orb.field()} &nbsp;${powerUps.orb.fieldTech()} &nbsp;${powerUps.orb.coupling(1)}`,
+                gun: `${powerUps.orb.gun()} &nbsp;${powerUps.orb.gunTech()} &nbsp;${powerUps.orb.ammo(1)}`,
+                tech: `${powerUps.orb.tech()} ${powerUps.orb.research(1)}`,
+            }
+            let menu
+            if (this.count > 0 && !this.isLost && !build.isExperimentSelection) {
+                const mode = modes[tech.nonDemolition] ? tech.nonDemolition : "field"
+                //the options have orb pictures, so this is a details element instead of a select
+                menu = `<details class="non-demolition-menu" onclick="event.stopPropagation()"><summary>${modes[mode]}</summary>`
+                for (const key of Object.keys(modes)) {
+                    menu += `<div class="non-demolition-option${key === mode ? " non-demolition-option-selected" : ""}" onclick="tech.inputHTML.nonDemolition('${key}')">${modes[key]}</div>`
+                }
+                menu += `</details>`
+            } else {
+                menu = `<br>${modes.field} &nbsp; or &nbsp; ${modes.gun} &nbsp; or &nbsp; ${modes.tech}`
+            }
+            return `when <span class="color-paused" data-help="pause">PAUSED</span> select what doesn't <strong>change</strong> when<br>you enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong> ${menu}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 3,
+        frequencyDefault: 3,
+        isAltRealityTech: true,
+        isInput: true,
+        allowed() {
+            return tech.tech.some(t => t.isAltRealityTech && t.count > 0 && t !== this)
+        },
+        requires: "an alternate reality tech",
+        effect() {
+            tech.nonDemolition = "field"
+        },
+        remove() {
+            tech.nonDemolition = null
         }
     },
     {
@@ -11726,6 +11845,13 @@ const tech = {
             return m.fieldMode === 5 && !tech.isExtruder
         },
         requires: "plasma torch, not extruder",
+        warmUp() { //see simulation.warmShaders
+            if (m.plasmaBall) {
+                m.draw()
+                m.plasmaBall.draw(m.pos, 60, 0.7)
+                for (const alpha of [1, 0.5, 0.1]) m.plasmaBall.draw(m.pos, 300, alpha) //explosions fade out
+            }
+        },
         effect() {
             tech.isPlasmaBall = true;
             window.removeEventListener("keydown", m.fieldEvent);

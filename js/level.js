@@ -14,7 +14,7 @@ const level = {
     isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"], //, "vault"
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", /* "superNgonBros", */ "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", /* "superNgonBros", */ "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage", "lake"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
     moreLevelsPromise: null,
@@ -57,7 +57,7 @@ const level = {
                 // m.wakeCheck();
                 // m.damageDone *= 10
 
-                m.maxHealth = m.health = 100
+                // m.maxHealth = m.health = 100
                 // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
@@ -82,6 +82,10 @@ const level = {
                 // for (let i = 0; i < 1; i++) tech.giveTech("siphonaptera")
                 // for (let i = 0; i < 1; i++) tech.giveTech("nematodes")
                 for (let i = 0; i < 1; i++) tech.giveTech("shotgun shell") //swap between fleas and worms when paused
+                tech.giveTech("nitinol")
+                tech.giveTech("optimization") //swap skins when paused
+                tech.giveTech("many-worlds") //alternate reality at the start of each level
+                tech.giveTech("quantum non-demolition") //choose what doesn't change in an alternate reality when paused
                 // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
                 // for (let i = 0; i < 1; i++) tech.giveTech("foam-shot")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
@@ -91,6 +95,7 @@ const level = {
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
                 // level.load("HVAC")
+                // level.load("lake")
                 level.maps.testing()
 
                 powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
@@ -2097,6 +2102,7 @@ const level = {
                 !level.isFlipping;
             if (isInside) {
                 level.exitCount += m.health < 0 ? 0.5 : 2
+                if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage while standing in the exit
             } else if (level.exitCount > 0) {
                 level.exitCount -= 2
             }
@@ -2111,7 +2117,7 @@ const level = {
             }
 
             const chargeProgress = Math.max(0, Math.min(1, level.exitCount / level.exit.chargeThreshold));
-            const ripple = level.exit.isInverted ? null : level.exit.updateRipple();
+            const ripple = level.exit.isInverted || localSettings.isHideHUD ? null : level.exit.updateRipple(); // Performance mode: no ripples.
             ctx.beginPath();
             if (level.exit.isInverted) {
                 ctx.moveTo(x, y + verticalSign * bottomOffset);

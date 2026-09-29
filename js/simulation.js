@@ -157,7 +157,7 @@ const simulation = {
                 const options = []
                 for (let i = 0; i < tech.tech.length; i++) {
                     const t = tech.tech[i]
-                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech) {
+                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech && !tech.isNonDemolitionKept(t, action.keep ?? null)) { //quantum non-demolition only replaces the tech it didn't keep
                         for (let j = 0; j < t.frequency; j++) options.push(i)
                     }
                 }
@@ -796,6 +796,32 @@ const simulation = {
         }, len * swapPeriod);
     },
     wipe() { }, //set in simulation.startGame
+    warmedShaders: new Set(), //effects already drawn by simulation.warmShaders, the GPU keeps their shaders until the page reloads
+    warmShaders() { //the first time some effects are drawn, the GPU can freeze the game for ~0.3s while it builds new shaders
+        //called after a choice, before unpausing, so the freeze happens while the choice menu is still up
+        //an effect opts in with a warmUp() that draws it at the player the way the game does, in each state that looks different to the GPU
+        let isDrawn = false
+        for (const effect of [m.fieldUpgrades[m.fieldMode], ...tech.tech]) {
+            if (effect.warmUp && (effect === m.fieldUpgrades[m.fieldMode] || effect.count > 0) && !simulation.warmedShaders.has(effect.name)) {
+                simulation.warmedShaders.add(effect.name)
+                ctx.save()
+                ctx.setTransform(1, 0, 0, 1, 0, 0)
+                simulation.camera() //the next frame wipes these draws before they're seen
+                effect.warmUp()
+                ctx.restore()
+                ctx.restore()
+                isDrawn = true
+            }
+        }
+        if (isDrawn) { //copy the canvas and read a pixel, which waits for the GPU to finish the draws
+            const copy = document.createElement("canvas")
+            copy.width = 512 //smaller canvases might not use the GPU
+            copy.height = 512
+            const copyCtx = copy.getContext("2d")
+            copyCtx.drawImage(canvas, 0, 0, 1, 1)
+            copyCtx.getImageData(0, 0, 1, 1)
+        }
+    },
     gravity() {
         function addGravity(bodies, magnitude) {
             for (var i = 0; i < bodies.length; i++) {

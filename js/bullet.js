@@ -3387,7 +3387,7 @@ const b = {
             b.phononWaveSolo(w, a, 55 * Math.sqrt(tech.bulletsLastLonger), speed, halfArc) //the arc is centered on angle
         }
     },
-    phononWaveSolo(where, angle, end = 68 * Math.sqrt(tech.bulletsLastLonger), speed = 1.7, halfArc = 0.24 * tech.wavePacketDamage, dmg = 1) {
+    phononWaveSolo(where, angle, end = 68 * Math.sqrt(tech.bulletsLastLonger), speed = 1.7, halfArc = 0.24 * tech.wavePacketDamage, dmg = 1, isReflectLeft = (simulation.cycle % 600) > 300) {
         if (tech.waveReflections > 1) end *= 0.8
         let reflectCount = tech.waveReflections //waveReflections counts legs, so bound state reflects 1 time per stack
         simulation.ephemera.push({
@@ -3509,7 +3509,7 @@ const b = {
                     if (this.count > end) {
                         reflectCount--
                         if (reflectCount > 0) { //toggle shrink or grow states
-                            const w = Vector.add(this.position, Vector.mult(((simulation.cycle % 600) > 300) ? this.unit1 : this.unit2, this.radius))
+                            const w = Vector.add(this.position, Vector.mult(isReflectLeft ? this.unit1 : this.unit2, this.radius))
                             this.position = w
                             this.radius = 25
                             this.count = 0
@@ -7035,6 +7035,7 @@ const b = {
             wavePacketCycle: 0,
             delay: 40,
             phononWaveCD: 0,
+            isReflectLeft: false, //bound state reflections alternate left and right each wave
             waves: [], //used in longitudinal mode
             chooseFireMethod() { //set in simulation.startGame
                 this.waves = [];
@@ -7095,7 +7096,8 @@ const b = {
                 const halfArc = a * (tech.isBulletTeleport ? 0.66 + (Math.random() - 0.5) : 1) //6.28 is a full circle, but these arcs needs to stay small because we are using small angle linear approximation, for collisions
                 const angle = m.angle + tech.isBulletTeleport * 0.3 * (Math.random() - 0.5)
                 //where, angle, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = tech.waveBeamSpeed, halfArc = 0.24 * tech.wavePacketDamage
-                b.phononWaveSolo({ x: m.pos.x, y: m.pos.y }, angle, (m.crouch ? 58 : 71) * Math.sqrt(tech.bulletsLastLonger), 1.7, halfArc)
+                this.isReflectLeft = !this.isReflectLeft
+                b.phononWaveSolo({ x: m.pos.x, y: m.pos.y }, angle, (m.crouch ? 58 : 71) * Math.sqrt(tech.bulletsLastLonger), 1.7, halfArc, 1, this.isReflectLeft)
                 // if (true) {
 
                 // }

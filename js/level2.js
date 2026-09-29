@@ -30636,6 +30636,220 @@ Object.assign(moreLevels, {
         spawn.randomLevelBoss(2050, -825);
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
+    lake() {
+        simulation.inGameConsole(`<strong>lake</strong> by <span class='color-var'>Richard0820</span>`);
+        simulation.fallHeight = 2500;
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = 7190;
+        level.exit.y = -30;
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        const boost1 = level.boost(6150, -1345, 25000);
+        const boost2 = level.boost(6100, -24387, 400, -Math.PI / 4)
+        const boost3 = level.boost(9775, -75, 10000, Math.PI);
+        const lakeX = 900, lakeW = 5940, lakeSurface = 30, lakeDepth = 1190
+        const lake = level.hazard(lakeX, lakeSurface, lakeW, lakeDepth, 0.003)
+        const pond = level.hazard(10025, 25, 450, 175, 0);
+
+        level.custom = () => {
+            level.exit.drawAndCheck();
+
+            level.enter.draw();
+            boost1.query();
+            boost2.query();
+            boost3.query();
+
+            if(spinIt) {
+                Matter.Body.setAngularVelocity(spinIt, 0.01);
+            }
+            ctx.beginPath();
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = "#000";
+            ctx.moveTo(7000, -2075);
+            ctx.lineTo(6775, -2075);
+            ctx.lineTo(6825, -2125);
+            ctx.stroke();
+            ctx.moveTo(6775, -2075);
+            ctx.lineTo(6825, -2025);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(12075, -250);
+            ctx.lineTo(12075, 375);
+            ctx.lineTo(12025, 325);
+            ctx.stroke();
+            ctx.moveTo(12075, 375);
+            ctx.lineTo(12125, 325);
+            ctx.stroke();
+
+            if(m.pos.y > 900) {
+                if(m.pos.x > 9500) {
+                    ctx.beginPath();
+                    ctx.fillStyle = "#000"
+                    ctx.font = "200px monospace";
+                    ctx.fillText("why would you trust me", 12050, 1225)
+                    ctx.fill();
+                } else {
+                    ctx.beginPath();
+                    ctx.fillStyle = "#000"
+                    ctx.font = "200px monospace";
+                    ctx.fillText("lmao", 8125, 2000)
+                    ctx.fill();
+                }
+            }
+            ctx.beginPath();
+            ctx.fillStyle = "#000"
+            ctx.font = "200px monospace";
+            ctx.fillText("don't move", 6525, -8575);
+            ctx.fill();
+        };
+        level.customTopLayer = () => {
+            lake.query();
+            pond.query();
+
+            ctx.fillStyle = color.map;
+            if(m.pos.y < 100 || (m.pos.x < 7700 || m.pos.x > 8075)) ctx.fillRect(7700, 0, 375, 1750);
+        };
+        const oldLevel = level.onLevel;
+        simulation.ephemera.push({
+            name: "slime",
+            yL: lakeSurface,
+            ym: lakeSurface + lakeDepth,
+            xc1: lakeX,
+            xc2: lakeX + lakeW,
+            do() {
+                if(oldLevel != level.onLevel) simulation.removeEphemera(this.name, true)
+                for (let i = 0; i < body.length; i++) {
+                    if (body[i].position.x < this.xc1 || body[i].position.x > this.xc2 || body[i].position.y > this.ym) continue;
+                    let vertices = body[i].vertices;
+                    let v2 = [];
+                    for (let j = 0; j < vertices.length; j++) {
+                        if (vertices[j].y >= this.yL) v2.push({ x: vertices[j].x, y: vertices[j].y });
+                        if ((vertices[j].y < this.yL && vertices[(j + 1) % vertices.length].y > this.yL) || (vertices[j].y > this.yL && vertices[(j + 1) % vertices.length].y < this.yL)) {
+                            let t = (this.yL - vertices[j].y) / (vertices[(j + 1) % vertices.length].y - vertices[j].y);
+                            v2.push({ x: vertices[j].x + t * (vertices[(j + 1) % vertices.length].x - vertices[j].x), y: this.yL });
+                        }
+                    }
+                    if (v2.length < 3) continue;
+                    let a2 = 0, cx = 0, cy = 0;
+                    for (let k = 0; k < v2.length; k++) {
+                        const p = v2[k], q = v2[(k + 1) % v2.length];
+                        const cross = p.x * q.y - q.x * p.y;
+                        a2 += cross;
+                        cx += (p.x + q.x) * cross;
+                        cy += (p.y + q.y) * cross;
+                    }
+                    if (a2 === 0) continue;
+                    const area = Math.abs(a2) / 2;
+                    Matter.Body.applyForce(body[i], { x: cx / (3 * a2), y: cy / (3 * a2) }, { x: 0, y: -area * simulation.g * 0.002 });
+                    Matter.Body.setVelocity(body[i], Vector.mult(body[i].velocity, 0.95));
+                    Matter.Body.setAngularVelocity(body[i], body[i].angularVelocity * 0.96);
+                }
+                if(m.pos.y > -1000 || m.pos.x > 6800) {
+                    ctx.fillStyle = "#d8dadf";
+                    ctx.fillRect(6000, -3325, 375, 2100);
+                }
+            }
+        });
+        spawn.mapRect(-675, 0, 1575, 1750);
+        spawn.mapRect(125, -275, 50, 300);
+        spawn.mapRect(-150, -275, 325, 50);
+        spawn.mapRect(-150, -275, 50, 75);
+        spawn.mapRect(lakeX, lakeSurface + lakeDepth, lakeW, 530);
+        spawn.mapRect(lakeX + lakeW, 0, 900, 1750);
+
+        spawn.mapRect(7075, -275, 50, 300);
+        spawn.mapRect(7075, -275, 300, 50);
+        spawn.mapRect(7325, -1900, 50, 1675);
+        spawn.mapRect(7300, -500, 50, 75);
+        spawn.mapRect(7300, -750, 50, 75);
+        spawn.mapRect(7300, -975, 50, 75);
+        spawn.mapRect(7300, -1225, 50, 75);
+        spawn.mapRect(7300, -1475, 50, 75);
+        spawn.mapRect(7300, -1750, 50, 75);
+        spawn.mapRect(6675, -1900, 450, 125);
+        spawn.mapRect(7325, -1750, 350, 25);
+        spawn.mapRect(7475, -1500, 450, 25);
+        spawn.mapRect(7350, -1200, 325, 25);
+        spawn.mapRect(7500, -950, 400, 25);
+        spawn.mapRect(7350, -725, 325, 25);
+        spawn.mapRect(7525, -475, 375, 25);
+        spawn.mapRect(7350, -250, 450, 25);
+
+        spawn.mapRect(6075, -3300, 75, 2025);
+        spawn.mapRect(6250, -1450, 75, 175);
+        spawn.mapRect(5950, -24500, 225, 175);
+        spawn.mapRect(5950, -24375, 150, 750);
+        spawn.mapRect(5950, -24575, 1050, 150);
+
+        spawn.mapRect(9875, -50, 125, 275);
+        spawn.mapRect(9725, 25, 300, 300);
+        spawn.mapRect(9850, 250, 650, 275);
+        spawn.mapRect(9950, 150, 950, 275);
+        spawn.mapRect(10450, 0, 725, 250);
+        spawn.mapRect(10675, -100, 600, 300);
+        spawn.mapRect(10600, 200, 875, 400);
+        spawn.mapRect(10825, 175, 850, 275);
+        spawn.mapRect(11100, 50, 725, 250);
+        spawn.mapRect(10200, 325, 825, 425);
+        spawn.mapRect(10375, 100, 250, 100);
+        spawn.mapRect(10025, 125, 250, 75);
+        spawn.mapRect(11150, -50, 400, 200);
+
+        spawn.mapRect(6050, 1050, 1025, 275);
+        spawn.mapRect(6600, 825, 350, 325);
+        spawn.mapRect(6725, 600, 200, 350);
+        spawn.mapRect(5550, 1175, 875, 150);
+        spawn.mapRect(825, 300, 250, 1100);
+        spawn.mapRect(975, 950, 775, 450);
+        spawn.mapRect(1000, 750, 275, 325);
+        spawn.mapRect(1700, 1175, 650, 150);
+
+        spawn.bodyRect(1050, -20, 260, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(1460, -20, 250, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(1866, -20, 240, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(2267, -20, 230, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(2664, -20, 220, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(3057, -20, 210, 15 + 100 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(4586, -17, 180, 15 + 95 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(4967, -15, 170, 15 + 90 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyVertex(3875, 25, "500 0 250 -433 -250 -433 -500 0 -250 433 250 433", spawn.propsIsNotHoldable);
+        const spinIt = body[body.length - 1];
+        spawn.bodyRect(5344, -15, 170, 15 + 90 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(5727, -15, 160, 15 + 90 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(6106, -15, 160, 15 + 90 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.bodyRect(6490, -15, 150, 15 + 90 * Math.random(), 1, spawn.propsIsNotHoldable);
+        spawn.mapRect(9750, 0, 150, 75);
+        spawn.mapRect(9850, -125, 100, 175);
+
+        spawn.randomMob(1800, -300);
+        spawn.randomMob(2600, -300);
+        spawn.randomMob(3400, -300);
+        spawn.randomMob(4200, -300);
+        spawn.randomMob(5000, -300);
+        spawn.randomMob(6990, -100);
+        spawn.randomMob(7500, -125);
+        spawn.randomMob(6900, -2025);
+        spawn.randomLevelBoss(3800, -800);
+        spawn.secondaryBossChance(3500, -500);
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
+        const fakePowerup = {
+            fakeTech: {
+                name: "fakeTech",
+                color: 'hsl(246,100%,77%)', //plain value, a getter-only color throws when a checkpoint is loaded later in the same session
+                size() { return 42 },
+                effect() {
+                   simulation.inGameConsole(`<b style="color: red;">ERROR</b>: TypeError: powerUp is not defined <span style="text-decoration: underline;">https://landgreen.github.io/n-gon/js/powerups.js:${3258 + Math.floor(Math.random() * 2000)}</span>`);
+                },
+            }
+        }
+        Object.assign(powerUps, fakePowerup)
+        for(let i = 0; i < 20; i++) powerUps.directSpawn(6425, -24750, "fakeTech")
+        spawn.mapRect(5950, -24925, 0.01, 400);
+        spawn.mapRect(7000, -24925, 0.01, 375);
+    },
     // ********************************************************************************************************
     // ********************************************************************************************************
     // ***************************************** training levels **********************************************

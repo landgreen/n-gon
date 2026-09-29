@@ -319,6 +319,7 @@ const powerUps = {
                 }
             }
         }
+        simulation.warmShaders()
         powerUps.endDraft(type);
     },
     showDraft() {
@@ -1261,7 +1262,7 @@ const powerUps = {
         const click = `powerUps.choose('tech',${choose})`
         if (t.isFieldTech) return powerUps.fieldTechText(choose, click)
         if (t.isGunTech) return powerUps.gunTechText(choose, click)
-        if (t.isLore) return `<div class="choose-grid-module" onclick="${click}"><div class="grid-title lore-text"><div class="circle-grid-title lore"></div> &nbsp; ${t.name} ${t.count > 0 ? `(${t.count + 1}x)` : ""}</div>${t.descriptionFunction ? t.descriptionFunction() : t.description}</div>`
+        if (t.isLore) return powerUps.card(`<div class="circle-grid-title lore"></div> &nbsp; <span class="lore-text">${t.name} ${t.count > 0 ? `(${t.count + 1}x)` : ""}</span>`, t.descriptionFunction ? t.descriptionFunction() : t.description, click)
         if (t.isJunk) return powerUps.junkTechText(choose, click)
         if (t.isSkin) return powerUps.skinTechText(choose, click)
         if (t.isSkinUpgrade) return powerUps.skinTechUpgradeText(choose, click)

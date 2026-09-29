@@ -1,131 +1,31 @@
 
+pause menu: type javascript into the console at the bottom of the console log
+console.log, console.warn, and console.error are copied into the in-game console with the file and line they came from
+  repeated log entries are ignored
 
-save system - saves at the start of each level
-  export from pause
-  load from settings or click continue if you didn't die
-  stores almost everything from your game state, but is limited to level start to avoid level, mob states, and hidden methods
-  removed old URL save system
 
-wave ripples for mirror exits on entry
-added setting for auto fullscreen on game start
-incendiary ammunition and ice crystal nucleation have compatibility with more modes
-  several very minor nail gun and shot gun adjustments for consistency 
-manifold animation
-removed zoospore vector as an allowed tech to unlock gun tech
-ICBM and AIM-9 Sidewinder can show up for missile-bot
+bound state: wave gun arcs now alternate reflecting left and right each wave
+standing in the exit mirror makes you invulnerable
 
-tech: ghost particle - killing mobs that are inside dark matter have a 100% chance to spawn coupling
-tech: baryon - killing mobs outside dark matter spawns has a 30% chance to spawn a qubit
-tech: galactic halo - increase dark matter effects, but drain player energy inside dark matter
-tech: flechettes - get a floating needle after firing needle gun 
+tech: quantum non-demolition - when paused, select your field, guns, or other tech to stay the same when you enter an alternate reality
+tech: optimization - when paused, select your skin from a dropdown menu
+
+community map: lake by Richard0820 - cross a slime lake on floating planks, and don't trust the arrows
 
 
 bug fixes
-  checkpoints now keep player size, unfinished tech grants, and needle bursts, and exchange operator removes correctly after loading
-  checkpoints now preserve filament growth, eigenstates, plasma charge, held blocks, cooldowns, and queued rewards and shots
-  checkpoints now keep heals and creatures traveling with you between levels
-  loading a pilot wave checkpoint no longer breaks the field
-  time dilation checkpoints restore rewind mode correctly
-  switched all files over to strict mode
-    required many minor improvements
-    should reduce silent errors, but might produce a couple loud errors
-  probably fixed some issues with full screen
-  typing into the experiment mode sort by bar now sorts by that text
-  more heal related tech are flagged to show up with the heal sort button
-  chute no longer has a 1/3 chance to spawn without a boss
-  Higgs mechanism no longer lets repeater shotgun recoil move the player
-  flechettes prints 1 needle per nail gun shot instead of 1 for each needle in the burst
-  pseudoscience research icon no longer shows up in a random spot or breaks the research button
-  dungeon boss laser mines no longer break the game when you use mines
-  fullscreen mouse lock is more reliable after choosing power ups, pausing, starting a run, or pressing ESC
-  removing super ball now switches super balls back to firing 3 balls
-  rebound no longer keeps super balls alive after polyurethane foam uses them up
-  incendiary ammunition is no longer offered for super balls after ricochet
-  ricochet gives the large super ball about 1.8x damage instead of 1.15x
-  seismic wave only stuns with landing waves, not every isotropic wave
-  bound state reflects waves 1 time per stack for every wave mode
-  sympathetic resonance waves aim at the nearby mob instead of to the side
-  isotropic waves can vibrate every block in a level, not just the first 30
-  isotropic waves draw the vibrations on mobs and blocks
-  transverse waves use less CPU, about 45% less with many bound states
-  acoustic levitation counts as a wave source for wave tech
-  liquid-propellant missiles no longer deal extra damage a second after they explode
-  missiles use less CPU when locking on to targets
-  vacuum bomb no longer pulls invulnerable mobs or dark matter, and pulls bosses less
-  path integration can show up for shotgun fleas, not just shotgun worms
-  explosions no longer do less damage to every mob after one behind a wall or more after one with a shield
-  neutron bombs and irradiated drones no longer do less damage to every mob after one behind a wall
-  axial flux motor makes drones rush 1.5x more often
-  irradiated drones pick up heals near full health when you have overheal tech, like normal drones
-  removing ideal gas law no longer leaves foam with less ammo per power up than before you had it
-  smelting fires every extra harpoon even when there aren't enough targets
-  smelting and railgun extra harpoons aim at targets around your mouse, not off to the left
-  wear harpoons that break cost 1 ammo, like the description says
-  railgun shots without a target no longer drift up or down based on your horizontal speed
-  induction furnace and brittle no longer do extra damage with rebar and maul
-  infrared diode, dye laser, free-electron laser, specular reflection, and iridescence can show up for laser-mines
-  removing spherical harmonics on another field no longer makes blocking cost 1.6x energy
-  surface plasmons no longer spins the laser lens 12x faster
-  negative pressure does 10x damage as described, and its range no longer depends on the field being on
-  annihilation no longer destroys invulnerable mobs in ship mode
-  plasma ball no longer costs energy at the start of each level after switching fields
-  extruder wire no longer breaks apart when aiming straight left
-  frame-dragging now gives 0.6x damage taken right away, not 0.66x until you switch fields
-  no-cloning theorem no longer keeps lowering duplication chance after its bonus runs out
-  boson composite no longer makes dynamo and orbit bots solid after decloaking
-  bots are no longer stuck intangible after switching fields while cloaked with boson composite
-  removing Bells theorem no longer stops you from firing while using pilot wave
-  cherenkov radiation no longer shows up for pilot wave, which can't deflect
-  pilot wave no longer pulls power ups twice as hard during its cooldown
-  manifold's damage and energy cost no longer get stuck on after loading a save made during the boost
-  grappling hook can grab a small block while also touching a heavy one
-  removing nitinol no longer leaves you with 0.8x damage taken
-  ionization energy no longer leaves invisible heals behind when it converts them
-  scale invariance's damage and defense no longer get out of sync with your size after loading a save
-  removing scale invariance now fully restores your body shape and block holding
-  reaction inhibitor now lowers the durability of mobs already on the level
-  removing orbital-bot upgrade now returns orbital-bots to their normal orbit
-  decorrelation and anticorrelation now reset when you use your field, and count from when you let go
-  BEAM robotics no longer gives a second bot upgrade
-  removing Gibbs free energy now removes its JUNK chance
-  removing Unified Field Theory now resets field tech chances
-  removing dark patterns now removes all of its damage stacks
-  virtual particles stacks now add up, 6 stacks is a 90% chance
-  mobs from the lore level no longer keep spawning after you leave it
-  lore conversations no longer skip a line when speech fails or freezes
-  the game now loads in browsers without text to speech
-  sliding map doors no longer close on top of a block
-  vanishing platforms now always clear out blocks in the way when they come back
-  doors now stop exactly at their open and closed positions
-  moving train platforms now carry mobs and power ups like conveyor floors do
-  vacuum energy no longer rolls twice for each coupling
-  collider no longer turns a tech, gun, or field into a small power up when swapping flavors
-  coherence no longer shows the same tech twice in one choice
-  gun power ups offer the ammo tech once you have every gun, instead of an empty choice
-  laser layer mobs now jump away after their laser hits you
-  freezer grenades thrown from far away no longer last much longer than intended
-  freezer and mortar death grenades no longer spawn while paused or on the next level
-  baby hoppers show the tier 2 health bar
-  block bosses and snake bosses no longer leave you holding a ghost block when they eat the one you're carrying
-  mantis boss strikers no longer die in one hit
-  mayfly boss flutter segments unlock all 3 of the next segments when they die
-  history boss no longer queues hundreds of wake-up timers
-  grenadier boss death grenades, snake boss power up returns, and beetle babies no longer spawn while paused or on the next level
-  mobs that spawn more mobs on death throw them in a random direction instead of diagonally
-  hydra boss tentacle segments are ignored by bots and missiles
-  snake spit and dragonfly boss tail segments no longer die in one hit
-  snake bosses grow and shrink between phases again
-  snake boss and tube worm tails hurt you anywhere you can see them, not just along the middle
-  ice puddles and quasar zones scale damage by boss tier like their other attacks
-  UAV swarm and other tech that remove instant tech no longer lower your tech count too much
-  switching away from time dilation now removes its faster fire rate
-  Stereo Madness and diamagnetism JUNK tech work again when community maps are off
-  loading a checkpoint with eigenstate or booby trap no longer adds an extra block or mine ammo
-  loading a checkpoint keeps your tech in the order you got them, so planned obsolescence still ejects the oldest
+  negative mass, tungsten carbide, and plasma ball no longer freeze the game the first time they're used; the delay happens when you pick them
+  undefined tech choice has the same padding and border as other tech
+  time dilation can pick up power ups while out of energy or on cooldown
+  optimization is ejected when an eigenstate dies, so it can't revive your other state
+  errors in the in-game console show the file and line number for each step of the stack trace
+
 
 *********************************************************** TODO *****************************************************
 
-
+new version of history boss with legs and it looks in the same direction the player looked in but +180
+  also has a sword?
+  also shots bullets?
 
 
 some times the game freezes for 0.2s
