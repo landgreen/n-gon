@@ -103,6 +103,7 @@ const pauseConsole = {
         const el = document.getElementById("pause-console-input")
         if (!el) return
         el.value = pauseConsole.draft
+        if (pauseConsole.history.length) el.placeholder = "" //only hint at what the box is for until it's been used
         el.addEventListener("input", () => { pauseConsole.draft = el.value })
         el.addEventListener("keyup", event => event.stopPropagation())
         el.addEventListener("keydown", event => {

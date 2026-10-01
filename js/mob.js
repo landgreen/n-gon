@@ -3,6 +3,10 @@
 let mob = [];
 //method to populate the array above
 const mobs = {
+    mobDeaths: 0, //kills this run, bosses count as 10, reset in simulation
+    isPacifist() { //the pacifist run allows fewer than 3 kills per level
+        return mobs.mobDeaths < 3 * level.levelsCleared
+    },
     loop() {
         let i = mob.length;
         while (i--) {
@@ -1863,7 +1867,7 @@ const mobs = {
 
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
-                    mobs.mobDeaths++
+                    mobs.mobDeaths += this.isBoss ? 100 : 1 //bosses count as 10 kills for the pacifist run
 
                     if (Math.random() < tech.sporesOnDeath) {
                         const amount = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))

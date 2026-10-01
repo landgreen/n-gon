@@ -87,6 +87,9 @@ const spawn = {
             spawn.pickList.push(push);
         }
     },
+    isPacifistStarters() { //on the final lore run, regular mobs are all starters while the player hasn't killed too many, bosses are normal
+        return localSettings.loreCount === 6 && mobs.isPacifist() && !simulation.isCheating
+    },
     randomizeSpawnList(tier) { //used in subway to get new random mobs at current tier level
         spawn.pickList.splice(0, 1);
         if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
@@ -174,51 +177,9 @@ const spawn = {
         }
     },
 
-
-
-    /* spawn chance rework
-    how to randomize the order of the mobs spawned in the level
-        combine chance to spawn with level cap
-        max mobs code:
-            mobs.length < 3*Math.log(level.levelsCleared)+simulation.difficultyMode
-        spawn chance code: (ignores chance parameter)
-            Math.random() < 1/math.sqrt(mob.length) + 0.05*simulation.difficultyMode
-
-    scales with
-        simulation.difficultyMode 1-7
-            +1 max mob per simulation.difficultyMode
-        level.levelsCleared 1-13
-        mob.length 0-20+
-            lower chance to spawn with mob.length
-        chance?
-            maybe just ignore chance?
-            maybe all spawns not random
-    ideal mobs
-        level.levelsCleared 12 (subway)
-            simulation.difficultyMode 2 = 10
-            simulation.difficultyMode 5 = 13
-            simulation.difficultyMode 7 = 15
-        level.levelsCleared 1 (level after intro)
-            simulation.difficultyMode 2 = 3
-            simulation.difficultyMode 5 = 6
-            simulation.difficultyMode 7 = 9
-
-    
-
-*/
-
-
-    //reworked with no chance effect
-    // spawnChance(chance) {
-    //     if (mob.length < 3 * Math.log(level.levelsCleared) + simulation.difficultyMode) {
-    //         return Math.random() < 1 / Math.sqrt(1.2 * mob.length) + 0.05 * simulation.difficultyMode
-    //     }
-    // },
-
-
     // original with 10% + number of mobs chance to fail
     spawnChance(chance) {
-        if (Math.random() < 0.1 + mob.length) false
+        // if (Math.random() < 0.1 + mob.length) false
         // const mobs = 12 * Math.log10(5 * level.levelsCleared)
         const mobs = 5 * Math.log(level.levelsCleared + 1) * (localSettings.isHideHUD ? 0.5 : 1)
         const maxMobs = (simulation.difficultyMode === 1) ? 2 : mobs //localSettings.isHideHUD
@@ -298,7 +259,13 @@ const spawn = {
     ],
     randomGroup(x, y, chance = 1) {
         if ((spawn.spawnChance(chance) && simulation.difficulty > 2) || chance === Infinity) {
-            if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
+            if (spawn.isPacifistStarters()) {
+                if (Math.random() < 0.55) {
+                    spawn.nodeGroup(x, y, "starter");
+                } else {
+                    spawn.lineGroup(x, y, "starter");
+                }
+            } else if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
                 function pickRandom(arr) {
                     const group = arr[Math.floor(Math.random() * arr.length)];
                     return group[Math.floor(Math.random() * group.length)];

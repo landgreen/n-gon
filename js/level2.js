@@ -46,7 +46,7 @@ Object.assign(moreLevels, {
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 100); //exit bump
 
 
-        if (mobs.mobDeaths < level.levelsCleared && !simulation.isCheating) { //pacifist run
+        if (mobs.isPacifist() && !simulation.isCheating) { //pacifist run
             spawn.pickList.splice(0, 1);
             spawn.pickList.push('starter');
             spawn.pickList.splice(0, 1);
@@ -276,7 +276,7 @@ Object.assign(moreLevels, {
         }, Math.PI / 2, { //down
             x: 500,
             y: 2025
-        }, -Math.PI / 2) //up
+        }, -Math.PI / 2, level.portalExit.launch, level.portalExit.launch) //up
         spawn.mapRect(350, 2025, 300, 300); //Bloc portail n°2
 
         if (isLevelReversed === false) { /// Normal Spawn  
@@ -1348,14 +1348,14 @@ Object.assign(moreLevels, {
         }, -Math.PI / 2, { //up
             x: 1000,
             y: 50
-        }, -Math.PI / 2) //up
+        }, -Math.PI / 2, level.portalExit.launch, level.portalExit.launch) //up
         const portal2 = level.portal({ //portals in upper right corner
             x: 1400,
             y: -2200
         }, -Math.PI / 2, { //up
             x: 1700,
             y: -1700
-        }, -Math.PI / 2) //up
+        }, -Math.PI / 2, level.portalExit.launch, level.portalExit.launch) //up
         //    rotor(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0, rotationForce = 0.0005) {
         const rotor = level.rotor(-600, -1950, 800, 50, 0.001, 0, 0.01, 0, -0.001)
 
@@ -1870,14 +1870,14 @@ Object.assign(moreLevels, {
         }, Math.PI / 2, {
             x: 570,
             y: -395
-        }, -Math.PI / 2)
+        }, -Math.PI / 2, level.portalExit.launch, level.portalExit.launch)
         const portal2 = level.portal({
             x: -1800,
             y: 1900
         }, Math.PI, {
             x: 200,
             y: 1105
-        }, -Math.PI / 2)
+        }, -Math.PI / 2, level.portalExit.straight, level.portalExit.launch)
         const drip1 = level.drip(1875, -660, -400, 70)
         const drip2 = level.drip(3525, -940, -400, 150)
         const drip3 = level.drip(1975, 100, 1200, 100)
@@ -3730,7 +3730,7 @@ Object.assign(moreLevels, {
             x: 58400,
             y: -17325,
         },
-            2 * Math.PI
+            2 * Math.PI, level.portalExit.launch, level.portalExit.launch
         );
         portal3 = level.portal({
             x: 59865,
@@ -3741,7 +3741,7 @@ Object.assign(moreLevels, {
             x: 60820,
             y: -31130,
         },
-            2.5 * Math.PI
+            2.5 * Math.PI, level.portalExit.launch, level.portalExit.launch
         );
 
         spawn.mapRect(60275, -32250, 975, 400);
@@ -5458,7 +5458,7 @@ Object.assign(moreLevels, {
         }, -2 * Math.PI, { //up
             x: -80,
             y: -475
-        }, -Math.PI / 100) //up
+        }, -Math.PI / 100, level.portalExit.launch, level.portalExit.launch) //up
 
         const drip1 = level.drip(4100 + 1000 * Math.random(), -1900, 50, 100) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
         const drip2 = level.drip(4100 + 1000 * Math.random(), -1900, 50, 207) // drip(x, yMin, yMax, period = 100, color = "hsla(160, 100%, 35%, 0.5)") {
@@ -6360,7 +6360,7 @@ Object.assign(moreLevels, {
             for (let i = 0; i < me.vertices.length; i++) {
                 const vertex = me.vertices[i]
                 const offset = genome.vertexOffset[i]
-                if (!offset) console.log(genome, me)
+                if (!offset) console.log(genome, me) // eslint-disable-line no-console
                 vertex.x += offset.x
                 vertex.y += offset.y
             }
@@ -6982,7 +6982,7 @@ Object.assign(moreLevels, {
         }, Math.PI * 1.5, {
             x: 525,
             y: 2625
-        }, -Math.PI)
+        }, -Math.PI, level.portalExit.launch, level.portalExit.launch)
         document.body.style.transition = '0ms'
         document.body.style.backgroundColor = "#061026" //"#061026";
 
@@ -7371,8 +7371,8 @@ Object.assign(moreLevels, {
         const boost3 = level.boost(19390, -31, 1700)
         const boost4 = level.boost(19390, -31, 1700)
         const boost5 = level.boost(17274, -1242, 1000)
-        const portal = level.portal({ x: 443, y: -1636 }, Math.PI, { x: 21391.9, y: -1806.3 }, -Math.PI)
-        const portal2 = level.portal({ x: 16838.3, y: -626.7 }, Math.PI, { x: 16882.8, y: -2566.5 }, -Math.PI)
+        const portal = level.portal({ x: 443, y: -1636 }, Math.PI, { x: 21391.9, y: -1806.3 }, -Math.PI, level.portalExit.straight, level.portalExit.launch)
+        const portal2 = level.portal({ x: 16838.3, y: -626.7 }, Math.PI, { x: 16882.8, y: -2566.5 }, -Math.PI, level.portalExit.straight, level.portalExit.launch)
         const buttonDoor = level.button(21889, -10)
         const door = level.door(19119, -2133, 110, 510, 480)
         const buttonDoor2 = level.button(18711, -2210)
@@ -9712,7 +9712,7 @@ Object.assign(moreLevels, {
         }, 2 * Math.PI, {
             x: 1805,
             y: -2295
-        }, 90)
+        }, 90, level.portalExit.launch, level.portalExit.launch)
 
         const button = level.button(-456, -1320)
         spawn.bodyRect(-400, -1475, 75, 75);
@@ -9874,7 +9874,7 @@ Object.assign(moreLevels, {
         }, -2 * Math.PI, { //right
             x: 23863,
             y: 82
-        }, 2 * Math.PI) //right
+        }, 2 * Math.PI, level.portalExit.launch, level.portalExit.launch) //right
 
         spawn.mapRect(1825, -2250, 3300, 300); spawn.mapRect(3250, -2875, 150, 625);
         spawn.mapRect(3250, -2875, 425, 125);
@@ -9989,7 +9989,7 @@ Object.assign(moreLevels, {
         const bunkerdoor = level.door(10700, -2500, 100, 500, 200)
         const boost1 = level.boost(7300, 1209, 2200)
         const boost2 = level.boost(6232.6, -832.8, 1400)
-        const portal = level.portal({ x: 4886.4, y: 1050.7 }, 2 * Math.PI, { x: 7686, y: -2121 }, 2 * Math.PI)
+        const portal = level.portal({ x: 4886.4, y: 1050.7 }, 2 * Math.PI, { x: 7686, y: -2121 }, 2 * Math.PI, level.portalExit.launch, level.portalExit.launch)
         const slime = level.hazard(-1800, 10, 4200, 400);
         const slime2 = level.hazard(2400, -2100, 200, 2100);
         const slime3 = level.hazard(2600, -2100, 3600, 200);
@@ -16369,8 +16369,8 @@ Object.assign(moreLevels, {
         const boost3 = level.boost(19390, -31, 1700)
         const boost4 = level.boost(19390, -31, 1700)
         const boost5 = level.boost(17274, -1242, 1000)
-        const portal = level.portal({ x: 443, y: -1636 }, Math.PI, { x: 21391.9, y: -1806.3 }, -Math.PI)
-        const portal2 = level.portal({ x: 16838.3, y: -626.7 }, Math.PI, { x: 16882.8, y: -2566.5 }, -Math.PI)
+        const portal = level.portal({ x: 443, y: -1636 }, Math.PI, { x: 21391.9, y: -1806.3 }, -Math.PI, level.portalExit.straight, level.portalExit.launch)
+        const portal2 = level.portal({ x: 16838.3, y: -626.7 }, Math.PI, { x: 16882.8, y: -2566.5 }, -Math.PI, level.portalExit.straight, level.portalExit.launch)
         const buttonDoor = level.button(21889, -10)
         const door = level.door(19119, -2133, 110, 510, 480)
         const buttonDoor2 = level.button(18711, -2210)
@@ -24370,7 +24370,7 @@ Object.assign(moreLevels, {
         }, Math.PI / 2, {
             x: 1100,
             y: -1025
-        }, Math.PI / 2))
+        }, Math.PI / 2, level.portalExit.launch, level.portalExit.launch))
         const soft = {
             createCloth(x, y, radius, width, height, attachToPlayer = false, stayStill = false, options, touchPlayer = true, constrictionStrength = 0.001) {
                 const bodies = [];
@@ -26882,7 +26882,7 @@ Object.assign(moreLevels, {
             {
                 x: 375,
                 y: -11325
-            }, Math.PI / 2
+            }, Math.PI / 2, level.portalExit.straight, level.portalExit.launch
         )
         const gradient = ctx.createRadialGradient(-11834, -17646, 50000, -11834, -17646, 0);
         gradient.addColorStop(0, "transparent");

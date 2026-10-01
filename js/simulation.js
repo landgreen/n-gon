@@ -62,11 +62,6 @@ const simulation = {
         // level.mirrorDoorsDraw();
         if (input.fire && m.fireCDcycle < m.cycle) {
             m.fireCDcycle = m.cycle + 15; //fire cooldown       
-            for (let i = 0, len = mob.length; i < len; i++) {
-                if (Vector.magnitudeSquared(Vector.sub(mob[i].position, simulation.mouseInGame)) < mob[i].radius * mob[i].radius) {
-                    console.log(mob[i])
-                }
-            }
         }
         simulation.draw.cons();
         simulation.draw.testing();
@@ -2524,7 +2519,6 @@ const simulation = {
                         if (level.isProcedural) {
                             simulation.outputMapString(`spawn.mapRect(x+${x}, ${y}, ${dx}, ${dy});\n`);
                         } else if (level.isVerticalFLipLevel) {
-                            console.log('hi')
                             simulation.outputMapString(`spawn.mapRect(${x}, ${y}, ${dx}, ${dy});\n`);
                             simulation.outputMapString(`//spawn.mapRect(${x}, ${-y - dy}, ${dx}, ${dy});\n`);
                         } else {
@@ -2598,12 +2592,12 @@ const simulation = {
             out += simulation.constructMapString[i];
             outHTML += "<div>" + simulation.constructMapString[i] + "</div>"
         }
-        console.log(out)
+        console.log(out) // eslint-disable-line no-console
         navigator.clipboard.writeText(out).then(function () {
             /* clipboard successfully set */
         }, function () {
             /* clipboard write failed */
-            console.log('copy failed')
+            console.log('copy failed') // eslint-disable-line no-console
         });
         document.getElementById("construct").innerHTML = outHTML
     },

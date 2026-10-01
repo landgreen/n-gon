@@ -191,7 +191,9 @@ const b = {
     inventoryGun: 0,
     inventory: [], //list of what guns player has  // 0 starts with basic gun
     setFireMethod() {
-        if (tech.isFireMoveLock) {
+        if (m.fieldMode === 11) { //the portal field uses the fire button
+            b.fire = b.fireNone
+        } else if (tech.isFireMoveLock) {
             b.fire = b.fireFloat
         } else if (tech.isAlwaysFire) {
             b.fire = b.fireAlwaysFire
@@ -200,6 +202,7 @@ const b = {
         }
     },
     fire() { },
+    fireNone() { }, //guns are off, like for the portal field
     fireNormal() {
         if (b.inventory.length && (b.activeGun !== null && b.activeGun !== undefined)) {
             if (input.fire && m.fireCDcycle < m.cycle && (!input.field || m.fieldFire)) {
@@ -1274,7 +1277,7 @@ const b = {
                     } else {
                         if (Matter.Query.collides(this, map).length) {
                             onCollide()
-                        } else if (tech.isRPG) { //if colliding with nothing
+                        } else if (this.thrust) { //if colliding with nothing, fired as a rocket
                             this.force.x += this.thrust.x;
                             this.force.y += this.thrust.y;
                         } else {
@@ -2972,7 +2975,8 @@ const b = {
             beforeDmg() { },
             onEnd() {
                 if (this.isArmed && !tech.isMineSentry) {
-                    if (tech.isFoamMine && bullet.length < 400) {
+                    if (tech.isFoamMine) {
+                        if (bullet.length > 399) return //too much foam already, don't fire nails instead
                         //send 14 in random directions slowly
                         for (let i = 0; i < 12; i++) {
                             const radius = 13 + 8 * Math.random()
@@ -3078,9 +3082,11 @@ const b = {
                                             this.do = function () { //overwrite the do method for this bullet
                                                 this.force.y += this.mass * 0.002; //extra gravity
                                                 if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
-                                                    if (tech.isFoamMine && bullet.length < 400) {
-                                                        this.shots -= 0.6 * b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
-                                                        b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
+                                                    if (tech.isFoamMine) {
+                                                        if (bullet.length < 400) { //wait for foam to pop instead of firing nails
+                                                            this.shots -= 0.6 * b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
+                                                            b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
+                                                        }
                                                     } else if (tech.isSuperMine) {
                                                         const cost = tech.oneSuperBall ? 2 : 0.7
                                                         this.shots -= cost * b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false)

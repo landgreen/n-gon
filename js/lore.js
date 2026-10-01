@@ -90,7 +90,7 @@ const lore = {
             }
         }
         const speechFrozen = setTimeout(() => { // speech frozen after 20 seconds of no end
-            console.log('speech frozen')
+            console.log('speech frozen') // eslint-disable-line no-console
             lore.isSpeech = false
             next(0)
         }, 20000);
@@ -616,22 +616,22 @@ const lore = {
                 function success(position) {
                     const latitude = position.coords.latitude;
                     const longitude = position.coords.longitude;
-                    console.log(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`)
-                    console.log(`Latitude: ${latitude} °, Longitude: ${longitude} °`)
+                    console.log(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`) // eslint-disable-line no-console
+                    console.log(`Latitude: ${latitude} °, Longitude: ${longitude} °`) // eslint-disable-line no-console
                     lore.miriam.text("We tracked the location down to this Latitude and Longitude:")
                     simulation.inGameConsole(`Latitude: ${latitude} °, Longitude: ${longitude} °`, Infinity);
                     simulation.inGameConsole(`https://www.openstreetmap.org/#map=18/${latitude}/${longitude}`, Infinity);
                 }
 
                 function error() {
-                    console.log('Unable to retrieve your location')
+                    console.log('Unable to retrieve your location') // eslint-disable-line no-console
                     lore.miriam.text("The exact coordinates are blocked.")
                 }
                 if (!navigator.geolocation) {
-                    console.log('Geolocation is not supported')
+                    console.log('Geolocation is not supported') // eslint-disable-line no-console
                     lore.miriam.text("The exact coordinates are blocked.")
                 } else {
-                    console.log('Locating…')
+                    console.log('Locating…') // eslint-disable-line no-console
                     const options = {
                         enableHighAccuracy: true,
                         maximumAge: 30000,
@@ -1004,7 +1004,7 @@ const lore = {
                 lore.anand.text(`So why don't you try to get the final level of the simulation without killing any mobs?`)
                 localSettings.loreCount++
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-                console.log(localSettings.loreCount)
+                console.log(localSettings.loreCount) // eslint-disable-line no-console
             },
             () => {
                 lore.miriam.text(`Ok check back in and let us know how it goes.`)
@@ -1039,25 +1039,25 @@ const lore = {
                 }, 3000);
             },
             () => {
-                if (mobs.mobDeaths < level.levelsCleared) {
+                if (mobs.isPacifist()) {
                     lore.miriam.text(`So I think it worked.`)
                     // localSettings.loreCount++
                     // if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 } else if (!simulation.isCheating) {
-                    lore.miriam.text(`Looks like you got back here, but you killed ${mobs.mobDeaths} mobs`)
+                    lore.miriam.text(`Looks like you got back here, but you killed too many mobs`)
                     localSettings.loreCount--
                     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
                 }
             },
             () => {
-                if (mobs.mobDeaths < level.levelsCleared) {
+                if (mobs.isPacifist()) {
                     lore.anand.text(`Yeah, at the end it wasn't attacking you.`)
                 } else if (!simulation.isCheating) {
-                    lore.miriam.text(`Try again to get to the final boss without killing any mobs.`)
+                    lore.miriam.text(`Try again to get to the final boss without killing so many mobs.`)
                 }
             },
             () => {
-                if (mobs.mobDeaths < level.levelsCleared) {
+                if (mobs.isPacifist()) {
                     lore.miriam.text(`It has learned HOW TO LOVE!`)
                 } else {
                     m.death();

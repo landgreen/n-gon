@@ -915,6 +915,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
 </div>`
         const hideStyle = `style="height:auto; border: none; background-color: transparent;"`
         for (let i = 0, len = m.fieldUpgrades.length; i < len; i++) {
+            if (m.fieldUpgrades[i].isLoreField && localSettings.loreCount === 0) continue //lore fields show up after testing is unlocked
             text += `<div id="field-${i}" class="experiment-grid-module card-background ${m.fieldMode === i ? " build-field-selected" : ""}" onclick="build.choosePowerUp(${i},'field');" ${hideStyle} >
                             <div class="card-text">
                                 <div class="grid-title"><div class="circle-grid-title field" onclick="speechHandler.speech('${m.fieldUpgrades[i].name}')"></div> &nbsp; ${build.nameLink(m.fieldUpgrades[i].name)}</div>
@@ -1778,18 +1779,18 @@ if (localStorageCheck()) {
         localSettings = null
     }
     if (localSettings) {
-        console.log('localStorage is enabled')
+        console.log('localStorage is enabled') // eslint-disable-line no-console
         localSettings.isAllowed = true
         localSettings.isEmpty = false
     } else {
-        console.log('localStorage is enabled, local settings empty')
+        console.log('localStorage is enabled, local settings empty') // eslint-disable-line no-console
         localSettings = {
             isAllowed: true,
             isEmpty: true
         }
     }
 } else {
-    console.log("localStorage is disabled")
+    console.log("localStorage is disabled") // eslint-disable-line no-console
     localSettings = {
         isAllowed: false
     }
@@ -1797,7 +1798,7 @@ if (localStorageCheck()) {
 
 const hadSavedFpsPreference = localSettings.fpsCapDefault !== undefined
 if (localSettings.isAllowed && !localSettings.isEmpty) {
-    console.log('restoring previous settings')
+    console.log('restoring previous settings') // eslint-disable-line no-console
 
     if (localSettings.key && localSettings.key.fullscreen) {
         input.key = localSettings.key
@@ -1869,7 +1870,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
 } else {
-    console.log('setting default localSettings')
+    console.log('setting default localSettings') // eslint-disable-line no-console
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
         banList: "",

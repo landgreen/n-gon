@@ -402,7 +402,11 @@ const m = {
             m.health = m.health * (1 + 0.5 * (Math.random() - 0.5))
             if (m.health > 1) m.health = 1;
             //randomize field
-            if (keep !== "field") m.setField(Math.ceil(Math.random() * (m.fieldUpgrades.length - 1)))
+            if (keep !== "field") {
+                const fields = [] //not field emitter or fields only found in lore
+                for (let i = 1; i < m.fieldUpgrades.length; i++) if (!m.fieldUpgrades[i].isLoreField) fields.push(i)
+                m.setField(fields[Math.floor(Math.random() * fields.length)])
+            }
             if (keep !== "gun") {
                 //removes guns and ammo
                 b.inventory = [];
@@ -686,6 +690,7 @@ const m = {
         if (tech.isTurret && m.crouch) dmg *= 0.3;
         if (tech.isFirstDer && b.inventory[0] === b.activeGun) dmg *= 0.85 ** b.inventory.length
         if (tech.isScaleInvariance && player.scale < 1) dmg *= tech.isBijection ? 0.5 : 0.7
+        if (tech.isLargePortal) dmg *= 0.6
         if (tech.isLowHealthDefense) dmg *= Math.pow(0.2, Math.max(0, 1 - (tech.isEnergyHealth ? m.energy / m.maxEnergy : m.health / m.maxHealth)))
         if (tech.isRemineralize) {
             //reduce mineral percent based on time since last check
@@ -1880,7 +1885,7 @@ const m = {
                         m.eigen.makeBlock()
                         //add block to player holding
                         //&& !(m.holdingTarget || m.holdingTarget === m.eigen.block)
-                        if (m.fieldMode !== 9 && m.fieldMode !== 8) {  //not wormhole field
+                        if (m.fieldMode !== 9 && m.fieldMode !== 8 && m.fieldMode !== 11) {  //not wormhole, pilot wave, or portal field
                             m.holdingTarget = m.eigen.block
                             m.isHolding = true;
                             m.holdingTarget.collisionFilter.category = 0;
@@ -3457,6 +3462,8 @@ const m = {
             m.fieldRegen = 0.001334 //8 energy per second wormhole
         } else if (m.fieldMode === 10) {
             m.fieldRegen = 0.0015 //9 energy per second grappling hook
+        } else if (m.fieldMode === 11) {
+            m.fieldRegen = 0.001334 //8 energy per second portal
         } else {
             m.fieldRegen = 0.001 //6 energy per second
         }
@@ -4389,6 +4396,8 @@ const m = {
                 return `<span style = 'font-size:89%;'>after eating <strong class='block' data-help='block'>blocks</strong> <strong>+${(3 * couple).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong></span>`
             case 10: //grappling hook
                 return `<span style="opacity: 1;">${powerUps.orb.ammo(1)}</span> give ${(5 * couple).toFixed(0)}% more ammo`
+            case 11: //portal
+                return `<span style = 'font-size:89%;'>after going through a ${m.fieldUpgrades[11].text()} <strong>+${couple.toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong></span>`
         }
     },
     couplingChange(change = 0) {
@@ -4421,6 +4430,7 @@ const m = {
             Matter.Composite.remove(engine.world, m.fieldUpgrades[8].collider);
             m.fieldUpgrades[8].collider = null
         }
+        m.fieldUpgrades[11].clear() //remove portals
 
         if (isNaN(index)) { //find index by name
             let found = false
@@ -4438,6 +4448,7 @@ const m = {
         m.setHoldDefaults();
         m.fieldUpgrades[index].effect();
         b.setFireCD() //time dilation's faster fire rate only applies while it's the field
+        b.setFireMethod() //the portal field uses the fire button
         simulation.inGameConsole(`${powerUps.orb.field()} <span class='color-var'>m</span>.setField("<strong class='color-text'>${m.fieldUpgrades[m.fieldMode].name}</strong>")<br>input.key.field<span class='color-symbol'>:</span> ["<span class='color-text'>MouseRight</span>"]`);
         if (m.fieldMode === 1) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[1]</span>energyHealthRatio <span class='color-symbol'>=</span> ${m.fieldUpgrades[1].energyHealthRatio} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←←↓→→↓</em>`);
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
@@ -4448,6 +4459,7 @@ const m = {
         if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4</strong><span class='color-symbol'>→</span><strong>5.5x</strong> <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong class='color-d' data-help='damage'>damage</strong> <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓←↓→</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓→↓←↓↓</em>`);
         if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓↓↑↓</em>`);
+        if (m.fieldMode === 11) simulation.inGameConsole(`level<span class='color-symbol'>.</span>surfacePortal<span class='color-symbol'>()</span>`);
         if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>,{</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span>y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↑↑↓↓</em>`);
     },
     fieldEvent: null,
@@ -6277,7 +6289,7 @@ const m = {
                 }
                 window.addEventListener("keydown", m.fieldEvent);
 
-                m.fieldMeterColor = "#ff8800"
+                m.fieldMeterColor = "#bbf"
                 m.duplicateChance = 0.08
                 m.fieldRange = 0
                 powerUps.setPowerUpMode(); //needed after adjusting duplication chance
@@ -6546,7 +6558,7 @@ const m = {
                             }
                         }
                     }
-                    m.drawRegenEnergy("rgba(0, 166, 187, 0.3)")
+                    m.drawRegenEnergy()
                 }
             },
         },
@@ -6689,7 +6701,181 @@ const m = {
                             ctx.setLineDash([]);
                         }
                     }
-                    m.drawRegenEnergy()
+                    m.drawRegenEnergy() //
+                }
+            }
+        },
+        {
+            name: "portal",
+            isLoreField: true, //only given on the final lore run, and in experiment mode after testing is unlocked
+            portals: null, //the portal pair on this level, see level.surfacePortal()
+            isFireHeld: false, //one cyan portal per press of the fire button
+            isFieldHeld: false, //one orange portal per press of the field button
+            pickUpQueue: [], //power ups that fell into a portal, { who, to } where to is the other portal, used in m.hold
+            isAiming: [false, false], //invariant, holding fire or field to aim the cyan or orange portal while time is paused
+            energyCost() {
+                return tech.isFreeWormHole ? 0.02 : 0.1
+            },
+            size() { //scales the portal width
+                return tech.isLargePortal ? 1.5 : tech.isSmallPortal ? 0.8 : 1
+            },
+            text(isPlural = false) { //the cyan and orange keyword
+                return `<strong class='color-portal' data-help='portal'><span>por</span><span>tal${isPlural ? "s" : ""}</span></strong>`
+            },
+            descriptionFunction() {
+                return `use <strong>${(100 * this.energyCost()).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong> to place ${this.text(true)}<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>, but you can't use ${powerUps.orb.gun()}<br><strong>8</strong> <strong class='energy' data-help='energy'>energy</strong> per second`
+            },
+            getPortals() { //level.start() clears the portals, so make a new pair when needed
+                if (!this.portals || !level.surfacePortals.includes(this.portals)) {
+                    this.portals = level.surfacePortal()
+                    this.portals.isBulletPass = true
+                    this.portals.onPlayerExit = () => this.playerExit()
+                    this.portals.onPowerUpEnter = (who, to) => { if (!this.pickUpQueue.some(item => item.who === who)) this.pickUpQueue.push({ who, to }) }
+                    this.pickUpQueue = []
+                }
+                return this.portals
+            },
+            clear() { //remove the portals, when switching to another field
+                if (this.portals) {
+                    const index = level.surfacePortals.indexOf(this.portals)
+                    if (index > -1) level.surfacePortals.splice(index, 1)
+                    this.portals = null
+                }
+            },
+            fire(portals, index) { //index 0 is the cyan portal and 1 is the orange portal
+                const cost = this.energyCost()
+                const start = { x: m.pos.x, y: m.pos.y }
+                const target = { x: simulation.mouseInGame.x, y: simulation.mouseInGame.y }
+                const isPlaced = m.energy > cost && portals.placeAlongRay(index, start, target, this.size())
+                const end = portals.ends[index]
+                if (isPlaced) m.energy -= cost
+                const color = end.color
+                const stop = isPlaced ? { x: end.position.x, y: end.position.y } : Vector.add(start, Vector.mult(Vector.normalise(Vector.sub(target, start)), 150))
+                simulation.ephemera.push({ //a quick beam to the new portal, or a short dashed beam if it didn't fit
+                    count: 10,
+                    do() {
+                        this.count--
+                        if (this.count < 0) simulation.removeEphemera(this)
+                        ctx.beginPath()
+                        ctx.moveTo(start.x, start.y)
+                        ctx.lineTo(stop.x, stop.y)
+                        ctx.strokeStyle = isPlaced ? color + `${0.05 * this.count})` : `rgba(0,0,0,${0.03 * this.count})`
+                        ctx.lineWidth = isPlaced ? 4 : 2
+                        if (!isPlaced) ctx.setLineDash([10, 15])
+                        ctx.stroke()
+                        ctx.setLineDash([])
+                    },
+                })
+            },
+            pickUp({ who, to }) { //use a power up that fell into a portal, like a wormhole does
+                simulation.ephemera.push({
+                    count: 5, //cycles before it self removes
+                    PposX: who.position.x,
+                    PposY: who.position.y,
+                    size: who.size,
+                    color: who.color,
+                    do() {
+                        this.count--
+                        if (this.count < 0) simulation.removeEphemera(this)
+                        ctx.beginPath();
+                        ctx.arc(this.PposX, this.PposY, Math.max(1, this.size * (this.count + 1) / 7), 0, 2 * Math.PI);
+                        ctx.fillStyle = this.color
+                        ctx.fill();
+                    },
+                })
+                powerUps.onPickUp(who);
+                who.effect();
+                Matter.Composite.remove(engine.world, who);
+                const index = powerUp.indexOf(who)
+                if (index > -1) powerUp.splice(index, 1);
+                if (tech.isPortalDuplicate && !who.isPortalCopy && Math.random() < 0.33) { //beam splitter, a copy comes out of the other portal
+                    const where = Vector.add(to.position, Vector.mult(to.unit, who.size + 10))
+                    powerUps.directSpawn(where.x, where.y, who.name, false, who.size, true)
+                    const copy = powerUp[powerUp.length - 1]
+                    if (copy && copy.name === who.name) {
+                        copy.isPortalCopy = true //copies don't make more copies
+                        Matter.Body.setVelocity(copy, Vector.add(Vector.mult(to.unit, 8), { x: 2 * (Math.random() - 0.5), y: 2 * (Math.random() - 0.5) }))
+                    }
+                }
+            },
+            playerExit() { //after the player comes out of a portal
+                if (tech.isSmallPortal && m.immuneCycle < m.cycle + 240) m.immuneCycle = m.cycle + 240 //quantum foam, 4 seconds of invulnerability
+                if (m.coupling > 0) { //coupling
+                    m.energy += 0.01 * m.coupling * level.isReducedRegen //not m.addEnergy(), going through a portal makes you briefly immune, which blocks it
+                    for (let i = 0, len = Math.min(15, m.coupling / 5); i < len; i++) simulation.energyGenGraphic()
+                }
+                if (tech.isCloakHealLastHit && m.lastHit > 0) { //patch
+                    const heal = Math.min(0.75 * m.lastHit, m.energy)
+                    m.addHealth(heal);
+                    m.lastHit = 0
+                    simulation.drawList.push({ x: player.position.x, y: player.position.y, radius: Math.sqrt(heal) * 200, color: "rgba(0,255,200,0.6)", time: 16 });
+                }
+                if (tech.isCloakStun) { //dazzler
+                    const range = 500
+                    for (let i = 0, len = mob.length; i < len; ++i) {
+                        if (!mob[i].isBadTarget && Vector.magnitude(Vector.sub(mob[i].position, player.position)) < range && !Matter.Query.rayAny(map, mob[i].position, player.position)) {
+                            mobs.statusStun(mob[i], 120)
+                        }
+                    }
+                    simulation.drawList.push({ x: player.position.x, y: player.position.y, radius: range, color: "rgba(255,255,255,0.2)", time: 8 });
+                }
+            },
+            effect: () => {
+                m.fieldMeterColor = "#ff8800"
+                m.fieldRange = 0
+                m.fieldHarmReduction = 0.5
+                m.fieldUpgrades[11].isFireHeld = true //a click that picked this field doesn't also place a portal
+                m.fieldUpgrades[11].isFieldHeld = true
+                m.fieldUpgrades[11].isAiming = [false, false]
+                m.hold = function () {
+                    const field = m.fieldUpgrades[11]
+                    const portals = field.getPortals()
+                    //fire places the cyan portal and field places the orange portal, guns are off, see b.setFireMethod()
+                    for (let index = 0; index < 2; index++) {
+                        const isDown = index === 0 ? input.fire : input.field
+                        const wasDown = index === 0 ? field.isFireHeld : field.isFieldHeld
+                        if (isDown && !wasDown && m.fieldCDcycle < m.cycle) {
+                            if (tech.isWormHolePause) {
+                                field.isAiming[index] = true //invariant, the portal is placed on release
+                            } else {
+                                field.fire(portals, index)
+                            }
+                        }
+                        if (field.isAiming[index]) {
+                            if (isDown) { //invariant, pause time and show where the portal is going
+                                if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
+                                m.freezeTime()
+                                Matter.Body.setVelocity(player, { x: 0, y: -55 * player.mass * simulation.g }); //keep player frozen, undo gravity before it is added
+                                player.force.x = 0
+                                player.force.y = 0
+                                ctx.beginPath()
+                                ctx.moveTo(m.pos.x, m.pos.y)
+                                ctx.lineTo(simulation.mouseInGame.x, simulation.mouseInGame.y)
+                                ctx.strokeStyle = portals.ends[index].color + "0.5)"
+                                ctx.lineWidth = 2
+                                ctx.setLineDash([10, 15])
+                                ctx.stroke()
+                                ctx.setLineDash([])
+                            } else {
+                                field.isAiming[index] = false
+                                field.fire(portals, index)
+                            }
+                        }
+                        if (index === 0) {
+                            field.isFireHeld = isDown
+                        } else {
+                            field.isFieldHeld = isDown
+                        }
+                    }
+                    if (!field.isAiming[0] && !field.isAiming[1] && tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
+                    if (input.fire || input.field) m.grabPowerUp(); //pull in power ups while either button is held, like the wormhole
+                    //power ups that fell into a portal, one at a time so choices don't stack up
+                    for (let i = field.pickUpQueue.length - 1; i > -1; i--) {
+                        if (!powerUp.includes(field.pickUpQueue[i].who)) field.pickUpQueue.splice(i, 1)
+                    }
+                    if (field.pickUpQueue.length && !simulation.isChoosing && !simulation.paused) field.pickUp(field.pickUpQueue.shift())
+                    portals.draw()
+                    m.drawRegenEnergy("rgba(0, 166, 187, 0.3)")
                 }
             }
         },
@@ -7044,7 +7230,7 @@ const m = {
                                             let type = "ammo"
                                             if (Math.random() < 0.4) {
                                                 type = "heal"
-                                            } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) {
+                                            } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) { // eslint-disable-line no-dupe-else-if
                                                 type = "research"
                                             }
                                             powerUps.spawn(mob[k].position.x, mob[k].position.y, type);

@@ -252,6 +252,7 @@ const saveGame = {
             saveGame.pendingMessage = ""
         }
         if (level.levelsCleared < 1 || simulation.isTraining || build.isExperimentRun || !m.alive) return
+        if (level.levels[level.onLevel] === "null") return //the run was already won on final, and the save was cleared
         try {
             saveGame.latest = saveGame.create()
             if (localSettings.isAllowed) localStorage.setItem(saveGame.storageKey, JSON.stringify(saveGame.latest))

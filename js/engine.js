@@ -404,6 +404,7 @@ function trackLastTouchedBlock(event) {
 
 
 Events.on(engine, "collisionStart", function (event) {
+    for (let i = 0; i < level.surfacePortals.length; i++) level.surfacePortals[i].collide(event) //first, it removes pairs going through a portal
     playerOnGroundCheck(event);
     trackLastTouchedBlock(event);
     // playerHeadCheck(event);
@@ -422,6 +423,9 @@ Events.on(engine, "collisionStart", function (event) {
     //         player.collision.isHeadSensor = true
     //     }
     // }
+});
+Events.on(engine, "afterUpdate", function () {
+    for (let i = 0; i < level.surfacePortals.length; i++) level.surfacePortals[i].update()
 });
 Events.on(engine, "collisionActive", function (event) {
     playerOnGroundCheck(event);

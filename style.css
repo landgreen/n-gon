@@ -1253,6 +1253,16 @@ body.has-autosave #start-button {
     text-shadow: 1px 0px 2px #234;
 }
 
+.color-portal span:nth-child(1) {
+    color: hsl(197, 100%, 42%);
+    background-color: hsla(197, 100%, 50%, 0.1);
+}
+
+.color-portal span:nth-child(2) {
+    color: hsl(29, 100%, 48%);
+    background-color: hsla(29, 100%, 50%, 0.1);
+}
+
 .color-print {
     color: #567;
     /* font-family: monospace; */

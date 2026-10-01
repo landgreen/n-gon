@@ -169,7 +169,7 @@ const tech = {
                                 const wordLimit = 7
                                 const wordNumber = Math.ceil(Math.random() * wordLimit)
                                 const answer = prompt(`On the wikipedia page for ${subject} what is word ${wordNumber + 1}?`)
-                                console.log(introArray[wordNumber])
+                                console.log(introArray[wordNumber]) // eslint-disable-line no-console
                                 if (introArray[wordNumber]) {
                                     if (answer && answer.toLowerCase() === introArray[wordNumber].toLowerCase().replace(/[^a-zA-Z]/g, '')) {
                                         powerUps.spawnDelay("research", 4)
@@ -221,7 +221,7 @@ const tech = {
                     tech.tech[i].count = 0;
                 }
             }
-            console.log('cheating')
+            console.log('cheating') // eslint-disable-line no-console
             sound.tone(250)
             sound.tone(300)
             sound.tone(375)
@@ -1042,7 +1042,7 @@ const tech = {
         frequencyDefault: 3,
         isSkinUpgrade: true,
         allowed() {
-            return tech.isEigenstate && m.fieldMode !== 9 && m.fieldMode !== 8
+            return tech.isEigenstate && m.fieldMode !== 9 && m.fieldMode !== 8 && m.fieldMode !== 11
         },
         requires: "eigenstate, not wormhole, pilot wave",
         effect() {
@@ -3380,9 +3380,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode !== 9 && !tech.isTokamak && !tech.isReel
+            return m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak && !tech.isReel
         },
-        requires: "not wormhole, reel, tokamak",
+        requires: "not wormhole, portal, reel, tokamak",
         effect() {
             tech.blockDamage = 0.3
         },
@@ -3400,9 +3400,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11
         },
-        requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave",
+        requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave, portal",
         effect() {
             tech.isGroupThrow = true
         },
@@ -3419,9 +3419,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
         },
-        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
+        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole, portal",
         effect() {
             tech.isAddBlockMass = true
         },
@@ -3437,9 +3437,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && m.fieldUpgrades[m.fieldMode].name !== "portal" && !tech.isTokamak
         },
-        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
+        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole, portal",
         effect() {
             tech.isBlockRestitution = true
         },
@@ -8044,8 +8044,9 @@ const tech = {
         },
         remove() {
             let i, len
-            if (tech.oneSuperBall) {
-                tech.oneSuperBall = false;
+            const wasOn = tech.oneSuperBall
+            tech.oneSuperBall = false; //always set, super ball mines use it to size balls
+            if (wasOn) {
                 for (i = 0, len = b.guns.length; i < len; i++) { //find which gun
                     if (b.guns[i].name === "super balls") b.guns[i].chooseFireMethod()
                 }
@@ -11933,9 +11934,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldMode === 6 || m.fieldMode === 8) && (build.isExperimentSelection || powerUps.research.count > 2)
+            return (m.fieldMode === 6 || m.fieldMode === 8 || m.fieldMode === 11) && (build.isExperimentSelection || powerUps.research.count > 2)
         },
-        requires: "time dilation or pilot wave",
+        requires: "time dilation, pilot wave, or portal",
         effect() {
             tech.fastTimeFire *= 0.66
             tech.fastTime += 0.45 //movement
@@ -11964,9 +11965,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return !tech.isGroundState && (m.fieldMode === 6 || m.fieldMode === 8)
+            return !tech.isGroundState && (m.fieldMode === 6 || m.fieldMode === 8 || m.fieldMode === 11)
         },
-        requires: "time dilation or pilot wave, not ground state",
+        requires: "time dilation, pilot wave, or portal, not ground state",
         effect() {
             tech.isTimeCrystals = true
             m.setFieldRegen()
@@ -11985,9 +11986,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (m.fieldMode === 6 || m.fieldMode === 7)
+            return (m.fieldMode === 6 || m.fieldMode === 7 || m.fieldMode === 11)
         },
-        requires: "cloaking, time dilation",
+        requires: "cloaking, time dilation, portal",
         effect() {
             tech.cloakDuplication = 0.4
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
@@ -12009,9 +12010,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 7 || m.fieldMode === 6
+            return m.fieldMode === 7 || m.fieldMode === 6 || m.fieldMode === 11
         },
-        requires: "time dilation, cloaking",
+        requires: "time dilation, cloaking, portal",
         effect() {
             tech.isQuantumEraser = true
         },
@@ -12068,7 +12069,9 @@ const tech = {
     {
         name: "patch",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Patch_(computing)' class="link">patch</a>`,
-        description: "after <strong class='color-cloaked' data-help='cloaking'>cloaking</strong> recover <strong>0.75x</strong><br>of your last <strong class='color-h' data-help='health'>health</strong> lost",
+        descriptionFunction() {
+            return `after ${m.fieldMode === 11 ? `going through a ${m.fieldUpgrades[11].text()}` : "<strong class='color-cloaked' data-help='cloaking'>cloaking</strong>"} recover <strong>0.75x</strong><br>of your last <strong class='color-h' data-help='health'>health</strong> lost`
+        },
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -12076,9 +12079,9 @@ const tech = {
         frequencyDefault: 2,
         isHealTech: true,
         allowed() {
-            return m.fieldMode === 7 && !tech.isEnergyHealth
+            return (m.fieldMode === 7 || m.fieldMode === 11) && !tech.isEnergyHealth
         },
-        requires: "metamaterial cloaking, not mass-energy",
+        requires: "metamaterial cloaking, portal, not mass-energy",
         effect() {
             tech.isCloakHealLastHit = true;
         },
@@ -12089,16 +12092,18 @@ const tech = {
     {
         name: "dazzler",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Dazzler_(weapon)' class="link">dazzler</a>`,
-        description: "after <strong class='color-cloaked' data-help='cloaking'>decloaking</strong><br><strong>stun</strong> nearby mobs for <strong>2</strong> seconds",
+        descriptionFunction() {
+            return `after ${m.fieldMode === 11 ? `coming out of a ${m.fieldUpgrades[11].text()}` : "<strong class='color-cloaked' data-help='cloaking'>decloaking</strong>"}<br><strong>stun</strong> nearby mobs for <strong>2</strong> seconds`
+        },
         isFieldTech: true,
         maxCount: 1,
         count: 0,
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 7
+            return m.fieldMode === 7 || m.fieldMode === 11
         },
-        requires: "metamaterial cloaking",
+        requires: "metamaterial cloaking, portal",
         effect() {
             tech.isCloakStun = true;
         },
@@ -12214,9 +12219,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (m.fieldMode === 8 || m.fieldMode === 9) && (build.isExperimentSelection || powerUps.research.count > 2)
+            return (m.fieldMode === 8 || m.fieldMode === 9 || m.fieldMode === 11) && (build.isExperimentSelection || powerUps.research.count > 2)
         },
-        requires: "wormhole, pilot wave",
+        requires: "wormhole, pilot wave, portal",
         effect() {
             tech.fieldDuplicate = 0.11
             powerUps.setPowerUpMode(); //needed after adjusting duplication chance
@@ -12302,6 +12307,7 @@ const tech = {
         name: "holographic principle",
         cost: 2,
         descriptionFunction() {
+            if (m.fieldMode === 11) return `placing a ${m.fieldUpgrades[11].text()} costs <strong>2</strong> <strong class='energy' data-help='energy'>energy</strong><br><em style ="float: right;">(originally 10 energy)</em>`
             return `entering a <strong class='color-worm' data-help='wormhole'>wormhole</strong> costs <strong>2</strong> <strong class='energy' data-help='energy'>energy</strong><br><em style ="float: right;">(originally 16 energy)</em>`
         },
         isFieldTech: true,
@@ -12310,9 +12316,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 9 && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
+            return (m.fieldMode === 9 || m.fieldMode === 11) && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
         },
-        requires: "wormhole",
+        requires: "wormhole, portal",
         effect() {
             powerUps.research.expend(this.cost)
             tech.isFreeWormHole = true
@@ -12457,7 +12463,7 @@ const tech = {
         name: "invariant",
         cost: 1,
         descriptionFunction() {
-            return `<strong>pause</strong> time while<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(this.cost)}</span><br>placing your <strong class='color-worm' data-help='wormhole'>wormhole</strong>`
+            return `<strong>pause</strong> time while<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(this.cost)}</span><br>placing your ${m.fieldMode === 11 ? `${m.fieldUpgrades[11].text(true)}, they open when you let go` : "<strong class='color-worm' data-help='wormhole'>wormhole</strong>"}`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -12465,9 +12471,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return m.fieldMode === 9 && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
+            return (m.fieldMode === 9 || m.fieldMode === 11) && (build.isExperimentSelection || powerUps.research.count > this.cost - 1)
         },
-        requires: "wormhole",
+        requires: "wormhole, portal",
         effect() {
             tech.isWormHolePause = true
             powerUps.research.expend(this.cost)
@@ -12564,6 +12570,71 @@ const tech = {
         remove() {
             tech.blockDamage = 0.075
             tech.isReel = false
+        }
+    },
+    {
+        name: "beam splitter",
+        descriptionFunction() {
+            return `<strong>power ups</strong> that go into a ${m.fieldUpgrades[11].text()} have a <strong>33%</strong><br>chance to <strong class='color-dup' data-help='duplicate'>duplicate</strong> out of the other one`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 11
+        },
+        requires: "portal",
+        effect() {
+            tech.isPortalDuplicate = true
+            powerUps.setPowerUpMode(); //draws duplicated power ups as polygons
+        },
+        remove() {
+            tech.isPortalDuplicate = false
+            if (this.count) powerUps.setPowerUpMode();
+        }
+    },
+    {
+        name: "Einstein-Rosen bridge",
+        descriptionFunction() {
+            return `<strong>1.5x</strong> larger ${m.fieldUpgrades[11].text(true)}<br><strong>0.6x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 11 && !tech.isSmallPortal
+        },
+        requires: "portal, not quantum foam",
+        effect() {
+            tech.isLargePortal = true
+        },
+        remove() {
+            tech.isLargePortal = false
+        }
+    },
+    {
+        name: "quantum foam",
+        descriptionFunction() {
+            return `<strong>0.8x</strong> smaller ${m.fieldUpgrades[11].text(true)}<br><strong class="color-invulnerable" data-help="invulnerability">invulnerable</strong> for <strong>4</strong> seconds after coming out of a ${m.fieldUpgrades[11].text()}`
+        },
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 11 && !tech.isLargePortal
+        },
+        requires: "portal, not Einstein-Rosen bridge",
+        effect() {
+            tech.isSmallPortal = true
+        },
+        remove() {
+            tech.isSmallPortal = false
         }
     },
 
@@ -13648,9 +13719,9 @@ const tech = {
         isInstant: true,
         isJunk: true,
         allowed() {
-            return m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
         },
-        requires: "not pilot wave, tokamak, wormhole",
+        requires: "not pilot wave, tokamak, wormhole, portal",
         effect() {
             m.throwBlock = m.throwSelf
         },
@@ -13667,9 +13738,9 @@ const tech = {
         // isInstant: true,
         isJunk: true,
         allowed() {
-            return m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
+            return m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
         },
-        requires: "not pilot wave, tokamak, wormhole",
+        requires: "not pilot wave, tokamak, wormhole, portal",
         effect() {
             tech.isStaticBlock = true
         },
@@ -15281,7 +15352,7 @@ const tech = {
         effect() {
             const urls = ["https://scratch.mit.edu/projects/14005697/fullscreen/", "https://scratch.mit.edu/projects/22573757/fullscreen/", "https://scratch.mit.edu/projects/41429974/fullscreen/", "https://scratch.mit.edu/projects/43690666/fullscreen/", "https://codepen.io/lilgreenland/full/ozXNWZ", "https://codepen.io/lilgreenland/full/wzARJY", "classic/7-1-2017/", "classic/4-15-2018/", "classic/7-11-2019/", "classic/9-8-2019/", "classic/7-15-2020/", "classic/6-1-2021/"]
             const choose = urls[Math.floor(Math.random() * urls.length)]
-            console.log(`opening new tab" ${choose}`)
+            console.log(`opening new tab" ${choose}`) // eslint-disable-line no-console
             let tab = window.open(choose, "_blank");
             setTimeout(() => {
                 tab.close();
