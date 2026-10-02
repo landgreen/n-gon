@@ -152,7 +152,7 @@ const simulation = {
                 const options = []
                 for (let i = 0; i < tech.tech.length; i++) {
                     const t = tech.tech[i]
-                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech && !tech.isNonDemolitionKept(t, action.keep ?? null)) { //quantum non-demolition only replaces the tech it didn't keep
+                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech && !tech.isNonDemolitionKept(t, action.keep ?? null)) { //self-locating uncertainty only replaces the tech it didn't keep
                         for (let j = 0; j < t.frequency; j++) options.push(i)
                     }
                 }
@@ -1503,6 +1503,8 @@ const simulation = {
             const intersections = [];
 
             for (const obj of domain) {
+                const bounds = obj.bounds; //skip the whole body if it's away from the ray
+                if (rayMaxX < bounds.min.x || bounds.max.x < rayMinX || rayMaxY < bounds.min.y || bounds.max.y < rayMinY) continue;
                 // iterate edges [i] -> [i+1]
                 for (let i = 0; i < obj.vertices.length - 1; i++) {
                     const a = obj.vertices[i];
@@ -1677,6 +1679,8 @@ const simulation = {
             function allCircleLineCollisions(c, radius, domain) {
                 var lines = [];
                 for (const obj of domain) {
+                    const bounds = obj.bounds; //skip bodies away from the circle, the extra 1 matches the distance check below
+                    if (c.x + radius + 1 < bounds.min.x || bounds.max.x < c.x - radius - 1 || c.y + radius + 1 < bounds.min.y || bounds.max.y < c.y - radius - 1) continue;
                     for (var i = 0; i < obj.vertices.length - 1; i++) lines.push(simulation.sight.circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
                     lines.push(simulation.sight.circleLineCollisions(obj.vertices[obj.vertices.length - 1], obj.vertices[0], c, radius));
                 }
@@ -1703,9 +1707,12 @@ const simulation = {
             }
 
             var vertices = [];
+            const radiusSquared = radius * radius
             for (const obj of simulation.sight.intersectMap) {
                 for (var i = 0; i < obj.vertices.length; i++) {
                     const vertex = obj.vertices[i];
+                    //skip corners outside the circle, where walls cross the circle is found below with circleCollisions
+                    if ((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2 > radiusSquared) continue
                     const angleToVertex = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                     // const distanceToVertex = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
                     // const queryPoint = { x: Math.cos(angleToVertex) * (distanceToVertex - 1) + pos.x, y: Math.sin(angleToVertex) * (distanceToVertex - 1) + pos.y }
@@ -1714,12 +1721,6 @@ const simulation = {
                     if (!Matter.Query.segmentAny(map, pos, queryPoint)) {
                         var distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
                         var endPoint = { x: vertex.x, y: vertex.y }
-
-                        if (distance > radius) {
-                            const angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
-                            endPoint = { x: Math.cos(angle) * radius + pos.x, y: Math.sin(angle) * radius + pos.y }
-                            distance = radius
-                        }
 
                         var best = simulation.sight.getIntersection(pos, endPoint, map);
                         if (best.dist >= distance) best = { x: endPoint.x, y: endPoint.y, dist: distance }
@@ -1783,6 +1784,9 @@ const simulation = {
                 vertices.push(vertex);
                 if (best.dist <= radius) vertices.push({ x: best.x, y: best.y })
             }
+            if (vertices.length === 0 && !Matter.Query.point(map, pos).length) { //no walls in the circle, so see the whole circle
+                for (let angle = -Math.PI; angle < Math.PI; angle += Math.PI / 2) vertices.push({ x: Math.cos(angle) * radius + pos.x, y: Math.sin(angle) * radius + pos.y })
+            }
             vertices.sort((a, b) => Math.atan2(a.y - pos.y, a.x - pos.x) - Math.atan2(b.y - pos.y, b.x - pos.x));
             return vertices;
         },
@@ -1812,6 +1816,18 @@ const simulation = {
                     simulation.draw.mapPath.lineTo(vertices[j].x, vertices[j].y);
                 }
                 simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
+            }
+            if (simulation.draw.drawMapPath === simulation.draw.drawMapSightSetting) simulation.draw.lineOfSightPrecalculation() //keep the line of sight setting up to date when the map changes
+        },
+        isLineOfSight() { //subway, the line of sight setting, and community maps with line of sight all replace drawMapPath
+            return simulation.draw.drawMapPath !== simulation.draw.drawMapPathDefault
+        },
+        updateLineOfSightSetting() { //line of sight setting draws every level like subway, levels with their own map drawing are left alone
+            if (localSettings.isLineOfSight && simulation.draw.drawMapPath === simulation.draw.drawMapPathDefault) {
+                simulation.draw.drawMapPath = simulation.draw.drawMapSightSetting
+                simulation.draw.lineOfSightPrecalculation() //required precalculation for line of sight
+            } else if (!localSettings.isLineOfSight && simulation.draw.drawMapPath === simulation.draw.drawMapSightSetting) {
+                simulation.draw.drawMapPath = simulation.draw.drawMapPathDefault
             }
         },
         lineOfSightPrecalculation() {
@@ -1845,7 +1861,10 @@ const simulation = {
             ctx.fillStyle = color.map;
             ctx.fill(simulation.draw.mapPath);
         },
-        drawMapSight() {
+        drawMapSightSetting() {
+            simulation.draw.drawMapSight(true)
+        },
+        drawMapSight(isShadeSight = false) {
             if (!simulation.isTimeSkipping) {
                 const pos = m.pos
                 const radius = 4000
@@ -1882,6 +1901,11 @@ const simulation = {
                     ctx.globalCompositeOperation = "destination-in";
                     ctx.fillStyle = "#000";
                     ctx.fill();
+                    if (isShadeSight) { //darken what you can see behind everything drawn so far, subway does this with a rect in level.custom
+                        ctx.globalCompositeOperation = "destination-over";
+                        ctx.fillStyle = "rgba(0,0,0,0.1)";
+                        ctx.fill();
+                    }
                     ctx.globalCompositeOperation = "source-over";
 
                     // make map visible

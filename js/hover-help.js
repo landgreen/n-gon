@@ -89,8 +89,11 @@ portal: +1 energy after going through a portal
         <br><br>// it can also be used as a currency to trade for certain tech`,
         wormhole: `// <strong class="color-worm">wormholes</strong> teleport the player, collect power ups, and consume nearby blocks
         <br><br>// <em>a wormhole connects locations in spacetime</em>`,
-        portal: `// <strong class="color-portal"><span>por</span><span>tals</span></strong> connect two flat surfaces
-        <br><br>// the player, blocks, bullets, and power ups that go in one come out the other, keeping their speed
+        portal: () => `// <strong class="color-portal"><span>por</span><span>tals</span></strong> connect two flat surfaces
+        <br><br>// fire (left click or ${keyLabel(input.key.fire)}) places the <strong class="color-portal"><span>cyan</span></strong> portal and field (right click or ${keyLabel(input.key.field)}) places the <strong class="color-portal"><span></span><span>orange</span></strong> portal when you let go, so they replace your guns and your field
+        <br><br>// hold either button to pick up a block you're looking at, then hold and let go to throw it
+        <br><br>// the player and blocks that go in one come out the other, keeping their speed
+        <br><br>// power ups that go in are absorbed and picked up
         <br><br>// <em>speedy thing goes in, speedy thing comes out</em>`,
         wire: `// <strong class="color-wire">filament</strong> is a thin strand attached to the player
         <br><br>// filament grows after consuming power ups and shrinks after touching mobs`,

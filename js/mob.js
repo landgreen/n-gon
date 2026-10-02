@@ -1632,6 +1632,10 @@ const mobs = {
                         dmg *= this.damageReduction
                     }
                     this.health -= dmg
+                    if (level.mobRegenCycles && dmg > 0 && dmg !== Infinity) { //mobs regenerate constraint, healed over time by its ephemera in level.js
+                        this.regenPool += 0.8 * dmg
+                        this.regenRate = this.regenPool / level.mobRegenCycles
+                    }
                     //this.fill = this.color + this.health + ')';
                     this.onDamage(dmg); //custom damage effects
                     if ((this.health < 0.01 || isNaN(this.health)) && this.alive) this.death();
@@ -1646,6 +1650,8 @@ const mobs = {
                 // to use declare custom method in mob spawn
             },
             damageReduction: 1,
+            regenPool: 0, //health left to recover from the mobs regenerate constraint
+            regenRate: 0, //health recovered per cycle from regenPool
             // damageReductionGoal: 0.001, //must add this to boss set up:   me.damageReduction = 0.25
             // damageReductionScale: 0.004, //for bosses in this.onDamage  determines the impact of dmg on damageReductionGoal
             // armor() { //slowly reduce damage reduction, for bosses

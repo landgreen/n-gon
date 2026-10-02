@@ -495,7 +495,7 @@ const tech = {
             tech.zeitgeistRemoveName = value
         },
         nonDemolition(value) {
-            const entry = tech.tech.find(item => item.name === "quantum non-demolition");
+            const entry = tech.tech.find(item => item.name === "self-locating uncertainty");
             if (!entry.count || !simulation.paused || simulation.isChoosing || !["field", "gun", "tech"].includes(value)) return;
             tech.nonDemolition = value
             build.generatePauseRight()
@@ -533,7 +533,7 @@ const tech = {
             build.generatePauseLeft()
         },
     },
-    nonDemolition: null, //quantum non-demolition: "field", "gun", or "tech" stay the same when switching worlds
+    nonDemolition: null, //self-locating uncertainty: "field", "gun", or "tech" stay the same when switching worlds
     isNonDemolitionKept(t, mode = tech.nonDemolition) { //t is a tech.tech entry
         if (mode === "field") return !!t.isFieldTech
         if (mode === "gun") return !!t.isGunTech
@@ -1042,7 +1042,7 @@ const tech = {
         frequencyDefault: 3,
         isSkinUpgrade: true,
         allowed() {
-            return tech.isEigenstate && m.fieldMode !== 9 && m.fieldMode !== 8 && m.fieldMode !== 11
+            return tech.isEigenstate && m.fieldMode !== 9 && m.fieldMode !== 8
         },
         requires: "eigenstate, not wormhole, pilot wave",
         effect() {
@@ -1768,6 +1768,33 @@ const tech = {
         },
         remove() {
             tech.isFarAwayDmg = false;
+        }
+    },
+    {
+        name: "outlier",
+        descriptionFunction() {
+            const shot = { //what gets bigger for each gun
+                "nail gun": "nail", "shotgun": "shot", "super balls": "shot", "missiles": "missile",
+                "grenades": "grenade", "spores": "sporangium", "drones": "drone", "foam": "bubble", "harpoon": "harpoon", "mine": "mine",
+            }[b.guns[b.activeGun]?.name] ?? "bullet"
+            const explosion = ", and a bigger <strong class='explode' data-help='explode'>explosion</strong>"
+            const extra = { missile: explosion, grenade: explosion, sporangium: ", and more spores", mine: ", and bigger nails" }[shot] ?? ""
+            return `every <strong>5</strong> seconds your next ${shot} is <strong>bigger</strong><br>it has <strong>5x</strong> <strong>mass</strong>${extra}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return b.inventory.some(i => b.guns[i].name !== "laser" && b.guns[i].name !== "wave")
+        },
+        requires: "a gun, not laser or wave",
+        effect() {
+            tech.isOutlier = true
+            b.outlierCycle = 0
+        },
+        remove() {
+            tech.isOutlier = false
         }
     },
     {
@@ -3380,9 +3407,9 @@ const tech = {
         frequency: 1,
         frequencyDefault: 1,
         allowed() {
-            return m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak && !tech.isReel
+            return m.fieldMode !== 9 && !tech.isTokamak && !tech.isReel
         },
-        requires: "not wormhole, portal, reel, tokamak",
+        requires: "not wormhole, reel, tokamak",
         effect() {
             tech.blockDamage = 0.3
         },
@@ -3400,9 +3427,9 @@ const tech = {
         frequency: 2,
         frequencyDefault: 2,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isTokamak || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9
         },
-        requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave, portal",
+        requires: "mass driver, additive manufacturing, tokamak, not wormhole, pilot wave",
         effect() {
             tech.isGroupThrow = true
         },
@@ -3419,9 +3446,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole, portal",
+        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
         effect() {
             tech.isAddBlockMass = true
         },
@@ -3437,9 +3464,9 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && m.fieldUpgrades[m.fieldMode].name !== "portal" && !tech.isTokamak
+            return (tech.blockDamage > 0.075 || tech.isPrinter || tech.isThrowBlocks) && m.fieldUpgrades[m.fieldMode].name !== "pilot wave" && m.fieldUpgrades[m.fieldMode].name !== "wormhole" && !tech.isTokamak
         },
-        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole, portal",
+        requires: "mass driver, additive manufacturing, not pilot wave, tokamak, wormhole",
         effect() {
             tech.isBlockRestitution = true
         },
@@ -4842,15 +4869,15 @@ const tech = {
         }
     },
     {
-        name: "quantum non-demolition",
-        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Quantum_nondemolition_measurement' class="link">quantum non-demolition</a>`,
+        name: "self-locating uncertainty",
+        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Many-worlds_interpretation' class="link">self-locating uncertainty</a>`,
         descriptionFunction() {
             const modes = {
                 field: `${powerUps.orb.field()} &nbsp;${powerUps.orb.fieldTech()} &nbsp;${powerUps.orb.coupling(1)}`,
                 gun: `${powerUps.orb.gun()} &nbsp;${powerUps.orb.gunTech()} &nbsp;${powerUps.orb.ammo(1)}`,
                 tech: `${powerUps.orb.tech()} ${powerUps.orb.research(1)}`,
             }
-            let menu
+            let menu = "" //only show the orbs in the drop down after you have it, so tech choices and experiment mode stay 2 lines
             if (this.count > 0 && !this.isLost && !build.isExperimentSelection) {
                 const mode = modes[tech.nonDemolition] ? tech.nonDemolition : "field"
                 //the options have orb pictures, so this is a details element instead of a select
@@ -4859,8 +4886,6 @@ const tech = {
                     menu += `<div class="non-demolition-option${key === mode ? " non-demolition-option-selected" : ""}" onclick="tech.inputHTML.nonDemolition('${key}')">${modes[key]}</div>`
                 }
                 menu += `</details>`
-            } else {
-                menu = `<br>${modes.field} &nbsp; or &nbsp; ${modes.gun} &nbsp; or &nbsp; ${modes.tech}`
             }
             return `when <span class="color-paused" data-help="pause">PAUSED</span> select what doesn't <strong>change</strong> when<br>you enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong> ${menu}`
         },
@@ -13719,9 +13744,9 @@ const tech = {
         isInstant: true,
         isJunk: true,
         allowed() {
-            return m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
+            return m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "not pilot wave, tokamak, wormhole, portal",
+        requires: "not pilot wave, tokamak, wormhole",
         effect() {
             m.throwBlock = m.throwSelf
         },
@@ -13738,9 +13763,9 @@ const tech = {
         // isInstant: true,
         isJunk: true,
         allowed() {
-            return m.fieldMode !== 8 && m.fieldMode !== 9 && m.fieldMode !== 11 && !tech.isTokamak
+            return m.fieldMode !== 8 && m.fieldMode !== 9 && !tech.isTokamak
         },
-        requires: "not pilot wave, tokamak, wormhole, portal",
+        requires: "not pilot wave, tokamak, wormhole",
         effect() {
             tech.isStaticBlock = true
         },

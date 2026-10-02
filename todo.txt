@@ -1,50 +1,29 @@
 
+level: portals - your bullets go through the portals on levels like test chamber
 
-field: portal - only available through lore
-  coupling: +1 energy after going through a portal
-  tech: beam splitter - power ups that go into a portal have a 33% chance to duplicate out of the other one
-  tech: Einstein-Rosen bridge - 1.5x larger portals, 0.6x damage taken
-  tech: quantum foam - 0.8x smaller portals, invulnerable for 4 seconds after coming out of a portal
-  holographic principle, patch, dazzler, vacuum fluctuation, Lorentz transformation, time crystals, invariant, commensalism, and no-cloning theorem work with portal
-  wormhole has its lavender energy colors back
+setting: line of sight (beta, low performance)- walls block your view on every level like on subway, toggle it in settings or the pause menu
+field: portal - the wall behind each portal shows the view out of the other portal
+tech: outlier - every 5 seconds your next shot is bigger with 5x mass
+
+constraint: mobs regenerate - mobs recover 80% of damage taken over 5s
+constraint: mobs reproduce - every 10s a mob far from you copies itself, +1s each time, up to the starting number of mobs
 
 
 bug fixes
-  getting rocket-propelled grenade while neutron bombs are in the air no longer crashes the game
-  elephants toothpaste mines no longer fire nails when there's too much foam
-  the null level no longer saves a checkpoint
-  blast ball mines no longer crash the game, and sentry mines no longer fire every frame
-  portals: big blocks come out in front of the portal instead of stuck in the wall, and heal attract only pulls nearby heals through
+  dying with scale invariance no longer stops you from stepping up small ledges in your next run
+  portals flip with the map on levels that turn upside down
 
 
 *********************************************************** TODO *****************************************************
-
-
  
-
-
-
-
 
 
 new version of history boss with legs and it looks in the same direction the player looked in but +180
   also has a sword?
   also shots bullets?
 
-bugs
-  sentry is firing too fast
 
-improve portal physics
-is it possible to make portals anywhere?
-  issues with wall collision
-
-constraint idea - mobs recover 80% of damage done to them over 5s
-  text: mobs regenerate
-constraint idea - a random normal mob(one that drops power ups) far from the player makes a copy of themselves every 10s up to a limit of the starting number of normal mobs
-  add one second to cooldown after each time reproducing, so 10s for first time, 11s for 2nd time
-  text: mobs reproduce
-
-  
+ 
 add more stronger constraints
   slow bots
   is2xAmmo
@@ -111,15 +90,6 @@ stats -
     or in settings in between runs
   will this effect performance?
   have to rework to add source in function calls
-
-
-
-tech:  - 0.85x damage taken after switching fields, and fields get switched randomly at the start of a level
-  converts fieldtech.
-  your field and fieldtech are not randomised when going into an alternate reality
-tech:  - 0.8x damage taken after collecting a skin, have your skin get switched to a random one and convert skintech upon starting a level
-  your skin and skintech are not randomised when going into an alternate reality.
-
 
 
 make one face of a mob take 4x damage
@@ -207,19 +177,19 @@ lore chapter 7
   the narrators don't recognize the player
   because at some point you switched worlds the story is now very different (maybe, you don't have to do it this way)
     add a switch worlds counter to local storage
-  the AI is trying to adjust the electron hole constants that govern PNP and NPN type technology
+  the AI is trying to adjust the electron hole physical constant values that govern PNP and NPN type technology
   so no solar panels, LEDs, and of course transistors.  computers will stop working everywhere
   conflicts
     is no computers bad
     danger of adjusting universal constants leading to issues
   resolution
-    new electron constant physics spreads spacetime at the speed of light
+    new electron constant physics rules spreads through spacetime at the speed of light
     the only way to escape the effects would be to escape the black hole the universe is inside.(Cosmological Natural Selection)
       how?  FTL/wormhole stuff
     once outside our black hole it's easier to undo the changes to constants
     what is it like outside our universes black hole?
       it's a thermodynamically heat death situation similar to the "Penrose diagram" for black holes
-      or it's just another alternate reality
+        or it's just another alternate reality // not this
       make a new level or a zone on the null level with no gravity, and maybe some strange particle graphics of something
         the level should be zoomed out really far to show there is nothing
         the player will have to travel around this level gather power ups (coupling)
@@ -250,18 +220,6 @@ Simplex Noise Vector Flow Field that interacts with the player
     map elements block wind?
 
 
-tech: self locating uncertainty - players have some control over switchWorlds()
-  requires: any alternate reality tech
-  how?
-    button to reroll up to 10 times
-        maybe spend research to reroll
-    input tech with check boxes to control which aspects are rerolled
-      gun, field, tech, health, energy, coupling, research, ...
-      maybe check 1-2 that can't change
-      or check 1-2 that will change
-
-
-
 
 
 add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D rectangles
@@ -274,27 +232,12 @@ add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D r
       maybe mouse2 to drag
       button to toggle a drag mode
 
-
-make mob invulnerability more obvious
-  flashing white?
-  thicker stroke
-
-
-tech:   - your next bullet has 5x mass    <br>5 second cooldown
-  does this work for all bullets?
-    might need special code for grenades/missile and spores/worm/fleas
-  add em right text to show CD status
-
 !tech: conformal infinity - when your wormhole dissipates(wording) regenerate 50% of the energy you had when the wormhole was produced
     how?    compare energy on wormhole creation to energy on wormhole dissipation
   !unwritten
 
 !tech:   - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
   !unwritten
-
-remove gradients in performance mode
-  plasma ball
-  tungsten carbide
 
 tech: plating- at the start of each level gain 0.25 damage reduction, slowly lose this effect over 40 seconds
 

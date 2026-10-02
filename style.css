@@ -1573,7 +1573,7 @@ body.has-autosave #start-button {
 
 }
 
-/* quantum non-demolition drop down, a details element because select options can't show orbs */
+/* self-locating uncertainty drop down, a details element because select options can't show orbs */
 .non-demolition-menu {
     float: right;
     border: 1px #333 solid;

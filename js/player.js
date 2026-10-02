@@ -39,6 +39,7 @@ const m = {
         });
         Matter.Body.setMass(player, m.mass);
         Composite.add(engine.world, [player]);
+        m.skin.floorDrop = 0 //the new body has normal floor vertices, so scale invariance's remove() doesn't lower them
     },
     cycle: 600, //starts at 600 cycles instead of 0 to prevent bugs with m.history
     lastKillCycle: 0,
@@ -354,7 +355,7 @@ const m = {
     switchWorlds(giveTech = "") {
         if (!m.isSwitchingWorlds) {
             let totalTech = 0;
-            const keep = tech.nonDemolition //quantum non-demolition: your "field", "gun", or other "tech" don't change
+            const keep = tech.nonDemolition //self-locating uncertainty: your "field", "gun", or other "tech" don't change
             powerUps.boost.endCycle = 0
             simulation.isTextLogOpen = false; //prevent console spam
             if (keep) {
@@ -1885,7 +1886,7 @@ const m = {
                         m.eigen.makeBlock()
                         //add block to player holding
                         //&& !(m.holdingTarget || m.holdingTarget === m.eigen.block)
-                        if (m.fieldMode !== 9 && m.fieldMode !== 8 && m.fieldMode !== 11) {  //not wormhole, pilot wave, or portal field
+                        if (m.fieldMode !== 9 && m.fieldMode !== 8) {  //not wormhole field
                             m.holdingTarget = m.eigen.block
                             m.isHolding = true;
                             m.holdingTarget.collisionFilter.category = 0;
@@ -6712,7 +6713,8 @@ const m = {
             isFireHeld: false, //one cyan portal per press of the fire button
             isFieldHeld: false, //one orange portal per press of the field button
             pickUpQueue: [], //power ups that fell into a portal, { who, to } where to is the other portal, used in m.hold
-            isAiming: [false, false], //invariant, holding fire or field to aim the cyan or orange portal while time is paused
+            pressCycle: [null, null], //when fire and field were pressed, a portal is placed when they're let go
+            holdCycles: 10, //holding a button this long looks for blocks to pick up instead of only placing a portal
             energyCost() {
                 return tech.isFreeWormHole ? 0.02 : 0.1
             },
@@ -6723,12 +6725,23 @@ const m = {
                 return `<strong class='color-portal' data-help='portal'><span>por</span><span>tal${isPlural ? "s" : ""}</span></strong>`
             },
             descriptionFunction() {
-                return `use <strong>${(100 * this.energyCost()).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong> to place ${this.text(true)}<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>, but you can't use ${powerUps.orb.gun()}<br><strong>8</strong> <strong class='energy' data-help='energy'>energy</strong> per second`
+                return `use <strong>${(100 * this.energyCost()).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong> to place ${this.text(true)}<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>, but you can't use ${powerUps.orb.gun()}<br><strong>8</strong> <strong class='energy' data-help='energy'>energy</strong> per second${m.fieldMode === 11 ? this.previewHTML() : ""}`
+            },
+            previewHTML() { //a checkbox in the pause menu that turns the views through the portals on and off, see surfacePortal drawViews()
+                //stopPropagation keeps the click from also choosing the field card it's on
+                return `<span style="float: right;" onclick="event.stopPropagation()"><input type="checkbox" id="portal-preview" onclick="event.stopPropagation(); m.fieldUpgrades[11].togglePreview()" ${localSettings.isPortalPreview ? "checked" : ""}> <label for="portal-preview">preview</label></span>`
+            },
+            togglePreview() { //saved in localSettings, like damage numbers, so it stays the same between runs
+                localSettings.isPortalPreview = !localSettings.isPortalPreview //off until turned on
+                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+                if (this.portals) this.portals.isViewOn = !!localSettings.isPortalPreview
+                const checkbox = document.getElementById("portal-preview")
+                if (checkbox) checkbox.checked = !!localSettings.isPortalPreview
             },
             getPortals() { //level.start() clears the portals, so make a new pair when needed
                 if (!this.portals || !level.surfacePortals.includes(this.portals)) {
                     this.portals = level.surfacePortal()
-                    this.portals.isBulletPass = true
+                    this.portals.isViewOn = !!localSettings.isPortalPreview
                     this.portals.onPlayerExit = () => this.playerExit()
                     this.portals.onPowerUpEnter = (who, to) => { if (!this.pickUpQueue.some(item => item.who === who)) this.pickUpQueue.push({ who, to }) }
                     this.pickUpQueue = []
@@ -6826,48 +6839,65 @@ const m = {
                 m.fieldHarmReduction = 0.5
                 m.fieldUpgrades[11].isFireHeld = true //a click that picked this field doesn't also place a portal
                 m.fieldUpgrades[11].isFieldHeld = true
-                m.fieldUpgrades[11].isAiming = [false, false]
+                m.fieldUpgrades[11].pressCycle = [null, null]
                 m.hold = function () {
                     const field = m.fieldUpgrades[11]
                     const portals = field.getPortals()
                     //fire places the cyan portal and field places the orange portal, guns are off, see b.setFireMethod()
-                    for (let index = 0; index < 2; index++) {
-                        const isDown = index === 0 ? input.fire : input.field
-                        const wasDown = index === 0 ? field.isFireHeld : field.isFieldHeld
-                        if (isDown && !wasDown && m.fieldCDcycle < m.cycle) {
-                            if (tech.isWormHolePause) {
-                                field.isAiming[index] = true //invariant, the portal is placed on release
-                            } else {
+                    //a tap places a portal when you let go, holding looks for blocks to pick up, and if there's no block the portal is placed when you let go
+                    if (m.isHolding) { //either button charges and throws the block
+                        m.drawHold(m.holdingTarget);
+                        m.holding();
+                        const isField = input.field
+                        input.field = input.fire || input.field //m.throwBlock() only checks the field button
+                        m.throwBlock();
+                        input.field = isField
+                        field.pressCycle = [null, null] //buttons used for throwing don't place portals
+                    } else {
+                        for (let index = 0; index < 2; index++) {
+                            const isDown = index === 0 ? input.fire : input.field
+                            const wasDown = index === 0 ? field.isFireHeld : field.isFieldHeld
+                            if (isDown && !wasDown && m.fieldCDcycle < m.cycle) field.pressCycle[index] = m.cycle
+                            if (field.pressCycle[index] === null) continue
+                            if (isDown) {
+                                if (tech.isWormHolePause) { //invariant, pause time and show where the portal is going
+                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
+                                    m.freezeTime()
+                                    Matter.Body.setVelocity(player, { x: 0, y: -55 * player.mass * simulation.g }); //keep player frozen, undo gravity before it is added
+                                    player.force.x = 0
+                                    player.force.y = 0
+                                    ctx.beginPath()
+                                    ctx.moveTo(m.pos.x, m.pos.y)
+                                    ctx.lineTo(simulation.mouseInGame.x, simulation.mouseInGame.y)
+                                    ctx.strokeStyle = portals.ends[index].color + "0.5)"
+                                    ctx.lineWidth = 2
+                                    ctx.setLineDash([10, 15])
+                                    ctx.stroke()
+                                    ctx.setLineDash([])
+                                }
+                            } else { //let go
+                                const isHeld = m.cycle - field.pressCycle[index] >= field.holdCycles
+                                field.pressCycle[index] = null
+                                if (isHeld && m.holdingTarget) {
+                                    m.pickUp()
+                                    field.pressCycle = [null, null]
+                                    break
+                                }
                                 field.fire(portals, index)
                             }
                         }
-                        if (field.isAiming[index]) {
-                            if (isDown) { //invariant, pause time and show where the portal is going
-                                if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
-                                m.freezeTime()
-                                Matter.Body.setVelocity(player, { x: 0, y: -55 * player.mass * simulation.g }); //keep player frozen, undo gravity before it is added
-                                player.force.x = 0
-                                player.force.y = 0
-                                ctx.beginPath()
-                                ctx.moveTo(m.pos.x, m.pos.y)
-                                ctx.lineTo(simulation.mouseInGame.x, simulation.mouseInGame.y)
-                                ctx.strokeStyle = portals.ends[index].color + "0.5)"
-                                ctx.lineWidth = 2
-                                ctx.setLineDash([10, 15])
-                                ctx.stroke()
-                                ctx.setLineDash([])
-                            } else {
-                                field.isAiming[index] = false
-                                field.fire(portals, index)
-                            }
-                        }
-                        if (index === 0) {
-                            field.isFireHeld = isDown
+                        const pressed = field.pressCycle.filter(cycle => cycle !== null)
+                        if (m.isHolding) {
+                            //just picked up a block, keep m.holdingTarget
+                        } else if (pressed.length && m.cycle - Math.min(...pressed) >= field.holdCycles) {
+                            m.lookForBlock() //highlights the block you'd pick up
                         } else {
-                            field.isFieldHeld = isDown
+                            m.holdingTarget = null
                         }
+                        if (!pressed.length && tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
                     }
-                    if (!field.isAiming[0] && !field.isAiming[1] && tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
+                    field.isFireHeld = input.fire
+                    field.isFieldHeld = input.field
                     if (input.fire || input.field) m.grabPowerUp(); //pull in power ups while either button is held, like the wormhole
                     //power ups that fell into a portal, one at a time so choices don't stack up
                     for (let i = field.pickUpQueue.length - 1; i > -1; i--) {

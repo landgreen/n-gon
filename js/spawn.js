@@ -88,7 +88,7 @@ const spawn = {
         }
     },
     isPacifistStarters() { //on the final lore run, regular mobs are all starters while the player hasn't killed too many, bosses are normal
-        return localSettings.loreCount === 6 && mobs.isPacifist() && !simulation.isCheating
+        return level.levelsCleared > 1 && mobs.isPacifist() && !simulation.isCheating //localSettings.loreCount === 6 &&
     },
     randomizeSpawnList(tier) { //used in subway to get new random mobs at current tier level
         spawn.pickList.splice(0, 1);
@@ -11967,3 +11967,16 @@ const spawn = {
         restitution: 0
     }
 };
+//tag each normal mob with its spawn name and arguments, so it can be copied later (used by the "mobs reproduce" constraint)
+for (const name of new Set([...spawn.fullPickList, ...spawn.tier.flat()])) {
+    const spawnMob = spawn[name]
+    spawn[name] = function (x, y, ...args) {
+        const index = mob.length
+        const result = spawnMob.call(spawn, x, y, ...args)
+        if (mob[index]) {
+            mob[index].spawnName = name
+            mob[index].spawnArgs = args
+        }
+        return result
+    }
+}

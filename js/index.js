@@ -331,6 +331,13 @@ const build = {
         document.getElementById("show-num").checked = localSettings.showDmgNumbers
         document.getElementById("show-num").classList.toggle("ticked")
     },
+    lineOfSight() {
+        localSettings.isLineOfSight = !localSettings.isLineOfSight
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("line-of-sight").checked = localSettings.isLineOfSight
+        document.getElementById("line-of-sight").classList.toggle("ticked")
+        simulation.draw.updateLineOfSightSetting()
+    },
     pauseGrid() {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
         build.generatePauseRight() //makes the right side of the pause menu with the tech
@@ -381,6 +388,9 @@ ${saveGame.exportHTML()}
 <br>
 <input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
 <label for="show-num" title="show in game combat text"  style="font-size:1.15em;">damage numbers</label>
+<br>
+<input onclick="build.lineOfSight()" type="checkbox" id="line-of-sight" name="line-of-sight" ${localSettings.isLineOfSight ? "checked" : ""}>
+<label for="line-of-sight" title="walls block your view on every level, like on subway"  style="font-size:1.15em;">line of sight <span style="color:#aaa; font-size:0.75em;">(beta, low performance)</span></label>
 
 </div>
 
@@ -1842,6 +1852,9 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     if (localSettings.showDmgNumbers === undefined) localSettings.showDmgNumbers = true
     document.getElementById("show-num").checked = localSettings.showDmgNumbers
 
+    if (localSettings.isLineOfSight === undefined) localSettings.isLineOfSight = false
+    document.getElementById("line-of-sight").checked = localSettings.isLineOfSight
+
     if (localSettings.isAutoFullscreen === undefined) localSettings.isAutoFullscreen = false
     document.getElementById("auto-fullscreen").checked = localSettings.isAutoFullscreen
 
@@ -1891,6 +1904,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         key: undefined,
         isHideHUD: false,
         showDmgNumbers: false,
+        isLineOfSight: false,
         isAutoFullscreen: false,
         musicService: "youtube",
         pauseMenuDetailsOpen: [true, false, false, true, false],

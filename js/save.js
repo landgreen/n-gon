@@ -16,6 +16,19 @@ const saveGame = {
         level: ["levels", "onLevel", "levelsCleared", "constraintIndex"],
         spawn: ["mobTypeSpawnOrder", "mobTierSpawnOrder", "pickList"],
     },
+    renamedTech: { "quantum non-demolition": "self-locating uncertainty" }, //old name: new name, so older saves keep tech that were renamed
+    renameTech(save) {
+        const rename = name => saveGame.renamedTech[name] ?? name
+        const renameKeys = obj => {
+            if (!obj || typeof obj !== "object") return obj
+            const result = {}
+            for (const name of Object.keys(obj)) result[rename(name)] = obj[name]
+            return result
+        }
+        save.techCounts = renameKeys(save.techCounts)
+        if (Array.isArray(save.techOrder)) save.techOrder = save.techOrder.map(rename)
+        save.state.techEntries = renameKeys(save.state.techEntries)
+    },
     simulationKeys: ["difficultyOptions", "difficultyMode", "difficulty", "accelScale", "CDScale", "healScale", "molecularMode", "isCheating", "isHorizontalFlipped", "cycle"],
 
     // ****************************************************************************************************
@@ -288,6 +301,7 @@ const saveGame = {
             return
         }
         if (!simulation.onTitlePage) return
+        saveGame.renameTech(save)
         const missing = []
         //community levels in the saved level order need level2.js, which startGame loads when community maps are on
         const communitySetting = simulation.isCommunityMaps

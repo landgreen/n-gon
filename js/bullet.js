@@ -155,7 +155,7 @@ function advancePhononWaveFront(position, radius, angle, halfArc, edge1Advance, 
 const b = {
     queueSuperBalls({ count = 0, num, speed, delay }) {
         simulation.ephemera.push({
-            saveType: "super balls", count, num, speed, delay,
+            saveType: "super balls", count, num, speed, delay, outlier: b.outlierQueue(),
             do() {
                 if (!m.alive || this.count >= this.num) {
                     simulation.removeEphemera(this)
@@ -164,6 +164,10 @@ const b = {
                 this.count++
                 b.superBall({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) },
                     { x: this.speed * Math.cos(m.angle), y: this.speed * Math.sin(m.angle) }, 11 * tech.bulletSize)
+                if (this.outlier) {
+                    b.enlarge(bullet[bullet.length - 1], this.outlier)
+                    this.outlier = 0 //only the first ball
+                }
                 m.fireCDcycle = m.cycle + this.delay
                 if (this.count >= this.num) simulation.removeEphemera(this)
             }
@@ -171,7 +175,7 @@ const b = {
     },
     queueHarpoons({ num, angle, spread, harpoonSize, totalCycles }) {
         simulation.ephemera.push({
-            saveType: "harpoons", num, angle, spread, harpoonSize, totalCycles,
+            saveType: "harpoons", num, angle, spread, harpoonSize, totalCycles, outlier: b.outlierQueue(),
             do() {
                 const gun = b.guns[9]
                 if (this.num < 1 || gun.ammo < 1 || !m.alive) {
@@ -182,6 +186,10 @@ const b = {
                 gun.ammo--
                 simulation.updateGunHUD()
                 b.harpoon({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }, null, this.angle, this.harpoonSize, true, this.totalCycles)
+                if (this.outlier) {
+                    b.enlarge(bullet[bullet.length - 1], this.outlier)
+                    this.outlier = 0 //only the first harpoon
+                }
                 this.angle += this.spread
             }
         })
@@ -213,7 +221,7 @@ const b = {
                 }
                 if (m.holdingTarget) m.drop();
             }
-            b.guns[b.activeGun].do();
+            b.outlierFire(() => b.guns[b.activeGun].do());
         }
     },
     fireAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
@@ -224,7 +232,7 @@ const b = {
                 }
                 if (m.holdingTarget) m.drop();
             }
-            b.guns[b.activeGun].do();
+            b.outlierFire(() => b.guns[b.activeGun].do());
         }
     },
     fireFloat() { //added  && player.speed < 0.5 && m.onGround
@@ -245,7 +253,7 @@ const b = {
                 player.force.x = 0
                 player.force.y = 0
             }
-            b.guns[b.activeGun].do();
+            b.outlierFire(() => b.guns[b.activeGun].do());
         }
     },
     isFreeShot() { //desublimated ammunition: every other crouched shot costs no ammo
@@ -264,7 +272,7 @@ const b = {
     },
     fireWithAmmo() { //triggers after firing when you have ammo
         m.lastFireFieldCycle = m.cycle //automatic guns fire without the fire key
-        b.guns[b.activeGun].fire();
+        b.outlierFire(() => b.guns[b.activeGun].fire());
         b.spendAmmo()
         simulation.updateGunHUD();
         if (tech.isSecondShot && b.inventory.length > 1) {
@@ -277,7 +285,7 @@ const b = {
                     simulation.switchGun();
 
                     if (b.guns[b.activeGun].ammo > 0) {
-                        b.guns[b.activeGun].fire();
+                        b.outlierFire(() => b.guns[b.activeGun].fire());
                         b.spendAmmo()
                         if (m.fireCDcycle > CD) CD = m.fireCDcycle
                     }
@@ -289,6 +297,46 @@ const b = {
 
             m.fireCDcycle = CD
         }
+    },
+    //outlier tech: after a cooldown, the next shot from a gun is bigger, with the same density so it has more mass
+    outlierCycle: 0, //m.cycle when outlier is ready again
+    outlierScale: 0, //size scale of the shot a gun is firing right now, 0 if it isn't an outlier, read by b.outlierQueue()
+    isOutlierQueued: false,
+    outlierFire(fire) { //runs a gun's fire or do, and enlarges the bullets it creates
+        const gun = b.guns[b.activeGun]
+        if (!tech.isOutlier || m.cycle < b.outlierCycle || !gun || gun.name === "laser" || gun.name === "wave") {
+            fire()
+            return
+        }
+        const start = bullet.length
+        b.outlierScale = Math.sqrt(5) //5x mass
+        b.isOutlierQueued = false
+        fire()
+        const scale = b.outlierScale
+        b.outlierScale = 0
+        if (bullet.length === start && !b.isOutlierQueued) return //nothing was fired
+        b.outlierCycle = m.cycle + 300
+        for (let i = start; i < bullet.length; i++) b.enlarge(bullet[i], scale)
+    },
+    outlierQueue() { //for guns that fire bullets over the next few cycles, returns how much to enlarge the first one, or 0
+        b.isOutlierQueued = true
+        return b.outlierScale
+    },
+    enlarge(who, scale) { //bigger bullet with the same density, so its mass grows with its area
+        const isNoRotation = who.inertia === Infinity //scale recalculates inertia, so drones would start spinning
+        Matter.Body.scale(who, scale, scale)
+        if (isNoRotation) Matter.Body.setInertia(who, Infinity)
+        if (who.radius) who.radius *= scale
+        if (who.maxRadius) who.maxRadius *= scale //sporangium grows until this size
+        if (who.totalSpores) who.totalSpores = Math.round(who.totalSpores * scale)
+        if (who.explodeRad) who.explodeRad *= Math.sqrt(scale) //bigger explosions, but not so big they always reach the player
+        if (typeof who.thrust === "object") who.thrust = Vector.mult(who.thrust, scale * scale) //rocket grenades keep their acceleration
+        if (who.bulletType === "mine") who.enlargeChildren = scale //mines fire bigger nails
+    },
+    enlargeChildren(who, action) { //bullets made by a big bullet are also big, like nails from a mine
+        const start = bullet.length
+        action()
+        for (let i = start; i < bullet.length; i++) b.enlarge(bullet[i], who.enlargeChildren)
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.inGameConsole(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
@@ -446,7 +494,11 @@ const b = {
         let i = bullet.length;
         while (i--) {
             if (bullet[i].endCycle < simulation.cycle) {
-                bullet[i].onEnd(i); //some bullets do stuff on end
+                if (bullet[i].enlargeChildren) {
+                    b.enlargeChildren(bullet[i], () => bullet[i].onEnd(i))
+                } else {
+                    bullet[i].onEnd(i); //some bullets do stuff on end
+                }
                 if (bullet[i]) {
                     Matter.Composite.remove(engine.world, bullet[i]);
                     bullet.splice(i, 1);
@@ -472,7 +524,11 @@ const b = {
     },
     bulletDo() {
         for (let i = 0, len = bullet.length; i < len; i++) {
-            bullet[i].do();
+            if (bullet[i].enlargeChildren) {
+                b.enlargeChildren(bullet[i], () => bullet[i].do())
+            } else {
+                bullet[i].do();
+            }
         }
     },
     fireProps(cd, speed, dir, me) {
@@ -7320,6 +7376,7 @@ const b = {
 
                     const onLevel = level.onLevel
                     simulation.ephemera.push({ //launch 1 missile every launchDelay game cycles
+                        outlier: b.outlierQueue(),
                         do() {
                             if (!m.alive || onLevel !== level.onLevel) {
                                 simulation.removeEphemera(this)
@@ -7327,7 +7384,13 @@ const b = {
                             }
                             if (m.isTimeDilated) return
                             count++
-                            if (!(count % launchDelay)) fireMissile()
+                            if (!(count % launchDelay)) {
+                                fireMissile()
+                                if (this.outlier) {
+                                    b.enlarge(bullet[bullet.length - 1], this.outlier)
+                                    this.outlier = 0 //only the first missile
+                                }
+                            }
                             if (totalMissiles < 1 || !m.alive) simulation.removeEphemera(this)
                         }
                     })
