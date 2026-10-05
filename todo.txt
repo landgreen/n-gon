@@ -1,27 +1,40 @@
 
-level: portals - your bullets go through the portals on levels like test chamber
 
-setting: line of sight (beta, low performance)- walls block your view on every level like on subway, toggle it in settings or the pause menu
-field: portal - the wall behind each portal shows the view out of the other portal
-tech: outlier - every 5 seconds your next shot is bigger with 5x mass
 
-constraint: mobs regenerate - mobs recover 80% of damage taken over 5s
-constraint: mobs reproduce - every 10s a mob far from you copies itself, +1s each time, up to the starting number of mobs
+
+
+
+
+field: perfect diamagnetism is now a flexible membrane of field lines that bends smoothly around the map
+tech: Meissner effect - stacks up to 3 times, perfect diamagnetism is bigger
+tech: ray - perfect diamagnetism is a solid line
+
+field: metamaterial cloaking can deflect mobs with the field button, like the field emitter
+guntech: cleavage - super balls that hit a block split it into 2 pieces, which shatter when hit again, making more balls for heavier blocks
+guntech: impulse - grenades bounce off anything with a smaller explosion, then explode on the next bounce or 3 seconds later, stacks up to 9 bounces
+fieldtech: Hawking radiation - wormholes leave behind a zone of radiation that damages mobs and you
+
+
 
 
 bug fixes
-  dying with scale invariance no longer stops you from stepping up small ledges in your next run
-  portals flip with the map on levels that turn upside down
+  eddy current's radius grows slower above 100 energy, so it no longer slows mob bullets across the whole screen
+  drop down menus and checkboxes no longer change when you press keys after clicking them, like P switching to plasma torch
+  choosing a power up with the portal field no longer places a portal
+  pacifist runs now end 20 seconds into the final level, or open the door to null if you have enough undefined
+  mirrors on reactor and null turn off with the line of sight setting
+  hidden areas on HVAC, vault, and other levels match the background with line of sight instead of being black
 
 
 *********************************************************** TODO *****************************************************
  
+portal combo?
+  maybe switch preview mode on off
 
 
 new version of history boss with legs and it looks in the same direction the player looked in but +180
   also has a sword?
   also shots bullets?
-
 
  
 add more stronger constraints
@@ -70,14 +83,12 @@ new difficulty ideas
         field drains energy (just reduce effect)
         
 
-
 new level element - color keys and keyButtons    
 !new map vault - 
   color keys and keyButtons and doors
   black out zones like HVAC
   motion lasers
   keep floor flat or mostly flat so keys can be pushed
-
 
 
 stats -
@@ -232,17 +243,6 @@ add option in pause menu to map tech,gun,field descriptions onto matter.js 2-D r
       maybe mouse2 to drag
       button to toggle a drag mode
 
-!tech: conformal infinity - when your wormhole dissipates(wording) regenerate 50% of the energy you had when the wormhole was produced
-    how?    compare energy on wormhole creation to energy on wormhole dissipation
-  !unwritten
-
-!tech:   - rip in spacetime - using wormhole leaves behind a zone of radiation, like neutron bomb  ( grenadeNeutron )
-  !unwritten
-
-tech: plating- at the start of each level gain 0.25 damage reduction, slowly lose this effect over 40 seconds
-
-Grenade- grenades bounce # number of times, detonating 1 second after final bounce (You ever play overwatch? pretty much junkrat in terms of how the grenade bounces)
-  explosions after each bounce?
 
 web lines - putting down lines that last maybe 10-20 seconds that slow and damage mobs.
   plasma field tech? maybe when the plasma globe explodes make web lines
@@ -260,17 +260,9 @@ filament
     and does something good when it touches them
       maybe isoWave360
 
-tubeWormBoss T4 or T5
-
-zoom in/out when choosing power ups
-  interactions with other zoom actions
-    zoom at start of level  (this could be instant)
-
-do something with powerUps.totalUsed
-  give dmg for each power up used this game?
-
 make a new power up that is
   large and orange or red
+  trade health for +dmg
 
 mob attack - crash on top of player when above
   mob flies towards player, but aims for a space above the player (if there is no map of body elements int the way)
@@ -291,6 +283,7 @@ Boltzmann brain
 
 challenges
   names: Epistemic logic, Temporal logic, relational semantics, Axiomatic systems, Modal realism
+  instant tech that triggers an ephemera that watches for the condition
   if you ______ for a level
     don't crouch
     don't fire
@@ -316,9 +309,12 @@ tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
     ?plasma torch, pilot wave, molecular assembler
     couple scale with coupling
 
-super balls tech - that hit blocks produce 10 balls?
-  destroy the block after 3 hits?
+ 
 
+//reviewed ideas above this point on oct 3
+
+
+  
 tech:   -  scale max energy with current health
   nonrefundable
 tech:   -  set max health equal to max energy

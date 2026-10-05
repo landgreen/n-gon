@@ -1258,8 +1258,7 @@ const spawn = {
             }
             if (!this.hasRunDeathScript) {
                 this.hasRunDeathScript = true
-                powerUps.difficulty.recordWin();
-                saveGame.clearAutosave() //the run is won
+                spawn.winRun()
 
                 //make a block body to replace this one
                 //this body is too big to leave behind in the normal way mobs.replace()
@@ -1279,80 +1278,6 @@ const spawn = {
                 };
                 expand(body[len], 200)
 
-                function unlockExit() {
-                    if (simulation.isHorizontalFlipped) {
-                        level.exit.x = -5500 - 100;
-                    } else {
-                        level.exit.x = 5500;
-                    }
-                    level.exit.y = -320;
-                    Matter.Composite.remove(engine.world, map[map.length - 1]);
-                    map.splice(map.length - 1, 1);
-                    simulation.draw.setPaths(); //redraw map draw path
-                    // level.levels.push("null")
-                }
-
-                //add lore level as next level if player took lore tech earlier in the game
-                if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
-                    simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`, 360);
-                    setTimeout(function () {
-                        simulation.inGameConsole(`level.levels.push("<span class='lore-text'>null</span>")`, 720);
-                        unlockExit()
-                        level.levels.push("null")
-                    }, 4000);
-                    //remove block map element so exit is clear
-                } else { //reset game
-                    let count = 0
-
-                    function loop() {
-                        if (!simulation.paused && !simulation.onTitlePage) {
-                            count++
-                            if (count < 660) {
-                                if (count === 1 && simulation.difficultyMode < 6) simulation.inGameConsole(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
-                                if (!(count % 60)) simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
-                            } else if (count === 660) {
-                                simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
-                            } else if (count === 780) {
-                                simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
-                            } else if (count === 1020) {
-                                simulation.inGameConsole(`Engine.clear(engine) <em>//simulation successful</em>`);
-                            } else if (count === 1260) {
-                                // tech.isImmortal = false;
-                                // m.alive = false;
-                                // simulation.paused = true;
-                                // m.health = 0;
-                                // m.displayHealth();
-                                document.getElementById("health").style.display = "none"
-                                document.getElementById("health-bg").style.display = "none"
-                                document.getElementById("defense-bar").style.display = "none"
-                                document.getElementById("text-log").style.display = "none"
-                                document.getElementById("fade-out").style.opacity = 1; //slowly fades out
-                                setTimeout(function () {
-                                    if (!simulation.onTitlePage) {
-                                        m.alive = false
-                                        simulation.paused = true;
-                                        // simulation.clearMap();
-                                        // Matter.Composite.clear(composite, keepStatic, [deep = false])
-                                        // Composite.clear(engine.composite);
-                                        engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
-                                        Engine.clear(engine);
-                                        simulation.splashReturn();
-                                    }
-                                }, 6000);
-                                return
-                            }
-                        }
-                        if (simulation.testing || simulation.difficultyMode > 6) {
-                            unlockExit()
-                            setTimeout(function () {
-                                simulation.inGameConsole(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
-                            }, 1500);
-                        } else {
-                            if (!simulation.onTitlePage) requestAnimationFrame(loop);
-                        }
-                    }
-                    requestAnimationFrame(loop);
-                }
                 //remove power Ups,  to avoid spamming console
                 function removeAll(array) {
                     for (let i = 0; i < array.length; ++i) Matter.Composite.remove(engine.world, array[i]);
@@ -1391,6 +1316,84 @@ const spawn = {
                 }
             }
         };
+    },
+    winRun() { //the run is won: the final boss died, or a pacifist run waited on the final level
+        powerUps.difficulty.recordWin();
+        saveGame.clearAutosave() //the run is won
+        function unlockExit() {
+            if (simulation.isHorizontalFlipped) {
+                level.exit.x = -5500 - 100;
+            } else {
+                level.exit.x = 5500;
+            }
+            level.exit.y = -320;
+            Matter.Composite.remove(engine.world, map[map.length - 1]);
+            map.splice(map.length - 1, 1);
+            simulation.draw.setPaths(); //redraw map draw path
+            // level.levels.push("null")
+        }
+
+        //add lore level as next level if player took lore tech earlier in the game
+        if (lore.techCount > (lore.techGoal - 1) && !simulation.isCheating) {
+            simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`, 360);
+            setTimeout(function () {
+                simulation.inGameConsole(`level.levels.push("<span class='lore-text'>null</span>")`, 720);
+                unlockExit()
+                level.levels.push("null")
+            }, 4000);
+            //remove block map element so exit is clear
+        } else { //reset game
+            let count = 0
+
+            function loop() {
+                if (!simulation.paused && !simulation.onTitlePage) {
+                    count++
+                    if (count < 660) {
+                        if (count === 1 && simulation.difficultyMode < 6) simulation.inGameConsole(`<em>//enter testing mode to set level.levels.length to <strong>Infinite</strong></em>`);
+                        if (!(count % 60)) simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> ${((count / 60 - Math.random()) * 0.1).toFixed(3)}`);
+                    } else if (count === 660) {
+                        simulation.inGameConsole(`simulation.analysis <span class='color-symbol'>=</span> 1 <em>//analysis complete</em>`);
+                    } else if (count === 780) {
+                        simulation.inGameConsole(`<span class="lore-text">undefined</span> <span class='color-symbol'>=</span> ${lore.techCount}/${lore.techGoal}`)
+                    } else if (count === 1020) {
+                        simulation.inGameConsole(`Engine.clear(engine) <em>//simulation successful</em>`);
+                    } else if (count === 1260) {
+                        // tech.isImmortal = false;
+                        // m.alive = false;
+                        // simulation.paused = true;
+                        // m.health = 0;
+                        // m.displayHealth();
+                        document.getElementById("health").style.display = "none"
+                        document.getElementById("health-bg").style.display = "none"
+                        document.getElementById("defense-bar").style.display = "none"
+                        document.getElementById("text-log").style.display = "none"
+                        document.getElementById("fade-out").style.opacity = 1; //slowly fades out
+                        setTimeout(function () {
+                            if (!simulation.onTitlePage) {
+                                m.alive = false
+                                simulation.paused = true;
+                                // simulation.clearMap();
+                                // Matter.Composite.clear(composite, keepStatic, [deep = false])
+                                // Composite.clear(engine.composite);
+                                engine.world.bodies.forEach((body) => { Matter.Composite.remove(engine.world, body) })
+                                Engine.clear(engine);
+                                simulation.splashReturn();
+                            }
+                        }, 6000);
+                        return
+                    }
+                }
+                if (simulation.testing || simulation.difficultyMode > 6) {
+                    unlockExit()
+                    setTimeout(function () {
+                        simulation.inGameConsole(`level.levels.length <span class='color-symbol'>=</span> <strong>Infinite</strong>`);
+                    }, 1500);
+                } else {
+                    if (!simulation.onTitlePage) requestAnimationFrame(loop);
+                }
+            }
+            requestAnimationFrame(loop);
+        }
     },
     zombie(x, y, radius = 20, sides = 4, color = "#000") { //mob that attacks other mobs
         mobs.spawn(x, y, sides, radius, color);

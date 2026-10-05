@@ -256,6 +256,15 @@ const b = {
             b.outlierFire(() => b.guns[b.activeGun].do());
         }
     },
+    muzzleCheck(start) { //not used right now, call after a gun fires with start = bullet.length from before it fired
+        //bullets spawn in front of the player and move before their first collision check, so next to a wall they can land past its middle and get pushed out the far side
+        for (let i = start; i < bullet.length; i++) {
+            const who = bullet[i]
+            if (who.isSensor || !(who.collisionFilter.mask & cat.map)) continue //bullets that go through walls
+            const hit = vertexCollision(m.pos, Vector.add(who.position, who.velocity), [map]) //from the player to where the bullet's first step ends
+            if (hit.who && Matter.Detector.canCollide(who.collisionFilter, hit.who.collisionFilter)) Matter.Body.setPosition(who, Vector.sub(hit, who.velocity)) //first step ends on the wall's surface instead
+        }
+    },
     isFreeShot() { //desublimated ammunition: every other crouched shot costs no ammo
         return !!(tech.crouchAmmoCount && m.crouch && !(tech.crouchAmmoCount % 2))
     },
@@ -1034,6 +1043,57 @@ const b = {
                 this.force.y += this.mass * 0.0025; //extra gravity for harder arcs
             };
             Composite.add(engine.world, bullet[me]); //add bullet to world
+            if (tech.grenadeBounces) { //impulse: bounce with a smaller explosion, then detonate on the next touch or 3 seconds after the last bounce
+                bullet[me].restitution = 1;
+                bullet[me].bouncesLeft = tech.grenadeBounces
+                bullet[me].isTouching = false
+                bullet[me].hitMob = null
+                bullet[me].beforeDmg = function (who) {
+                    if (this.bouncesLeft > 0) {
+                        this.hitMob = who //bounce in do(), velocity changes don't stick inside collision events
+                    } else {
+                        this.endCycle = 0;
+                    }
+                };
+                bullet[me].bounce = function (away) {
+                    this.bouncesLeft--
+                    b.explosion(this.position, 0.8 * this.explodeRad) //no fireworks, fragments, or other grenade end effects
+                    //kick away from what it hit so it always bounces some, capped at about 500 high
+                    const speed = Vector.dot(this.velocity, away)
+                    const along = Vector.sub(this.velocity, Vector.mult(away, speed))
+                    Matter.Body.setVelocity(this, Vector.add(along, Vector.mult(away, Math.min(Math.max(0, speed) + 13, 26))));
+                    this.endCycle = simulation.cycle + (this.bouncesLeft ? 300 : 180) //5 second backup timer between bounces
+                }
+                const baseDo = bullet[me].do
+                bullet[me].do = function () {
+                    baseDo.call(this)
+                    let isTouching = false
+                    let away = { x: 0, y: 0 } //points away from everything it is touching
+                    if (this.hitMob) {
+                        isTouching = true
+                        away = Vector.normalise(Vector.sub(this.position, this.hitMob.position))
+                        this.hitMob = null
+                    }
+                    const hits = Matter.Query.collides(this, [...map, ...body])
+                    for (let i = 0; i < hits.length; i++) {
+                        const who = hits[i].bodyA === this ? hits[i].bodyB : hits[i].bodyA
+                        const filter = who.parent.collisionFilter
+                        if ((filter.category & this.collisionFilter.mask) && (filter.mask & this.collisionFilter.category)) {
+                            isTouching = true
+                            const normal = hits[i].normal
+                            away = Vector.add(away, Vector.dot(normal, Vector.sub(this.position, who.position)) < 0 ? Vector.neg(normal) : normal)
+                        }
+                    }
+                    if (isTouching && !this.isTouching) { //only once per touch
+                        if (this.bouncesLeft > 0) {
+                            this.bounce(Vector.normalise(away))
+                        } else {
+                            this.endCycle = 0 //after the last bounce, explode on the next touch or 3 seconds later
+                        }
+                    }
+                    this.isTouching = isTouching
+                };
+            }
             if (tech.isPrecision) {
                 const baseDo = bullet[me].do
                 bullet[me].do = function () {
@@ -4370,6 +4430,38 @@ const b = {
                 this.force.y += this.mass * gravity;
             };
         }
+        if (tech.isBallCleave) { //fatigue: blocks a ball hits make more balls and split into 2 pieces, pieces shatter
+            bullet[me].cleaveCheck = function () {
+                const hits = Matter.Query.collides(this, body)
+                for (let i = 0; i < hits.length; i++) {
+                    const who = (hits[i].bodyA === this ? hits[i].bodyB : hits[i].bodyA).parent
+                    const index = body.indexOf(who)
+                    if (
+                        (who.collisionFilter.mask & this.collisionFilter.category) && index !== -1 && !(who.cleaveCycle > simulation.cycle) &&
+                        !who.isNotHoldable && !who.isInvulnerable && !who.isImmutable && !who.isStatic //level parts like spinners can't split or shatter, so they don't make balls
+                    ) {
+                        const balls = (where, mass) => { //1 ball for a 30x30 block, 3 for 100x100, up to 5 for 150x150 and bigger
+                            if (bullet.length < 300) b.targetedBall(where, Math.min(5, Math.max(1, Math.floor(Math.sqrt(mass / 0.9) + 0.001)))) //limit balls so the game doesn't slow down
+                        }
+                        if (who.isCleaved) { //pieces from a split block shatter into the new balls
+                            if (who === m.holdingTarget) m.drop()
+                            Matter.Composite.remove(engine.world, who);
+                            body.splice(index, 1);
+                            balls(who.position, who.mass)
+                        } else if (b.cleaveBlock(who, this.position)) { //some blocks can't split, like ones made of several parts
+                            balls(this.position, who.mass)
+                        }
+                        return
+                    }
+                }
+            }
+            const withCleave = baseDo => function () {
+                baseDo.call(this)
+                this.cleaveCheck()
+            }
+            bullet[me].do = withCleave(bullet[me].do)
+            if (bullet[me].collidePlayerDo) bullet[me].collidePlayerDo = withCleave(bullet[me].collidePlayerDo) //slime swaps do after a few cycles
+        }
         bullet[me].beforeDmg = function (who) {
             if (!who.isInvulnerable) {
                 if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
@@ -4448,6 +4540,60 @@ const b = {
                 }
             }
         };
+    },
+    cleaveBlock(who, where) { //split a block into 2 pieces along a line from where it was hit through its center, returns true if it split
+        const index = body.indexOf(who)
+        if (index === -1 || who.parts.length > 1) return false
+        const cut = Vector.rotate(Vector.normalise(Vector.sub(who.position, where)), 0.5 * (Math.random() - 0.5))
+        const side = v => cut.x * (v.y - who.position.y) - cut.y * (v.x - who.position.x) //which side of the cut a vertex is on
+        const pieces = [[], []]
+        const add = (piece, v) => { //skip repeated points, they make bad collision axes
+            const last = piece[piece.length - 1]
+            if (!last || Math.abs(last.x - v.x) + Math.abs(last.y - v.y) > 0.5) piece.push({ x: v.x, y: v.y })
+        }
+        const vertices = who.vertices
+        for (let i = 0, len = vertices.length; i < len; i++) {
+            const a = vertices[i]
+            const c = vertices[(i + 1) % len]
+            const sideA = side(a)
+            const sideC = side(c)
+            add(pieces[sideA < 0 ? 0 : 1], a)
+            if ((sideA < 0) !== (sideC < 0)) { //this edge crosses the cut
+                const t = sideA / (sideA - sideC)
+                let cross = { x: a.x + t * (c.x - a.x), y: a.y + t * (c.y - a.y) }
+                if (Vector.magnitude(Vector.sub(cross, a)) < 0.5) cross = a //snap to a nearby corner so both pieces share it
+                if (Vector.magnitude(Vector.sub(cross, c)) < 0.5) cross = c
+                add(pieces[0], cross)
+                add(pieces[1], cross)
+            }
+        }
+        for (const piece of pieces) {
+            if (piece.length > 1 && Math.abs(piece[0].x - piece[piece.length - 1].x) + Math.abs(piece[0].y - piece[piece.length - 1].y) < 0.5) piece.pop()
+            if (piece.length < 3) return false
+        }
+        if (who === m.holdingTarget) m.drop()
+        Matter.Composite.remove(engine.world, who);
+        body.splice(index, 1);
+        for (const points of pieces) {
+            const centre = Matter.Vertices.centre(points)
+            const piece = Bodies.fromVertices(centre.x, centre.y, [points], {
+                friction: who.friction,
+                frictionAir: who.frictionAir,
+                frictionStatic: who.frictionStatic,
+                restitution: who.restitution
+            })
+            Matter.Body.setDensity(piece, who.density)
+            piece.collisionFilter.category = who.collisionFilter.category
+            piece.collisionFilter.mask = who.collisionFilter.mask
+            piece.classType = "body"
+            piece.isCleaved = true //pieces can't split again
+            piece.cleaveCycle = simulation.cycle + 15 //pieces wait 0.25 seconds before super balls can shatter them
+            Matter.Body.setVelocity(piece, Vector.add(who.velocity, Vector.mult(Vector.normalise(Vector.sub(centre, who.position)), 2))) //push the pieces apart
+            Matter.Body.setAngularVelocity(piece, who.angularVelocity)
+            body[body.length] = piece
+            Composite.add(engine.world, piece)
+        }
+        return true
     },
     targetedBall(position, num = 1, speed = 42 + 12 * Math.random(), range = 1200, isRandomAim = true) {
         let shotsFired = 0

@@ -47,7 +47,7 @@ const level = {
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
                 // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
-                m.setField(11)
+                m.setField(2)
                 // simulation.molecularMode = 4;
 
                 // m.energy = m.maxEnergy = 12.2
@@ -71,27 +71,29 @@ const level = {
                 // m.takeDamage(0.01);
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                b.giveGuns(1)
+                b.giveGuns(2)
                 b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("spaghettification")
-                // tech.giveTech("8-bit")
-                // for (let i = 0; i < 1; ++i) tech.giveTech("manifold")
+                // for (let i = 0; i < 3; ++i) tech.giveTech("Meissner effect")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("ray")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("Hawking radiation")
+                // for (let i = 0; i < 9; ++i) tech.giveTech("impulse")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("fatigue")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("pulse")
                 // for (let i = 0; i < 1; i++) tech.giveTech("photonic crystal")
                 // for (let i = 0; i < 1; i++) tech.giveTech("needle gun")
                 // for (let i = 0; i < 1; i++) tech.giveTech("siphonaptera")
                 // for (let i = 0; i < 1; i++) tech.giveTech("nematodes")
-                for (let i = 0; i < 1; i++) tech.giveTech("shotgun shell") //swap between fleas and worms when paused
+                // for (let i = 0; i < 1; i++) tech.giveTech("shotgun shell") //swap between fleas and worms when paused
                 // tech.giveTech("beam splitter")
                 // tech.giveTech("Einstein-Rosen bridge")
                 // tech.giveTech("quantum foam")
                 // tech.giveTech("nitinol")
-                tech.giveTech("optimization") //swap skins when paused
-                tech.giveTech("outlier")
+                // tech.giveTech("optimization") //swap skins when paused
+                // tech.giveTech("outlier")
                 // tech.giveTech("many-worlds") //alternate reality at the start of each level
-                tech.giveTech("self-locating uncertainty") //choose what doesn't change in an alternate reality when paused
+                // tech.giveTech("self-locating uncertainty") //choose what doesn't change in an alternate reality when paused
                 // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
                 // for (let i = 0; i < 1; i++) tech.giveTech("foam-shot")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
@@ -100,11 +102,11 @@ const level = {
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
-                level.load("testChamber")
-                // level.load("initial")
+                // level.load("labs")
+                level.load("initial")
                 // level.maps.testing()
 
-                powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+                // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
@@ -1463,7 +1465,7 @@ const level = {
                     return;
                 }
                 const { opacity, tintOpacity } = this;
-                if (simulation.isTimeSkipping) return;
+                if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
                 // The camera translates/scales world coordinates; the source
@@ -1556,7 +1558,7 @@ const level = {
                     return;
                 }
                 const { opacity, tintOpacity } = this;
-                if (simulation.isTimeSkipping) return;
+                if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
                 // The camera translates/scales world coordinates; the source
@@ -1646,7 +1648,7 @@ const level = {
                     simulation.removeEphemera(this);
                     return;
                 }
-                if (simulation.isTimeSkipping) return;
+                if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
                 // The camera translates/scales world coordinates; the source
@@ -3350,7 +3352,7 @@ const level = {
             let v = this.vertices;
             ctx.moveTo(v[0].x, v[0].y);
             for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
-            ctx.fillStyle = this.portal && simulation.draw.isLineOfSight() ? document.body.style.backgroundColor : this.color //line of sight doesn't fill the map, so the block behind the portal matches the background like the walls do
+            ctx.fillStyle = this.portal ? simulation.draw.mapColor(this.color) : this.color //the block behind the portal looks like the map
             ctx.fill();
         }
         const query = function (isRemoveBlocks = false) {
@@ -5132,10 +5134,10 @@ const level = {
                 ctx.fillStyle = "rgba(0,255,255,0.05)"
                 ctx.fillRect(2600, -600, 400, 300)
                 //draw shade for ceiling tech
-                ctx.fillStyle = "rgba(68, 68, 68,0.95)"
+                ctx.fillStyle = simulation.draw.mapColor("rgba(68, 68, 68,0.95)")
                 ctx.fillRect(2030, -2800, 150, 1800);
                 ctx.fillRect(2030, 0, 150, 1800);
-                ctx.fillStyle = "rgba(68, 68, 68,0.98)"
+                ctx.fillStyle = simulation.draw.mapColor("rgba(68, 68, 68,0.98)")
                 // ctx.fillRect(-2750, -300, 2600, 125);
                 ctx.fillRect(-2925, -2800, 2775, 2650);
             };
@@ -5197,6 +5199,15 @@ const level = {
             slime.min.y += slime.maxHeight
             slime.max.y = slime.min.y + slime.height
             let finalBoss = null
+            const isPacifistRun = mobs.isPacifist() && !simulation.isCheating //no final boss, just starters
+            let isNullDoorOpen = false
+            let pacifistCycles = 0
+            const pacifistWin = () => { //a pacifist run has no boss to kill, so the run is won after 20 seconds
+                if (isPacifistRun && !isNullDoorOpen && pacifistCycles !== null && ++pacifistCycles > 1200) {
+                    pacifistCycles = null
+                    spawn.winRun()
+                }
+            }
 
             // Match the cable-filled infrastructure of the initial level, scaled to this arena.
             // Each route continues into a wall so the visible room feels like one section of a larger machine.
@@ -5280,6 +5291,7 @@ const level = {
             }
             level.custom = () => {
                 drawInfrastructure()
+                pacifistWin()
                 level.exit.drawAndCheck();
                 level.enter.draw();
 
@@ -5332,7 +5344,7 @@ const level = {
             spawn.mapRect(5400, -300, 400, 400); //right wall
             spawn.mapRect(5700, -3300, 1800, 5100); //right wall
             spawn.mapRect(5403, -650, 400, 450); //blocking exit
-            if (mobs.isPacifist() && !simulation.isCheating) { //pacifist run
+            if (isPacifistRun) {
                 for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
             } else {
                 spawn.finalBoss(3000, -750)
@@ -5345,6 +5357,7 @@ const level = {
                 level.setPosToSpawn(0, -250);
                 level.custom = () => {
                     drawInfrastructure()
+                    pacifistWin()
                     level.exit.drawAndCheck();
                     level.enter.draw();
 
@@ -5372,6 +5385,7 @@ const level = {
             }
             if (mobs.isPacifist() && localSettings.loreCount > 5 && !simulation.isCheating) {
                 //open door for pacifist run on final lore chapter
+                isNullDoorOpen = true
                 if (simulation.isHorizontalFlipped) {
                     level.exit.x = -5500 - 100;
                 } else {
@@ -7617,7 +7631,7 @@ const level = {
                 if (coverAlpha > 0) {
                     ctx.save()
                     ctx.globalAlpha = coverAlpha
-                    ctx.fillStyle = color.map
+                    ctx.fillStyle = simulation.draw.mapColor()
                     ctx.fillRect(region.x, region.y, region.width, region.height)
                     ctx.restore()
                 }
@@ -9801,7 +9815,7 @@ const level = {
                     ctx.fillRect(-325, -950, 300, 225)
                     ctx.fillRect(-1025, -1000, 525, 275);
                     ctx.fillRect(-875, -1600, 225, 275);
-                    ctx.fillStyle = "rgba(68,68,68,0.93)"
+                    ctx.fillStyle = simulation.draw.mapColor("rgba(68,68,68,0.93)")
                     ctx.fillRect(-1575, 150, 2150, 150);
                     for (let i = 0, len = vanish.length; i < len; i++) vanish[i].query()
                 };
@@ -9829,7 +9843,7 @@ const level = {
                     ctx.fillRect(650, -1600, 225, 275);
                     ctx.fillRect(-1050, 50, 325, 225)
                     ctx.fillRect(25, -950, 300, 225)
-                    ctx.fillStyle = "rgba(68,68,68,0.93)"
+                    ctx.fillStyle = simulation.draw.mapColor("rgba(68,68,68,0.93)")
                     ctx.fillRect(-575, 150, 2150, 150);
                     for (let i = 0, len = vanish.length; i < len; i++) vanish[i].query()
                 };
@@ -11372,7 +11386,7 @@ const level = {
                 ctx.lineTo(-4250, 1010)
                 ctx.lineTo(-4250, 675)
                 ctx.fill()
-                ctx.fillStyle = "rgba(68, 68, 68,0.9)"
+                ctx.fillStyle = simulation.draw.mapColor("rgba(68, 68, 68,0.9)")
                 ctx.fillRect(-50, -4300, 325, 1950);
                 for (let i = 0; i < movers.length; i++) movers[i].draw();
             };
@@ -12058,7 +12072,7 @@ const level = {
                     if (coverAlpha > 0) {
                         ctx.save()
                         ctx.globalAlpha = coverAlpha
-                        ctx.fillStyle = '#474444'//color.map
+                        ctx.fillStyle = simulation.draw.mapColor('#474444')
                         ctx.fillRect(zone.x, zone.y, zone.width, zone.height)
                         ctx.restore()
                     }
@@ -12071,7 +12085,7 @@ const level = {
                 if (playerCoverAlpha > 0) {
                     ctx.save()
                     ctx.globalAlpha = playerCoverAlpha
-                    ctx.fillStyle = color.map
+                    ctx.fillStyle = simulation.draw.mapColor()
                     ctx.fillRect(playerBlackoutZone.x, playerBlackoutZone.y, playerBlackoutZone.width, playerBlackoutZone.height)
                     ctx.restore()
                 }
@@ -12532,7 +12546,7 @@ const level = {
                 hazardSlimeLeft.query();
                 hazardSlimeRight.query();
                 portal.draw();
-                ctx.fillStyle = color.map //below portal
+                ctx.fillStyle = simulation.draw.mapColor() //below portal
                 ctx.fillRect(375, 150, 200, 2525);
                 ctx.fillStyle = "rgba(0,0,0,0.1)" //shadows
                 ctx.fillRect(-250, -1550, 1250, 1575);
@@ -14311,7 +14325,7 @@ const level = {
                 }
                 ctx.fillRect(-3540, -1720, 1, 770)
 
-                ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+                ctx.fillStyle = simulation.draw.mapColor("rgba(64,64,64,0.97)") //hidden section
                 ctx.fillRect(-4450, -750, 800, 200)
                 ctx.fillStyle = "rgba(0,0,0,0.12)"
                 ctx.fillRect(-2500, -1975, 150, 300);
@@ -14516,7 +14530,7 @@ const level = {
                         ctx.fillRect(3540 - 1, -1720, 1, 740)
                     }
 
-                    ctx.fillStyle = "rgba(64,64,64,0.97)" //hidden section
+                    ctx.fillStyle = simulation.draw.mapColor("rgba(64,64,64,0.97)") //hidden section
                     ctx.fillRect(4450 - 800, -750, 800, 200)
                     ctx.fillStyle = "rgba(0,0,0,0.12)"
                     ctx.fillRect(2500 - 150, -1975, 150, 300);

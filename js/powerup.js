@@ -388,6 +388,7 @@ const powerUps = {
         build.unPauseGrid()
         if (m.immuneCycle < m.cycle + 5) m.immuneCycle = m.cycle + 5; //player is immune to damage
         if (m.holdingTarget) m.drop();
+        if (m.fieldMode === 11) m.fieldUpgrades[11].cancelPresses() //a portal press from before the choice doesn't place a portal after it
         mouseMove.lock()
     },
     animatePowerUpGrab(color, count = 25) {

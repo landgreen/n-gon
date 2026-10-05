@@ -1281,6 +1281,17 @@ window.addEventListener("keyup", function (event) {
     }
 });
 
+//drop downs and checkboxes in the menus keep focus after you click them, then keys like P or W would change them
+//this runs first (capture), so they never react to keys, and the game still gets the key below
+window.addEventListener("keydown", function (event) {
+    const el = event.target
+    if (el.tagName === "SELECT" || (el.tagName === "INPUT" && (el.type === "checkbox" || el.type === "radio"))) {
+        if (event.code === "Tab") return //still move between menu options with tab
+        event.preventDefault()
+        el.blur()
+    }
+}, true);
+
 window.addEventListener("keydown", function (event) {
     // input.lastDown = event.code
     // console.log(event.code)
