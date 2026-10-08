@@ -357,9 +357,13 @@ function collisionChecks(event) {
                                 }
                                 who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
 
-                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp && Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
-                                    options = ["coupling", "boost", "heal", "research", "ammo"]
-                                    powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
+                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp) {
+                                    for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) { //double beta decay rolls buckling twice
+                                        if (Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
+                                            options = ["coupling", "boost", "heal", "research", "ammo"]
+                                            powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
+                                        }
+                                    }
                                 }
 
                                 const stunTime = dmg / Math.sqrt(obj.mass)

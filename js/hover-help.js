@@ -109,6 +109,8 @@ portal: +1 energy after going through a portal
         <br><br>// sporangium attach to surfaces and grow <strong class="spore">spores</strong>, <strong class="spore">fleas</strong>, or <strong class="spore">worms</strong>
         <br><br>// <em>a sporangium is an enclosure where biological spores are grown</em>`,
         slow: `// <strong class="color-s">slows</strong> reduce mob movement speed`,
+        "mob-death": () => `// <strong class="color-death">mob death</strong> tech have effects after mobs die
+        <br><br>// ${tech.tech.filter(t => t.isMobDeathTech).map(t => t.count ? `<strong>${t.name}</strong>` : t.name).join(", ")}`,
         checkpoint: () => {
             const save = typeof saveGame !== "undefined" ? saveGame.latest : null
             const current = save ? `<br><br>// this checkpoint is from the start of level ${save.state.level.levelsCleared}: <strong>${save.state.level.levels[save.state.level.onLevel] ?? ""}</strong>` : ""

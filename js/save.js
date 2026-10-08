@@ -201,7 +201,7 @@ const saveGame = {
         return {
             tech: saveGame.props(tech, ["tech"]),
             techEntries: saveGame.byName(tech.tech, ["name", "link", "requires", "keyListener"]),
-            m: saveGame.props(m, ["fieldUpgrades", "history"]), //history is reset at the start of each level
+            m: saveGame.props(m, ["fieldUpgrades", "history", "fieldEvent"]), //history is reset at the start of each level, fieldEvent is the field's key listener
             fields: saveGame.byName(m.fieldUpgrades),
             guns: saveGame.byName(b.guns),
             b: saveGame.props(b, ["guns"]),
@@ -363,7 +363,7 @@ const saveGame = {
         const applyByName = (list, group, exclude = []) => { for (const item of list) { saveGame.assign(item, base[group][item.name], exclude); saveGame.assign(item, state[group][item.name], exclude) } }
         apply(tech, "tech", ["wire"])
         applyByName(tech.tech, "techEntries", ["keyListener"]) //keep rebuilt event listeners, including when older saves contain null
-        apply(m, "m", ["eigen", "plasmaBall", "holdingTarget"])
+        apply(m, "m", ["eigen", "plasmaBall", "holdingTarget", "fieldEvent"]) //keep the key listener setField just added, so the next setField can remove it
         applyByName(m.fieldUpgrades, "fields", ["collider"]) //keep the physics body rebuilt by setField, including when older saves contain collider: null
         applyByName(b.guns, "guns")
         apply(b, "b")
@@ -447,11 +447,11 @@ const saveGame = {
         return `n-gon checkpoint level ${save.state.level.levelsCleared} ${save.state.level.levels[save.state.level.onLevel] ?? ""} ${save.seed}.ngon`.replace(/\s+/g, " ").trim()
     },
     exportHTML() { //pause menu controls
-        if (!saveGame.latest) return `<div style="clear: both; text-align: right; color:#aaa; padding: 4px 0;"><span data-help="checkpoint">export checkpoint</span>: available after the first level</div>`
-        return `<div id="export-save" style="clear: both; text-align: right; padding: 4px 0;"><span data-help="checkpoint">export checkpoint</span>:
-<button onclick="saveGame.copyCode()" class='sort-button' style="font-size:1em;">copy code</button>
-<button onclick="saveGame.download()" class='sort-button' style="font-size:1em;">download file</button>
-</div>`
+        if (!saveGame.latest) return `<div class="pause-row pause-hint"><span data-help="checkpoint">export checkpoint</span><span>available after the first level</span></div>`
+        return `<div id="export-save" class="pause-row"><span data-help="checkpoint">export checkpoint</span><span>
+<button onclick="saveGame.copyCode()" class='sort-button' style="font-size:0.9em;">copy code</button>
+<button onclick="saveGame.download()" class='sort-button' style="font-size:0.9em;">download file</button>
+</span></div>`
     },
     async copyCode() {
         if (!saveGame.latest) return

@@ -287,6 +287,10 @@ function setupCanvas() {
 setupCanvas();
 window.onresize = () => {
     setupCanvas();
+    //health bars above 1 max health scale with the window width
+    document.getElementById("health-bg").style.width = `${Math.floor(m.healthBarWidth(m.maxHealth))}px`
+    m.displayHealth()
+    m.lastCalculatedDefense = 0 //this triggers a redraw of the defense bar
 };
 
 //**********************************************************************
@@ -313,7 +317,7 @@ const build = {
                     if (!(m.cycle % 15)) { //4 times a second
                         const defense = m.defense()             //update defense bar
                         if (m.lastCalculatedDefense !== defense) {
-                            document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+                            document.getElementById("defense-bar").style.width = Math.floor(m.healthBarWidth(m.maxHealth) * (1 - defense)) + "px";
                             m.lastCalculatedDefense = defense
                         }
                         const damage = tech.damageAdjustments()             //update damage bar
@@ -337,6 +341,19 @@ const build = {
         document.getElementById("line-of-sight").checked = localSettings.isLineOfSight
         document.getElementById("line-of-sight").classList.toggle("ticked")
         simulation.draw.updateLineOfSightSetting()
+    },
+    fpsOptions: [["max", "no cap"], ["72", "72 fps"], ["60", "60 fps"], ["45", "45 fps"], ["30", "30 fps"]], //same as the title screen settings
+    setFpsCap(value) { //limit frames per second, from the title screen settings or the pause menu
+        hasExplicitFpsPreference = true
+        const isAtDefault = simulation.fpsCap === simulation.fpsCapDefault //don't cut short the slow down after taking damage
+        simulation.fpsCapDefault = value === 'max' ? 999999999 : Number(value)
+        if (isAtDefault) {
+            simulation.fpsCap = simulation.fpsCapDefault
+            simulation.fpsInterval = 1000 / simulation.fpsCap;
+        }
+        localSettings.fpsCapDefault = value
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        document.getElementById("fps-select").value = value
     },
     pauseGrid() {
         build.generatePauseLeft() //makes the left side of the pause menu with the tech
@@ -372,30 +389,19 @@ const build = {
         } else {
             mobText = ""
         }
-        function cleanText(text) {
-            return text.replace('Key', '').replace('Digit', '')
+        function keyCap(key) { //same key style as the training levels
+            return `<strong class="key-input-train">${key.replace('Key', '').replace('Digit', '')}</strong>`
         }
-        let fullscreenWarning = document.fullscreenElement ? `<div><span style="font-size:1.25em;font-weight: 600; float: left;">FULLSCREEN</span> <em style="float: right;color:#ccc;">press ${cleanText(input.key.fullscreen)} or hold ESC to exit</em></div><br>` : ""
+        const fullscreenRow = document.fullscreenElement ? `<div class="pause-row"><span class="color-paused">FULLSCREEN</span><span class="pause-hint">${keyCap(input.key.fullscreen)} or ${keyCap("ESC")} to exit</span></div>` : ""
 
-        let text = `<div class="pause-grid-module" style="padding: 8px;">
-<span class="color-paused" data-help="pause" style="font-size:1.0em; float: left;">PAUSED</span> 
-<em style="float: right;color:#ccc;">press ${input.key.pause} to resume</em>
-<br>
-${fullscreenWarning}
-${saveGame.exportHTML()}
-<input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
-<label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks" style="font-size:1.15em;">performance mode</label>
-<br>
-<input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
-<label for="show-num" title="show in game combat text"  style="font-size:1.15em;">damage numbers</label>
-<br>
-<input onclick="build.lineOfSight()" type="checkbox" id="line-of-sight" name="line-of-sight" ${localSettings.isLineOfSight ? "checked" : ""}>
-<label for="line-of-sight" title="walls block your view on every level, like on subway"  style="font-size:1.15em;">line of sight <span style="color:#aaa; font-size:0.75em;">(beta, low performance)</span></label>
-
+        let text = `<div class="pause-grid-module pause-top">
+<div class="pause-row"><span class="color-paused" data-help="pause">PAUSED</span><span class="pause-hint">${keyCap(input.key.pause)} to resume</span></div>
+${fullscreenRow}
 </div>
 
 <div class="pause-grid-module">
     
+        <!-- music menu, commented out
         <details id="pause-music-details" style="padding: 0 8px;line-height: 140%;">
             <summary>music</summary>
             <div class="pause-details" style="font-size: 100%;">
@@ -420,14 +426,34 @@ ${saveGame.exportHTML()}
                 </label>
             </div>
         </details>
+        -->
     
+    <details id="pause-settings-details" style="padding: 0 8px;line-height: 140%;">
+    <summary>settings</summary>
+        <div class="pause-details">
+            ${saveGame.exportHTML()}
+            <div class="pause-row pause-setting">
+            <span><input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
+            <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks">performance mode</label></span>
+            <span><input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
+            <label for="show-num" title="show in game combat text">damage numbers</label></span>
+            </div>
+            <div class="pause-row pause-setting">
+            <span><input onclick="build.lineOfSight()" type="checkbox" id="line-of-sight" name="line-of-sight" ${localSettings.isLineOfSight ? "checked" : ""}>
+            <label for="line-of-sight" title="walls block your view on every level, like on subway">line of sight <span class="pause-hint" style="font-size:0.75em;">(beta, low performance)</span></label></span>
+            </div>
+            <div class="pause-row">
+            <label for="pause-fps-select" title="use this to slow the game down">limit frames per second</label>
+            <select id="pause-fps-select" oninput="build.setFpsCap(this.value); this.blur()">${build.fpsOptions.map(([value, text]) => `<option value="${value}"${String(localSettings.fpsCapDefault) === value ? " selected" : ""}>${text}</option>`).join("")}</select>
+            </div>
+        </div>
+    </details>
+
     <details id = "simulation-variables-details" style="padding: 0 8px;line-height: 140%;">
     <summary>simulation variables</summary>
         <div class="pause-details">
             <strong class='color-d' data-help='damage'>damage</strong> ${((tech.damageAdjustments())).toPrecision(4)}x
-            <span style="float: right;">empty</span>
-            <br><strong class='color-defense' data-help='defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x
-            <span style="float: right;">empty</span>
+            <span style="float: right;"><strong class='color-defense' data-help='defense'>damage taken</strong> ${(m.defense()).toPrecision(4)}x</span>
             <br><strong class='color-h' data-help='health'>health</strong> (${level.isHideHealth ? "null" : (m.health * 100).toFixed(0)} / ${(m.maxHealth * 100).toFixed(0)})
             <span style="float: right;">${powerUps.research.count} ${powerUps.orb.research()}</span>
             <br><strong class='energy' data-help='energy'>energy</strong> (${(m.energy * 100).toFixed(0)} / ${(m.maxEnergy * 100).toFixed(0)}) + (${(m.fieldRegen * 6000 * level.isReducedRegen).toFixed(0)}/s)
@@ -456,7 +482,7 @@ ${saveGame.exportHTML()}
         text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id="difficulty-parameters-details" style="padding: 0 8px;">
 <summary>difficulty parameters</summary>
-<div class="pause-details">
+<div class="pause-details pause-difficulty-grid">
         ${powerUps.difficulty.pauseText()}
 </div>
 </details>
@@ -496,7 +522,8 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                 document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
                 document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
                 if (document.getElementById("constraints-details")) document.getElementById("constraints-details").open = localSettings.pauseMenuDetailsOpen[3]
-                document.getElementById("pause-music-details").open = localSettings.pauseMenuDetailsOpen[4]
+                // document.getElementById("pause-music-details").open = localSettings.pauseMenuDetailsOpen[4]
+                document.getElementById("pause-settings-details").open = localSettings.pauseMenuDetailsOpen[5]
             }
         });
     },
@@ -689,6 +716,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
             if (document.getElementById("constraints-details")) localSettings.pauseMenuDetailsOpen[3] = document.getElementById("constraints-details").open
             if (document.getElementById("pause-music-details")) localSettings.pauseMenuDetailsOpen[4] = document.getElementById("pause-music-details").open
+            if (document.getElementById("pause-settings-details")) localSettings.pauseMenuDetailsOpen[5] = document.getElementById("pause-settings-details").open
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         }
 
@@ -1883,10 +1911,11 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     //Individual selections are restored below, after default settings are initialized.
 
     if (localSettings.pauseMenuDetailsOpen === undefined) {
-        localSettings.pauseMenuDetailsOpen = [true, false, false, true, false]
+        localSettings.pauseMenuDetailsOpen = [true, false, false, true, false, false]
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    } else if (localSettings.pauseMenuDetailsOpen[4] === undefined) {
-        localSettings.pauseMenuDetailsOpen[4] = false
+    } else if (localSettings.pauseMenuDetailsOpen[5] === undefined) {
+        if (localSettings.pauseMenuDetailsOpen[4] === undefined) localSettings.pauseMenuDetailsOpen[4] = false
+        localSettings.pauseMenuDetailsOpen[5] = false
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
     if (localSettings.techHistory === undefined) {
@@ -1918,7 +1947,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isLineOfSight: false,
         isAutoFullscreen: false,
         musicService: "youtube",
-        pauseMenuDetailsOpen: [true, false, false, true, false],
+        pauseMenuDetailsOpen: [true, false, false, true, false, false],
         techHistory: [],
     };
     input.setDefault()
@@ -1993,15 +2022,7 @@ if (document.readyState === 'complete') {
 }
 
 document.getElementById("fps-select").addEventListener("input", () => {
-    hasExplicitFpsPreference = true
-    let value = document.getElementById("fps-select").value
-    if (value === 'max') {
-        simulation.fpsCapDefault = 999999999;
-    } else {
-        simulation.fpsCapDefault = Number(value)
-    }
-    localSettings.fpsCapDefault = value
-    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    build.setFpsCap(document.getElementById("fps-select").value)
 });
 
 document.getElementById("banned").addEventListener("input", () => {

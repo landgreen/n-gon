@@ -1,39 +1,44 @@
 
 
+grappling hook: the rope wraps around map corners and pulls you around them instead of through walls
+  rappel down faster
+  let go of down and the rope holds its length, press up to reel in again
+  left and right pump your swing around the hook
 
+pause left menus - clean up 
+outlier - every 5 seconds, after you fire, nearby bullets get 3x mass
+  brackets around your crosshair close in until your next big shot is ready
+portal field: ↑↓↑↓↑ lets you see through your portals, replacing the preview checkbox
+health bar grows more slowly above 100 max health and never reaches across the screen, 700 max health is about half the screen
 
+tech: double beta decay - mob death tech effects happen twice, expend 4 research, requires 2 mob death tech
+tech: stress-energy tensor - set max health equal to max energy, expend 3 research
+tech: mass hyperboloid - set max energy equal to max health, expend 3 research
 
-
-
-field: perfect diamagnetism is now a flexible membrane of field lines that bends smoothly around the map
-tech: Meissner effect - stacks up to 3 times, perfect diamagnetism is bigger
-tech: ray - perfect diamagnetism is a solid line
-
-field: metamaterial cloaking can deflect mobs with the field button, like the field emitter
-guntech: cleavage - super balls that hit a block split it into 2 pieces, which shatter when hit again, making more balls for heavier blocks
-guntech: impulse - grenades bounce off anything with a smaller explosion, then explode on the next bounce or 3 seconds later, stacks up to 9 bounces
-fieldtech: Hawking radiation - wormholes leave behind a zone of radiation that damages mobs and you
-
-
-
+new community map: ballast by DesBoot
+community map downpour changes
+community map turbine changes
 
 bug fixes
-  eddy current's radius grows slower above 100 energy, so it no longer slows mob bullets across the whole screen
-  drop down menus and checkboxes no longer change when you press keys after clicking them, like P switching to plasma torch
-  choosing a power up with the portal field no longer places a portal
-  pacifist runs now end 20 seconds into the final level, or open the door to null if you have enough undefined
-  mirrors on reactor and null turn off with the line of sight setting
-  hidden areas on HVAC, vault, and other levels match the background with line of sight instead of being black
+  Ψ(t) collapse's text now matches the 6 research it spawns after a boss dies
+  continuing a saved run no longer leaves your field's key combo active in later runs, which caused errors on key presses after switching to field emitter
+  mortars are visible again, they fade in when they see you and can touch you once fully visible
+  performance mode takes effect as soon as you tick it, block outlines used to wait for a new run and mirrors for the next level
+  labs hop room mobs match the level's tier, with a third one tier higher, no more tier 3 hopMothers on the first level
+  community maps perplex and biohazard had 3 walls built inside out, so things like bullets and mines didn't always treat them as solid
+  the grappling hook no longer flies through thin walls
+
 
 
 *********************************************************** TODO *****************************************************
  
-portal combo?
-  maybe switch preview mode on off
+A visual for kinetic bombardment:
+
+improve player stuck in map code?
 
 
 new version of history boss with legs and it looks in the same direction the player looked in but +180
-  also has a sword?
+  also has a laser sword?
   also shots bullets?
 
  
@@ -309,64 +314,6 @@ tech, field? base game? - doing damage heals 1x (less?) of the last damage taken
     ?plasma torch, pilot wave, molecular assembler
     couple scale with coupling
 
- 
-
-//reviewed ideas above this point on oct 3
-
-
-  
-tech:   -  scale max energy with current health
-  nonrefundable
-tech:   -  set max health equal to max energy
-tech:   -  set max energy equal to max health
-  names
-    Free energy
-    stress-energy tensor
-    binding energy
-    condensed matter
-    mass hyperboloid
-    off shell
-    stress–energy tensor
-    nuclear pasta
-    Lagrangian
-
-tech:   - make a few random types of special bullets for super balls
-  super ball type ideas:
-    shoot lasers
-      vertical laser directed down
-      random directions
-      2 horizontal lasers
-    damaging aura
-    duplicate ball after hitting map or mob
-      but don't extend life span
-    freeze mobs  (with aura)
-    stun mobs (bigger ball)
-    aim at nearby mobs after hitting: mob or map
-    explode every couple seconds
-    extra long life
-      prevent it from getting slow, like reactor bosses
-    randomly change direction
-    fire nails at nearby mobs
-    attract mobs, like black hole
-    attract other super balls and grow as they merge
-
-tech:   - give ____ (nails) a tail that damages mobs.
-  use plasma code that runs in bullet history
-
-constraint - periodic darkness
-  random delay and duration of darkness?
-  trigger after getting a power up?
-
-tech:  - repeat all _____ effects a second time
-  on remove/eject tech
-  on mob death
-  on getting hit
-  hard to balance this...
-
-wormhole tech:  - random bullets fire from both wormholes
-  fire b.needle() for 3 seconds after making a new wormhole
-    need to adjust b.needle() for positions that aren't the player's
-
 add sounds?  see ***sound*** section below
   Web Audio API
   AI sound generation survey (June 2025)
@@ -385,21 +332,6 @@ add sounds?  see ***sound*** section below
       average songs
 
 power up: entanglement - make it spawn from killing a mob that kinda looks like the player?
-
-tech:  - limit the total number of tech
-  skin tech or field tech
-  limit:
-    match level.levelsCleared (times 2?)
-    match set number, like 10
-    match number of guns (times 3?)
-    only show choices for: gun tech, field tech, nonrefundable tech
-  benefit:
-    improve ability to choose and eject
-    improve damage, damage taken
-  UI
-    pop up a menu that asks player to choose one of their tech to remove
-      before or after normal tech UI
-      can copy the standard tech UI with a few differences
 
 tech:  - instant tech that gives you 2 tech that each have minor negative effects
   synergy with removing tech builds
@@ -420,13 +352,6 @@ field tech: - use _____ to refresh current choices  (or give +6 choices for the 
     time dilation (rewind time)
     or skin tech (or skin tech upgrade)
 
-mob status: confused - I could rotate the velocity that mobs have gently over 1-2 seconds. that might work.
-  probably also want to add a force so effects are noticable for stationary mobs
-  problem is that mobs all have different airFriction
-
-constraint: remove 10% of your tech until the end of the level
-  what if remove then adding gives a benefits / lasting effects?
-
 mob: weeping angle - spawns long lasting bullets, like seekers, but called weepers
   tier 3
 mob: weepers - bullet
@@ -437,13 +362,9 @@ mob: weepers - bullet
     invincible
     frozen/not moving/slow moving?
 
-!!!mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
+mob: spiker - moves around, but then stops and makes porcupine spikes for 2 seconds, then moves again.
   maybe use hopper movement?
   maybe use slasher laser code
-
-guntech:  - 0.5x damage taken while ____  gun is equipped
-  wave or shotgun?
-  thematic issues? (how is a gun going to protect you)
 
 make guns do different things if  tap or hold fire
   effects have some overlap with crouch
@@ -457,21 +378,11 @@ make guns do different things if  tap or hold fire
   like incendiary, but only active on tap and release
     bigger explosions to balance?
 
-tech - if you haven't fired a bullet in 4 seconds your next bullet is bigger?
-  effect?
-    size: nail gun,shotgun,super balls,drones,foam,harpoon
-    spores,mine: number of projectiles
-    wave?
-    explosion size: missiles,grenades
-    laser?
-  code?
-    ephemera?  This doesn't sync to the bullet fired, it would have to be a additional projectiles
-    custom to each gun?
 
-wormhole fieldtech:   - gain 1% duplication for this level each time the wormhole eats a block
-  add a limit to the number of blocks that can be duplicated?
-  can this be exploited to not be fun?
-  how many blocks are on an average level?
+
+
+
+//reviewed ideas above this point on oct 6
 
 tech - benefit if you haven't killed any mobs on this level
   have to clean up mobs that die on level spawn from falling blocks
@@ -966,7 +877,6 @@ possible names for tech
   Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
   Unruh effect - accelerating makes heat/thermal particles
   configuration space - holds the position of everything (related to fermions/bosons and particle interactions)
-  stress–energy tensor
   radioisotope thermoelectric generator -
   retrovirus: these things make JUNK DNA so link it somehow to that tech?
     Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
@@ -1039,3 +949,133 @@ list of powerful synergies
   chain reaction + invulnerable + Abelian group = clear all mobs on level
   Wormhole + manifold + that one upgrade that makes wormholes super cheap on energy + that one upgrade that makes them stop time
   Unified Field Theory+Lots of duplication tech (and wormhole)+Inductive Charging+Energy Conservation+Virtual Particles+Residual Dipolar Coating
+
+
+******************************************************* PERFORMANCE REFERENCE ******************************************************
+
+measured 2026-10-08 on this computer, headless Chrome 154.0.8037.99, 1280 x 800 canvas, zoom 1600
+all times below are approximate microseconds (µs); 1 ms = 1,000 µs; a 60 fps frame has a 16,667 µs budget
+
+quiet initial: 23 map pieces, 3 native blocks, no mobs, power ups, bullets, bots, or extra tech
+quiet ruins: 934 map pieces, 38 native blocks, no mobs, power ups, bullets, bots, or extra tech
+"empty" below uses these quiet maps, keeping their native blocks and terrain
+
+whole-frame baselines (total cost, not added cost):
+  empty initial, with background graphics                 ~41 µs
+  empty initial, without decorative background graphics   ~35 µs  (~4 µs saved in paired measurements)
+  initial with 30 research power ups                      ~49 µs
+  empty ruins                                            ~415 µs
+  physics update alone in these baselines                 ~13 µs initial / ~365 µs ruins
+  removing initial's background keeps terrain, blocks, physics, and the exit; removes wires, room fills, and ceiling shades
+
+thing                                         added per frame: initial   added per frame: ruins   code alone: initial / ruins
+30 research power ups                         ~15 µs                     ~25 µs                   ~6 / ~6 µs
+100 research power ups                        ~45 µs                     ~80 µs                   ~17 / ~17 µs
+30 extra loose 30 x 30 blocks                 ~9 µs (noise)              ~20 µs                   ~5 / ~8 µs
+100 extra loose 30 x 30 blocks                ~35 µs                     ~65 µs                   ~13 / ~17 µs
+negative mass selected, field off             noise                      ~20 µs (noisy)           <1 / ~1.5 µs
+negative mass on, drifting, radius 650        ~3 µs (noise)              ~6 µs (noise)            ~2.9 / ~4 µs
+base plasma torch on                          ~4 µs (noise)              ~20 µs                   ~4 / ~15 µs
+one plasma ball in flight, radius 40          ~8 µs (noise)              ~25 µs (noisy)           ~7 / ~20 µs
+standing wave, passive shield                 ~4 µs (noise)              ~6 µs (noise)            ~4 / ~5 µs
+perfect diamagnetism, field button held       noise                      ~4 µs (noise)            ~40 / ~60 µs
+metamaterial cloaking, cloaked vs decloaked   ~6 µs (noise)              noise                    ~5 / ~7 µs
+30 nails in flight                            ~25 µs                     ~30 µs                   <1 / <1 µs
+30 super balls in flight, radius 8            ~30 µs                     ~40 µs (noisy)           <1 / ~1.3 µs
+30 spores, no targets                         ~20 µs                     ~30 µs (noisy)           <1 / ~1.5 µs
+20 drones, no targets or power ups            ~20 µs                     ~30 µs (noisy)           ~1.3 / ~1.3 µs
+30 unattached foam blobs, radius 10           ~170 µs                    ~490 µs                  ~125 / ~420 µs
+10 nail bots, idle with no targets            ~8 µs (noise)              ~10 µs (noisy)           <1 / ~1.4 µs
+20 starter mobs, radius 16, active AI         ~45 µs                     ~65 µs                   ~15 / ~20 µs
+final boss, full health, before damage        ~6 µs (noise)              ~9 µs (noise)            <1 / ~1.2 µs
+final boss, damaged, first active attack      ~580 µs                    ~760 µs                  ~505 / ~610 µs
+line-of-sight setting on                      ~240 µs                    ~5,150 µs                ~220 / ~4,950 µs
+16 base shotgun pellets, one airborne volley  ~30 µs                     ~30 µs                   ~17 / ~20 µs
+10 longitudinal wave arcs, radius 200-300     ~140 µs                    ~375 µs                  ~125 / ~360 µs
+10 base missiles in flight, no targets        ~15 µs                     ~20 µs (noisy)           ~3 / ~3 µs
+10 base grenades in flight, before explosion  ~15 µs                     ~15 µs (noisy)           <1 / <1 µs
+10 unguided harpoons in flight, no rope       ~10 µs                     ~30 µs                   <1 / <1 µs
+20 unarmed mines still in flight              ~30 µs                     ~240 µs                  ~3 / ~220 µs
+20 armed mines, no targets                    ~20 µs                     ~15 µs                   <1 / <1 µs
+30 ice IX projectiles, no targets             ~30 µs                     ~35 µs (noisy)           ~2.8 / ~4 µs
+30 worms, no targets                          ~45 µs                     ~60 µs                   ~13 / ~15 µs
+30 fleas, no targets                          ~30 µs                     ~295 µs                  ~4 / ~275 µs
+10 extra loose 30 x 30 blocks                 ~6 µs (noise)              ~8 µs (noise)            ~3 / ~6 µs
+300 extra loose 30 x 30 blocks                ~220 µs                    ~255 µs                  ~35 / ~35 µs
+600 extra loose 30 x 30 blocks                ~465 µs                    ~500 µs                  ~60 / ~65 µs
+one visible 100 x 250 mirror vs none          ~8 µs (noise)              ~7 µs (noise)            ~16 / ~20 µs
+one visible 1000 x 1000 mirror vs none        ~10 µs                     ~10 µs (noise)           ~15 / ~20 µs
+10 visible 100 x 250 mirrors vs none          ~120 µs (noisy)            ~255 µs (noisy)          ~110 / ~135 µs
+10 offscreen 100 x 250 mirrors vs none        noise                      ~5 µs (noise)            ~3 / ~3 µs
+visible idle exit vs exit function disabled   ~20 µs (noisy)             ~9 µs (noise)            ~19 / ~25 µs
+visible half-charged exit vs disabled         ~15 µs (noisy)             ~10 µs                   ~19 / ~25 µs
+offscreen idle exit vs function disabled      ~7 µs (noise)              ~15 µs (noisy)           ~2.6 / ~2.8 µs
+visible idle exit reflection on vs off        ~7 µs (noise)              ~5 µs (noise)            ~19 / ~25 µs
+
+how to read these numbers:
+  added per frame is the paired difference in the complete production normalLoop(), including live physics and draw calls
+  added cost uses each case's paired idle frame, not subtraction of the baseline totals listed above
+  entity additions compare against the same quiet map; negative mass off and standing wave compare against the base field emitter
+  negative mass on, torch, diamagnetism, and plasma ball compare against that same field with its active effect off
+  code alone times powerUps.do(), block drawing, m.hold(), b.bulletDo(), mobs.loop(), or map drawing, as appropriate
+  those code-alone values are the entire named function, including any idle/native work; they are not added costs
+  projectile/bot code alone excludes projectile drawing and physics; mob code includes graphics drawn inside its AI function
+  therefore code alone can be much smaller than added cost, or exceed it when the baseline already does similar work
+  bots/drones/spores have no combat targets; these rows do not estimate their cost while attacking a crowd
+  final boss is spawned into each quiet map at its normal radius 300, at 98.9% health for the damaged row
+  damaged boss has cleared its opening add-wave and uses motionLaser as its first attack; its fractal health graphic is active
+  boss modes are normally randomized; later phases, other attacks, and spawned mobs have different costs
+
+measurement details and limits:
+  rounded medians of six paired round averages; each round times 256 frames per state after warm-up, alternating state order
+  code alone uses a separate instrumented pass of 128 frames per state per round; timers are outside scene resets
+  geometry, energy, projectile counts, and foam size are restored before each frame so cases do not expire or drift
+  rendering runs in short bursts with browser yields between them; normal gameplay files and the testing loadout are unchanged
+  "noise" means the cost is too small to distinguish reliably from normal timing fluctuations; it does not mean zero cost
+  "noisy" means the reported estimate varied substantially between runs; use it for rough scale, not precise comparisons
+  these are CPU execution/Canvas submission timings, not complete GPU/presentation times or measured fps
+  asynchronous graphics work can add costs that these timings miss, particularly fields using compositing
+  this harness differs from the earlier three-row chart; compare rows within this block, not absolute numbers across the two
+  on ruins, line of sight uses about 31% of a 60 fps frame budget in measured added CPU time; damaged boss about 4.6%, foam about 3%
+  costs depend on hardware, camera position, collisions, targets, and tech combinations; rows are reference cases and do not simply add together
+
+additional projectile, block, mirror, and exit setup notes:
+  the new projectile rows complete coverage of the remaining base gun projectiles; laser was already measured in the earlier three-row chart
+  projectile rows time existing projectiles, not the cost of spawning a shot, explosions, impact effects, or a gun's sustained firing rate
+  shotgun pellets and ice IX geometry are restored before each timed frame so shrinking does not change the case
+  wave count/radius are restored; the 10 arcs represent overlapping waves already in progress, not 10 waves fired every frame
+  unarmed mines repeatedly scan terrain for landing; armed mines already finished their arming delay and have no targets
+  blocks are spread over clear, non-overlapping grid positions; native blocks remain in the scene
+  these block rows measure mostly free bodies, not the more expensive case of a tightly packed pile or chain of constraints
+  mirror dimensions are world units; at this camera scale 100 x 250 is about 50 x 125 canvas pixels, 1000 x 1000 about 500 x 500
+  mirror off is removal of the effect; offscreen mirrors remain registered and perform their normal culling check
+  mirror code alone includes the ephemera dispatcher; wave code alone includes its drawing and collision queries
+  10 visible mirrors on ruins varied from ~145 to ~430 µs added across the six round averages; the table gives the median
+  exit on vs disabled includes both exit checks and graphics; the reflection-only row keeps checks, ripple, tint, and outline on both sides
+  half-charged exit is held at about 50% charge so it never changes levels; exit positions are placed relative to the same fixed camera
+  exit code alone includes its early request and final draw calls; an offscreen exit still updates and traces its outline
+  normal styles were loaded and representative projectile, mirror, exit, and menu screenshots checked for this expanded reference
+  earlier gameplay rows were refreshed using the same corrected stylesheet setup; normal gameplay source files were not edited
+
+menu costs (different units and meaning from the gameplay table):
+  gameplay is paused for these menus, so there is no recurring game-frame cost while they remain open
+  opening costs are warm repeated opens, not the first page load; the layout column forces the browser to resolve styles/layout after opening
+  opening timings are elapsed function time, including any awaited work; they exclude later paint/GPU presentation and are not isolated CPU samples
+
+menu                                     opening function alone   opening plus style/layout   idle added main-thread CPU
+base experiment menu, full open/reset    ~27,350 µs                ~64,300 µs                  ~414 ms/s
+base pause menu, no guns or extra tech   ~900 µs                   ~1,750 µs                   ~2.2 ms/s (noise)
+tech choose menu, 3 options              ~950 µs                   ~1,900 µs                   ~0.4 ms/s (noise)
+tech choose menu, 6 options              ~1,050 µs                 ~2,400 µs                   ~16 ms/s (choice-dependent)
+
+  idle added CPU is the visible menu's Chrome main-thread task time minus the same page with menu panels hidden
+  sampled three 1.2-second windows per state after settling; ms/s means milliseconds of CPU time per second, not milliseconds per game frame
+  experiment open includes resetting the build/run plus generating the full grid; pause and tech rows generate their respective menus
+  experiment grid had about 6,500 elements; base pause had about 150; choosing different tech changes text, layout, and animations
+  animated descriptions can keep the browser busy even with the game loop stopped; choice-menu idle values are examples, not fixed costs
+  3-option idle samples were ~0.35-2.1 ms/s; 6-option samples ~13-20 ms/s; base pause ~0.8-3.2 ms/s
+  experiment menu's ~414 ms/s extra main-thread work is about 41% of one CPU core; it is not 41% of the whole computer
+  separate paired check: the visible experiment menu used ~420 ms/s total main-thread time normally, ~17 ms/s with CSS animations disabled
+  that animation check kept the game cycle unchanged in every window; the ~17 ms/s includes the browser's background overhead
+  disabling animations was a temporary measurement-only browser override; no menu styles or game behavior were changed
+  menu measurements omit complete GPU/compositor costs, scrolling, typing, tooltips, and cold asset/font loading

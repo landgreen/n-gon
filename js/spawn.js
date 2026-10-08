@@ -165,16 +165,21 @@ const spawn = {
             },
         })
     },
-    randomMobByLevelsCleared(x, y) {
+    //theme like "hop" picks only mobs with that in their name, if any can spawn at this tier
+    //tier overrides this level's tier, but after 13 levels every tier can spawn
+    randomMobByLevelsCleared(x, y, theme = "", tier = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]) {
+        let pickFrom
         if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
-            const pick = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
-            spawn[pick](x, y);
+            pickFrom = spawn.fullPickList
         } else {
-            const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
-            const pickFrom = spawn.tier[t]
-            const pick = pickFrom[Math.floor(Math.random() * pickFrom.length)];
-            spawn[pick](x, y);
+            pickFrom = spawn.tier[tier]
         }
+        if (theme) {
+            const themed = pickFrom.filter(name => name.includes(theme))
+            if (themed.length) pickFrom = themed
+        }
+        const pick = pickFrom[Math.floor(Math.random() * pickFrom.length)];
+        spawn[pick](x, y);
     },
 
     // original with 10% + number of mobs chance to fail
@@ -6047,8 +6052,9 @@ const spawn = {
             }
         }
         me.fireLaser = function () {
+            const rayWalls = tech.isRay && m.fieldMode === 2 ? m.fieldUpgrades[2].rayWalls() : [] //tech: ray, the line left behind blocks lasers
             for (let i = 0; i < this.laserArray.length; i++) { //fire all lasers in the array
-                let best = vertexCollision(this.laserArray[i].a, this.laserArray[i].b, m.isCloak ? [body] : [body, [playerBody, playerHead]]); //not checking map to fix not hitting player bug, this might make some lasers look strange when the map changes
+                let best = vertexCollision(this.laserArray[i].a, this.laserArray[i].b, m.isCloak ? [body, rayWalls] : [body, rayWalls, [playerBody, playerHead]]); //not checking map to fix not hitting player bug, this might make some lasers look strange when the map changes
                 if (this.laserArray[i].fade > 0.99) {
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
@@ -6070,7 +6076,7 @@ const spawn = {
                             this.force.x -= 2 * forceMag * Math.cos(angle);
                             this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
                         }
-                    } else if (best.who && best.who.classType === "body") { //hitting block
+                    } else if (best.who && (best.who.classType === "body" || best.who.isRay)) { //hitting block or tech: ray's line
                         ctx.beginPath();
                         ctx.moveTo(best.x, best.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
@@ -6208,8 +6214,9 @@ const spawn = {
             }
         }
         me.fireLaser = function () {
+            const rayWalls = tech.isRay && m.fieldMode === 2 ? m.fieldUpgrades[2].rayWalls() : [] //tech: ray, the line left behind blocks lasers
             for (let i = 0; i < this.laserArray.length; i++) { //fire all laserArray in the array
-                let best = vertexCollision(this.laserArray[i].a, this.laserArray[i].b, m.isCloak ? [body] : [body, [playerBody, playerHead]]); //not checking map to fix not hitting player bug, this might make some lasers look strange when the map changes
+                let best = vertexCollision(this.laserArray[i].a, this.laserArray[i].b, m.isCloak ? [body, rayWalls] : [body, rayWalls, [playerBody, playerHead]]); //not checking map to fix not hitting player bug, this might make some lasers look strange when the map changes
                 if (this.laserArray[i].fade > 0.99) {
                     if (best.who && (best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage after getting hit
@@ -6231,7 +6238,7 @@ const spawn = {
                             this.force.x -= 2 * forceMag * Math.cos(angle);
                             this.force.y -= 2 * forceMag * Math.sin(angle); // - 0.0007 * this.mass; //antigravity
                         }
-                    } else if (best.who && best.who.classType === "body") { //hitting block
+                    } else if (best.who && (best.who.classType === "body" || best.who.isRay)) { //hitting block or tech: ray's line
                         ctx.beginPath();
                         ctx.moveTo(best.x, best.y);
                         ctx.lineTo(this.laserArray[i].a.x, this.laserArray[i].a.y);
@@ -10055,6 +10062,36 @@ const spawn = {
                 }
                 this.recoil()
             }, 0.03)
+            if (this.seePlayer.recall) {
+                if (this.alpha < 1) this.alpha += 0.01;
+            } else {
+                if (this.alpha > 0) this.alpha -= 0.03;
+            }
+            //draw
+            if (this.alpha > 0) {
+                if (this.alpha > 0.95) {
+                    if (this.seePlayer.recall) this.healthBar4()
+                    if (!this.isNotCloaked) {
+                        this.isNotCloaked = true;
+                        this.isBadTarget = false;
+                        this.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob; //can touch player
+                    }
+                }
+                //draw body
+                ctx.beginPath();
+                const vertices = this.vertices;
+                ctx.moveTo(vertices[0].x, vertices[0].y);
+                for (let j = 1, len = vertices.length; j < len; ++j) {
+                    ctx.lineTo(vertices[j].x, vertices[j].y);
+                }
+                ctx.lineTo(vertices[0].x, vertices[0].y);
+                ctx.fillStyle = `rgba(25,0,50,${this.alpha * this.alpha})`;
+                ctx.fill();
+            } else if (this.isNotCloaked) {
+                this.isNotCloaked = false;
+                this.isBadTarget = true
+                this.collisionFilter.mask = cat.map | cat.body | cat.bullet | cat.mob //can't touch player
+            }
         };
     },
     grenade(x, y, tier, lifeSpan = 90 + Math.ceil(60 / simulation.accelScale), pulseRadius = Math.min(550, 250 + simulation.difficulty * 3), size = 3) {

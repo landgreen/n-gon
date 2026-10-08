@@ -894,23 +894,7 @@ const simulation = {
             }
         }
         simulation.isStartingGame = false
-        if (localSettings.isHideHUD) {
-            simulation.draw.body = function () {
-                ctx.beginPath();
-                for (let i = 0, len = body.length; i < len; ++i) {
-                    let vertices = body[i].vertices;
-                    ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (let j = 1; j < vertices.length; j++) {
-                        ctx.lineTo(vertices[j].x, vertices[j].y);
-                    }
-                    ctx.lineTo(vertices[0].x, vertices[0].y);
-                }
-                ctx.fillStyle = color.block;
-                ctx.fill();
-            }
-        } else {
-            simulation.draw.body = simulation.draw.bodyDefault
-        }
+        simulation.draw.body = simulation.draw.bodyDefault //undo a community map's custom block drawing from the last run
         simulation.isTextLogOpen = true
         simulation.clearMap()
         level.pendingTransfers = null //a fresh run never inherits arrivals from the previous run
@@ -1050,6 +1034,7 @@ const simulation = {
         m.immuneCycle = 0;
         m.coupling = 0
         m.fieldUpgrades[1].energyHealthRatio = 1
+        m.fieldUpgrades[11].isPreview = false //portal views start off each run
         m.setField(0) //this calls m.couplingChange(), which sets max health and max energy
         m.energy = 1
         //exit testing
@@ -1072,7 +1057,7 @@ const simulation = {
                     if (!(m.cycle % 15)) { //4 times a second
                         const defense = m.defense() //update defense bar
                         if (m.lastCalculatedDefense !== defense) {
-                            document.getElementById("defense-bar").style.width = Math.floor(300 * m.maxHealth * (1 - defense)) + "px";
+                            document.getElementById("defense-bar").style.width = Math.floor(m.healthBarWidth(m.maxHealth) * (1 - defense)) + "px";
                             m.lastCalculatedDefense = defense
                         }
                         const damage = tech.damageAdjustments() //update damage bar
@@ -1933,11 +1918,13 @@ const simulation = {
                 }
                 ctx.lineTo(vertices[0].x, vertices[0].y);
             }
-            ctx.lineWidth = 2;
             ctx.fillStyle = color.block;
             ctx.fill();
-            ctx.strokeStyle = color.blockS;
-            ctx.stroke();
+            if (!localSettings.isHideHUD) { //performance mode: no stroke on blocks, checked every frame so the pause menu toggle applies right away
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = color.blockS;
+                ctx.stroke();
+            }
         },
         body() { },
         cons() {

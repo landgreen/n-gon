@@ -14,7 +14,7 @@ const level = {
     isFlipping: false,
     uniqueLevels: ["initial", "reservoir", "factory", "interferometer", "reactor", "subway", "final"], //see level.populateLevels:   (initial, ... , (reservoir, factory, or interferometer), reactor, ... , subway, final)    added later
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"], //, "vault"
-    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", /* "superNgonBros", */ "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage", "lake"],
+    communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", /* "superNgonBros", */ "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage", "lake", "ballast"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
     levels: [],
     moreLevelsPromise: null,
@@ -29,7 +29,7 @@ const level = {
             if (true) {
                 level.load(simulation.isTraining ? "walk" : "initial") //normal starting level **************************************************
             } else { //testing setup
-                // simulation.enableConstructMode()  //used to build maps in testing mode
+                simulation.enableConstructMode()  //used to build maps in testing mode
                 // simulation.setZoom(600) //zoom way in to see details
                 // simulation.difficultyMode = 1
                 // build.isExperimentRun = true
@@ -46,8 +46,7 @@ const level = {
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 // requestAnimationFrame(() => { m.setField(9) });
-                // m.setField(4) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
-                m.setField(2)
+                m.setField(10) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
                 // simulation.molecularMode = 4;
 
                 // m.energy = m.maxEnergy = 12.2
@@ -74,6 +73,11 @@ const level = {
                 b.giveGuns(2)
                 b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
+                // for (let i = 0; i < 1; i++) tech.giveTech("mass hyperboloid")
+                for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
+                for (let i = 0; i < 1; i++) tech.giveTech("shear stress")
+                for (let i = 0; i < 1; i++) tech.giveTech("double beta decay")
+                // for (let i = 0; i < 10; i++) tech.giveTech("nail-bot")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 3; ++i) tech.giveTech("Meissner effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("ray")
@@ -91,7 +95,7 @@ const level = {
                 // tech.giveTech("quantum foam")
                 // tech.giveTech("nitinol")
                 // tech.giveTech("optimization") //swap skins when paused
-                // tech.giveTech("outlier")
+                tech.giveTech("outlier")
                 // tech.giveTech("many-worlds") //alternate reality at the start of each level
                 // tech.giveTech("self-locating uncertainty") //choose what doesn't change in an alternate reality when paused
                 // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
@@ -102,11 +106,11 @@ const level = {
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
-                // level.load("labs")
-                level.load("initial")
-                // level.maps.testing()
+                // level.load("testChamber")
+                // level.load("initial")
+                level.maps.testing()
 
-                // powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+                powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
@@ -1441,7 +1445,6 @@ const level = {
     // the camera keeps their source visible, with enough zoom-out that it cannot go past the player.
     // another issue is with multiple mirrors we don't want them drawing each other, the call order of multiple level.mirrors in the level should fix it if it's one sided
     mirror(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040") {
-        if (localSettings.isHideHUD) return; //performance mode: do not register a mirror
         if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
             throw new RangeError("mirror requires finite coordinates and positive dimensions");
         }
@@ -1465,6 +1468,7 @@ const level = {
                     return;
                 }
                 const { opacity, tintOpacity } = this;
+                if (localSettings.isHideHUD) return; //performance mode, checked every frame so the pause menu toggle applies right away
                 if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
@@ -1521,7 +1525,6 @@ const level = {
     // reflectionScale below 1 shrinks the scene by sampling a larger adjacent area.
     // verticalOffset shifts the image inside the fixed mirror: positive down, negative up (world units).
     mirrorExperimental(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040", reflectionScale = 1, verticalOffset = 0) {
-        if (localSettings.isHideHUD) return; //performance mode: do not register a mirror
         if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
             throw new RangeError("mirrorExperimental requires finite coordinates and positive dimensions");
         }
@@ -1558,6 +1561,7 @@ const level = {
                     return;
                 }
                 const { opacity, tintOpacity } = this;
+                if (localSettings.isHideHUD) return; //performance mode, checked every frame so the pause menu toggle applies right away
                 if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
@@ -1615,7 +1619,6 @@ const level = {
     // Same parameters as mirror, followed by pixel block size in world units and
     // glitch probability: 0 never skips a draw cycle, 1 always skips it.
     mirrorPixel(x, y, width, height, direction = "right", opacity = 1, tintOpacity = 0, tintColor = "#040", pixelSize = 8, glitch = 0) {
-        if (localSettings.isHideHUD) return; //performance mode: no ephemera or buffer allocation
         if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) {
             throw new RangeError("mirrorPixel requires finite coordinates and positive dimensions");
         }
@@ -1648,6 +1651,7 @@ const level = {
                     simulation.removeEphemera(this);
                     return;
                 }
+                if (localSettings.isHideHUD) return; //performance mode, checked every frame so the pause menu toggle applies right away
                 if (simulation.isTimeSkipping || simulation.draw.isLineOfSight()) return; //mirrors copy the canvas, which doesn't work with line of sight
                 if (opacity === 0 && tintOpacity === 0) return;
 
@@ -3724,7 +3728,7 @@ const level = {
                 }
             },
             viewRadius: 2000, //how far behind each portal you can see out of the other one
-            isViewOn: true, //draw the views through the portals, the portal field has a checkbox for this
+            isViewOn: true, //draw the views through the portals, the portal field turns this on and off with ↑↓↑↓↑
             isViewInMapOnly: false, //false: the view covers whatever is behind the portal, like a window, true: only where the map is
             drawViews() { //behind each portal, show the area in front of the other portal
                 //the part of that area on screen is copied from the canvas like level.mirror(), with every effect
@@ -6939,30 +6943,26 @@ const level = {
             //left side mirrors
             level.mirror(-775, -750, 1000, 1550, "right", 1, 0.15, "#040");
             const doorMirror = level.mirror(-775, -1110, 987, 360, "right", 1, 0.15, "#040");
-            if (doorMirror) { // Mirrors are disabled in performance mode.
-                doorMirror.name = "mirrorDoor";
-                const drawMirror = doorMirror.do;
-                doorMirror.do = function () {
-                    ctx.save();
-                    // Move both the reflected source and destination with the door.
-                    ctx.translate(0, doorIn.position.y + 930);
-                    drawMirror.call(this);
-                    ctx.restore();
-                };
-            }
+            doorMirror.name = "mirrorDoor";
+            const drawDoorMirror = doorMirror.do;
+            doorMirror.do = function () {
+                ctx.save();
+                // Move both the reflected source and destination with the door.
+                ctx.translate(0, doorIn.position.y + 930);
+                drawDoorMirror.call(this);
+                ctx.restore();
+            };
             level.mirror(-775, -2600, 1000, 1500, "right", 1, 0.15, "#040");
             //right side mirrors
             const doorOutMirror = level.mirror(2762, -385, 1038, 410, "left", 1, 0.15, "#040");
-            if (doorOutMirror) { // Mirrors are disabled in performance mode.
-                doorOutMirror.name = "mirrorDoor";
-                const drawMirror = doorOutMirror.do;
-                doorOutMirror.do = function () {
-                    ctx.save();
-                    ctx.translate(0, doorOut.position.y + 180);
-                    drawMirror.call(this);
-                    ctx.restore();
-                };
-            }
+            doorOutMirror.name = "mirrorDoor";
+            const drawDoorOutMirror = doorOutMirror.do;
+            doorOutMirror.do = function () {
+                ctx.save();
+                ctx.translate(0, doorOut.position.y + 180);
+                drawDoorOutMirror.call(this);
+                ctx.restore();
+            };
             level.mirror(2750, -7, 1050, 807, "left", 1, 0.15, "#040");
             level.mirror(2750, -2600, 1050, 2225, "left", 1, 0.15, "#040");
             const reactorMirrors = simulation.ephemera.filter(effect => effect.name === "mirror" || effect.name === "mirrorDoor");
@@ -9384,14 +9384,11 @@ const level = {
                                     }
                                     for (let i = 0; i < 4; ++i) spawn.hopBullet(x + 150 + 750 * Math.random(), y + -1600)
                                     for (let i = 0; i < 4; ++i) spawn.hopBullet(x + 1100 + 750 * Math.random(), y + -1600)
-                                    spawn.hopper(x + 1550, y + -775);
-                                    spawn.hopper(x + 500, y + -775);
-                                    spawn.hopper(x + 500, y + -2200);
-                                    spawn.hopper(x + 1100, y + -2200);
-                                    spawn.hopMother(x + 1400, y + -775);
-                                    spawn.hopMother(x + 550, y + -775);
-                                    spawn.hopMother(x + 525, y + -1475);
-                                    spawn.hopMother(x + 1550, y + -1500);
+                                    //hop mobs from this level's tier: T1 hopper, T2 hopperBaby, T3 hopMother, T4 hopsploder
+                                    //never starters, and a third of them are one tier higher, up to T4
+                                    const hopTier = Math.max(1, spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)])
+                                    const hopSpots = [[1550, -775], [500, -775], [500, -2200], [1100, -2200], [1400, -775], [550, -775], [525, -1475], [1550, -1500]]
+                                    hopSpots.forEach(([dx, dy], i) => spawn.randomMobByLevelsCleared(x + dx, y + dy, "hop", Math.min(4, hopTier + (i % 3 === 0 ? 1 : 0))))
                                 }
                             }
                         }

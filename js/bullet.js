@@ -155,7 +155,7 @@ function advancePhononWaveFront(position, radius, angle, halfArc, edge1Advance, 
 const b = {
     queueSuperBalls({ count = 0, num, speed, delay }) {
         simulation.ephemera.push({
-            saveType: "super balls", count, num, speed, delay, outlier: b.outlierQueue(),
+            saveType: "super balls", count, num, speed, delay,
             do() {
                 if (!m.alive || this.count >= this.num) {
                     simulation.removeEphemera(this)
@@ -164,10 +164,6 @@ const b = {
                 this.count++
                 b.superBall({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) },
                     { x: this.speed * Math.cos(m.angle), y: this.speed * Math.sin(m.angle) }, 11 * tech.bulletSize)
-                if (this.outlier) {
-                    b.enlarge(bullet[bullet.length - 1], this.outlier)
-                    this.outlier = 0 //only the first ball
-                }
                 m.fireCDcycle = m.cycle + this.delay
                 if (this.count >= this.num) simulation.removeEphemera(this)
             }
@@ -175,7 +171,7 @@ const b = {
     },
     queueHarpoons({ num, angle, spread, harpoonSize, totalCycles }) {
         simulation.ephemera.push({
-            saveType: "harpoons", num, angle, spread, harpoonSize, totalCycles, outlier: b.outlierQueue(),
+            saveType: "harpoons", num, angle, spread, harpoonSize, totalCycles,
             do() {
                 const gun = b.guns[9]
                 if (this.num < 1 || gun.ammo < 1 || !m.alive) {
@@ -186,10 +182,6 @@ const b = {
                 gun.ammo--
                 simulation.updateGunHUD()
                 b.harpoon({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) }, null, this.angle, this.harpoonSize, true, this.totalCycles)
-                if (this.outlier) {
-                    b.enlarge(bullet[bullet.length - 1], this.outlier)
-                    this.outlier = 0 //only the first harpoon
-                }
                 this.angle += this.spread
             }
         })
@@ -221,7 +213,7 @@ const b = {
                 }
                 if (m.holdingTarget) m.drop();
             }
-            b.outlierFire(() => b.guns[b.activeGun].do());
+            b.guns[b.activeGun].do();
         }
     },
     fireAlwaysFire() { //added  && player.speed < 0.5 && m.onGround  //removed input.fire && (!input.field || m.fieldFire)
@@ -232,7 +224,7 @@ const b = {
                 }
                 if (m.holdingTarget) m.drop();
             }
-            b.outlierFire(() => b.guns[b.activeGun].do());
+            b.guns[b.activeGun].do();
         }
     },
     fireFloat() { //added  && player.speed < 0.5 && m.onGround
@@ -253,7 +245,7 @@ const b = {
                 player.force.x = 0
                 player.force.y = 0
             }
-            b.outlierFire(() => b.guns[b.activeGun].do());
+            b.guns[b.activeGun].do();
         }
     },
     muzzleCheck(start) { //not used right now, call after a gun fires with start = bullet.length from before it fired
@@ -281,7 +273,7 @@ const b = {
     },
     fireWithAmmo() { //triggers after firing when you have ammo
         m.lastFireFieldCycle = m.cycle //automatic guns fire without the fire key
-        b.outlierFire(() => b.guns[b.activeGun].fire());
+        b.guns[b.activeGun].fire();
         b.spendAmmo()
         simulation.updateGunHUD();
         if (tech.isSecondShot && b.inventory.length > 1) {
@@ -294,7 +286,7 @@ const b = {
                     simulation.switchGun();
 
                     if (b.guns[b.activeGun].ammo > 0) {
-                        b.outlierFire(() => b.guns[b.activeGun].fire());
+                        b.guns[b.activeGun].fire();
                         b.spendAmmo()
                         if (m.fireCDcycle > CD) CD = m.fireCDcycle
                     }
@@ -307,29 +299,74 @@ const b = {
             m.fireCDcycle = CD
         }
     },
-    //outlier tech: after a cooldown, the next shot from a gun is bigger, with the same density so it has more mass
-    outlierCycle: 0, //m.cycle when outlier is ready again
-    outlierScale: 0, //size scale of the shot a gun is firing right now, 0 if it isn't an outlier, read by b.outlierQueue()
-    isOutlierQueued: false,
-    outlierFire(fire) { //runs a gun's fire or do, and enlarges the bullets it creates
-        const gun = b.guns[b.activeGun]
-        if (!tech.isOutlier || m.cycle < b.outlierCycle || !gun || gun.name === "laser" || gun.name === "wave") {
-            fire()
-            return
+    //outlier tech: every 5 seconds, after your gun fires, bullets near you get bigger, with the same density so they have more mass
+    //it all runs in one ephemera that watches m.fireCDcycle and bullet[], so guns, bots, and fields don't need to know about it
+    outlierEphemera() {
+        const cooldown = 300
+        const bigScale = Math.sqrt(3) //3x mass
+        return {
+            name: "outlier",
+            readyCycle: 0, //m.cycle when the next shot makes nearby bullets big
+            fireCDcycle: m.fireCDcycle,
+            gunCycle: -Infinity, //m.cycle when a gun last moved m.fireCDcycle, guns move it when they fire or charge, bots don't
+            lastId: bullet.length ? bullet[bullet.length - 1].id : 0, //new bullets go on the end of bullet[] and have bigger ids
+            bigMines: [], //big mines fire big nails
+            do() {
+                if (m.fireCDcycle !== this.fireCDcycle) {
+                    this.fireCDcycle = m.fireCDcycle
+                    this.gunCycle = m.cycle
+                }
+                const range = 100 * Math.max(1, player.scale)
+                const isNear = who => !who.botType && Vector.magnitude(Vector.sub(who.position, m.pos)) < range
+                if (this.bigMines.length) {
+                    for (let i = bullet.length - 1; i >= 0 && bullet[i].id > this.lastId; i--) {
+                        if (this.bigMines.some(mine => Vector.magnitude(Vector.sub(bullet[i].position, mine.position)) < 60)) b.enlarge(bullet[i], bigScale)
+                    }
+                    this.bigMines = this.bigMines.filter(mine => bullet.includes(mine)) //a mine's last nails come out the cycle it's removed
+                }
+                if (m.cycle >= this.readyCycle && m.cycle - this.gunCycle < 2) { //a charged harpoon fires the cycle after it stops moving m.fireCDcycle
+                    //a new bullet next to you came from your gun, so charging or firing with no ammo doesn't count
+                    //bots fire from their center and don't move until the next physics step, so a new bullet on top of a bot is the bot's
+                    const bots = bullet.filter(who => who.botType)
+                    let isShot = false
+                    for (let i = bullet.length - 1; i >= 0 && bullet[i].id > this.lastId; i--) {
+                        if (isNear(bullet[i]) && !bots.some(bot => Vector.magnitude(Vector.sub(bullet[i].position, bot.position)) < 5)) {
+                            isShot = true
+                            break
+                        }
+                    }
+                    if (isShot) {
+                        this.readyCycle = m.cycle + cooldown
+                        for (const who of bullet) {
+                            if (isNear(who)) {
+                                b.enlarge(who, bigScale)
+                                if (who.bulletType === "mine" && !this.bigMines.includes(who)) this.bigMines.push(who)
+                            }
+                        }
+                    }
+                }
+                if (bullet.length) this.lastId = bullet[bullet.length - 1].id
+
+                //brackets around the crosshair close in until the next big shot is ready
+                const wait = Math.min(1, Math.max(0, this.readyCycle - m.cycle) / cooldown) //1 right after a shot, 0 when ready
+                const px = simulation.edgeZoomOutSmooth / simulation.zoom //size of a screen pixel, so the brackets match the crosshair at any zoom
+                const d = (14 + 26 * wait) * px //distance from the crosshair to each corner
+                const arm = 6 * px
+                const x = simulation.mouseInGame.x
+                const y = simulation.mouseInGame.y
+                ctx.beginPath();
+                for (const sx of [-1, 1]) {
+                    for (const sy of [-1, 1]) {
+                        ctx.moveTo(x + sx * d, y + sy * (d - arm));
+                        ctx.lineTo(x + sx * d, y + sy * d);
+                        ctx.lineTo(x + sx * (d - arm), y + sy * d);
+                    }
+                }
+                ctx.lineWidth = 2 * px;
+                ctx.strokeStyle = wait ? "rgba(0,0,0,0.25)" : "#000";
+                ctx.stroke();
+            },
         }
-        const start = bullet.length
-        b.outlierScale = Math.sqrt(5) //5x mass
-        b.isOutlierQueued = false
-        fire()
-        const scale = b.outlierScale
-        b.outlierScale = 0
-        if (bullet.length === start && !b.isOutlierQueued) return //nothing was fired
-        b.outlierCycle = m.cycle + 300
-        for (let i = start; i < bullet.length; i++) b.enlarge(bullet[i], scale)
-    },
-    outlierQueue() { //for guns that fire bullets over the next few cycles, returns how much to enlarge the first one, or 0
-        b.isOutlierQueued = true
-        return b.outlierScale
     },
     enlarge(who, scale) { //bigger bullet with the same density, so its mass grows with its area
         const isNoRotation = who.inertia === Infinity //scale recalculates inertia, so drones would start spinning
@@ -340,12 +377,6 @@ const b = {
         if (who.totalSpores) who.totalSpores = Math.round(who.totalSpores * scale)
         if (who.explodeRad) who.explodeRad *= Math.sqrt(scale) //bigger explosions, but not so big they always reach the player
         if (typeof who.thrust === "object") who.thrust = Vector.mult(who.thrust, scale * scale) //rocket grenades keep their acceleration
-        if (who.bulletType === "mine") who.enlargeChildren = scale //mines fire bigger nails
-    },
-    enlargeChildren(who, action) { //bullets made by a big bullet are also big, like nails from a mine
-        const start = bullet.length
-        action()
-        for (let i = start; i < bullet.length; i++) b.enlarge(bullet[i], who.enlargeChildren)
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.inGameConsole(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
@@ -503,11 +534,7 @@ const b = {
         let i = bullet.length;
         while (i--) {
             if (bullet[i].endCycle < simulation.cycle) {
-                if (bullet[i].enlargeChildren) {
-                    b.enlargeChildren(bullet[i], () => bullet[i].onEnd(i))
-                } else {
-                    bullet[i].onEnd(i); //some bullets do stuff on end
-                }
+                bullet[i].onEnd(i); //some bullets do stuff on end
                 if (bullet[i]) {
                     Matter.Composite.remove(engine.world, bullet[i]);
                     bullet.splice(i, 1);
@@ -533,11 +560,7 @@ const b = {
     },
     bulletDo() {
         for (let i = 0, len = bullet.length; i < len; i++) {
-            if (bullet[i].enlargeChildren) {
-                b.enlargeChildren(bullet[i], () => bullet[i].do())
-            } else {
-                bullet[i].do();
-            }
+            bullet[i].do();
         }
     },
     fireProps(cd, speed, dir, me) {
@@ -1564,9 +1587,17 @@ const b = {
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,
+                isLocked: false, //after rappelling down the rope holds its length until you press up
+                ropeLength: 0,
                 drawStringControlMagnitude: 1000 + 1000 * Math.random(),
                 drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
                 attached: false,
+                anchor: null, //where the rope meets the map, set when the hook attaches
+                bends: [], //map corners the rope wraps around, in order from the hook to the player
+                bendLength: 0, //rope length from the hook to the last bend
+                lastPlayerPos: null, //where each end of the rope was last cycle, used to find the corner it swung into
+                lastHookPos: null,
+                lastTip: null, //where the hook's tip was last cycle, so it can't skip through thin walls
                 glowColor: tech.hookNails ? "rgba(200,0,0,0.07)" : tech.isHarmReduce ? "rgba(50,100,255,0.1)" : "rgba(0,200,255,0.07)",
                 collisionFilter: {
                     category: cat.bullet,
@@ -1586,9 +1617,9 @@ const b = {
                     ctx.lineWidth = 0.5
                     ctx.beginPath();
                     ctx.moveTo(where.x, where.y);
-                    if (this.attached) {
-                        const controlPoint = Vector.add(where, Vector.mult(sub, -0.5))
-                        ctx.quadraticCurveTo(controlPoint.x, controlPoint.y, this.vertices[0].x, this.vertices[0].y)
+                    if (this.attached || this.bends.length) {
+                        for (let i = this.bends.length - 1; i > -1; i--) ctx.lineTo(this.bends[i].x, this.bends[i].y)
+                        ctx.lineTo(this.vertices[0].x, this.vertices[0].y)
                     } else {
                         const long = Math.max(Vector.magnitude(sub), 60)
                         const perpendicular = Vector.mult(Vector.normalise(Vector.perp(sub)), this.drawStringFlip * Math.min(0.7 * long, 10 + this.drawStringControlMagnitude / (10 + Vector.magnitude(sub))))
@@ -1713,6 +1744,7 @@ const b = {
                 },
                 retract() {
                     this.attached = false
+                    this.bends = [] //the hook flies straight back
                     this.do = this.returnToPlayer
                     this.endCycle = simulation.cycle + 60
                     Matter.Body.setDensity(this, 0.0005); //reduce density on return
@@ -1842,6 +1874,123 @@ const b = {
                     }
                     m.grabPowerUp();
                 },
+                holdRope(toPivot) { //after rappelling, the rope stays the length you let it out to and you swing on it
+                    const along = Vector.normalise(toPivot)
+                    const stretch = Vector.magnitude(toPivot) - Math.max(this.ropeLength - this.bendLength, 30)
+                    if (stretch > 0) { //the rope is tight: stop moving away from the hook and pull back to the rope's length
+                        const alongSpeed = Vector.dot(player.velocity, along)
+                        const goal = Math.max(alongSpeed, Math.min(0.3 * stretch, 10))
+                        Matter.Body.setVelocity(player, Vector.add(player.velocity, Vector.mult(along, goal - alongSpeed)))
+                    }
+                    this.pump(along, 30) //nothing slows a hanging swing, so only push while slower than 30 or it builds forever
+                },
+                pump(along, maxSpeed) { //left and right push you around the hook, right is rightward when you hang below it and downward when you're left of it
+                    if (input.right === input.left || m.onGround) return
+                    const around = Vector.mult(Vector.perp(along), input.right ? 1 : -1)
+                    if (Vector.dot(player.velocity, around) > maxSpeed) return
+                    player.force.x += around.x * 0.032 //about twice as strong as normal air control
+                    player.force.y += around.y * 0.032
+                },
+                wrapRope() { //bend the rope around map corners between the hook and the player, while the hook flies and after it attaches
+                    const hookEnd = this.attached ? this.anchor : this.vertices[0]
+                    if (Matter.Query.point(map, m.pos).length || Matter.Query.point(map, hookEnd).length) return //an end is inside the map, so there's no sensible way to wrap
+                    //unwrap when the rope swings back past a corner, at the player's end and at the hook's end
+                    while (this.bends.length) {
+                        const bend = this.bends[this.bends.length - 1]
+                        const before = this.bends.length > 1 ? this.bends[this.bends.length - 2] : hookEnd
+                        if (Vector.cross(Vector.sub(bend, before), Vector.sub(m.pos, bend)) * bend.side > 0) break
+                        this.bends.pop()
+                    }
+                    while (this.bends.length) {
+                        const bend = this.bends[0]
+                        const after = this.bends.length > 1 ? this.bends[1] : m.pos
+                        if (Vector.cross(Vector.sub(bend, hookEnd), Vector.sub(after, bend)) * bend.side > 0) break
+                        this.bends.shift()
+                    }
+                    //wrap around the corners each end swung into
+                    const isPlayerEndClear = this.wrapEnd(m.pos, this.lastPlayerPos, hookEnd, false)
+                    const isHookEndClear = this.wrapEnd(hookEnd, this.lastHookPos, m.pos, true)
+                    //if the rope is still inside the map it's unclear which way it got there, so guess
+                    if (!isPlayerEndClear) this.wrapEnd(m.pos, null, hookEnd, false)
+                    if (!isHookEndClear) this.wrapEnd(hookEnd, null, m.pos, true)
+                    this.lastPlayerPos = { x: m.pos.x, y: m.pos.y }
+                    this.lastHookPos = { x: hookEnd.x, y: hookEnd.y }
+                    this.bendLength = 0
+                    for (let i = 0; i < this.bends.length; i++) this.bendLength += Vector.magnitude(Vector.sub(this.bends[i], i ? this.bends[i - 1] : hookEnd))
+                },
+                wrapEnd(end, from, otherEnd, isHookEnd) { //wrap the rope between one end and its nearest bend, "from" is where that end was last cycle, returns true if that part of the rope ends up clear
+                    for (let i = 0; i < 3 && this.bends.length < 20; i++) { //a few times if it moved fast
+                        const pivot = this.bends.length ? this.bends[isHookEnd ? 0 : this.bends.length - 1] : otherEnd
+                        const hit = vertexCollision(pivot, end, [map])
+                        if (!hit.who) return true
+                        const bend = this.findCorner(pivot, from, end, hit.who)
+                        if (!bend) return false
+                        if (isHookEnd) {
+                            bend.side *= -1 //sides are measured going from the hook to the player
+                            this.bends.unshift(bend)
+                        } else {
+                            this.bends.push(bend)
+                        }
+                        if (from) from = Vector.add(bend, Vector.mult(Vector.normalise(Vector.sub(bend, pivot)), Vector.magnitude(Vector.sub(end, bend)))) //past the new bend the rope used to point straight on
+                    }
+                    return false
+                },
+                findCorner(pivot, from, end, blocker) { //the map corner the rope caught as its end swung around the pivot from "from" to "end"
+                    const toEnd = Vector.sub(end, pivot)
+                    const angleTo = (where) => { //angle from the rope to where
+                        const v = Vector.sub(where, pivot)
+                        return Math.atan2(Vector.cross(toEnd, v), Vector.dot(toEnd, v))
+                    }
+                    const outOf = (vertices, j) => { //the direction pointing out of the map from this corner
+                        const len = vertices.length
+                        return Vector.normalise(Vector.add(Vector.normalise(Vector.sub(vertices[j], vertices[(j + len - 1) % len])), Vector.normalise(Vector.sub(vertices[j], vertices[(j + 1) % len]))))
+                    }
+                    const isBuried = (vertices, j) => Matter.Query.point(map, Vector.add(vertices[j], Vector.mult(outOf(vertices, j), 4))).length > 0 //inside another overlapping piece of map
+                    const skip2 = pivot.side ? 100 : 0 //when the pivot is a bend, skip the corner it already wraps around
+                    let best = null
+                    if (from) { //the first corner the rope swept into
+                        const fromAngle = angleTo(from)
+                        if (!fromAngle) return null
+                        const reach2 = Math.max(Vector.magnitudeSquared(toEnd), Vector.magnitudeSquared(Vector.sub(from, pivot)))
+                        const pad = 50
+                        const minX = Math.min(pivot.x, from.x, end.x) - pad
+                        const maxX = Math.max(pivot.x, from.x, end.x) + pad
+                        const minY = Math.min(pivot.y, from.y, end.y) - pad
+                        const maxY = Math.max(pivot.y, from.y, end.y) + pad
+                        for (let i = 0; i < map.length; i++) {
+                            const bounds = map[i].bounds
+                            if (bounds.max.x < minX || bounds.min.x > maxX || bounds.max.y < minY || bounds.min.y > maxY) continue
+                            const vertices = map[i].vertices
+                            for (let j = 0; j < vertices.length; j++) {
+                                const dist2 = Vector.magnitudeSquared(Vector.sub(vertices[j], pivot))
+                                if (dist2 < skip2 || dist2 > reach2) continue //skip the corner a bend already wraps, and corners past the end
+                                const angle = angleTo(vertices[j])
+                                if (angle * fromAngle <= 0 || Math.abs(angle) > Math.abs(fromAngle)) continue //the rope didn't swing past it
+                                if ((!best || Math.abs(angle) > Math.abs(best.angle)) && !isBuried(vertices, j)) best = { vertices, j, angle }
+                            }
+                        }
+                    } else { //go around whichever side of the map in the way bends the rope less
+                        const vertices = blocker.vertices
+                        let most = null, least = null
+                        for (let j = 0; j < vertices.length; j++) {
+                            if (Vector.magnitudeSquared(Vector.sub(vertices[j], pivot)) < skip2 || isBuried(vertices, j)) continue
+                            if (vertexCollision(pivot, Vector.add(vertices[j], Vector.mult(outOf(vertices, j), 4)), [map]).who) continue //the rope can't reach this corner
+                            const angle = angleTo(vertices[j])
+                            if (!most || angle > most.angle) most = { vertices, j, angle }
+                            if (!least || angle < least.angle) least = { vertices, j, angle }
+                        }
+                        if (most) best = most.angle < -least.angle ? most : least
+                    }
+                    if (!best) return null
+                    //sit just outside the corner so the rope doesn't catch on its own edges
+                    const corner = best.vertices[best.j]
+                    const out = outOf(best.vertices, best.j)
+                    const bend = Vector.add(corner, Vector.mult(out, 4))
+                    if (vertexCollision(pivot, bend, [map]).who) return null //the rope can't reach it without going through the map
+                    bend.side = best.angle > 0 ? -1 : 1 //which way the rope turns at this corner
+                    bend.pull = Vector.add(corner, Vector.mult(out, 30)) //pull the player a body width outside the corner so they don't snag on it
+                    return bend
+                },
                 do() {
                     if (input.field) {
                         if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
@@ -1850,8 +1999,16 @@ const b = {
                     } else {
                         this.retract()
                     }
+                    const isFlying = input.field && this.do !== this.returnToPlayer //not retracted this cycle by letting go or grabbing a block
+                    //don't skip through thin walls, if the tip passed through the map since last cycle put it back where it hit
+                    if (isFlying) {
+                        const tip = this.vertices[2]
+                        const hit = vertexCollision(this.lastTip || m.pos, tip, [map])
+                        if (hit.who) Matter.Body.setPosition(this, Vector.add(this.position, Vector.add(Vector.sub(hit, tip), { x: 70 * Math.cos(this.angle), y: 70 * Math.sin(this.angle) }))) //after backing out 20 below it sits 50 deep, about where hooks used to land
+                        this.lastTip = { x: this.vertices[2].x, y: this.vertices[2].y }
+                    }
                     //grappling hook
-                    if (input.field && Matter.Query.collides(this, map).length) {
+                    if (isFlying && Matter.Query.collides(this, map).length) {
                         Matter.Body.setPosition(this, Vector.add(this.position, { x: -20 * Math.cos(this.angle), y: -20 * Math.sin(this.angle) }))
                         if (Matter.Query.collides(this, map).length) {
                             if (tech.hookNails) {
@@ -1861,39 +2018,70 @@ const b = {
 
                             }
                             this.attached = true
+                            //the rope meets the map where the hook went in, found by tracing back along the hook from its tip, or from the player if that starts inside the map
+                            const dir = { x: Math.cos(this.angle), y: Math.sin(this.angle) }
+                            let traceStart = Vector.sub(this.vertices[2], Vector.mult(dir, 150))
+                            if (Matter.Query.point(map, traceStart).length) traceStart = m.pos
+                            const surface = vertexCollision(traceStart, this.vertices[2], [map])
+                            if (surface.who) {
+                                let normal = Vector.normalise(Vector.perp(Vector.sub(surface.v2, surface.v1)))
+                                if (Vector.dot(normal, Vector.sub(traceStart, surface)) < 0) normal = Vector.neg(normal) //point out of the map
+                                this.anchor = Vector.add(surface, Vector.mult(normal, 3))
+                            } else {
+                                this.anchor = { x: this.vertices[0].x, y: this.vertices[0].y }
+                            }
+                            this.lastHookPos = this.anchor //the hook end jumps from the hook to the anchor, that isn't a swing
+                            this.wrapRope()
                             Matter.Body.setVelocity(this, { x: 0, y: 0 });
                             Matter.Sleeping.set(this, true)
                             this.endCycle = simulation.cycle + 5
                             this.do = () => {
                                 if (input.field && m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                                 this.grabPowerUp()
+                                this.wrapRope()
 
-                                //between player nose and the grapple
-                                const sub = Vector.sub(this.vertices[0], { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) })
-                                let dist = Vector.magnitude(sub)
+                                //between player nose and the grapple, or the last corner the rope wraps around
+                                const sub = Vector.sub(this.bends.length ? this.bends[this.bends.length - 1].pull : this.vertices[0], { x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) })
+                                let dist = Vector.magnitude(sub) + this.bendLength
+                                //the rope itself, from the player to the hook or to the last corner it wraps around
+                                const toPivot = Vector.sub(this.bends.length ? this.bends[this.bends.length - 1] : this.anchor, m.pos)
                                 if (input.field) {
                                     this.endCycle = simulation.cycle + 10
                                     if (input.down) { //down
-                                        this.isSlowPull = true
+                                        this.isLocked = true //let go of down and the rope stays as long as you let it out
                                         dist = 0
-                                        player.force.y += 3 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
+                                        player.force.y += 5 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
                                     } else if (input.up) {
+                                        this.isLocked = false //back to reeling in
                                         this.isSlowPull = false
-                                        player.force.y -= player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
+                                        player.force.y -= player.mass * simulation.g; //float up while hooked and pressing up
                                     }
                                     if (m.energy < this.drain) this.isSlowPull = true
+                                    if (this.isLocked && !input.down) {
+                                        this.holdRope(toPivot)
+                                    } else {
+                                        //high friction along the rope keeps the pull tight, low friction sideways lets you swing, orbit, and let go to fling
+                                        const along = Vector.normalise(sub)
+                                        const alongSpeed = Vector.dot(player.velocity, along)
+                                        const sideways = Vector.sub(player.velocity, Vector.mult(along, alongSpeed))
+                                        const range = Math.min(Math.max(100, dist), 700)
+                                        const alongDrag = 1 - 30 / range - 0.1 * (player.speed > 66)
+                                        const sidewaysDrag = 1 - 6 / range - 0.1 * (player.speed > 66) //more friction up close so you don't orbit the hook forever
+                                        Matter.Body.setVelocity(player, Vector.add(Vector.mult(along, alongSpeed * alongDrag), Vector.mult(sideways, sidewaysDrag)));
+                                        const pull = Vector.mult(along, 0.0004 * Math.min(Math.max(15, dist), this.isSlowPull ? 70 : 200))
+                                        this.pump(along, Infinity) //the sideways friction above keeps this from building forever
+                                        //friction on all your speed, so swinging died out fast
+                                        // const drag = 1 - 30 / Math.min(Math.max(100, dist), 700) - 0.1 * (player.speed > 66)
+                                        // Matter.Body.setVelocity(player, { x: player.velocity.x * drag, y: player.velocity.y * drag });
+                                        //original pulling force with high friction and very linear pull
+                                        // Matter.Body.setVelocity(player, { x: player.velocity.x * 0.85, y: player.velocity.y * 0.85 });
+                                        // const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), this.isSlowPull ? 100 : 200))
 
-                                    // pulling friction that allowed a slight swinging, but has high linear pull at short dist
-                                    const drag = 1 - 30 / Math.min(Math.max(100, dist), 700) - 0.1 * (player.speed > 66)
-                                    Matter.Body.setVelocity(player, { x: player.velocity.x * drag, y: player.velocity.y * drag });
-                                    const pull = Vector.mult(Vector.normalise(sub), 0.0004 * Math.min(Math.max(15, dist), this.isSlowPull ? 70 : 200))
-                                    //original pulling force with high friction and very linear pull
-                                    // Matter.Body.setVelocity(player, { x: player.velocity.x * 0.85, y: player.velocity.y * 0.85 });
-                                    // const pull = Vector.mult(Vector.normalise(sub), 0.0008 * Math.min(Math.max(15, dist), this.isSlowPull ? 100 : 200))
-
-                                    player.force.x += pull.x
-                                    player.force.y += pull.y
-                                    if (dist > 500) m.energy -= this.drain
+                                        player.force.x += pull.x
+                                        player.force.y += pull.y
+                                        if (dist > 500) m.energy -= this.drain
+                                        this.ropeLength = Vector.magnitude(toPivot) + this.bendLength //how long the rope is, for when it gets locked
+                                    }
                                 } else {
                                     Matter.Sleeping.set(this, false)
                                     this.retract()
@@ -1902,6 +2090,7 @@ const b = {
                             }
                         }
                     }
+                    if (isFlying && !this.attached) this.wrapRope() //still flying, and not inside the map
                     this.force.x += this.thrustMag * this.mass * Math.cos(this.angle);
                     this.force.y += this.thrustMag * this.mass * Math.sin(this.angle);
                     this.draw()
@@ -3268,7 +3457,7 @@ const b = {
                     if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
                         setTimeout(() => {
                             if (!who.alive) {
-                                for (let i = 0; i < 3; i++) { //spawn 3 more
+                                for (let i = 0, len = tech.isMobDeathRepeat ? 6 : 3; i < len; i++) { //spawn 3 more, double beta decay doubles it
                                     b.worm(this.position)
                                     bullet[bullet.length - 1].endCycle = Math.min(simulation.cycle + Math.floor(420 * tech.bulletsLastLonger), this.endCycle + 180 + Math.floor(60 * Math.random())) //simulation.cycle + Math.floor(420 * tech.bulletsLastLonger)
                                 }
@@ -3784,7 +3973,7 @@ const b = {
                     if (tech.iceEnergy && !who.shield && !who.isShielded && who.isDropPowerUp && who.alive && m.immuneCycle < m.cycle) {
                         setTimeout(() => {
                             if (!who.alive) {
-                                m.addEnergy(tech.iceEnergy * 0.8 * level.isReducedRegen)
+                                m.addEnergy(tech.iceEnergy * 0.8 * level.isReducedRegen * (tech.isMobDeathRepeat ? 2 : 1)) //double beta decay doubles thermoelectric effect
                                 simulation.energyGenGraphic()
                                 simulation.energyGenGraphic()
                             }
@@ -3869,7 +4058,7 @@ const b = {
                     if (tech.isSpawnBulletsOnDeath && who.alive && who.isDropPowerUp) {
                         setTimeout(() => {
                             if (!who.alive) {
-                                for (let i = 0; i < 2; i++) { //spawn 2 more
+                                for (let i = 0, len = tech.isMobDeathRepeat ? 4 : 2; i < len; i++) { //spawn 2 more, double beta decay doubles it
                                     const speed = 10 + 5 * Math.random()
                                     const angle = 2 * Math.PI * Math.random()
                                     b.flea(this.position, {
@@ -4441,7 +4630,9 @@ const b = {
                         !who.isNotHoldable && !who.isInvulnerable && !who.isImmutable && !who.isStatic //level parts like spinners can't split or shatter, so they don't make balls
                     ) {
                         const balls = (where, mass) => { //1 ball for a 30x30 block, 3 for 100x100, up to 5 for 150x150 and bigger
-                            if (bullet.length < 300) b.targetedBall(where, Math.min(5, Math.max(1, Math.floor(Math.sqrt(mass / 0.9) + 0.001)))) //limit balls so the game doesn't slow down
+                            let num = Math.min(5, Math.max(1, Math.floor(Math.sqrt(mass / 0.9) + 0.001)))
+                            if (tech.oneSuperBall) num = Math.max(1, Math.round(num / 3)) //super ball: 1/3 as many balls, at least 1
+                            if (bullet.length < 300) b.targetedBall(where, num) //limit balls so the game doesn't slow down
                         }
                         if (who.isCleaved) { //pieces from a split block shatter into the new balls
                             if (who === m.holdingTarget) m.drop()
@@ -4843,7 +5034,7 @@ const b = {
                             if (dist < 1000000 && !mob[i].isInvulnerable) targets.push(mob[i])
                         }
                         const radius = Math.min(this.radius * 0.5, 9)
-                        const len = bullet.length < 80 ? 2 : 1
+                        const len = (bullet.length < 80 ? 2 : 1) * (tech.isMobDeathRepeat ? 2 : 1) //double beta decay doubles necrophage
                         for (let i = 0; i < len; i++) {
                             if (targets.length - i > 0) {
                                 const index = Math.floor(Math.random() * targets.length)
@@ -7522,7 +7713,6 @@ const b = {
 
                     const onLevel = level.onLevel
                     simulation.ephemera.push({ //launch 1 missile every launchDelay game cycles
-                        outlier: b.outlierQueue(),
                         do() {
                             if (!m.alive || onLevel !== level.onLevel) {
                                 simulation.removeEphemera(this)
@@ -7530,13 +7720,7 @@ const b = {
                             }
                             if (m.isTimeDilated) return
                             count++
-                            if (!(count % launchDelay)) {
-                                fireMissile()
-                                if (this.outlier) {
-                                    b.enlarge(bullet[bullet.length - 1], this.outlier)
-                                    this.outlier = 0 //only the first missile
-                                }
-                            }
+                            if (!(count % launchDelay)) fireMissile()
                             if (totalMissiles < 1 || !m.alive) simulation.removeEphemera(this)
                         }
                     })

@@ -617,11 +617,17 @@ const m = {
             );
         }
     },
+    healthBarWidth(health) { //px width of a health bar, linear up to 1 health, then approaches the window width but never reaches it
+        if (health <= 1) return 300 * health
+        const fullWidth = Math.max(300, window.innerWidth - 30)
+        const extra = health - 1
+        return 300 + (fullWidth - 300) * extra / (extra + 4) //4 makes 7 health cover about 2/3 of the screen
+    },
     displayHealth() {
         let id
         id = document.getElementById("health");
         // health display is a x^1.5 rule to make it seem like the player has lower health 
-        id.style.width = Math.floor(300 * m.maxHealth * Math.pow(Math.max(0, m.health) / m.maxHealth, 1.4)) + "px";
+        id.style.width = Math.floor(m.healthBarWidth(m.maxHealth) * Math.pow(Math.max(0, m.health) / m.maxHealth, 1.4)) + "px";
         if (m.health < 0) {
             id.style.borderRightColor = "#f00"
         } else if (m.health === m.maxHealth) {
@@ -657,8 +663,8 @@ const m = {
             m.maxHealth *= scale
         }
 
-        document.getElementById("health-bg").style.width = `${Math.floor(300 * m.maxHealth)}px`
-        document.getElementById("defense-bar").style.width = Math.max(0, Math.floor(300 * m.maxHealth * (1 - m.defense()))) + "px";
+        document.getElementById("health-bg").style.width = `${Math.floor(m.healthBarWidth(m.maxHealth))}px`
+        document.getElementById("defense-bar").style.width = Math.max(0, Math.floor(m.healthBarWidth(m.maxHealth) * (1 - m.defense()))) + "px";
 
         if (isMessage) simulation.inGameConsole(`<span class='color-var'>m</span>.<span class='color-h' data-help='health'>maxHealth</span> <span class='color-symbol'>=</span> ${m.maxHealth.toFixed(2)}`)
         if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -4460,7 +4466,7 @@ const m = {
         if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4</strong><span class='color-symbol'>→</span><strong>5.5x</strong> <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong class='color-d' data-help='damage'>damage</strong> <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓←↓→</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓→↓←↓↓</em>`);
         if (m.fieldMode === 9) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>({</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span> y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓↓↑↓</em>`);
-        if (m.fieldMode === 11) simulation.inGameConsole(`level<span class='color-symbol'>.</span>surfacePortal<span class='color-symbol'>()</span>`);
+        if (m.fieldMode === 11) simulation.inGameConsole(`portals<span class='color-symbol'>.</span>isViewOn <span class='color-symbol'>=</span> ${m.fieldUpgrades[11].isPreview} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓↑↓↑</em>`);
         if (m.fieldMode === 10) simulation.inGameConsole(`Matter<span class='color-symbol'>.</span>Body<span class='color-symbol'>.</span>setPosition<span class='color-symbol'>(</span>player<span class='color-symbol'>,{</span>x<span class='color-symbol'>:</span>0<span class='color-symbol'>,</span>y<span class='color-symbol'>:</span>0<span class='color-symbol'>})</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↑↑↓↓</em>`);
     },
     fieldEvent: null,
@@ -4657,9 +4663,9 @@ const m = {
                                 // ctx.lineWidth = 1;
                                 // ctx.strokeStyle = "#f0f";
                                 // ctx.stroke();
-                                if (!input.down || Matter.Query.rayAny(map, upper, lower, 35)) simulation.removeEphemera(this)
-                                const unit = { x: Math.cos(m.fieldAngle), y: Math.sin(m.fieldAngle) }
-                                m.fieldPosition = Vector.add(m.fieldPosition, Vector.mult(unit, 10))
+                                if (!input.down || Matter.Query.rayAny(tech.isRay ? map.filter(who => !who.isRay) : map, upper, lower, 35)) simulation.removeEphemera(this) //tech: ray's own line isn't in the way
+                                m.fieldPosition.x += 10 * Math.cos(m.fieldAngle) //moved in place, so tech: ray still knows the player placed this field
+                                m.fieldPosition.y += 10 * Math.sin(m.fieldAngle)
                             },
                         })
 
@@ -4800,7 +4806,7 @@ const m = {
                         },
                     },
                     ray: { //tech: ray, a straight line in front of the eye that stops flush against the map
-                        lengths: [1, 1.3, 2, 3], //tech: Meissner effect, how many times longer the line is for 0 to 3 stacks
+                        lengths: [1, 1.5, 2.5, 5], //tech: Meissner effect, how many times longer the line is for 0 to 3 stacks
                         farther: 0.2, //only this part of the extra length moves the line farther from the eye, the rest makes it span a wider arc
                         base: null,
                         shape(stacks) { //distance from the eye to the middle of the line, and half the line's length
@@ -4851,7 +4857,7 @@ const m = {
                         wallMap: null, //levels that rebuild the map replace the map array, which removes the walls
                         wallCycle: 0,
                         wallWatcher: null,
-                        placed: null, //m.fieldPosition when the player last released the field, only a line the player placed is solid, not one placed by a new level or a new field
+                        placed: null, //m.fieldPosition when the player last released the field, only a line the player placed is left behind, not one placed by a new level or a new field
                         setWalls(pieces, eye) {
                             this.wallCycle = m.cycle
                             if (this.wallMap !== map) { //the old walls went with the old map
@@ -4877,7 +4883,7 @@ const m = {
                                     collisionFilter: { category: cat.map, mask: cat.player | cat.bullet | cat.mobBullet }, //lasers find it in map, mobs and blocks pass through
                                     isRay: true,
                                 })
-                                if (Matter.Query.collides(who, [playerBody, playerHead]).some(hit => hit.depth > 5)) { //never make a wall inside the player, try again next cycle, standing on it is fine
+                                if (Matter.Query.collides(who, [playerBody, playerHead]).some(hit => hit.depth > 15)) { //never make a wall inside the player, try again next cycle, standing on it or the line moving into the player a little is fine
                                     this.wallKey = ""
                                     continue
                                 }
@@ -4909,6 +4915,10 @@ const m = {
                             this.wallKey = ""
                         },
                         draw(center, angle, isAttached) {
+                            if (!isAttached && this.placed !== m.fieldPosition) { //nothing is left behind until the player places a line, so every line you see is solid
+                                this.clearWalls()
+                                return
+                            }
                             const cos = Math.cos(angle)
                             const sin = Math.sin(angle)
                             const eye = 15 * player.scale
@@ -4964,10 +4974,8 @@ const m = {
                             if (isAttached) {
                                 this.clearWalls()
                                 this.placed = m.fieldPosition
-                            } else if (this.placed === m.fieldPosition) {
-                                this.setWalls(pieces, where)
                             } else {
-                                this.clearWalls()
+                                this.setWalls(pieces, where)
                             }
                             this.drawCycle = m.cycle
                             this.pieces = pieces
@@ -5061,6 +5069,7 @@ const m = {
                 }
                 const version = () => tech.isRay ? versions.ray : versions.membrane
                 m.fieldUpgrades[2].rayLength = (stacks) => 2 * versions.ray.shape(stacks).halfLength //for tech: Meissner effect's description
+                m.fieldUpgrades[2].rayWalls = () => versions.ray.walls //for mob lasers that don't check the map
                 m.perfectPush = (isFree = false) => {
                     if (m.fieldCDcycle < m.cycle) {
                         const current = version()
@@ -7090,6 +7099,8 @@ const m = {
             pickUpQueue: [], //power ups that fell into a portal, { who, to } where to is the other portal, used in m.hold
             pressCycle: [null, null], //when fire and field were pressed, a portal is placed when they're let go
             holdCycles: 10, //holding a button this long looks for blocks to pick up instead of only placing a portal
+            isPreview: false, //↑↓↑↓↑ turns the views through the portals on and off, see surfacePortal drawViews()
+            keyLog: [null, null, null, null, null],
             energyCost() {
                 return tech.isFreeWormHole ? 0.02 : 0.1
             },
@@ -7100,23 +7111,12 @@ const m = {
                 return `<strong class='color-portal' data-help='portal'><span>por</span><span>tal${isPlural ? "s" : ""}</span></strong>`
             },
             descriptionFunction() {
-                return `use <strong>${(100 * this.energyCost()).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong> to place ${this.text(true)}<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>, but you can't use ${powerUps.orb.gun()}<br><strong>8</strong> <strong class='energy' data-help='energy'>energy</strong> per second${m.fieldMode === 11 ? this.previewHTML() : ""}`
-            },
-            previewHTML() { //a checkbox in the pause menu that turns the views through the portals on and off, see surfacePortal drawViews()
-                //stopPropagation keeps the click from also choosing the field card it's on
-                return `<span style="float: right;" onclick="event.stopPropagation()"><input type="checkbox" id="portal-preview" onclick="event.stopPropagation(); m.fieldUpgrades[11].togglePreview()" ${localSettings.isPortalPreview ? "checked" : ""}> <label for="portal-preview">preview</label></span>`
-            },
-            togglePreview() { //saved in localSettings, like damage numbers, so it stays the same between runs
-                localSettings.isPortalPreview = !localSettings.isPortalPreview //off until turned on
-                if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-                if (this.portals) this.portals.isViewOn = !!localSettings.isPortalPreview
-                const checkbox = document.getElementById("portal-preview")
-                if (checkbox) checkbox.checked = !!localSettings.isPortalPreview
+                return `use <strong>${(100 * this.energyCost()).toFixed(0)}</strong> <strong class='energy' data-help='energy'>energy</strong> to place ${this.text(true)}<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>, but you can't use ${powerUps.orb.gun()}<br><strong>8</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓↑↓↑</em>`
             },
             getPortals() { //level.start() clears the portals, so make a new pair when needed
                 if (!this.portals || !level.surfacePortals.includes(this.portals)) {
                     this.portals = level.surfacePortal()
-                    this.portals.isViewOn = !!localSettings.isPortalPreview
+                    this.portals.isViewOn = this.isPreview
                     this.portals.onPlayerExit = () => this.playerExit()
                     this.portals.onPowerUpEnter = (who, to) => { if (!this.pickUpQueue.some(item => item.who === who)) this.pickUpQueue.push({ who, to }) }
                     this.pickUpQueue = []
@@ -7218,6 +7218,23 @@ const m = {
                 m.fieldRange = 0
                 m.fieldHarmReduction = 0.5
                 m.fieldUpgrades[11].cancelPresses() //a click that picked this field doesn't also place a portal
+                //store event function so it can be found and removed in m.setField()
+                m.fieldEvent = function (event) {
+                    m.fieldUpgrades[11].keyLog.shift() //remove first element
+                    m.fieldUpgrades[11].keyLog.push(event.code) //add new key to end
+                    const patternA = ["ArrowUp", "ArrowDown", "ArrowUp", "ArrowDown", "ArrowUp"]
+                    const patternB = [input.key.up, input.key.down, input.key.up, input.key.down, input.key.up]
+                    const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
+                    if (arraysEqual(m.fieldUpgrades[11].keyLog, patternA) || arraysEqual(m.fieldUpgrades[11].keyLog, patternB)) {
+                        //↑↓↑↓↑ see through the portals
+                        const field = m.fieldUpgrades[11]
+                        field.keyLog = [null, null, null, null, null] //so ↓↑ doesn't toggle it right back
+                        field.isPreview = !field.isPreview
+                        if (field.portals) field.portals.isViewOn = field.isPreview
+                        simulation.inGameConsole(`portals<span class='color-symbol'>.</span>isViewOn <span class='color-symbol'>=</span> ${field.isPreview} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">↑↓↑↓↑</em>`);
+                    }
+                }
+                window.addEventListener("keydown", m.fieldEvent);
                 m.hold = function () {
                     const field = m.fieldUpgrades[11]
                     const portals = field.getPortals()
@@ -7634,14 +7651,18 @@ const m = {
                                         let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2 : 1);
                                         if (mob[k].isShielded) dmg *= 0.7
                                         mob[k].damage(dmg, true);
-                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp && Math.random() < 0.5) {
-                                            let type = "ammo"
-                                            if (Math.random() < 0.4) {
-                                                type = "heal"
-                                            } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) { // eslint-disable-line no-dupe-else-if
-                                                type = "research"
+                                        if (tech.isBlockPowerUps && !mob[k].alive && mob[k].isDropPowerUp) {
+                                            for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) { //double beta decay rolls buckling twice
+                                                if (Math.random() < 0.5) {
+                                                    let type = "ammo"
+                                                    if (Math.random() < 0.4) {
+                                                        type = "heal"
+                                                    } else if (Math.random() < 0.4 && !tech.isSuperDeterminism) { // eslint-disable-line no-dupe-else-if
+                                                        type = "research"
+                                                    }
+                                                    powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
+                                                }
                                             }
-                                            powerUps.spawn(mob[k].position.x, mob[k].position.y, type);
                                             // for (let i = 0, len = Math.ceil(2 * Math.random()); i < len; i++) {}
                                         }
 

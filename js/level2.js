@@ -1467,7 +1467,7 @@ Object.assign(moreLevels, {
         spawn.bodyRect(2585, -1650, 15, 300);
 
         spawn.mapRect(1800, -4200, 800, 1600); //4-2 right wall
-        spawn.mapRect(800, -4200, 1800, -500); //4-2 ceiling
+        spawn.mapRect(800, -4700, 1800, 500); //4-2 ceiling
         spawn.mapRect(1075, -3400, 225, 850); //upper shute right wall
         spawn.mapRect(800, -3400, 125, 850); //upper shute left wall
 
@@ -1482,7 +1482,7 @@ Object.assign(moreLevels, {
         spawn.mapRect(-1900, -2450, 250, 450); //
         //exit room
         spawn.mapRect(350, -3000, 50, 100); //exit room left wall
-        spawn.mapRect(350, -3000, 450, -1700); //exit room ceiling
+        spawn.mapRect(350, -4700, 450, 1700); //exit room ceiling
         spawn.bodyRect(350, -2900, 50, 50.5); //door
         spawn.bodyRect(350, -2850, 50, 50.5); //door
         spawn.bodyRect(350, -2800, 50, 50.5); //door
@@ -6676,7 +6676,7 @@ Object.assign(moreLevels, {
 
         level.exit.x = 5700 //you exit at x
         level.exit.y = -130 //you exit at y
-        spawn.mapRect(5800, -110, -100, 10)
+        spawn.mapRect(5700, -110, 100, 10)
 
         level.defaultZoom = 2000 //how far out you want the image to be zoomed at (lower = zoom in, higher = zoom out)
         simulation.zoomTransition(level.defaultZoom) //makes the level transition to have the zoom at the start of a level
@@ -9963,7 +9963,10 @@ Object.assign(moreLevels, {
         powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     downpour() {
+        level.announceText(130, 20, true)
+        level.announceMobTypes()
         simulation.inGameConsole(`<strong>Downpour</strong> by <span class='color-var'>DesBoot</span>`);
+        simulation.inGameConsole(`<em>//send errors to @desboot on discord</em>`);
 
         /* NEW CHANGES:
         Added lights in the buildings
@@ -9975,16 +9978,26 @@ Object.assign(moreLevels, {
         Added sounds:
             thunder
             buzz from lights
+
+        SECOND UPDATE:
+
+            Sound now defaults to Off
+            Added toggle for rain
+            Reduced lag maybe? (I spent almost 10 minutes with all objects enabled on negative mass and other no noticeable frame rate drop, all while on low power mode)
+            Rain/flowing water now stops if m is time dilated
+            Replaced the laser button with a toggle to prevent soft locks
+            Increased the number of enemies
         */
 
 
         //BUILD EVERYTHING
         const laser = level.hazard(7492, -2612, 10, 500, 0.3) //laserintro
         spawn.mapRect(340, -2032.5, 20, 25); //laser nose //laserintro
-        const laserbutton = level.button(5485, -2510)
+        const lasertoggle = level.toggle(5485, -2510)
         const doorbutton = level.button(7618, -3204)
         const doortoggle = level.toggle(5088.4, 1226.7)
         const mutetoggle = level.toggle(100, 0)
+        const raintoggle = level.toggle(400, 0)
         const door = level.door(6500, -1200, 100, 350, 100)
         const bunkerdoor = level.door(10700, -2500, 100, 500, 200)
         const boost1 = level.boost(7300, 1209, 2200)
@@ -9999,6 +10012,13 @@ Object.assign(moreLevels, {
         const oldOnLevel = level.levelsCleared;
 
         let whereToDrip = Math.random() * 2;
+        let introSoundPlayed = false;
+
+        let frozenRainSeed = 0;
+
+        let startUnMuted = false;
+        //false: start muted, turn on
+        //true: start on, turn to mute
 
         const mainDropRange = (min, max) => Math.random() * (max - min) + min
         const amount = Math.round(15 + 20 * Math.random())
@@ -10047,7 +10067,6 @@ Object.assign(moreLevels, {
         //SOUNDS
         let thunder1 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder1.mp3?raw=true');
         let chemicalLove = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/Chemical%20Love%20thunder.mp3?raw=true');
-        chemicalLove.play();
         let thunder2 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder2.mp3?raw=true');
         let thunder3 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder3.wav?raw=true');
         let thunder4 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder4.wav?raw=true');
@@ -10056,16 +10075,35 @@ Object.assign(moreLevels, {
         let rain3 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/8mb.video-ggm-Jd62jXAH.m4a?raw=true');
         rain1.volume = 0.125;
         rain3.volume = 0.125;
-        thunder1.volume = 0.25;
-        thunder2.volume = 0.25;
-        thunder3.volume = 0.25;
-        thunder4.volume = 0.25;
+        thunder1.volume = 1;
+        thunder2.volume = 0.5;
+        thunder3.volume = 0.5;
+        thunder4.volume = 0.5;
+
+        thunder1.preservesPitch = false;
+        thunder2.preservesPitch = false;
+        thunder3.preservesPitch = false;
+        thunder4.preservesPitch = false;
 
 
 
 
         //simulation.inGameConsole(stopcycle)
         level.custom = () => {
+            //check if M is in caves, lower thunder volume and pitch if so
+            if (m.pos.x > 2600 && m.pos.y > -1900) {
+                // simulation.inGameConsole("In Cave")
+                thunder1.playbackRate = 0.75;
+                thunder2.playbackRate = 0.75;
+                thunder3.playbackRate = 0.75;
+                thunder4.playbackRate = 0.75;
+            } else {
+                thunder1.playbackRate = 1;
+                thunder2.playbackRate = 1;
+                thunder3.playbackRate = 1;
+                thunder4.playbackRate = 1;
+            }
+
             for (const drip of drips) drip.draw()
             drip1.draw();
             // drip1.x = Math.random() * 500 + 1630
@@ -10093,7 +10131,7 @@ Object.assign(moreLevels, {
             ctx.fill()
             ctx.fillRect(6100, -2000, 400, 50)
             // do {
-            if (simulation.paused) {
+            if (simulation.paused || m.isTimeDilated || isMuted()) {
                 rain1.pause();
                 // rain2.pause();
                 rain3.pause();
@@ -10101,6 +10139,7 @@ Object.assign(moreLevels, {
                 thunder2.pause();
                 thunder3.pause();
                 thunder4.pause();
+                ambiance1.pause();
             } else {
                 // if (!mutetoggle.isOn)
                 rain3.play();
@@ -10129,7 +10168,7 @@ Object.assign(moreLevels, {
             distanceToLight2 = Math.sqrt((player.position.x - 4877) * (player.position.x - 4877) + (player.position.y + 1690) * (player.position.y + 1690))
 
             if (doortoggle.isOn) {
-                if (simulation.paused) { //is it paused
+                if (simulation.paused || m.isTimeDilated || isMuted()) { //is it paused
                     ambiance1.pause();
                 } else {
                     if (distanceToLight1 < 2000 || distanceToLight2 < 2000) { // is M close enough
@@ -10147,12 +10186,21 @@ Object.assign(moreLevels, {
                 }
 
 
+            } else {
+                ambiance1.pause();
             }
 
-            if (mutetoggle.isOn) {
+            if (!mutetoggle.isOn ^ startUnMuted) {
                 // simulation.inGameConsole(isMuted)
-                muteAll();
-
+                // muteAll();
+                introSoundPlayed = false
+                rain1.muted = true
+                ambiance1.muted = true
+                rain3.muted = true
+                thunder1.muted = true
+                thunder2.muted = true
+                thunder3.muted = true
+                thunder4.muted = true
             } else {
                 // simulation.inGameConsole(isMuted)
                 rain1.muted = false
@@ -10162,6 +10210,10 @@ Object.assign(moreLevels, {
                 thunder2.muted = false
                 thunder3.muted = false
                 thunder4.muted = false
+                if (!introSoundPlayed) {
+                    chemicalLove.play();
+                    introSoundPlayed = true
+                }
 
             }
 
@@ -10179,10 +10231,10 @@ Object.assign(moreLevels, {
 
 
                 ctx.fillStyle = "rgba(242, 255, 0, 0.3})"
-                ctx.fillStyle = `rgba(242,255,0,${(Math.round(Math.random + 0.3)) / 3})`
+                ctx.fillStyle = `rgba(242,255,0,${(((Math.round((Math.random()) + 0.3)) / 3))})`
                 ctx.fillStyle = "rgba(242,255,0,0.3)"
 
-                if (doortoggle.isOn) {
+                if (doortoggle.isOn && !m.isTimeDilated) {
                     ctx.beginPath()
                     ctx.moveTo(6325, 212)
                     ctx.lineTo(6325 - 75, 212)
@@ -10210,48 +10262,86 @@ Object.assign(moreLevels, {
                     ctx.lineTo(4875 + 75, -1688)//left side
                     ctx.fill()
                 }
+                if (!raintoggle.isOn) {
 
-                //rain
-                // if (!mutetoggle.isOn) {
-                ctx.beginPath()
-                ctx.fillStyle = "rgba(30,150,117,255)"
-                ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
-                ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
-                ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
-                ctx.rect(Math.random() * 2000 + 2500, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 2000 + 2500, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1300 + 4500, -5000, 3 + 2.5, 2500)
-                ctx.rect(Math.random() * 1300 + 7500, -5000, 3 + 2.5, 1800)
-                ctx.rect(Math.random() * 1800 + 5700, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1800 + 5700, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1800 + 8400, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1800 + 8400, -5000, 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
-                ctx.fillStyle = "rgba(30,150,117,255)"
-                ctx.fill()
-                //rain on shed
-                rainXtemp1 = Math.random() * 900 + 11100
-                rainXtemp2 = Math.random() * 900 + 10200
-                if (rainXtemp2 < 10800) {
-                    ctx.rect(rainXtemp2, -5000, Math.random() * 3 + 2.5, 3000)
-                } else {
-                    ctx.rect(rainXtemp2, -5000, Math.random() * 3 + 2.5, 2600)
+                    //rain
+                    // if (!mutetoggle.isOn) {
+                    if (m.isTimeDilated) {
+                        ctx.beginPath()
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.1)) / Math.PI * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.2)) / Math.PI * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.3)) / Math.PI * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.4)) / Math.PI * 2000 + 2500, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.5)) / Math.PI * 2000 + 2500, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.6)) / Math.PI * 1300 + 4500, -5000, 3 + 2.5, 2500)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.7)) / Math.PI * 1300 + 7500, -5000, 3 + 2.5, 1800)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.8)) / Math.PI * 1800 + 5700, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 0.9)) / Math.PI * 1800 + 5700, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 1)) / Math.PI * 1800 + 8400, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 1.1)) / Math.PI * 1800 + 8400, -5000, 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 1.2)) / Math.PI * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.fill()
+                        //rain on shed
+                        rainXtemp1 = (frozenRainSeed % (Math.PI + 1.3)) / Math.PI * 900 + 11100
+                        rainXtemp2 = (frozenRainSeed % (Math.PI + 1.4)) / Math.PI * 900 + 10200
+                        if (rainXtemp2 < 10800) {
+                            ctx.rect(rainXtemp2, -5000, (frozenRainSeed % (Math.PI + 1.5)) / Math.PI * 3 + 2.5, 3000)
+                        } else {
+                            ctx.rect(rainXtemp2, -5000, (frozenRainSeed % (Math.PI + 1.6)) / Math.PI * 3 + 2.5, 2600)
+                        }
+                        ctx.rect(rainXtemp1, -5000, (frozenRainSeed % (Math.PI + 1.7)) / Math.PI * 3 + 2.5, 5000 + 0.5468 * rainXtemp1 - 8507)
+
+                        // ctx.rect(Math.random() * 900 + 10200, -5000, Math.random() * 3 + 2.5, 3000)
+                        // ctx.rect(Math.random() * 900 + 11100, -5000, Math.random() * 3 + 2.5, 5000 + 0.5468 * this.x - 8507)
+                        ctx.rect((frozenRainSeed % (Math.PI + 1.8)) / Math.PI * 1800 + 12000, -5000, (frozenRainSeed % (Math.PI + 1.9)) / Math.PI * 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 2.0)) / Math.PI * 1800 + 12000, -5000, (frozenRainSeed % (Math.PI + 2.1)) / Math.PI * 3 + 2.5, 3000)
+                        ctx.rect((frozenRainSeed % (Math.PI + 2.4)) / Math.PI * 1500 - 3500, -5000, (frozenRainSeed % (Math.PI + 3.0)) / Math.PI * 3 + 2.5, 10030)
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.fill()
+                    } else {
+                        ctx.beginPath()
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.rect(Math.random() * 2000 + 2500, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 2000 + 2500, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1300 + 4500, -5000, 3 + 2.5, 2500)
+                        ctx.rect(Math.random() * 1300 + 7500, -5000, 3 + 2.5, 1800)
+                        ctx.rect(Math.random() * 1800 + 5700, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1800 + 5700, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1800 + 8400, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1800 + 8400, -5000, 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 4500 - 2000, -5000, 3 + 2.5, 5030)
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.fill()
+                        //rain on shed
+                        rainXtemp1 = Math.random() * 900 + 11100
+                        rainXtemp2 = Math.random() * 900 + 10200
+                        if (rainXtemp2 < 10800) {
+                            ctx.rect(rainXtemp2, -5000, Math.random() * 3 + 2.5, 3000)
+                        } else {
+                            ctx.rect(rainXtemp2, -5000, Math.random() * 3 + 2.5, 2600)
+                        }
+                        ctx.rect(rainXtemp1, -5000, Math.random() * 3 + 2.5, 5000 + 0.5468 * rainXtemp1 - 8507)
+
+                        // ctx.rect(Math.random() * 900 + 10200, -5000, Math.random() * 3 + 2.5, 3000)
+                        // ctx.rect(Math.random() * 900 + 11100, -5000, Math.random() * 3 + 2.5, 5000 + 0.5468 * this.x - 8507)
+                        ctx.rect(Math.random() * 1800 + 12000, -5000, Math.random() * 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1800 + 12000, -5000, Math.random() * 3 + 2.5, 3000)
+                        ctx.rect(Math.random() * 1500 - 3500, -5000, Math.random() * 3 + 2.5, 10030)
+                        ctx.fillStyle = "rgba(30,150,117,255)"
+                        ctx.fill()
+                    }
+
                 }
-                ctx.rect(rainXtemp1, -5000, Math.random() * 3 + 2.5, 5000 + 0.5468 * rainXtemp1 - 8507)
-
-                // ctx.rect(Math.random() * 900 + 10200, -5000, Math.random() * 3 + 2.5, 3000)
-                // ctx.rect(Math.random() * 900 + 11100, -5000, Math.random() * 3 + 2.5, 5000 + 0.5468 * this.x - 8507)
-                ctx.rect(Math.random() * 1800 + 12000, -5000, Math.random() * 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1800 + 12000, -5000, Math.random() * 3 + 2.5, 3000)
-                ctx.rect(Math.random() * 1500 - 3500, -5000, Math.random() * 3 + 2.5, 10030)
-                ctx.fillStyle = "rgba(30,150,117,255)"
-                ctx.fill()
-
-
                 // }
 
             } while (Math.random() < 0.5); //this is really important, keep it
 
+            if (!m.isTimeDilated) frozenRainSeed = Math.random() * 10000
 
 
             //simulation.inGameConsole(stopcycle)
@@ -10303,10 +10393,18 @@ Object.assign(moreLevels, {
             ctx.fillText("Audio:", 150, -270);
             ctx.font = "54px monospace";
             ctx.textAlign = "right";
-            ctx.fillText(mutetoggle.isOn ? "Muted" : "Unmuted", 250, -210);
+            ctx.fillText(mutetoggle.isOn ^ startUnMuted ? "unmuted" : "Muted", 250, -210);
             ctx.textAlign = "center";
+
+            ctx.font = "27px monospace";
+            ctx.fillText("Rain:", 450, -270);
+            ctx.font = "54px monospace";
+            ctx.textAlign = "right";
+            ctx.fillText(!raintoggle.isOn ? "Enabled" : "Disabled", 550, -210);
+            ctx.textAlign = "center";
+
             //mute symbol
-            if (mutetoggle.isOn) {
+            if (!mutetoggle.isOn ^ startUnMuted) {
                 ctx.strokeStyle = "#ff0400";
             } else {
                 ctx.strokeStyle = "#00ff00";
@@ -10329,7 +10427,7 @@ Object.assign(moreLevels, {
 
             // canvas.width += 5
             // ctx.strokeSyle()
-            if (mutetoggle.isOn) {
+            if (!mutetoggle.isOn ^ startUnMuted) {
                 ctx.lineWidth = 9;
                 ctx.moveTo(230, -185)
                 ctx.lineTo(140, -95)
@@ -10544,7 +10642,7 @@ Object.assign(moreLevels, {
 
             portal[2].query()
             portal[3].query()
-            if (laserbutton.isUp) {
+            if (!lasertoggle.isOn) {
                 laser.isOn = true;
             } else {
                 laser.isOn = false;
@@ -10596,11 +10694,11 @@ Object.assign(moreLevels, {
             }
             level.exit.drawAndCheck();
 
-            addEventListener("keydown", function (event) {
-                if (event.key == "u") {
-                    muteAll();
-                }
-            })
+            // addEventListener("keydown", function (event) {
+            //     if (event.key == "u") {
+            //         muteAll();
+            //     }
+            // })
 
             // if (simulation.testing) {
             //     if (key.toLowerCase = "o") {
@@ -10629,21 +10727,38 @@ Object.assign(moreLevels, {
 
 
             //water falling/flowing effect
-            ctx.fillStyle = `hsla(160, 100%, 26%,${0.5 + 0.07 * Math.random()})`//lower river
-            ctx.fillRect(-1800 + Math.random() * 100, 10 + 400 * Math.random(), 3900, 5)
-            ctx.fillRect(-1800, 10 + 400 * Math.random(), 4400, 5)
+            //(frozenRainSeed % (Math.PI+2.0))/Math.PI
+            if (!raintoggle.isOn) {
+                if (m.isTimeDilated) {
+                    ctx.fillStyle = `hsla(160, 100%, 26%,${0.5 + 0.07 * (frozenRainSeed % (Math.PI + 3.0)) / Math.PI})`//lower river
+                    ctx.fillRect(-1800 + (frozenRainSeed % (Math.PI + 3.1)) / Math.PI * 100, 10 + 400 * (frozenRainSeed % (Math.PI + 3.2)) / Math.PI, 3900, 5)
+                    ctx.fillRect(-1800, 10 + 400 * (frozenRainSeed % (Math.PI + 3.3)) / Math.PI, 4400, 5)
 
-            ctx.fillRect(2400 + 200 * Math.random(), Math.random() * - 100 - 2000, 5, 2000)//first waterfall
-            ctx.fillRect(6100 + 100 * Math.random(), Math.random() * - 100 - 1900, 5, 1050)//twin waterfalls
-            ctx.fillRect(6400 + 100 * Math.random(), Math.random() * - 100 - 1900, 5, 1050)
-            ctx.fillRect(-2000 + 200 * Math.random(), Math.random() * 100, 5, 2000)//far left waterfall
+                    ctx.fillRect(2400 + 200 * (frozenRainSeed % (Math.PI + 3.4)) / Math.PI, (frozenRainSeed % (Math.PI + 3.9)) / Math.PI * - 100 - 2000, 5, 2000)//first waterfall
+                    ctx.fillRect(6100 + 100 * (frozenRainSeed % (Math.PI + 3.5)) / Math.PI, (frozenRainSeed % (Math.PI + 3.8)) / Math.PI * - 100 - 1900, 5, 1050)//twin waterfalls
+                    ctx.fillRect(6400 + 100 * (frozenRainSeed % (Math.PI + 3.6)) / Math.PI, (frozenRainSeed % (Math.PI + 3.7)) / Math.PI * - 100 - 1900, 5, 1050)
+                    ctx.fillRect(-2000 + 200 * (frozenRainSeed % (Math.PI + 4.0)) / Math.PI, (frozenRainSeed % (Math.PI + 4.1)) / Math.PI * 100, 5, 2000)//far left waterfall
 
-            ctx.fillRect(7200 + 100 * Math.random(), -800 - 50 * Math.random(), 5, 2032)
+                    ctx.fillRect(7200 + 100 * (frozenRainSeed % (Math.PI + 4.3)) / Math.PI, -800 - 50 * (frozenRainSeed % (Math.PI + 4.2)) / Math.PI, 5, 2032)
+                } else {
+                    ctx.fillStyle = `hsla(160, 100%, 26%,${0.5 + 0.07 * Math.random()})`//lower river
+                    ctx.fillRect(-1800 + Math.random() * 100, 10 + 400 * Math.random(), 3900, 5)
+                    ctx.fillRect(-1800, 10 + 400 * Math.random(), 4400, 5)
+
+                    ctx.fillRect(2400 + 200 * Math.random(), Math.random() * - 100 - 2000, 5, 2000)//first waterfall
+                    ctx.fillRect(6100 + 100 * Math.random(), Math.random() * - 100 - 1900, 5, 1050)//twin waterfalls
+                    ctx.fillRect(6400 + 100 * Math.random(), Math.random() * - 100 - 1900, 5, 1050)
+                    ctx.fillRect(-2000 + 200 * Math.random(), Math.random() * 100, 5, 2000)//far left waterfall
+
+                    ctx.fillRect(7200 + 100 * Math.random(), -800 - 50 * Math.random(), 5, 2032)
+                }
+            }
             level.enter.draw();
-            laserbutton.query();
-            laserbutton.draw();
+
             doortoggle.query();
+            lasertoggle.query();
             mutetoggle.query();
+            raintoggle.query();
             if (!doortoggle.isOn) {
                 door.isClosing = true
                 bunkerdoor.isClosing = true
@@ -10655,10 +10770,10 @@ Object.assign(moreLevels, {
                     spawn.randomSmallMob(6128.0, 822.6);
                     spawn.randomSmallMob(6854.8, 560.2);
                     spawn.randomSmallMob(8320.7, -3402.4);
-                    spawn.randomMob(6629.0, 711.3, 0.8);
-                    spawn.randomMob(8199.2, -2545.5, 0.8);
-                    spawn.randomMob(8067.7, -2957.2, 0.8);
-                    spawn.randomMob(5149.6, -1444.1, 0.8);
+                    spawn.randomMob(6629.0, 711.3, 1);
+                    spawn.randomMob(8199.2, -2545.5, 1);
+                    spawn.randomMob(8067.7, -2957.2, 1);
+                    spawn.randomMob(5149.6, -1444.1, 1);
 
                     mobsspawned = 1
 
@@ -10692,7 +10807,6 @@ Object.assign(moreLevels, {
 
             //     ctx.fill()
             // }
-            spawn.mapRect(6250, 200, 150, 12);
 
 
             laser.opticalQuery();
@@ -10792,8 +10906,8 @@ Object.assign(moreLevels, {
         spawn.mapVertex(965, 67, "0 -100   220 0   0 0");
         spawn.mapVertex(-185, 67, "0 -100   -420 0   0 0");
         spawn.mapVertex(1210, 365, "0 -400   300 0   0 0");
-        spawn.mapRect(257.5, -358.5, 50, 360);
-        spawn.mapRect(-83, -358.5, 350, 50);
+        spawn.mapRect(780, -358.5, 50, 360);
+        spawn.mapRect(-83, -358.5, 670, 50);
 
         //blocks in river/waterfall
         spawn.mapRect(1275, 0, 450, 75);
@@ -10911,7 +11025,6 @@ Object.assign(moreLevels, {
         //spawn.randomSmallMob(3992.2, -1223.9);
         spawn.randomSmallMob(5018.1, -1483.5);
         spawn.randomGroup(6776.2, -3054.5, 0.4);
-        spawn.randomGroup(4217.4, -1403.6, 0.4);
 
 
         //surface area mobs
@@ -10923,6 +11036,15 @@ Object.assign(moreLevels, {
         spawn.randomMob(8129.0, -2406.7, 0.8);
         spawn.randomMob(8129.0, -2406.7, 0.8);
         spawn.randomGroup(2225.3, -1543.2, 0.4);
+
+        spawn.randomMob(3600.0, -1080.7, 0.7);
+        spawn.randomMob(5150.0, -1420.7, 0.7);
+        spawn.randomMob(5000.0, -2700.7, 0.8);
+        spawn.randomMob(8000.0, -2406.7, 0.8);
+        spawn.randomMob(7975.0, -2900.7, 0.9);
+        spawn.randomMob(9300.0, -2475.7, 0.1);
+
+        spawn.secondaryBossChance(4360, -1460)
 
 
         spawn.debris(4426.9, -1433.8, 700, 1); //16 debris per level
@@ -11022,10 +11144,19 @@ Object.assign(moreLevels, {
         }
 
         function checkForPush(objectX, objectY) {
-            return (objectY > -70 && objectX < 2785 || objectX > 2400 && objectX < 2600 || objectX > 2600 && objectX < 6000 && objectY < -1900 && objectY > -2121.3 || objectX > 6500 && objectX < 10000 && objectY < -1900 && objectY > -2121.3 || objectX > 2600 && objectX < 6100 && objectY < -650 && objectY > -920 || objectX > 6500 && objectX < 7300 && objectY < -650 && objectY > -920 || objectX > 7200 && objectX < 7350 && objectY > -950 && objectY < 1250 || objectX > 6100 && objectX < 6200 && objectY < -800 && objectY > -2000 || objectX > 6400 && objectX < 6500 && objectY < -800 && objectY > -2000);
+            if (m.isTimeDilated) {
+                return false
+            } else {
+                return (objectY > -70 && objectX < 2785 || objectX > 2400 && objectX < 2600 || objectX > 2600 && objectX < 6000 && objectY < -1900 && objectY > -2121.3 || objectX > 6500 && objectX < 10000 && objectY < -1900 && objectY > -2121.3 || objectX > 2600 && objectX < 6100 && objectY < -650 && objectY > -920 || objectX > 6500 && objectX < 7300 && objectY < -650 && objectY > -920 || objectX > 7200 && objectX < 7350 && objectY > -950 && objectY < 1250 || objectX > 6100 && objectX < 6200 && objectY < -800 && objectY > -2000 || objectX > 6400 && objectX < 6500 && objectY < -800 && objectY > -2000);
+            }
+        }
+
+        function isMuted() { //muted sounds aren't played at all, playing them errors when github can't be reached
+            return Boolean(!mutetoggle.isOn ^ startUnMuted)
         }
 
         function playRandomThunder() {
+            if (isMuted()) return
             let tempRandom = Math.floor(4 * Math.random())
             switch (tempRandom) {
                 case 1:
@@ -27493,7 +27624,11 @@ Object.assign(moreLevels, {
         let allEntities = [body, powerUp, mob];
         checkCounter = 0;
         let ent = allEntities[1];
+        let playerCycledThruTracker = 0;
+        let isInWindBox = false
+        let playerCycleTracker = 0;
         simulation.inGameConsole(`<strong>Turbine</strong> by <span class='color-var'>Desboot</span>`);
+        simulation.inGameConsole(`<em>//send errors to @desboot on discord</em>`);
         level.announceText(-36, 30, true)
         level.announceMobTypes()
         // tech.giveTech("performance")
@@ -27507,7 +27642,8 @@ Object.assign(moreLevels, {
         inhiddenroom = 0;
         intoHiddenRoom = 0;
         bossPlace = Math.round(Math.random());
-        turbineSwitchOption = Math.random();// Math.round(3*Math.random()-0.5);
+        // turbineSwitchOption = Math.random();
+        turbineSwitchOption = (Math.seed % Math.PI) / Math.PI// Math.round(3*Math.random()-0.5);
         if (turbineSwitchOption < 0.375) {
             leverX = 2600
             leverY = -1725
@@ -27582,6 +27718,8 @@ Object.assign(moreLevels, {
 
         level.custom = () => {
             let rand1, rand2, rand3, rand4, rand5
+
+            // simulation.inGameConsole(playerCycledThruTracker)
             if (checkCounter < 10) {
                 ++checkCounter
             } else {
@@ -27590,14 +27728,15 @@ Object.assign(moreLevels, {
             if (m.pos.x < -3000) {
                 Matter.Body.setPosition(player, {
                     x: 7000,
-                    y: 400
+                    y: -400
                 });
+                playerCycledThruTracker++
                 // m.setVelocity(m, { x: 0, y: 0 });
             }
             if (m.pos.y < -4500) {
                 Matter.Body.setPosition(player, {
                     x: 7000,
-                    y: 400
+                    y: -400
                 });
             }
             // if (m.position.y < -3000) {
@@ -27630,7 +27769,7 @@ Object.assign(moreLevels, {
                 for (let i = 0; i < allEntities.length; i++) {
                     const ent = allEntities[i];
                     if (ent.position.x < -2000 || ent.position.y < -3000) {
-                        Matter.Body.setPosition(ent, { x: 6000, y: 400 });
+                        Matter.Body.setPosition(ent, { x: 6000, y: -400 });
                         Matter.Body.setVelocity(ent, { x: 0, y: 0 });
                     }
                 }
@@ -27835,6 +27974,13 @@ Object.assign(moreLevels, {
 
 
 
+            if (m.pos.y > -550.0 && m.pos.y < -320.0 && windBoxState == 1) {
+                isInWindBox = true;
+            } else {
+                isInWindBox = false;
+                playerCycledThruTracker = 0;
+            }
+            // simulation.inGameConsole(playerCycledThruTracker)
 
 
             //WINDBOX DECALS
@@ -28069,6 +28215,13 @@ Object.assign(moreLevels, {
             }
         };
         level.customTopLayer = () => {
+            //if (playerCycledThruTracker > 0) {
+            if (playerCycledThruTracker > playerCycleTracker) simulation.inGameConsole("Hold ↑")
+            playerCycleTracker = playerCycledThruTracker
+
+            //ctx.font = "54px monospace";
+            //ctx.fillText("Hold ↑", 4230 + 146, -550 + 40);
+            //}
 
             mover.draw();
             fizzlers.query();
@@ -28185,7 +28338,7 @@ Object.assign(moreLevels, {
             if (turbineSwitchOption > 0.75) {
                 spawn.mapRect(4150, -1775, 325, 25);
                 for (let i = 0; i < 5; i++) {
-                    spawn.mapRect(4275 + i * 50, -1775 + i * 12, 325, 25);
+                    spawn.mapRect(4250 + i * 50, -1775 + i * 13, 325, 25);
                 }
 
             } else {
@@ -28252,6 +28405,8 @@ Object.assign(moreLevels, {
 
 
 
+
+        spawn.mapVertex(4037 + 17, -300 - 15, "0 0  0 -50  100 0");
 
         // spawn.debris(750, -2200, 3700, 8);
         // spawn.debris(750, -2200, 3700, 8);
@@ -30849,6 +31004,601 @@ Object.assign(moreLevels, {
         for(let i = 0; i < 20; i++) powerUps.directSpawn(6425, -24750, "fakeTech")
         spawn.mapRect(5950, -24925, 0.01, 400);
         spawn.mapRect(7000, -24925, 0.01, 375);
+    },
+    ballast() {
+        level.announceMobTypes()
+        level.announceText(0, 30, true)
+        simulation.inGameConsole(`<strong>Ballast</strong> by <span class='color-var'>DesBoot</span>`);
+        simulation.inGameConsole(`<em>//send errors to @desboot on discord</em>`);
+
+        level.setPosToSpawn(0, -50); //normal spawn
+        level.exit.x = -50 + 25;
+        level.exit.y = -1675 - 30;
+        let buttonPressed = false;
+        let waterDrained = 0;
+        let waterDrained2 = 0;
+        let slimeDrainState = 0;
+        let waterFullyDrained = false;
+        let fillRate = 0;
+        let drainTimer = 0;
+        let fillMultiplier = 0;
+        let door2BaseHeight = -325;
+        let floorSlimeHeight = 0; //tracks height of floor slime
+
+        let slimeFlowStartY = 0;
+        let door2OpenPercent = 0;
+        let outFlowMultiplier = 0;
+        let outFlowMultiplier1 = 0;
+        let outFlowMultiplier2 = 0;
+        let outFlowMultiplier3 = 0;
+        let outFlowMultiplier4 = 0;
+        let extraDrain = 0;
+        let rotor = level.rotor(1950, -950, 750, 50, 0.001, 0, 0.01, 0, 0.001)
+        let upperSlimeTracker = 0; //tracks how much upper right slime has drained
+        let floatingBlockXTarget = 2185;
+        let floatingBlockYTarget = -30;
+        let button2Pressed = 0;
+        let elevatorSpawned = false
+        let exitDoorMove = 25
+        let debrisPlacerTracker = 0;
+
+        //constants
+        const upperWaterDrainLimit = -730 //Point at when the upper water stops draining
+        const upperWaterHalvePoint = -350 //point where the upper right water stops and the upper water slows
+        const fullSpeedDrainPoint = -97 //point where door fully opens, upper water drains at max speed
+        const drainTimerLimit = 591
+        const door2maxHeight = -475
+        const fillRateMax = 140
+        const floorSlimeRateMultiplier = 260;
+        const upperSlimeRateMultiplier = 100
+        const floorSlimeMaxHeight = -247
+
+
+        spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20); //bump for level entrance
+        spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20); //bump for level exit
+        level.defaultZoom = 1800
+        simulation.zoomTransition(level.defaultZoom)
+        document.body.style.backgroundColor = "#d8dadf";
+        // color.map = "#444" //custom map color
+        const door1 = level.door(-200, -200, 25, 200, 125)
+        const door2 = level.door(175, -525, 25, 200, 150)
+        const door3 = level.door(1052, -1000, 23, 375, 375)
+        const door4 = level.door(-175 + exitDoorMove, -1900, 25, 225, 225)
+        const door5 = level.door(150 + exitDoorMove, -1900, 25, 225, 225)
+        const doorButton = level.button(5800, 0)
+        const button2 = level.button(6000, -1075)
+        const floorSlime = level.hazard(-200, 5, 5100, 1) //slime that will rise
+        const upperSlime = level.hazard(175, -1000, 900, 500)
+        //const floorSlime = level.hazard(-200, waterDrained / 3 + secondWaterDrained, 5200, -waterDrained / 3 - secondWaterDrained) //slime that will rise
+        const elevator = level.elevator(3100, -130, 100, 25, -800)
+
+        const laser = level.hazard(1057.5 + 2.5, -1625, 5, 550, 0.3)
+        spawn.mapRect(1057.5 - 6.25, -1625, 22.5, 6.25)
+        // const elevator1 = level.elevator(2275-100, -2500, 75, 25, -13100, 0.003)
+        const elevator2 = level.elevator(2275 - 150, -1340, 125, 25, -3000)
+        const boost1 = level.boost(4100 - 100, -1375 + 34.5 - 75, 2400, Math.PI / 12 * 7)
+
+
+
+
+        const wind = []
+        wind.push(level.wind(-200, 5, 5300, 230, { x: -0.001, y: 0 }))
+        wind.push(level.wind(200, -475, 250, 475, { x: 0.001, y: 0.003 }))
+
+
+        spawn.bodyRect(4600, -900, 300, 15, 0.9);
+
+        function blockInWhichWater(x, y) {
+            if ((x > -170 && x < 4900 && y < 0 && y > floorSlime.min.y)) {
+                return 1 //floor slime
+            } else if (x > 189 && x < 1060 && y < -510 && y > (upperSlime.min.y)) {
+                return 2 //upper slime
+            } else if (x > -1626 && x < 186 && (y < Math.min(((12 / 19) * (x + 1680) - 1016), -300) && y > -1000 - Math.max((waterDrained + extraDrain), -730) + 5 * Math.sin(simulation.cycle * 0.015))) {
+                return 3
+            } else {
+                return 0
+            }
+        }
+
+        function findBuoyancyForce(yPos, yVelocity, mass, whichWater) {
+            switch (whichWater) {
+                case 1:
+                    return (((floorSlime.min.y - yPos - 25) * 0.000075) - (yVelocity * 0.0005)) * mass
+                case 2:
+                    return (((upperSlime.min.y - yPos - 25) * 0.000075) - (yVelocity * 0.0005)) * mass
+                case 3:
+                    return ((((-1000 - Math.max((waterDrained + extraDrain), -730) + 5 * Math.sin(simulation.cycle * 0.015)) - yPos - 25) * 0.000075) - (yVelocity * 0.0005)) * mass
+                default:
+                    return 0
+            }
+            //(((floorSlime.min.y - body[i].position.y - 25) * 0.000075) - (body[i].velocity.y * 0.0005)) * body[i].mass
+            //simulation.mouseInGame.x
+
+        }
+        spawn.bodyRect(floatingBlockXTarget, floatingBlockYTarget, 280, 30, 30, 1); // door
+        spawn.mapRect(-200, -250, 25, 50)
+
+        // simulation.inGameConsole(simulation.mouseInGame.x)
+        // simulation.inGameConsole((simulation.mouseInGame.x > -1598 - 1.5 * waterDrained && simulation.mouseInGame.x < 189 && simulation.mouseInGame.y < ((12/19)*(x+1680)-1016) && simulation.mouseInGame.y > -1000 - Math.max((waterDrained + extraDrain), -730) + 5 * Math.sin(simulation.cycle * 0.015)))
+
+        level.custom = () => {
+            elevator2.move();
+
+            level.exit.drawAndCheck();
+
+            doorButton.query();
+            button2.query();
+
+
+
+
+            rotor.rotate();
+            //push player in windbox (i cant get it to move properly)
+            // if (m.pos.x > wind[0].x && m.pos.x < wind[0].x + wind[0].width && m.pos.y < 0 && m.pos.y > wind[0].y) {
+            //     player.force.x += wind[0].velocity.x * 5 * (m.crouch ? 0.3 : 1) * (m.onGround ? 0.5 : 1)
+            // }
+
+            for (let i = 0, len = body.length; i < len; i++) { //run thru all blocks
+                let whichWater = blockInWhichWater(body[i].position.x, body[i].position.y) //finds if/which water the block is in.
+                if (0 != whichWater) { //body[i].position.x > -170 && body[i].position.x < 5000 && body[i].position.y < 0 && body[i].position.y > floorSlime.min.y
+                    const diameter = Math.sqrt(body[i].mass) * 0.1
+                    //const buoyancy = findBuoyancy(body[i].position.x, body[i].position.y, diameter, whichWater,i)
+                    let blockRotatorLowerBound = 0.01;
+                    let temp1 = (((Math.max((Math.PI / 2 - Math.abs(Math.PI / 2 - (Math.abs(body[i].angle % (Math.PI))))) / (Math.PI / 2), blockRotatorLowerBound) - blockRotatorLowerBound) ** 2));
+                    if (body[i].angle > 0) {
+                        temp1 = (temp1 * Math.sign((body[i].angle % Math.PI) - Math.PI / 2)) //works for negative direction
+                    } else {
+                        temp1 = (temp1 * Math.sign((body[i].angle % Math.PI) + Math.PI / 2))
+                    }
+                    Matter.Body.setAngularVelocity(body[i], (body[i].angularVelocity += 0.001 * temp1) * 0.99)
+                    //if (whichWater == 1) simulation.inGameConsole(((whichWater == 1) ? 1 : 0))
+                    let applyXForce = 0;
+                    if (Math.abs(body[i].velocity.x) < 10) applyXForce = -0.001 * (body[i].velocity.x * -0.0005 * body[i].mass + ((whichWater == 1) && (fillRate < 0) ? 1 : 0))
+                    Matter.Body.applyForce(body[i], body[i].position, {
+                        x: applyXForce,
+                        y: findBuoyancyForce(body[i].position.y, body[i].velocity.y, body[i].mass, whichWater)// (((floorSlime.min.y - body[i].position.y - 25) * 0.000075) - (body[i].velocity.y * 0.0005)) * body[i].mass
+                    });
+                }
+
+            }
+            // simulation.inGameConsole(fillRate)
+
+            if (!m.isTimeDilated) {
+                if (fillRate > 0) {
+                    wind[1].do()
+                    // simulation.inGameConsole("wind 1")
+                }
+                if (buttonPressed && button2Pressed && floorSlimeHeight < -10) {
+                    wind[0].do()
+                    // simulation.inGameConsole("left")
+                    if (m.pos.x > wind[0].x && m.pos.x < wind[0].x + wind[0].width && m.pos.y < 0 && m.pos.y > wind[0].y && fillRate < 0) {
+                        player.force.x += wind[0].velocity.x * 20 * (m.crouch ? 0.3 : 1) * (m.onGround ? 0.5 : 1)
+                    }
+                }
+            }
+            // simulation.inGameConsole(floorSlimeHeight)
+
+            // wind[0].x+=1
+            // wind[0].level(false, 1)
+
+            // floorSlime.level(false, 1)
+
+
+
+            // extraDrain = 1
+            if (!m.isTimeDilated) { //the water waits while time is stopped, like the slime hazards and doors do
+                if (drainTimer > 443) {
+                    extraDrain -= 0.005 * (600 - (drainTimer))
+                } else {
+                    extraDrain = 0
+                }
+            }
+            //bakgrounds:
+            ctx.fillStyle = "rgb(200, 200, 200)";
+            ctx.beginPath()
+            ctx.moveTo(-525, -1075)
+            ctx.lineTo(-525, -1000)
+            ctx.lineTo(-525 + 135, -324)
+            ctx.lineTo(-200, -250)
+            ctx.lineTo(-200, 0)
+            ctx.lineTo(1950 - 190, 0)
+            ctx.lineTo(1950, -1075)
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.moveTo(-152, -1675)
+            ctx.lineTo(-175, -1275)
+            ctx.lineTo(-175 + 200 / 5, -1075)
+            ctx.lineTo(1073 - 550 / 5, -1075)
+            ctx.lineTo(1073, -1620)
+            ctx.lineTo(1056, -1675)
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.moveTo(3800, -1325)
+            ctx.lineTo(3800 + 250 / 5, -1075)
+            ctx.lineTo(4650 - 250 / 5, -1075)
+            ctx.lineTo(4650, -1325)
+            ctx.fill()
+
+            ctx.fillRect(4775 + 50, -1225, 250 - 100, 225)
+            ctx.fillRect(5225, -1375, 300, 375)
+
+
+            ctx.beginPath()
+            ctx.moveTo(3500, -900)
+            ctx.lineTo(3500, -400)
+            ctx.lineTo(3500 + 400 / 5, 0)
+            ctx.lineTo(6000, 0)
+            ctx.lineTo(6000, -1000)
+            ctx.fill()
+
+
+            ctx.beginPath()
+            ctx.moveTo(-1467, -900)
+            ctx.lineTo(-1150, -900)
+            ctx.lineTo(-1150, -700)
+            ctx.fill()
+
+            ctx.beginPath()
+            ctx.moveTo(-900 + 50, -760)
+            ctx.lineTo(-900 + 50, -500)
+            ctx.lineTo(-575 - 50, -340)
+            ctx.lineTo(-575 - 50, -760)
+            ctx.fill()
+
+            ctx.fillRect(3050, -210, 350, 230)
+
+            ctx.fillStyle = "rgb(175, 175, 175)";
+            ctx.fillRect(1100, -213, 350, 230)
+            ctx.fillRect(1635, -475, 105, 500)
+            ctx.fillRect(3850, -550, 325, 550)
+            ctx.fillRect(4300, -210, 250, 210)
+            ctx.fillRect(5375, -300, 250, 400)
+
+
+            ctx.fillStyle = "rgb(150, 150, 150)";
+            ctx.fillRect((1950 + 2700) / 2 - 50, -3500 + 1500, 100, 2000)
+
+            //button pressed
+            if (!doorButton.isUp) {
+                if (!buttonPressed) {
+                    //second mobs
+                    spawn.randomMob(4360, -400, 0.9);
+                    spawn.randomMob(3150, -525, 0.8);
+                    spawn.randomMob(2300, -300, 1);
+                    spawn.randomMob(1500, -585, 0.9);
+                    spawn.randomMob(192, -725, 0.7);
+                    spawn.randomMob(500, -750, 0.8);
+                }
+                buttonPressed = true;
+            }
+            if (!button2.isUp) {
+                if (!button2Pressed) {
+                    //third mobs
+                    spawn.randomMob(3200, -1300, 0.7);
+                    spawn.randomMob(4500, -2800, 0.8);
+                    spawn.randomMob(1000, -1825, 0.9);
+                    spawn.randomMob(-730, -1525, 1);
+                    spawn.randomMob(-950, -1400, 0.8);
+                }
+                button2Pressed = true;
+
+            }
+            if (!m.isTimeDilated) { //the water waits while time is stopped, like the slime hazards and doors do
+                if (buttonPressed) { //updating and tracking slime levels
+                    floorSlime.level(false, (-fillRate / floorSlimeRateMultiplier) * fillMultiplier)
+                    if (button2Pressed) wind[0].y += (-fillRate / floorSlimeRateMultiplier) * fillMultiplier //fix this
+                    floorSlimeHeight += (-fillRate / floorSlimeRateMultiplier) * fillMultiplier
+                    if (waterDrained > -345) {
+                        upperSlime.level(false, (fillRate / upperSlimeRateMultiplier))
+                        upperSlimeTracker += (fillRate / upperSlimeRateMultiplier)
+                    }
+                }
+
+                if (buttonPressed == true) { //opens doors, tracks door height, grows fill rate to max
+                    door2.isClosing = false
+                    door2.openClose();
+                    if (door2BaseHeight > door2maxHeight) { //tracks door height
+                        door2BaseHeight--
+                        // simulation.inGameConsole(door2BaseHeight)
+                    }
+                    if (!waterFullyDrained) { //increases fillrate to max after first door opens
+                        if (fillRate < fillRateMax) {
+                            fillRate++
+                        }
+                    }
+                } else {
+                    door2.isClosing = false;
+                }
+
+                //keeps track of state of draining. 1=speeding up, 2=full speed, 3=upper right not draining
+                if (waterDrained > fullSpeedDrainPoint) {
+                    fillMultiplier = 0.6 + (drainTimerLimit - drainTimer) / drainTimerLimit
+                    slimeDrainState = 1
+                } else if (waterDrained > -325) {
+                    fillMultiplier = 0.6 + (drainTimerLimit - drainTimer) / drainTimerLimit
+                    slimeDrainState = 2
+                } else if (!waterFullyDrained) {
+                    slimeDrainState = 3
+                    fillMultiplier = 0.3 + (drainTimerLimit - drainTimer) / drainTimerLimit
+                } else {
+                    fillMultiplier = 1
+                }
+
+
+                if (waterDrained > upperWaterDrainLimit) { //if upper water hasnt fully drained, lower waterDrained by fillrate/100
+                    waterDrained -= fillRate / 100
+                    if (buttonPressed) drainTimer++
+                } else {
+                    waterFullyDrained = true
+                }
+                if (waterDrained > upperWaterHalvePoint) {
+                    waterDrained2 = waterDrained
+                }
+            }
+
+            // if (waterFullyDrained) {
+            //     door3.openClose();
+            //     door1.openClose();
+            //     fillRate = -20
+            // }
+
+            if (waterFullyDrained) {
+                door3.openClose();
+                if (button2Pressed) {
+                    door1.openClose();
+                    fillRate = -50
+                } else {
+                    fillRate = 0
+                }
+            }
+
+            doorButton.draw();
+            button2.draw();
+            level.enter.draw();
+            if (button2Pressed) {
+                door4.openClose();
+                door5.openClose();
+            }
+            ctx.fillRect(-375 + 50, -1425, 100, 425)
+            ctx.fillStyle = "rgb(100, 100, 100)";
+            ctx.fillRect(2175, -3500, 400, 25)
+
+            ctx.fillStyle = "rgb(175, 175, 175)";
+            ctx.fillRect(4862.5, -3000, 74.5, 3000)
+
+            ctx.fillRect(2275 - 800, -2800, 100 + 1600, 50)
+            ctx.fillRect(2275 - 1000, -2100, 100 + 2000, 50)
+            ctx.fillRect(4862.5 - 500, -2650, 75 + 1000, 50)
+            ctx.fillRect(4862.5 - 600, -2000, 75 + 1200, 50)
+
+            ctx.fillStyle = "hsl(175, 35%, 76%)" //exit
+            ctx.fillRect(-150, -1900, 350, 275)
+        };
+
+        spawn.mapRect(4862.5 - 600, -2000, 400, 25)
+        spawn.mapRect(4862.5 + 200 + 75, -2000, 400, 25)
+        spawn.mapRect(4862, -2300 - 75 / 2, 75, 25)
+        spawn.mapRect(4862.5 + 25, -3000, 25, 150)
+
+        spawn.mapRect(4862.5 - 600 + 100, -2650, 300, 25)
+        spawn.mapRect(4862.5 + 200 + 75 - 100 + 100, -2650, 300, 25)
+
+
+        level.customTopLayer = () => {
+            if (fillRate < 0 && floorSlimeHeight < 0) {
+                ctx.fillStyle = "hsla(160, 100%, 33%,0.75)"
+                ctx.fillRect(-250, floorSlimeHeight + 5 + 5 * Math.sin(simulation.cycle * 0.015), 50, 2075)
+            }
+
+
+            //flowing slime
+            if (!waterFullyDrained) {
+                // // ctx.fillStyle = "hsla(160, 100%, 35%,0.75)"
+
+
+
+                // //  ctx.fillStyle = "rgba(0, 179, 119, 0.75)"
+
+                slimeFlowStartY = Math.min(Math.max(door2BaseHeight, -1000 - Math.min(waterDrained + extraDrain)), -325)
+                door2OpenPercent = 2 * ((slimeFlowStartY + 325) / -150) * fillMultiplier
+                outFlowMultiplier4 = outFlowMultiplier3
+                outFlowMultiplier3 = outFlowMultiplier2
+                outFlowMultiplier2 = outFlowMultiplier
+                outFlowMultiplier += (-0.5 * (outFlowMultiplier - 0.95)) + Math.random() * 0.05
+                // simulation.inGameConsole(outFlowMultiplier)
+                ctx.fillStyle = "rgba(0, 179, 119, 0.75)"
+                ctx.beginPath()
+                // ctx.moveTo(173, Math.min(Math.max(door2BaseHeight, -1000 - waterDrained),-325)) //top of water or door
+                ctx.moveTo(175, slimeFlowStartY + 5 * Math.sin(simulation.cycle * 0.015)) //top of water or door
+                ctx.lineTo(200, slimeFlowStartY + 5 * Math.sin(simulation.cycle * 0.015)) //top of water or door
+                ctx.lineTo(200 + 40 * door2OpenPercent * outFlowMultiplier, slimeFlowStartY - (slimeFlowStartY - floorSlimeHeight) / 4)
+                ctx.lineTo(200 + 70 * door2OpenPercent * outFlowMultiplier2, slimeFlowStartY - (slimeFlowStartY - floorSlimeHeight) / 2)
+                ctx.lineTo(200 + 90 * door2OpenPercent * outFlowMultiplier3, slimeFlowStartY - 3 * (slimeFlowStartY - floorSlimeHeight) / 4)
+                ctx.lineTo(200 + 100 * door2OpenPercent * outFlowMultiplier4, floorSlimeHeight + 5 * Math.sin(simulation.cycle * 0.015) + 5)
+                ctx.lineTo(200 + 60 * door2OpenPercent * outFlowMultiplier3, floorSlimeHeight + 5 * Math.sin(simulation.cycle * 0.015) + 5) //bottom
+                ctx.lineTo(200 + 40 * door2OpenPercent * outFlowMultiplier4, (floorSlimeHeight - 325) / 2) //bottom
+                ctx.lineTo(200, -325)
+                ctx.lineTo(175, -325)
+                ctx.moveTo(-524.5 + 700, -1000 - Math.max((waterDrained + extraDrain), -730) + 5 * Math.sin(simulation.cycle * 0.015))
+                ctx.lineTo(-524.5 + 700, -1000 + 700)
+                ctx.lineTo(-524, -300)
+                ctx.lineTo(-1598 - 1.5 * waterDrained, -1000 - waterDrained + 5 * Math.sin(simulation.cycle * 0.015))
+                ctx.fill()
+                ctx.fillStyle = "#00ccff"
+            }// else {simulation.inGameConsole(ctx.fillStyle)}
+
+            if (!button2Pressed) {
+                // elevator2.isOn = false;
+                // elevator2.maxHeight = 0;
+                // simulation.inGameConsole("0")
+            } else {
+                // elevator2.isOn = true;
+                // elevator2.maxHeight = -4000;
+                // simulation.inGameConsole("-4000")
+                laser.opticalQuery();
+                laser.isOn = true;
+                if (!elevatorSpawned) {
+                    elevatorSpawned = true;
+                }
+            }
+            floorSlime.query();
+            upperSlime.query();
+            door1.draw();
+            door2.draw();
+            door3.draw();
+            door4.draw();
+            door5.draw();
+            boost1.query();
+
+
+
+        };
+        // spawn.bodyRect(2185, -236, 280, 30, 1); // door
+
+
+
+
+        //main platform
+        spawn.mapRect(-200, 0, 6300, 100);
+        // spawn.mapRect(-200, 0, 10 + 375, 100);
+        // spawn.mapRect(-180 + 375, 0, 6040 - 375, 20);
+        // spawn.mapRect(-200, 30, 6300, 70);
+        // spawn.mapRect(5870, 0, 230, 100);
+        //first house
+        spawn.mapRect(-200, -325, 400, 75);
+        // spawn.mapRect(-200, -300, 25, 400);
+        spawn.mapRect(175, -300, 25, 100);
+
+        // spawn.mapRect(175, -525, 25, 225); //removes
+        spawn.mapRect(200, -525, 900, 50);
+        spawn.mapRect(1050, -237.5 - 50 / 2, 450, 50);
+        spawn.mapRect(3500 - 500, -237.5 - 50 / 2, 450, 50);
+        spawn.mapRect(1051, -675, 25, 200);
+        // spawn.mapRect(1075, -700, 25, 175); //removes
+        spawn.mapRect(-525, -1075, 2475, 75);
+        spawn.mapRect(-540, -325, 340, 75);
+
+
+        //upper house
+        spawn.mapRect(3500, -1000, 1000, 100);
+        spawn.mapRect(3500, -1000, 100, 600);
+
+        spawn.mapRect(-900, -525, 325, 25);
+        spawn.mapRect(-900, -775, 325, 25);
+        spawn.mapRect(-1525, -925, 425, 25);
+
+        spawn.mapRect(4862.5, -475, 75, 475);
+        spawn.mapRect(-1713, -1600, 50, 575);
+
+        spawn.mapRect(1625, -525, 125, 50);
+
+
+
+        spawn.mapVertex(-1125, -663, "-1175 0  -1175 -75  0 675  0 750");
+
+        spawn.mapVertex(6920, -475, "1645 25  1645 -75  0 975  0 1075");
+        spawn.mapVertex(6920 - 224, -475 - 140 - 50, "0 -75  1645 -75  1645 25  0 1075");
+
+        spawn.mapRect(4500, -1000, 1550, 100);
+        spawn.mapRect(6000, -1075, 150, 1075);
+        spawn.mapRect(3500, -1075, 5875 - 1625, 75);
+
+        spawn.mapRect(2700, -1075, 50, 400);
+        spawn.mapRect(1900, -1075, 50, 125);
+
+        //top buildings:
+        spawn.mapRect(4250, -260, 350, 50);
+        spawn.mapRect(3800, -600, 425, 50);
+        spawn.mapRect(5325, -475 + 125, 350, 50);
+        spawn.mapRect(-175, -1625, 50, 425 - 75);
+        spawn.mapRect(-200, -1675, 50, 50);
+        spawn.mapRect(-175, -1700, 50, 50);
+
+        // spawn.mapRect(-200, -1700, 50, 425);
+        spawn.mapRect(-150, -1675, 400, 50);
+        spawn.mapRect(-200 + 600, -1675, 1275 - 600, 50);
+
+        spawn.mapRect(5175, -1650, 50, 275);
+        spawn.mapRect(5175, -1425, 400, 50);
+        spawn.mapRect(5525, -1425, 50, 150);
+        spawn.mapRect(4775, -1250, 250, 25);
+        spawn.mapRect(4325, -1450, 325, 125);
+        spawn.mapRect(4100, -1650, 225, 325);
+        spawn.mapRect(3800, -1375, 300, 50);
+        spawn.mapRect(5000, -1550, 175, 25);
+
+        spawn.mapRect(2275 - 400, -3500, 300, 25);
+
+
+        //mast
+        spawn.mapRect((1950 + 2700) / 2 - 50, -3500, 100, 1500)
+
+        spawn.mapRect(-200 + exitDoorMove, -1925, 400, 25)
+
+        spawn.mapRect(150 + exitDoorMove, -1700, 50, 25)
+        spawn.mapRect(-375, -1450, 200, 25);
+        // spawn.mapRect(650, -1275, 25, 200);
+
+        spawn.mapRect(2275, -3500, 500, 25);
+
+        //first mobs
+        spawn.randomMob(1386, -740, 0.7);
+        spawn.randomMob(3077, -728, 0.6);
+        spawn.randomMob(4435, -541, 0.7);
+        spawn.randomMob(5500, -640, 0.8);
+        spawn.randomMob(320, -1300, 0.9);
+        spawn.randomMob(1170, -1375, 0.6);
+        spawn.randomMob(4700, -1650, 0.9);
+        spawn.randomMob(5380, -1250, 0.8);
+
+        spawn.randomGroup(6900, -1400, 0.4);
+        spawn.randomGroup(777, -2000, 0.4);
+
+        spawn.randomLevelBoss(6000, -1650);
+        spawn.secondaryBossChance(5500, -600)
+
+        spawn.randomSmallMob(4075, -260);
+        spawn.randomSmallMob(5375, -550);
+        spawn.randomSmallMob(2325, -350);
+        spawn.randomSmallMob(1450, -1326);
+        spawn.randomSmallMob(900, -1900);
+        spawn.randomSmallMob(4875, -1400);
+
+        spawn.debris(-1625, -1200, 3600, 8);
+        spawn.debris(3500, -2000, 2000, 8);
+        spawn.debris(250, -300, 5000, 8);
+
+        spawn.bodyRect(400 + (Math.seed % (Math.PI + 0)) / Math.PI * 1333, -20, 150 + (Math.seed % (Math.PI + 0.2)) / Math.PI * 300, 20)
+        spawn.bodyRect(400 + 1333 + (Math.seed % (Math.PI + 0.6)) / Math.PI * 1333, -20, 150 + (Math.seed % (Math.PI + 0.3)) / Math.PI * 300, 20)
+        spawn.bodyRect(400 + 2666 + (Math.seed % (Math.PI + 0.5)) / Math.PI * 1333, -20, 150 + (Math.seed % (Math.PI + 0.4)) / Math.PI * 300, 20)
+
+
+
+
+        // level.chain(1975, -1035, 0, true, 13, 29.1)
+        level.chain(2775, -1035, 0, true, 13, 29.1)
+        // spawn.mapRect(3500, -1075, 100, 75);
+
+        //-725+375,-1075+375
+        //second house
+
+
+        // powerUps.spawnStartingPowerUps(1475, -1175);
+        // spawn.debris(750, -400, 3700, 16); //16 debris per level
+        // spawn.bodyRect(2200, -40, 300, 25, 1);
+        // spawn.bodyRect(2600, -700, 25, 25, 1);
+        // spawn.bodyRect(2800, -700, 100, 100, 1);
+        // spawn.bodyRect(1540, -1110, 300, 25, 0.9);
+        // spawn.randomSmallMob(1300, -70);
+        // spawn.randomMob(2650, -975, 0.8);
+        // spawn.randomGroup(1700, -900, 0.4);
+        // spawn.randomLevelBoss(2200, -1300);
+        // spawn.secondaryBossChance(100, -1500)
+
+        // research, heal, tech, field, gun, ammo, coupling, qubit, Casimir, boost
+        powerUps.addResearchToLevel() //needs to run after mobs are spawned
     },
     // ********************************************************************************************************
     // ********************************************************************************************************

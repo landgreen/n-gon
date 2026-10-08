@@ -348,6 +348,33 @@ body.has-autosave #start-button {
     overflow: hidden;
 }
 
+/* top of the left pause column (status) and the pause settings menu */
+.pause-top {
+    padding: 6px 8px;
+}
+
+.pause-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0px 8px;
+    /* if a row doesn't fit on one line the right side wraps instead of getting cut off */
+}
+
+.pause-setting input {
+    margin-left: 0px;
+}
+
+.pause-hint {
+    color: #999;
+}
+
+.pause-hint .key-input-train {
+    padding: 0px 4px;
+    border-width: 1.5px;
+}
+
 #pause-console {
     display: flex;
     align-items: center;
@@ -1066,7 +1093,8 @@ body.has-autosave #start-button {
 }
 
 #hover-help[data-help-key="coupling"],
-#hover-help[data-help-key="orb-coupling"] {
+#hover-help[data-help-key="orb-coupling"],
+#hover-help[data-help-key="mob-death"] {
     max-width: min(330px, calc(100vw - 16px));
 }
 
@@ -1199,6 +1227,12 @@ body.has-autosave #start-button {
     font-variant: small-caps;
     letter-spacing: 1px;
     text-shadow: 1.5px -1.5px hsla(243, 100%, 38%, 0.2);
+}
+
+.color-death {
+    /* a faint ghost of the word floats above it, used for mob death tech */
+    color: #3e4458;
+    text-shadow: 0 -0.45em 0 rgba(95, 110, 170, 0.25);
 }
 
 .color-remove {
@@ -2115,12 +2149,44 @@ body.has-autosave #start-button {
     margin-right: auto;
 }
 
-.pause-difficulty-row {
+/* pause menu copy of the difficulty power up grid
+the gaps show the border color through, so the lines are only between options and the details box is the outside border */
+.pause-details.pause-difficulty-grid {
+    display: grid;
+    gap: 1px;
+    font-size: 0.85em;
+    /* small enough that every option fits on one line at the narrowest pause column */
+    padding: 0px;
+    overflow: hidden;
+    background-color: #333;
+}
+
+.pause-difficulty-section {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+}
+
+.pause-difficulty-option {
+    display: flex;
+    align-items: center;
+    padding: 3px 6px;
+    background-color: #e2e9ec;
     line-height: 130%;
-    font-size: 1em;
-    padding: 7px 0px 7px 0px;
-    /* top | right | bottom | left */
-    margin: -5px 0;
+    white-space: normal;
+}
+
+/* an odd option out at the end of a section fills its row */
+.pause-difficulty-option:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+}
+
+.pause-difficulty-option>span {
+    opacity: 0.1;
+}
+
+.pause-difficulty-selected>span {
+    opacity: 1;
 }
 
 .pause-details {

@@ -1747,9 +1747,6 @@ const mobs = {
                         }
                         requestAnimationFrame(cycle);
                     }
-                    if (tech.iceIXOnDeath && this.isSlowed) {
-                        for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
-                    }
                     if (tech.deathSpawnsFromBoss || tech.deathSpawns) {
                         const spawns = tech.deathSpawns + tech.deathSpawnsFromBoss
                         const len = Math.min(12, spawns * Math.ceil(Math.random() * simulation.difficulty * spawns))
@@ -1787,161 +1784,18 @@ const mobs = {
                             spawn.randomMobByLevelsCleared(this.position.x, this.position.y);
                         }, 1000);
                     }
-                    if (tech.isGhostParticle) { //spawn coupling if mob dies inside dark matter
-                        for (let i = 0, len = mob.length; i < len; i++) {
-                            if (mob[i].isDarkMatter && mob[i].alive) {
-                                if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - this.radius < mob[i].radius) {
-                                    powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "coupling");
-                                }
-                                break
-                            }
-                        }
-                    }
-                    if (tech.isBaryon && tech.isNotDarkMatter && Math.random() < (tech.isGalacticHalo ? 0.41 : 0.3)) { //spawn qubit if mob dies outside dark matter
-                        for (let i = 0, len = mob.length; i < len; i++) {
-                            if (mob[i].isDarkMatter && mob[i].alive) {
-                                if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - this.radius > mob[i].radius) {
-                                    powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "qubit");
-                                }
-                                break
-                            }
-                        }
-                    }
-                    if (tech.healSpawn && Math.random() < tech.healSpawn * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
-                        powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
-                        simulation.drawList.push({
-                            x: this.position.x,
-                            y: this.position.y,
-                            radius: 50,
-                            color: "#0eb",
-                            time: 12
-                        });
-                        simulation.drawList.push({
-                            x: this.position.x,
-                            y: this.position.y,
-                            radius: 100,
-                            color: "#0eb",
-                            time: 6
-                        });
-                        simulation.drawList.push({
-                            x: this.position.x,
-                            y: this.position.y,
-                            radius: 200,
-                            color: "#0eb",
-                            time: 3
-                        });
-                    }
-
-                    if (tech.isVerlet && !m.isTimeDilated) {
-                        if (tech.isBarycenter) {
-                            b.orbitBot(player.position, false);
-                            bullet[bullet.length - 1].endCycle = simulation.cycle + 1200
-                        }
-
-                        requestAnimationFrame(() => {
-                            simulation.timePlayerSkip(this.isBoss ? 60 : 30)
-                            simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
-                        }); //wrapping in animation frame prevents errors, probably
-                    }
-                    if (tech.isEnergyLoss) {
-                        m.energy -= 0.05;
-                        if (m.energy < 0) m.energy = 0
-                    }
-
-
-
-                    if (tech.isRemineralize) {
-                        //reduce mineral percent based on time since last check
-                        const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
-                        tech.mineralLastCheck = simulation.cycle
-                        tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
-                        tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
-                        //apply mineral damage reduction
-                        tech.mineralDamageReduction *= 0.85
-                    }
-                    if (tech.isDemineralize) {
-                        //reduce mineral percent based on time since last check
-                        const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
-                        tech.mineralLastCheck = simulation.cycle
-                        tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
-                        tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
-                        //apply mineral damage
-                        tech.mineralDamage *= 1.08
-                    }
-
-
-
+                    for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) this.deathTech(i > 0) //tech effects after mobs die, double beta decay repeats them
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
                     mobs.mobDeaths += this.isBoss ? 100 : 1 //bosses count as 10 kills for the pacifist run
-
-                    if (Math.random() < tech.sporesOnDeath) {
-                        const amount = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
-                        if (tech.isSporeFlea) {
-                            const len = amount / 2
-                            for (let i = 0; i < len; i++) {
-                                const speed = 10 + 5 * Math.random()
-                                const angle = 2 * Math.PI * Math.random()
-                                b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
-                            }
-                        } else if (tech.isSporeWorm) {
-                            const len = amount / 2
-                            for (let i = 0; i < len; i++) b.worm(this.position)
-                        } else {
-                            for (let i = 0; i < amount; i++) b.spore(this.position)
-                        }
-                    }
-                    if (tech.isChitin && tech.wire) {
-                        // add new segment where the current tip is
-                        for (let i = 0; i < 2; i++) {
-                            if (tech.wire.segments.length < 200) { //cap max length at 200 for performance
-                                const last = tech.wire.segments[tech.wire.segments.length - 1];
-                                tech.wire.segments.push({ x: last.x, y: last.y, oldX: last.x, oldY: last.y });
-                            }
-                        }
-                    }
-                    if (tech.isConchoidal) {
-                        const dmg = 1.04
-                        m.damageDone *= dmg
-                        tech.conchoidalDamage *= dmg
-                    }
-                    if (tech.isExplodeMob) {
-                        b.explosion(this.position, Math.min(700, Math.sqrt(this.mass + 6) * (30 + 60 * Math.random())))
-                    }
-                    if (tech.nailsDeathMob) {
-                        b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
-                    }
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
                             if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 900 //15 seconds
                         }
                     }
-                    if (Math.random() < tech.botSpawner) {
-                        b.randomBot(this.position, false)
-                        bullet[bullet.length - 1].endCycle = simulation.cycle + 900 //15 seconds
-                        this.leaveBody = false; // no body since it turned into the bot
-                    }
                     if (tech.isMobDeathImmunity) {
                         const immuneTime = 300
                         if (m.immuneCycle < m.cycle + immuneTime) m.immuneCycle = m.cycle + immuneTime; //player is immune to damage
-                    }
-                    if (tech.isAddRemoveMaxHealth) {
-                        if (!this.isBoss) {
-                            const amount = 0.01
-                            if (tech.isEnergyHealth) {
-                                if (m.maxEnergy > amount) {
-                                    tech.healMaxEnergyBonus -= amount
-                                    m.setMaxEnergy();
-                                }
-                            } else if (m.maxHealth > amount) {
-                                tech.extraMaxHealth -= amount //decrease max health
-                                m.setMaxHealth();
-                            }
-                        }
-                    }
-                    if (tech.cloakDuplication > 0 && !this.isBoss) {
-                        tech.cloakDuplication = Math.max(0, tech.cloakDuplication - 0.01)
-                        powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                     }
                 } else if (tech.isShieldAmmo && this.shield && this.shieldCount === 1) {
                     let type = "ammo"
@@ -1971,7 +1825,7 @@ const mobs = {
                             }
                         }
                         if (closestIndex) {
-                            mobs.statusDoT(mob[closestIndex], dmg, tech.isLongRadiation ? 715392000 : 180)
+                            mobs.statusDoT(mob[closestIndex], dmg * (tech.isMobDeathRepeat && this.isDropPowerUp ? 2 : 1), tech.isLongRadiation ? 715392000 : 180) //double beta decay spreads it twice, but not from shields
                             ctx.beginPath();
                             ctx.moveTo(this.position.x, this.position.y);
                             ctx.lineTo(mob[closestIndex].position.x, mob[closestIndex].position.y);
@@ -1980,6 +1834,148 @@ const mobs = {
                             ctx.stroke();
                         }
                     }
+                }
+            },
+            deathTech(isRepeat) { //tech effects after mobs die, double beta decay runs this twice
+                if (tech.iceIXOnDeath && this.isSlowed) {
+                    for (let i = 0, len = 2 * Math.sqrt(Math.min(this.mass, 25)) * tech.iceIXOnDeath; i < len; i++) b.iceIX(3, Math.random() * 2 * Math.PI, this.position)
+                }
+                if (tech.isGhostParticle) { //spawn coupling if mob dies inside dark matter
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].isDarkMatter && mob[i].alive) {
+                            if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - this.radius < mob[i].radius) {
+                                powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "coupling");
+                            }
+                            break
+                        }
+                    }
+                }
+                if (tech.isBaryon && tech.isNotDarkMatter && Math.random() < (tech.isGalacticHalo ? 0.41 : 0.3)) { //spawn qubit if mob dies outside dark matter
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        if (mob[i].isDarkMatter && mob[i].alive) {
+                            if (Vector.magnitude(Vector.sub(this.position, mob[i].position)) - this.radius > mob[i].radius) {
+                                powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "qubit");
+                            }
+                            break
+                        }
+                    }
+                }
+                if (tech.healSpawn && Math.random() < tech.healSpawn * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
+                    powerUps.spawn(this.position.x + 20 * (Math.random() - 0.5), this.position.y + 20 * (Math.random() - 0.5), "heal");
+                    simulation.drawList.push({
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 50,
+                        color: "#0eb",
+                        time: 12
+                    });
+                    simulation.drawList.push({
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 100,
+                        color: "#0eb",
+                        time: 6
+                    });
+                    simulation.drawList.push({
+                        x: this.position.x,
+                        y: this.position.y,
+                        radius: 200,
+                        color: "#0eb",
+                        time: 3
+                    });
+                }
+                if (tech.isVerlet && !m.isTimeDilated) {
+                    if (tech.isBarycenter) {
+                        b.orbitBot(player.position, false);
+                        bullet[bullet.length - 1].endCycle = simulation.cycle + 1200
+                    }
+
+                    requestAnimationFrame(() => {
+                        simulation.timePlayerSkip(this.isBoss ? 60 : 30)
+                        simulation.loop(); //ending with a wipe and normal loop fixes some very minor graphical issues where things are draw in the wrong locations
+                    }); //wrapping in animation frame prevents errors, probably
+                }
+                if (tech.isRemineralize) {
+                    //reduce mineral percent based on time since last check
+                    const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
+                    tech.mineralLastCheck = simulation.cycle
+                    tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
+                    tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
+                    //apply mineral damage reduction
+                    tech.mineralDamageReduction *= 0.85
+                }
+                if (tech.isDemineralize) {
+                    //reduce mineral percent based on time since last check
+                    const seconds = (simulation.cycle - tech.mineralLastCheck) / 60
+                    tech.mineralLastCheck = simulation.cycle
+                    tech.mineralDamageReduction = 1 - (1 - tech.mineralDamageReduction) * Math.pow(0.9, seconds);
+                    tech.mineralDamage = 1 + (tech.mineralDamage - 1) * Math.pow(0.9, seconds);
+                    //apply mineral damage
+                    tech.mineralDamage *= 1.08
+                }
+                if (isRepeat) powerUps.spawnTechPowerUps(this.position.x, this.position.y, true) //the first roll is in powerUps.spawnRandomPowerUp
+                if (Math.random() < tech.sporesOnDeath) {
+                    const amount = Math.min(25, Math.floor(2 + this.mass * (0.5 + 0.5 * Math.random())))
+                    if (tech.isSporeFlea) {
+                        const len = amount / 2
+                        for (let i = 0; i < len; i++) {
+                            const speed = 10 + 5 * Math.random()
+                            const angle = 2 * Math.PI * Math.random()
+                            b.flea(this.position, { x: speed * Math.cos(angle), y: speed * Math.sin(angle) })
+                        }
+                    } else if (tech.isSporeWorm) {
+                        const len = amount / 2
+                        for (let i = 0; i < len; i++) b.worm(this.position)
+                    } else {
+                        for (let i = 0; i < amount; i++) b.spore(this.position)
+                    }
+                }
+                if (tech.isChitin && tech.wire) {
+                    // add new segment where the current tip is
+                    for (let i = 0; i < 2; i++) {
+                        if (tech.wire.segments.length < 200) { //cap max length at 200 for performance
+                            const last = tech.wire.segments[tech.wire.segments.length - 1];
+                            tech.wire.segments.push({ x: last.x, y: last.y, oldX: last.x, oldY: last.y });
+                        }
+                    }
+                }
+                if (tech.isConchoidal) {
+                    const dmg = 1.04
+                    m.damageDone *= dmg
+                    tech.conchoidalDamage *= dmg
+                }
+                if (tech.isExplodeMob) {
+                    b.explosion(this.position, Math.min(700, Math.sqrt(this.mass + 6) * (30 + 60 * Math.random())))
+                }
+                if (tech.nailsDeathMob) {
+                    b.targetedNail(this.position, tech.nailsDeathMob, 39 + 6 * Math.random())
+                }
+                if (Math.random() < tech.botSpawner) {
+                    b.randomBot(this.position, false)
+                    bullet[bullet.length - 1].endCycle = simulation.cycle + 900 //15 seconds
+                    this.leaveBody = false; // no body since it turned into the bot
+                }
+                if (tech.isEnergyLoss) {
+                    m.energy -= 0.05;
+                    if (m.energy < 0) m.energy = 0
+                }
+                if (tech.isAddRemoveMaxHealth) {
+                    if (!this.isBoss) {
+                        const amount = 0.01
+                        if (tech.isEnergyHealth) {
+                            if (m.maxEnergy > amount) {
+                                tech.healMaxEnergyBonus -= amount
+                                m.setMaxEnergy();
+                            }
+                        } else if (m.maxHealth > amount) {
+                            tech.extraMaxHealth -= amount //decrease max health
+                            m.setMaxHealth();
+                        }
+                    }
+                }
+                if (tech.cloakDuplication > 0 && !this.isBoss) {
+                    tech.cloakDuplication = Math.max(0, tech.cloakDuplication - 0.01)
+                    powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 }
             },
             removeConsBB() {
