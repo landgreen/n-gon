@@ -27,10 +27,10 @@ const spawn = {
     ],
     bossTier: [
         [],//T0
-        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "hydraBoss", "centipedeBoss", "roundwormBoss", "tubeWormBoss"],//T1
-        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "spiderBoss2", "tendrilBoss", "hydraBoss2", "caterpillarBoss", "mayflyBoss"],//T2
+        ["snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "hydraBoss", "centipedeBoss", "roundwormBoss", "tubeWormBoss", "jellyBoss"],//T1
+        ["powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "spiderBoss2", "tendrilBoss", "hydraBoss2", "caterpillarBoss", "mayflyBoss", "jellyBoss2"],//T2
         ["powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss", "spiderBoss3", "tendrilBoss3", "larvaBoss"],//T3
-        ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4", "roundwormBoss4"] //T4
+        ["stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4", "roundwormBoss4", "jellyBoss4"] //T4
         //finalBoss is T5
     ],
     // tier-n bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss, trainBoss, trainBoss2    //these need a particular level to work so they scale with level.levelsCleared
@@ -41,8 +41,8 @@ const spawn = {
         // "snakeSpitBoss", "laserBombingBoss", "blockBoss", "revolutionBoss", "slashBoss", "shieldingBoss",
         // "timeSkipBoss", "dragonFlyBoss", "beetleBoss", "sneakBoss", "mantisBoss", "laserLayerBoss",
         // "snakeBoss", "conductorBoss", 
-        "snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss",
-        "powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture",
+        "snakeBoss", "dragonFlyBoss", "slashBoss", "revolutionBoss", "streamBoss", "launcherBoss", "grenadierBoss", "shooterBoss", "orbitalBoss", "spiderBoss", "shieldingBoss", "jellyBoss",
+        "powerUpBossBaby", "sneakBoss", "blockBoss", "laserTargetingBoss", "blinkBoss", "pulsarBoss", "spawnerBossCulture", "growBossCulture", "jellyBoss2",
         "powerUpBoss", "laserLayerBoss", "historyBoss", "beetleBoss", "snakeSpitBoss", "mantisBoss", "laserBombingBoss", "cellBossCulture", "bomberBoss", "timeSkipBoss", "conductorBoss",
         // "stagBeetleBoss", "kingSnakeBoss", "iceBlockBoss", "fabricatorBoss", "pentaLaserBoss", "defendingBoss", "quasarBoss", "spiderBoss4"
     ],
@@ -1332,8 +1332,11 @@ const spawn = {
                 level.exit.x = 5500;
             }
             level.exit.y = -320;
-            Matter.Composite.remove(engine.world, map[map.length - 1]);
-            map.splice(map.length - 1, 1);
+            const block = map.find(who => who.isBlockingExit) //not always the last map element, tech: ray adds walls to the map
+            if (block) {
+                Matter.Composite.remove(engine.world, block);
+                map.splice(map.indexOf(block), 1);
+            }
             simulation.draw.setPaths(); //redraw map draw path
             // level.levels.push("null")
         }
@@ -2346,6 +2349,588 @@ const spawn = {
         me.swordDamage = 0.02 * me.damageScale()
         me.laserAngle = 3 * Math.PI / 5
         me.sword = () => { } //base function that changes during different aspects of the sword swing
+    },
+    jellyBoss2(x, y, radius = 220) { //flies, and over half of each membrane is armored, so you have to hit the other side
+        spawn.jellyBoss(x, y, radius, { tier: 2, rgb: "190, 150, 255", damageReduction: 0.07, nodeDamageReduction: 0.175, armorFraction: 0.58, burstEarly: 1, healthBar: "healthBar2", exposedTime: 420, isFlying: true })
+    },
+    jellyBoss4(x, y, radius = 260) { //twice the nodes, all but 1/4 of each membrane is armored, and it splits into 2 smaller flying blobs at 2/3 and 1/3 health
+        spawn.jellyBoss(x, y, radius, { tier: 4, rgb: "0, 0, 0", damageReduction: 0.2, nodeDamageReduction: 0.35, armorFraction: 1, burstFraction: 1 / 4, burstEarly: 2, healthBar: "healthBar4", nodeCount: 44, thresholds: [0.66, 0.33], isSplit: true, group: { alive: 0 }, exposedTime: 240 })
+    },
+    jellyBoss(x, y, radius = 220, options = {}) { //a ring of node mobs held round by gas pressure around an invulnerable core, popping a node opens a leak that jets it around until the hole seals
+        //popping enough nodes bursts the membrane and exposes the core, each health threshold the core passes grows a new membrane
+        const o = Object.assign({
+            tier: 1, rgb: "0, 190, 170", damageReduction: 0.1, nodeDamageReduction: 0.125, healthBar: "healthBar1",
+            burstFraction: 1 / 3, //fraction of the membrane's nodes that have to pop to burst it
+            armorFraction: 0, //fraction of nodes that are armored, at most all the nodes that don't have to pop
+            burstEarly: 0, //burst this many pops sooner, without changing how many nodes are armored
+            isFlying: false, //no gravity, the membrane pushes it through the air toward the player instead of crawling and hopping
+            nodeCount: 22, //nodes in the first membrane, later membranes have a few more
+            thresholds: [0.75, 0.5, 0.25], //health where the core grows a new membrane
+            isSplit: false, //at each threshold, split into 2 smaller flying blobs before growing new membranes
+            coreRadius: 40,
+            group: null, //{ alive } shared by blobs that split from the same boss, only the last one to die drops the boss power up
+            health: null, //starting health for blobs that split off
+            isGrowing: false, //start with a small membrane that grows, for blobs that split off
+            exposedTime: Infinity, //cycles the core stays exposed after the membrane bursts before it grows a new one anyway
+        }, options)
+        const color = `rgb(${o.rgb})`
+        mobs.spawn(x, y, 7, o.coreRadius, color);
+        const me = mob[mob.length - 1];
+        me.tier = o.tier
+        me.isBoss = true;
+        Matter.Body.setDensity(me, 0.002); //extra dense //normal is 0.001 //makes effective life much larger  and damage on collision
+        me.damageReduction = o.damageReduction  //normal is 1,  most bosses have 0.25
+        me.startingDamageReduction = me.damageReduction
+        me.isInvulnerable = false
+        if (o.health !== null) me.health = o.health
+        const nextThreshold = health => o.thresholds.find(t => t < health) ?? 0
+        me.nextHealthThreshold = nextThreshold(me.health)
+        me.nodeCount = o.nodeCount
+        me.isSplitting = false //split into 2 blobs after the hop, before growing a new membrane
+        if (o.group) o.group.alive++
+        me.frictionAir = 0.03
+        me.seePlayerFreq = 30
+        me.memory = 240
+        me.cd = simulation.cycle + 120 //cycle when it can leap at the player again
+        me.collisionFilter.mask = cat.player | cat.bullet | cat.body //no collisions with its own nodes, or the map while it has a membrane so it can squeeze through gaps
+        me.baseRadius = radius
+        me.membrane = [] //node mobs in order around the ring, each node's linkNext is the constraint to the next node
+        me.holes = [] //{ a, b, link, count } leaking gaps in the membrane between nodes a and b, a weak link keeps the hole from tearing open until it seals after count cycles
+        me.isBursting = false //true while the whole membrane is being killed at once
+        me.gas = 0 //pressure = gas / area
+        me.pressure = 0
+        me.pressureMag = 0.002 //outward force on each node at full pressure, gravity is nodeGravity
+        me.pressureScale = 0 //pressure at full inflation, set in growMembrane()
+        me.isFlying = o.isFlying
+        me.nodeGravity = me.isFlying ? 0 : 0.001
+        me.foldMag = 0.012 //pushes apart nodes that aren't neighbors when they get close, so the membrane doesn't fold
+        me.flyMag = 0.002 //force on each node toward the player while flying
+        me.flySpeed = 11 //top flying speed with a full membrane, about as fast as hydraBoss and tendrilBoss
+        me.rollMag = 0.0007
+        me.crawlMag = 0.012 //nodes touching the map push along the surface toward the player
+        me.adhesionMag = 0.004 //nodes touching the map stick to it, so it can climb walls
+        me.stuck = { cycle: 0, dist: Infinity, tries: 0 } //when it hasn't gotten closer in a while it hops, or steers to the side if flying
+        me.thrustMag = 0.0016 //jet force from each leaking hole at full pressure
+        me.spacing = 0 //rest length of the links between nodes
+        me.leapCount = 0 //cycles left in a leap, the membrane passes through the player while leaping so it can land around them
+        me.regrowCount = Infinity //cycles until the exposed core grows a new membrane, set when the membrane bursts (exposedTime) and when the core passes a health threshold
+        me.burstCount = 0 //the membrane bursts when it has fewer nodes than this, set in growMembrane()
+        me.isEngulfing = false
+        me.center = { x, y }
+        me.digestDmg = 0.004 * me.damageScale()
+        const linkStiffness = 0.9
+        const linkDamping = 0.05
+        const deltaTime2 = simulation.delta * simulation.delta //turns a force per mass into a change in speed each cycle
+        const isInside = (point, ring) => { //ray casting, works for concave rings
+            let inside = false
+            for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                const a = ring[i].position
+                const b = ring[j].position
+                if ((a.y > point.y) !== (b.y > point.y) && point.x < (b.x - a.x) * (point.y - a.y) / (b.y - a.y) + a.x) inside = !inside
+            }
+            return inside
+        }
+        me.link = function (a, b, length, isOpen = false) {
+            consBB[consBB.length] = Constraint.create({ bodyA: a, bodyB: b, stiffness: isOpen ? 0.01 : linkStiffness, damping: linkDamping, length });
+            Composite.add(engine.world, consBB[consBB.length - 1]);
+            a.linkNext = consBB[consBB.length - 1]
+            a.linkNext.isOpen = isOpen //open links are holes, the gas leaks out instead of pushing on them
+            a.linkNext.restLength = isOpen ? length : this.spacing //length grows or shrinks toward this
+        }
+        me.isTangled = function () { //does any edge of the membrane cross another edge
+            const ring = this.membrane
+            const n = ring.length
+            for (let i = 0; i < n; i++) {
+                const p = ring[i].position
+                const q = ring[(i + 1) % n].position
+                for (let j = i + 2; j < n; j++) {
+                    if (i === 0 && j === n - 1) continue //neighbors
+                    const a = ring[j].position
+                    const b = ring[(j + 1) % n].position
+                    const d = (q.x - p.x) * (b.y - a.y) - (q.y - p.y) * (b.x - a.x)
+                    if (!d) continue
+                    const t = ((a.x - p.x) * (b.y - a.y) - (a.y - p.y) * (b.x - a.x)) / d
+                    const u = ((a.x - p.x) * (q.y - p.y) - (a.y - p.y) * (q.x - p.x)) / d
+                    if (t > 0 && t < 1 && u > 0 && u < 1) return true
+                }
+            }
+            return false
+        }
+        me.untangle = function () { //relink the membrane in order around its center
+            for (const node of this.membrane) {
+                Composite.remove(engine.world, node.linkNext)
+                const index = consBB.indexOf(node.linkNext)
+                if (index !== -1) consBB.splice(index, 1)
+            }
+            const c = this.center
+            this.membrane.sort((a, b) => Math.atan2(a.position.y - c.y, a.position.x - c.x) - Math.atan2(b.position.y - c.y, b.position.x - c.x))
+            const n = this.membrane.length
+            for (let i = 0; i < n; i++) {
+                const a = this.membrane[i]
+                const b = this.membrane[(i + 1) % n]
+                this.link(a, b, Vector.magnitude(Vector.sub(a.position, b.position)))
+            }
+        }
+        me.restArea = function () { //area of a circle with the membrane's perimeter, using the current link lengths so it inflates while growing
+            let perimeter = 0
+            for (const node of this.membrane) perimeter += node.linkNext.length
+            return perimeter * perimeter / (4 * Math.PI)
+        }
+        me.setPlayerCollision = function (isOn) {
+            const mask = isOn ? cat.player | cat.bullet | cat.body | cat.map : cat.bullet | cat.body | cat.map
+            this.collisionFilter.mask = mask & ~cat.map
+            for (const node of this.membrane) node.collisionFilter.mask = mask
+        }
+        me.setExposed = function (isExposed) { //the core can only be damaged, and only hits the map, while it has no membrane
+            this.isInvulnerable = !isExposed
+            this.damageReduction = isExposed ? this.startingDamageReduction : 0
+            this.collisionFilter.mask = isExposed ? cat.player | cat.bullet | cat.body | cat.map : cat.player | cat.bullet | cat.body
+        }
+        me.growMembrane = function (isFull = false) { //spawn a small ring of nodes around the core, the links lengthen and the gas refills to inflate it
+            const num = Math.floor(this.nodeCount * (1 + 0.36 * (1 - this.health))) //bigger at lower health
+            const popsToBurst = Math.ceil(o.burstFraction * num)
+            const armored = Math.min(Math.ceil(o.armorFraction * num), num - popsToBurst)
+            this.burstCount = num - popsToBurst + o.burstEarly + 1
+            this.membraneSize = num
+            const ringRadius = this.baseRadius * (1 + 0.25 * (1 - this.health))
+            this.spacing = 2 * Math.PI * ringRadius / num
+            const spot = (i, scale) => ({ x: this.position.x + scale * ringRadius * Math.cos(2 * Math.PI * i / num), y: this.position.y + scale * ringRadius * Math.sin(2 * Math.PI * i / num) })
+            const isBlocked = where => Matter.Query.rayAny(map, this.position, where)
+            let startScale = 0.3
+            if (isFull) { //start full size if it fits, otherwise grow from small
+                startScale = 1
+                for (let i = 0; i < num; i++) {
+                    if (isBlocked(spot(i, 1))) {
+                        startScale = 0.3
+                        break
+                    }
+                }
+            }
+            for (let i = 0; i < num; i++) {
+                let where = spot(i, startScale)
+                if (isBlocked(where)) where = { x: this.position.x, y: this.position.y } //nodes don't collide with the core, so they can start inside it
+                mobs.spawn(where.x, where.y, 0, 13, color);
+                const node = mob[mob.length - 1]
+                node.tier = this.tier
+                node.isDropPowerUp = false
+                node.leaveBody = false
+                node.isArmored = i < armored //armored nodes are on one side of the ring, they can't be damaged
+                node.isInvulnerable = node.isArmored
+                node.isBadTarget = node.isArmored //homing bullets and bots skip armored nodes
+                node.damageReduction = node.isArmored ? 0 : o.nodeDamageReduction
+                if (node.isArmored) node.fill = "#fff"
+                node.frictionAir = 0.01
+                node.friction = 0.6
+                node.restitution = 0.2
+                node.collisionFilter.mask = cat.player | cat.bullet | cat.body | cat.map
+                node.damageScale = () => 0.25 * me.damageScale() //the membrane is soft, touching it does less damage
+                node.onDamage = () => me.locatePlayer()
+                node.onDeath = function () { me.pop(this) }
+                node.do = function () { this.checkStatus() }
+                Matter.Body.setVelocity(node, this.velocity)
+                this.membrane.push(node)
+            }
+            for (let i = 0; i < num; i++) this.link(this.membrane[i], this.membrane[(i + 1) % num], startScale * this.spacing)
+            this.pressureScale = this.pressureMag * this.membrane[0].mass / this.spacing
+            this.gas = this.pressureScale * this.restArea()
+        }
+        me.pop = function (node) { //a node died, open a leaking hole where it was
+            const i = this.membrane.indexOf(node)
+            if (i === -1) return
+            const n = this.membrane.length
+            const prev = this.membrane[(i - 1 + n) % n]
+            const next = this.membrane[(i + 1) % n]
+            this.membrane.splice(i, 1)
+            if (this.isBursting || !this.alive) return
+            this.holes = this.holes.filter(hole => hole.a !== node && hole.b !== node) //neighboring holes merge into one bigger hole, death() removes this node's links after this
+            this.link(prev, next, Vector.magnitude(Vector.sub(prev.position, next.position)), true)
+            this.holes.push({ a: prev, b: next, link: prev.linkNext, count: 100 + Math.floor(40 * Math.random()) })
+            if (this.membrane.length < this.burstCount) this.burst()
+        }
+        me.killMembrane = function () {
+            this.isBursting = true //nodes dying now don't open holes
+            for (const node of this.membrane.slice()) if (node.alive) node.death()
+            this.isBursting = false
+            this.membrane.length = 0
+            this.holes.length = 0
+        }
+        me.burst = function () { //pop the whole membrane at once, the gas blast shoves the player and blocks away and exposes the core
+            const fullness = this.pressureScale ? Math.min(1.5, this.pressure / this.pressureScale) : 0
+            this.killMembrane()
+            this.isEngulfing = false
+            this.leapCount = 0
+            this.setPlayerCollision(true)
+            this.setExposed(true)
+            this.regrowCount = o.exposedTime
+            const range = 1.8 * this.baseRadius
+            const blast = (who, speed) => {
+                const sub = Vector.sub(who.position, this.center)
+                const dist = Vector.magnitude(sub)
+                if (dist < range) Matter.Body.setVelocity(who, Vector.add(who.velocity, Vector.mult(Vector.normalise(sub), speed * fullness * (1 - dist / range))))
+            }
+            blast(player, 30)
+            for (const block of body) if (!block.isStatic) blast(block, 40) //setting velocity on a static body, like a moving platform, sticks forever and launches anything touching it
+            simulation.drawList.push({ x: this.center.x, y: this.center.y, radius: range, color: `rgba(${o.rgb},0.15)`, time: 12 });
+        }
+        me.onDamage = function () {
+            if (this.health < this.nextHealthThreshold && this.alive) {
+                this.health = this.nextHealthThreshold - 0.01
+                this.nextHealthThreshold = nextThreshold(this.health)
+                this.isSplitting = o.isSplit
+                if (this.membrane.length) {
+                    this.setExposed(false)
+                } else {
+                    this.hopToRegrow()
+                }
+            }
+        };
+        me.hopToRegrow = function () { //go immune and hop up off the ground, then grow a new membrane
+            this.setExposed(false)
+            this.regrowCount = 10
+            Matter.Body.setVelocity(this, { x: 0.5 * this.velocity.x, y: -12 })
+        }
+        me.onDeath = function () {
+            this.killMembrane()
+            if (!o.group || --o.group.alive === 0) powerUps.spawnBossPowerUp(this.position.x, this.position.y)
+        };
+        me.split = function () { //shrink and spawn a smaller sibling blob next to it, each grows its own membrane
+            const scale = 0.72
+            Matter.Body.scale(this, scale, scale)
+            this.radius *= scale
+            this.baseRadius *= scale
+            this.nodeCount = Math.round(this.nodeCount * scale)
+            let side = Math.random() < 0.5 ? 1 : -1
+            const spot = () => ({ x: this.position.x + side * 3 * this.radius, y: this.position.y })
+            let where = spot()
+            if (Matter.Query.rayAny(map, this.position, where)) {
+                side *= -1
+                where = spot()
+                if (Matter.Query.rayAny(map, this.position, where)) where = { x: this.position.x, y: this.position.y } //cores don't collide with each other
+            }
+            spawn.jellyBoss(where.x, where.y, this.baseRadius, Object.assign({}, o, { nodeCount: this.nodeCount, coreRadius: this.radius, health: this.health, isGrowing: true, isFlying: true }))
+            this.isFlying = true //blobs that split off fly, only the original crawls
+            this.nodeGravity = 0
+            const sibling = mob[mob.length - 1]
+            Matter.Body.setVelocity(sibling, { x: this.velocity.x + 5 * side, y: this.velocity.y })
+            Matter.Body.setVelocity(this, { x: this.velocity.x - 5 * side, y: this.velocity.y })
+        }
+        me.membraneDo = function () {
+            const ring = this.membrane
+            const n = ring.length
+            let cx = 0, cy = 0, vx = 0, vy = 0, area = 0
+            const bounds = { min: { x: Infinity, y: Infinity }, max: { x: -Infinity, y: -Infinity } }
+            for (let i = 0; i < n; i++) {
+                const p = ring[i].position
+                const q = ring[(i + 1) % n].position
+                cx += p.x
+                cy += p.y
+                bounds.min.x = Math.min(bounds.min.x, p.x - 30)
+                bounds.min.y = Math.min(bounds.min.y, p.y - 30)
+                bounds.max.x = Math.max(bounds.max.x, p.x + 30)
+                bounds.max.y = Math.max(bounds.max.y, p.y + 30)
+                vx += ring[i].velocity.x
+                vy += ring[i].velocity.y
+                area += p.x * q.y - q.x * p.y
+            }
+            const center = this.center = { x: cx / n, y: cy / n }
+            const velocity = { x: vx / n, y: vy / n }
+            const sign = area < 0 ? -1 : 1 //in case the ring gets turned inside out
+            const restArea = this.restArea()
+            const gasTarget = this.pressureScale * restArea
+            area = Math.max(0.5 * Math.abs(area), 0.15 * restArea)
+            //softer than real gas, pressure only rises with the square root of how squished it is, so it can squeeze through gaps
+            const pressure = this.pressure = Math.min(this.pressureScale * (this.gas / gasTarget) * Math.sqrt(restArea / area), 3 * this.pressureScale)
+            const fullness = pressure / this.pressureScale
+            const isGrowing = this.pressurize(sign, pressure)
+            this.keepApart()
+            //the core follows the middle of the membrane
+            this.force.x += (center.x - this.position.x) * 0.0001 * this.mass
+            this.force.y += (center.y - this.position.y) * 0.0001 * this.mass
+            Matter.Body.setVelocity(this, { x: 0.9 * this.velocity.x + 0.1 * velocity.x, y: 0.9 * this.velocity.y + 0.1 * velocity.y })
+            this.vent(center, gasTarget, fullness)
+            if (isGrowing) {
+                this.gas = Math.max(this.gas, gasTarget) //inflate as it grows
+            } else if (!this.holes.length) {
+                this.gas += (gasTarget - this.gas) * 0.006 //slowly reinflate
+            }
+            if (!(simulation.cycle % 10) && !this.holes.length && this.isTangled()) this.untangle() //fix the membrane if it folds over itself
+            if (this.seePlayer.recall) {
+                this.roll(center)
+                this.findContacts(bounds)
+                const canLeap = this.isFlying ? this.fly(center, velocity) : this.crawl(center, velocity)
+                this.leap(center, canLeap, fullness)
+            }
+            if (this.leapCount > 0 && --this.leapCount === 0) this.setPlayerCollision(true)
+            //the player is stuck inside, slowed by the goo and digested
+            this.isEngulfing = this.leapCount === 0 && isInside(player.position, ring)
+            if (this.isEngulfing) {
+                Matter.Body.setVelocity(player, { x: 0.9 * player.velocity.x + 0.1 * velocity.x, y: 0.9 * player.velocity.y + 0.1 * velocity.y })
+                if (!(simulation.cycle % 15) && m.immuneCycle < m.cycle) m.takeDamage(this.digestDmg)
+            }
+            this.drawMembrane()
+        }
+        me.keepApart = function () { //push apart nodes that aren't neighbors when they get closer than a link length, so the membrane can't fold or twist over itself
+            const ring = this.membrane
+            const n = ring.length
+            const minGap = this.spacing
+            for (let i = 0; i < n; i++) {
+                const a = ring[i]
+                for (let j = i + 2; j < n; j++) {
+                    if (i === 0 && j === n - 1) continue //neighbors
+                    const b = ring[j]
+                    const dx = b.position.x - a.position.x
+                    const dy = b.position.y - a.position.y
+                    if (dx > minGap || dx < -minGap || dy > minGap || dy < -minGap) continue
+                    const gap = Math.sqrt(dx * dx + dy * dy)
+                    if (gap >= minGap || gap < 0.1) continue
+                    const push = this.foldMag * (1 - gap / minGap) / gap
+                    a.force.x -= dx * push * a.mass
+                    a.force.y -= dy * push * a.mass
+                    b.force.x += dx * push * b.mass
+                    b.force.y += dy * push * b.mass
+                }
+            }
+        }
+        me.pressurize = function (sign, pressure) { //gas pressure pushes each closed edge outward, gravity pulls each node down, returns true while the links are still growing
+            const ring = this.membrane
+            const n = ring.length
+            let isGrowing = false
+            for (let i = 0; i < n; i++) {
+                const a = ring[i]
+                const b = ring[(i + 1) % n]
+                a.force.y += a.mass * this.nodeGravity
+                //push inward kinks back out, so the membrane doesn't fold over itself
+                const prev = ring[(i - 1 + n) % n].position
+                if (sign * ((a.position.x - prev.x) * (b.position.y - a.position.y) - (a.position.y - prev.y) * (b.position.x - a.position.x)) < 0) {
+                    const out = Vector.normalise({ x: sign * (b.position.y - prev.y), y: -sign * (b.position.x - prev.x) })
+                    a.force.x += out.x * this.pressureMag * a.mass
+                    a.force.y += out.y * this.pressureMag * a.mass
+                }
+                const link = a.linkNext
+                if (link.isOpen) continue
+                const fx = 0.5 * sign * pressure * (b.position.y - a.position.y)
+                const fy = -0.5 * sign * pressure * (b.position.x - a.position.x)
+                a.force.x += fx
+                a.force.y += fy
+                b.force.x += fx
+                b.force.y += fy
+                if (link.length < link.restLength) { //grow after spawning
+                    link.length = Math.min(link.restLength, link.length + 2)
+                    isGrowing = true
+                } else if (link.length > link.restLength) { //shrink after a hole seals
+                    link.length = Math.max(link.restLength, link.length - 2)
+                }
+            }
+            return isGrowing
+        }
+        me.vent = function (center, gasTarget, fullness) { //leaking holes vent gas and jet the whole blob the other way, like letting go of a balloon
+            for (let i = this.holes.length - 1; i >= 0; i--) {
+                const hole = this.holes[i]
+                const mid = Vector.mult(Vector.add(hole.a.position, hole.b.position), 0.5)
+                const jet = Vector.rotate(Vector.normalise(Vector.sub(mid, center)), 0.5 * Math.sin(simulation.cycle * 0.13 + 2 * i))
+                const thrust = this.thrustMag * Math.min(1, this.gas / gasTarget)
+                for (const node of this.membrane) {
+                    node.force.x -= jet.x * thrust * node.mass
+                    node.force.y -= jet.y * thrust * node.mass
+                }
+                this.force.x -= jet.x * thrust * this.mass
+                this.force.y -= jet.y * thrust * this.mass
+                this.gas = Math.max(0.3 * gasTarget, 0.985 * this.gas) //it never fully deflates
+                const toPlayer = Vector.sub(player.position, mid)
+                const dist = Vector.magnitude(toPlayer)
+                if (dist < 300 && Vector.dot(toPlayer, jet) > 0.7 * dist) { //the jet blows the player away
+                    player.force.x += jet.x * 0.003 * fullness * player.mass
+                    player.force.y += jet.y * 0.003 * fullness * player.mass
+                }
+                hole.count--
+                if (hole.count < 0) { //seal the hole, the link shrinks to normal length
+                    hole.link.isOpen = false
+                    hole.link.stiffness = linkStiffness
+                    hole.link.restLength = this.spacing
+                    this.holes.splice(i, 1)
+                }
+            }
+        }
+        me.roll = function (center) { //spin the membrane toward the player
+            const dx = this.seePlayer.position.x - center.x
+            const roll = (dx > 0 ? 1 : -1) * this.rollMag * Math.min(1, Math.abs(dx) / 300)
+            for (const node of this.membrane) {
+                const rx = node.position.x - center.x
+                const ry = node.position.y - center.y
+                const r = Math.sqrt(rx * rx + ry * ry) || 1
+                node.force.x -= ry / r * roll * node.mass
+                node.force.y += rx / r * roll * node.mass
+            }
+        }
+        me.findContacts = function (bounds) { //set node.into, the direction into the map for nodes touching it, or null
+            const near = [] //only check the map near the membrane
+            for (const wall of map) if (Matter.Bounds.overlaps(wall.bounds, bounds)) near.push(wall)
+            for (const node of this.membrane) {
+                const hits = Matter.Query.collides(node, near)
+                //Matter's normal points toward bodyA
+                node.into = hits.length ? Vector.normalise(hits.reduce((sum, hit) => Vector.add(sum, hit.bodyA === node ? Vector.neg(hit.normal) : hit.normal), { x: 0, y: 0 })) : null
+            }
+        }
+        me.fly = function (center, velocity) { //every node pushes toward the player, so it flies slower as nodes pop, returns true so it can leap from the air
+            const sub = Vector.sub(this.seePlayer.position, center)
+            const dist = Vector.magnitude(sub)
+            if (dist < 0.5 * this.baseRadius) return true //on top of the player
+            const toTarget = Vector.mult(sub, 1 / dist)
+            //when it stops getting closer, like under a platform, steer to one side and then the other until it gets around
+            if (simulation.cycle > this.stuck.cycle + 45) {
+                const isStuck = dist > this.stuck.dist - 40 && (dist > 300 || Matter.Query.rayAny(map, center, this.seePlayer.position))
+                this.stuck.tries = isStuck ? this.stuck.tries + 1 : 0
+                this.stuck.cycle = simulation.cycle
+                this.stuck.dist = dist
+            }
+            const heading = this.stuck.tries ? Vector.normalise(Vector.add(toTarget, Vector.mult(Vector.perp(toTarget), this.stuck.tries % 2 ? 1 : -1))) : toTarget
+            const share = this.membrane.length / this.membraneSize
+            const forward = Vector.dot(velocity, toTarget)
+            const drive = Math.max(0, 1 - forward / (this.flySpeed * share)) //ease off at top speed
+            const side = Vector.sub(velocity, Vector.mult(toTarget, forward)) //damp sideways drift so it doesn't circle the player
+            for (const node of this.membrane) {
+                let push = heading
+                if (node.into) { //slide along walls instead of pushing into them
+                    const dot = Vector.dot(heading, node.into)
+                    if (dot > 0) {
+                        const along = Vector.sub(heading, Vector.mult(node.into, dot))
+                        const length = Vector.magnitude(along)
+                        push = length > 0.1 ? Vector.mult(along, 1 / length) : { x: 0, y: 0 }
+                    }
+                }
+                node.force.x += (push.x * this.flyMag * drive * share - side.x * 0.03 / deltaTime2) * node.mass
+                node.force.y += (push.y * this.flyMag * drive * share - side.y * 0.03 / deltaTime2) * node.mass
+            }
+            return true
+        }
+        me.crawl = function (center, velocity) { //nodes touching the map stick to it and crawl along it toward the player, and hop when stuck, returns true if it's on the ground
+            const ring = this.membrane
+            const sub = Vector.sub(this.seePlayer.position, center)
+            const dist = Vector.magnitude(sub)
+            const toTarget = Vector.normalise(sub)
+            const drive = dist < 0.5 * this.baseRadius ? 0 : Math.max(0, 1 - Vector.dot(velocity, toTarget) / 7) //ease off at top speed, and stop crawling when on top of the player so it doesn't fold itself up
+            let isGrounded = false
+            let isOnWall = false
+            for (const node of ring) {
+                const into = node.into
+                if (!into) continue
+                if (into.y > 0.5) isGrounded = true
+                const dot = Vector.dot(toTarget, into)
+                if (dot > -0.3) { //let go of surfaces facing away from the player, like a ceiling when the player is below
+                    node.force.x += into.x * this.adhesionMag * node.mass
+                    node.force.y += into.y * this.adhesionMag * node.mass
+                    if (Math.abs(into.x) > 0.6) isOnWall = true
+                }
+                const along = Vector.sub(toTarget, Vector.mult(into, dot))
+                const length = Vector.magnitude(along)
+                if (length > 0.2) {
+                    node.force.x += along.x / length * this.crawlMag * drive * node.mass
+                    node.force.y += along.y / length * this.crawlMag * drive * node.mass
+                }
+            }
+            if (isOnWall && toTarget.y < -0.2) { //cling to walls to climb up them, less gravity
+                for (const node of ring) node.force.y -= 0.75 * this.nodeGravity * node.mass
+            }
+            //hop toward the player if it's stuck, like below a ledge
+            if (simulation.cycle > this.stuck.cycle + 45) {
+                const isStuck = dist > this.stuck.dist - 40 && (dist > 300 || Matter.Query.rayAny(map, center, this.seePlayer.position)) //not getting closer, and not already next to the player
+                this.stuck.tries = isStuck ? this.stuck.tries + 1 : 0
+                if (isGrounded && isStuck && this.leapCount === 0) {
+                    const g = this.nodeGravity * deltaTime2
+                    const vy = -Math.min(24, Math.sqrt(2 * g * Math.max(150, 120 - sub.y)) * 1.15)
+                    let hop = { x: Math.max(-10, Math.min(10, sub.x / (1.5 * -vy / g))), y: vy }
+                    //if hopping up didn't work and something is overhead, like being under a platform, hop out one side and then the other
+                    if (this.stuck.tries % 3 && Matter.Query.rayAny(map, center, { x: center.x, y: center.y - this.baseRadius - 150 })) {
+                        hop = { x: 10 * (sub.x > 0 ? 1 : -1) * (this.stuck.tries % 3 === 1 ? 1 : -1), y: -8 }
+                    }
+                    for (const node of ring) Matter.Body.setVelocity(node, Vector.add(Vector.mult(node.velocity, 0.3), hop))
+                    Matter.Body.setVelocity(this, hop)
+                }
+                this.stuck.cycle = simulation.cycle
+                this.stuck.dist = dist
+            }
+            return isGrounded
+        }
+        me.leap = function (center, canLeap, fullness) { //leap onto the player, the membrane passes through them while in the air so it lands around them
+            if (
+                canLeap && this.leapCount === 0 && this.cd < simulation.cycle && !this.holes.length && !this.isEngulfing && fullness > 0.7 &&
+                Vector.magnitudeSquared(Vector.sub(player.position, center)) < 800 * 800
+            ) {
+                this.cd = simulation.cycle + 240 + Math.floor(120 * Math.random())
+                this.leapCount = 40
+                this.setPlayerCollision(false)
+                const leap = {
+                    x: Math.max(-20, Math.min(20, (player.position.x - center.x) / this.leapCount)),
+                    y: Math.max(-25, Math.min(5, (player.position.y - center.y) / this.leapCount - 0.5 * this.nodeGravity * deltaTime2 * this.leapCount))
+                }
+                for (const node of this.membrane) Matter.Body.setVelocity(node, leap)
+                Matter.Body.setVelocity(this, leap)
+            }
+        }
+        me.drawMembrane = function () { //the inside, then the skin, white between armored nodes, and none over open holes
+            const ring = this.membrane
+            const n = ring.length
+            ctx.beginPath();
+            ctx.moveTo(ring[0].position.x, ring[0].position.y)
+            for (let i = 1; i < n; i++) ctx.lineTo(ring[i].position.x, ring[i].position.y)
+            ctx.closePath()
+            ctx.fillStyle = `rgba(${o.rgb},0.8)`
+            ctx.fill()
+            ctx.lineWidth = 8
+            ctx.lineCap = "round"
+            for (const isArmor of [false, true]) {
+                ctx.beginPath();
+                for (let i = 0; i < n; i++) {
+                    if (ring[i].linkNext.isOpen) continue
+                    const b = ring[(i + 1) % n]
+                    if ((ring[i].isArmored && b.isArmored) !== isArmor) continue
+                    ctx.moveTo(ring[i].position.x, ring[i].position.y)
+                    ctx.lineTo(b.position.x, b.position.y)
+                }
+                ctx.strokeStyle = isArmor ? "#fff" : color
+                ctx.stroke()
+            }
+            ctx.lineCap = "butt"
+            if (o.armorFraction) { //white outline on armored nodes
+                ctx.beginPath();
+                for (const node of ring) {
+                    if (!node.isArmored) continue
+                    ctx.moveTo(node.position.x + node.radius + 3, node.position.y)
+                    ctx.arc(node.position.x, node.position.y, node.radius + 3, 0, 2 * Math.PI)
+                }
+                ctx.lineWidth = 5 + 3 * Math.random()
+                ctx.strokeStyle = `rgba(255,255,255,${0.6 + 0.2 * Math.random()})`
+                ctx.stroke()
+            }
+        }
+        me.exposedDo = function () { //no membrane, the core falls and sits there until it passes a health threshold or runs out of time, then hops up and grows a new one
+            this.regrowCount--
+            this.force.y += this.mass * 0.001 //it can't move on its own without a membrane, it just falls
+            this.center = { x: this.position.x, y: this.position.y }
+            if (this.regrowCount < 0 && !this.isPhaseInvulnerable) { //ran out of time before passing a health threshold
+                this.hopToRegrow()
+            } else if (this.regrowCount < 0) {
+                this.regrowCount = Infinity
+                if (this.isSplitting) {
+                    this.isSplitting = false
+                    this.split()
+                }
+                this.growMembrane()
+            }
+        }
+        me.do = function () {
+            this.seePlayerByHistory(60);
+            this.checkStatus();
+            if (this.seePlayer.recall) this[o.healthBar]()
+            if (this.isPhaseInvulnerable) this.drawPhaseOutline() //immune while it has a membrane
+            if (this.membrane.length) {
+                this.membraneDo()
+            } else {
+                this.exposedDo()
+            }
+        };
+        me.growMembrane(!o.isGrowing)
+        me.setExposed(false)
     },
     softSegmentDeath(who, isHead = false) { //soft boss segment died: unlock the next columns, and end the boss when only a couple segments are left
         who.isSoftBoss = false;

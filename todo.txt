@@ -1,54 +1,51 @@
 
 
-grappling hook: the rope wraps around map corners and pulls you around them instead of through walls
-  rappel down faster
-  let go of down and the rope holds its length, press up to reel in again
-  left and right pump your swing around the hook
+boss: jellyBoss
+constraints: slow bots - when stronger, slowed nail, foam, sound, and boom bots also wait 1.5x longer between attacks
+mouse cursor shows a pointer over buttons, checkboxes, sliders, menus, and clickable cards
 
-pause left menus - clean up 
-outlier - every 5 seconds, after you fire, nearby bullets get 3x mass
-  brackets around your crosshair close in until your next big shot is ready
-portal field: ↑↓↑↓↑ lets you see through your portals, replacing the preview checkbox
-health bar grows more slowly above 100 max health and never reaches across the screen, 700 max health is about half the screen
+tech: ground wire - while grounded or attached, grappling hook rope stuns and damages mobs it touches for 10 energy per zap
+grappling hook
+  new secret combo replaces ↑↑↓↓, it fires a line that attaches without pulling until you press field
+  the rope wraps up to 30 corners, 15 in performance mode
+  holding down while attached lowers you about 30% faster
+  laser, plasma, and orbit bots do 1.5x less damage, and dynamo bots give 1.5x less energy
+tech: self-locating uncertainty - after dying rewind to the start of the level in this reality
+  requires quantum immortality
+tech: the old self-locating uncertainty is renamed localization
+tech: fine-tuned universe - rewind to the start of the level,
+  undoing everything since the checkpoint  
+tech: observer effect - 1.7x damage to mobs that are off screen, stacks up to 3 times
+  replaces kinetic bombardment
+tech: tunable laser is renamed acousto-optic modulator
+tech: aerostat, dead reckoning, microstates, simulated annealing, dynamical systems, Gibbs free energy, exothermic process, control theory, fluoroantimonic acid, and negative feedback
+  can all stack up to 3 times
 
-tech: double beta decay - mob death tech effects happen twice, expend 4 research, requires 2 mob death tech
-tech: stress-energy tensor - set max health equal to max energy, expend 3 research
-tech: mass hyperboloid - set max energy equal to max health, expend 3 research
-
-new community map: ballast by DesBoot
-community map downpour changes
-community map turbine changes
 
 bug fixes
-  Ψ(t) collapse's text now matches the 6 research it spawns after a boss dies
-  continuing a saved run no longer leaves your field's key combo active in later runs, which caused errors on key presses after switching to field emitter
-  mortars are visible again, they fade in when they see you and can touch you once fully visible
-  performance mode takes effect as soon as you tick it, block outlines used to wait for a new run and mirrors for the next level
-  labs hop room mobs match the level's tier, with a third one tier higher, no more tier 3 hopMothers on the first level
-  community maps perplex and biohazard had 3 walls built inside out, so things like bullets and mines didn't always treat them as solid
-  the grappling hook no longer flies through thin walls
+  mass-energy equivalence no longer gets fluoroantimonic acid damage without having fluoroantimonic acid
+  Gibbs free energy text shows its real damage, 1.007x for each missing energy
+  acoustic levitation keeps all its stacks of jump time after Higgs mechanism is reapplied or removed
+  clicking a skin tech upgrade orb says its name out loud again
+  the wall blocking null on the final level is removed even when ray has left a wall behind
+  getting stuck in the map is caught in about 3 seconds instead of up to 11, and catches being wedged in thin gaps
+    you're moved back to your last spot outside the map instead of the level start
+  paradigm shift no longer ejects the wrong tech after strange loop or martingale gives a tech while paused
 
 
 
 *********************************************************** TODO *****************************************************
- 
-A visual for kinetic bombardment:
 
-improve player stuck in map code?
+
+make some new mobs
+  stream line new mob creation and balance testing
+  see ideas at bottom of this todo.txt
 
 
 new version of history boss with legs and it looks in the same direction the player looked in but +180
   also has a laser sword?
   also shots bullets?
 
- 
-add more stronger constraints
-  slow bots
-  is2xAmmo
-    3x ammo?
-  isNoDuplicate
-    maybe the duplication chance becomes chance to spawn nothing?
-    maybe it's a chance to spawn the wrong thing?
 
 new difficulty ideas
   much fewer tech spawn
@@ -58,34 +55,9 @@ new difficulty ideas
       (field) don't normally spawn
   1 higher TIER mob
     make a few mobs at T5
-  randomly disable 10% of your tech each level
-    better as a constraint?
-  1 fewer choice
-    if chosen, remove it's constraint
   2x boss health
   2x mob health
-  convert all constraints into coupling?
-    pros
-      extreme customization
-        gain ~10 new difficulty options
-      some constraints are annoying to people and can be skipped
-      other constraints don't have space to really develop
-    cons
-      loss of current constraint and stronger constraint difficulty options
-      too many options overwhelming complexity watered down difficulty
-      lack of clear "hardest" difficulty
-      UI changes
-        rework rainbow color
-      many constraints are incompatible for a full game
-        could use the incompatible constraints for JUNK or normal tech 
-        slow bots
-        hallucinations
-        no health bar? maybe
-      maybe adapt these
-        power ups in stasis
-          only push power ups the moment they spawn, but not when added to new level
-        no duplication (0.5x dup?)
-        field drains energy (just reduce effect)
+  
         
 
 new level element - color keys and keyButtons    
@@ -830,105 +802,6 @@ Pixabay Download Free Game Sound Effects - Royalty-Free Video Game Sounds | Soun
 Mixkit Download Free Game Sound Effects | Mixkit - Has 36 free game sound effects Download Free Game Sound Effects | Mixkit including arcade games sounds to sporting game samples Download Free Game Sound Effects | Mixkit.
 Zapsplat Game Developer Sounds | Download FREE Game Developer sound effects | Zapsplat - Thousands of free sounds for game developers, including action tones, win, bonus, level up, coins Game Developer Sounds | Download FREE Game Developer sound effects | Zapsplat.
 
-
-******************************************************** LORE ********************************************************
-
-look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
-
-possible names for tech
-  sidereal - with respect to the stars  (an extra rotation for time keeping)
-  hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
-  swarm intelligence - for a drone tech
-  metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
-  stochastic optimization
-  electrostatic discharge
-  Gödel's incompleteness
-  phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
-  Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
-  evolutionary cosmology
-  eternal inflation
-  hypergraph
-  SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
-  Josephson junction - superconducting junction used in SQUIDS and quantum computers
-  nuclear pasta - hard matter in neutron star
-  spaghettification
-  nonperturbative
-  D-branes
-  instanton or pseudoparticle
-  soliton  (wave packet that can do strange stuff, like move at different speeds proportional to amplitude)
-  hall effect thrusters (related to magnetism)
-  particle accelerator
-  superluminal signalling
-  lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
-  p-hacking JUNK tech
-  https://en.wikipedia.org/wiki/High-entropy_alloys  high yield strength and low ductility, high temp resistance
-  https://en.wikipedia.org/wiki/Refractory_metals  hard, high temp resistance
-  https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
-  prion quine - self replicating protein
-  Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time
-    this is violated by expansion of the universe
-  https://en.wikipedia.org/wiki/Cosmic_censorship_hypothesis - black holes can't leak
-  Alcubierre warp drive (FTL with negative mass)
-  Spherules - A spherule is a small sphere or spherical body. It can also refer to a thick-walled spherical structure that contains endospores and occurs in the parasitic form of fungi
-  negative entropy
-  memetics
-  magnetorquers - produce spin by pushing on earth's magnetic field
-  Josephson junction - superconducting junction
-  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
-  Unruh effect - accelerating makes heat/thermal particles
-  configuration space - holds the position of everything (related to fermions/bosons and particle interactions)
-  radioisotope thermoelectric generator -
-  retrovirus: these things make JUNK DNA so link it somehow to that tech?
-    Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
-  thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
-  ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
-  difference engine - early calculator/computer
-  cyanoacrylate - superglue use for a slowing effect?
-  math terms - integral, derivative, Laplace transform, inflection point
-  quasicrystals - something with low friction, maybe defense?
-  coalescence - things merging together like clouds.  maybe mergin power ups?
-  trihydrogen cation - common molecule in space, dark matter tech?
-  superradiance - laser tech
-  cryocoolers - freezing effects
-  metaphysics - maybe this changes something deep and universal about physics?  not sure
-  cork - used as a heat shield for rockets
-  P = NP - something with speeding up calculation times
-  NP-complete
-  transistivity - something where a>b and b>c ->  a>c
-  lenticular - looks different from different angles (lasers?, cloaking?)
-    every few seconds pick a random skin tech?
-  De Sitter space - simple model of universe related to general relativity (mass-energy?)
-  active optics - something with lasers?  maybe something with diffuse beam getting smaller
-  biofilm - something defensive?  related to spores?
-  thermogalvanic - makes things cold, for no energy
-  intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
-  Kolmogorov complexity - how long the computer program code for an algorithm is, related to entropy?
-  r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
-  acousto-optic modulator - sound makes light have a different frequency (maybe use for laser tech with many colors)
-  gravity wave -
-  tuple - a finite list
-  Navier–Stokes - equations for the movement of fluids
-  renormalization
-  fractal dimension - maybe for surface area?
-  self-locating uncertainty - something related to anthropic principle, or many worlds
-  fine-tuned universe
-  ontic - real (maybe something with research)
-  epistemic - knowledge about whats real, but not strictly real... (maybe something with research)
-  nonagon - nine-sided polygon
-  brute fact - a fact that cannot be explained in terms of a deeper, more "fundamental" fact.
-  involution (function that is it's own inverse, like 1/x)
-  modus tollens (If P, then Q. Not Q. Therefore, not P.)
-  modus ponens (If P, then Q. P. Therefore, Q.)
-  parsimony - just means Occam's razor
-  zero-index waveguide - something for metematerial cloaking field
-  beables - randomly chosen configuration of physical quantities
-  complex, real, imaginary numbers - something with rotation, dimensionality, or quantum spaces
-    maybe negative mass tech?
-  localization - something about many worlds...
-  metallic hydrogen - energy or damage reduction maybe?
-  birefringence - light, laser: light ray to split into two distinct rays traveling at different speeds
-
-
 ******************************************************* DESIGN ******************************************************
 
 priorities
@@ -1079,3 +952,131 @@ tech choose menu, 6 options              ~1,050 µs                 ~2,400 µs  
   that animation check kept the game cycle unchanged in every window; the ~17 ms/s includes the browser's background overhead
   disabling animations was a temporary measurement-only browser override; no menu styles or game behavior were changed
   menu measurements omit complete GPU/compositor costs, scrolling, typing, tooltips, and cold asset/font loading
+
+******************************************************** LORE ********************************************************
+
+look up sci-fi science ideas here  https://projectrho.com/public_html/rocket/
+
+possible names for tech
+  sidereal - with respect to the stars  (an extra rotation for time keeping)
+  hypergolic - A hypergolic propellant combination used in a rocket engine is one whose components spontaneously ignite when they come into contact with each other.
+  swarm intelligence - for a drone tech
+  metaheuristic - is a higher-level procedure or heuristic designed to find, generate, or select a heuristic (partial search algorithm) that may provide a sufficiently good solution to an optimization problem, especially with incomplete or imperfect information or limited computation capacity
+  stochastic optimization
+  electrostatic discharge
+  Gödel's incompleteness
+  phlogiston theory is a superseded scientific theory that postulated the existence of a fire-like element called phlogiston
+  Laplace's demon was a notable published articulation of causal determinism on a scientific basis by Pierre-Simon Laplace in 1814.[1] According to determinism, if someone (the demon) knows the precise location and momentum of every atom in the universe, their past and future values for any given time are entailed; they can be calculated from the laws of classical mechanics.
+  evolutionary cosmology
+  eternal inflation
+  hypergraph
+  SQUID (for superconducting quantum interference device) is a very sensitive magnetometer used to measure extremely subtle magnetic fields, based on superconducting loops containing Josephson junctions.
+  Josephson junction - superconducting junction used in SQUIDS and quantum computers
+  nuclear pasta - hard matter in neutron star
+  spaghettification
+  nonperturbative
+  D-branes
+  instanton or pseudoparticle
+  soliton  (wave packet that can do strange stuff, like move at different speeds proportional to amplitude)
+  hall effect thrusters (related to magnetism)
+  particle accelerator
+  superluminal signalling
+  lenticular lens:  is an array of lenses, designed so that when viewed from slightly different angles, different parts of the image underneath are shown.
+  p-hacking: JUNK tech effects
+  https://en.wikipedia.org/wiki/High-entropy_alloys  high yield strength and low ductility, high temp resistance
+  https://en.wikipedia.org/wiki/Refractory_metals  hard, high temp resistance
+  https://en.wikipedia.org/wiki/Upper-atmospheric_lightning#Elves
+  prion quine - self replicating protein
+  Unitarity - https://en.wikipedia.org/wiki/Unitarity_(physics) - all probabilities add up to 1, calculations work the same forward and backwards in time
+    this is violated by expansion of the universe
+  https://en.wikipedia.org/wiki/Cosmic_censorship_hypothesis - black holes can't leak
+  Alcubierre warp drive (FTL with negative mass)
+  Spherules - A spherule is a small sphere or spherical body. It can also refer to a thick-walled spherical structure that contains endospores and occurs in the parasitic form of fungi
+  negative entropy
+  memetics
+  magnetorquers - produce spin by pushing on earth's magnetic field
+  Josephson junction - superconducting junction
+  Pyroelectricity - voltage from temp changes - upgrade from piezoelectricity
+  Unruh effect - accelerating makes heat/thermal particles
+  configuration space - holds the position of everything (related to fermions/bosons and particle interactions)
+  radioisotope thermoelectric generator -
+  retrovirus: these things make JUNK DNA so link it somehow to that tech?
+    Upon infection with a retrovirus, a cell converts the retroviral RNA into DNA and sometimes the DNA will be passed on to progeny as JUNK DNA
+  thermoplastic - the stuff in 3-D printers, use for molecular assembler tech
+  ergosphere - region of a spinning black hole that might allow FTL or alternate realities.
+  difference engine - early calculator/computer
+  cyanoacrylate - superglue use for a slowing effect?
+  math terms - integral, derivative, Laplace transform, inflection point
+  quasicrystals - something with low friction, maybe defense?
+  coalescence - things merging together like clouds.  maybe mergin power ups?
+  trihydrogen cation - common molecule in space, dark matter tech?
+  superradiance - laser tech
+  cryocoolers - freezing effects
+  metaphysics - maybe this changes something deep and universal about physics?  not sure
+  cork - used as a heat shield for rockets
+  P = NP - something with speeding up calculation times
+  NP-complete
+  transistivity - something where a>b and b>c ->  a>c
+  lenticular - looks different from different angles (lasers?, cloaking?)
+    every few seconds pick a random skin tech?
+  De Sitter space - simple model of universe related to general relativity (mass-energy?)
+  active optics - something with lasers?  maybe something with diffuse beam getting smaller
+  biofilm - something defensive?  related to spores?
+  thermogalvanic - makes things cold, for no energy
+  intron - noncoding DNA that separates regions of coding DNA,  use for JUNK tech
+  Kolmogorov complexity - how long the computer program code for an algorithm is, related to entropy?
+  r-selection - flea/worm tech - opposite of K-selection, so lots of weaker sproes/fleas
+  gravity wave -
+  tuple - a finite list
+  Navier–Stokes - equations for the movement of fluids
+  renormalization
+  fractal dimension - maybe for surface area?
+  ontic - real (maybe something with research)
+  epistemic - knowledge about whats real, but not strictly real... (maybe something with research)
+  nonagon - nine-sided polygon
+  brute fact - a fact that cannot be explained in terms of a deeper, more "fundamental" fact.
+  involution (function that is it's own inverse, like 1/x)
+  modus tollens (If P, then Q. Not Q. Therefore, not P.)
+  modus ponens (If P, then Q. P. Therefore, Q.)
+  parsimony - just means Occam's razor
+  zero-index waveguide - something for metematerial cloaking field
+  beables - randomly chosen configuration of physical quantities
+  complex, real, imaginary numbers - something with rotation, dimensionality, or quantum spaces
+    maybe negative mass tech?
+  localization - something about many worlds...
+  metallic hydrogen - energy or damage reduction maybe?
+  birefringence - light, laser: light ray to split into two distinct rays traveling at different speeds
+
+
+************************************  mob/boss ideas ********************************************************
+
+Multi-body bosses connected in new ways
+Ripped armor (inspired by Shadow of the Colossus and Terraria's Golem). A big core covered in armor plates. The plates are real blocks in body[], welded to the core by two offset constraints each, so they turn with it. Bullets just thud off them. You grab a plate with your field and pull; past a stretch threshold the weld snaps and you're holding a heavy plate you can throw at the exposed core. You can also stand on the plates and ride it. It turns block-throwing, n-gon's core verb, into the boss fight.
+
+Marionette. An invulnerable puppeteer floats near the ceiling. Strings (long constraints with pointB on each limb) run down to a hinged ragdoll knight that it yanks around to attack. Cutting a string by shooting its midpoint node makes that limb go limp. With every string cut the puppet collapses and the puppeteer has to come down. It's a real ragdoll with joints, which you don't have yet.
+
+Splitting worm (Terraria's Eater of Worlds). Kill a middle segment and the chain splits into two worms, and the segment nearest the break becomes a new head. Your current snakes and soft grids lose segments in a fixed order; this one makes where you shoot matter. It needs a cap on the number of heads.
+
+Linkage walker (Theo Jansen's Strandbeest). A motor body spins with setAngularVelocity, and a pin-jointed linkage turns that rotation into a real walking gait with stomping feet. Destroy a joint and that leg locks up, so it limps; the gait gets visibly worse as it takes damage. One caveat: Matter's constraints are soft, so a full Jansen linkage may jitter. A simpler 4-bar or Klann linkage is safer.
+
+Flail. A small, fragile core swings a heavy invulnerable ball on a chain of tiny links. The ball smashes blocks and you. Because the chain is real, it wraps around map corners and gets snagged, and you can fight it by tangling it. Grappling or negative-mass the ball to turn it back on the core.
+
+New mechanics
+Grabber (Rain World's Daddy Long Legs). Tentacles latch onto the player with a constraint and reel you toward a mouth. You escape by shooting the tentacle, boosting until it overstretches and snaps, or using your field. This would feel very different from anything in n-gon. It has to release reliably on death, level change and immunity frames.
+
+Ring-out (Smash Bros). Direct damage only builds up a knockback percentage. The boss dies from impact: slamming into a wall above a speed threshold, or being knocked into spikes or a pit. It tries to jump back to safety the way Smash characters recover. Knockback tech, explosions, thrown blocks and negative mass suddenly become the build.
+
+Topple boss (an inverted pendulum, like the active ragdolls in Totally Accurate Battle Simulator). A tall unicycle-like boss keeps itself upright with torque and can't be hurt while it's standing. Hits high up give more leverage. Knock it over and it lies stunned and open until it rights itself, so the stun comes from the physics instead of a timer.
+
+Pressure blob (Gish, LocoRoco). A ring of nodes with perimeter springs plus an outward "gas pressure" force that scales with target area divided by current area. It squishes through gaps and can engulf you: you're inside the ring taking damage and have to shoot your way out. Pop a node and gas jets out of the hole, so it rockets around like a released balloon and shrinks before it reseals. That's a lot of physics comedy from one mechanic.
+
+Entangled pair. Two bodies joined by a wave tether share one health pool. Damaging only one heals it back unless you hit both within a short window, or they swap positions whenever one is hit. It fits n-gon's physics-concept naming.
+
+Radically different
+Parasite: a boss with no body of its own. It's tiny and latches onto the strongest nearby mob with a constraint, buffing and steering it. When the host dies it leaps to the next mob, to a block (and animates it), or to you, where it drags on your movement until you shake it off. You fight it by managing what's around it.
+
+Swallowed. A boss made of a hinged cage of plates eats you, and the fight happens inside it while it rolls around the level like a hamster ball. Gravity relative to the walls keeps shifting, and the organs are inside with you. Hinged plates (pointB) give it a floppy, organic feel. Fast players might clip through the cage, so the bars need to be thick.
+
+Mirror. The boss is your reflection across a line, so your movement drives it. When you fire, it fires the mirrored shot. You can't simply shoot it; you have to steer it into hazards or bank shots off walls. History boss is a time-delayed copy of you; this one is an instant mirror image you control, which makes it a puzzle.
+
+Katamari. A rolling boss welds blocks, power ups and dead mobs onto its surface with rigid offset constraints. As it grows it gets lumpier and rolls unevenly. Shooting off the junk changes how it moves, and the pieces that fly off become hazards.

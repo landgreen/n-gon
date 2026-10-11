@@ -438,6 +438,7 @@ const powerUps = {
             let text = `<div class="grid-container" style = "font-size:1rem;padding: 0px;"><pre> <strong>//console commands</strong>
  powerUps.instructions.effect()     //reproduce this message
  powerUps.warp.effect()             //warp to any level
+ saveGame.rewind()                  //restart this level from its checkpoint
  tech.giveTech("name")              //replace "name" with tech name
  m.setField("name")                 //standing wave  perfect diamagnetism  negative mass  molecular assembler  plasma torch  time dilation  metamaterial cloaking  pilot wave  wormhole  grappling hook  portal
  b.giveGuns("name")                 //nail gun  shotgun  super balls  wave  missiles  grenades  spores  drones  foam  harpoon  mine  laser

@@ -16,7 +16,7 @@ const saveGame = {
         level: ["levels", "onLevel", "levelsCleared", "constraintIndex"],
         spawn: ["mobTypeSpawnOrder", "mobTierSpawnOrder", "pickList"],
     },
-    renamedTech: { "quantum non-demolition": "self-locating uncertainty" }, //old name: new name, so older saves keep tech that were renamed
+    renamedTech: { "quantum non-demolition": "localization", "tunable laser": "acousto-optic modulator", "kinetic bombardment": "observer effect" }, //old name: new name, so older saves keep tech that were renamed
     renameTech(save) {
         const rename = name => saveGame.renamedTech[name] ?? name
         const renameKeys = obj => {
@@ -407,6 +407,25 @@ const saveGame = {
     continueRun() {
         const save = saveGame.storedSave()
         if (save) saveGame.load(save)
+    },
+    isRewindable() { //the latest checkpoint is from the start of the current level
+        const save = saveGame.latest
+        return Boolean(save && m.alive && save.state.level.levelsCleared === level.levelsCleared && save.state.level.onLevel === level.onLevel)
+    },
+    rewind(onLoad = () => { }) { //fine-tuned universe and self-locating uncertainty, load the checkpoint from the start of this level without going to the title page
+        if (!saveGame.isRewindable()) return
+        const save = JSON.parse(JSON.stringify(saveGame.latest)) //load keeps the save it's given, so the game can't change the stored copy
+        simulation.paused = true //the running game loop stops on its next frame, startGame starts a new one
+        requestAnimationFrame(() => { //after any game loop frame already requested
+            if (!m.alive) return
+            simulation.clearTimeouts() //delayed effects from the abandoned level
+            simulation.onTitlePage = true //load only starts from the title page
+            saveGame.load(save).then(() => {
+                if (simulation.onTitlePage) return
+                saveGame.pendingMessage = `<em>//rewound to the start of level ${save.state.level.levelsCleared}</em>`
+                onLoad(save) //runs before the loaded level starts
+            })
+        })
     },
 
     // ****************************************************************************************************

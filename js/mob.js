@@ -429,6 +429,11 @@ const mobs = {
             isSlowed: false,
             isStunned: false,
             seeAtDistance2: Infinity, //sqrt(4000000) = 2000 = max seeing range
+            isOffScreen() { //undoes the camera transform in simulation.camera() to find the visible area in world units
+                const scale = simulation.zoom / simulation.edgeZoomOutSmooth
+                return Math.abs(this.position.x - canvas.width2 + m.transX) > canvas.width2 / scale + this.radius ||
+                    Math.abs(this.position.y - canvas.height2 + m.transY) > canvas.height2 / scale + this.radius
+            },
             distanceToPlayer() {
                 const dx = this.position.x - player.position.x;
                 const dy = this.position.y - player.position.y;
@@ -1599,7 +1604,7 @@ const mobs = {
                                 },
                             })
                         }
-                        if (tech.isFarAwayDmg) dmg *= 1 + Math.sqrt(Math.max(500, Math.min(3000, this.distanceToPlayer())) - 500) * 0.0067 //up to 33% dmg at max range of 3000
+                        if (tech.isFarAwayDmg && this.isOffScreen()) dmg *= 1 + 0.7 * tech.isFarAwayDmg
                         //energy and heal drain should be calculated after damage boosts and before mass reduction
                         if (tech.energySiphon && this.isDropPowerUp) {
                             //dmg !== Infinity &&
@@ -1956,7 +1961,7 @@ const mobs = {
                     this.leaveBody = false; // no body since it turned into the bot
                 }
                 if (tech.isEnergyLoss) {
-                    m.energy -= 0.05;
+                    m.energy -= 0.05 * tech.isEnergyLoss;
                     if (m.energy < 0) m.energy = 0
                 }
                 if (tech.isAddRemoveMaxHealth) {

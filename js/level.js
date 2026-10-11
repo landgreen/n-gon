@@ -31,8 +31,6 @@ const level = {
             } else { //testing setup
                 simulation.enableConstructMode()  //used to build maps in testing mode
                 // simulation.setZoom(600) //zoom way in to see details
-                // simulation.difficultyMode = 1
-                // build.isExperimentRun = true
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = false
@@ -42,42 +40,30 @@ const level = {
                 // tech.giveTech("performance")
                 // m.coyoteCycles = 120
                 powerUps.research.changeRerolls(100000)
-                // tech.tech[297].frequency = 100
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
-                // requestAnimationFrame(() => { m.setField(9) });
                 m.setField(10) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
                 // simulation.molecularMode = 4;
-
                 // m.energy = m.maxEnergy = 12.2
-                // m.energy += 1
-                // m.couplingChange(1000)
-                // m.fieldUpgrades[6].isRewindMode = true
-                // window.removeEventListener("keydown", m.fieldEvent);
-                // m.fieldUpgrades[6].set()
-                // m.wakeCheck();
-                // m.damageDone *= 10
+                m.damageDone *= 10
 
                 m.maxHealth = m.health = 100
-                // m.energy = m.health = 0.000001
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
                 // m.maxEnergy = m.energy = 10000000
-                // powerUps.research.count = 3
-                // tech.isHookWire = true
-                // m.energy = 0
-                // simulation.molecularMode = 2
-                // m.takeDamage(0.01);
+
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                b.giveGuns(2)
+                b.giveGuns(0)
                 b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
                 // for (let i = 0; i < 1; i++) tech.giveTech("mass hyperboloid")
-                for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
-                for (let i = 0; i < 1; i++) tech.giveTech("shear stress")
-                for (let i = 0; i < 1; i++) tech.giveTech("double beta decay")
-                // for (let i = 0; i < 10; i++) tech.giveTech("nail-bot")
+                // for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
+                // for (let i = 0; i < 1; i++) tech.giveTech("shear stress")
+                // for (let i = 0; i < 1; i++) tech.giveTech("double beta decay")
+                // for (let i = 0; i < 3; i++) tech.giveTech("nail-bot")
+                // simulation.difficultyOptions.isStrongerConstraints = true //stronger slow bots, the slowed bots wait 1.5x longer between attacks
+                // level.constraint.find(c => c.description === "slow bots").effect()
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 3; ++i) tech.giveTech("Meissner effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("ray")
@@ -95,9 +81,13 @@ const level = {
                 // tech.giveTech("quantum foam")
                 // tech.giveTech("nitinol")
                 // tech.giveTech("optimization") //swap skins when paused
-                tech.giveTech("outlier")
+                // tech.giveTech("outlier")
+                // tech.giveTech("ground wire")
+                // for (let i = 0; i < 3; i++) tech.giveTech("observer effect")
                 // tech.giveTech("many-worlds") //alternate reality at the start of each level
-                // tech.giveTech("self-locating uncertainty") //choose what doesn't change in an alternate reality when paused
+                // tech.giveTech("localization") //choose what doesn't change in an alternate reality when paused
+                // tech.giveTech("quantum immortality")
+                // tech.giveTech("self-locating uncertainty") //dying rewinds to the checkpoint, so clear the first level before testing it
                 // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
                 // for (let i = 0; i < 1; i++) tech.giveTech("foam-shot")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
@@ -106,17 +96,20 @@ const level = {
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
-                // level.load("testChamber")
+                // level.load("chute")
                 // level.load("initial")
                 level.maps.testing()
 
-                powerUps.spawn(m.pos.x, m.pos.y, "difficulty", false);
+                powerUps.spawn(-115, -433, "difficulty", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
                 // for (let i = 0; i < 1; i++) spawn.mantisBoss(1300 + 10 * i, -400)
                 // for (let i = 0; i < 1; i++) spawn.starter(1300 + 200 * i, -200, 100)
                 for (let i = 0; i < 3; i++) spawn.starter(2400 + 200 * i, -200)
+                spawn.jellyBoss2(1300, -500)
+                // spawn.jellyBoss2(1300, -500)
+                // spawn.jellyBoss(1300, -500)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
@@ -170,6 +163,7 @@ const level = {
         simulation.draw.updateLineOfSightSetting();
         b.respawnBots();
         m.resetHistory();
+        simulation.removeEphemera("stuck", true) //a stuck check from the last level shouldn't move the player on this one
         level.deliverTransfers();
 
         m.fieldCDcycle = m.cycle + 15;
@@ -4624,9 +4618,9 @@ const level = {
         },
         testing() {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
-            level.setPosToSpawn(6172, -230); //near exit spawn
-            spawn.mapRect(6100, -205, 300, 200); //something to stand on to get to exit fast
-            // level.setPosToSpawn(150, -450); //original spawn
+            // level.setPosToSpawn(6172, -230); //near exit spawn
+            // spawn.mapRect(6100, -205, 300, 200); //something to stand on to get to exit fast
+            level.setPosToSpawn(150, -450); //original spawn
             level.exit.x = 6507
             level.exit.y = -220
 
@@ -5348,6 +5342,7 @@ const level = {
             spawn.mapRect(5400, -300, 400, 400); //right wall
             spawn.mapRect(5700, -3300, 1800, 5100); //right wall
             spawn.mapRect(5403, -650, 400, 450); //blocking exit
+            map[map.length - 1].isBlockingExit = true //removed to open the door to null
             if (isPacifistRun) {
                 for (let i = 0; i < 250; i++) spawn.starter(1000 + 4000 * Math.random(), -1500 * Math.random())
             } else {
@@ -5396,8 +5391,9 @@ const level = {
                     level.exit.x = 5500;
                 }
                 level.exit.y = -320;
-                Matter.Composite.remove(engine.world, map[map.length - 1]);
-                map.splice(map.length - 1, 1);
+                const block = map.find(who => who.isBlockingExit)
+                Matter.Composite.remove(engine.world, block);
+                map.splice(map.indexOf(block), 1);
                 simulation.draw.setPaths(); //redraw map draw path
                 level.levels.push("null")
             }

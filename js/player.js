@@ -245,6 +245,44 @@ const m = {
             return true
         }
     },
+    mapDepth() { //how deep the player's body or head is in the map, normal play stays below 6 and stuck players are above 15
+        let depth = 0
+        for (const part of [playerBody, playerHead]) {
+            const hits = Matter.Query.collides(part, map)
+            for (let i = 0; i < hits.length; i++) {
+                if (hits[i].depth > depth) depth = hits[i].depth
+            }
+        }
+        return depth
+    },
+    isInsideMap() { //the center of the player is in the map, or they are deep in a thin platform or wedged in a narrow gap
+        return Matter.Query.rayAny(map, m.pos, player.position) || m.mapDepth() > 15
+    },
+    lastUnstuckCycle: -1000,
+    unstuck() { //move the player to the last spot in their history where they weren't in the map, or to the level start if it keeps happening
+        let where = { x: level.enter.x + 50, y: level.enter.y - 20 }
+        if (m.cycle > m.lastUnstuckCycle + 900) {
+            m.doCrouch() //test spots with the smallest player, they stand back up when their head is clear
+            for (let i = 10; i < 600; i += 10) {
+                const history = m.history[(simulation.cycle - i) % 600]
+                if (!history) continue
+                Matter.Body.setPosition(player, history.position)
+                if (m.mapDepth() < 8) { //normal play stays below 6
+                    where = history.position
+                    break
+                }
+            }
+        }
+        m.lastUnstuckCycle = m.cycle
+        Matter.Body.setVelocity(player, { x: 0, y: 0 });
+        Matter.Body.setPosition(player, where);
+        for (let i = 0; i < bullet.length; i++) { //move bots
+            if (bullet[i].botType) {
+                Matter.Body.setPosition(bullet[i], Vector.add(player.position, { x: 250 * (Math.random() - 0.5), y: 250 * (Math.random() - 0.5) }));
+                Matter.Body.setVelocity(bullet[i], { x: 0, y: 0 });
+            }
+        }
+    },
     buttonCD_jump: 0, //cool down for player buttons
     jump() {
         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
@@ -355,7 +393,7 @@ const m = {
     switchWorlds(giveTech = "") {
         if (!m.isSwitchingWorlds) {
             let totalTech = 0;
-            const keep = tech.nonDemolition //self-locating uncertainty: your "field", "gun", or other "tech" don't change
+            const keep = tech.nonDemolition //localization: your "field", "gun", or other "tech" don't change
             powerUps.boost.endCycle = 0
             simulation.isTextLogOpen = false; //prevent console spam
             if (keep) {
@@ -510,6 +548,13 @@ const m = {
                     break
                 }
             }
+        } else if (tech.isImmortal && tech.isImmortalRewind && saveGame.isRewindable()) { //self-locating uncertainty, load this level's checkpoint instead of an alternate reality
+            m.health = 1 //stay alive until the checkpoint loads
+            m.displayHealth()
+            saveGame.rewind(save => {
+                tech.isImmortalRewind = false //only works once, set after loading or the checkpoint would turn it back on
+                saveGame.pendingMessage = `<span class='color-var'>saveGame</span>.rewind() <em>//self-locating uncertainty</em>` //players can type this in the console too
+            })
         } else if (tech.isImmortal) { //if player has the immortality buff, spawn on the same level with randomized damage
             //remove immortality tech
             // for (let i = 0; i < tech.tech.length; i++) {
@@ -6950,86 +6995,24 @@ const m = {
         {
             name: "grappling hook",
             descriptionFunction() {
-                return `use <strong class='energy' data-help='energy'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong><br><strong>9</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↑↓↓</em>`
+                return `use <strong class='energy' data-help='energy'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong><br><strong>9</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↓→→↓←</em>`
             },
-            keyLog: [null, null, null, null],
+            keyLog: [null, null, null, null, null, null],
             effect: () => {
                 //store event function so it can be found and removed in m.setField()
                 m.fieldEvent = function (event) {
+                    if (event.repeat) return //holding a key down doesn't count as pressing it again
                     m.fieldUpgrades[10].keyLog.shift() //remove first element
                     m.fieldUpgrades[10].keyLog.push(event.code) //add new key to end
-                    const patternA = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown"]
-                    const patternB = [input.key.up, input.key.up, input.key.down, input.key.down]
+                    const patternA = ["ArrowLeft", "ArrowDown", "ArrowRight", "ArrowRight", "ArrowDown", "ArrowLeft"]
+                    const patternB = [input.key.left, input.key.down, input.key.right, input.key.right, input.key.down, input.key.left]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
-                    const drain = 0.13
-                    if (m.energy > drain && (arraysEqual(m.fieldUpgrades[10].keyLog, patternA) || arraysEqual(m.fieldUpgrades[10].keyLog, patternB))) {
-                        //↑↑↓↓ slam down to the ground below
-                        const rayResults = Matter.Query.ray([...map, ...body], m.pos, { x: m.pos.x, y: m.pos.y + 5000 }, 40);
-                        if (rayResults.length) {
-                            rayResults.sort((a, b) => a.body.position.y - b.body.position.y);
-                            const h = rayResults[0].body.bounds.min.y
-                            if (h - m.pos.y > 400) { //check if at least 400 above the ground
-                                m.energy -= drain
-                                const hLast = player.position.y
-                                const range = 0.05 * Math.min(h - hLast, 1500)
-                                const range2 = Math.min(h - hLast, 1500) * Math.min(h - hLast, 1500)
-                                simulation.ephemera.push({
-                                    count: 0, //cycles before it self removes
-                                    do() {
-                                        this.count++
-                                        if (this.count > 6) simulation.removeEphemera(this)
-
-                                        ctx.fillStyle = 'rgba(255,255,255,0.5)'
-                                        ctx.beginPath();
-
-                                        ctx.arc(m.pos.x, m.pos.y, range * this.count, 0, 2 * Math.PI);
-                                        ctx.lineWidth = 10;
-                                        ctx.fill();
-
-                                        ctx.beginPath();
-                                        ctx.moveTo(m.pos.x, hLast);
-                                        ctx.lineTo(m.pos.x, h - 90);
-                                        ctx.strokeStyle = 'rgba(255,255,255,0.15)'
-                                        ctx.lineWidth = 40;
-                                        ctx.stroke();
-                                    },
-                                })
-                                Matter.Body.setPosition(player, { x: m.pos.x, y: h - 90 });
-                                Matter.Body.setVelocity(player, { x: player.velocity.x, y: 0 });
-                                input.field = false //force release grapple
-                                const immunity = Math.min(Math.floor(0.06 * (h - hLast)), 180)
-                                if (m.immuneCycle < m.cycle + immunity) m.immuneCycle = m.cycle + immunity; //immune for up to 3 seconds, longer falls give more
-
-                                m.doCrouch()
-                                m.yOff = m.yOffWhen.jump;
-                                m.hardLandCD = m.cycle + m.hardLandCDScale * Math.min(2 * m.hardLanding / 6.5 - 6, 40)
-
-                                //push away blocks, mobs
-                                const magX = 0.0015 * range
-                                const magY = 0.001 * range
-                                for (let i = 0, len = body.length; i < len; ++i) {
-                                    if (Vector.magnitudeSquared(Vector.sub(body[i].position, player.position)) < range2) {
-                                        body[i].force.x += magX * body[i].mass * (body[i].position.x > player.position.x ? 1 : -1)
-                                        body[i].force.y -= magY * body[i].mass
-                                    }
-                                }
-                                for (let i = 0, len = mob.length; i < len; ++i) {
-                                    if (Vector.magnitudeSquared(Vector.sub(mob[i].position, player.position)) < range2) {
-                                        mob[i].force.x += magX * mob[i].mass * (mob[i].position.x > player.position.x ? 1 : -1)
-                                        mob[i].force.y -= magY * mob[i].mass
-                                    }
-                                }
-                                //pull power ups in
-                                for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                    if (Vector.magnitudeSquared(Vector.sub(powerUp[i].position, player.position)) < range2) {
-                                        powerUp[i].force.x -= magX * powerUp[i].mass * (powerUp[i].position.x > player.position.x ? 1 : -1)
-                                        powerUp[i].force.y += magY * powerUp[i].mass
-                                    }
-                                }
-                            } else {
-                                simulation.inGameConsole(`<em style ="color:#777;">//additional height required</em>`);
-                            }
-                        }
+                    if (m.fieldCDcycle < m.cycle && m.energy > 0.02 && !m.isHolding && !simulation.paused && !bullet.some(who => who.isSlack) && (arraysEqual(m.fieldUpgrades[10].keyLog, patternA) || arraysEqual(m.fieldUpgrades[10].keyLog, patternB))) {
+                        //←↓→→↓← fire a slack line that attaches without pulling until you press field
+                        m.energy -= 0.02
+                        const r = 40
+                        b.grapple({ x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }, m.angle, true)
+                        if (m.fieldCDcycle < m.cycle + 20) m.fieldCDcycle = m.cycle + 20
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
@@ -7045,7 +7028,7 @@ const m = {
                         m.throwBlock();
                     } else if (input.field) {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                        if (m.fieldCDcycle < m.cycle) {
+                        if (m.fieldCDcycle < m.cycle && !bullet.some(who => who.isSlack)) { //pressing field with a slack line out pulls you along it instead of firing a new hook
                             if (m.energy > 0.02) m.energy -= 0.02
                             const r = 40
                             b.grapple({ x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }, m.angle)

@@ -1549,7 +1549,7 @@ const b = {
             }
         }
     },
-    grapple(where, angle = m.angle) {
+    grapple(where, angle = m.angle, isSlack = false) {
         const me = bullet.length;
         const returnRadius = 100
         bullet[me] = Bodies.fromVertices(where.x, where.y, [{
@@ -1588,12 +1588,14 @@ const b = {
                 endCycle: simulation.cycle + 70,
                 isSlowPull: false,
                 isLocked: false, //after rappelling down the rope holds its length until you press up
+                isSlack, //fired by the grappling hook combo, it flies and attaches without pulling until you press field, then it acts normally
                 ropeLength: 0,
                 drawStringControlMagnitude: 1000 + 1000 * Math.random(),
                 drawStringFlip: (Math.round(Math.random()) ? 1 : -1),
                 attached: false,
                 anchor: null, //where the rope meets the map, set when the hook attaches
                 bends: [], //map corners the rope wraps around, in order from the hook to the player
+                maxBends: localSettings.isHideHUD ? 15 : 30, //the rope stops wrapping corners after this many, fewer in performance mode
                 bendLength: 0, //rope length from the hook to the last bend
                 lastPlayerPos: null, //where each end of the rope was last cycle, used to find the corner it swung into
                 lastHookPos: null,
@@ -1612,6 +1614,8 @@ const b = {
                     // draw rope
                     const r = 30 * player.scale
                     const where = { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }
+                    const isLive = tech.isGroundWire && (m.onGround || this.attached) && m.energy >= 0.1 //ground wire, the rope is grounded through the player or the map
+                    if (isLive) this.shockWire(where)
                     const sub = Vector.sub(where, this.vertices[0])
                     ctx.strokeStyle = "#000" // "#0ce"
                     ctx.lineWidth = 0.5
@@ -1628,7 +1632,7 @@ const b = {
                     }
                     // ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
                     // ctx.stroke();
-                    ctx.strokeStyle = this.glowColor // "#0ce"
+                    ctx.strokeStyle = isLive ? "rgba(255,0,255,0.12)" : this.glowColor // "#0ce"
                     ctx.lineWidth = 10
                     ctx.stroke();
                     ctx.strokeStyle = "#000" // "#0ce"
@@ -1714,6 +1718,68 @@ const b = {
 
 
                     this.retract()
+                },
+                shockWire(start) { //ground wire, stun and damage mobs touching the rope
+                    const points = [start]
+                    for (let i = this.bends.length - 1; i > -1; i--) points.push(this.bends[i])
+                    points.push(this.vertices[0])
+                    for (let i = 0; i < mob.length; i++) {
+                        const who = mob[i]
+                        if (!who.alive || who.groundWireCycle > simulation.cycle) continue
+                        for (let j = 1; j < points.length; j++) {
+                            //closest point on this part of the rope to the mob
+                            const seg = Vector.sub(points[j], points[j - 1])
+                            const len2 = Vector.magnitudeSquared(seg)
+                            const t = len2 ? Math.min(1, Math.max(0, Vector.dot(Vector.sub(who.position, points[j - 1]), seg) / len2)) : 0
+                            const touch = Vector.add(points[j - 1], Vector.mult(seg, t))
+                            const reach = who.radius + 5
+                            if (Vector.magnitudeSquared(Vector.sub(touch, who.position)) < reach * reach) {
+                                const scale = Math.max(0.05, Math.min(1, (simulation.cycle - tech.groundWireCycle) / 60)) //less damage and energy if the wire zapped anything in the last second, down to 1/20
+                                if (m.energy < 0.1 * scale) return //a full zap uses 10 energy
+                                m.energy -= 0.1 * scale
+                                who.groundWireCycle = simulation.cycle + 60 //each mob can be shocked once a second
+                                tech.groundWireCycle = simulation.cycle
+                                const dmg = 27 * scale //about half a second of plasma torch
+                                who.damage(dmg);
+                                mobs.statusStun(who, 30)
+                                simulation.ephemera.push({
+                                    count: 10, //cycles before it self removes
+                                    do() {
+                                        this.count--
+                                        if (this.count < 0) {
+                                            simulation.removeEphemera(this)
+                                            return
+                                        }
+                                        //a few jagged bolts from the rope across the mob, sparking out past its edge, redrawn each cycle so they flicker
+                                        ctx.beginPath();
+                                        for (let k = 0; k < 3; k++) {
+                                            const corner = who.vertices[Math.floor(Math.random() * who.vertices.length)]
+                                            const end = Vector.add(who.position, Vector.mult(Vector.sub(corner, who.position), 1.3 + 0.7 * Math.random()))
+                                            const step = Vector.mult(Vector.sub(end, touch), 1 / 4)
+                                            const jitter = 0.4 * who.radius + 10
+                                            let x = touch.x
+                                            let y = touch.y
+                                            ctx.moveTo(x, y);
+                                            for (let n = 0; n < 3; n++) {
+                                                x += step.x + jitter * (Math.random() - 0.5)
+                                                y += step.y + jitter * (Math.random() - 0.5)
+                                                ctx.lineTo(x, y);
+                                            }
+                                            ctx.lineTo(end.x, end.y);
+                                        }
+                                        const fade = (this.count + 1) / 10
+                                        ctx.strokeStyle = `rgba(255,0,255,${0.3 * fade})`
+                                        ctx.lineWidth = 9
+                                        ctx.stroke();
+                                        ctx.strokeStyle = `rgba(255,0,255,${fade})`
+                                        ctx.lineWidth = 2
+                                        ctx.stroke();
+                                    },
+                                })
+                                break
+                            }
+                        }
+                    }
                 },
                 caughtPowerUp: null,
                 dropCaughtPowerUp() {
@@ -1919,7 +1985,7 @@ const b = {
                     for (let i = 0; i < this.bends.length; i++) this.bendLength += Vector.magnitude(Vector.sub(this.bends[i], i ? this.bends[i - 1] : hookEnd))
                 },
                 wrapEnd(end, from, otherEnd, isHookEnd) { //wrap the rope between one end and its nearest bend, "from" is where that end was last cycle, returns true if that part of the rope ends up clear
-                    for (let i = 0; i < 3 && this.bends.length < 20; i++) { //a few times if it moved fast
+                    for (let i = 0; i < 3 && this.bends.length < this.maxBends; i++) { //a few times if it moved fast
                         const pivot = this.bends.length ? this.bends[isHookEnd ? 0 : this.bends.length - 1] : otherEnd
                         const hit = vertexCollision(pivot, end, [map])
                         if (!hit.who) return true
@@ -1992,14 +2058,15 @@ const b = {
                     return bend
                 },
                 do() {
-                    if (input.field) {
-                        if (m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
+                    if (input.field) this.isSlack = false //pressing field makes a slack hook act normally
+                    if (input.field || this.isSlack) {
+                        if (input.field && m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5 //a slack hook doesn't hold the field cooldown, so energy regens normally
                         this.grabBlocks()
                         this.grabPowerUp()
                     } else {
                         this.retract()
                     }
-                    const isFlying = input.field && this.do !== this.returnToPlayer //not retracted this cycle by letting go or grabbing a block
+                    const isFlying = (input.field || this.isSlack) && this.do !== this.returnToPlayer //not retracted this cycle by letting go or grabbing a block
                     //don't skip through thin walls, if the tip passed through the map since last cycle put it back where it hit
                     if (isFlying) {
                         const tip = this.vertices[2]
@@ -2036,6 +2103,7 @@ const b = {
                             Matter.Sleeping.set(this, true)
                             this.endCycle = simulation.cycle + 5
                             this.do = () => {
+                                if (input.field) this.isSlack = false //pressing field pulls you along a slack line
                                 if (input.field && m.fieldCDcycle < m.cycle + 5) m.fieldCDcycle = m.cycle + 5
                                 this.grabPowerUp()
                                 this.wrapRope()
@@ -2050,7 +2118,7 @@ const b = {
                                     if (input.down) { //down
                                         this.isLocked = true //let go of down and the rope stays as long as you let it out
                                         dist = 0
-                                        player.force.y += 5 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
+                                        player.force.y += 6.6 * player.mass * simulation.g; //adjust this to control fall rate while hooked and pressing down
                                     } else if (input.up) {
                                         this.isLocked = false //back to reeling in
                                         this.isSlowPull = false
@@ -2082,7 +2150,9 @@ const b = {
                                         if (dist > 500) m.energy -= this.drain
                                         this.ropeLength = Vector.magnitude(toPivot) + this.bendLength //how long the rope is, for when it gets locked
                                     }
-                                } else {
+                                } else if (this.isSlack) { //the line stays attached and you can walk around freely
+                                    this.endCycle = simulation.cycle + 10
+                                } else { //letting go while pulled brings the hook back
                                     Matter.Sleeping.set(this, false)
                                     this.retract()
                                 }
@@ -5650,12 +5720,15 @@ const b = {
         for (let i = 0; i < tech.plasmaBotCount; i++) b.plasmaBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
-        })
+        }, !level.isSlowBots)
         for (let i = 0; i < tech.missileBotCount; i++) b.missileBot({
             x: player.position.x + 50 * (Math.random() - 0.5),
             y: player.position.y + 50 * (Math.random() - 0.5)
         })
         if (tech.isIntangible && m.isCloak) b.setBotsIntangible(true)
+    },
+    slowBotScale(isKeep) { //stronger slow bots constraint, the slowed bots wait 1.5x longer between attacks or do 1.5x less
+        return (!isKeep && level.isSlowBots && simulation.difficultyOptions.isStrongerConstraints) ? 1.5 : 1
     },
     setBotsIntangible(isIntangible) { //boson composite, while cloaked bots pass through blocks and mobs
         for (let i = 0; i < bullet.length; i++) {
@@ -5786,6 +5859,7 @@ const b = {
             },
             followDelay: 0,
             phase: Math.floor(60 * Math.random()),
+            energyScale: 1 / b.slowBotScale(isKeep),
             do() {
                 let q
                 // if (Vector.magnitude(Vector.sub(this.position, player.position)) < 150) {
@@ -5800,10 +5874,10 @@ const b = {
                     if (Vector.magnitude(Vector.sub(this.position, player.position)) < 250 && m.immuneCycle < m.cycle) { //give energy
                         Matter.Body.setAngularVelocity(this, this.spin)
                         if (this.isUpgraded) {
-                            m.addEnergy(0.12 * level.isReducedRegen)
+                            m.addEnergy(0.12 * this.energyScale * level.isReducedRegen)
                             for (let i = 0; i < 2; i++)simulation.energyGenGraphic()
                         } else {
-                            m.addEnergy(0.04 * level.isReducedRegen)
+                            m.addEnergy(0.04 * this.energyScale * level.isReducedRegen)
                         }
                         simulation.energyGenGraphic()
                     }
@@ -5863,7 +5937,7 @@ const b = {
             minDmgSpeed: 2,
             // lookFrequency: 56 + Math.floor(17 * Math.random()) - isUpgraded * 20,
             lastLookCycle: simulation.cycle + 60 * Math.random(),
-            delay: Math.floor((tech.isNailBotUpgrade ? 22 : 85) + 10 * isKeep),
+            delay: Math.floor(((tech.isNailBotUpgrade ? 22 : 85) + 10 * isKeep) * b.slowBotScale(isKeep)),
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100,
             endCycle: Infinity,
@@ -6019,7 +6093,7 @@ const b = {
             cd: 0,
             fireCount: 0,
             fireLimit: 5 + 2 * tech.isFoamBotUpgrade - isKeep,
-            delay: Math.floor((200 + (tech.isFoamBotUpgrade ? 0 : 200))),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            delay: Math.floor((200 + (tech.isFoamBotUpgrade ? 0 : 200)) * b.slowBotScale(isKeep)),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
@@ -6092,7 +6166,7 @@ const b = {
             cd: 0,
             fireCount: 0,
             fireLimit: 4 - isKeep,
-            delay: Math.floor(140),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
+            delay: Math.floor(140 * b.slowBotScale(isKeep)),// + 30 - 20 * tech.isFoamBotUpgrade,//20 + Math.floor(85 * b.fireCDscale) - 20 * tech.isFoamBotUpgrade,
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             range: 60 * (1 + 0.3 * Math.random()) + 3 * b.totalBots() + !isKeep * 100, //how far from the player the bot will move
             endCycle: Infinity,
@@ -6169,7 +6243,7 @@ const b = {
             range: (600 + 375 * tech.isLaserBotUpgrade) * (1 + 0.12 * Math.random()),
             drainThreshold: 0.15 + 0.5 * Math.random() + (tech.isEnergyHealth ? 0.3 : 0),// laser bot will not attack if the player is below this energy
             drain: (0.57 - 0.43 * tech.isLaserBotUpgrade + isKeep * 0.08) * tech.laserDrain,
-            laserDamage: 0.75 + 0.75 * tech.isLaserBotUpgrade,
+            laserDamage: (0.75 + 0.75 * tech.isLaserBotUpgrade) / b.slowBotScale(isKeep),
             endCycle: Infinity,
             classType: "bullet",
             collisionFilter: {
@@ -6333,7 +6407,7 @@ const b = {
             restitution: 1,
             dmg: 0,
             minDmgSpeed: 0,
-            lookFrequency: 43 + Math.floor(7 * Math.random()) - 15 * tech.isBoomBotUpgrade,
+            lookFrequency: Math.floor((43 + Math.floor(7 * Math.random()) - 15 * tech.isBoomBotUpgrade) * b.slowBotScale(isKeep)), //how often it picks a target to punch
             acceleration: (isKeep ? 0.005 : 0.001) * (1 + 0.5 * Math.random()),
             attackAcceleration: 0.012 + 0.005 * tech.isBoomBotUpgrade,
             range: 500 * (1 + 0.1 * Math.random()) + 250 * tech.isBoomBotUpgrade + !isKeep * 100,
@@ -6420,6 +6494,7 @@ const b = {
             acceleration: 0.009,
             endCycle: Infinity,
             drainThreshold: tech.isEnergyHealth ? 0.5 : 0.05,
+            dmgScale: 1 / b.slowBotScale(isKeep),
             classType: "bullet",
             collisionFilter: {
                 category: cat.bullet,
@@ -6470,7 +6545,7 @@ const b = {
                         if (best.dist2 != Infinity) { //if hitting something
                             path[path.length - 1] = { x: best.x, y: best.y };
                             if (best.who.alive) {
-                                const dmg = 1.4; //********** SCALE DAMAGE HERE *********************
+                                const dmg = 1.4 * this.dmgScale; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
                                 //push mobs away
@@ -6546,6 +6621,7 @@ const b = {
             isStatic: true,
             isSensor: true,
             isKeep: isKeep,
+            dmgScale: 1 / b.slowBotScale(isKeep),
             restitution: 0,
             dmg: 0, // 0.14   //damage done in addition to the damage from momentum
             minDmgSpeed: 0,
@@ -6590,7 +6666,7 @@ const b = {
                     for (let i = 0; i < q.length; i++) {
                         if (!q[i].isShielded) {
                             mobs.statusStun(q[i], 210 + 90 * this.isUpgraded)
-                            const dmg = 0.4 * (this.isUpgraded ? 4.5 : 1) * (tech.isCrit ? 4 : 1)
+                            const dmg = 0.4 * (this.isUpgraded ? 4.5 : 1) * (tech.isCrit ? 4 : 1) * this.dmgScale
                             q[i].damage(dmg);
                             if (q[i].alive) q[i].foundPlayer();
                             if (q[i].damageReduction) {
@@ -7422,7 +7498,7 @@ const b = {
             name: "wave", //3
             // description: `emit <strong>wave packets</strong> that propagate through <strong>solids</strong><br>waves <strong class='color-s' data-help='slow'>slow</strong> mobs<br><strong>115</strong> packets per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `emit <strong>${(0.25 * 360 / Math.PI).toFixed(0)}°</strong> expanding <strong>arcs</strong> that <strong class='color-s' data-help='slow'>slow</strong> mobs<br>and <strong>propagate</strong> longitudinally through <strong>solids</strong><br>costs 0 <strong class='color-ammo'>ammo</strong> <em style ="float: right;">(auto fire until you press fire)</em>`
+                return `emit <strong>${(0.25 * 360 / Math.PI).toFixed(0)}°</strong> expanding <strong>arcs</strong> that <strong class='color-s' data-help='slow'>slow</strong> mobs<br>and <strong>propagate</strong> longitudinally through <strong>solids</strong><br>costs 0 <strong class='color-ammo'>ammo</strong> <em style ="float: right;">(emits unless you press fire)</em>`
             },
             // ammo: 0,
             // ammoPack: 60,

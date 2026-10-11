@@ -152,7 +152,7 @@ const simulation = {
                 const options = []
                 for (let i = 0; i < tech.tech.length; i++) {
                     const t = tech.tech[i]
-                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech && !tech.isNonDemolitionKept(t, action.keep ?? null)) { //self-locating uncertainty only replaces the tech it didn't keep
+                    if (t.count < t.maxCount && t.allowed() && !t.isBadRandomOption && !t.isLore && !t.isJunk && !t.isAltRealityTech && !tech.isNonDemolitionKept(t, action.keep ?? null)) { //localization only replaces the tech it didn't keep
                         for (let j = 0; j < t.frequency; j++) options.push(i)
                     }
                 }
@@ -1176,29 +1176,27 @@ const simulation = {
                         }
                     }
 
+                    //check if player is stuck inside the map
+                    if (m.alive && !simulation.ephemera.some(e => e.name === "stuck") && m.isInsideMap()) {
+                        //check for the next 2 seconds to see if being stuck continues, physics can jiggle a stuck player out for a few cycles
+                        simulation.ephemera.push({
+                            name: "stuck",
+                            count: 0,
+                            free: 0, //cycles not inside the map
+                            do() {
+                                this.count++
+                                if (!m.isInsideMap()) this.free++
+                                if (this.free > 30) {
+                                    simulation.removeEphemera(this)
+                                } else if (this.count > 120) {
+                                    simulation.removeEphemera(this)
+                                    if (m.alive) m.unstuck()
+                                }
+                            },
+                        })
+                    }
+
                     if (!(m.cycle % 420)) { //once every 7 seconds
-                        //check if player is inside the map
-
-                        if (Matter.Query.rayAny(map, m.pos, player.position)) {
-                            // if (Matter.Query.point(map, m.pos).length > 0 || Matter.Query.point(map, player.position).length > 0) {
-                            //check for the next few seconds to see if being stuck continues
-                            simulation.ephemera.push({
-                                count: 240, //cycles before it self removes
-                                do() {
-                                    if (Matter.Query.rayAny(map, m.pos, player.position)) {
-                                        this.count--
-
-                                        if (this.count < 0) {
-                                            simulation.removeEphemera(this)
-                                            Matter.Body.setVelocity(player, { x: 0, y: 0 });
-                                            Matter.Body.setPosition(player, { x: level.enter.x + 50, y: level.enter.y - 20 });
-                                        }
-                                    } else {
-                                        simulation.removeEphemera(this)
-                                    }
-                                },
-                            })
-                        }
                         if (tech.isZeno) {
                             m.takeDamage(0.05 * (tech.isEnergyHealth ? m.energy : m.health), false)
                             // if (tech.isEnergyHealth) {

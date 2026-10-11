@@ -434,7 +434,7 @@ ${fullscreenRow}
             ${saveGame.exportHTML()}
             <div class="pause-row pause-setting">
             <span><input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
-            <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, no stroke on blocks">performance mode</label></span>
+            <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, fewer grappling hook rope wraps, no stroke on blocks">performance mode</label></span>
             <span><input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
             <label for="show-num" title="show in game combat text">damage numbers</label></span>
             </div>
@@ -770,7 +770,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
     // },
     skinTechUpgradeText(i) {
         return `<div class="card-text"> <div class="grid-title">
-                <span style="position:relative;">
+                <span style="position:relative;" onclick="speechHandler.speech('${tech.tech[i].name}')">
                     <div class="circle-grid-title" style="position:absolute; top:0.18em; left:0.56em;opacity:1;">
                         <span style="position:relative;">
                             <div class="circle-grid-skin"></div>

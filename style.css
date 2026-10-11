@@ -48,6 +48,18 @@ select {
     cursor: pointer;
 }
 
+/* clickable things get the pointer cursor, text fields keep the browser's text cursor */
+button,
+input[type="checkbox"],
+input[type="checkbox"]+label,
+input[type="range"] {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: default;
+}
+
 input {
     padding: 0px 4px;
     font-size: 0.8em;
@@ -70,6 +82,7 @@ em {
 }
 
 #splash {
+    cursor: default;
     user-select: none;
     position: absolute;
     top: 0;
@@ -109,6 +122,7 @@ td {
 }
 
 .key-input {
+    cursor: pointer;
     padding: 3px 8px;
     border: 2px solid #333;
     background-color: #fff;
@@ -134,12 +148,14 @@ td {
 
 summary {
     font-size: 1.2em;
+    cursor: pointer;
 }
 
 .SVG-button {
     border: 1.5px #333 solid;
     border-radius: 8px;
     background-color: #fff;
+    cursor: pointer;
 }
 
 .SVG-button:hover {
@@ -288,6 +304,17 @@ body.has-autosave #start-button {
 
 .choose-grid-module:hover {
     background-color: var(--hover-card-color);
+}
+
+.choose-grid-module[onclick],
+.experiment-grid-module[onclick],
+.cancel-card[onclick],
+.research-card[onclick],
+.pause-eject,
+#exit,
+#choose-unPause,
+#choose-training {
+    cursor: pointer;
 }
 
 .choose-grid-module:hover .card-text {
@@ -1067,6 +1094,11 @@ body.has-autosave #start-button {
     cursor: help;
 }
 
+button[data-help],
+button [data-help] {
+    cursor: pointer;
+}
+
 #hover-help {
     display: none;
     position: fixed;
@@ -1607,7 +1639,7 @@ body.has-autosave #start-button {
 
 }
 
-/* self-locating uncertainty drop down, a details element because select options can't show orbs */
+/* localization drop down, a details element because select options can't show orbs */
 .non-demolition-menu {
     float: right;
     border: 1px #333 solid;
@@ -2170,7 +2202,7 @@ the gaps show the border color through, so the lines are only between options an
 .pause-difficulty-option {
     display: flex;
     align-items: center;
-    padding: 3px 6px;
+    padding: 4px 6px;
     background-color: #e2e9ec;
     line-height: 130%;
     white-space: normal;
