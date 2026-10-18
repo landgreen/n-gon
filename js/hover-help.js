@@ -14,8 +14,8 @@
     const keyLabel = code => escapeHTML(code).replace("Key", "").replace("Digit", "")
     //field emitter gets part of several other fields' coupling effects, see m.setMaxEnergy, m.setFieldRegen, m.defense, tech.damageAdjustments, powerUps ammo, block collisions, m.pushMass
     const fieldEmitterCoupling = `field emitter, per coupling:<br>
-&nbsp; +1 max energy, +0.18 energy per second<br>
-&nbsp; 0.99x damage taken, 1.002x damage<br>
+&nbsp; +1 max energy, +0.16 energy per second<br>
+&nbsp; 0.992x damage taken, 1.01x damage<br>
 &nbsp; ammo power ups give 5% more ammo<br>
 &nbsp; 1.05x block collision damage<br>
 &nbsp; 2% chance deflecting makes ice IX<br>`
@@ -37,7 +37,7 @@ portal: +1 energy after going through a portal
     const dropPercent = chance => `${Number((100 * Math.min(1, Math.max(0, chance || 0))).toFixed(2))}%`
     const spawnLine = (chance, qualifier = "") => `<br><br>// ${dropPercent(chance)} chance per mob to spawn${qualifier}`
     const definitions = {
-        tier: `// higher <strong class="color-tier">TIER</strong> mobs and bosses are tougher enemies with stronger abilities<br><br>// there are a total of 4 tiers that are introduced as you clear levels`,
+        tier: `// higher <strong class="color-tier">TIER</strong> mobs and bosses are tougher enemies with stronger abilities<br><br>// there are a total of 4 tiers that are introduced as you clear levels<br><br>// <strong class="color-tier">TIER</strong> <strong>5</strong> mobs only spawn with the next <strong class="color-tier">TIER</strong> mob difficulty`,
         constraint: `// <strong class="constraint">constraints</strong> randomly add a unique challenge per level`,//<br><br>// the <strong class="constraint">constraint</strong> changes each level
         "orb-coupling": () => couplingDefinition() + spawnLine(tech.coupling * dropScale()),
         // coupling: couplingDefinition,
@@ -58,6 +58,7 @@ portal: +1 energy after going through a portal
         "dark-matter": `// <strong class="color-dark-matter">dark matter</strong> follows you and reduces damage taken when you are inside it
         <br><br>// <em>dark matter is hypothetical invisible matter inferred from unexplained gravity</em>`,
         "alternate-reality": `// entering an <strong class="alt">alternate reality</strong> randomizes guns, ammo, field, tech, health, research, and coupling
+        <br><br>// qubits are kept, but more than 5 qubits are randomized
         <br><br>// <em>in the many-worlds interpretation, quantum events form non-interacting branches with internally consistent histories</em>`,
         "fire-rate": `// <span class="color-fire-rate">fire rate</span> controls how often a weapon fires (doesn't affect bots)<br><br>// higher <span class="color-fire-rate">fire rate</span> means less delay between shots`,
         block: `// <strong class="block">blocks</strong> are grey polygons

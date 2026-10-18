@@ -1,63 +1,56 @@
+tech: surface tension - foam forms bubbles that merge into one growing bubble on each mob and catch more foam, 1.2x foam damage
+  the old surface tension, 1.4x foam damage, is renamed Marangoni effect
+tech: alternator - your harpoon swings in a quick arc, and still has 0.05x harpoon energy cost
+  aims at the mob nearest your aim,
+  scrapes along walls, knocks blocks aside, bounces off mobs,
+  grabs every power up it touches
+  crouch for a longer, narrower, slower swing
+  railgun: pick stab or railgun from a drop down on the harpoon in the pause menu, with alternator you can also pick sweep
+perfect diamagnetism: the field is drawn as purple fills when you have Hall effect, and lines otherwise, Hall effect and ray are no longer compatible
+perfect diamagnetism: while falling with the field on, the field puffs up wider and flatter when aimed up, and narrower when aimed down
+tech: symbiosis - after a mob dies lose 0.01x max health or energy, instead of 1
+removed link to game pad support since it's not working with some of the new changes, like difficulty power up
+boss: floodFillBoss - sends out paths that bounce off walls and blocks searching for you, when one sees you it dashes down the path and leaves a mortar blast
+alternate reality: qubits are no longer lost, but if you have more than 5 qubits they are randomized by 0.5x to 1.5x
+tech: preserve, reserve - show (empty) after you spawn all of their heals or ammo
 
 
-boss: jellyBoss
-constraints: slow bots - when stronger, slowed nail, foam, sound, and boom bots also wait 1.5x longer between attacks
-mouse cursor shows a pointer over buttons, checkboxes, sliders, menus, and clickable cards
-
-tech: ground wire - while grounded or attached, grappling hook rope stuns and damages mobs it touches for 10 energy per zap
-grappling hook
-  new secret combo replaces ↑↑↓↓, it fires a line that attaches without pulling until you press field
-  the rope wraps up to 30 corners, 15 in performance mode
-  holding down while attached lowers you about 30% faster
-  laser, plasma, and orbit bots do 1.5x less damage, and dynamo bots give 1.5x less energy
-tech: self-locating uncertainty - after dying rewind to the start of the level in this reality
-  requires quantum immortality
-tech: the old self-locating uncertainty is renamed localization
-tech: fine-tuned universe - rewind to the start of the level,
-  undoing everything since the checkpoint  
-tech: observer effect - 1.7x damage to mobs that are off screen, stacks up to 3 times
-  replaces kinetic bombardment
-tech: tunable laser is renamed acousto-optic modulator
-tech: aerostat, dead reckoning, microstates, simulated annealing, dynamical systems, Gibbs free energy, exothermic process, control theory, fluoroantimonic acid, and negative feedback
-  can all stack up to 3 times
+difficulty: next TIER mobs - each level starts with an extra mob from 1 tier higher
+  the extra mob can be T5, T5 mobs don't spawn any other way
+difficulty: faster mobs - mobs move about 1.2x faster
+  base mobs are now slower by about 0.9x movement, 
+  faster mobs are 1.1x faster than the previous patch
+mob: spinner5 - T5 spinner, spins up faster, charges harder, charges twice, and does 4x damage
+mob: focuser5 - T5 focuser, its laser reaches farther, locks on faster, drains more energy, and does 6x damage
+mob: pulsar5 - T5 pulsar, a bigger blast that aims and fires faster and does 8x damage
+mob: slicer5 - T5 slicer, a longer and faster sword, moves and dodges faster, and does 8x damage
 
 
 bug fixes
-  mass-energy equivalence no longer gets fluoroantimonic acid damage without having fluoroantimonic acid
-  Gibbs free energy text shows its real damage, 1.007x for each missing energy
-  acoustic levitation keeps all its stacks of jump time after Higgs mechanism is reapplied or removed
-  clicking a skin tech upgrade orb says its name out loud again
-  the wall blocking null on the final level is removed even when ray has left a wall behind
-  getting stuck in the map is caught in about 3 seconds instead of up to 11, and catches being wedged in thin gaps
-    you're moved back to your last spot outside the map instead of the level start
-  paradigm shift no longer ejects the wrong tech after strange loop or martingale gives a tech while paused
+  with just one of 0.5x damage or 2x damage taken, final boss boulders, mines, and extra bosses, and trainBoss2 freeze grenades come at the right rate, they came half as often
+  mob shields aren't counted twice anymore, they took about 2x damage from explosions and other area damage, and shielded mobs never copied with mobs reproduce
+  salvo keeps its full cooldown with wave, railgun, or autocannon equipped, they let you fire again early
+  pressure vessel keeps its foam charge when you switch guns, so it works with salvo now
+  Brownian ratchet shows the heal number and console text when its zone heals you
+  working mass stops printing blocks after you lose it, extra copies kept working in alternate realities
+  vanishing platforms are fully gone while they're gone, they used to hide at one spot on the map where they could still block lasers and mob vision, and show up on some community maps
+  construction mode doesn't zoom with the scroll wheel while paused, choosing, or in the experiment menu
+
 
 
 
 *********************************************************** TODO *****************************************************
 
 
+  add more T5 mob types
+
 make some new mobs
   stream line new mob creation and balance testing
   see ideas at bottom of this todo.txt
-
-
+  
 new version of history boss with legs and it looks in the same direction the player looked in but +180
   also has a laser sword?
   also shots bullets?
-
-
-new difficulty ideas
-  much fewer tech spawn
-    how?
-  field never spawns
-    wording to mean that they can still spawn from tech
-      (field) don't normally spawn
-  1 higher TIER mob
-    make a few mobs at T5
-  2x boss health
-  2x mob health
-  
         
 
 new level element - color keys and keyButtons    
@@ -196,6 +189,10 @@ lore chapter 7
       if you stop the change n-gon continues to work.
         something interesting should happen?
           undefined are converted to some cool new effect?
+  make a long list of cool console commands  and hide them in the game
+  hide in lore
+    new chapter
+      -->ask player to enter in console commands to progress
 
 Simplex Noise Vector Flow Field that interacts with the player
   perlin noise
@@ -1046,6 +1043,8 @@ possible names for tech
   localization - something about many worlds...
   metallic hydrogen - energy or damage reduction maybe?
   birefringence - light, laser: light ray to split into two distinct rays traveling at different speeds
+  kinetic bombardment - maybe blocks?
+  Hermitian matrix
 
 
 ************************************  mob/boss ideas ********************************************************

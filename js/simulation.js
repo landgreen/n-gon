@@ -500,7 +500,6 @@ const simulation = {
         if (!tech.isTransverse && b.activeGun === 3) b.guns[3].waves = []; //empty array of longitudinal wave bullets
         if (tech.crouchAmmoCount) tech.crouchAmmoCount = 1 //this prevents hacking the tech by switching guns
         if (b.inventory.length > 0) b.activeGun = b.inventory[b.inventoryGun];
-        b.guns[8].charge = 0; // foam charge to 0
         simulation.updateGunHUD();
         simulation.boldActiveGunHUD();
         //set crosshairs
@@ -987,6 +986,8 @@ const simulation = {
         powerUps.field.choiceLog = [];
         powerUps.totalPowerUps = 0;
         powerUps.research.count = 0;
+        powerUps.qubit.count = 0;
+        powerUps.qubit.damageCount = 0;
         powerUps.boost.endCycle = 0
         powerUps.isFieldSpawned = false
         m.setFillColors();
@@ -2572,6 +2573,7 @@ const simulation = {
         });
 
         document.body.addEventListener("wheel", (e) => {
+            if (simulation.paused || simulation.isChoosing || build.isExperimentSelection || simulation.onTitlePage) return //only zoom during active gameplay, not while scrolling menus
             if (e.deltaY > 0) {
                 simulation.setZoom(simulation.zoomScale / 0.9)
             } else {

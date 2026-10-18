@@ -429,6 +429,7 @@ const m = {
                 // if (giveTech) tech.giveTech(giveTech) //give many worlds back
                 for (let i = 0; i < addBack.length; i++) tech.giveTech(addBack[i])
             }
+            const isQubitChanged = powerUps.qubit.switchWorlds(!!keep) //resetAllTech wiped the qubits' damage taken, unless localization skipped it
 
             //remove all bullets
             for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
@@ -524,6 +525,7 @@ const m = {
             simulation.updateTechHUD();
             m.displayHealth();
             simulation.isTextLogOpen = true;
+            if (isQubitChanged) simulation.inGameConsole(`${powerUps.orb.qubit(1)} <span class='color-var'>powerUps</span>.qubit.count <span class='color-symbol'>=</span> ${powerUps.qubit.count} <em>//alternate reality</em>`)
             m.drop();
             if (simulation.paused) build.pauseGrid() //update the build when paused
         }
@@ -729,7 +731,7 @@ const m = {
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.6 + 0.4 * Math.sin(m.cycle * 0.01);
         if (tech.isHarmDarkMatter) dmg *= (tech.isMoveDarkMatter || tech.isNotDarkMatter) ? ((tech.isGalacticHalo && tech.isNotDarkMatter) ? 0.25 / 2.2 : 0.15625) : 0.3
-        if (m.fieldMode === 0) dmg *= 0.99 ** m.coupling
+        if (m.fieldMode === 0) dmg *= 0.992 ** m.coupling
         if (m.fieldMode === 3) dmg *= 0.977 ** m.coupling
         if (tech.isHarmReduceNoKill && m.lastKillCycle + 300 < m.cycle) dmg *= 0.3
         if (tech.isAddBlockMass && m.isHolding) dmg *= 0.1
@@ -889,7 +891,7 @@ const m = {
             return
         }
         m.lastHarmCycle = m.cycle
-        if (tech.isDroneOnDamage && bullet.length < 180) { //chance to build a drone on damage from tech
+        if (tech.isDroneOnDamage && b.shotCount() < 180) { //chance to build a drone on damage from tech
             const len = Math.min((dmg - 0.045 * Math.random()) * 95, 65) / tech.droneEnergyReduction * (tech.isEnergyHealth ? 0.5 : 1)
             for (let i = 0; i < len; i++) {
                 if (Math.random() < 0.5) b.drone({
@@ -3498,7 +3500,7 @@ const m = {
     setFieldRegen() {
         if (m.fieldMode === 0) {
             m.fieldRegen = 0.001  //6 energy per second for field emitter
-            m.fieldRegen += 0.00003 * m.coupling
+            m.fieldRegen += 0.00002667 * m.coupling
         } else if (m.fieldMode === 6) {
             m.fieldRegen = 0.002  //12 energy per second for time dilation
         } else if (m.fieldMode === 2) {
@@ -4262,7 +4264,7 @@ const m = {
             } else {
                 m.fieldCDcycle = m.cycle + m.fieldBlockCD;
             }
-            if (!who.isInvulnerable && (m.coupling && m.fieldMode === 0) && bullet.length < 200) { //for field emitter iceIX, 2% chance per coupling, +1 ice IX for every 50 coupling
+            if (!who.isInvulnerable && (m.coupling && m.fieldMode === 0) && b.shotCount() < 200) { //for field emitter iceIX, 2% chance per coupling, +1 ice IX for every 50 coupling
                 for (let i = 0, len = Math.ceil(0.02 * m.coupling); i < len; i++) {
                     if (0.02 * m.coupling - i > Math.random()) {
                         const sub = Vector.mult(Vector.normalise(Vector.sub(who.position, m.pos)), (m.fieldRange * m.harmonicRadius) * (0.4 + 0.3 * Math.random())) //m.harmonicRadius should be 1 unless you are standing wave expansion
@@ -4742,9 +4744,13 @@ const m = {
                         lines: 5, //field lines behind the edge, each one closer to the player
                         pointStep: 0.03, //radians between points along the edge
                         rayStep: 0.05, //radians between rays, the rounding smooths out the space between them
-                        draw(where, angle, isAttached) {
-                            const range = m.fieldRange
-                            const halfArc = Math.PI * m.fieldArc
+                        draw(where, angle, isAttached, widen = 1) { //widen stretches the field sideways while the tip and ends stay put, so the center moves behind where and the field gets flatter
+                            const depth = m.fieldRange * (1 - Math.cos(Math.PI * m.fieldArc)) //from the straight line between the ends out to the tip
+                            const halfWidth = widen * m.fieldRange * Math.sin(Math.PI * m.fieldArc)
+                            const range = (halfWidth * halfWidth + depth * depth) / (2 * depth) //radius of the circle through the tip and both ends
+                            const halfArc = Math.atan2(halfWidth, range - depth)
+                            const back = range - m.fieldRange
+                            where = { x: where.x - back * Math.cos(angle), y: where.y - back * Math.sin(angle) }
                             const count = Math.ceil(2 * halfArc / this.pointStep) //points along the edge
                             const step = 2 * halfArc / count
                             const cos = Math.cos(angle)
@@ -4813,6 +4819,20 @@ const m = {
                             const chord = [] //how far out the straight line between the two ends of the field is in each direction, as a fraction of the edge
                             for (let i = 0; i <= count; i++) chord[i] = Math.cos(halfArc) / Math.cos(-halfArc + i * step)
                             const isDim = isAttached && m.holdingTarget //dimmer when a block is in reach
+                            if (tech.isFloatEnergy) { //tech: Hall effect, overlapping faded fills like the railgun charging, so you can see you have it
+                                ctx.fillStyle = `rgba(50, 0, 140, ${isDim ? 0.03 + 0.01 * Math.random() : 0.065 + 0.01 * Math.random()})` //a slight flicker, like the edge of the lines
+                                for (let k = 1; k <= this.lines; k++) { //each fill reaches in from the edge to a field line, so they all overlap at the edge
+                                    const f = k / (this.lines + 1)
+                                    ctx.beginPath();
+                                    for (let i = 0; i <= count; i++) ctx.lineTo(where.x + edge[i] * dirX[i], where.y + edge[i] * dirY[i])
+                                    for (let i = count; i >= 0; i--) {
+                                        const r = Math.min(edge[i], smooth(i, k * this.softness) * (1 - f + f * chord[i]))
+                                        ctx.lineTo(where.x + r * dirX[i], where.y + r * dirY[i])
+                                    }
+                                    ctx.fill();
+                                }
+                                return
+                            }
                             const color = "0, 115, 239"//"91, 158, 230"//"110,180,255"
                             // "rgb(0, 115, 239)"
                             ctx.lineWidth = 2;
@@ -5113,6 +5133,7 @@ const m = {
                     },
                 }
                 const version = () => tech.isRay ? versions.ray : versions.membrane
+                let floatWiden = 0 //how much wider the field is drawn while floating, eases toward its target so the width changes smoothly
                 m.fieldUpgrades[2].rayLength = (stacks) => 2 * versions.ray.shape(stacks).halfLength //for tech: Meissner effect's description
                 m.fieldUpgrades[2].rayWalls = () => versions.ray.walls //for mob lasers that don't check the map
                 m.perfectPush = (isFree = false) => {
@@ -5124,7 +5145,7 @@ const m = {
                                 mob[i].locatePlayer();
                                 const unit = hit.unit
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD + (mob[i].isShielded ? 10 : 0);
-                                if (!mob[i].isInvulnerable && bullet.length < 250) { //0.1 ice IX per coupling
+                                if (!mob[i].isInvulnerable && b.shotCount() < 250) { //0.1 ice IX per coupling
                                     for (let i = 0, len = Math.ceil(0.1 * m.coupling); i < len; i++) {
                                         if (0.1 * m.coupling - i > Math.random()) {
                                             const ice = hit.ice()
@@ -5220,6 +5241,8 @@ const m = {
                     const hover = current.hover(tech.meissnerCount)
                     m.fieldRange = current.range(tech.meissnerCount)
                     m.fieldArc = current.arc(tech.meissnerCount) //run calculateFieldThreshold after setting fieldArc, used for powerUp grab and mobPush with lookingAt(mob)
+                    const isFloating = hover && !m.isHolding && input.field && player.velocity.y > 1
+                    floatWiden += 0.1 * ((isFloating ? -0.2 * Math.sin(m.angle) : 0) - floatWiden) //floating draws the field 20% wider pointed up and 20% narrower pointed down
                     m.calculateFieldThreshold();
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -5252,7 +5275,7 @@ const m = {
                         m.fieldPosition = { x: m.pos.x, y: m.pos.y }
                         m.fieldAngle = m.angle
 
-                        current.draw(m.pos, m.angle, true) //draw field attached to player
+                        current.draw(m.pos, m.angle, true, 1 + floatWiden) //draw field attached to player
                         m.perfectPush();
 
                         if (tech.isThrowBlocks && input.down) {
@@ -5311,7 +5334,7 @@ const m = {
                     } else {
                         m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         if (!input.field) { //&& tech.isFieldFree
-                            current.draw(m.fieldPosition, m.fieldAngle, false) //draw field free of player
+                            current.draw(m.fieldPosition, m.fieldAngle, false, 1 + floatWiden) //draw field free of player
                             m.perfectPush(true);
                         }
                     }

@@ -415,6 +415,19 @@ const mobs = {
                     }
                 }
             },
+            healthBar5() { //healthBar1 but 1.8x wider and 1.1x taller with a black outline, the extra height goes up so the bottom edge matches healthBar1
+                const h = this.radius * 0.33;
+                const w = this.radius * 3.6;
+                const x = this.position.x - w / 2;
+                const y = this.position.y - this.radius * 1.1 - h;
+                ctx.fillStyle = "rgba(100, 100, 100, 0.3)";
+                ctx.fillRect(x, y, w, h);
+                ctx.fillStyle = spawn.tier5Color;
+                ctx.fillRect(x, y, w * this.health, h);
+                ctx.lineWidth = 0.114 * this.radius; //scales with the bar, 4 at radius 35
+                ctx.strokeStyle = "#000";
+                ctx.strokeRect(x, y, w, h);
+            },
             status: [], // [ { effect(), endCycle } ]
             checkStatus() {
                 let j = this.status.length;
@@ -625,12 +638,12 @@ const mobs = {
             //     })
             //     canvas.style.filter = `brightness(${brightness})`;
             // },
-            harmZone() {
+            harmZone(zapDelay = 15) { //zaps the player every zapDelay cycles while they're in range
                 if (this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
                     // ctx.lineDashOffset = 6*(simulation.cycle % 215);
                     if (this.distanceToPlayer() < this.laserRange) {
-                        if (m.immuneCycle < m.cycle && !(m.cycle % 15)) {
+                        if (m.immuneCycle < m.cycle && !(m.cycle % zapDelay)) {
                             m.takeDamage(0.0045 * this.damageScale());
                             if (m.energy > 0.1) m.energy -= 0.003
                         }
@@ -1079,7 +1092,7 @@ const mobs = {
                         const forceMag = (this.accelMag + this.accelMag * Math.random()) * this.mass;
                         const angle = Math.atan2(this.seePlayer.position.y - this.position.y, this.seePlayer.position.x - this.position.x);
                         this.force.x += forceMag * Math.cos(angle);
-                        this.force.y += forceMag * Math.sin(angle) - (Math.random() * 0.06 + 0.1) * this.mass; //antigravity
+                        this.force.y += (forceMag * Math.sin(angle) - (Math.random() * 0.06 + 0.1) * this.mass) * Math.sqrt(spawn.fasterMobs(1.3)); //antigravity, 1.3x higher hops with faster mobs, 0.85x without
                         if (onHop) onHop()
                     }
                 } else if (this.randomHopCD < simulation.cycle && this.isOnGround()) {
@@ -1382,6 +1395,7 @@ const mobs = {
                 }
                 for (let i = 0, len = body.length; i < len; ++i) push(body[i])
                 for (let i = 0, len = bullet.length; i < len; ++i) push(bullet[i])
+                for (const who of b.bubbles()) push(who)
                 for (let i = 0, len = powerUp.length; i < len; ++i) push(powerUp[i])
                 push(player)
             },
@@ -1965,15 +1979,14 @@ const mobs = {
                     if (m.energy < 0) m.energy = 0
                 }
                 if (tech.isAddRemoveMaxHealth) {
-                    if (!this.isBoss) {
-                        const amount = 0.01
+                    if (!this.isBoss) { //lose 0.01x of current max, scaled to undo the multipliers in m.setMaxEnergy and m.setMaxHealth
                         if (tech.isEnergyHealth) {
-                            if (m.maxEnergy > amount) {
-                                tech.healMaxEnergyBonus -= amount
-                                m.setMaxEnergy();
-                            }
-                        } else if (m.maxHealth > amount) {
-                            tech.extraMaxHealth -= amount //decrease max health
+                            const scale = level.isReducedEnergy ? (simulation.difficultyOptions.isStrongerConstraints ? 0.3 : 0.55) : 1
+                            tech.healMaxEnergyBonus -= 0.01 * m.maxEnergy * tech.inverseFireRate / m.fieldUpgrades[1].energyHealthRatio / scale
+                            m.setMaxEnergy();
+                        } else {
+                            const scale = level.isReducedHealth ? (simulation.difficultyOptions.isStrongerConstraints ? 0.3 : 0.6) : 1
+                            tech.extraMaxHealth -= 0.01 * m.maxHealth * m.fieldUpgrades[1].energyHealthRatio / scale //decrease max health
                             m.setMaxHealth();
                         }
                     }

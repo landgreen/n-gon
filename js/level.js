@@ -22,6 +22,7 @@ const level = {
     start() {
         saveGame.autosave() //the previous level is already cleared, so this is the state a loaded save starts from
         spawn.randomMobPositions.length = 0
+        spawn.isHigherTierMobSpawned = false
         level.surfacePortals.length = 0
         level.setConstraints()
         if (level.levelsCleared === 0) { //this code only runs on the first level
@@ -42,10 +43,12 @@ const level = {
                 powerUps.research.changeRerolls(100000)
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
-                m.setField(10) //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch  6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
+                //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch 
+                // 6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
+                m.setField(2)
                 // simulation.molecularMode = 4;
                 // m.energy = m.maxEnergy = 12.2
-                m.damageDone *= 10
+                // m.damageDone *= 20
 
                 m.maxHealth = m.health = 100
                 // m.displayHealth();
@@ -54,19 +57,23 @@ const level = {
 
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                b.giveGuns(0)
+                b.giveGuns(8)
                 b.guns[b.inventory[0]].ammo = 100000
+                tech.giveTech("aerogel")
+                tech.giveTech("surface tension")
                 // tech.addJunkTechToPool(0.5)
                 // for (let i = 0; i < 1; i++) tech.giveTech("mass hyperboloid")
-                // for (let i = 0; i < 1; i++) tech.giveTech("thermal runaway")
+                for (let i = 0; i < 1; i++) tech.giveTech("cavitation")
                 // for (let i = 0; i < 1; i++) tech.giveTech("shear stress")
                 // for (let i = 0; i < 1; i++) tech.giveTech("double beta decay")
                 // for (let i = 0; i < 3; i++) tech.giveTech("nail-bot")
                 // simulation.difficultyOptions.isStrongerConstraints = true //stronger slow bots, the slowed bots wait 1.5x longer between attacks
+                simulation.difficultyOptions.isFasterMobs = true //faster mobs difficulty
                 // level.constraint.find(c => c.description === "slow bots").effect()
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 3; ++i) tech.giveTech("Meissner effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("ray")
+                for (let i = 0; i < 1; ++i) tech.giveTech("Hall effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("Hawking radiation")
                 // for (let i = 0; i < 9; ++i) tech.giveTech("impulse")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("fatigue")
@@ -82,14 +89,15 @@ const level = {
                 // tech.giveTech("nitinol")
                 // tech.giveTech("optimization") //swap skins when paused
                 // tech.giveTech("outlier")
-                // tech.giveTech("ground wire")
-                // for (let i = 0; i < 3; i++) tech.giveTech("observer effect")
+                // tech.giveTech("maul")
+                tech.giveTech("alternator")
+                for (let i = 0; i < 3; i++) tech.giveTech("smelting")
                 // tech.giveTech("many-worlds") //alternate reality at the start of each level
                 // tech.giveTech("localization") //choose what doesn't change in an alternate reality when paused
                 // tech.giveTech("quantum immortality")
                 // tech.giveTech("self-locating uncertainty") //dying rewinds to the checkpoint, so clear the first level before testing it
                 // for (let i = 0; i < 1; ++i) tech.giveTech("incendiary ammunition")
-                // for (let i = 0; i < 1; i++) tech.giveTech("foam-shot")
+                // for (let i = 0; i < 2; i++) tech.giveTech("foam-bot")
                 // for (let i = 0; i < 1; i++) tech.giveTech("uncertainty principle")
                 // spawn.bodyRect(575, -700, 150, 150);  //block mob line of site on testing
                 // level.levelsCleared = 2
@@ -105,10 +113,15 @@ const level = {
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
                 // for (let i = 0; i < 1; i++) spawn.mantisBoss(1300 + 10 * i, -400)
-                // for (let i = 0; i < 1; i++) spawn.starter(1300 + 200 * i, -200, 100)
+                // for (let i = 0; i < 1; i++) spawn.roundwormBoss(1300 + 200 * i, -200, 100)
                 for (let i = 0; i < 3; i++) spawn.starter(2400 + 200 * i, -200)
-                spawn.jellyBoss2(1300, -500)
-                // spawn.jellyBoss2(1300, -500)
+                // spawn.jellyBoss4(1300, -500)
+                // spawn.spinner5(1500, -300)
+                // spawn.focuser5(1800, -400)
+                // spawn.pulsar5(2100, -400)
+                // spawn.slicer5(2400, -400)
+                // spawn.jellyBoss4(1300, -500)
+                // spawn.floodFillBoss(3300, -700)
                 // spawn.jellyBoss(1300, -500)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
@@ -149,6 +162,7 @@ const level = {
             if (spawn.isPacifistStarters()) spawn.pickList = ["starter", "starter"] //pacifist lore run, regular mobs are all starters
             // spawn.pickList = ["focuser", "focuser"]
             level.load(level.levels[level.onLevel]); //picks the current map from level.maps or moreLevels
+            spawn.higherTierMobAtLevelStart()
             if (!simulation.isCheating && !build.isExperimentRun && !simulation.isTraining && !saveGame.isResuming) {
                 localSettings.runCount += level.levelsCleared //track the number of total runs locally
                 if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -221,9 +235,9 @@ const level = {
             }
         }
         tech.isDeathAvoidedThisLevel = false;
-        //catch waves that continue to exist
+        //catch waves and bubbles that continue to exist
         for (let i = simulation.ephemera.length - 1; i >= 0; i--) {
-            if (simulation.ephemera[i].name === "wave") simulation.ephemera.splice(i, 1)
+            if (simulation.ephemera[i].name === "wave" || simulation.ephemera[i].name === "bubbles") simulation.ephemera.splice(i, 1)
         }
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
@@ -2998,164 +3012,84 @@ const level = {
             }
         }
     },
-    vanish(x, y, width, height, isVertical = false, hide = {
-        x: 0,
-        y: 400
-    }) {
-        x = x + width / 2
-        y = y + height / 2
-        const vertices = [{
-            x: x,
-            y: y,
-            index: 0,
-            isInternal: false
-        }, {
-            x: x + width,
-            y: y,
-            index: 1,
-            isInternal: false
-        }, {
-            x: x + width,
-            y: y + height,
-            index: 4,
-            isInternal: false
-        }, {
-            x: x,
-            y: y + height,
-            index: 3,
-            isInternal: false
-        }]
-        const block = body[body.length] = Bodies.fromVertices(x, y, vertices, {
-            // const block = body[body.length] = Bodies.rectangle(x, y, width, height, {
+    vanish(x, y, width, height, isVertical = false) { //platform that shrinks away after the player touches it, then comes back
+        const block = body[body.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, {
             collisionFilter: {
                 category: cat.map,
                 mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
             },
-            inertia: Infinity, //prevents rotation
             isNotHoldable: true,
             isNonStick: true, //this keep sporangium from sticking
             isTouched: false,
             fadeTime: 10 + Math.ceil(0.25 * width),
-            fadeCount: null,
+            fadeCount: 0,
             isThere: true,
             returnTime: 120,
             returnCount: 0,
-            shrinkVertices(size) {
-                if (isVertical) {
-                    return [{
-                        x: x,
-                        y: y * size,
-                        index: 0,
-                        isInternal: false
-                    }, {
-                        x: x + width,
-                        y: y * size,
-                        index: 1,
-                        isInternal: false
-                    }, {
-                        x: x + width,
-                        y: (y + height) * size,
-                        index: 4,
-                        isInternal: false
-                    }, {
-                        x: x,
-                        y: (y + height) * size,
-                        index: 3,
-                        isInternal: false
-                    }]
-                } else {
-                    return [{
-                        x: x * size,
-                        y: y,
-                        index: 0,
-                        isInternal: false
-                    }, {
-                        x: (x + width) * size,
-                        y: y,
-                        index: 1,
-                        isInternal: false
-                    }, {
-                        x: (x + width) * size,
-                        y: y + height,
-                        index: 4,
-                        isInternal: false
-                    }, {
-                        x: x * size,
-                        y: y + height,
-                        index: 3,
-                        isInternal: false
-                    }]
-                }
+            setSize(size) { //shrink around the center, setVertices keeps the body's position
+                const w = isVertical ? width : width * size
+                const h = isVertical ? height * size : height
+                Matter.Body.setVertices(this, [{ x: -w / 2, y: -h / 2 }, { x: w / 2, y: -h / 2 }, { x: w / 2, y: h / 2 }, { x: -w / 2, y: h / 2 }])
             },
             query() {
                 if (this.isThere) {
                     if (this.isTouched) {
                         if (!m.isTimeDilated) {
                             this.fadeCount--
-                            Matter.Body.setVertices(this, this.shrinkVertices(Math.max(this.fadeCount / this.fadeTime, 0.03)))
+                            this.setSize(Math.max(this.fadeCount / this.fadeTime, 0.03))
                         }
-                        if (this.fadeCount < 1) {
-                            Matter.Body.setPosition(this, hide)
+                        if (this.fadeCount < 1) { //take it out of the world and the body array until it returns, so it can't block lasers, vision, or get drawn while gone
                             this.isThere = false
                             this.isTouched = false
-                            this.collisionFilter.mask = 0 //cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
                             this.returnCount = this.returnTime
-                            Matter.Body.setVertices(this, this.shrinkVertices(1))
-                            Matter.Body.setVertices(this, vertices)
+                            this.setSize(1)
+                            Matter.Composite.remove(engine.world, this);
+                            const index = body.indexOf(this)
+                            if (index > -1) body.splice(index, 1);
                         }
-                    } else if (Matter.Query.collides(this, [player]).length) { // || (Matter.Query.collides(this, body).length)) {
+                    } else if (Matter.Query.collides(this, [player]).length) {
                         this.isTouched = true
                         this.fadeCount = this.fadeTime;
                     }
-                    ctx.beginPath();
-                    const v = this.vertices;
-                    ctx.moveTo(v[0].x, v[0].y);
-                    for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
-                    ctx.lineTo(v[0].x, v[0].y);
-                    ctx.fillStyle = "#586370"
-                    ctx.fill();
-                } else {
-                    if (!m.isTimeDilated) {
-                        this.returnCount--
-                        if (this.returnCount < 1) {
-                            Matter.Body.setPosition(this, { x: x, y: y })
-                            if (Matter.Query.collides(this, [player]).length) { //|| (Matter.Query.collides(this, body).length)) {
-                                Matter.Body.setPosition(this, hide)
-                                this.returnCount = 15
-                            } else {
-                                this.isThere = true
-                                this.collisionFilter.mask = cat.player | cat.mob | cat.body | cat.bullet | cat.powerUp | cat.mobBullet
-                                this.fadeCount = this.fadeTime
-                                //delete any overlapping blocks
-                                const blocks = Matter.Query.collides(this, body)
-                                for (let i = 0; i < blocks.length; i++) {
-                                    const who = blocks[i].bodyA === this ? blocks[i].bodyB : blocks[i].bodyA //the other body, it can be either side of the pair
-                                    if (who !== this && who !== m.holdingTarget && !who.isImmutable) {
-                                        Matter.Composite.remove(engine.world, who);
-                                        const index = body.indexOf(who)
-                                        if (index > -1) body.splice(index, 1);
-                                    }
+                } else if (!m.isTimeDilated) {
+                    this.returnCount--
+                    if (this.returnCount < 1) {
+                        if (Matter.Query.collides(this, [player]).length) {
+                            this.returnCount = 15 //wait for the player to move out of the way
+                        } else {
+                            //delete any overlapping blocks, but not level parts like doors or other vanishes
+                            const blocks = Matter.Query.collides(this, body)
+                            for (let i = 0; i < blocks.length; i++) {
+                                const who = (blocks[i].bodyA === this ? blocks[i].bodyB : blocks[i].bodyA).parent //the other body, it can be either side of the pair
+                                if (who !== m.holdingTarget && !who.isNotHoldable && !who.isImmutable) {
+                                    Matter.Composite.remove(engine.world, who);
+                                    const index = body.indexOf(who)
+                                    if (index > -1) body.splice(index, 1);
                                 }
                             }
+                            this.isThere = true
+                            Composite.add(engine.world, this);
+                            body.push(this)
                         }
                     }
-                    ctx.beginPath();
-                    const v = this.v;
-                    ctx.moveTo(v[0].x, v[0].y);
-                    for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
-                    ctx.lineTo(v[0].x, v[0].y);
+                }
+                ctx.beginPath();
+                const v = this.vertices;
+                ctx.moveTo(v[0].x, v[0].y);
+                for (let i = 1; i < v.length; ++i) ctx.lineTo(v[i].x, v[i].y);
+                ctx.closePath();
+                if (this.isThere) {
+                    ctx.fillStyle = "#586370"
+                    ctx.fill();
+                } else { //outline fades in while it's gone
                     ctx.strokeStyle = `rgba(88, 99, 112,${1 - Math.sqrt(this.returnCount / this.returnTime)})`
                     ctx.lineWidth = 1
                     ctx.stroke();
                 }
             },
         });
-        //store shape
-        body[body.length - 1].v = body[body.length - 1].vertices
         Matter.Body.setStatic(block, true); //make static
         Composite.add(engine.world, block); //add to world
-        // who.classType = "body"
-        if (simulation.isHorizontalFlipped) x *= -1
         return block
     },
     door(x, y, width, height, distance, speed = 1) {
@@ -6528,6 +6462,7 @@ const level = {
                 spawn.randomMobPositions = []
                 stations[stationList[Math.abs(stationNumber % stationList.length)]]() //*************** run this one when done testing individual stations
                 spawn.randomMobFromArray()
+                if (spawn.randomMobPositions.length) spawn.randomHigherTierMob(spawn.randomMobPositions[0].x, spawn.randomMobPositions[0].y) //next TIER mobs difficulty: one at each station with mobs, the positions are already shuffled
                 // stations[7]()
 
                 //add in standard station map infrastructure
@@ -10410,6 +10345,7 @@ const level = {
                 invertVertical(body);
                 invertVertical(powerUp);
                 invertVertical(bullet);
+                for (const who of b.bubbles()) who.position = { x: who.position.x, y: -who.position.y }
                 invertVertical(mob);
                 //fields
                 if (m.fieldMode === 9 && m.hole.isOn) {
@@ -10849,6 +10785,7 @@ const level = {
                 invertVertical(body);
                 invertVertical(powerUp);
                 invertVertical(bullet);
+                for (const who of b.bubbles()) who.position = { x: who.position.x, y: -who.position.y }
                 invertVertical(mob);
 
                 //fields

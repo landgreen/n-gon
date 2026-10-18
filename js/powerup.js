@@ -552,15 +552,16 @@ const powerUps = {
         options: [
             { key: "isHalfDamage", required: true, text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
             { key: "isDoubleDamageTaken", required: true, text: '<strong>2x</strong> <strong class="color-defense" data-help="defense">damage taken</strong>' },
-            // { key: "isMobTier23", required: true, text: 'increase mob <strong class="color-tier" data-help="tier">TIER</strong><br>after every <strong>4</strong> levels' },
-            { key: "isMobTier23", required: true, text: '<strong class="color-tier" data-help="tier">TIER</strong> <strong>2</strong> and <strong class="color-tier" data-help="tier">TIER</strong> <strong>3</strong> mobs' },
-            { key: "isSecondBoss", required: true, get text() { return `<strong>2 bosses</strong> per level`; } },
+            { key: "isMobTier23", required: true, text: '<strong class="color-tier" data-help="tier">TIER</strong> <strong>3</strong> mobs' },
+            { key: "isSecondBoss", required: true, get text() { return `<strong>2</strong> bosses each level`; } },
             { key: "isMobTier4", text: '<strong class="color-tier" data-help="tier">TIER</strong> <strong>4</strong> mobs' },
             { key: "isDoubleMobs", text: '<strong>2x</strong> mobs' },
-            { key: "isFewerAmmoHeal", get text() { return `2 fewer ${powerUps.orb.heal()} ${powerUps.orb.ammo()} each level`; } },
+            { key: "isNextTierMobs", text: 'next <strong class="color-tier" data-help="tier">TIER</strong> mob each level' }, //each level starts with a mob 1 tier above the level's highest tier mobs, up to T5
+            { key: "isFasterMobs", text: '<strong>1.2x</strong> mob speed' }, //each mob type has its own speed up, see spawn.fasterMobs and spawn.fasterBoss
+            { key: "isFewerAmmoHeal", get text() { return `<strong>2</strong> fewer ${powerUps.orb.heal()} ${powerUps.orb.ammo()} each level`; } },
             { key: "isLateEquipment", get text() { return `${powerUps.orb.gun()} ${powerUps.orb.field()} spawn later`; } },
-            { key: "isFewerResearch", get text() { return `1 fewer ${powerUps.orb.research()} each level`; } },
-            { key: "isFewerTech", get text() { return `4 fewer ${powerUps.orb.tech()} spawn`; } },
+            { key: "isFewerResearch", get text() { return `<strong>1</strong> fewer ${powerUps.orb.research()} each level`; } },
+            { key: "isFewerTech", get text() { return `<strong>4</strong> fewer ${powerUps.orb.tech()} spawn`; } },
             { key: "isConstraint", text: 'random <strong class="constraint" data-help="constraint">constraints</strong>' },
             { key: "isStrongerConstraints", requires: "isConstraint", text: 'stronger <strong class="constraint" data-help="constraint">constraints</strong>' },
             { key: "isExtraHalfDamage", text: '<strong>0.5x</strong> <strong class="color-d" data-help="damage">damage</strong>' },
@@ -683,7 +684,7 @@ const powerUps = {
                     button.disabled = !difficulty.allowed(option, selected);
                     button.classList.toggle('difficulty-option-selected', selected[option.key]);
                     button.setAttribute('aria-checked', String(selected[option.key]));
-                    button.title = button.disabled ? (option.requires ? 'requires random constraint' : 'requires all four starting options') : '';
+                    button.title = button.disabled ? (option.requires ? `requires ${difficulty.options.find(o => o.key === option.requires).text.replace(/<[^>]*>/g, '')}` : 'requires all four starting options') : '';
                 }
             };
             for (const option of difficulty.options) {
@@ -732,6 +733,8 @@ const powerUps = {
     qubit: {
         name: "qubit",
         color: "#fff",
+        count: 0, //qubits used this run, kept in alternate realities
+        damageCount: 0, //qubits used with interference
         size() {
             return 13;
         },
@@ -740,11 +743,27 @@ const powerUps = {
         },
         effect() {
             powerUps.animatePowerUpGrab('rgba(255,255,255,0.7)');
+            powerUps.qubit.count++;
             m.damageReduction *= 0.97;
-            if (tech.isQubitDamage) m.damageDone *= 1.03;
+            if (tech.isQubitDamage) {
+                powerUps.qubit.damageCount++;
+                m.damageDone *= 1.03;
+            }
             simulation.inGameConsole(`${powerUps.orb.qubit(1)} <span class='color-var'>m</span>.<span class='color-defense'>damageReduction</span> <span class='color-symbol'>*=</span> 0.97 <em>//qubit</em>${tech.isQubitDamage ? `<br><span class='color-var'>m</span>.<span class='color-d'>damageDone</span> <span class='color-symbol'>*=</span> 1.03 <em>//interference</em>` : ""}`);
             m.displayHealth();
             powerUps.Casimir.random();
+        },
+        switchWorlds(isApplied) { //alternate realities keep qubits, but more than 5 are randomized from 0.5x to 1.5x
+            const scale = this.count > 5 ? 0.5 + Math.random() : 1;
+            const count = Math.round(this.count * scale);
+            const damageCount = Math.round(this.damageCount * scale);
+            //isApplied: the old qubits are still in m.damageReduction, because localization skipped resetAllTech
+            m.damageReduction *= 0.97 ** (count - (isApplied ? this.count : 0));
+            m.damageDone *= 1.03 ** (damageCount - (isApplied ? this.damageCount : 0));
+            const isChanged = count !== this.count;
+            this.count = count;
+            this.damageCount = damageCount;
+            return isChanged;
         }
     },
     Casimir: {
@@ -1004,8 +1023,13 @@ const powerUps = {
                             if (powerUps.healGiveMaxEnergy) { //ionization energy: fill energy instead of health
                                 if (m.energy < m.maxEnergy) m.energy = m.maxEnergy
                             } else if (!tech.isEnergyHealth) {
+                                const healOutput = m.maxHealth - m.health
                                 m.health = m.maxHealth;
                                 m.displayHealth();
+                                if (healOutput > 0) {
+                                    simulation.dmgNumbers({ x: m.pos.x, y: m.pos.y - 13 }, Math.ceil(100 * healOutput).toFixed(0), "rgba(0, 238, 187,", 60, true)
+                                    simulation.inGameConsole(`<div class="circle-grid heal"></div> <span class='color-var'>m</span>.health <span class='color-symbol'>+=</span> ${healOutput.toFixed(3)} <em>//Brownian ratchet</em>`)
+                                }
                             }
                         }
                         for (const who of mob) {
@@ -1668,7 +1692,7 @@ const powerUps = {
                 for (let i = 0; i < 3; i++)simulation.energyGenGraphic()
             }
         }
-        if (tech.isMineDrop && bullet.length < 150 && Math.random() < 0.5) {
+        if (tech.isMineDrop && b.shotCount() < 150 && Math.random() < 0.5) {
             if (tech.isLaserMine && input.down) {
                 b.laserMine(who.position)
             } else {

@@ -211,6 +211,11 @@ function collisionChecks(event) {
         } else {
             continue
         }
+        //mobs like jellyBoss let loose blocks pass through, unless the block is fast enough to do damage, like a thrown block
+        if (who.passesSlowBlocks && obj.classType === "body" && obj.speed <= 9 && !obj.isStatic && !obj.isNotHoldable) {
+            pair.isSensor = true //Matter only sets isSensor when a pair is made, so it stays a sensor until they separate
+            continue
+        }
 
         collideMob(who, obj, pair)
     }

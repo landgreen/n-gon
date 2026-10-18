@@ -164,7 +164,7 @@ const b = {
                 this.count++
                 b.superBall({ x: m.pos.x + 30 * Math.cos(m.angle), y: m.pos.y + 30 * Math.sin(m.angle) },
                     { x: this.speed * Math.cos(m.angle), y: this.speed * Math.sin(m.angle) }, 11 * tech.bulletSize)
-                m.fireCDcycle = m.cycle + this.delay
+                m.fireCDcycle = Math.max(m.fireCDcycle, m.cycle + this.delay) //don't shorten a longer cooldown, like from salvo
                 if (this.count >= this.num) simulation.removeEphemera(this)
             }
         })
@@ -266,7 +266,7 @@ const b = {
         if (tech.crouchAmmoCount && m.crouch) tech.crouchAmmoCount++ //makes the no ammo toggle off and on
         if (isFree) return
         gun.ammo--;
-        if (level.is2xAmmo && gun.ammo > 0 && (gun.name !== "harpoon" || tech.isRailGun)) {
+        if (level.is2xAmmo && gun.ammo > 0 && (gun.name !== "harpoon" || gun.mode === "railgun")) {
             gun.ammo--;
             if (simulation.difficultyOptions.isStrongerConstraints && gun.ammo > 0) gun.ammo--;
         }
@@ -335,6 +335,7 @@ const b = {
                             break
                         }
                     }
+                    if (!isShot) isShot = b.bubbles().some(who => who.count < 3 && !who.target && isNear(who)) //a bubble's count is its age for its first 20 cycles
                     if (isShot) {
                         this.readyCycle = m.cycle + cooldown
                         for (const who of bullet) {
@@ -342,6 +343,9 @@ const b = {
                                 b.enlarge(who, bigScale)
                                 if (who.bulletType === "mine" && !this.bigMines.includes(who)) this.bigMines.push(who)
                             }
+                        }
+                        for (const who of b.bubbles()) {
+                            if (!who.target && isNear(who)) who.radius *= bigScale //bigger and longer lasting, like b.enlarge() does to foam
                         }
                     }
                 }
@@ -2169,9 +2173,7 @@ const b = {
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], player.velocity); //set velocity in direction of player
     },
-    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
-        const me = bullet.length;
-        const returnRadius = 100 * Math.sqrt(harpoonSize)
+    harpoonShape(harpoonSize = 1) { //vertices for a harpoon, rebar, or maul, pointing right
         let shape
         if (tech.isRebar || tech.isMaul) {
             const long = tech.isMaul ? 32 : 65
@@ -2230,7 +2232,12 @@ const b = {
                 isInternal: false
             }]
         }
-        bullet[me] = Bodies.fromVertices(where.x, where.y, shape, {
+        return shape
+    },
+    harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
+        const me = bullet.length;
+        const returnRadius = 100 * Math.sqrt(harpoonSize)
+        bullet[me] = Bodies.fromVertices(where.x, where.y, b.harpoonShape(harpoonSize), {
             cycle: 0,
             angle: angle,
             friction: 1,
@@ -2529,6 +2536,546 @@ const b = {
             }
         }
         Composite.add(engine.world, bullet[me]); //add bullet to world
+    },
+    harpoonSwingTuning: { //alternator sweep, these can be changed live in the console, like  b.harpoonSwingTuning.cycles = 20
+        //the harpoon's rope end follows an ellipse that points where you look, or at the mob in front of you nearest your aim
+        cycles: 15, //how long a swing takes
+        arc: Math.PI, //radians the swing sweeps, centered on the aim
+        reach: 340, //distance from the player to the ellipse's far end
+        roundness: 0.53, //the ellipse's width over its length, 1 is a circle
+        offset: 0.66, //how far back from the ellipse's center the player stands, 0 is at the center, near 1 is at the back edge
+        swell: 0.7, //how the swing grows out from the player to the ellipse by the middle, then back in by the end, 0 stays out the whole swing, higher stays in longer
+        inner: 40, //distance from the player to the rope end at the start and end of a swing
+        crouchReach: 1.625, //crouching scales reach
+        crouchRoundness: 1 / 1.875, //crouching scales roundness, smaller is a narrower ellipse
+        crouchCooldown: 1.3, //crouching scales the time between swings
+        crouchSpeedCap: 1.4, //crouching scales damageSpeedCap, to make up for the slower crouched swings
+        targetCone: Math.PI, //radians wide, centered on where you look, to find the mob nearest your aim to point the swing at, 0 is off
+        targetStretch: 1.5, //the farthest a swing can reach for a mob, as a multiple of reach, closer mobs shrink the swing to fit
+        targetLead: 1, //how much the swing aims ahead of moving mobs, 0 aims where they are now
+        ease: 0.1, //0 swings at a constant speed, up to 0.159 starts and ends slowly with a fast middle
+        tilt: 0, //radians the harpoon leans into the swing, 0 points straight out from the player
+        comboCycles: 90, //a swing this soon after the last one goes back the other way, otherwise it swings over the top, 0 is always over the top
+        smeltNarrowing: 1.3, //each extra harpoon from smelting swings the other way, on an ellipse this many times narrower than the one before
+        smeltDelay: 3, //cycles between each extra harpoon from smelting going out
+        randomArc: 0.22, //each harpoon's arc is randomly up to this much bigger or smaller, 0.22 is 22%
+        smeltSpread: 12 * Math.PI / 180, //each harpoon from smelting goes after a different mob, the ones left over fan out to alternating sides of the first harpoon's aim, 12 then -12 then 24 then -24 degrees
+        randomRoundness: 0.27, //each harpoon's ellipse is randomly up to this much wider or narrower
+        smeltRandomRoundness: 0.5, //the same for the extra harpoons from smelting, so they vary more
+        damage: 1, //scales the thrown harpoon's damage formula, which goes up with harpoon mass and speed
+        damageSpeedCap: 75, //the most hit speed that counts for damage, a big swing's tip moves much faster than a thrown harpoon, so without this far swings do 2x a stab's damage
+        rehitCycles: 30, //cycles before the same harpoon can damage the same mob again
+        //physics: the arc is where the harpoon tries to go, walls, blocks, and mobs knock it off and it springs back
+        stiffness: 0.8, //how hard the harpoon pulls back toward its arc after getting knocked off, per cycle squared
+        damping: 0.9, //how quickly it settles back onto its arc instead of wobbling around it, 2 * sqrt(stiffness) is no wobble
+        bounce: 0.4, //how much speed it keeps bouncing off mobs, 0 stops dead, 1 is perfectly bouncy
+        friction: 0.1, //fraction of its sliding speed it loses each time it hits a mob
+        heft: 1, //scales the harpoon's mass when it hits things, higher pushes blocks and mobs harder and bounces off mobs less
+        knockSpeed: 6, //the fastest a swing can knock a mob, in pixels per cycle, about what a thrown harpoon does, without this the swing pushes a mob until it's as fast as the tip and throws it across the map
+        returnCycles: 10, //most cycles to wait for a knocked off harpoon to come home after the arc ends
+        scrapeFriction: 0.1, //fraction of its speed the harpoon loses per cycle scraping along the map or blocks, it doesn't bounce off them
+        blockPush: 0.3, //how hard the harpoon shoves blocks, as a fraction of a real hit, 1 sends light blocks flying
+        blockSlow: 0.3, //how much going through a block slows the harpoon, more for heavier blocks
+        blockWinMass: 30, //blocks lighter than this get knocked aside as the harpoon goes through them, heavier ones it scrapes along like the map
+        uhmwpe: 0.5, //how much of UHMWPE's rope length bonus makes the swing bigger
+        stepSize: 20, //most pixels the harpoon moves between collision checks, smaller is more accurate but slower
+        cooldown: 40, //cycles between swings, scaled by fire rate
+        drain: 0.006, //energy per cycle while swinging
+        fadeCycles: 30, //cycles the swept path lingers after the swing ends
+        fillColor: "0,0,0", //rgb of the swept path
+        fillAlpha: 0.07, //opacity of the swept path's fill
+        edgeAlpha: 0.25, //opacity of the swept path's outer edge
+        isGrabPowerUps: true, //any part of the harpoon grabs power ups, they stack down it from the tip and come back with it
+        grabRange: 50, //how close a power up's edge has to get to the harpoon to be grabbed
+    },
+    harpoonSwing(isRefund = true) { //alternator sweep, swing the harpoon around the player instead of throwing it
+        const tune = b.harpoonSwingTuning
+        const gun = b.guns[9]
+        const shape = b.harpoonShape(tech.isLargeHarpoon ? 1 + 0.1 * Math.sqrt(gun.ammo) : 1) //same size as harpoonFire
+        let minX = Infinity, maxX = -Infinity, halfWidth = 0
+        for (const v of shape) {
+            minX = Math.min(minX, v.x)
+            maxX = Math.max(maxX, v.x)
+            halfWidth = Math.max(halfWidth, Math.abs(v.y))
+        }
+        const length = maxX - minX
+        const mass = Matter.Vertices.area(shape, false) * tech.harpoonDensity * (tech.isRebar ? 0.6 : 1) //same mass as a thrown harpoon
+        const ropeScale = 1 + (tech.isUHMWPE ? tune.uhmwpe * 0.013 * Math.min(110, gun.ammo) : 0)
+        const reach = tune.reach * (m.crouch ? tune.crouchReach : 1)
+        const roundness = tune.roundness * (m.crouch ? tune.crouchRoundness : 1)
+        const speedCap = tune.damageSpeedCap * (m.crouch ? tune.crouchSpeedCap : 1)
+        //find the mobs to point the swings at, nearest your aim first, each harpoon from smelting goes after a different one
+        const targets = []
+        if (tune.targetCone) {
+            const look = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
+            const range = ropeScale * tune.targetStretch * reach + 0.6 * length //the farthest the front of the harpoon can go through a mob
+            const minCos = Math.cos(tune.targetCone / 2) //cosine of the angle from your aim to a mob, bigger is nearer your aim
+            for (let i = 0, len = mob.length; i < len; ++i) {
+                const who = mob[i]
+                if (!who.alive || who.isBadTarget || who.isInvulnerable || who.shield) continue
+                const sub = Vector.sub(who.position, m.pos)
+                const dist = Vector.magnitude(sub)
+                const cos = Vector.dot(sub, look) / dist
+                if (cos > minCos && dist < range && !Matter.Query.rayAny(map, m.pos, who.position)) targets.push({ who, cos })
+            }
+            targets.sort((x, y) => y.cos - x.cos)
+        }
+        function aimAt(who) { //point a swing at a mob, and size it so the front of the harpoon goes through the mob at the middle of the swing
+            const lead = Vector.mult(Vector.sub(who.velocity, player.velocity), tune.targetLead * tune.cycles / 2) //how far the mob moves before the middle of the swing
+            const where = Vector.add(Vector.sub(who.position, m.pos), lead)
+            const goal = Vector.magnitude(where) - 0.6 * length
+            return { aim: Math.atan2(where.y, where.x), fit: Math.max(tune.inner, Math.min(ropeScale * tune.targetStretch * reach, goal)) / (ropeScale * reach) } //fit scales the swing to reach the mob
+        }
+        const main = targets.length ? aimAt(targets[0].who) : { aim: m.angle, fit: 1 }
+        const isCombo = m.cycle - gun.swingCycle < tune.comboCycles
+        const dir = isCombo ? -gun.swingDirection : (Math.cos(main.aim) < 0 ? -1 : 1) //1 is clockwise
+        gun.swingDirection = dir
+        gun.swingCycle = m.cycle
+        const harpoons = []
+        const vary = amount => 1 + amount * (2 * Math.random() - 1) //a random scale, like 0.9 to 1.1 for 0.1
+        let fanned = 0 //harpoons from smelting without a mob of their own
+        for (let i = 0, len = 1 + tech.extraHarpoons; i < len; i++) {
+            const target = targets[i] ? aimAt(targets[i].who) : null
+            let axis = main.aim
+            if (!target && i) { //no mob left for this one, so fan out around the first harpoon's aim, 1, -1, 2, -2, ... steps of smeltSpread
+                fanned++
+                axis += dir * Math.ceil(fanned / 2) * (fanned % 2 ? 1 : -1) * tune.smeltSpread //times dir, so facing left fans out the same as facing right
+            } else if (target) {
+                axis = target.aim
+            }
+            const a = ropeScale * (target ? target.fit : main.fit) * reach / (1 + tune.offset) //half the ellipse's length
+            const narrow = roundness / Math.pow(tune.smeltNarrowing, i) * vary(i ? tune.smeltRandomRoundness : tune.randomRoundness)
+            harpoons.push({
+                dir: i % 2 ? -dir : dir, //extra harpoons from smelting take turns swinging the other way
+                axis, //the direction the harpoon's ellipse points
+                a,
+                c: tune.offset * a, //how far the ellipse's center is in front of the player
+                bb: narrow * narrow * a * a, //half the harpoon's ellipse's width, squared, each extra harpoon's ellipse is narrower
+                arc: tune.arc * vary(tune.randomArc),
+                delay: i * tune.smeltDelay, //extra harpoons from smelting go out one after another
+                isOut: false,
+                vel: { x: 0, y: 0 },
+                id: Math.random(), //each harpoon hits each mob once per swing
+                pose: null,
+                front: [], //the swept path, so it can be filled
+                back: [],
+                foamSpawned: 0,
+                flashCycle: 0,
+                debris: null, //a broken harpoon tumbles away
+                passed: [], //blocks this harpoon already went through
+                caught: [], //power ups stacked down the harpoon from the tip, like a shish kebab
+            })
+        }
+        function closest(pose, point) { //the point on the harpoon closest to point
+            const seg = Vector.sub(pose.front, pose.back)
+            const t = Math.min(1, Math.max(0, Vector.dot(Vector.sub(point, pose.back), seg) / Vector.magnitudeSquared(seg)))
+            return { t, touch: Vector.add(pose.back, Vector.mult(seg, t)) }
+        }
+        function release(who) { //a caught power up drops where it is and collides again
+            who.isGrabbed = false
+            who.collisionFilter.category = cat.powerUp
+            who.collisionFilter.mask = cat.map | cat.powerUp
+        }
+        function reachAt(phi, h) { //distance from the player to the edge of a harpoon's ellipse, at angle phi from where it points
+            const cos = Math.cos(phi)
+            const sin = Math.sin(phi)
+            const aa = h.a * h.a
+            const A = cos * cos / aa + sin * sin / h.bb
+            const B = -2 * h.c * cos / aa
+            const C = h.c * h.c / aa - 1
+            return (-B + Math.sqrt(B * B - 4 * A * C)) / (2 * A)
+        }
+        function harpoonPath(back, angle) { //adds the harpoon's outline to the current path, with its rope end at back
+            const cos = Math.cos(angle)
+            const sin = Math.sin(angle)
+            const x = back.x - minX * cos
+            const y = back.y - minX * sin
+            ctx.moveTo(x + shape[0].x * cos - shape[0].y * sin, y + shape[0].x * sin + shape[0].y * cos)
+            for (let i = 1; i < shape.length; i++) ctx.lineTo(x + shape[i].x * cos - shape[i].y * sin, y + shape[i].x * sin + shape[i].y * cos)
+            ctx.closePath()
+        }
+        const heftMass = mass * tune.heft //the harpoon's mass when it bounces off things
+        const swing = {
+            name: "harpoon swing",
+            harpoons,
+            time: 0, //cycles since the swing started
+            endTime: tech.extraHarpoons * tune.smeltDelay + tune.cycles, //when the last harpoon's arc ends
+            overtime: 0, //cycles spent pulling the harpoon home after the arc ends
+            isDone: false,
+            isRefund,
+            fade: tune.fadeCycles,
+            last: null, //the arc's state last cycle, to step between
+            state() { //the swing's time and where the player is
+                return { time: this.time, x: m.pos.x, y: m.pos.y }
+            },
+            lerpState(from, to, t) {
+                return { time: from.time + t * (to.time - from.time), x: from.x + t * (to.x - from.x), y: from.y + t * (to.y - from.y) }
+            },
+            pose(s, h) { //where the arc wants a harpoon to be
+                const p = Math.min(1, Math.max(0, (s.time - h.delay) / tune.cycles)) //how far through its arc
+                const sweep = h.arc * (p - tune.ease * Math.sin(2 * Math.PI * p))
+                const axis = h.axis
+                const theta = axis + h.dir * (sweep - h.arc / 2)
+                const r = tune.inner + (reachAt(theta - axis, h) - tune.inner) * Math.pow(Math.sin(Math.PI * p), tune.swell) //grow out from the player and back in
+                return this.place(h, { x: s.x + r * Math.cos(theta), y: s.y + r * Math.sin(theta) }, s, theta)
+            },
+            launch(h, s) { //send out a harpoon, turned away from any wall it would start inside
+                h.isOut = true
+                h.target = this.pose(s, h)
+                h.targetVel = { x: 0, y: 0 }
+                h.pose = h.target
+                let theta = h.target.theta
+                for (let i = 0; i < 18 && vertexCollision(s, h.pose.front, [map, body]).who; i++) {
+                    theta += h.dir * 0.175
+                    h.pose = this.place(h, { x: s.x + tune.inner * Math.cos(theta), y: s.y + tune.inner * Math.sin(theta) }, s, theta)
+                }
+                h.front.push(h.pose.front)
+                h.back.push(h.pose.back)
+            },
+            place(h, back, center, theta) { //a harpoon with its rope end at back, pointing away from the player like it's on a taut rope
+                const dx = back.x - center.x
+                const dy = back.y - center.y
+                const r = Math.hypot(dx, dy)
+                if (r > 1) theta = Math.atan2(dy, dx) //right on the player, so use the arc's angle
+                const minR = 0.75 * tune.inner //close to the player, a small move would spin the harpoon around, so keep the rope end out a bit
+                if (r < minR) back = { x: center.x + minR * Math.cos(theta), y: center.y + minR * Math.sin(theta) }
+                const angle = theta + h.dir * tune.tilt
+                return { back, front: { x: back.x + length * Math.cos(angle), y: back.y + length * Math.sin(angle) }, angle, theta }
+            },
+            do() {
+                if (!this.isDone) {
+                    if (!m.isTimeDilated) this.swing()
+                } else if (this.fade-- < 0) {
+                    simulation.removeEphemera(this)
+                    return
+                }
+                this.draw()
+            },
+            swing() {
+                if (this.time >= this.endTime) this.overtime++ //the arcs are over, pull the harpoons home
+                this.time++
+                const now = this.state()
+                const last = this.last
+                //move in steps between last cycle and now, so a fast harpoon can't skip through walls or mobs
+                let travel = Math.hypot(now.x - last.x, now.y - last.y)
+                for (const h of harpoons) {
+                    if (now.time < h.delay) continue
+                    travel = Math.max(travel, Vector.magnitude(Vector.sub(this.pose(now, h).front, this.pose(last, h).front)))
+                    if (h.isOut) {
+                        const r = Math.max(tune.inner, Vector.magnitude(Vector.sub(h.pose.back, m.pos)))
+                        travel = Math.max(travel, Vector.magnitude(h.vel) * (r + length) / r) //the tip moves faster than the rope end
+                    }
+                }
+                const steps = Math.max(1, Math.min(30, Math.ceil(travel / tune.stepSize)))
+                const dt = 1 / steps
+                for (let i = 1; i <= steps; i++) {
+                    const s = this.lerpState(last, now, i / steps)
+                    for (const h of harpoons) {
+                        if (h.debris) continue
+                        if (!h.isOut) {
+                            if (s.time >= h.delay) this.launch(h, s)
+                            continue
+                        }
+                        //the harpoon tries to follow the arc, and springs back toward it after getting knocked off
+                        const target = this.pose(s, h)
+                        const targetVel = Vector.mult(Vector.sub(target.back, h.target.back), steps)
+                        let error = Vector.sub(h.pose.back, h.target.back)
+                        let errorVel = Vector.sub(h.vel, h.targetVel)
+                        errorVel = Vector.add(errorVel, Vector.mult(Vector.add(Vector.mult(error, tune.stiffness), Vector.mult(errorVel, tune.damping)), -dt))
+                        error = Vector.add(error, Vector.mult(errorVel, dt))
+                        h.target = target
+                        h.targetVel = targetVel
+                        h.vel = Vector.add(targetVel, errorVel)
+                        const lastPose = h.pose
+                        this.move(h, Vector.add(target.back, error), s, target.theta, steps)
+                        this.collideMobs(h, lastPose, s, target.theta, steps)
+                        if (tune.isGrabPowerUps && !h.debris) this.grabPowerUps(h)
+                        h.front.push(h.pose.front)
+                        h.back.push(h.pose.back)
+                    }
+                }
+                this.last = now
+                for (const h of harpoons) { //stack each harpoon's power ups down it from the tip, the extras pile up at the back
+                    if (!h.caught.length) continue
+                    //power ups are drawn before the harpoon moves, so move them ahead as far as the arc goes next cycle
+                    const next = this.pose({ time: now.time + 1, x: now.x, y: now.y }, h)
+                    const front = Vector.add(h.pose.front, Vector.sub(next.front, h.target.front))
+                    const back = Vector.add(h.pose.back, Vector.sub(next.back, h.target.back))
+                    let along = 0 //distance back from the tip
+                    for (let i = 0; i < h.caught.length; i++) {
+                        if (i) along = Math.min(length, along + h.caught[i - 1].size + h.caught[i].size)
+                        Matter.Body.setPosition(h.caught[i], Vector.add(front, Vector.mult(Vector.sub(back, front), along / length)))
+                        Matter.Body.setVelocity(h.caught[i], { x: 0, y: 0 })
+                    }
+                }
+                const drain = tune.drain * (tech.isRailEnergy ? 0.05 : 1) //alternator
+                if (m.energy > drain) m.energy -= drain
+                const isHome = harpoons.every(h => h.debris || (h.isOut && Vector.magnitude(Vector.sub(h.pose.back, m.pos)) < tune.inner + 20)) //back near the player, even if the map kept it off the arc's end
+                if (((this.time >= this.endTime && isHome) || this.overtime > tune.returnCycles || !m.alive) && this.deliver()) this.end()
+            },
+            sweep(from, to, steps, passed) { //the first wall or block a few points along the harpoon hit moving between two poses
+                const blocks = passed.length ? body.filter(who => !passed.includes(who)) : body //skip blocks the harpoon already went through
+                let hit = null
+                for (const t of [0, 0.5, 1]) {
+                    const a = Vector.add(from.back, Vector.mult(Vector.sub(from.front, from.back), t))
+                    const b = Vector.add(to.back, Vector.mult(Vector.sub(to.front, to.back), t))
+                    const ray = vertexCollision(a, b, [map, blocks])
+                    if (ray.who) {
+                        const first = Math.sqrt(ray.dist2) / Vector.magnitude(Vector.sub(b, a))
+                        if (!hit || first < hit.first) hit = { first, who: ray.who, point: { x: ray.x, y: ray.y }, edge: Vector.sub(ray.v2, ray.v1), vel: Vector.mult(Vector.sub(b, a), steps) }
+                    }
+                }
+                return hit
+            },
+            move(h, next, center, theta, steps) { //move the harpoon's rope end to next, knocking blocks aside and scraping along the map
+                for (let k = 0; k < 3; k++) { //after scraping into something, try again with the rest of the move slid along it
+                    const from = h.pose
+                    const to = this.place(h, next, center, theta)
+                    const hit = this.sweep(from, to, steps, h.passed)
+                    if (!hit) {
+                        h.pose = to
+                        return
+                    }
+                    let normal = Vector.normalise(Vector.perp(hit.edge))
+                    if (Vector.dot(normal, Vector.sub(hit.point, hit.who.position)) < 0) normal = Vector.neg(normal) //face out of what it hit, so a harpoon that ends up inside gets pushed out
+                    const isBlock = hit.who.collisionFilter.category !== cat.map
+                    if (isBlock) this.bounce(h, normal, hit.who, hit.point, hit.vel, true) //shove the block
+                    if (isBlock && !hit.who.isStatic && hit.who.mass < tune.blockWinMass) { //the harpoon wins, it slows a bit and goes on through the block
+                        h.passed.push(hit.who)
+                        h.vel = Vector.mult(h.vel, 1 - tune.blockSlow * hit.who.mass / (hit.who.mass + heftMass))
+                        continue
+                    }
+                    let f = hit.first
+                    for (let j = 0; j < 4; j++) { //the harpoon turns as it moves, so back off until the turn doesn't carry it into the wall
+                        h.pose = this.place(h, Vector.add(Vector.add(from.back, Vector.mult(Vector.sub(next, from.back), f)), Vector.mult(normal, 2)), center, theta)
+                        if (!this.sweep(from, h.pose, steps, h.passed)) break
+                        f *= 0.5
+                    }
+                    //scrape: lose the speed going into the map or a heavy block, keep the speed along it
+                    const into = Vector.dot(h.vel, normal)
+                    if (into < 0) h.vel = Vector.sub(h.vel, Vector.mult(normal, into))
+                    h.vel = Vector.mult(h.vel, 1 - tune.scrapeFriction / steps)
+                    const rest = Vector.sub(next, h.pose.back)
+                    next = Vector.sub(next, Vector.mult(normal, Math.min(0, Vector.dot(rest, normal))))
+                }
+            },
+            bounce(h, normal, who, point, pointVel, isBlock = false) { //trade momentum with a mob, or shove a block that the harpoon then scrapes along
+                const isMovable = !who.isStatic && who.collisionFilter.category !== cat.map
+                let rel = pointVel
+                let rn = 0 //how much the hit spins what it hits
+                let invMass = 0
+                if (isMovable) {
+                    const r = Vector.sub(point, who.position)
+                    rel = Vector.sub(pointVel, Vector.add(who.velocity, { x: -who.angularVelocity * r.y, y: who.angularVelocity * r.x }))
+                    rn = Vector.cross(r, normal)
+                    invMass = 1 / who.mass + (who.inertia ? rn * rn / who.inertia : 0)
+                }
+                const into = Vector.dot(rel, normal)
+                if (into >= 0) return //already moving apart
+                let impulse = -(1 + (isBlock ? 0 : tune.bounce)) * into / (1 / heftMass + invMass)
+                if (isBlock) {
+                    impulse *= tune.blockPush //the harpoon wins, so it isn't slowed by this, it scrapes along the block instead
+                } else {
+                    h.vel = Vector.add(h.vel, Vector.mult(normal, impulse / heftMass))
+                    const slide = Vector.sub(h.vel, Vector.mult(normal, Vector.dot(h.vel, normal)))
+                    h.vel = Vector.sub(h.vel, Vector.mult(slide, tune.friction))
+                }
+                if (isMovable) {
+                    let share = 1 //how much of the hit a mob takes, so it isn't knocked faster than knockSpeed, or faster than it was already going
+                    const push = Vector.mult(normal, -impulse / who.mass) //the velocity the whole hit would add
+                    const cap = Math.max(tune.knockSpeed, who.speed)
+                    if (!isBlock && Vector.magnitudeSquared(Vector.add(who.velocity, push)) > cap * cap) {
+                        const pp = Vector.magnitudeSquared(push)
+                        const vp = Vector.dot(who.velocity, push)
+                        share = (-vp + Math.sqrt(vp * vp - pp * (who.speed * who.speed - cap * cap))) / pp //solves |velocity + share * push| = cap
+                    }
+                    Matter.Body.setVelocity(who, Vector.add(who.velocity, Vector.mult(push, share)))
+                    if (who.inertia) Matter.Body.setAngularVelocity(who, who.angularVelocity - rn * share * impulse / who.inertia)
+                }
+            },
+            collideMobs(h, lastPose, center, theta, steps) { //the harpoon can't pass through mobs, it hits them, pushes them, and bounces off
+                for (let i = 0; i < mob.length; i++) {
+                    const who = mob[i]
+                    if (!who.alive || (tech.isShieldPierce ? who.shield : who.isShielded)) continue
+                    const pose = h.pose
+                    const { t, touch } = closest(pose, who.position)
+                    const reach = who.radius + halfWidth
+                    const away = Vector.sub(touch, who.position)
+                    const dist = Vector.magnitude(away)
+                    if (!(dist < reach)) continue
+                    //speed of the touching point, per cycle
+                    const pointVel = Vector.mult(Vector.add(Vector.mult(Vector.sub(pose.back, lastPose.back), 1 - t), Vector.mult(Vector.sub(pose.front, lastPose.front), t)), steps)
+                    if (who.damageReduction && !(who.harpoonSwingID === h.id && simulation.cycle < who.harpoonSwingCycle)) {
+                        const speed = Vector.magnitude(Vector.sub(pointVel, who.velocity))
+                        if (speed > 4) { //same minimum speed as a thrown harpoon
+                            who.harpoonSwingID = h.id
+                            who.harpoonSwingCycle = simulation.cycle + tune.rehitCycles
+                            if (this.damageMob(h, who, touch, speed, pointVel)) return //the harpoon broke
+                        }
+                    }
+                    const normal = dist > 0.1 ? Vector.mult(away, 1 / dist) : Vector.normalise(Vector.neg(pointVel))
+                    h.pose = this.place(h, Vector.add(pose.back, Vector.mult(normal, reach - dist)), center, theta) //push the harpoon out of the mob
+                    this.bounce(h, normal, who, touch, pointVel)
+                }
+            },
+            damageMob(h, who, touch, speed, vel) { //returns true if the harpoon broke
+                let hitMass = mass
+                if (tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle) { //induction furnace
+                    hitMass *= 1.8
+                } else if (tech.isHarpoonFullHealth && who.health === 1) { //brittle
+                    hitMass *= 2.2
+                    h.flashCycle = simulation.cycle + 3
+                }
+                let dmg = tune.damage * (6 + 0.15 * hitMass * Math.min(speed, speedCap)) //same as a thrown harpoon's collision damage
+                if (tech.isCrit && who.isStunned) dmg *= 4
+                who.damage(dmg, tech.isShieldPierce, touch, true)
+                if (who.alive) who.foundPlayer()
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: touch.x,
+                    y: touch.y,
+                    radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                    color: simulation.playerDmgColor,
+                    time: simulation.drawTime
+                });
+                if (tech.isLessDamageReduction && !who.shield) who.damageReduction *= who.isBoss ? (who.isFinalBoss ? 1.0005 : 1.0025) : 1.05
+                if (tech.fragments) b.targetedNail(touch, tech.fragments * Math.floor(2 + Math.random()))
+                if (tech.isFoamBall && h.foamSpawned < 55) {
+                    for (let j = 0, len = Math.min(33, 3 + 4 * Math.sqrt(mass)); j < len; j++) {
+                        const radius = 5 + 9 * Math.random()
+                        b.foam(touch, Vector.rotate({ x: Math.max(0.5, 2 - radius * 0.1), y: 0 }, 6.28 * Math.random()), radius)
+                        h.foamSpawned++
+                    }
+                }
+                if (tech.isBreakHarpoon && Math.random() < 0.1 && !who.isInvulnerable) { //wear
+                    if (tech.isBreakHarpoonGain && who.isDropPowerUp) { //spalling
+                        powerUps.spawn(m.pos.x, m.pos.y - 50, "research");
+                        powerUps.spawn(m.pos.x - 20, m.pos.y + 15, "research");
+                        powerUps.spawn(m.pos.x + 20, m.pos.y + 15, "boost");
+                        b.targetedNail(touch, Math.floor(1 + 1.5 * Math.random()))
+                    }
+                    this.isRefund = false //a broken harpoon costs its ammo
+                    h.debris = { x: h.pose.back.x, y: h.pose.back.y, vx: 0.3 * vel.x, vy: 0.3 * vel.y, angle: h.pose.angle, spin: 0.5 * (Math.random() - 0.5) }
+                    for (const who of h.caught) release(who) //it lets go of its power ups
+                    h.caught = []
+                    return true
+                }
+                return false
+            },
+            grabPowerUps(h) { //grab every power up touching any part of the harpoon
+                for (let i = 0, len = powerUp.length; i < len; ++i) {
+                    const who = powerUp[i]
+                    if (who.isGrabbed || (tech.isEnergyNoAmmo && who.name === "ammo") || (who.name === "heal" && m.health === m.maxHealth && !tech.isOverHeal)) continue
+                    const range = who.size + tune.grabRange
+                    if (Vector.magnitudeSquared(Vector.sub(who.position, closest(h.pose, who.position).touch)) < range * range) {
+                        who.isGrabbed = true
+                        who.collisionFilter.category = 0 //it doesn't collide while caught, so a stack of them can't push each other around
+                        who.collisionFilter.mask = 0
+                        h.caught.push(who)
+                    }
+                }
+            },
+            deliver() { //give the player the caught power ups, returns false while a power up's menu, like tech, is open, so the rest wait for it to close
+                for (const h of harpoons) {
+                    while (h.caught.length) {
+                        if (simulation.isChoosing && m.alive) return false
+                        const who = h.caught.shift()
+                        const index = powerUp.indexOf(who)
+                        if (index !== -1 && m.alive && (who.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                            powerUps.onPickUp(who);
+                            who.effect();
+                            Matter.Composite.remove(engine.world, who);
+                            powerUp.splice(index, 1);
+                            if (tech.isHarpoonPowerUp) tech.harpoonPowerUpCycle = simulation.cycle
+                        } else {
+                            release(who)
+                        }
+                    }
+                }
+                return true
+            },
+            end() {
+                this.isDone = true
+                if (this.isRefund) {
+                    gun.ammo++;
+                    simulation.updateGunHUD();
+                }
+            },
+            draw() {
+                const fade = this.isDone ? Math.max(0, this.fade / tune.fadeCycles) : 1
+                //swept path, between the paths of the front and back of each harpoon
+                ctx.beginPath();
+                for (const h of harpoons) {
+                    if (h.front.length < 2) continue
+                    const [out, back] = h.dir === 1 ? [h.front, h.back] : [h.back, h.front] //wind every path the same way, so where they overlap they fill instead of canceling out
+                    ctx.moveTo(out[0].x, out[0].y);
+                    for (let i = 1; i < out.length; i++) ctx.lineTo(out[i].x, out[i].y);
+                    for (let i = back.length - 1; i > -1; i--) ctx.lineTo(back[i].x, back[i].y);
+                    ctx.closePath();
+                }
+                ctx.fillStyle = `rgba(${tune.fillColor},${tune.fillAlpha * fade})`
+                ctx.fill();
+                ctx.beginPath();
+                for (const h of harpoons) {
+                    if (h.front.length < 2) continue
+                    ctx.moveTo(h.front[0].x, h.front[0].y);
+                    for (let i = 1; i < h.front.length; i++) ctx.lineTo(h.front[i].x, h.front[i].y);
+                }
+                ctx.strokeStyle = `rgba(${tune.fillColor},${tune.edgeAlpha * fade})`
+                ctx.lineWidth = 1.5
+                ctx.stroke();
+                //broken harpoons tumble away
+                ctx.beginPath();
+                for (const h of harpoons) {
+                    if (!h.debris) continue
+                    const d = h.debris
+                    if (!m.isTimeDilated) {
+                        d.vy += 0.6
+                        d.x += d.vx
+                        d.y += d.vy
+                        d.angle += d.spin
+                    }
+                    harpoonPath(d, d.angle)
+                }
+                ctx.fillStyle = color.bullet
+                ctx.fill();
+                if (this.isDone) return
+                //rope
+                ctx.beginPath();
+                for (const h of harpoons) {
+                    if (h.debris || !h.pose) continue
+                    const angle = Math.atan2(h.pose.back.y - m.pos.y, h.pose.back.x - m.pos.x)
+                    ctx.moveTo(m.pos.x + 30 * player.scale * Math.cos(angle), m.pos.y + 30 * player.scale * Math.sin(angle));
+                    ctx.lineTo(h.pose.back.x, h.pose.back.y);
+                }
+                ctx.strokeStyle = "#000"
+                ctx.lineWidth = 1
+                ctx.stroke();
+                //harpoons
+                const isPowered = tech.isHarpoonPowerUp && simulation.cycle - 480 < tech.harpoonPowerUpCycle //induction furnace
+                for (const h of harpoons) {
+                    if (h.debris || !h.pose) continue
+                    ctx.beginPath();
+                    harpoonPath(h.pose.back, h.pose.angle)
+                    if (isPowered || h.flashCycle > simulation.cycle) {
+                        ctx.lineJoin = "miter"
+                        ctx.miterLimit = 20;
+                        ctx.lineWidth = 15;
+                        ctx.strokeStyle = "rgba(255,0,100,0.25)";
+                        ctx.stroke();
+                        ctx.lineWidth = 4;
+                        ctx.strokeStyle = `#f07`;
+                        ctx.stroke();
+                        ctx.lineJoin = "round"
+                        ctx.miterLimit = 5
+                    }
+                    ctx.fillStyle = color.bullet
+                    ctx.fill();
+                }
+            },
+        }
+        swing.last = swing.state()
+        swing.launch(harpoons[0], swing.last)
+        simulation.ephemera.push(swing)
     },
     missile(where, angle, speed, size = 1) {
         if (tech.isMissileBig) {
@@ -3351,7 +3898,7 @@ const b = {
             onEnd() {
                 if (this.isArmed && !tech.isMineSentry) {
                     if (tech.isFoamMine) {
-                        if (bullet.length > 399) return //too much foam already, don't fire nails instead
+                        if (b.shotCount() > 399) return //too much foam already, don't fire nails instead
                         //send 14 in random directions slowly
                         for (let i = 0; i < 12; i++) {
                             const radius = 13 + 8 * Math.random()
@@ -3458,7 +4005,7 @@ const b = {
                                                 this.force.y += this.mass * 0.002; //extra gravity
                                                 if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
                                                     if (tech.isFoamMine) {
-                                                        if (bullet.length < 400) { //wait for foam to pop instead of firing nails
+                                                        if (b.shotCount() < 400) { //wait for foam to pop instead of firing nails
                                                             this.shots -= 0.6 * b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
                                                             b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
                                                         }
@@ -4702,7 +5249,7 @@ const b = {
                         const balls = (where, mass) => { //1 ball for a 30x30 block, 3 for 100x100, up to 5 for 150x150 and bigger
                             let num = Math.min(5, Math.max(1, Math.floor(Math.sqrt(mass / 0.9) + 0.001)))
                             if (tech.oneSuperBall) num = Math.max(1, Math.round(num / 3)) //super ball: 1/3 as many balls, at least 1
-                            if (bullet.length < 300) b.targetedBall(where, num) //limit balls so the game doesn't slow down
+                            if (b.shotCount() < 300) b.targetedBall(where, num) //limit balls so the game doesn't slow down
                         }
                         if (who.isCleaved) { //pieces from a split block shatter into the new balls
                             if (who === m.holdingTarget) m.drop()
@@ -4961,7 +5508,8 @@ const b = {
             closest.force.y -= direction.y * force;
         }
     },
-    foam(position, velocity, radius) {
+    foam(position, velocity, radius) { //returns the bullet, or the bubble with surface tension
+        if (tech.isFoamBubble) return b.bubble(position, velocity, radius)
         if (tech.isFoamCavitation && Math.random() < 0.25) {
             velocity = Vector.mult(velocity, 1.35)
             radius = 1.2 * radius + 13
@@ -5163,6 +5711,383 @@ const b = {
         if (tech.isBulletTeleport) bullet[me].nextPortCycle = simulation.cycle + bullet[me].portFrequency
         Composite.add(engine.world, bullet[me]); //add bullet to world
         Matter.Body.setVelocity(bullet[me], velocity);
+        return bullet[me]
+    },
+    circleContact(center, radius, who) { //closest point on a body's edge, or null if the circle doesn't overlap the body
+        const bounds = who.bounds
+        if (center.x + radius < bounds.min.x || center.x - radius > bounds.max.x || center.y + radius < bounds.min.y || center.y - radius > bounds.max.y) return null
+        const v = who.vertices
+        let best = Infinity
+        let x = 0
+        let y = 0
+        for (let i = 0, j = v.length - 1; i < v.length; j = i++) {
+            const edgeX = v[i].x - v[j].x
+            const edgeY = v[i].y - v[j].y
+            const length2 = edgeX * edgeX + edgeY * edgeY
+            const t = length2 ? Math.max(0, Math.min(1, ((center.x - v[j].x) * edgeX + (center.y - v[j].y) * edgeY) / length2)) : 0
+            const px = v[j].x + t * edgeX
+            const py = v[j].y + t * edgeY
+            const dist2 = (center.x - px) * (center.x - px) + (center.y - py) * (center.y - py)
+            if (dist2 < best) {
+                best = dist2
+                x = px
+                y = py
+            }
+        }
+        if (best < radius * radius || Matter.Vertices.contains(v, center)) return { x, y }
+        return null
+    },
+    bubbles() { //every bubble, empty after a new level or game since those remove the bubbles ephemera
+        return simulation.ephemera.find(who => who.name === "bubbles")?.list ?? []
+    },
+    shotCount() { //bullets and bubbles, for limits that keep the game from slowing down
+        return bullet.length + b.bubbles().length
+    },
+    bubbleEphemera() { //all bubbles share this ephemera, so they move and draw in one batch, see b.bubble()
+        return {
+            name: "bubbles",
+            list: [],
+            stuck: new Map(), //mob: the bubble on it
+            mergedRadius(who, weight) { //one bubble just covers the mob at 1.1x its radius, each bubble merged in adds less, it never reaches 5x
+                return who.radius * (5 - 3.9 / (1 + 0.015 * (weight - 1)))
+            },
+            fields() { //fields that move bullets move free bubbles here, so the field code doesn't need to know about bubbles
+                if (m.fieldMode === 8 && m.fieldOn && m.fieldRadius > 0) { //pilot wave guides slow bubbles, the same as its guide() does to slow bullets
+                    const radius2 = m.fieldRadius * m.fieldRadius
+                    const velocity = m.fieldUpgrades[8].collider.velocity
+                    for (const who of this.list) {
+                        if (who.target || Vector.magnitude(who.velocity) >= 30 || Vector.magnitudeSquared(Vector.sub(who.position, m.fieldPosition)) >= radius2) continue
+                        who.velocity = { x: velocity.x, y: velocity.y }
+                        const sub = Vector.sub(m.fieldPosition, who.position)
+                        const push = Vector.mult(Vector.normalise(sub), 0.0001 * who.mass * Vector.magnitude(sub))
+                        who.force.x += push.x
+                        who.force.y += push.y - who.mass * simulation.g
+                    }
+                } else if (m.fieldMode === 9 && m.hole.isOn && tech.isWormHoleBullets) { //geodesics sends bubbles through a wormhole once, like bullets
+                    for (const who of this.list) {
+                        if (who.target || who.isInHole) continue
+                        if (Vector.magnitude(Vector.sub(m.hole.pos1, who.position)) < m.fieldRange) {
+                            who.position = Vector.add(m.hole.pos2, Vector.sub(m.hole.pos1, who.position))
+                        } else if (Vector.magnitude(Vector.sub(m.hole.pos2, who.position)) < m.fieldRange) {
+                            who.position = Vector.add(m.hole.pos1, Vector.sub(m.hole.pos2, who.position))
+                        } else {
+                            continue
+                        }
+                        m.fieldRange += 5
+                        who.isInHole = true
+                    }
+                }
+            },
+            do() {
+                if (!m.isTimeDilated) { //frozen like bullets
+                    this.fields()
+                    for (let i = 0, len = this.list.length; i < len; i++) this.list[i].do()
+                }
+                this.list = this.list.filter(who => who.endCycle >= simulation.cycle)
+                if (this.list.length === 0) {
+                    simulation.removeEphemera(this)
+                    return
+                }
+                this.stuck = new Map()
+                ctx.beginPath();
+                for (let i = 0, len = this.list.length; i < len; i++) {
+                    const who = this.list[i]
+                    let x = who.position.x
+                    let y = who.position.y
+                    if (who.target && who.target.alive) {
+                        this.stuck.set(who.target, who)
+                        x += who.jiggle.x //drawn a bit off center after the mob lurches, see updateJiggle()
+                        y += who.jiggle.y
+                    }
+                    const radius = who.size()
+                    const squash = 0.04 * Math.sin(who.wobble) //squash and stretch, so it looks soft
+                    ctx.moveTo(x + radius * (1 + squash), y)
+                    ctx.ellipse(x, y, radius * (1 + squash), radius * (1 - squash), 0, 0, 2 * Math.PI);
+                }
+                ctx.strokeStyle = color.bullet;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            },
+        }
+    },
+    bubble(position, velocity, radius) { //foam without a physics body, drawn as an outline, it's what foam becomes with surface tension
+        //a mob only ever has one bubble, the first one to hit it sits at its center and later ones merge into it
+        //when the mob dies its bubble floats away, with the damage and time it had left, see docs/bubbles.md
+        if (tech.isFoamCavitation && Math.random() < 0.25) {
+            velocity = Vector.mult(velocity, 1.35)
+            radius = 1.2 * radius + 13
+        }
+        if (tech.nanoparticles === 7) velocity = Vector.mult(velocity, 2.5)
+        let bubbles = simulation.ephemera.find(who => who.name === "bubbles")
+        if (!bubbles) {
+            bubbles = b.bubbleEphemera()
+            simulation.ephemera.push(bubbles)
+        }
+        const growCycles = 20 //a bubble grows for this many cycles, then shrinks until it pops
+        const growRate = 1.06
+        const popRadius = 8
+        const me = {
+            position: { x: position.x, y: position.y },
+            velocity: { x: velocity.x, y: velocity.y },
+            force: { x: 0, y: 0 }, //force / mass is the acceleration like a body, so code that pushes bullets pushes bubbles the same way
+            mass: 1,
+            frictionAir: 0.003,
+            damage: 1.2 * tech.foamDamage * (tech.isFastFoam ? 2.8 : 1) * (tech.isBulletTeleport ? 1.53 : 1), //damage done each cycle while on a mob, 1.2x foam's, merged bubbles catching more shots brings it to about 1.6x, aerogel changes both the same way
+            weight: 1, //how many bubbles merged into this one
+            scale: 1 - 0.006 / tech.bulletsLastLonger * (tech.isFastFoam ? 1.65 : 1) / (tech.nanoparticles === 6 ? 1.6 : 1), //shrinks like foam, so a bubble lasts as long as foam
+            collisionFilter: { group: 0, category: cat.bullet, mask: cat.mob | cat.mobBullet }, //the mobs it can stick to, checked with Matter.Detector.canCollide
+            endCycle: Infinity,
+            count: 0, //cycles it has grown, which is its age for its first cycles
+            radius: radius, //sets how long it lasts, and its size when it's not on a mob
+            drawScale: 1, //size / radius, more than 1 after floating away from a dead mob
+            wobble: 2 * Math.PI * Math.random(), //phase of its squash and stretch
+            jiggle: null, //how far it's drawn off the center of its mob, and how fast that changes, set when it sticks to a mob
+            target: null,
+            contact: null, //the point on the mob or its bubble that it touched, set before beforeDmg
+            portFrequency: 7 + Math.floor(5 * Math.random()),
+            nextPortCycle: Infinity, //disabled unless you have the teleport tech
+            size() { //radius as drawn
+                return this.target && this.target.alive ? bubbles.mergedRadius(this.target, this.weight) : this.radius * this.drawScale
+            },
+            shrink() { //how much the radius shrinks each cycle after it's done growing
+                return tech.isFoamAdhesive ? Math.sqrt(this.scale) : this.scale
+            },
+            cyclesLeft() { //cycles until it pops, if nothing else shrinks it
+                const grow = Math.max(0, growCycles - this.count)
+                return grow + Math.max(0, Math.log(this.radius * Math.pow(growRate, grow) / popRadius) / -Math.log(this.shrink()))
+            },
+            absorb(who) { //add another bubble's damage, and average the time they have left weighted by damage, so the total damage doesn't change
+                const damage = this.damage + who.damage
+                const cycles = (this.damage * this.cyclesLeft() + who.damage * who.cyclesLeft()) / damage || 0
+                this.damage = damage
+                this.weight += who.weight
+                this.count = growCycles //done growing
+                this.radius = popRadius / Math.pow(this.shrink(), cycles) //pops after that many cycles
+                who.endCycle = 0
+                const kick = Vector.mult(Vector.normalise(Vector.sub(this.position, who.contact)), 2) //the bubble it swallowed pushes it from that side
+                this.jiggle.vx += kick.x
+                this.jiggle.vy += kick.y
+            },
+            beforeDmg(who) {
+                if (!this.target && who.alive && !who.isInvulnerable) {
+                    this.target = who;
+                    this.velocity = { x: 0, y: 0 }
+                    this.jiggle = { x: 0, y: 0, vx: 0, vy: 0, lastVx: who.velocity.x, lastVy: who.velocity.y }
+                    if (tech.nanoparticles) {
+                        if (tech.nanoparticles === 1) {
+                            if (Math.random() < 0.45) b.explosion(this.position, 115 + 60 * Math.random());
+                        } else if (tech.nanoparticles === 2) {
+                            if (Math.random() < 0.3) b.isoWave360Solo(this.position, 50 * Math.sqrt(tech.bulletsLastLonger))
+                        } else if (tech.nanoparticles === 3) {
+                            mobs.statusSlow(this.target, 300)
+                        } else if (tech.nanoparticles === 4) {
+                            m.addEnergy(0.13)
+                        } else if (tech.nanoparticles === 5) {
+                            if (Math.random() < 0.5) mobs.statusDoT(this.target, 2, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
+                        } else if (tech.nanoparticles === 8) {
+                            const relative = Vector.rotate(Vector.sub(this.contact, who.position), -who.angle) //stuck bubbles sit at the mob's center, so the laser fires out from where it hit
+                            if (Math.random() < 0.33) simulation.ephemera.push({
+                                count: 120, //cycles before it self removes
+                                cleared: level.levelsCleared,
+                                do() {
+                                    this.count--
+                                    if (this.count < 0 || this.cleared !== level.levelsCleared || !who.alive) {
+                                        simulation.removeEphemera(this)
+                                        return
+                                    }
+                                    const where = Vector.add(who.position, Vector.rotate(relative, who.angle))
+                                    const sub = Vector.normalise(Vector.sub(where, who.position))
+                                    const end = Vector.add(where, Vector.mult(sub, 4000))
+                                    b.laser(Vector.add(where, Vector.mult(sub, 10)), end, 1.85 * tech.laserDamage);
+                                },
+                            })
+                        }
+                    }
+                }
+            },
+            move() { //move like a matter.js body, which scales force / mass by delta squared, returns the map near it
+                const deltaSquared = simulation.delta * simulation.delta
+                this.velocity = {
+                    x: this.velocity.x * (1 - this.frictionAir) + this.force.x / this.mass * deltaSquared,
+                    y: this.velocity.y * (1 - this.frictionAir) + this.force.y / this.mass * deltaSquared
+                }
+                //bounce softly off the map instead of sinking in like foam, so floating bubbles gather under ceilings
+                //check where its leading edge goes along each axis, bubbles already inside the map just drift like foam
+                const size = this.size()
+                const near = Matter.Query.region(map, { //only the map near where it's going, so the map checks are cheap
+                    min: { x: this.position.x + Math.min(0, this.velocity.x) - size, y: this.position.y + Math.min(0, this.velocity.y) - size },
+                    max: { x: this.position.x + Math.max(0, this.velocity.x) + size, y: this.position.y + Math.max(0, this.velocity.y) + size }
+                })
+                if (near.length) {
+                    const isHitX = Matter.Query.point(near, { x: this.position.x + this.velocity.x + Math.sign(this.velocity.x) * size, y: this.position.y }).length > 0
+                    const isHitY = Matter.Query.point(near, { x: this.position.x, y: this.position.y + this.velocity.y + Math.sign(this.velocity.y) * size }).length > 0
+                    if ((isHitX || isHitY) && !Matter.Query.point(near, this.position).length) {
+                        this.velocity = {
+                            x: this.velocity.x * (isHitX ? -0.4 : 0.97), //bounce back with 0.4x speed, or slide along the surface
+                            y: this.velocity.y * (isHitY ? -0.4 : 0.97)
+                        }
+                    }
+                }
+                this.position = Vector.add(this.position, this.velocity)
+                return near
+            },
+            collide() { //stick to the first mob it touches, or merge into the bubble on it, like foam colliding with a mob in engine.js
+                const size = this.size()
+                for (let i = 0, len = mob.length; i < len; i++) {
+                    const who = mob[i]
+                    if (!who.alive || !who.damageReduction || who.isInvulnerable || !Matter.Detector.canCollide(this.collisionFilter, who.collisionFilter)) continue
+                    let contact = null
+                    const host = bubbles.stuck.get(who)
+                    if (host) { //the mob's bubble covers the mob, so touching it is enough to merge
+                        const radius = host.size()
+                        const sub = Vector.sub(this.position, who.position)
+                        const dist = Vector.magnitude(sub)
+                        if (dist < radius + size) contact = dist > 0 ? Vector.add(who.position, Vector.mult(sub, radius / dist)) : { x: who.position.x, y: who.position.y }
+                    } else {
+                        contact = b.circleContact(this.position, size, who)
+                    }
+                    if (contact) {
+                        this.contact = contact
+                        this.beforeDmg(who)
+                        if (who.alive) who.foundPlayer();
+                        simulation.drawList.push({ //add dmg to draw queue
+                            x: contact.x,
+                            y: contact.y,
+                            radius: Math.log(1.1) * 40 * who.damageReduction + 3, //foam collisions do almost no damage
+                            color: simulation.playerDmgColor,
+                            time: simulation.drawTime
+                        });
+                        if (tech.isLessDamageReduction && !who.shield) who.damageReduction *= who.isBoss ? (who.isFinalBoss ? 1.0005 : 1.0025) : 1.05
+                        return
+                    }
+                }
+            },
+            updateJiggle() { //when the mob speeds up or turns, the bubble's drawn center lags behind and springs back
+                const j = this.jiggle
+                const v = this.target.velocity
+                j.vx = 0.85 * (j.vx - 0.12 * j.x - (v.x - j.lastVx))
+                j.vy = 0.85 * (j.vy - 0.12 * j.y - (v.y - j.lastVy))
+                j.lastVx = v.x
+                j.lastVy = v.y
+                j.x += j.vx
+                j.y += j.vy
+                const maxOffset = 0.2 * this.size()
+                const offset = Math.sqrt(j.x * j.x + j.y * j.y)
+                if (offset > maxOffset) {
+                    j.x *= maxOffset / offset
+                    j.y *= maxOffset / offset
+                }
+            },
+            floatAway() { //the mob died, so its bubble floats away at the same size, with the damage and time it had left
+                const dead = this.target
+                this.drawScale = bubbles.mergedRadius(dead, this.weight) / this.radius
+                this.collisionFilter.mask = cat.mob
+                this.velocity = { x: dead.velocity.x, y: dead.velocity.y }
+                if (tech.isSpawnBulletsOnDeath && !dead.isMobBullet) {
+                    let targets = []
+                    for (let i = 0, len = mob.length; i < len; i++) {
+                        const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position));
+                        if (dist < 1000000 && !mob[i].isInvulnerable) targets.push(mob[i])
+                    }
+                    const radius = Math.min(this.radius * 0.5, 9)
+                    for (let j = 0; j < this.weight; j++) { //each bubble that merged into it spawns its own, like foam
+                        const count = b.shotCount()
+                        if (count >= 180) break
+                        const len = (count < 80 ? 2 : 1) * (tech.isMobDeathRepeat ? 2 : 1) //double beta decay doubles necrophage
+                        for (let i = 0; i < len; i++) {
+                            if (targets.length - i > 0) {
+                                const index = Math.floor(Math.random() * targets.length)
+                                const speed = 6 + 6 * Math.random()
+                                const velocity = Vector.mult(Vector.normalise(Vector.sub(targets[index].position, this.position)), speed)
+                                b.bubble(this.position, Vector.rotate(velocity, 0.5 * (Math.random() - 0.5)), radius)
+                            } else {
+                                b.bubble(this.position, Vector.rotate({ x: 15 + 10 * Math.random(), y: 0 }, 2 * Math.PI * Math.random()), radius)
+                            }
+                        }
+                    }
+                }
+                this.target = null
+            },
+            do() {
+                let near = map //the map pieces near it, found while it moves
+                if (!this.target) { //move and collide first, like foam does in Engine.update before b.bulletDo()
+                    near = this.move()
+                    this.collide()
+                }
+                this.force = { x: 0, y: 0 } //forces only last one cycle
+                if (this.count < growCycles) {
+                    this.count++
+                    this.radius *= growRate;
+                } else {
+                    this.radius *= this.shrink();
+                    if (this.radius < popRadius) this.endCycle = 0;
+                }
+                if (this.target && this.target.alive) { //if stuck to a target
+                    const host = bubbles.stuck.get(this.target)
+                    if (host && host !== this && host.endCycle >= simulation.cycle) { //the mob already has a bubble
+                        if (this.endCycle >= simulation.cycle) host.absorb(this) //unless this one popped or exploded this cycle
+                        return
+                    }
+                    bubbles.stuck.set(this.target, this)
+                    if (tech.isFoamAdhesive) b.foamAdhesion(this.target);
+                    this.position = { x: this.target.position.x, y: this.target.position.y }
+                    this.updateJiggle()
+                    //each bubble merged into it slows the mob
+                    const slow = this.target.isBoss ? 0.975 : 0.94
+                    const minSpeed = this.target.isBoss ? 6.5 : 2.5
+                    for (let i = 0; i < this.weight && this.target.speed > minSpeed; i++) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, slow))
+                    Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * Math.pow(0.9, this.weight));
+                    if (this.target.isShielded) {
+                        this.target.damage(this.damage, true, this.position); //shield damage bypass
+                        this.radius *= Math.pow(1 - 0.004 / tech.bulletsLastLonger, tech.isFoamAdhesive ? 0.5 : 1) //shrink if mob is shielded
+                    } else {
+                        this.target.damage(this.damage);
+                    }
+                } else if (this.target !== null) {
+                    this.floatAway()
+                } else if (Matter.Query.point(near, this.position).length > 0) { //slow when inside the map
+                    this.velocity = Vector.mult(this.velocity, 0.87)
+                    this.radius *= tech.isFoamAdhesive ? Math.sqrt(0.97) : 0.97
+                } else if (Matter.Query.point(body, this.position).length > 0) { //slow when touching blocks
+                    this.velocity = Vector.mult(this.velocity, 0.94)
+                    this.radius *= tech.isFoamAdhesive ? Math.sqrt(0.99) : 0.99
+                } else {
+                    //gravity like foam, aerogel makes it float, bigger bubbles float or sink faster
+                    //small bubbles (size 30 or less) get 0.7x as much, big ones (60 or more) the full amount
+                    const size = this.size()
+                    this.force.y += this.mass * tech.foamGravity * Math.sqrt(size / 20) * Math.min(1, Math.max(0.7, 0.4 + size / 100));
+                    if (tech.isFoamAttract) {
+                        for (let i = 0, len = mob.length; i < len; i++) {
+                            const range = Vector.magnitude(Vector.sub(mob[i].position, this.position))
+                            if (
+                                !mob[i].isBadTarget &&
+                                mob[i].alive &&
+                                !mob[i].isInvulnerable &&
+                                range < 500 &&
+                                !Matter.Query.rayAny(map, this.position, mob[i].position)
+                            ) {
+                                const mag = 0.001 * Math.min(1, 200 / range)
+                                this.force = Vector.mult(Vector.normalise(Vector.sub(mob[i].position, this.position)), this.mass * mag)
+                                this.velocity = Vector.mult(this.velocity, 0.98)
+                                break
+                            }
+                        }
+                    }
+                }
+                if (this.nextPortCycle < simulation.cycle) { //teleport around if you have tech.isBulletTeleport
+                    this.nextPortCycle = simulation.cycle + this.portFrequency
+                    const range = 13 * Math.sqrt(this.radius) * Math.random()
+                    this.position = Vector.add(this.position, Vector.rotate({
+                        x: range,
+                        y: 0
+                    }, 2 * Math.PI * Math.random()))
+                }
+                this.wobble += 0.6 / Math.sqrt(this.size()) //bigger bubbles wobble slower
+            }
+        }
+        if (tech.isBulletTeleport) me.nextPortCycle = simulation.cycle + me.portFrequency
+        bubbles.list.push(me)
+        return me
     },
     targetedBlock(who, speed = 50 - Math.min(20, who.mass * 2), range = 1600) {
         let closestMob, dist
@@ -6116,7 +7041,6 @@ const b = {
                 const SPEED = Math.max(5, 25 - radius * 0.4); //(m.crouch ? 32 : 20) - radius * 0.7;
                 const velocity = Vector.mult(Vector.normalise(Vector.sub(this.fireTarget, this.position)), SPEED)
                 b.foam(this.position, Vector.rotate(velocity, 0.07 * (Math.random() - 0.5)), radius + 5 * this.isUpgraded)
-
                 //recoil
                 // const force = Vector.mult(Vector.normalise(velocity), 0.005 * this.mass * (tech.isFoamCavitation ? 2 : 1))
                 const force = Vector.mult(velocity, 0.0001 * this.mass * (tech.isFoamCavitation ? 2 : 1))
@@ -7362,12 +8286,11 @@ const b = {
                         for (let i = 0; i < number; i++) {
                             const SPEED = (4 * Math.random() + 14) / Math.pow(tech.rifling, 1)
                             const angle = m.angle + spread * (Math.random() - 0.5)
-                            b.foam(where, {
+                            const foam = b.foam(where, {
                                 x: 0.6 * player.velocity.x + SPEED * Math.cos(angle),
                                 y: 0.5 * player.velocity.y + SPEED * Math.sin(angle)
                             }, 8 + 7 * Math.random())
                             if (tech.isIncendiary && Math.random() < 0.5) { //half the foam bubbles are explosive
-                                const foam = bullet[bullet.length - 1]
                                 const beforeDmg = foam.beforeDmg
                                 foam.beforeDmg = function (who) {
                                     if (this.endCycle === 0 || !who.alive) return
@@ -7532,7 +8455,7 @@ const b = {
             waveFireCD: 0,
             autoFire() {
                 if (input.fire || m.isHolding) {
-                    m.fireCDcycle = m.cycle + 1
+                    m.fireCDcycle = Math.max(m.fireCDcycle, m.cycle + 1) //don't shorten a longer cooldown, like from salvo
                 } else if (this.waveFireCD < m.cycle) {
                     this.fire();
                 }
@@ -7572,7 +8495,7 @@ const b = {
                 const angle = m.angle + tech.isBulletTeleport * 0.3 * (Math.random() - 0.5)
                 //where, angle, end = 500 * Math.sqrt(tech.bulletsLastLonger), speed = tech.waveBeamSpeed, halfArc = 0.24 * tech.wavePacketDamage
                 this.isReflectLeft = !this.isReflectLeft
-                b.phononWaveSolo({ x: m.pos.x, y: m.pos.y }, angle, (m.crouch ? 58 : 71) * Math.sqrt(tech.bulletsLastLonger), 1.7, halfArc, 1, this.isReflectLeft)
+                b.phononWaveSolo({ x: m.pos.x, y: m.pos.y }, angle, (m.crouch ? 85 : 71) * Math.sqrt(tech.bulletsLastLonger), 1.7, halfArc, 1, this.isReflectLeft)
                 // if (true) {
 
                 // }
@@ -8225,28 +9148,72 @@ const b = {
             name: "harpoon", //9
             // description: `throw a <strong>self-steering</strong> harpoon that uses <strong class='energy' data-help='energy'>energy</strong><br>to <strong>retract</strong> and refund its <strong class='color-ammo'>ammo</strong> cost<br><strong>1-2</strong> harpoons per ${powerUps.orb.ammo()}`,
             descriptionFunction() {
-                return `throw a <strong>harpoon</strong> that uses <strong class='energy' data-help='energy'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${Number((0.5 * this.ammoPack).toFixed(1))}</strong> harpoons per ${powerUps.orb.ammo()}`
+                let menu = ""
+                if (this.modes().length > 1 && simulation.paused && !simulation.isChoosing && !build.isExperimentSelection) {
+                    menu = `<select aria-label="harpoon mode" onclick="event.stopPropagation()" onchange="tech.inputHTML.harpoonMode(this.value)" style="float: right;">${this.modes().map(name => `<option value="${name}"${name === this.mode ? " selected" : ""}>${name}</option>`).join("")}</select>`
+                }
+                return `${this.mode === "sweep" ? "swing" : "throw"} a <strong>harpoon</strong> that uses <strong class='energy' data-help='energy'>energy</strong> to <strong>retract</strong><br><strong>harpoons</strong> refund <strong class='color-ammo'>ammo</strong><br><strong>${Number((0.5 * this.ammoPack).toFixed(1))}</strong> harpoons per ${powerUps.orb.ammo()}${menu}`
             },
             harpoonName() {
                 return "<strong>" + (tech.isMaul ? "maul" : (tech.isRebar ? "rebar" : "harpoon")) + "</strong>"
             },
             ammo: 0,
-            ammoPack: 0.77, //update this in railgun tech
+            ammoPack: 0.77, //setMode changes this for railgun
             defaultAmmoPack: 0.77,
             have: false,
             fire() { },
             do() { },
             chooseFireMethod() {
-                if (tech.isRailGun) {
+                if (!this.modes().includes(this.mode)) this.mode = this.modes()[0] //like at the start of a run
+                if (this.mode === "railgun") {
                     this.do = this.railDo
                     this.fire = this.railFire
                     // } else if (tech.isGrapple) {
                     //     this.do = () => { }
                     //     this.fire = this.grappleFire
+                } else if (this.mode === "sweep") {
+                    this.do = () => { }
+                    this.fire = this.swingFire
                 } else {
                     this.do = () => { }
                     this.fire = this.harpoonFire
                 }
+            },
+            mode: "stab", //stab, sweep, or railgun, alternator and railgun let you pick it from a drop down when paused
+            modes() { //the modes you can pick right now
+                const modes = ["stab"]
+                if (tech.isRailEnergy) modes.push("sweep") //alternator
+                if (tech.isRailGun) modes.push("railgun")
+                return modes
+            },
+            setMode(mode) {
+                const modes = this.modes()
+                if (!modes.includes(mode)) mode = modes[modes.length - 1] //like railgun after losing alternator, or sweep after losing railgun
+                const isRail = mode === "railgun"
+                if (isRail !== (this.mode === "railgun")) { //railgun harpoons are denser and can't retract, so railgun ammo comes in 6x as many
+                    if (this.charge > 0) { //drop a railgun charge and give back its ammo
+                        this.charge = 0
+                        this.ammo++
+                    }
+                    tech.harpoonDensity += isRail ? 0.003 : -0.003
+                    if (isRail) {
+                        this.ammoPack *= 3
+                        this.ammo *= 6
+                    } else {
+                        this.ammoPack /= 3
+                        this.ammo = Math.ceil(this.ammo / 6)
+                    }
+                    simulation.updateGunHUD()
+                }
+                this.mode = mode
+                this.chooseFireMethod()
+            },
+            swingDirection: 1, //sweep, 1 is clockwise
+            swingCycle: -1000, //when the last swing started, so quick swings go back and forth
+            swingFire() { //sweep
+                b.harpoonSwing(!b.isFreeShot()) //a free crouched shot didn't cost ammo, so it can't refund any
+                const tune = b.harpoonSwingTuning
+                m.fireCDcycle = m.cycle + tune.cooldown * (m.crouch ? tune.crouchCooldown : 1) * b.fireCDscale * (tech.isBreakHarpoon ? 0.5 : 1) + 60 * (m.energy < 0.05) + tech.extraHarpoons * tune.smeltDelay
             },
             charge: 0,
             railDo() {
@@ -8389,7 +9356,7 @@ const b = {
                             player.force.x = 0
                             player.force.y = 0
                         }
-                        m.fireCDcycle = m.cycle + 10 //can't fire until mouse is released
+                        m.fireCDcycle = Math.max(m.fireCDcycle, m.cycle + 10) //can't fire until mouse is released, and don't shorten a longer cooldown, like from salvo
                         // const previousCharge = this.charge
 
                         //small b.fireCDscale = faster shots, b.fireCDscale=1 = normal shot,  big b.fireCDscale = slower chot

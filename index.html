@@ -97,6 +97,7 @@
                     <input id="import-save-text" name="import-save-text" placeholder="paste checkpoint code" autocomplete="off" spellcheck="false" style="width: 192px;" onkeydown="if (event.key === 'Enter') saveGame.importFromBox()" />:
                     <button onclick="saveGame.importFromBox()" class='sort-button' style="font-size:1em;">load code</button>
                     <br>
+                    <!-- gamepad support, disabled for now, might add it back later
                     <br>
                     <br>
                     <svg class="SVG-button SVG-button-splash" id="enable-gamepad" width="300" height="60" stroke='none' fill='#333' font-family="Arial, sans-serif" onclick="javascript: (async () => { const scriptText = await (await fetch('https://raw.githubusercontent.com/kgurchiek/n-gon-controller/main/main.js')).text(); var script = document.createElement('script'); script.type = 'text/javascript'; script.textContent = scriptText; document.head.appendChild(script); document.getElementById('enable-gamepad').style.stroke = '#0b5';})();">
@@ -104,6 +105,7 @@
                         <text x="40" y="38" fill='#aaa' font-size="15px">community code, external script</text>
                         <text x="12" y="55" fill='#aaa' font-size="14px">https://github.com/kgurchiek/n-gon-controller</text>
                     </svg>
+                    -->
 
                 </div>
             </details>
