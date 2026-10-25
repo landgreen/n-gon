@@ -463,7 +463,7 @@ const powerUps = {
                          <strong>chrome</strong>                 <strong>firefox</strong>               <strong>safari</strong>
  <strong>Win/Linux/ChromeOS:</strong> Ctrl + Shift + J       Ctrl + Shift + J      Ctrl + Alt + C
               <strong>macOS:</strong> Cmd + Option + J       Cmd + Shift + J       Option + Cmd + C
-            <strong>in-game:</strong> press ${input.key.pause.replace(/^Key/, "")} to pause, then type in the console log box</pre></div><div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
+            <strong>in-game:</strong> press ${input.key.pause.replace(/^Key/, "")} to pause, then open the console menu on the left</pre></div><div class="choose-grid-module" id="exit" style="text-align: center;font-size: 1.3rem;">exit</div>`
             document.getElementById("choose-grid").innerHTML = text
             //show level info
             document.getElementById("choose-grid").style.opacity = "1"

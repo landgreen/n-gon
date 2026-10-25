@@ -296,24 +296,30 @@
     </div>
 
     <svg id='splash' class="intro ui" viewBox="0 0 800 800" onclick="simulation.startGame()">
+        <!-- the title page player, js/title.js:
+             data-platform  a hidden map body behind it, "flat-top" follows the outline but is flat across the top
+             data-block     a logo letter's convex pieces in its own units, the letter falls when the player touches it
+             data-letter    pairs a letter's fill and outline, data-holdable lets the field pick it up
+             data-key       lights up while that control is held -->
         <g class="fade-in" transform="translate(100,210) scale(34)" fill='#afafaf' stroke='none'>
-            <path d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
-            <rect x="4" y="1.25" width="1" height="0.5" rx='0.03' />
-            <path transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
-            <path transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
-            <path transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
+            <path data-letter="0" data-block="0,0 1,0 1,3.1 0,3.1 | 1,0.2 2.7,0.2 3,0.5 3,1.4 1,1.4 | 2,1.4 3,1.4 3,3.1 2,3.1" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
+            <rect data-letter="1" data-holdable data-block="4,1.25 5,1.25 5,1.75 4,1.75" x="4" y="1.25" width="1" height="0.5" rx='0.03' />
+            <path data-letter="2" data-block="0,0 1,0 1.7,0.7 1.7,2.4 0,2.4 -0.7,1.7 -0.7,0.7 | 1.1,2.4 1.7,2.4 1.7,3 1.5,3.2 1.1,3.2 | -0.3,2.7 1.1,2.7 1.1,3.2 -0.3,3.2" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path data-letter="3" data-block="0,0 1,0 1.7,0.7 1.7,1.7 1,2.4 0,2.4 -0.7,1.7 -0.7,0.7" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" />
+            <path data-letter="4" data-block="0,0 1,0 1,3.1 0,3.1 | 1,0.2 2.7,0.2 3,0.5 3,1.4 1,1.4 | 2,1.4 3,1.4 3,3.1 2,3.1" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" />
         </g>
         <g transform="translate(100,210) scale(34)" fill='none' stroke='#333' stroke-linejoin="round" stroke-linecap="round">
-            <path class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
-            <rect class="draw-lines-dash" x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
-            <path class="draw-lines-g" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
-            <path class="draw-lines-o" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
-            <path class="draw-lines" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
+            <path data-letter="0" class="draw-lines" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
+            <rect data-letter="1" class="draw-lines-dash" x="4" y="1.25" width="1" height="0.5" stroke-width='0.0875' rx='0.03' />
+            <path data-letter="2" class="draw-lines-g" transform="translate(6.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v2.3  l-0.2 0.2 h-1.8 v-0.5 h1.4   L 1.1 2.4   h-1.1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path data-letter="3" class="draw-lines-o" transform="translate(10.9,0) scale(1.25)" d="M0 0  h1  l 0.7 0.7  v1  l -0.7 0.7  h-1  l -0.7 -0.7  v-1  l 0.7 -0.7 Z" stroke-width='0.07' />
+            <path data-letter="4" class="draw-lines" transform="translate(14,0)" d="M0 0  h1  v0.2  h1.7  l0.3 0.3  v2.6  h-1  v-1.7  h-1  v1.7  h-1 z" stroke-width='0.0875' />
         </g>
         <!-- mouse -->
         <g class="draw-lines3" transform="translate(320,430) scale(0.28)" stroke-linecap="round" stroke-linejoin="round" stroke-width="10px" stroke="#333" fill="none">
-            <path class="fade-in" stroke="none" fill="#fff" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
-            <path class="fade-in" d="M832.41,106.64 V322 H651.57 V255 c0-82,67.5-148,150-148 Z" fill="rgb(0, 200, 255)" stroke="none" />
+            <path class="fade-in" id="splash-mouse" data-platform="flat-top" stroke="none" fill="#fff" d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
+            <path class="fade-in" data-key="fire" d="M832.41,106.64 V322 H651.57 V255 c0-82,67.5-148,150-148 Z" fill="rgb(0, 200, 255)" stroke="none" />
+            <path class="fade-in" data-key="field" d="M832.41,106.64 V322 H1002.43 V255 c0-82,-67.5-148,-150-148 Z" fill="#fff" stroke="none" />
             <path d="M827,112 h30 a140,140,0,0,1,140,140 v268 a140,140,0,0,1-140,140 h-60 a140,140,0,0,1-140-140v-268 a140,140,0,0,1,140-140h60" />
             <path d="M657 317 h340 h-170 v-25 m0 -140 v-42 s 21 -59, -5 -59 S 807 7, 807 7" />
             <ellipse fill="none" cx="827.57" cy="218.64" rx="29" ry="68" />
@@ -322,20 +328,23 @@
 
         <!-- keys -->
         <g transform="translate(105,480) scale(0.8)">
+            <!-- platforms: the top row from Q to P is one rectangle so there's no seam to walk over, A S D is under it -->
+            <rect data-platform x="0" y="0" width="370" height="60" fill="none" stroke="none" />
+            <rect data-platform x="0" y="60" width="200" height="70" fill="none" stroke="none" />
             <!-- fade in background -->
             <g fill='#fff' stroke='none' class="fade-in">
-                <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
+                <path data-key="up" d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
                 <g>
-                    <path d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
-                    <path d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
+                    <path data-key="previousGun" d="M0 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
+                    <path data-key="nextGun" d="M140 60 h60 v-60 h-60 v60" class="draw-lines-box-3" />
 
-                    <path d="M240 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
-                    <path d="M310 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
+                    <path data-key="fullscreen" d="M240 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
+                    <path data-key="pause" d="M310 60 h60 v-60 h-60 v60" class="draw-lines-box-1" />
                 </g>
 
-                <path d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
-                <path d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
-                <path d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
+                <path data-key="left" d="M0 70 h60 v60 h-60 v-60" class="draw-lines-box-1" />
+                <path data-key="down" d="M70 70 h60 v60 h-60 v-60" class="draw-lines-box-2" />
+                <path data-key="right" d="M140 70 h60 v60 h-60 v-60" class="draw-lines-box-3" />
             </g>
             <g fill='none' stroke='#333' stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
                 <path d="M70 60 h60 v-60 h-60 v60" class="draw-lines-box-2" />
@@ -405,6 +414,7 @@
     <script src="js/save.js"></script>
     <script src="js/hover-help.js"></script>
     <script src="js/index.js"></script>
+    <script src="js/title.js"></script>
 </body>
 
 </html>

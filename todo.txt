@@ -1,41 +1,7 @@
-tech: surface tension - foam forms bubbles that merge into one growing bubble on each mob and catch more foam, 1.2x foam damage
-  the old surface tension, 1.4x foam damage, is renamed Marangoni effect
-tech: alternator - your harpoon swings in a quick arc, and still has 0.05x harpoon energy cost
-  aims at the mob nearest your aim,
-  scrapes along walls, knocks blocks aside, bounces off mobs,
-  grabs every power up it touches
-  crouch for a longer, narrower, slower swing
-  railgun: pick stab or railgun from a drop down on the harpoon in the pause menu, with alternator you can also pick sweep
-perfect diamagnetism: the field is drawn as purple fills when you have Hall effect, and lines otherwise, Hall effect and ray are no longer compatible
-perfect diamagnetism: while falling with the field on, the field puffs up wider and flatter when aimed up, and narrower when aimed down
-tech: symbiosis - after a mob dies lose 0.01x max health or energy, instead of 1
-removed link to game pad support since it's not working with some of the new changes, like difficulty power up
-boss: floodFillBoss - sends out paths that bounce off walls and blocks searching for you, when one sees you it dashes down the path and leaves a mortar blast
-alternate reality: qubits are no longer lost, but if you have more than 5 qubits they are randomized by 0.5x to 1.5x
-tech: preserve, reserve - show (empty) after you spawn all of their heals or ammo
-
-
-difficulty: next TIER mobs - each level starts with an extra mob from 1 tier higher
-  the extra mob can be T5, T5 mobs don't spawn any other way
-difficulty: faster mobs - mobs move about 1.2x faster
-  base mobs are now slower by about 0.9x movement, 
-  faster mobs are 1.1x faster than the previous patch
-mob: spinner5 - T5 spinner, spins up faster, charges harder, charges twice, and does 4x damage
-mob: focuser5 - T5 focuser, its laser reaches farther, locks on faster, drains more energy, and does 6x damage
-mob: pulsar5 - T5 pulsar, a bigger blast that aims and fires faster and does 8x damage
-mob: slicer5 - T5 slicer, a longer and faster sword, moves and dodges faster, and does 8x damage
-
+title screen: the player drops in, try moving, jumping, and throwing a block, climb the keys, mouse, buttons, and open menus, knock down the logo
 
 bug fixes
-  with just one of 0.5x damage or 2x damage taken, final boss boulders, mines, and extra bosses, and trainBoss2 freeze grenades come at the right rate, they came half as often
-  mob shields aren't counted twice anymore, they took about 2x damage from explosions and other area damage, and shielded mobs never copied with mobs reproduce
-  salvo keeps its full cooldown with wave, railgun, or autocannon equipped, they let you fire again early
-  pressure vessel keeps its foam charge when you switch guns, so it works with salvo now
-  Brownian ratchet shows the heal number and console text when its zone heals you
-  working mass stops printing blocks after you lose it, extra copies kept working in alternate realities
-  vanishing platforms are fully gone while they're gone, they used to hide at one spot on the map where they could still block lasers and mob vision, and show up on some community maps
-  construction mode doesn't zoom with the scroll wheel while paused, choosing, or in the experiment menu
-
+power ups on the first level fall down their tube every run, they used to jump out of it on every run after the first, and sometimes bounced onto the exit shelf
 
 
 

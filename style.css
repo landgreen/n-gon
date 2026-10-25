@@ -93,6 +93,20 @@ em {
     transition: opacity 5s ease-in;
 }
 
+/* title page keys and mouse buttons light up while held, see js/title.js */
+#splash [data-key] {
+    transition: fill 0.3s ease-out;
+}
+
+#splash [data-key].pressed {
+    fill: rgb(0, 200, 255);
+    transition: none;
+}
+
+#splash [data-key="fire"].pressed {
+    fill: rgb(0, 140, 220);
+}
+
 *:focus {
     outline: none;
 }

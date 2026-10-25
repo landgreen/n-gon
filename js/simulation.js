@@ -839,6 +839,7 @@ const simulation = {
 
         canvas.style.filter = "brightness(1)"
         simulation.clearTimeouts();
+        titlePage.queueStart() //the title page player drops in after a couple seconds, see js/title.js
         simulation.onTitlePage = true;
         document.getElementById("splash").onclick = function () {
             simulation.startGame();
@@ -893,6 +894,7 @@ const simulation = {
             }
         }
         simulation.isStartingGame = false
+        titlePage.stop() //removes the title page player and platforms before the run's player spawns, see js/title.js
         simulation.draw.body = simulation.draw.bodyDefault //undo a community map's custom block drawing from the last run
         simulation.isTextLogOpen = true
         simulation.clearMap()
