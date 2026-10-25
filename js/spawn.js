@@ -2369,8 +2369,9 @@ const spawn = {
             this.seePlayerByHistory()
             this.checkStatus();
             if (this.seePlayer.recall) this.healthBar4()
-            if (this.distanceToPlayer() < 500) {
-                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, m.pos)) this.sword = this.swordWaiting
+            const target = this.playerTarget()
+            if ((!m.isCloak || this.seePlayer.recall) && Vector.magnitude(Vector.sub(target, this.position)) < 500) {
+                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, target)) this.sword = this.swordWaiting
             }
             this.attraction();
             this.sword() //does various things depending on what stage of the sword swing
@@ -2390,10 +2391,10 @@ const spawn = {
         me.sword = () => { } //base function that changes during different aspects of the sword swing
     },
     jellyBoss2(x, y, radius = 175) { //flies, over half of each membrane is armored, so you have to hit the other side, and it splits at 2/3 and 1/3 health
-        spawn.jellyBoss(x, y, radius, { tier: 2, rgb: "190, 150, 255", damageReduction: 0.07, nodeDamageReduction: 0.175, armorFraction: 0.58, burstEarly: 1, healthBar: "healthBar2", thresholds: [0.66, 0.33], exposedTime: 420, isFlying: true })
+        return spawn.jellyBoss(x, y, radius, { tier: 2, rgb: "190, 150, 255", damageReduction: 0.07, nodeDamageReduction: 0.175, armorFraction: 0.58, burstEarly: 1, healthBar: "healthBar2", thresholds: [0.66, 0.33], exposedTime: 420, isFlying: true })
     },
     jellyBoss4(x, y, radius = 210) { //twice the nodes, all but 1/4 of each membrane is armored, and it splits at 0.9, 2/3, 1/2, and 1/4 health, so up to 16 blobs
-        spawn.jellyBoss(x, y, radius, { tier: 4, rgb: "0, 0, 0", damageReduction: 0.2, nodeDamageReduction: 0.35, armorFraction: 1, burstFraction: 1 / 4, burstEarly: 2, healthBar: "healthBar4", nodeCount: 44, thresholds: [0.9, 0.66, 0.5, 0.25], exposedTime: 240 })
+        return spawn.jellyBoss(x, y, radius, { tier: 4, rgb: "0, 0, 0", damageReduction: 0.2, nodeDamageReduction: 0.35, armorFraction: 1, burstFraction: 1 / 4, burstEarly: 2, healthBar: "healthBar4", nodeCount: 44, thresholds: [0.9, 0.66, 0.5, 0.25], exposedTime: 240 })
     },
     jellyBoss(x, y, radius = 175, options = {}) { //a ring of node mobs held round by gas pressure around an invulnerable core, popping a node opens a leak that jets it around until the hole seals
         //popping enough nodes bursts the membrane and exposes the core, each health threshold the core passes splits it into 2 smaller flying blobs that each grow a new membrane
@@ -2486,6 +2487,11 @@ const spawn = {
             a.linkNext.isOpen = isOpen //open links are holes, the gas leaks out instead of pushing on them
             a.linkNext.restLength = isOpen ? length : this.spacing //length grows or shrinks toward this
         }
+        me.unlink = function (link) { //retire an owned membrane edge from the world as well as the draw/cleanup list
+            Composite.remove(engine.world, link)
+            const index = consBB.indexOf(link)
+            if (index !== -1) consBB.splice(index, 1)
+        }
         me.isTangled = function () { //does any edge of the membrane cross another edge
             const ring = this.membrane
             const n = ring.length
@@ -2506,11 +2512,7 @@ const spawn = {
             return false
         }
         me.untangle = function () { //relink the membrane in order around its center
-            for (const node of this.membrane) {
-                Composite.remove(engine.world, node.linkNext)
-                const index = consBB.indexOf(node.linkNext)
-                if (index !== -1) consBB.splice(index, 1)
-            }
+            for (const node of this.membrane) this.unlink(node.linkNext)
             const c = this.center
             this.membrane.sort((a, b) => Math.atan2(a.position.y - c.y, a.position.x - c.x) - Math.atan2(b.position.y - c.y, b.position.x - c.x))
             const n = this.membrane.length
@@ -2591,9 +2593,11 @@ const spawn = {
             const n = this.membrane.length
             const prev = this.membrane[(i - 1 + n) % n]
             const next = this.membrane[(i + 1) % n]
+            this.unlink(prev.linkNext)
+            this.unlink(node.linkNext)
             this.membrane.splice(i, 1)
             if (this.isBursting || !this.alive) return
-            this.holes = this.holes.filter(hole => hole.a !== node && hole.b !== node) //neighboring holes merge into one bigger hole, death() removes this node's links after this
+            this.holes = this.holes.filter(hole => hole.a !== node && hole.b !== node) //neighboring holes merge into one bigger hole
             this.link(prev, next, Vector.magnitude(Vector.sub(prev.position, next.position)), true)
             this.holes.push({ a: prev, b: next, link: prev.linkNext, count: 100 + Math.floor(40 * Math.random()) })
             if (this.membrane.length < this.burstCount) this.burst()
@@ -2658,11 +2662,12 @@ const spawn = {
                 where = spot()
                 if (Matter.Query.rayAny(map, this.position, where)) where = { x: this.position.x, y: this.position.y } //cores don't collide with each other
             }
-            spawn.jellyBoss(where.x, where.y, this.baseRadius, Object.assign({}, o, { nodeCount: this.nodeCount, coreRadius: this.radius, health: this.health, isGrowing: true, isFlying: true }))
+            const sibling = spawn.jellyBoss(where.x, where.y, this.baseRadius, Object.assign({}, o, { nodeCount: this.nodeCount, coreRadius: this.radius, health: this.health, isGrowing: true, isFlying: true }))
             this.isFlying = true //blobs that split off fly, only the original crawls
             this.nodeGravity = 0
-            const sibling = mob[mob.length - 1]
-            Matter.Body.setVelocity(sibling, { x: this.velocity.x + 5 * side, y: this.velocity.y })
+            const velocity = { x: this.velocity.x + 5 * side, y: this.velocity.y }
+            Matter.Body.setVelocity(sibling, velocity)
+            for (const node of sibling.membrane) Matter.Body.setVelocity(node, velocity)
             Matter.Body.setVelocity(this, { x: this.velocity.x - 5 * side, y: this.velocity.y })
         }
         me.membraneDo = function () {
@@ -3076,6 +3081,7 @@ const spawn = {
         };
         me.growMembrane(!o.isGrowing)
         me.setExposed(false)
+        return me
     },
     softSegmentDeath(who, isHead = false) { //soft boss segment died: unlock the next columns, and end the boss when only a couple segments are left
         who.isSoftBoss = false;
@@ -3291,8 +3297,9 @@ const spawn = {
             this.checkStatus();
             if (this.seePlayer.recall) {
                 this.healthBar2()
-                if (this.distanceToPlayer() < 500) {
-                    if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, m.pos)) this.sword = this.swordWaiting
+                const target = this.playerTarget()
+                if ((!m.isCloak || this.seePlayer.recall) && Vector.magnitude(Vector.sub(target, this.position)) < 500) {
+                    if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, target)) this.sword = this.swordWaiting
                 }
             }
             this.attraction();
@@ -3420,8 +3427,8 @@ const spawn = {
                 powerUps.ejectGraphic("150, 138, 255");
                 // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
                 // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
-                this.accelMag *= 1.4
-                Matter.Body.setDensity(this, this.density * 1.4); //normal is 0.001
+                this.accelMag *= 1.2 //reduced effect
+                Matter.Body.setDensity(this, this.density * 1.3);
             }
         };
         me.onDeath = function () {
@@ -3483,8 +3490,8 @@ const spawn = {
                 powerUps.ejectGraphic("150, 138, 255");
                 // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "ammo");
                 // powerUps.spawn(m.pos.x + 60 * (Math.random() - 0.5), m.pos.y + 60 * (Math.random() - 0.5), "research");
-                this.accelMag *= 1.4
-                Matter.Body.setDensity(this, this.density * 1.4); //normal is 0.001
+                this.accelMag *= 1.2 //reduced effect
+                Matter.Body.setDensity(this, this.density * 1.3);
             }
         };
         me.onDeath = function () {
@@ -3805,13 +3812,14 @@ const spawn = {
         };
         me.do = function () {
             this.gravity();
+            this.alwaysSeePlayer(); //remembers where the player was before they cloaked
             this.checkStatus();
             if (this.cd < simulation.cycle && (Matter.Query.collides(this, map).length || Matter.Query.collides(this, body).length)) {
                 this.cd = simulation.cycle + this.delay;
-                if (this.isRandomMove || Math.random() < 0.2) {
+                if (this.isRandomMove || !this.seePlayer.recall || Math.random() < 0.2) {
                     this.force.x += (0.01 + 0.03 * Math.random()) * this.mass * (Math.random() < 0.5 ? 1 : -1); //random move
                 } else {
-                    this.force.x += (0.01 + 0.03 * Math.random()) * this.mass * (player.position.x > this.position.x ? 1 : -1); //chase player
+                    this.force.x += (0.01 + 0.03 * Math.random()) * this.mass * (this.seePlayer.position.x > this.position.x ? 1 : -1); //chase player
                 }
                 this.force.y -= (0.04 + 0.04 * Math.random()) * this.mass * this.hopLift
             }
@@ -3845,7 +3853,7 @@ const spawn = {
                 //spawn hopBullets after each jump
                 for (let i = 0, len = 1 + 0.05 * simulation.difficulty; i < len; ++i) spawn.hopBullet(this.position.x + 100 * (Math.random() - 0.5), this.position.y + 100 * (Math.random() - 0.5), this.tier)
 
-                this.force.x += (0.02 + 0.06 * Math.random()) * this.mass * (player.position.x > this.position.x ? 1 : -1);
+                this.force.x += (0.02 + 0.06 * Math.random()) * this.mass * (this.playerTarget().x > this.position.x ? 1 : -1);
                 this.force.y -= (0.08 + 0.08 * Math.random()) * this.mass * Math.sqrt(spawn.fasterBoss(1.3)) //hop height goes with the square of the push
             }
         };
@@ -4969,14 +4977,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex closest to the player
                 let dist = Infinity
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                     if (D < dist) {
                         dist = D
                         this.swordVertex = i
@@ -4992,7 +5000,7 @@ const spawn = {
                 // Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.5)
                 //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
                 const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
-                const playerVector = Vector.sub(this.position, m.pos)
+                const playerVector = Vector.sub(this.position, this.playerTarget())
                 const cross = Matter.Vector.cross(laserStartVector, playerVector)
                 this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
             }
@@ -5147,9 +5155,10 @@ const spawn = {
                 }
             }
             this.checkStatus();
-            if (this.distanceToPlayer() < 500) {
+            const target = this.playerTarget()
+            if ((!m.isCloak || this.seePlayer.recall) && Vector.magnitude(Vector.sub(target, this.position)) < 500) {
                 this.accelMag = 0.0015 * speed //faster when close
-                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, m.pos)) this.sword = this.swordWaiting
+                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, target)) this.sword = this.swordWaiting
             } else {
                 this.accelMag = 0.0004 * speed
             }
@@ -8161,9 +8170,10 @@ const spawn = {
             if (this.seePlayer.recall) this.healthBar3()
             this.seePlayerForStrike()
             this.checkStatus();
-            if (this.distanceToPlayer() < 500) {
+            const target = this.playerTarget()
+            if ((!m.isCloak || this.seePlayer.recall) && Vector.magnitude(Vector.sub(target, this.position)) < 500) {
                 this.accelMag = 0.0015 * speed //faster when close
-                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, m.pos)) this.sword = this.swordWaiting
+                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, target)) this.sword = this.swordWaiting
             } else {
                 this.accelMag = 0.0004 * speed
             }
@@ -8172,7 +8182,7 @@ const spawn = {
 
 
             //dodge by rotating an arc around the player
-            if (this.cd < simulation.cycle && this.seePlayer.recall && this.distanceToPlayer() > 500) {
+            if (this.cd < simulation.cycle && this.seePlayer.recall && Vector.magnitude(Vector.sub(target, this.position)) > 500) {
                 this.cd = simulation.cycle + this.delay;
                 this.dodgeAround(radius)
             }
@@ -8218,9 +8228,10 @@ const spawn = {
             if (this.seePlayer.recall) this.healthBar5()
             this.seePlayerForStrike()
             this.checkStatus();
-            if (this.distanceToPlayer() < 1000) { //2x the slicer range to match its sword
+            const target = this.playerTarget()
+            if ((!m.isCloak || this.seePlayer.recall) && Vector.magnitude(Vector.sub(target, this.position)) < 1000) { //2x the slicer range to match its sword
                 this.accelMag = 0.0027 * speed //faster when close
-                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, m.pos)) this.sword = this.swordWaiting
+                if (!this.isSlashing && m.immuneCycle < m.cycle && !Matter.Query.rayAny(map, this.position, target)) this.sword = this.swordWaiting
             } else {
                 this.accelMag = 0.000675 * speed
             }
@@ -8229,7 +8240,7 @@ const spawn = {
 
 
             //dodge by rotating an arc around the player
-            if (this.cd < simulation.cycle && this.seePlayer.recall && this.distanceToPlayer() > 1000) {
+            if (this.cd < simulation.cycle && this.seePlayer.recall && Vector.magnitude(Vector.sub(target, this.position)) > 1000) {
                 this.cd = simulation.cycle + this.delay;
                 this.dodgeAround(radius)
             }
@@ -9739,15 +9750,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
-                !m.isCloak &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex farthest away from player
                 // let dist = 0
                 // for (let i = 0, len = this.vertices.length; i < len; i++) {
-                //     const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                //     const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                 //     if (D > dist) {
                 //         dist = D
                 //         this.swordVertex = i
@@ -9856,14 +9866,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex farthest away from player
                 let dist = 0
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                     if (D > dist) {
                         dist = D
                         this.swordVertex = i
@@ -9928,7 +9938,7 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
@@ -9998,14 +10008,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex closest to the player
                 let dist = Infinity
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                     if (D < dist) {
                         dist = D
                         this.swordVertex = i
@@ -10021,7 +10031,7 @@ const spawn = {
                 // Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.5)
                 //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
                 const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
-                const playerVector = Vector.sub(this.position, m.pos)
+                const playerVector = Vector.sub(this.position, this.playerTarget())
                 const cross = Matter.Vector.cross(laserStartVector, playerVector)
                 this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
             }
@@ -10083,14 +10093,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex closest to the player
                 let dist = Infinity
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                     if (D < dist) {
                         dist = D
                         this.swordVertex = i
@@ -10106,7 +10116,7 @@ const spawn = {
                 // Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.5)
                 //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
                 const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
-                const playerVector = Vector.sub(this.position, m.pos)
+                const playerVector = Vector.sub(this.position, this.playerTarget())
                 const cross = Matter.Vector.cross(laserStartVector, playerVector)
                 this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
             }
@@ -10274,14 +10284,14 @@ const spawn = {
             if (
                 this.seePlayer.recall &&
                 this.cd < simulation.cycle &&
-                this.distanceToPlayer2() < seeDistance2 &&
+                Vector.magnitudeSquared(Vector.sub(this.playerTarget(), this.position)) < seeDistance2 &&
                 !Matter.Query.rayAny(map, this.position, this.playerPosRandomY()) &&
                 !Matter.Query.rayAny(body, this.position, this.playerPosRandomY())
             ) {
                 //find vertex closest to the player
                 let dist = Infinity
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub({ x: this.vertices[i].x, y: this.vertices[i].y }, this.playerTarget()))
                     if (D < dist) {
                         dist = D
                         this.swordVertex = i
@@ -10297,7 +10307,7 @@ const spawn = {
                 // Matter.Body.setAngularVelocity(this, this.angularVelocity * 0.5)
                 //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
                 const laserStartVector = Vector.sub(this.position, this.vertices[this.swordVertex])
-                const playerVector = Vector.sub(this.position, m.pos)
+                const playerVector = Vector.sub(this.position, this.playerTarget())
                 const cross = Matter.Vector.cross(laserStartVector, playerVector)
                 this.torque = 0.00002 * this.inertia * (cross > 0 ? 1 : -1)
             }
@@ -12507,7 +12517,7 @@ const spawn = {
             Matter.Body.setDensity(me, 0.00001) //very low density to not mess with the original mob's motion
             me.stroke = "transparent";
             me.shield = true;
-            me.damageReduction = 0.073 * (simulation.difficultyOptions.isStrongerConstraints ? 0.5 : 1)
+            me.damageReduction = 0.073 * (level.isMobShields && simulation.difficultyOptions.isStrongerConstraints ? 0.5 : 1)
             me.torqueMag = (0.00000005 + 0.00000001 * (Math.random() - 0.5)) * me.inertia
             me.isUnblockable = true
             me.collisionFilter.category = cat.mobShield

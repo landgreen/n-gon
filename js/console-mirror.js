@@ -105,7 +105,7 @@ const pauseConsole = {
         el.value = pauseConsole.draft
         if (pauseConsole.history.length) el.placeholder = "" //only hint at what the box is for until it's been used
         el.addEventListener("input", () => { pauseConsole.draft = el.value })
-        el.addEventListener("keyup", event => event.stopPropagation())
+        //let key releases reach the game so controls held before focusing here can clear
         el.addEventListener("keydown", event => {
             if (el.offsetParent === null) { //the pause menu closed without removing focus (firefox), so give the keys back to the game
                 el.blur()

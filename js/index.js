@@ -301,6 +301,11 @@ for (let i = 0, len = tech.tech.length; i < len; i++) {
     if (!tech.tech[i].link) tech.tech[i].link = `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(tech.tech[i].name).replace(/'/g, '%27')}&title=Special:Search' class="link">${tech.tech[i].name}</a>`
 }
 const build = {
+    setSettingCheckbox(id, isChecked) { //the title page and the pause menu each have a checkbox for this setting, the pause menu's id starts with "pause-"
+        for (const el of [document.getElementById(id), document.getElementById(`pause-${id}`)]) {
+            if (el) el.checked = isChecked
+        }
+    },
     hideHUD() {
         if (simulation.isTraining) {
             localSettings.isHideHUD = false
@@ -308,8 +313,7 @@ const build = {
             localSettings.isHideHUD = !localSettings.isHideHUD
         }
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        document.getElementById("hide-hud").checked = localSettings.isHideHUD
-        document.getElementById("hide-hud").classList.toggle("ticked")
+        build.setSettingCheckbox("hide-hud", localSettings.isHideHUD)
         simulation.removeEphemera("dmgDefBars", true)
         if (!localSettings.isHideHUD) {
             simulation.ephemera.push({
@@ -332,19 +336,18 @@ const build = {
     showDmgNumbers() {
         localSettings.showDmgNumbers = !localSettings.showDmgNumbers
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        document.getElementById("show-num").checked = localSettings.showDmgNumbers
-        document.getElementById("show-num").classList.toggle("ticked")
+        build.setSettingCheckbox("show-num", localSettings.showDmgNumbers)
     },
     lineOfSight() {
         localSettings.isLineOfSight = !localSettings.isLineOfSight
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-        document.getElementById("line-of-sight").checked = localSettings.isLineOfSight
-        document.getElementById("line-of-sight").classList.toggle("ticked")
+        build.setSettingCheckbox("line-of-sight", localSettings.isLineOfSight)
         simulation.draw.updateLineOfSightSetting()
     },
     fpsOptions: [["max", "no cap"], ["72", "72 fps"], ["60", "60 fps"], ["45", "45 fps"], ["30", "30 fps"]], //same as the title screen settings
     setFpsCap(value) { //limit frames per second, from the title screen settings or the pause menu
         hasExplicitFpsPreference = true
+        localSettings.fpsPreferenceIsExplicit = true
         const isAtDefault = simulation.fpsCap === simulation.fpsCapDefault //don't cut short the slow down after taking damage
         simulation.fpsCapDefault = value === 'max' ? 999999999 : Number(value)
         if (isAtDefault) {
@@ -433,14 +436,14 @@ ${fullscreenRow}
         <div class="pause-details">
             ${saveGame.exportHTML()}
             <div class="pause-row pause-setting">
-            <span><input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
-            <label for="hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, fewer grappling hook rope wraps, no stroke on blocks">performance mode</label></span>
-            <span><input onclick="build.showDmgNumbers()" type="checkbox" id="show-num" name="show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
-            <label for="show-num" title="show in game combat text">damage numbers</label></span>
+            <span><input onclick="build.hideHUD()" type="checkbox" id="pause-hide-hud" name="pause-hide-hud" ${localSettings.isHideHUD ? "checked" : ""}>
+            <label for="pause-hide-hud" title="hide: tech, damage taken, damage, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, fewer grappling hook rope wraps, no stroke on blocks">performance mode</label></span>
+            <span><input onclick="build.showDmgNumbers()" type="checkbox" id="pause-show-num" name="pause-show-num" ${localSettings.showDmgNumbers ? "checked" : ""}>
+            <label for="pause-show-num" title="show in game combat text">damage numbers</label></span>
             </div>
             <div class="pause-row pause-setting">
-            <span><input onclick="build.lineOfSight()" type="checkbox" id="line-of-sight" name="line-of-sight" ${localSettings.isLineOfSight ? "checked" : ""}>
-            <label for="line-of-sight" title="walls block your view on every level, like on subway">line of sight <span class="pause-hint" style="font-size:0.75em;">(beta, low performance)</span></label></span>
+            <span><input onclick="build.lineOfSight()" type="checkbox" id="pause-line-of-sight" name="pause-line-of-sight" ${localSettings.isLineOfSight ? "checked" : ""}>
+            <label for="pause-line-of-sight" title="walls block your view on every level, like on subway">line of sight <span class="pause-hint" style="font-size:0.75em;">(beta, low performance)</span></label></span>
             </div>
             <div class="pause-row">
             <label for="pause-fps-select" title="use this to slow the game down">limit frames per second</label>
@@ -486,7 +489,6 @@ ${fullscreenRow}
         ${powerUps.difficulty.pauseText()}
 </div>
 </details>
-${simulation.difficultyOptions.isConstraint ? `<details id="constraints-details" style="padding: 0 8px;"><summary>active constraint</summary><div class="pause-details"><span class="constraint">${level.constraintDescription1}</span></div></details>` : ""}
 </div>`
         text += `<div class="pause-grid-module card-background" style="height:auto;">
 <details id = "console-log-details" style="padding: 0 8px;">
@@ -521,7 +523,6 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                 document.getElementById("simulation-variables-details").open = localSettings.pauseMenuDetailsOpen[0]
                 document.getElementById("difficulty-parameters-details").open = localSettings.pauseMenuDetailsOpen[1]
                 document.getElementById("console-log-details").open = localSettings.pauseMenuDetailsOpen[2]
-                if (document.getElementById("constraints-details")) document.getElementById("constraints-details").open = localSettings.pauseMenuDetailsOpen[3]
                 // document.getElementById("pause-music-details").open = localSettings.pauseMenuDetailsOpen[4]
                 document.getElementById("pause-settings-details").open = localSettings.pauseMenuDetailsOpen[5]
             }
@@ -714,7 +715,6 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             if (document.getElementById("simulation-variables-details")) localSettings.pauseMenuDetailsOpen[0] = document.getElementById("simulation-variables-details").open
             if (document.getElementById("difficulty-parameters-details")) localSettings.pauseMenuDetailsOpen[1] = document.getElementById("difficulty-parameters-details").open
             if (document.getElementById("console-log-details")) localSettings.pauseMenuDetailsOpen[2] = document.getElementById("console-log-details").open
-            if (document.getElementById("constraints-details")) localSettings.pauseMenuDetailsOpen[3] = document.getElementById("constraints-details").open
             if (document.getElementById("pause-music-details")) localSettings.pauseMenuDetailsOpen[4] = document.getElementById("pause-music-details").open
             if (document.getElementById("pause-settings-details")) localSettings.pauseMenuDetailsOpen[5] = document.getElementById("pause-settings-details").open
             localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
@@ -1112,16 +1112,19 @@ const input = {
     fire: false, // left mouse
     field: false, // right mouse
     up: false, // jump
+    upPressCycle: -Infinity, //m.cycle when jump was last pressed, used to buffer jumps pressed just before landing, -Infinity when there is no buffered press
     down: false, // crouch
     left: false,
     right: false,
     isPauseKeyReady: true,
+    isMenuKeyFocus: false, //Tab navigation keeps the normal keyboard controls in menus
     // isMouseInside: true,
     // lastDown: null,
     reset() {
         input.fire = false
         input.field = false
         input.up = false
+        input.upPressCycle = -Infinity
         input.down = false
         input.left = false
         input.fire = false
@@ -1309,14 +1312,24 @@ window.addEventListener("keyup", function (event) {
     }
 });
 
-//drop downs and checkboxes in the menus keep focus after you click them, then keys like P or W would change them
-//this runs first (capture), so they never react to keys, and the game still gets the key below
+window.addEventListener("pointerdown", function () {
+    input.isMenuKeyFocus = false
+}, true);
+
+//After a click, game keys must not change the focused setting. Tab lets the player edit it with the keyboard instead.
 window.addEventListener("keydown", function (event) {
+    if (event.code === "Tab") {
+        input.isMenuKeyFocus = true
+        return
+    }
     const el = event.target
     if (el.tagName === "SELECT" || (el.tagName === "INPUT" && (el.type === "checkbox" || el.type === "radio"))) {
-        if (event.code === "Tab") return //still move between menu options with tab
-        event.preventDefault()
-        el.blur()
+        if (input.isMenuKeyFocus) {
+            event.stopImmediatePropagation() //keep native menu controls without also moving, firing, or pausing the game
+        } else {
+            event.preventDefault()
+            el.blur()
+        }
     }
 }, true);
 
@@ -1335,6 +1348,7 @@ window.addEventListener("keydown", function (event) {
         case input.key.up:
         case "ArrowUp":
             input.up = true
+            if (!event.repeat) input.upPressCycle = m.cycle
             break;
         case input.key.down:
         case "ArrowDown":
@@ -1845,7 +1859,7 @@ if (localStorageCheck()) {
     }
 }
 
-const hadSavedFpsPreference = localSettings.fpsCapDefault !== undefined
+const hadSavedFpsPreference = localSettings.fpsPreferenceIsExplicit ?? (localSettings.fpsCapDefault !== undefined) //preserve legacy preferences; new defaults carry an explicit false marker
 if (localSettings.isAllowed && !localSettings.isEmpty) {
     console.log('restoring previous settings') // eslint-disable-line no-console
 
@@ -1934,6 +1948,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         difficultyMode: '2',
         difficultyCompleted: [null, false, false, false, false, false, false, false],
         fpsCapDefault: 'max',
+        fpsPreferenceIsExplicit: false,
         estimatedDisplayFps: null,
         runCount: 0,
         isTrainingNotAttempted: true,
@@ -1976,14 +1991,19 @@ if (simulation.isCommunityMaps) {
 //**********************************************************************
 
 let hasExplicitFpsPreference = hadSavedFpsPreference
+let isDisplayFpsSampling = false
 function detectDisplayFps() {
-    if (Number.isFinite(localSettings.estimatedDisplayFps) && localSettings.estimatedDisplayFps > 0) return
+    if (isDisplayFpsSampling || (Number.isFinite(localSettings.estimatedDisplayFps) && localSettings.estimatedDisplayFps > 0)) return
+    isDisplayFpsSampling = true
     localSettings.estimatedDisplayFps = null
     let previous
     let warmup = 5
     const intervals = []
     function sample(timestamp) {
-        if (!simulation.onTitlePage) return
+        if (!simulation.onTitlePage) {
+            isDisplayFpsSampling = false
+            return
+        }
         if (document.hidden) {
             previous = undefined
             warmup = 5
@@ -2002,6 +2022,7 @@ function detectDisplayFps() {
                 intervals.sort((a, b) => a - b)
                 const median = (intervals[14] + intervals[15]) / 2
                 localSettings.estimatedDisplayFps = Math.round(1000 / median)
+                isDisplayFpsSampling = false
                 if (!hasExplicitFpsPreference) {
                     localSettings.fpsCapDefault = median < 15 ? '60' : 'max'
                     simulation.fpsCapDefault = median < 15 ? 60 : 999999999

@@ -457,6 +457,9 @@ const mobs = {
                 const dy = this.position.y - player.position.y;
                 return dx * dx + dy * dy;
             },
+            playerTarget() { //where the mob aims, the player, or while cloaked the last place this mob saw the player
+                return m.isCloak ? this.seePlayer.position : player.position
+            },
             gravity() {
                 this.force.y += this.mass * this.g;
             },
@@ -598,9 +601,10 @@ const mobs = {
                 }
             },
             playerPosRandomY() {
+                const where = this.playerTarget()
                 return {
-                    x: player.position.x, // + (Math.random() - 0.5) * 50,
-                    y: player.position.y + (Math.random() - 0.5) * 110
+                    x: where.x, // + (Math.random() - 0.5) * 50,
+                    y: where.y + (Math.random() - 0.5) * 110
                 };
             },
             // hacked() { //set this.hackedTarget variable before running this method
@@ -1153,12 +1157,13 @@ const mobs = {
             dodgeAround(radius) { //teleport sideways around the player, try both directions, then half as far
                 ctx.beginPath();
                 ctx.moveTo(this.position.x, this.position.y);
-                const sub = Vector.sub(this.position, m.pos)
+                const target = this.playerTarget()
+                const sub = Vector.sub(this.position, target)
                 const first = 300 / Vector.magnitude(sub) * (Math.random() < 0.5 ? 1 : -1)
                 let rotate
                 for (const r of [first, -first, -0.5 * first, 0.5 * first]) {
                     rotate = r
-                    const where = Vector.add(m.pos, Vector.rotate(sub, rotate))
+                    const where = Vector.add(target, Vector.rotate(sub, rotate))
                     if (!Matter.Query.rayAny(map, this.position, where)) {
                         Matter.Body.setPosition(this, where)
                         ctx.lineTo(this.position.x, this.position.y);
@@ -1176,7 +1181,7 @@ const mobs = {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
                     const mod = (a, n) => a - Math.floor(a / n) * n
-                    const sub = Vector.sub(m.pos, this.position) //give this a nudge if it's facing 180 degrees away
+                    const sub = Vector.sub(this.playerTarget(), this.position) //give this a nudge if it's facing 180 degrees away
                     const diff = mod(Math.atan2(sub.y, sub.x) - this.angle + Math.PI, 2 * Math.PI) - Math.PI
                     if (Math.abs(diff) > 2.8) this.torque += 0.0002 * this.inertia * Math.random();
                 }
@@ -1303,9 +1308,10 @@ const mobs = {
             },
             swordWaiting() { //start a slicer swing from the vertex farthest from the player
                 this.cd = simulation.cycle + 74;
+                const target = this.playerTarget()
                 let dist = 0
                 for (let i = 0, len = this.vertices.length; i < len; i++) {
-                    const D = Vector.magnitudeSquared(Vector.sub(this.vertices[i], m.pos))
+                    const D = Vector.magnitudeSquared(Vector.sub(this.vertices[i], target))
                     if (D > dist) {
                         dist = D
                         this.swordVertex = i
@@ -1319,7 +1325,7 @@ const mobs = {
                 this.swordRadius = this.swordRadiusInitial
                 Matter.Body.setAngularVelocity(this, 0)
                 //gently rotate towards the player with a torque, use cross product to decided clockwise or counterclockwise
-                const cross = Matter.Vector.cross(Vector.sub(this.position, this.vertices[this.swordVertex]), Vector.sub(this.position, m.pos))
+                const cross = Matter.Vector.cross(Vector.sub(this.position, this.vertices[this.swordVertex]), Vector.sub(this.position, target))
                 this.torque = 0.0003 * this.inertia * (cross > 0 ? 1 : -1)
             },
             swordGrow() { //slicer sword grows until swordRadiusMax, then shrinks back
@@ -1341,7 +1347,7 @@ const mobs = {
                 if (!(simulation.cycle % this.seePlayerFreq)) {
                     this.fireDir = Vector.normalise(Vector.sub(this.seePlayer.position, this.position));
                     //the dot product below can't tell facing directly away from facing directly towards, so nudge if pointed directly away
-                    const sub = Vector.sub(m.pos, this.position)
+                    const sub = Vector.sub(this.playerTarget(), this.position)
                     const a = Math.atan2(sub.y, sub.x) - this.angle + Math.PI
                     const diff = a - Math.floor(a / (2 * Math.PI)) * 2 * Math.PI - Math.PI
                     if (Math.abs(diff) > 2.8) this.torque += 0.0002 * this.inertia * Math.random();
@@ -1809,7 +1815,7 @@ const mobs = {
                     mobs.mobDeaths += this.isBoss ? 100 : 1 //bosses count as 10 kills for the pacifist run
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
-                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = simulation.cycle + 900 //15 seconds
+                            if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = Math.max(bullet[i].endCycle, simulation.cycle + 900) //15 seconds, don't shorten longer lasting bots like barycenter's
                         }
                     }
                     if (tech.isMobDeathImmunity) {

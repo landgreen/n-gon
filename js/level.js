@@ -35,7 +35,7 @@ const level = {
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
                 // simulation.isHorizontalFlipped = false
-                // level.levelsCleared = 10
+                level.levelsCleared = 13
                 // level.updateDifficulty()
                 // simulation.isCheating = true
                 // tech.giveTech("performance")
@@ -45,10 +45,10 @@ const level = {
                 // m.couplingChange(100)
                 //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch 
                 // 6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
-                m.setField(2)
+                m.setField(5)
                 // simulation.molecularMode = 4;
-                // m.energy = m.maxEnergy = 12.2
-                // m.damageDone *= 20
+                // m.energy = m.maxEnergy = 10
+                // m.damageDone *= 0.1//20
 
                 m.maxHealth = m.health = 100
                 // m.displayHealth();
@@ -57,23 +57,23 @@ const level = {
 
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                b.giveGuns(8)
-                b.guns[b.inventory[0]].ammo = 100000
-                tech.giveTech("aerogel")
-                tech.giveTech("surface tension")
+                // b.giveGuns(8)
+                // b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
-                // for (let i = 0; i < 1; i++) tech.giveTech("mass hyperboloid")
-                for (let i = 0; i < 1; i++) tech.giveTech("cavitation")
-                // for (let i = 0; i < 1; i++) tech.giveTech("shear stress")
-                // for (let i = 0; i < 1; i++) tech.giveTech("double beta decay")
+                tech.giveTech("electronvolt")
+                // tech.giveTech("soliton")
+                tech.giveTech("electric potential")
+                // tech.giveTech("cold plasma")
+                for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
+                for (let i = 0; i < 3; i++) tech.giveTech("plasma jet")
+                for (let i = 0; i < 1; i++) tech.giveTech("Maxwells demon")
+                // for (let i = 0; i < 1; i++) tech.giveTech("plasma ball")
                 // for (let i = 0; i < 3; i++) tech.giveTech("nail-bot")
-                // simulation.difficultyOptions.isStrongerConstraints = true //stronger slow bots, the slowed bots wait 1.5x longer between attacks
-                simulation.difficultyOptions.isFasterMobs = true //faster mobs difficulty
                 // level.constraint.find(c => c.description === "slow bots").effect()
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
                 // for (let i = 0; i < 3; ++i) tech.giveTech("Meissner effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("ray")
-                for (let i = 0; i < 1; ++i) tech.giveTech("Hall effect")
+                // for (let i = 0; i < 1; ++i) tech.giveTech("Hall effect")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("Hawking radiation")
                 // for (let i = 0; i < 9; ++i) tech.giveTech("impulse")
                 // for (let i = 0; i < 1; ++i) tech.giveTech("fatigue")
@@ -90,8 +90,8 @@ const level = {
                 // tech.giveTech("optimization") //swap skins when paused
                 // tech.giveTech("outlier")
                 // tech.giveTech("maul")
-                tech.giveTech("alternator")
-                for (let i = 0; i < 3; i++) tech.giveTech("smelting")
+                // tech.giveTech("alternator")
+                // for (let i = 0; i < 3; i++) tech.giveTech("smelting")
                 // tech.giveTech("many-worlds") //alternate reality at the start of each level
                 // tech.giveTech("localization") //choose what doesn't change in an alternate reality when paused
                 // tech.giveTech("quantum immortality")
@@ -235,10 +235,6 @@ const level = {
             }
         }
         tech.isDeathAvoidedThisLevel = false;
-        //catch waves and bubbles that continue to exist
-        for (let i = simulation.ephemera.length - 1; i >= 0; i--) {
-            if (simulation.ephemera[i].name === "wave" || simulation.ephemera[i].name === "bubbles") simulation.ephemera.splice(i, 1)
-        }
         if (tech.isForeverDrones) {
             if (tech.isDroneRadioactive) {
                 for (let i = 0; i < tech.isForeverDrones * 0.25; i++) {
@@ -1139,12 +1135,12 @@ const level = {
                 const isNormalMob = who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet
                 this.reproduceEffect = {
                     name: "mobs reproduce",
-                    maxMobs: null, //double the normal mobs on the first cycle, after the map's mobs have spawned
+                    maxMobs: null, //starting normal-mob population, captured on the first cycle after the map's mobs have spawned
                     cooldown: simulation.difficultyOptions.isStrongerConstraints ? 420 : 600,
                     count: 0,
                     do() {
                         if (!m.alive || m.isTimeDilated) return;
-                        if (this.maxMobs === null) this.maxMobs = 2 * mob.filter(isNormalMob).length
+                        if (this.maxMobs === null) this.maxMobs = mob.filter(isNormalMob).length
                         if (++this.count < this.cooldown) return;
                         //copy a random normal mob that is far from the player
                         const parents = mob.filter(who => isNormalMob(who) && who.spawnName && Vector.magnitudeSquared(Vector.sub(who.position, m.pos)) > 1200 * 1200)
@@ -3331,7 +3327,7 @@ const level = {
             }
             for (let i = 0; i < bullet.length; i++) { //bullets fly into the hole behind the portal, since the block there doesn't stop them
                 const who = bullet[i]
-                if (who.botType || who.isInHole || who.drawStringFlip !== undefined) continue //not bots, the plasma extruder, or harpoons and hooks tied to the player
+                if (who.botType || who.isInHole || who.drawStringFlip !== undefined) continue //not bots, bullets that already went through a wormhole, or harpoons and hooks tied to the player
                 if (!isTouchingSoon(this, who)) {
                     if (who.isInPortal === this) who.isInPortal = null
                 } else if (who.isInPortal !== this) {
@@ -3340,10 +3336,15 @@ const level = {
                     const velocity = level.portalExitVelocity(who.velocity, this, { unit: to.unit, exit: bulletExit })
                     const slideFrom = Vector.perp(this.unit)
                     const slideTo = Vector.perp(to.unit)
-                    const across = Math.max(-0.5 * height, Math.min(0.5 * height, Vector.dot(Vector.sub(who.position, this.portal.position), slideFrom))) * (Vector.dot(slideFrom, slideTo) < 0 ? -1 : 1)
-                    //come out just in front of the portal face, since some levels have map in the hole behind a portal
-                    Matter.Body.setPosition(who, Vector.add(Vector.add(to.portal.position, Vector.mult(to.unit, 3 - level.portalExtent(who, to.unit).min)), Vector.mult(slideTo, across)))
+                    const offset = Vector.dot(Vector.sub(who.position, this.portal.position), slideFrom) * (Vector.dot(slideFrom, slideTo) < 0 ? -1 : 1)
                     Matter.Body.setAngle(who, who.angle + Math.atan2(velocity.y, velocity.x) - Math.atan2(who.velocity.y, who.velocity.x)) //turn with the velocity, so missiles and nails point the new way
+                    //keep the rotated shape inside the opening, moving edge shots inward just enough to fit
+                    const slideExtent = level.portalExtent(who, slideTo)
+                    const minAcross = -0.5 * height - slideExtent.min + 3
+                    const maxAcross = 0.5 * height - slideExtent.max - 3
+                    const across = minAcross <= maxAcross ? Math.max(minAcross, Math.min(maxAcross, offset)) : 0.5 * (minAcross + maxAcross)
+                    //measure the rotated shape so it comes out clear of the map around the portal face
+                    Matter.Body.setPosition(who, Vector.add(Vector.add(to.portal.position, Vector.mult(to.unit, 3 - level.portalExtent(who, to.unit).min)), Vector.mult(slideTo, across)))
                     Matter.Body.setVelocity(who, velocity)
                 }
             }
@@ -3529,11 +3530,14 @@ const level = {
                 }
                 return false
             },
+            canUseBlock(who) {
+                return !who.isStatic && who !== m.holdingTarget
+            },
             canUse(who) {
                 if (who === player) return true
-                if (who.classType === "body") return who !== m.holdingTarget && body.includes(who)
+                if (who.classType === "body") return this.canUseBlock(who) && body.includes(who)
                 if (who.collisionFilter.category === cat.powerUp) return powerUp.includes(who)
-                return this.isBulletPass && !who.botType && !who.isInHole && who.drawStringFlip === undefined && bullet.includes(who) //not bots, the plasma extruder, or harpoons and hooks tied to the player
+                return this.isBulletPass && !who.botType && !who.isInHole && who.drawStringFlip === undefined && bullet.includes(who) //not bots, bullets that already went through a wormhole, or harpoons and hooks tied to the player
             },
             enter(who, velocity, from) {
                 for (let i = 0; i < this.pending.length; i++) {
@@ -3575,7 +3579,7 @@ const level = {
                     const end = this.ends[j]
                     if (Matter.Bounds.overlaps(end.bounds, player.bounds) && Vector.dot(player.velocity, end.unit) < 0.5 && this.isOver(player, end, -8, 3)) this.enter(player, player.velocity, end)
                     for (let i = 0; i < body.length; i++) {
-                        if (Matter.Bounds.overlaps(end.bounds, body[i].bounds) && body[i] !== m.holdingTarget && Vector.dot(body[i].velocity, end.unit) < 0.5 && this.isOver(body[i], end, -8, 3)) this.enter(body[i], body[i].velocity, end)
+                        if (this.canUseBlock(body[i]) && Matter.Bounds.overlaps(end.bounds, body[i].bounds) && Vector.dot(body[i].velocity, end.unit) < 0.5 && this.isOver(body[i], end, -8, 3)) this.enter(body[i], body[i].velocity, end)
                     }
                     for (let i = 0; i < powerUp.length; i++) {
                         if (Matter.Bounds.overlaps(end.bounds, powerUp[i].bounds) && Vector.dot(powerUp[i].velocity, end.unit) < 0.5 && this.isOver(powerUp[i], end, -8, 3)) this.enter(powerUp[i], powerUp[i].velocity, end)
@@ -3670,9 +3674,14 @@ const level = {
                 const copyScreen = screenRect(3)
                 const redrawScreen = screenRect(6)
                 const screenBounds = { min: { x: Math.min(redrawScreen[0].x, redrawScreen[2].x), y: Math.min(redrawScreen[0].y, redrawScreen[2].y) }, max: { x: Math.max(redrawScreen[0].x, redrawScreen[2].x), y: Math.max(redrawScreen[0].y, redrawScreen[2].y) } }
+                const viewScreen = screenRect(-1) //include the full viewport and a pixel of room at its edges
+                const viewBounds = { min: { x: Math.min(...viewScreen.map(p => p.x)), y: Math.min(...viewScreen.map(p => p.y)) }, max: { x: Math.max(...viewScreen.map(p => p.x)), y: Math.max(...viewScreen.map(p => p.y)) } }
                 for (let j = 0; j < 2; j++) {
                     const from = this.ends[j] //the view is drawn behind this portal
                     const to = this.ends[1 - j] //of the area in front of this portal
+                    //the view can reach this far from any point along the opening, even when its face is offscreen
+                    const reach = this.viewRadius + from.half + 1
+                    if (from.position.x + reach < viewBounds.min.x || from.position.x - reach > viewBounds.max.x || from.position.y + reach < viewBounds.min.y || from.position.y - reach > viewBounds.max.y) continue
                     //a point at some depth behind "from" matches the point that far in front of "to", and the offset along the portal flips like the slide speed in level.portalExitVelocity()
                     //so the linear part L turns from.unit into -to.unit and from.tangent into flip * to.tangent
                     const flip = Vector.dot(from.tangent, to.tangent) < 0 ? -1 : 1
@@ -4729,7 +4738,10 @@ const level = {
             simulation.zoomTransition(level.defaultZoom)
             // document.body.style.backgroundColor = "#aaa";
             document.body.style.backgroundColor = "#ddd";
-            color.map = "transparent"//"#586363" //808f8f"
+            const updateMapColor = () => {
+                color.map = localSettings.isHideHUD || simulation.draw.isLineOfSight() ? "#586363" : "transparent"
+            }
+            updateMapColor()
             // console.log(level.onLevel, level.levels)
             //start a conversation based on the number of conversations seen
             if (localSettings.loreCount > lore.conversation.length - 1) localSettings.loreCount = lore.conversation.length - 1; //repeat final conversation if lore count is too high
@@ -4766,6 +4778,7 @@ const level = {
                 radius: 50
             }
             level.custom = () => {
+                updateMapColor()
                 //draw wide line
                 ctx.beginPath();
                 ctx.moveTo(circle.x, -800)

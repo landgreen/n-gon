@@ -841,6 +841,7 @@ const simulation = {
         simulation.clearTimeouts();
         titlePage.queueStart() //the title page player drops in after a couple seconds, see js/title.js
         simulation.onTitlePage = true;
+        detectDisplayFps()
         document.getElementById("splash").onclick = function () {
             simulation.startGame();
         };
@@ -1284,7 +1285,7 @@ const simulation = {
     },
     clearNow: false,
     clearMap() {
-        let i, len
+        let len
         level.disableExit = false; //clear level-specific locks, including when starting a new run
         // level.mirrorDoors.reset();
         level.exit.reflection = null;
@@ -1296,42 +1297,6 @@ const simulation = {
         level.fallMode = "";
         simulation.unFlipCameraVertical()
         ctx.setTransform(1, 0, 0, 1, 0, 0);
-        if (m.alive) {
-            if (!tech.isTransverse) b.guns[3].waves = []; //empty array of longitudinal wave bullets
-            if (b.guns[10].have) { //do you have mines as a gun
-                let count = 0;
-                for (i = 0, len = bullet.length; i < len; i++) { //count mines left on map
-                    if (
-                        (bullet[i].bulletType === "mine" && (!tech.isMineSentry || bullet[i].shots === undefined)) ||
-                        (bullet[i].bulletType === "laser mine" && !bullet[i].isDetonated)) { //laser mines that already fired aren't refunded
-                        count++
-                    }
-                }
-                if (tech.crouchAmmoCount) count = Math.ceil(count / 2)
-                b.guns[10].ammo += count
-                if (tech.ammoCap) b.guns[10].ammo = Math.min(tech.ammoCap, b.guns[10].ammo)
-                simulation.updateGunHUD();
-            }
-
-            for (let i = 0; i < bullet.length; i++) { //harpoons still out give back their ammo
-                if (bullet[i].refundsAmmo) b.guns[9].ammo++
-            }
-            if (tech.isMutualism) {
-                for (let i = 0; i < bullet.length; i++) {
-                    if (bullet[i].isMutualismActive) {
-                        const refund = bullet[i].isSpore ? 0.01 : 0.02
-                        bullet[i].isMutualismActive = false
-                        if (tech.isEnergyHealth) {
-                            m.addEnergy(refund)
-                            simulation.energyGenGraphic()
-                        } else {
-                            m.health = Math.min(m.maxHealth, m.health + refund)
-                            m.displayHealth();
-                        }
-                    }
-                }
-            }
-        }
         simulation.lastLogTime = 0; //clear previous messages
         spawn.allowShields = true;
         powerUps.totalPowerUps = powerUp.length
@@ -1357,6 +1322,7 @@ const simulation = {
         mobs.maxMobBody = 40
 
         level.collectTransfers()
+        b.clearProjectiles({ refund: true })
         if (tech.isQuantumEraser && m.alive && !saveGame.isResuming) {
             let count = 0
             for (let i = 0, len = mob.length; i < len; i++) {
@@ -1385,8 +1351,6 @@ const simulation = {
         cons = [];
         removeAll(consBB);
         consBB = [];
-        removeAll(bullet);
-        bullet = [];
         removeAll(composite);
         composite = [];
         // if player was holding something this makes a new copy to hold
@@ -1405,7 +1369,7 @@ const simulation = {
             m.holdingTarget = body[len];
             m.holdingTarget.collisionFilter.category = 0;
             m.holdingTarget.collisionFilter.mask = 0;
-            m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+            m.definePlayerMass(m.holdingMass(m.holdingTarget))
             Composite.add(engine.world, m.holdingTarget); //add to world
             m.holdingTarget.classType = "body"
         }

@@ -99,7 +99,8 @@ const m = {
     onGround: false, //checks if on ground or in air
     lastOnGroundCycle: 0, //use to calculate coyote time
     // groundCount: 0, // used to prevent wall jumps
-    coyoteCycles: 5,
+    coyoteCycles: 8,
+    jumpBufferCycles: 7, //a jump pressed this many cycles before landing still jumps
     hardLanding: 130,
     squirrelFx: 1,
     squirrelJump: 1,
@@ -129,7 +130,14 @@ const m = {
         ground: 0.01,
         air: 0.0025
     },
-    airSpeedLimit: 125, // 125/mass/mass = 5
+    airSpeedLimit: 25, // 25/mass = 5
+    airTurnFx: 1.5, //air force scale when pushing against your horizontal velocity
+    shortJumpDamp: 0.85, //y-velocity scale each cycle after letting go of jump early, lower makes short hops shorter
+    apexGravity: 0.6, //gravity scale near the top of a jump while holding jump
+    apexSpeed: 3, //vertical speed below which the top of a jump counts as the apex
+    ceilingSlide: 14, //how far the player can slide sideways around a ceiling corner while jumping
+    ledgeStep: 30, //how far above the player's foot a ledge can be and still be climbed onto
+    ledgeClimbSpeed: 3, //how fast the player climbs up a ledge they barely missed
     angle: 0,
     walk_cycle: 0,
     stepSize: 0,
@@ -284,8 +292,13 @@ const m = {
         }
     },
     buttonCD_jump: 0, //cool down for player buttons
+    isJumpBuffered() { //jump was pressed in the last few cycles, so tapping jump just before landing still jumps
+        const cyclesSincePress = m.cycle - input.upPressCycle
+        return cyclesSincePress >= 0 && cyclesSincePress < m.jumpBufferCycles
+    },
     jump() {
         m.buttonCD_jump = m.cycle; //can't jump again until 20 cycles pass
+        input.upPressCycle = -Infinity //use up the buffered jump press
         //apply a fraction of the jump force to the body the player is jumping off of
         // 0.2 * Math.max(0, Math.min(3 * (m.cycle - m.lastOnGroundCycle), Math.min(120, m.lastOnGroundCycle + m.coyoteCycles - m.cycle)))
         if (m.cycle - m.lastOnGroundCycle < 6) Matter.Body.applyForce(m.standingOn, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
@@ -303,7 +316,7 @@ const m = {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
         } else if (input.down || m.hardLandCD > m.cycle) {
             m.doCrouch(); //on ground && not crouched and pressing s or down
-        } else if (input.up && m.buttonCD_jump + 20 < m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
+        } else if ((input.up || m.isJumpBuffered()) && m.buttonCD_jump + 20 < m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
             // console.log("ground", m.groundCount, player.speed, player.velocity)
             m.jump()
         }
@@ -333,7 +346,7 @@ const m = {
         m.moverX = 0 //reset the level mover offset
     },
     airControl() {
-        if (m.crouch && m.cycle % 30 === 0 && m.checkHeadClear()) {
+        if (m.crouch && m.cycle % 5 === 0 && m.checkHeadClear()) {
             m.undoCrouch();
             m.yOffGoal = m.yOffWhen.jump;
         }
@@ -344,14 +357,67 @@ const m = {
         }
         //check for short jumps   //moving up   //recently pressed jump  //but not pressing jump key now
         if (m.buttonCD_jump + 60 > m.cycle && !(input.up) && m.Vy < 0) {
-            Matter.Body.setVelocity(player, { x: player.velocity.x, y: player.velocity.y * 0.94 }); //reduce player y-velocity every cycle
+            Matter.Body.setVelocity(player, { x: player.velocity.x, y: player.velocity.y * m.shortJumpDamp }); //reduce player y-velocity every cycle
         }
+        //hang at the top of a jump while holding jump
+        if (input.up && m.buttonCD_jump + 60 > m.cycle && Math.abs(player.velocity.y) < m.apexSpeed) player.force.y -= player.mass * simulation.g * (1 - m.apexGravity)
+        m.ceilingCornerSlide()
+        m.ledgeAssist()
 
+        //turning around in the air uses extra force, like on the ground
         if (input.left) {
-            if (player.velocity.x > -m.airSpeedLimit / player.mass / player.mass) player.force.x -= m.FxAir; // move player   left / a
+            if (player.velocity.x > -m.airSpeedLimit / player.mass) player.force.x -= m.FxAir * (player.velocity.x > 0 ? m.airTurnFx : 1); // move player   left / a
         }
         if (input.right) {
-            if (player.velocity.x < m.airSpeedLimit / player.mass / player.mass) player.force.x += m.FxAir; //move player  right / d
+            if (player.velocity.x < m.airSpeedLimit / player.mass) player.force.x += m.FxAir * (player.velocity.x < 0 ? m.airTurnFx : 1); //move player  right / d
+        }
+    },
+    isMapAt(x, y) {
+        return Matter.Query.point(map, { x, y }).length > 0
+    },
+    ceilingCornerSlide() { //jumping into the edge of a ceiling slides the player around it over the cycles before they touch it
+        const v = player.velocity
+        if (v.y > -1) return
+        const ahead = 4 //cycles to look ahead for a ceiling corner
+        for (const part of [playerHead, playerBody]) { //the body is wider than the head, so check the corners of both
+            const top = part.bounds.min.y
+            const left = part.bounds.min.x + 1
+            const right = part.bounds.max.x - 1
+            const isHitAhead = x => Matter.Query.segmentAny(map, { x, y: top }, { x: x + ahead * v.x, y: top + ahead * v.y }) //this corner's path, so thin platforms aren't skipped
+            const isLeftBlocked = isHitAhead(left)
+            if (isLeftBlocked === isHitAhead(right)) continue //clear above, or a gap narrower than the player
+            const dir = isLeftBlocked ? 1 : -1 //slide away from the blocked side
+            const edge = isLeftBlocked ? left : right
+            //a stationary side probe is a point, including its boundary, rather than an open segment
+            if (v.x === 0 ? m.isMapAt(edge, top) : Matter.Query.segmentAny(map, { x: edge, y: top }, { x: edge + ahead * v.x, y: top })) continue //a wall beside the player, not a ceiling above them
+            const vx = dir * v.x < 0 ? 0 : v.x //stop steering into the ceiling's edge, like bumping into its side
+            let cycles = 1 //cycles until this corner reaches the ceiling
+            while (cycles < ahead && !m.isMapAt(edge + cycles * vx, top + cycles * v.y)) cycles++
+            const x = edge + cycles * vx //where the corner meets the ceiling
+            const y = top + cycles * v.y
+            if (m.isMapAt((left + right) / 2 + cycles * vx, y)) return //the ceiling covers the middle of the player
+            const maxSlide = m.ceilingSlide * player.scale
+            if (m.isMapAt(x + dir * maxSlide, y)) return //the ceiling's edge is too far in to slide around
+            if (vx !== v.x) Matter.Body.setVelocity(player, { x: 0, y: v.y })
+            if (!m.isMapAt(x, y)) return //stopping the steering was enough
+            let slide = 1
+            while (slide < maxSlide && m.isMapAt(x + dir * slide, y)) slide++
+            const shift = dir * (slide + 1) / cycles //spread the slide evenly so it looks like a glancing hit
+            const depth = m.mapDepth()
+            Matter.Body.setPosition(player, { x: player.position.x + shift, y: player.position.y })
+            if (m.mapDepth() > depth) Matter.Body.setPosition(player, { x: player.position.x - shift, y: player.position.y }) //undo if it pushed the player into the map
+            return
+        }
+    },
+    ledgeAssist() { //pressing into a ledge the player barely missed climbs them up until their slanted foot rides over the corner
+        const dir = (input.right && !input.left) ? 1 : (input.left && !input.right) ? -1 : 0
+        if (!dir || player.velocity.y > 8) return //falling too fast to catch the ledge
+        const bounds = playerBody.bounds
+        const x = (dir > 0 ? bounds.max.x : bounds.min.x) + dir * (Math.max(0, dir * player.velocity.x) + 2) //just ahead of the player next cycle
+        const foot = bounds.max.y
+        const footSlant = 12 * player.scale //the slanted bottom of the player rides up over corners lower than this
+        if (m.isMapAt(x, foot - footSlant) && !m.isMapAt(x, foot - m.ledgeStep * player.scale)) { //a ledge, not a wall too tall to step onto
+            Matter.Body.setVelocity(player, { x: player.velocity.x, y: Math.min(player.velocity.y, -m.ledgeClimbSpeed * player.scale) })
         }
     },
     printBlock() {
@@ -385,7 +451,7 @@ const m = {
             vertices.push({ x: who.position.x + r1 * Math.cos(angle), y: who.position.y + r2 * Math.sin(angle) })
         }
         Matter.Body.setVertices(who, vertices)
-        m.definePlayerMass(m.defaultMass + who.mass * m.holdingMassScale)
+        m.definePlayerMass(m.holdingMass(who))
         m.fieldUpgrades[4].endoThermic(0.01)
     },
     alive: false,
@@ -431,9 +497,7 @@ const m = {
             }
             const isQubitChanged = powerUps.qubit.switchWorlds(!!keep) //resetAllTech wiped the qubits' damage taken, unless localization skipped it
 
-            //remove all bullets
-            for (let i = 0; i < bullet.length; ++i) Matter.Composite.remove(engine.world, bullet[i]);
-            bullet = [];
+            b.clearProjectiles()
 
             //randomize
             if (keep !== "tech") powerUps.research.count = Math.floor(powerUps.research.count * (0.5 + 1.5 * Math.random()))
@@ -456,9 +520,10 @@ const m = {
                     b.guns[i].have = false;
                     if (b.guns[i].ammo !== Infinity) {
                         b.guns[i].ammo = 0;
-                        b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+                        b.guns[i].onAmmoReset?.();
                     }
                 }
+                b.resetAmmoPacks()
                 //give random guns
                 // const totalGuns = 1 + Math.floor(b.inventory.length * (0.5 + 1.5 * Math.random()))
                 const totalGuns = 1 + Math.floor(Math.random() * Math.random() * 7)
@@ -692,7 +757,7 @@ const m = {
     },
     addHealth(heal) {
         if (!tech.isEnergyHealth) {
-            heal *= simulation.healScale * (level.isLowHeal ? (simulation.difficultyOptions.isStrongerConstraints ? 0.5 : 0.3) : 1);
+            heal *= simulation.healScale * (level.isLowHeal ? (simulation.difficultyOptions.isStrongerConstraints ? 0.3 : 0.5) : 1);
             heal = Math.min(heal, m.maxHealth - m.health)
             m.health += heal
             // if (m.health > m.maxHealth) m.health = m.maxHealth;
@@ -724,6 +789,7 @@ const m = {
     damageDone: 1,
     damageReduction: 1,
     defense() {
+        if (tech.isHyperpolarisation || m.skin?.isPolarDefense) m.skin.updatePolarDefense()
         let dmg = m.damageReduction * powerUps.difficulty.damageReduction
         if (tech.proportionality !== null) dmg *= Math.pow(tech.proportionality, 1.631)
         if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
@@ -1143,7 +1209,7 @@ const m = {
         m.yOffWhen.stand = 49
         m.yOffWhen.crouch = 22
         m.isAltSkin = false
-        m.coyoteCycles = 5 + 120 * tech.isCoyote
+        m.coyoteCycles = 8 + 120 * tech.isCoyote
         m.hardLanding = 130
         m.squirrelFx = 1;
         m.squirrelJump = 1;
@@ -1603,7 +1669,6 @@ const m = {
             m.bodyGradient = grd
 
             m.draw = function () {
-                m.skin.updatePolarDefense()
                 ctx.fillStyle = m.fillColor;
                 m.walk_cycle += m.flipLegs * m.Vx;
                 ctx.save();
@@ -1727,7 +1792,7 @@ const m = {
                 m.skin.setPlayerScale(scale)
                 if (m.fieldMode !== 3) { //big players can hold heavy blocks
                     m.holdingMassScale = scale > 1 ? 0.01 : 0.5
-                    if (m.isHolding) m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                    if (m.isHolding) m.definePlayerMass(m.holdingMass(m.holdingTarget))
                 }
             }
             setSize(tech.isBijection ? 0.5 : size.big) //scale invariance starts big, bijection starts small
@@ -1944,11 +2009,21 @@ const m = {
                             m.isHolding = true;
                             m.holdingTarget.collisionFilter.category = 0;
                             m.holdingTarget.collisionFilter.mask = 0;
-                            m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+                            m.definePlayerMass(m.holdingMass(m.holdingTarget))
                         }
                     }
                 },
-                block() { },
+                block: null,
+                clear() {
+                    window.removeEventListener("keydown", this.keyListener);
+                    if (this.block) {
+                        if (m.holdingTarget === this.block) m.drop()
+                        Composite.remove(engine.world, this.block)
+                        const index = body.indexOf(this.block)
+                        if (index !== -1) body.splice(index, 1)
+                        this.block = null
+                    }
+                },
                 makeBlock() {
                     body[body.length] = Matter.Bodies.polygon(m.pos.x, m.pos.y, 0, 30, {
                         friction: 0.9,
@@ -3392,7 +3467,7 @@ const m = {
         if (m.isCloak) b.setBotsIntangible(false) //boson composite, switching fields while cloaked
         m.isCloak = false;
         player.collisionFilter.mask = cat.body | cat.map | cat.mob | cat.mobBullet | cat.mobShield
-        m.airSpeedLimit = 125
+        m.airSpeedLimit = 25
         m.fieldFx = 1
         m.FxAir = 0.016
         m.fieldJump = 1
@@ -3561,6 +3636,9 @@ const m = {
             m.holdingTarget.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet
             m.holdingTarget = null;
         }
+    },
+    holdingMass(who) { //player mass while holding a block, blocks count as 0.7x their mass so carrying them isn't as slow
+        return m.defaultMass + 0.7 * who.mass * m.holdingMassScale
     },
     definePlayerMass(mass = m.defaultMass) {
         Matter.Body.setMass(player, mass);
@@ -4389,7 +4467,7 @@ const m = {
         totalMomentum = Vector.add(Vector.mult(player.velocity, player.mass), Vector.mult(m.holdingTarget.velocity, m.holdingTarget.mass))
         Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (m.defaultMass + m.holdingTarget.mass)));
 
-        m.definePlayerMass(m.defaultMass + m.holdingTarget.mass * m.holdingMassScale)
+        m.definePlayerMass(m.holdingMass(m.holdingTarget))
         //make block collide with nothing
         m.holdingTarget.collisionFilter.category = 0;
         m.holdingTarget.collisionFilter.mask = 0;
@@ -4497,6 +4575,7 @@ const m = {
             }
             if (!found) return //if you can't find the field don't give a field to avoid game crash
         }
+        m.fieldUpgrades[m.fieldMode].onExit?.()
         m.fieldMode = index;
         document.getElementById("field").innerHTML = m.fieldUpgrades[index].name
         m.setHoldDefaults();
@@ -4508,7 +4587,13 @@ const m = {
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
         if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↑→↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓→↓←↑↑↓</em>`);
-        if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.08 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↧</em>`);
+        if (m.fieldMode === 5) {
+            if (tech.isPlasmaBall) {
+                simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.08 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↧</em>`);
+            } else {
+                simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHose <span class='color-symbol'>=</span> ${m.fieldUpgrades[5].isHose} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↓</em>`);
+            }
+        }
         if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle<span class='color-symbol'>-</span>200<span class='color-symbol'>)</span><span class='color-symbol'>%</span>600<span class='color-symbol'>]</span> <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↓→↑←↓→↑</em>`);
         if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4</strong><span class='color-symbol'>→</span><strong>5.5x</strong> <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong class='color-d' data-help='damage'>damage</strong> <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓←↓→</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓→↓←↓↓</em>`);
@@ -4682,6 +4767,9 @@ const m = {
             descriptionFunction() {
                 return `<strong>deflecting</strong> does not drain <strong class='energy' data-help='energy'>energy</strong><br><strong>shield</strong> persists while inactive<br><strong>5</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">← → ← → ↧</em>`
             },
+            membraneRange(stacks) { return 185 * 1.48 ** stacks },
+            membraneArc(stacks) { return 0.35 + stacks * 11 / 360 },
+            rayScale(stacks) { return [1, 1.5, 2.5, 5][Math.min(stacks, 3)] },
             keyLog: [null, null, null, null, null],
             effect: () => {
                 //store event function so it can be found and removed in m.setField()
@@ -4734,9 +4822,9 @@ const m = {
                 //unit points from the circle to the field, dist is how far outside the field the circle's center is, contact is where electricity starts, ice() is where ice IX forms
                 const versions = {
                     membrane: { //the default, the field squishes against the map, ray casts find how far it can reach in each direction
-                        //each stack of tech: Meissner effect makes the field 1.35x bigger, 17° wider, and float better
-                        range(stacks) { return 185 * 1.48 ** stacks },
-                        arc(stacks) { return 0.35 + stacks * 11 / 360 }, //fraction of a full turn the field spans
+                        //Meissner effect shares these size rules with its description
+                        range: m.fieldUpgrades[2].membraneRange,
+                        arc: m.fieldUpgrades[2].membraneArc, //fraction of a full turn the field spans
                         hover(stacks) { return 0.5 + 0.16 * stacks }, //upward push while falling with the field on, in units of gravity
                         gap: 3, //the map pushes the field this far away from it
                         rounding: 0.4, //radians, how far around the map the field curves
@@ -4871,7 +4959,7 @@ const m = {
                         },
                     },
                     ray: { //tech: ray, a straight line in front of the eye that stops flush against the map
-                        lengths: [1, 1.5, 2.5, 5], //tech: Meissner effect, how many times longer the line is for 0 to 3 stacks
+                        lengthScale: m.fieldUpgrades[2].rayScale, //Meissner effect's total length for each stack count
                         farther: 0.2, //only this part of the extra length moves the line farther from the eye, the rest makes it span a wider arc
                         base: null,
                         shape(stacks) { //distance from the eye to the middle of the line, and half the line's length
@@ -4891,7 +4979,7 @@ const m = {
                                 const distance = 180 * n / sum
                                 this.base = { distance, halfLength: distance * spread }
                             }
-                            const length = this.lengths[Math.min(stacks, 3)]
+                            const length = this.lengthScale(stacks)
                             return { distance: this.base.distance * (1 + this.farther * (length - 1)), halfLength: this.base.halfLength * length }
                         },
                         range(stacks) { //average distance from the eye to spots along the line
@@ -5372,14 +5460,14 @@ const m = {
             //cost: energy used per cycle, times tech.negativeMassCost
             flight: {
                 normal: {
-                    airSpeedLimit: 400,
+                    airSpeedLimit: 80,
                     FxAir: 0.005,
                     down: { lift: 0.5, radius: 400, mag: 0.7, cost: 0 },
                     up: { lift: 1.45, radius: 850, mag: 1.38, cost: 5 },
                     drift: { lift: 1.07, radius: 650, mag: 1.06, cost: 1 }, //slow upward drift
                 },
                 inertialMass: {
-                    airSpeedLimit: 1000,
+                    airSpeedLimit: 200,
                     FxAir: 0.01,
                     down: { lift: -0.5, radius: 500, mag: 0, cost: 0 },
                     up: { lift: 2.25, radius: 1100, mag: 1.8, cost: 5 },
@@ -5459,7 +5547,7 @@ const m = {
                 m.fieldHarmReduction = 0.5;
 
                 m.hold = function () {
-                    m.airSpeedLimit = 125 //5 * player.mass * player.mass
+                    m.airSpeedLimit = 25 //5 * player.mass
                     m.FxAir = 0.016
                     if (m.isHolding) {
                         m.drawHold(m.holdingTarget);
@@ -5474,7 +5562,7 @@ const m = {
                             const flight = field.flightMode()
                             const mode = input.down ? flight.down : input.up ? flight.up : flight.drift
                             //control horizontal acceleration
-                            m.airSpeedLimit = flight.airSpeedLimit // 7* player.mass * player.mass
+                            m.airSpeedLimit = flight.airSpeedLimit
                             m.FxAir = flight.FxAir
                             //control vertical acceleration
                             m.energy -= mode.cost * tech.negativeMassCost
@@ -5641,12 +5729,16 @@ const m = {
         {
             name: "plasma torch",
             descriptionFunction() {
-                return `use <strong class='energy' data-help='energy'>energy</strong> to emit short range <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>1.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>10</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↧</em>`
+                const isBall = tech.isPlasmaBall && m.plasmaBall
+                const energy = `<strong class='energy' data-help='energy'>energy</strong>`
+                const drain = (6000 * (isBall ? m.plasmaBall.drain : b.extruder.drain)).toFixed(1) //while it's on, regen stops and this drains, per second
+                return `use ${energy} to ${isBall ? "grow a <strong>ball</strong> of" : "<strong>stream</strong> a jet of"} hot <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>1.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>10</strong> ${energy} per second, <strong>-${drain}</strong> while ${isBall ? "charging" : "streaming"}<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">${tech.isPlasmaBall ? "←↓→→↧" : "←↓→→↓"}</em>`
             },
             keyLog: [null, null, null, null, null],
-            fieldOn() { //used by every plasma mode while the field button is held
+            isHose: false, //secret combo: the free plasma stream droops under gravity, like water from a hose
+            fieldOn(isDraining = true) { //used by every plasma mode while the field button is held, isDraining false lets energy regenerate while the stream is out of energy
                 if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
-                if (m.energy > m.fieldRegen) m.energy -= m.fieldRegen
+                if (isDraining && m.energy > m.fieldRegen) m.energy -= m.fieldRegen
                 m.grabPowerUp();
                 m.lookForBlock();
             },
@@ -5659,7 +5751,11 @@ const m = {
                     const patternB = [input.key.left, input.key.down, input.key.right, input.key.right, input.key.down]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[5].keyLog, patternA) || arraysEqual(m.fieldUpgrades[5].keyLog, patternB)) {
-
+                        if (!tech.isPlasmaBall) { //the stream toggles hose mode, plasma ball keeps the old combo, holding down to pull in arcs
+                            m.fieldUpgrades[5].isHose = !m.fieldUpgrades[5].isHose
+                            simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHose <span class='color-symbol'>=</span> ${m.fieldUpgrades[5].isHose} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>`);
+                            return
+                        }
                         simulation.ephemera.push({
                             do() {
                                 if (!input.down || input.field || input.fire || m.fieldMode !== 5) {
@@ -5690,6 +5786,7 @@ const m = {
                                     }
                                     simulation.ephemera.push({
                                         count: 25,
+                                        isProjectile: true, //an arc on its way to the player, b.clearProjectiles() discards it
                                         who: closest.target,
                                         where: where,
                                         isReady: true,
@@ -5747,7 +5844,7 @@ const m = {
                 }
                 window.addEventListener("keydown", m.fieldEvent);
 
-                b.isExtruderOn = false
+                b.extruder.clear()
                 m.fieldDamage = 1.5
                 if (m.plasmaBall) {
                     Matter.Composite.remove(engine.world, m.plasmaBall);
@@ -5762,6 +5859,7 @@ const m = {
                         isAttached: false,
                         isOn: false,
                         drain: 0.0018,
+                        energyIn: 0, //electronvolt tech: energy spent charging, firing, and soliton rings on this ball, 0.75x comes back when it explodes
                         radiusLimit: 10,
                         damage: 0.7,
                         effectRadius: 10,
@@ -5787,7 +5885,10 @@ const m = {
                         },
                         fire() {
                             const drain = 0.06
-                            if (m.energy > drain) m.energy -= drain
+                            if (m.energy > drain) {
+                                m.energy -= drain
+                                this.energyIn += drain
+                            }
                             this.isAttached = false;
                             const speed = 5 + Math.min(15, 80 / this.mass) //scale speed with mass
                             Matter.Body.setVelocity(this, {
@@ -5799,16 +5900,62 @@ const m = {
                         scale(scale) {
                             if (this.circleRadius > this.radiusLimit) Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
                         },
+                        isSolitonInReach() { //soliton tech: hold the ring until a mob is close enough for it to reach
+                            const end = 1.4 * this.effectRadius + 40
+                            for (const who of mob) {
+                                if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable) continue
+                                if (Vector.magnitude(Vector.sub(this.position, who.position)) < end + who.radius) return true
+                            }
+                            return false
+                        },
+                        soliton(dmg) { //soliton tech: a black ring grows out of the ball over 15 cycles, bonus damage to each mob it reaches
+                            const ball = this
+                            const start = 0.6 * this.effectRadius
+                            const end = 1.4 * this.effectRadius + 40
+                            const hits = []
+                            simulation.ephemera.push({
+                                isProjectile: true, //b.clearProjectiles() discards it
+                                count: 0,
+                                do() {
+                                    this.count++
+                                    if (this.count > 15) {
+                                        simulation.removeEphemera(this)
+                                        return
+                                    }
+                                    const radius = start + (end - start) * this.count / 15
+                                    for (const who of mob) {
+                                        if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable || hits.includes(who)) continue
+                                        if (Vector.magnitude(Vector.sub(ball.position, who.position)) < radius + who.radius) {
+                                            hits.push(who)
+                                            who.damage(dmg)
+                                        }
+                                    }
+                                    ctx.beginPath()
+                                    ctx.arc(ball.position.x, ball.position.y, radius, 0, 2 * Math.PI)
+                                    ctx.lineWidth = 6 * (1 - this.count / 18)
+                                    ctx.strokeStyle = "#000"
+                                    ctx.stroke()
+                                },
+                            })
+                        },
                         reset() {
                             const scale = 1 / this.circleRadius
                             Matter.Body.scale(this, scale, scale); //grow
                             this.alpha = 0.7
                             this.isOn = false
+                            this.energyIn = 0 //electronvolt tech: a ball that's reset without exploding, like at a new level, doesn't refund its energy later
                             // this.isAttached = true;
                         },
                         do() {
                             if (this.isOn) {
                                 this.effectRadius = 2 * m.plasmaBall.circleRadius * (0.6 + 0.4 * tech.isPlasmaRange)
+                                if (tech.isSoliton && !(this.solitonCycle > simulation.cycle) && this.isSolitonInReach()) { //skip looking for mobs while the burst is cooling down
+                                    const bonus = b.solitonReady(this)
+                                    if (bonus) {
+                                        this.energyIn += this.solitonSpent //electronvolt tech: the ring's energy comes back too
+                                        this.soliton(b.solitonDamage * bonus)
+                                    }
+                                }
 
                                 if (Matter.Query.collides(this, map).length > 0) {
                                     if (this.isAttached) {
@@ -5829,6 +5976,7 @@ const m = {
                                         const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
                                         if (sub < this.effectRadius + mob[i].radius) {
                                             mob[i].damage(dmg);
+                                            if (tech.isPlasmaFreeze) b.coldPlasma(mob[i])
                                             if (mob[i].speed > 5) {
                                                 Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.6, y: mob[i].velocity.y * 0.6 });
                                             } else {
@@ -5843,6 +5991,7 @@ const m = {
                                     if (tech.plasmaDischarge > Math.random()) {
                                         const who = arcList[Math.floor(Math.random() * arcList.length)]
                                         who.damage(dmg * 4);
+                                        if (tech.isPlasmaFreeze) b.coldPlasma(who)
                                         //draw arcs
                                         const sub = Vector.sub(who.position, this.position)
                                         const unit = Vector.normalise(sub)
@@ -5908,7 +6057,13 @@ const m = {
                         },
                         explode() {
                             const ball = this
+                            if (tech.isElectronvolt && this.energyIn > 0) {
+                                m.energy += 0.75 * this.energyIn //not m.addEnergy(), so the refund isn't lost while you're immune after a hit
+                                simulation.energyGenGraphic()
+                            }
+                            this.energyIn = 0
                             simulation.ephemera.push({
+                                isProjectile: true, //b.clearProjectiles() discards it
                                 position: { x: this.position.x, y: this.position.y },
                                 radius: this.effectRadius,
                                 alpha: 1,
@@ -5925,6 +6080,7 @@ const m = {
                                             const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
                                             if (sub < this.radius + mob[i].radius) {
                                                 mob[i].damage(dmg);
+                                                if (tech.isPlasmaFreeze) b.coldPlasma(mob[i])
                                             }
                                         }
                                     }
@@ -5956,6 +6112,7 @@ const m = {
 
                                     }
                                 } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
+                                    const energyBefore = m.energy
                                     if (tech.isCapacitor) {
                                         m.energy -= m.plasmaBall.drain * 2;
                                         const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
@@ -5970,6 +6127,7 @@ const m = {
                                         const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                         Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                     }
+                                    m.plasmaBall.energyIn += energyBefore - m.energy
                                     m.plasmaBall.setPositionToNose()
 
                                     //float
@@ -5997,62 +6155,23 @@ const m = {
                         m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
                         m.plasmaBall.do()
                     }
-                } else if (tech.isExtruder) {
+                } else { //extrude a wire of plasma
                     m.hold = function () {
-                        b.isExtruderOn = false
+                        let isFieldOn = false
                         if (m.isHolding) {
                             m.drawHold(m.holdingTarget);
                             m.holding();
                             m.throwBlock();
                         } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                            m.fieldUpgrades[5].fieldOn()
-                            b.extruder();
+                            m.fieldUpgrades[5].fieldOn(b.extruder.canFire) //still grabs power ups while the stream is out of energy
+                            isFieldOn = true
                         } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
                             m.pickUp();
                         } else {
                             m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
                         }
                         m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
-                        if (input.field) {
-                            b.wasExtruderOn = true
-                        } else {
-                            b.wasExtruderOn = false
-                            b.canExtruderFire = true
-                        }
-                        ctx.beginPath(); //draw all the wave bullets
-                        for (let i = 1, len = bullet.length; i < len; i++) { //skip the first bullet (which is is oldest bullet)
-                            if (bullet[i].isWave) {
-                                if (bullet[i].isBranch || bullet[i - 1].isBranch) {
-                                    ctx.moveTo(bullet[i].position.x, bullet[i].position.y)
-                                } else {
-                                    ctx.lineTo(bullet[i].position.x, bullet[i].position.y)
-                                }
-                            }
-                        }
-                        const r = 15 * player.scale
-                        if (b.wasExtruderOn && b.isExtruderOn) ctx.lineTo(m.pos.x + r * Math.cos(m.angle), m.pos.y + r * Math.sin(m.angle))
-                        ctx.lineWidth = 4;
-                        ctx.strokeStyle = "#f07"
-                        ctx.stroke();
-                        ctx.lineWidth = tech.extruderRange;
-                        ctx.strokeStyle = "rgba(255,0,110,0.06)"
-                        ctx.stroke();
-                    }
-                } else {
-                    m.hold = function () {
-                        if (m.isHolding) {
-                            m.drawHold(m.holdingTarget);
-                            m.holding();
-                            m.throwBlock();
-                        } else if (input.field && m.fieldCDcycle < m.cycle) { //not hold but field button is pressed
-                            m.fieldUpgrades[5].fieldOn()
-                            b.plasma();
-                        } else if (m.holdingTarget && m.fieldCDcycle < m.cycle) { //holding, but field button is released
-                            m.pickUp();
-                        } else {
-                            m.holdingTarget = null; //clears holding target (this is so you only pick up right after the field button is released and a hold target exists)
-                        }
-                        m.drawRegenEnergy("rgba(0, 0, 0, 0.2)")
+                        b.extruder.do(isFieldOn) //move, fire, and draw the wire
                     }
                 }
             },
@@ -6228,7 +6347,7 @@ const m = {
         {
             name: "metamaterial cloaking",
             descriptionFunction() {
-                return `<strong>0.6x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong> and <strong class='color-d' data-help='damage'>damage</strong> while <strong class='color-cloaked' data-help='cloaking'>cloaked</strong><br>after <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong>4x</strong> <strong class='color-d' data-help='damage'>damage</strong> for up to <strong>~1.7</strong> s<br><strong>6</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`
+                return `<strong>0.6x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong> and <strong class='color-d' data-help='damage'>damage</strong> while <strong class='color-cloaked' data-help='cloaking'>cloaked</strong><br>after <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong>4x</strong> <strong class='color-d' data-help='damage'>damage</strong> for up to <strong>1.7</strong> s<br><strong>6</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">↑↓←↓→</em>`
             },
             keyLog: [null, null, null, null, null],
             smallFieldRadius: 110,
@@ -7017,6 +7136,15 @@ const m = {
         },
         {
             name: "grappling hook",
+            onExit() {
+                for (let i = bullet.length - 1; i >= 0; i--) {
+                    const hook = bullet[i]
+                    if (!hook.isGrapple) continue
+                    hook.onClear()
+                    Matter.Composite.remove(engine.world, hook)
+                    bullet.splice(i, 1)
+                }
+            },
             descriptionFunction() {
                 return `use <strong class='energy' data-help='energy'>energy</strong> to fire a hook that <strong>pulls</strong> you<br><strong>0.5x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong><br><strong>9</strong> <strong class='energy' data-help='energy'>energy</strong> per second<em style ="float: right; font-family: monospace;font-size:1rem;color:#fff;">←↓→→↓←</em>`
             },
@@ -7183,11 +7311,13 @@ const m = {
                     },
                 })
                 powerUps.onPickUp(who);
+                const canDuplicate = tech.isPortalDuplicate && !who.isPortalCopy && !who.isPortalProcessed
+                if (canDuplicate) who.isPortalProcessed = true //a heal's unused health keeps this spent roll
                 who.effect();
                 Matter.Composite.remove(engine.world, who);
                 const index = powerUp.indexOf(who)
                 if (index > -1) powerUp.splice(index, 1);
-                if (tech.isPortalDuplicate && !who.isPortalCopy && Math.random() < 0.33) { //beam splitter, a copy comes out of the other portal
+                if (canDuplicate && Math.random() < 0.33) { //beam splitter, a copy comes out of the other portal
                     const where = Vector.add(to.position, Vector.mult(to.unit, who.size + 10))
                     powerUps.directSpawn(where.x, where.y, who.name, false, who.size, true)
                     const copy = powerUp[powerUp.length - 1]
@@ -7262,11 +7392,6 @@ const m = {
                             if (field.pressCycle[index] === null) continue
                             if (isDown) {
                                 if (tech.isWormHolePause) { //invariant, pause time and show where the portal is going
-                                    if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage for 1 cycle
-                                    m.freezeTime()
-                                    Matter.Body.setVelocity(player, { x: 0, y: -55 * player.mass * simulation.g }); //keep player frozen, undo gravity before it is added
-                                    player.force.x = 0
-                                    player.force.y = 0
                                     ctx.beginPath()
                                     ctx.moveTo(m.pos.x, m.pos.y)
                                     ctx.lineTo(simulation.mouseInGame.x, simulation.mouseInGame.y)
@@ -7295,7 +7420,15 @@ const m = {
                         } else {
                             m.holdingTarget = null
                         }
-                        if (!pressed.length && tech.isWormHolePause && m.isTimeDilated) m.wakeCheck();
+                    }
+                    if (tech.isWormHolePause) {
+                        if (!m.isHolding && field.pressCycle.some(cycle => cycle !== null)) { //freeze once even when both portals are being aimed
+                            if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1;
+                            m.freezeTime()
+                            Matter.Body.setVelocity(player, { x: 0, y: -55 * player.mass * simulation.g }); //keep player frozen, undo gravity before it is added
+                            player.force.x = 0
+                            player.force.y = 0
+                        } else if (m.isTimeDilated) m.wakeCheck();
                     }
                     field.isFireHeld = input.fire
                     field.isFieldHeld = input.field

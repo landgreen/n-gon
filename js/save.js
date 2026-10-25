@@ -14,7 +14,7 @@ const saveGame = {
     //these depend on the run's seed, so they're saved even when they match a fresh run
     alwaysSaved: {
         level: ["levels", "onLevel", "levelsCleared", "constraintIndex"],
-        spawn: ["mobTypeSpawnOrder", "mobTierSpawnOrder", "pickList"],
+        spawn: ["mobTypeSpawnOrder", "mobTierSpawnOrder", "pickList", "tier", "bossTier"],
     },
     renamedTech: { "quantum non-demolition": "localization", "tunable laser": "acousto-optic modulator", "kinetic bombardment": "observer effect" }, //old name: new name, so older saves keep tech that were renamed
     renameTech(save) {
@@ -214,7 +214,9 @@ const saveGame = {
         }
     },
     captureBaseline() { //called at the end of simulation.startGame
-        saveGame.baseline = saveGame.state()
+        //only the first run since the page loaded, because later runs can keep values that startGame doesn't reset, like the laser's Infinity ammo
+        //a save only has what changed from the baseline, so it needs the same baseline when it's loaded in a new tab
+        if (!saveGame.baseline) saveGame.baseline = saveGame.state()
         saveGame.latest = null //a new run has no save until its first level starts
     },
     create() {
@@ -238,6 +240,7 @@ const saveGame = {
         }
         //The mode can already be active in the baseline after a previous run.
         changed.fields["time dilation"] = { ...changed.fields["time dilation"], isRewindMode: m.fieldUpgrades[6].isRewindMode }
+        changed.fields["plasma torch"] = { ...changed.fields["plasma torch"], isHose: m.fieldUpgrades[5].isHose }
         const techCounts = {}
         for (const t of tech.tech) if (t.count > 0) techCounts[t.name] = t.count
         const simulationValues = {}
@@ -372,9 +375,8 @@ const saveGame = {
         apply(spawn, "spawn")
         apply(level, "level")
         apply(lore, "lore")
-        //rebuilding tech can fire bullets, like booby trap's mine; clearMap would refund their ammo, so remove them first
-        for (const who of bullet) Matter.Composite.remove(engine.world, who)
-        bullet = []
+        //rebuilding tech can fire shots, like booby trap's mine; discard them before clearMap can refund ammo
+        b.clearProjectiles()
         //rebuilding tech like eigenstate can hand the player a block; only the saved held block comes back, in clearMap
         m.isHolding = false
         m.holdingTarget = null
@@ -391,10 +393,12 @@ const saveGame = {
         //recalculate things that are derived from the restored values
         level.updateDifficulty()
         powerUps.difficulty.setDamageAndDefense(false) //false keeps the restored mob spawn order
+        for (const g of b.guns) if (g.have && g.ammoPack === Infinity) g.ammo = Infinity //older saves can leave the laser and wave at 0 ammo
         for (const g of b.guns) if (g.chooseFireMethod) g.chooseFireMethod()
         b.setFireMethod()
         b.setFireCD()
         saveGame.restoreRuntime(state.runtime)
+        powerUps.setPowerUpMode() //saved duplication can come from removed tech rather than rebuilt effects
         simulation.makeGunHUD()
         simulation.updateGunHUD()
         simulation.updateTechHUD()

@@ -300,7 +300,7 @@ const b = {
         }
     },
     //outlier tech: every 5 seconds, after your gun fires, bullets near you get bigger, with the same density so they have more mass
-    //it all runs in one ephemera that watches m.fireCDcycle and bullet[], so guns, bots, and fields don't need to know about it
+    //the ephemera watches m.fireCDcycle and nearby bullets; projectiles own any child-size inheritance
     outlierEphemera() {
         const cooldown = 300
         const bigScale = Math.sqrt(3) //3x mass
@@ -310,7 +310,6 @@ const b = {
             fireCDcycle: m.fireCDcycle,
             gunCycle: -Infinity, //m.cycle when a gun last moved m.fireCDcycle, guns move it when they fire or charge, bots don't
             lastId: bullet.length ? bullet[bullet.length - 1].id : 0, //new bullets go on the end of bullet[] and have bigger ids
-            bigMines: [], //big mines fire big nails
             do() {
                 if (m.fireCDcycle !== this.fireCDcycle) {
                     this.fireCDcycle = m.fireCDcycle
@@ -318,12 +317,6 @@ const b = {
                 }
                 const range = 100 * Math.max(1, player.scale)
                 const isNear = who => !who.botType && Vector.magnitude(Vector.sub(who.position, m.pos)) < range
-                if (this.bigMines.length) {
-                    for (let i = bullet.length - 1; i >= 0 && bullet[i].id > this.lastId; i--) {
-                        if (this.bigMines.some(mine => Vector.magnitude(Vector.sub(bullet[i].position, mine.position)) < 60)) b.enlarge(bullet[i], bigScale)
-                    }
-                    this.bigMines = this.bigMines.filter(mine => bullet.includes(mine)) //a mine's last nails come out the cycle it's removed
-                }
                 if (m.cycle >= this.readyCycle && m.cycle - this.gunCycle < 2) { //a charged harpoon fires the cycle after it stops moving m.fireCDcycle
                     //a new bullet next to you came from your gun, so charging or firing with no ammo doesn't count
                     //bots fire from their center and don't move until the next physics step, so a new bullet on top of a bot is the bot's
@@ -341,7 +334,6 @@ const b = {
                         for (const who of bullet) {
                             if (isNear(who)) {
                                 b.enlarge(who, bigScale)
-                                if (who.bulletType === "mine" && !this.bigMines.includes(who)) this.bigMines.push(who)
                             }
                         }
                         for (const who of b.bubbles()) {
@@ -381,6 +373,7 @@ const b = {
         if (who.totalSpores) who.totalSpores = Math.round(who.totalSpores * scale)
         if (who.explodeRad) who.explodeRad *= Math.sqrt(scale) //bigger explosions, but not so big they always reach the player
         if (typeof who.thrust === "object") who.thrust = Vector.mult(who.thrust, scale * scale) //rocket grenades keep their acceleration
+        who.onEnlarge?.(scale)
     },
     outOfAmmo() { //triggers after firing when you have NO ammo
         simulation.inGameConsole(`${b.guns[b.activeGun].name}.<span class='color-g'>ammo</span><span class='color-symbol'>:</span> 0`);
@@ -437,6 +430,7 @@ const b = {
             for (let i = 0; i < b.guns.length; i++) {
                 b.inventory[i] = i;
                 b.guns[i].have = true;
+                b.guns[i].onAmmoReset?.();
                 if (b.guns[i].ammo !== Infinity) b.guns[i].ammo = Math.ceil(b.guns[i].ammoPack * ammoPacks);
             }
             b.inventoryGun = 0;
@@ -456,6 +450,7 @@ const b = {
             if (!b.guns[gun]) return //invalid gun index
             if (!b.guns[gun].have) b.inventory.push(gun);
             b.guns[gun].have = true;
+            b.guns[gun].onAmmoReset?.();
             if (b.guns[gun].ammo !== Infinity) b.guns[gun].ammo = Math.ceil(b.guns[gun].ammoPack * ammoPacks);
             if (b.activeGun === null) {
                 b.inventoryGun = 0;
@@ -520,18 +515,69 @@ const b = {
         }
         b.setFireCD();
     },
+    resetAmmoPacks() {
+        for (const gun of b.guns) gun.ammoPack = gun.defaultAmmoPack
+        for (const t of tech.tech) if (t.count > 0) t.onAmmoPackReset?.()
+    },
     resetAllGuns() {
         b.inventory = []; //removes guns and ammo
         for (let i = 0, len = b.guns.length; i < len; ++i) {
             b.guns[i].count = 0;
             b.guns[i].have = false;
-            b.guns[i].ammoPack = b.guns[i].defaultAmmoPack;
+            b.guns[i].onAmmoReset?.();
             if (b.guns[i].ammo != Infinity) b.guns[i].ammo = 0;
         }
+        b.resetAmmoPacks()
         tech.buffedGun = 0
         b.activeGun = null;
         b.inventoryGun = 0;
         simulation.drawCursor = simulation.drawCursorBasic //set cross hairs
+    },
+    clearProjectiles({ refund = false } = {}) { //discard live shots without their onEnd attacks; non-physics shots opt in with isProjectile: true and an optional onClear hook
+        refund = refund && m.alive
+        if (refund) {
+            if (b.guns[10].have) {
+                let count = 0
+                for (const who of bullet) {
+                    if ((who.bulletType === "mine" && (!tech.isMineSentry || who.shots === undefined)) ||
+                        (who.bulletType === "laser mine" && !who.isDetonated)) count++
+                }
+                if (tech.crouchAmmoCount) count = Math.ceil(count / 2)
+                b.guns[10].ammo += count
+                if (tech.ammoCap) b.guns[10].ammo = Math.min(tech.ammoCap, b.guns[10].ammo)
+            }
+            for (const who of bullet) {
+                if (who.refundsAmmo) b.guns[9].ammo++
+                b.refundMutualism(who)
+            }
+        }
+        for (const who of bullet) {
+            who.onClear?.({ refund })
+            Matter.Composite.remove(engine.world, who)
+        }
+        bullet = []
+        const effects = simulation.ephemera.filter(who => who.isProjectile)
+        simulation.ephemera = simulation.ephemera.filter(who => !who.isProjectile)
+        for (const who of effects) who.onClear?.({ refund })
+        b.guns[3].waves = []
+        b.extruder.clear()
+        if (m.plasmaBall?.isOn && !m.plasmaBall.isAttached) { //a fired plasma ball is a live shot, but the field keeps the ball itself
+            Matter.Body.setVelocity(m.plasmaBall, { x: 0, y: 0 })
+            m.plasmaBall.reset()
+        }
+        if (refund) simulation.updateGunHUD()
+    },
+    refundMutualism(who) {
+        if (!tech.isMutualism || !who.isMutualismActive) return;
+        who.isMutualismActive = false
+        const amount = who.isSpore ? 0.01 : 0.02
+        if (tech.isEnergyHealth) {
+            m.energy += amount //repay a loan even when immunity or stopped time prevents regeneration
+            simulation.energyGenGraphic()
+        } else {
+            m.health = Math.min(m.maxHealth, m.health + amount)
+            m.displayHealth()
+        }
     },
     bulletRemove() { //run in main loop
         //remove bullet if at end cycle for that bullet
@@ -1590,6 +1636,7 @@ const b = {
                 dmg: 11.2, //damage done in addition to the damage from momentum
                 classType: "bullet",
                 endCycle: simulation.cycle + 70,
+                isGrapple: true,
                 isSlowPull: false,
                 isLocked: false, //after rappelling down the rope holds its length until you press up
                 isSlack, //fired by the grappling hook combo, it flies and attaches without pulling until you press field, then it acts normally
@@ -1793,6 +1840,10 @@ const b = {
                         this.caughtPowerUp = null
                     }
                 },
+                onClear() {
+                    this.dropCaughtPowerUp()
+                    this.pickUpTarget = null
+                },
                 onEnd() {
                     if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
                         let index = null //find index
@@ -1856,7 +1907,7 @@ const b = {
                             totalMomentum = Vector.add(playerMomentum, grappleMomentum)
                             Matter.Body.setVelocity(player, Vector.mult(totalMomentum, 1 / (m.defaultMass + blockMass)));
 
-                            m.definePlayerMass(m.defaultMass + this.pickUpTarget.mass * m.holdingMassScale)
+                            m.definePlayerMass(m.holdingMass(this.pickUpTarget))
                             //make block collide with nothing
                             m.holdingTarget.collisionFilter.category = 0;
                             m.holdingTarget.collisionFilter.mask = 0;
@@ -2344,10 +2395,14 @@ const b = {
             caughtPowerUp: null,
             dropCaughtPowerUp() {
                 if (this.caughtPowerUp) {
+                    this.caughtPowerUp.isGrabbed = false
                     this.caughtPowerUp.collisionFilter.category = cat.powerUp
                     this.caughtPowerUp.collisionFilter.mask = cat.map | cat.powerUp
                     this.caughtPowerUp = null
                 }
+            },
+            onClear() {
+                this.dropCaughtPowerUp()
             },
             onEnd() {
                 if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
@@ -2655,7 +2710,7 @@ const b = {
                 delay: i * tune.smeltDelay, //extra harpoons from smelting go out one after another
                 isOut: false,
                 vel: { x: 0, y: 0 },
-                id: Math.random(), //each harpoon hits each mob once per swing
+                hitCycles: new WeakMap(), //this harpoon's next allowed hit on each mob, independent of other harpoons
                 pose: null,
                 front: [], //the swept path, so it can be filled
                 back: [],
@@ -2697,6 +2752,7 @@ const b = {
         const heftMass = mass * tune.heft //the harpoon's mass when it bounces off things
         const swing = {
             name: "harpoon swing",
+            isProjectile: true,
             harpoons,
             time: 0, //cycles since the swing started
             endTime: tech.extraHarpoons * tune.smeltDelay + tune.cycles, //when the last harpoon's arc ends
@@ -2905,11 +2961,10 @@ const b = {
                     if (!(dist < reach)) continue
                     //speed of the touching point, per cycle
                     const pointVel = Vector.mult(Vector.add(Vector.mult(Vector.sub(pose.back, lastPose.back), 1 - t), Vector.mult(Vector.sub(pose.front, lastPose.front), t)), steps)
-                    if (who.damageReduction && !(who.harpoonSwingID === h.id && simulation.cycle < who.harpoonSwingCycle)) {
+                    if (who.damageReduction && simulation.cycle >= (h.hitCycles.get(who) ?? -Infinity)) {
                         const speed = Vector.magnitude(Vector.sub(pointVel, who.velocity))
                         if (speed > 4) { //same minimum speed as a thrown harpoon
-                            who.harpoonSwingID = h.id
-                            who.harpoonSwingCycle = simulation.cycle + tune.rehitCycles
+                            h.hitCycles.set(who, simulation.cycle + tune.rehitCycles)
                             if (this.damageMob(h, who, touch, speed, pointVel)) return //the harpoon broke
                         }
                     }
@@ -2994,11 +3049,20 @@ const b = {
                 return true
             },
             end() {
+                if (this.isDone) return
                 this.isDone = true
                 if (this.isRefund) {
                     gun.ammo++;
                     simulation.updateGunHUD();
                 }
+            },
+            onClear({ refund }) {
+                for (const h of harpoons) {
+                    for (const who of h.caught) release(who)
+                    h.caught = []
+                }
+                if (!refund) this.isRefund = false
+                this.end()
             },
             draw() {
                 const fade = this.isDone ? Math.max(0, this.fade / tune.fadeCycles) : 1
@@ -3251,89 +3315,751 @@ const b = {
             })
         }
     },
-    lastAngle: 0,
-    wasExtruderOn: false,
-    isExtruderOn: false,
-    didExtruderDrain: false,
-    canExtruderFire: true,
-    extruder() {
-        const DRAIN = 0.0012
-        if (m.energy > DRAIN && b.canExtruderFire) {
+    solitonReady(who, cost = b.solitonCost, perExcess = 0.02) { //soliton tech: when who's burst is ready, every solitonDelay cycles, pay the energy and return how many times its usual damage the burst does, or 0 if it isn't ready, who keeps its own timer in solitonCycle
+        if (who.solitonCycle > simulation.cycle || m.energy <= cost) return 0
+        who.solitonCycle = simulation.cycle + b.solitonDelay
+        const excess = Math.max(0, m.energy - cost - m.maxEnergy) //energy above max is spent too, each 1 energy of it adds perExcess times the damage
+        m.energy -= cost + excess
+        who.solitonSpent = cost + excess
+        return 1 + perExcess * 100 * excess
+    },
+    solitonDamage: 64, //soliton tech: damage for each plasma ball or plasma-bot burst, the stream's wave does solitonPower times this
+    solitonCost: 0.1, //soliton tech: energy each plasma ball or plasma-bot burst costs
+    solitonDelay: 240, //soliton tech: cycles between bursts, 4 seconds
+    electronvoltBotScale: 0.75, //electronvolt tech: plasma-bot's beam and soliton bursts use this much energy
+    solitonSparks(x, y) { //soliton tech: black sparks crackle off where a plasma-bot burst hit
+        simulation.ephemera.push({
+            isProjectile: true, //b.clearProjectiles() discards it
+            count: 10, //cycles before it self removes
+            do() {
+                this.count--
+                if (this.count < 0) simulation.removeEphemera(this)
+                ctx.beginPath()
+                for (let k = 0; k < 4; k++) {
+                    let sx = x
+                    let sy = y
+                    const angle = 2 * Math.PI * Math.random()
+                    ctx.moveTo(sx, sy)
+                    for (let i = 0; i < 3; i++) {
+                        const a = angle + 1.4 * (Math.random() - 0.5)
+                        const step = 10 + 12 * Math.random()
+                        sx += step * Math.cos(a)
+                        sy += step * Math.sin(a)
+                        ctx.lineTo(sx, sy)
+                    }
+                }
+                ctx.lineWidth = 2
+                ctx.strokeStyle = "#000"
+                ctx.stroke()
+            },
+        })
+    },
+    coldPlasma(who, cycles = 120 + tech.iceIXFreezeTime - 150) { //cold plasma tech: freeze a mob that plasma touches, refreshed at most every half second so the freeze isn't rebuilt every cycle, 2 seconds, longer with triple point
+        if (who.coldPlasmaCycle > simulation.cycle || !who.alive) return
+        who.coldPlasmaCycle = simulation.cycle + 30
+        mobs.statusSlow(who, cycles)
+    },
+    extruder: { //plasma torch tech: a thin wire of plasma flies straight out of the nose, then slides along the map, blocks, and mobs in a wave
+        //the wire is plain points instead of bullets, so physics, mobs, and other tech skip them
+        //m.hold calls do() every cycle, b.clearProjectiles() and the plasma torch's set() call clear()
+        wire: [], //oldest point first
+        lastAngle: 0, //aim when the last point was fired
+        wasFiring: false, //fired a point last cycle, so the next point continues the same line
+        canFire: true, //false after running out of energy, until energy regenerates to restartEnergy
+        restartEnergy: 0.1, //10 energy
+        hover: 3, //how far above a surface a point's base sits, so the wire's width shows on top of the map
+        lowGap: 12, //gaps lower than this are too tight for the wire, so it treats them as walls
+        range: 37, //cycles a point lasts, which sets how long the wire is, before plasma jet
+        mobRange: 48, //cycles a point lasts while any of the wire touches a mob, before plasma jet
+        potentialRange: 74, //electric potential tech: cycles a point lasts once the wire bends toward or touches a mob, 2x range, before plasma jet
+        potentialStretch: 24, //electric potential tech: the wire stretches this many cycles of travel between a point on a mob and its neighbor before it breaks, instead of breakGap
+        potentialReach: 150, //electric potential tech: points flying free or riding the wave curve toward mobs this close to their edge
+        potentialTurn: 0.3, //electric potential tech: how hard they curve each cycle, as a share of their speed
+        life: 37, //cycles a point lasts right now, before plasma jet, it grows toward mobRange while the wire touches a mob and shrinks back after, 1 per cycle, so the whole wire stretches and shrinks together
+        holdCycle: 0, //the wire keeps growing until this cycle, set by touching a mob, so even a quick touch stretches it all the way
+        hoseGravity: 0.6, //plasma torch's secret combo: how much a free point's speed turns downward each cycle
+        mobReach: 20, //the wire flying this close to a mob's edge curves in and catches on it
+        powerUpReach: 80, //the wire pulls in power ups this close to its edge, so the top of a 100 high arch still reaches one sitting on the floor under it
+        breakGap: 6, //the wire breaks between neighbors farther apart than this many cycles of travel
+        healGap: 3, //a break heals once its two ends are this many cycles of travel apart or closer, and aren't pulling apart, less than breakGap so a join doesn't flicker
+        healMobGap: 1.5, //healGap for a break with an end on a mob
+        tuckGap: 2.5, //neighbors on surfaces whose line crosses the map or a block, with bases this many cycles of travel apart or closer, are wrapping the same corner, so they tuck in against it instead of breaking
+        healWait: 3, //cycles in a row the two ends of a break have to stay close and not pull apart before it heals, so ends that only pass by each other stay broken
+        dmg: 0.66, //damage each cycle to a mob with fullHits points of the wire on it, the old plasma torch beam did 0.9 but only to one mob in a straight line
+        fullHits: 25, //points of the wire on a mob for full damage, about 2 wraps around a normal mob, more points add a little more
+        kneeHits: 45, //past this many points on a mob, more than a normal wire wraps, damage grows as (hits / kneeHits) ** wrapPower instead of fading out
+        wrapPower: 0.75, //between square root and linear, so a long wire coiled up on one mob never stops adding damage
+        fade: Math.pow(0.1, 1 / 24), //each point touching a mob adds this much of the point before's damage, so point 25 adds 1/10 of the first
+        slow: 0.97, //each point touching a mob scales its velocity by this, while it's faster than its speed cap below
+        slowSpeed: 2, //the wire doesn't slow normal mobs below this speed
+        slowBossSpeed: 4, //or bosses and shielded mobs below this speed
+        lifetime() { //cycles a point lasts right now, a point is added every cycle, so this is also how many points the wire has
+            //a long wire has a lot of points, spacing them out or speeding them up to cap the count made the wire shimmer or rush out
+            return this.life * this.jet() * tech.bulletsLastLonger
+        },
+        jet() { //plasma jet makes the wire 1.5x longer per stack, half from faster points and half from points that last longer, so they stay about as far apart
+            return Math.sqrt(tech.isPlasmaRange)
+        },
+        speed() { //how far a point moves each cycle
+            return 20 * this.jet()
+        },
+        solitons: [], //soliton tech: wave packets traveling down the wire, each is { at, hits, dmg, bonus }, at is the born cycle of the point it's on, counting down toward the tip, hits are the mobs it already burned
+        solitonCycle: 0, //the next wave packet can start after this cycle
+        solitonCost: 0.05, //energy each wave packet costs
+        solitonPower: 2, //each wave packet does this times b.solitonDamage, about 194 cycles of the stream's full damage
+        solitonExcess: 0.01, //each 1 energy above max a wave packet spends adds this times its damage
+        drain: 0.00075, //energy the stream costs each cycle, on top of the field's drain that cancels its regen, same as the old plasma torch beam
+        charges: [], //electronvolt tech: wave packets riding the wire back to the player from a wrapped mob, each is { at }, the born cycle of the point it's on, counting up toward the nose
+        cold: null, //cold plasma tech: the one wave bouncing along the wire, { at, isOut }, at is the born cycle of the point it's on, isOut while it heads for the tip
+        clear() {
+            this.wire = []
+            this.wasFiring = false
+            this.life = this.range
+            this.holdCycle = 0
+            this.solitons = []
+            this.charges = []
+            this.cold = null
+        },
+        do(isFieldOn) { //every cycle, isFieldOn when the field button is down and the player isn't holding a block
+            this.move(this.wire)
+            const isFiring = isFieldOn && !m.isTimeDilated && this.fire() //no new points while time is stopped, they'd all share one born cycle and never expire
+            if (tech.isSoliton) this.moveSolitons(isFiring)
+            if (this.charges.length) this.moveCharges()
+            if (tech.isPlasmaFreeze) this.moveCold(isFiring)
+            this.draw(isFiring)
+            this.wasFiring = isFiring
+        },
+        fire() { //add a point to the wire at the nose, false when out of energy
+            const DRAIN = this.drain
+            if (!this.canFire && m.energy >= this.restartEnergy) this.canFire = true
+            if (m.energy < 0.01 || !this.canFire) { //below 1 energy counts as out, since regen alone would keep it just above the drain
+                this.canFire = false //stay off until energy regenerates, so it doesn't sputter along on regen alone
+                return false
+            }
             m.energy -= DRAIN
-            b.isExtruderOn = true
-            const SPEED = 8 + 12 * tech.isPlasmaRange
-            const me = bullet.length;
-            const where = Vector.add(m.pos, player.velocity)
+            const isBranch = !this.wasFiring || Math.PI - Math.abs(Math.abs(this.lastAngle - m.angle) - Math.PI) > 0.13 //starts a new line, after a pause or when the aim jumps (angle change, wrapped around ±π)
             const r = 20 * player.scale
-            bullet[me] = Bodies.polygon(where.x + r * Math.cos(m.angle), where.y + r * Math.sin(m.angle), 4, 0.01, {
-                cycle: -0.5,
-                isWave: true,
-                endCycle: simulation.cycle + 40, // + 30 * tech.isPlasmaRange,
-                inertia: Infinity,
-                frictionAir: 0,
-                isInHole: true, //this keeps the bullet from entering wormholes
-                minDmgSpeed: 0,
-                dmg: 2.7, //damage also changes when you divide by mob.mass on in .do()
-                classType: "bullet",
-                isBranch: false,
-                restitution: 0,
-                collisionFilter: {
-                    // category: 0,
-                    // mask: 0, //cat.mob | cat.mobBullet | cat.mobShield
-                    category: 0, //cat.bullet,
-                    mask: 0, //cat.map, //cat.mob | cat.mobBullet | cat.mobShield
-                },
-                beforeDmg() { },
-                onEnd() { },
-                do() {
-                    if (this.endCycle < simulation.cycle + 1) this.isWave = false
-                    if (Matter.Query.point(map, this.position).length) { //check if inside map   //|| Matter.Query.point(body, this.position).length
-                        this.isBranch = true;
-                        this.do = () => {
-                            if (this.endCycle < simulation.cycle + 1) this.isWave = false
-                        }
-                    } else { //check if inside a mob
-                        for (let i = 0, len = mob.length; i < len; i++) {
-                            const dist = Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position))
-                            const radius = mob[i].radius + tech.extruderRange / 2
-                            if (dist < radius * radius) {
-                                if (mob[i].speed > 2) {
-                                    if (mob[i].isBoss || mob[i].isShielded) {
-                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.95, y: mob[i].velocity.y * 0.95 });
-                                    } else {
-                                        Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.25, y: mob[i].velocity.y * 0.25 });
-                                    }
+            this.emit(this.wire, m.pos, m.pos.x + player.velocity.x + r * Math.cos(m.angle), m.pos.y + player.velocity.y + r * Math.sin(m.angle), m.angle, isBranch)
+            this.lastAngle = m.angle
+            return true
+        },
+        emit(wire, from, x, y, angle, isBranch) { //add a point to the end of a wire at x, y flying toward angle, from is a spot it can see without going through a wall
+            const speed = this.speed()
+            const p = {
+                x, //where it's drawn
+                y,
+                vx: speed * Math.cos(angle), //velocity, along the surface while it slides on one
+                vy: speed * Math.sin(angle),
+                speed, //how fast it slides along surfaces
+                gap: speed, //how far it starts from the point before it
+                on: null, //the map or block it slides on, null while it flies free
+                nx: 0, //outward normal of the surface it slides on
+                ny: 0,
+                base: { x: 0, y: 0 }, //where it is on the surface, it's drawn up to 100 above that in arches, see arch()
+                v1: null, //the edge of the surface it slides on, the body's own vertices
+                v2: null,
+                rise: 0, //distance along the surface since it landed or wrapped around a corner, it rises into the wave no steeper than 45°
+                isTight: false, //under a roof too low to fit under
+                born: simulation.cycle,
+                isBranch, //starts a new line
+                breakDistance: undefined, //while isBranch, how far it was from the point before it last cycle, to tell if a break is closing or pulling apart
+                healWait: 0, //while isBranch, cycles in a row it's been close to the point before it and not pulling apart
+                isCut: false, //a block ran into it, move() removes it
+            }
+            const hit = vertexCollision(from, p, [map, body])
+            if (hit.who) { //the nose is in a wall, so start sliding along it
+                this.attach(p, hit, p.vx, p.vy, 0, [map, body])
+                this.land(p, wire[wire.length - 1], null)
+            }
+            wire.push(p)
+        },
+        move(wire) { //move every point of the wire, then tidy it up and damage mobs it touches
+            const lifetime = this.lifetime()
+            while (wire.length && simulation.cycle - wire[0].born > lifetime) wire.shift() //oldest points are first, anti-shear topology makes them last longer
+            if (!wire.length) this.life = this.range
+            if (!wire.length || m.isTimeDilated) return
+            //only check the map, blocks, and mobs near the wire, a point is drawn up to 103 above its base, which can move and probe at most 2 * speed + a bit in one cycle, and it burns mobs within extruderRange / 2
+            let minX = m.pos.x, maxX = m.pos.x, minY = m.pos.y, maxY = m.pos.y
+            for (const p of wire) {
+                if (p.x < minX) minX = p.x
+                if (p.x > maxX) maxX = p.x
+                if (p.y < minY) minY = p.y
+                if (p.y > maxY) maxY = p.y
+            }
+            const reach = 2 * this.speed() + 130 + tech.extruderRange / 2 + Math.abs(player.velocity.x) + Math.abs(player.velocity.y)
+            const isNear = who => who.bounds.max.x > minX - reach && who.bounds.min.x < maxX + reach && who.bounds.max.y > minY - reach && who.bounds.min.y < maxY + reach
+            const blocks = body.filter(isNear)
+            const mobs = mob.filter(who => who.alive && !who.isZombie && who.collisionFilter.mask && isNear(who)) //not your zombies, or mobs that can't touch anything, like dark matter and WIMPs
+            const grips = mobs.filter(who => !who.isMobBullet) //mobs the wire wraps around
+            const walls = [map.filter(isNear), blocks] //vertexCollision takes a list of body lists
+            const solid = [...walls, grips]
+            const isIn = (where, list) => list.find(who => Matter.Bounds.contains(who.bounds, where) && Matter.Vertices.contains(who.vertices, where))
+
+            let isCut = false
+            let isAttracted = false //electric potential tech: some of the wire is bending toward a mob
+            for (let i = 0, len = wire.length; i < len; i++) {
+                const p = wire[i]
+                if (p.on && !p.on.isStatic) { //ride along with the block or mob it's on, as it moves and spins
+                    const ux = p.on.velocity.x - p.on.angularVelocity * (p.base.y - p.on.position.y)
+                    const uy = p.on.velocity.y + p.on.angularVelocity * (p.base.x - p.on.position.x)
+                    p.base.x += ux
+                    p.base.y += uy
+                    p.x += ux
+                    p.y += uy
+                }
+                const where = p.on ? p.base : p
+                let grabber = null
+                let attractor = null //electric potential tech: the closest mob the free point curves toward
+                if (grips.length) {
+                    grabber = isIn(where, grips)
+                    if (!grabber && !(p.on && p.on.mob)) { //flying close to a mob, or riding the wave over the map or a block close to one, measured from where it's drawn on the wave
+                        let closest = Infinity
+                        for (const who of grips) {
+                            const dx = p.x - who.position.x
+                            const dy = p.y - who.position.y
+                            const reach = who.radius + this.mobReach
+                            const d2 = dx * dx + dy * dy
+                            if (d2 < reach * reach) {
+                                grabber = who
+                                break
+                            }
+                            if (tech.isElectricPotential && d2 < closest && !who.isBadTarget && !who.isInvulnerable) {
+                                const pull = who.radius + this.potentialReach
+                                if (d2 < pull * pull) {
+                                    closest = d2
+                                    attractor = who
                                 }
-                                // Matter.Body.setPosition(this, Vector.add(this.position, mob[i].velocity)) //move with the medium
-                                let dmg = this.dmg / Math.min(10, mob[i].mass)
-                                mob[i].damage(dmg);
-                                if (mob[i].alive) mob[i].foundPlayer();
                             }
                         }
                     }
-                    this.cycle++
-                    const wiggleMag = (m.crouch ? 6 : 12) * Math.cos(simulation.cycle * 0.09)
-                    const wiggle = Vector.mult(transverse, wiggleMag * Math.cos(this.cycle * 0.36)) //+ wiggleMag * Math.cos(simulation.cycle * 0.3))
-                    const velocity = Vector.mult(player.velocity, 0.4) //move with player
-                    Matter.Body.setPosition(this, Vector.add(velocity, Vector.add(this.position, wiggle)))
                 }
-            });
-            Composite.add(engine.world, bullet[me]); //add bullet to world
-            Matter.Body.setVelocity(bullet[me], {
-                x: SPEED * Math.cos(m.angle),
-                y: SPEED * Math.sin(m.angle)
-            });
-            const transverse = Vector.normalise(Vector.perp(bullet[me].velocity))
-            if (Math.PI - Math.abs(Math.abs(b.lastAngle - m.angle) - Math.PI) > 0.13 || !b.wasExtruderOn) { //angle change, wrapped around ±π
-                bullet[me].isBranch = true; //don't draw stroke for this bullet
-                bullet[me].do = function () {
-                    if (this.endCycle < simulation.cycle + 1) this.isWave = false
+                if (blocks.length && isIn(where, blocks)) { //a block ran into it
+                    p.isCut = isCut = true
+                } else if (grabber) { //it's in or flying close to a mob, so it catches on the mob
+                    this.grab(p, grabber, wire[i - 1], wire[i + 1])
+                } else if (p.on && !attractor) {
+                    this.crawl(p, solid)
+                } else {
+                    if (attractor) {
+                        p.on = null //electric potential tech: leave the map or block, and fly from where it's drawn on the wave toward the mob
+                        this.steer(p, attractor)
+                        isAttracted = true
+                    }
+                    this.fly(p, wire[i - 1], wire[i + 1], solid)
                 }
             }
-            b.lastAngle = m.angle //track last angle for the above angle difference calculation
-        } else {
-            b.canExtruderFire = false;
-        }
+            if (isCut) { //a block ran through the wire, so cut it there
+                for (let i = wire.length - 1; i > -1; i--) {
+                    if (!wire[i].isCut) continue
+                    if (i + 1 < wire.length) {
+                        wire[i + 1].isBranch = true
+                    } else {
+                        this.wasFiring = false //it was the newest point, so the next point fired starts a new line
+                    }
+                    wire.splice(i, 1)
+                }
+            }
+
+            this.tidy(wire, solid, walls, [blocks, grips], this.wasFiring)
+            const isTouching = this.damage(mobs, wire)
+            if (powerUp.length) this.pushPowerUps(wire, minX, maxX, minY, maxY)
+            const longest = tech.isElectricPotential ? this.potentialRange : this.mobRange //electric potential tech: 2x longer once it bends toward a mob
+            if (isTouching || isAttracted) this.holdCycle = simulation.cycle + longest - this.range
+            this.life = Math.max(this.range, Math.min(longest, this.life + (simulation.cycle < this.holdCycle ? 1 : -1)))
+        },
+        steer(p, who) { //electric potential tech: turn a flying point toward a mob, keeping its speed, so the wire curves in like it's charged
+            const dx = who.position.x - p.x
+            const dy = who.position.y - p.y
+            const d = Math.sqrt(dx * dx + dy * dy) || 1
+            const vx = p.vx + this.potentialTurn * p.speed * dx / d
+            const vy = p.vy + this.potentialTurn * p.speed * dy / d
+            const v = Math.sqrt(vx * vx + vy * vy) || 1
+            p.vx = p.speed * vx / v
+            p.vy = p.speed * vy / v
+        },
+        grab(p, who, older, newer) { //put a point that's in or near a mob onto the mob's edge, straight out from its center
+            const where = p.on && p.on.mob ? p.base : p //from where it's drawn, unless it's already on another mob
+            const dx = where.x - who.position.x
+            const dy = where.y - who.position.y
+            const len = Math.sqrt(dx * dx + dy * dy) || 1
+            const hit = vertexCollision(who.position, { x: who.position.x + 3 * who.radius * dx / len, y: who.position.y + 3 * who.radius * dy / len }, [[who]])
+            if (!hit.who) return
+            p.on = null //land on it fresh, so its wave starts on the mob
+            this.attach(p, hit, -dx, -dy, 0, [[who]])
+            this.land(p, older, newer)
+        },
+        tidy(wire, solid, walls, drawnOver, isGrowing) { //smooth the line, keep it from crossing the map, blocks, and mobs, and drop stray bits
+            //solid is the map, blocks, and mobs, walls is just the map and blocks, drawnOver is the blocks and mobs, which are drawn under the wire, isGrowing while the wire's newest piece is still getting points
+            //elasticity, pull each point toward the middle of its neighbors, so kinks straighten out but the big waves and arcs stay
+            for (let pass = 0; pass < 2; pass++) {
+                for (let i = 1, len = wire.length - 1; i < len; i++) {
+                    const p = wire[i]
+                    if (p.isBranch || wire[i + 1].isBranch) continue //the ends of each piece stay put
+                    const to = { x: p.x + 0.4 * (0.5 * (wire[i - 1].x + wire[i + 1].x) - p.x), y: p.y + 0.4 * (0.5 * (wire[i - 1].y + wire[i + 1].y) - p.y) }
+                    //sliding points ease back to their spot above the surface, and a free point can only be pulled into the map or a block by a neighbor that's on one
+                    if (p.on || !(wire[i - 1].on || wire[i + 1].on) || !vertexCollision(p, to, solid).who) {
+                        p.x = to.x
+                        p.y = to.y
+                    }
+                }
+            }
+            if (drawnOver[0].length || drawnOver[1].length) { //the wire is drawn on top of blocks and mobs, unlike the map, so keep it from cutting across their corners as it eases around them or gets pulled by its neighbors
+                for (const p of wire) {
+                    if (!p.on) continue
+                    const hit = vertexCollision(p.base, p, drawnOver)
+                    if (hit.who) {
+                        const dx = p.x - p.base.x
+                        const dy = p.y - p.base.y
+                        const len = Math.sqrt(dx * dx + dy * dy)
+                        p.x = hit.x - this.hover * dx / len
+                        p.y = hit.y - this.hover * dy / len
+                    }
+                }
+            }
+            //a line between neighbors farther apart than 1.5 cycles of travel can cross the map or a block
+            //mobs don't count, the wire crawls over packs of them touching each other, and splitting it there chops off every point that gets to the gap between them
+            for (let i = 1, len = wire.length; i < len; i++) {
+                const p = wire[i]
+                if (p.isBranch) continue
+                const q = wire[i - 1]
+                const far2 = 2.25 * p.gap * p.gap
+                const d2 = (p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y)
+                const gap = tech.isElectricPotential && ((p.on && p.on.mob) || (q.on && q.on.mob)) ? this.potentialStretch : this.breakGap //electric potential tech: stretch to keep hold of a mob that moves away
+                if (d2 > gap * gap * p.gap * p.gap) { //neighbors pulled this far apart, like by a mob running off with part of the wire, would draw a long straight line, so break the wire there
+                    p.isBranch = true
+                    continue
+                }
+                if (d2 < far2 || !vertexCollision(q, p, walls).who) continue
+                if (p.on && q.on && (p.base.x - q.base.x) * (p.base.x - q.base.x) + (p.base.y - q.base.y) * (p.base.y - q.base.y) < this.tuckGap * this.tuckGap * p.gap * p.gap && p.nx * q.nx + p.ny * q.ny > -0.5) {
+                    //they're wrapping around the same corner, with their waves on either side of it, so tuck them in against it, unless they face opposite ways, like over and under a thin platform
+                    p.x = p.base.x
+                    p.y = p.base.y
+                    q.x = q.base.x
+                    q.y = q.base.y
+                    p.rise = q.rise = 0 //and rise back into the arches slowly, instead of easing right back up into the corner and getting tucked again next cycle, which flickers
+                } else { //they went different ways around it, like over and under a thin platform, so split the wire there
+                    p.isBranch = true
+                }
+            }
+            //heal short breaks, a piece that starts close to where the piece before it ends joins back on, the elasticity smooths the join over the next few cycles
+            //only when the ends aren't pulling apart, so breaks from a jump in aim or points sliding opposite ways stay broken, and nothing in the way, so it doesn't rejoin across a wall
+            for (let i = 1, len = wire.length; i < len; i++) {
+                const p = wire[i]
+                if (!p.isBranch) continue
+                const q = wire[i - 1]
+                const d = Math.sqrt((p.x - q.x) * (p.x - q.x) + (p.y - q.y) * (p.y - q.y))
+                const isOnMob = (p.on && p.on.mob) || (q.on && q.on.mob) //mobs drag the wire around unpredictably, so a break there heals only if its ends get closer
+                const isSteady = p.breakDistance !== undefined && d < p.breakDistance + 1 && d < (isOnMob ? this.healMobGap : this.healGap) * p.gap //close, and not pulling apart since last cycle
+                p.breakDistance = d
+                p.healWait = isSteady ? p.healWait + 1 : 0
+                if (p.healWait < this.healWait || vertexCollision(q, p, walls).who) continue
+                p.isBranch = false
+                p.breakDistance = undefined //if it breaks again, start watching it over
+                //pull the two ends a third of the way toward each other, the line between them is clear, so this can't push either into a wall
+                const mx = 0.5 * (p.x + q.x)
+                const my = 0.5 * (p.y + q.y)
+                p.x += (mx - p.x) / 3
+                p.y += (my - p.y) / 3
+                q.x += (mx - q.x) / 3
+                q.y += (my - q.y) / 3
+            }
+            //remove stray pieces only 1 to 3 points long, left over from splits and cuts, but not the newest piece while it's still growing from the nose
+            for (let end = wire.length, i = wire.length - 1; i > -1; i--) {
+                if (i && !wire[i].isBranch) continue //i is the first point of a piece that ends before end
+                if (end - i < 4 && !(end === wire.length && isGrowing)) wire.splice(i, end - i)
+                end = i
+            }
+        },
+        crawl(p, solid) { //move a point along the surface it's on, following it around corners, and up and down in a wave
+            const base = p.base
+            const end = { x: base.x + p.vx, y: base.y + p.vy }
+            let hit = vertexCollision(base, end, solid)
+            if (!hit.who && !p.isTight) { //a gap too low for the wire to fit in, like under a block leaning on another, is a wall too, so it climbs over instead of squeezing in and getting split off, but once it's in one it can get out
+                const up = this.lowGap - this.hover
+                hit = vertexCollision(base, { x: end.x + up * p.nx, y: end.y + up * p.ny }, solid)
+            }
+            if (hit.who) {
+                this.attach(p, hit, p.vx, p.vy, 1) //inside corner, go up the next wall
+            } else {
+                base.x = end.x
+                base.y = end.y
+                const probe = p.speed + 6
+                hit = vertexCollision(base, { x: base.x - probe * p.nx, y: base.y - probe * p.ny }, solid)
+                if (hit.who) {
+                    this.attach(p, hit, -p.nx, -p.ny, 0) //still over the surface, follow it as it slopes
+                } else { //past an outside corner, look back just under it and wrap around
+                    const from = { x: base.x - 4 * p.nx, y: base.y - 4 * p.ny }
+                    hit = vertexCollision(from, { x: from.x - probe * p.vx / p.speed, y: from.y - probe * p.vy / p.speed }, solid)
+                    if (!hit.who) {
+                        p.on = null //lost the surface, fly free from where it's drawn
+                        return
+                    }
+                    this.attach(p, hit, -p.vx, -p.vy, -1)
+                }
+            }
+            //rise and fall in arches pinned to the surface, up to 100 above it, or smaller around a small mob
+            p.rise += p.speed
+            const lift = Math.min(p.rise, this.arch(p))
+            const up = Math.max(lift, this.lowGap) //and look a bit higher to see if it's in a gap too low to fit in
+            const ceiling = vertexCollision(base, { x: base.x + up * p.nx, y: base.y + up * p.ny }, solid) //stay under low ceilings
+            p.isTight = ceiling.dist2 < this.lowGap * this.lowGap
+            const top = ceiling.dist2 < lift * lift ? { x: ceiling.x - this.hover * p.nx, y: ceiling.y - this.hover * p.ny } : { x: base.x + lift * p.nx, y: base.y + lift * p.ny }
+            //ease toward that spot, halfway for every 20 it travels, so it swings around corners instead of jumping
+            const ease = 1 - Math.pow(0.5, p.speed / 20)
+            p.x += ease * (top.x - p.x)
+            p.y += ease * (top.y - p.y)
+        },
+        archLength: 360, //how long the wave's arches are on a long surface, they're 100 high
+        archCorner: Math.cos(0.5), //edges that turn less than about 30° from each other are one smooth surface, so a round boulder gets big arches instead of one per side
+        archMobCorner: Math.cos(0.9), //mobs are rougher circles, so up to about 50°, mobs with 8 or more sides are round
+        arch(p) { //how high above the surface a point is drawn, in arches pinned to the surface, so the wire holds the same shape as points flow through it
+            //each smooth run of edges, from one sharp corner to the next, fits a whole number of arches about archLength long, so every corner is a low point, short runs get shorter, lower arches
+            let a = p.v1
+            let c = p.v2
+            const vertices = a.body && a.body.vertices
+            if (vertices && (a.index + 1) % vertices.length !== c.index) [a, c] = [c, a] //measure from the edge's first corner, in the body's order
+            const ex = c.x - a.x
+            const ey = c.y - a.y
+            const length = Math.sqrt(ex * ex + ey * ey) || 1
+            let run = a.wireArch
+            if (!run || Math.abs(run.length - length) > 0.5) run = a.wireArch = this.archRun(a, length) //bodies don't bend, so it's worked out once per edge, again if a mob grows
+            const along = run.along + ((p.base.x - a.x) * ex + (p.base.y - a.y) * ey) / length //distance from the start of the smooth run
+            const unit = p.on.mob ? Math.min(this.archLength, 3.6 * p.on.radius) : this.archLength //smaller arches around smaller mobs
+            const span = run.run / Math.max(1, Math.round(run.run / unit))
+            const height = 100 * unit / this.archLength * Math.min(1, Math.sqrt(span / unit))
+            return 0.5 * height * (1 - Math.cos(2 * Math.PI * along / span))
+        },
+        archRun(a, length) { //the smooth run of edges that the edge starting at vertex a is part of, how far into the run a is, and how long the run is
+            const vertices = a.body && a.body.vertices
+            if (!vertices) return { length, along: 0, run: length }
+            const n = vertices.length
+            const edge = k => {
+                const from = vertices[k]
+                const to = vertices[(k + 1) % n]
+                return { x: to.x - from.x, y: to.y - from.y, length: Math.hypot(to.x - from.x, to.y - from.y) || 1 }
+            }
+            const corner = a.body.mob ? this.archMobCorner : this.archCorner
+            const isSmooth = (e1, e2) => e1.x * e2.x + e1.y * e2.y > corner * e1.length * e2.length
+            let along = 0
+            let k = a.index
+            let steps = 0
+            while (steps < n - 1 && isSmooth(edge((k - 1 + n) % n), edge(k))) { //back to the last sharp corner
+                k = (k - 1 + n) % n
+                along += edge(k).length
+                steps++
+            }
+            if (steps === n - 1) { //no sharp corners at all, like a round boulder, so the run is the whole way around, starting at the first vertex
+                let around = 0
+                along = 0
+                for (let i = 0; i < n; i++) {
+                    if (i === a.index) along = around
+                    around += edge(i).length
+                }
+                return { length, along, run: around }
+            }
+            let run = along + length
+            for (let j = a.index; isSmooth(edge(j), edge((j + 1) % n)); j = (j + 1) % n) run += edge((j + 1) % n).length //on to the next sharp corner
+            return { length, along, run }
+        },
+        fly(p, older, newer, solid) { //move a free point in a straight line, and with the player, landing on whatever it hits
+            //older and newer are the points fired just before and after it, it moves with most of the player's velocity, so the free wire moves almost as one piece
+            if (m.fieldUpgrades[5].isHose) p.vy += this.hoseGravity //plasma torch's secret combo: it falls like water from a hose
+            const dx = p.vx + 0.7 * player.velocity.x
+            const dy = p.vy + 0.7 * player.velocity.y
+            const end = { x: p.x + dx, y: p.y + dy }
+            const hit = vertexCollision(p, end, solid)
+            if (hit.who) {
+                this.attach(p, hit, dx, dy, 0, solid)
+                this.land(p, older, newer)
+            } else {
+                p.x = end.x
+                p.y = end.y
+            }
+        },
+        attach(p, hit, dx, dy, turn, solid) { //put a point's base on the edge it hit, moving along it at the same speed, so the wire follows the map and blocks around corners
+            //dx, dy is the way it was going when it hit, turn 1 goes up the new wall (inside corner), -1 wraps around the old surface (outside corner), 0 keeps going the same way
+            //solid is what it can hit, only needed when it lands
+            let tx = hit.v2.x - hit.v1.x
+            let ty = hit.v2.y - hit.v1.y
+            const len = Math.sqrt(tx * tx + ty * ty)
+            tx /= len
+            ty /= len
+            const flip = tx * dy - ty * dx > 0 ? -1 : 1 //the normal faces back the way it came
+            const nx = -ty * flip
+            const ny = tx * flip
+            const base = { x: hit.x + this.hover * nx, y: hit.y + this.hover * ny }
+            const isLanding = !p.on
+            let along = turn * (tx * p.nx + ty * p.ny) //which way along the edge, away from or around the surface it was on
+            if (Math.abs(along) < 0.1) along = tx * p.vx + ty * p.vy //the edges are about parallel, or it was flying free
+            if (isLanding && Math.abs(along) < 0.35 * p.speed) { //it hit about head on, so go the way that's open longer, instead of into a nearby corner where it would have to turn back
+                const ahead = vertexCollision(base, { x: base.x + 150 * tx, y: base.y + 150 * ty }, solid)
+                const behind = vertexCollision(base, { x: base.x - 150 * tx, y: base.y - 150 * ty }, solid)
+                if (ahead.dist2 !== behind.dist2) along = ahead.dist2 > behind.dist2 ? 1 : -1
+            }
+            const speed = along < 0 ? -p.speed : p.speed
+            p.vx = tx * speed
+            p.vy = ty * speed
+            p.nx = nx
+            p.ny = ny
+            p.on = hit.who
+            p.v1 = hit.v1 //the edge it's on, the body's own vertices, so they move with it
+            p.v2 = hit.v2
+            p.base.x = base.x
+            p.base.y = base.y
+            if (isLanding) { //it starts down on the surface, and rises into the arches
+                p.rise = 0
+                p.x = base.x
+                p.y = base.y
+            } else if (turn < 0) { //the wave tucks in around outside corners, then rises back into the wave, so it doesn't swing across to the new side
+                p.rise = 0
+            }
+        },
+        land(p, older, newer) { //p just landed, older and newer are the points fired just before and after it
+            //sliding the opposite way from a neighbor on the same surface means the aim crossed the surface's normal, so split the wire there instead of drawing a line between the two ends as they pull apart
+            //a neighbor on another surface, like up the wall p is sliding toward, is just around a corner
+            const isSameSurface = who => who && who.on && p.nx * who.nx + p.ny * who.ny > 0.7
+            const isOpposite = who => isSameSurface(who) && p.vx * who.vx + p.vy * who.vy < 0
+            if (p.on.mob && (isOpposite(older) || isOpposite(newer))) { //a mob is round, so wrap it the same way as the neighbor instead of splitting
+                p.vx = -p.vx
+                p.vy = -p.vy
+                return
+            }
+            if (isOpposite(older)) p.isBranch = true
+            if (isOpposite(newer)) newer.isBranch = true
+        },
+        damage(mobs, wire) { //burn and slow the mobs a wire touches or wraps around, true if it touched any
+            const range = tech.extruderRange / 2
+            let isTouching = false
+            for (const who of mobs) {
+                const radius = who.radius + range
+                const touch = who.isMobBullet ? who.radius + Math.max(range, this.mobReach) : radius //the wire doesn't wrap mob bullets, so it can burn them from as far as it would catch on a mob
+                const base = who.radius + 15 / 2 //radius without refractory metal, default extruderRange is 15
+                const maxHits = this.fullHits
+                let hits = 0
+                let newest = null //the newest point touching the mob, the closest to the nose along the wire
+                for (let i = 0; i < wire.length; i++) {
+                    const p = wire[i]
+                    const dx = p.x - who.position.x
+                    const dy = p.y - who.position.y
+                    if (p.on !== who && dx * dx + dy * dy > touch * touch) continue
+                    hits++
+                    newest = p
+                    if (who.speed > (who.isBoss || who.isShielded ? this.slowBossSpeed : this.slowSpeed)) {
+                        Matter.Body.setVelocity(who, { x: who.velocity.x * this.slow, y: who.velocity.y * this.slow });
+                    }
+                }
+                if (!hits) continue
+                isTouching = true
+                //each point touching the mob adds a bit less than the one before, from 10% of this.dmg for the first point down to 1% at fullHits, up to kneeHits, then it grows by a power, refractory metal's wider wire burns hotter
+                const curve = h => (1 - this.fade ** h) / (1 - this.fade ** maxHits)
+                const burn = hits < this.kneeHits ? curve(hits) : curve(this.kneeHits) * (hits / this.kneeHits) ** this.wrapPower
+                who.damage(this.dmg * burn * radius / base);
+                if (who.alive) who.foundPlayer();
+                if (tech.isElectronvolt && !who.isInvulnerable && !who.isShielded && !who.shield && !who.isMobBullet && !(who.electronvoltCycle > simulation.cycle)) { //electronvolt tech: the wire is touching it, so send energy back along the wire, at most every second for each mob, but not from shields, mob bullets, or mobs that can't be hurt
+                    who.electronvoltCycle = simulation.cycle + 60
+                    this.charges.push({ at: newest.born })
+                }
+            }
+            return isTouching
+        },
+        draw(isFiring) { //the wire, oldest point first, on to the nose while firing
+            if (!this.wire.length) return //nothing to draw, the packets and cold wave ride the wire, so they're gone too
+            const r = 15 * player.scale
+            const noseX = m.pos.x + r * Math.cos(m.angle)
+            const noseY = m.pos.y + r * Math.sin(m.angle)
+            ctx.beginPath()
+            this.trace(this.wire)
+            if (isFiring) ctx.lineTo(noseX, noseY)
+            ctx.lineWidth = Math.min(80, tech.extruderRange) //the glow shows refractory metal's reach, but a very wide stroke is slow to draw
+            const isHose = m.fieldUpgrades[5].isHose //plasma torch's secret combo: a watery violet, less saturated than cold plasma's blue
+            ctx.strokeStyle = isHose ? "rgba(140,110,255,0.08)" : "rgba(255,0,110,0.06)"
+            ctx.stroke()
+            ctx.lineWidth = 4
+            ctx.strokeStyle = isHose ? "rgb(140,110,255)" : "#f07"
+            ctx.stroke()
+            if (this.cold) { //a filled blue wave, the color of frozen mobs' outline
+                ctx.beginPath()
+                this.tracePackets(this.wire, [this.cold], 60, true)
+                ctx.fillStyle = "rgba(0,100,255,0.85)"
+                ctx.fill()
+            }
+            for (const packet of this.solitons) { //a filled black carrier wave, darker the more energy above max it spent
+                ctx.beginPath()
+                this.tracePackets(this.wire, [packet], 52, true)
+                ctx.fillStyle = `rgba(0,0,0,${Math.min(0.9, 0.5 * packet.bonus ** 0.25)})`
+                ctx.fill()
+            }
+            if (this.charges.length) { //a filled see-through magenta carrier wave, the color of plasma torch's energy bar
+                ctx.beginPath()
+                this.tracePackets(this.wire, this.charges, 34, true)
+                ctx.fillStyle = "rgba(255,0,255,0.5)"
+                ctx.fill()
+            }
+        },
+        trace(wire) { //add a wire to the path, starting a new line at its first point, since the one that started it may have expired
+            for (let i = 0, len = wire.length; i < len; i++) {
+                const p = wire[i]
+                if (p.isBranch || i === 0) {
+                    ctx.moveTo(p.x, p.y)
+                } else {
+                    ctx.lineTo(p.x, p.y)
+                }
+            }
+        },
+        moveSolitons(isFiring) { //soliton tech: start a wave packet at the nose while firing, every b.solitonDelay cycles, it rides down the wire and burns each mob the wire is wrapped on as it passes
+            const wire = this.wire
+            if (isFiring && wire.length > 14) { //wait for the wire to grow, so it has somewhere to ride
+                const bonus = b.solitonReady(this, this.solitonCost, this.solitonExcess)
+                if (bonus) this.solitons.push({ at: wire[wire.length - 1].born, hits: [], dmg: this.solitonPower * b.solitonDamage * bonus, bonus })
+            } else if (this.solitonCycle < simulation.cycle + 20) { //the last third of a second of cooldown only ticks once the wire is ready, so a packet doesn't start right with cold plasma's wave
+                this.solitonCycle = simulation.cycle + 20
+            }
+            for (let k = this.solitons.length - 1; k > -1; k--) {
+                const packet = this.solitons[k]
+                const was = packet.at
+                packet.at -= 0.25 //points per cycle, on top of the points moving out, so it moves along at 1.25x the speed of the points
+                if (!wire.length || packet.at < wire[0].born) { //reached the tip
+                    this.solitons.splice(k, 1)
+                    continue
+                }
+                for (let i = wire.length - 1; i > -1 && wire[i].born > packet.at; i--) { //the points it passed this cycle, newest first
+                    const p = wire[i]
+                    const who = p.on
+                    if (p.born > was || !who || !who.alive || packet.hits.includes(who)) continue
+                    packet.hits.push(who)
+                    who.damage(packet.dmg)
+                    simulation.drawList.push({ x: p.x, y: p.y, radius: who.radius + 20 * Math.min(3, Math.sqrt(packet.bonus)), color: "rgba(0,0,0,0.35)", time: 10 })
+                }
+            }
+        },
+        moveCharges() { //electronvolt tech: each packet rides the wire back toward the nose, and gives energy when it gets there
+            const wire = this.wire
+            for (let k = this.charges.length - 1; k > -1; k--) {
+                const packet = this.charges[k]
+                packet.at += 2.25 //points per cycle, against the points moving out, so it comes back at 1.25x the speed they go out
+                if (!wire.length) {
+                    this.charges.splice(k, 1)
+                } else if (packet.at >= wire[wire.length - 1].born) { //reached the nose
+                    this.charges.splice(k, 1)
+                    m.energy += 1 //100 energy
+                    simulation.energyGenGraphic()
+                }
+            }
+        },
+        pushPowerUps(wire, minX, maxX, minY, maxY) { //power ups touching the wire get pushed back along it toward the player
+            //to stay cheap with 200 power ups, skip any outside the wire's bounds, and only check every 4th point, a different 4th each cycle, a push lasts 2 checks so one miss doesn't drop it
+            const stride = 4
+            const reach = tech.extruderRange / 2 + this.powerUpReach
+            for (const who of powerUp) {
+                const x = who.position.x
+                const y = who.position.y
+                const isPushed = who.streamPushCycle > simulation.cycle
+                const r = who.size + reach + (isPushed ? 25 : 0) //a power up already on the wire holds on from a bit farther
+                if (x > minX - r && x < maxX + r && y > minY - r && y < maxY + r) {
+                    for (let i = simulation.cycle % stride, len = wire.length; i < len; i += stride) {
+                        const p = wire[i]
+                        const dx = p.x - x
+                        const dy = p.y - y
+                        if (dx * dx + dy * dy > r * r) continue
+                        let next = m.pos //aim at a point 3 closer to the nose, so it's pulled onto the wire as it goes, or straight to the player from the end of a line
+                        for (let j = i + 1; j < len && j < i + 4 && !wire[j].isBranch; j++) next = wire[j]
+                        const ux = next.x - x
+                        const uy = next.y - y
+                        const length = Math.sqrt(ux * ux + uy * uy) || 1
+                        who.streamPush = { x: ux / length, y: uy / length }
+                        who.streamPushCycle = simulation.cycle + 2 * stride
+                        break
+                    }
+                }
+                if (who.streamPushCycle > simulation.cycle) { //friction and a strong pull, easing toward 27 speed down the wire, with no gravity
+                    Matter.Body.setVelocity(who, { x: 0.75 * who.velocity.x + 6.75 * who.streamPush.x, y: 0.75 * who.velocity.y + 6.75 * who.streamPush.y })
+                    who.force.y -= who.mass * simulation.g
+                }
+            }
+        },
+        moveCold(isFiring) { //cold plasma tech: one wave bounces back and forth along the wire, off the tip and off the nose, freezing each mob it touches for 4 seconds
+            const wire = this.wire
+            if (!wire.length) {
+                this.cold = null
+                return
+            }
+            const nose = wire[wire.length - 1].born
+            const tip = wire[0].born
+            if (!this.cold) {
+                if (isFiring && wire.length > 14) this.cold = { at: nose, isOut: true } //wait for the wire to grow, so it has somewhere to bounce
+                return
+            }
+            const wave = this.cold
+            wave.at += wave.isOut ? -0.5 : 2.5 //points per cycle, against the points moving out, so it moves 1.5 points along the wire each cycle either way
+            if (wave.at <= tip) { //bounce off the tip
+                let isMain = true //the tip is on the line still connected to the nose
+                for (let i = wire.length - 1; i > 0 && isMain; i--) if (wire[i].isBranch) isMain = false
+                if (isFiring && !isMain) { //the tip broke off from the line you're firing, so skip the trip back and start over at the nose
+                    wave.at = nose
+                    wave.isOut = true
+                } else {
+                    wave.at = tip
+                    wave.isOut = false
+                }
+            } else if (wave.at >= nose) { //bounce off the nose
+                wave.at = nose
+                wave.isOut = true
+            }
+            let p = wire[0] //the point it's on
+            for (let i = wire.length - 1; i > -1; i--) {
+                if (wire[i].born <= wave.at) {
+                    p = wire[i]
+                    break
+                }
+            }
+            for (const who of mob) {
+                if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable) continue
+                const dx = p.x - who.position.x
+                const dy = p.y - who.position.y
+                const reach = who.radius + 30 //about half as tall as the wave is drawn, wide enough that it can't skip past a mob in one cycle
+                if (dx * dx + dy * dy < reach * reach) b.coldPlasma(who, 240 + tech.iceIXFreezeTime - 150) //4 seconds, longer with triple point
+            }
+        },
+        fitMob(p) { //how tall a wave packet is at a point, shrunk to fit a small mob the wire is wrapped on, full size on mobs radius 50 and up and off mobs, no smaller than for radius 5
+            return p.on && p.on.alive ? Math.max(5, Math.min(50, p.on.radius)) / 50 : 1
+        },
+        tracePackets(wire, packets, height, isFilled = false) { //soliton, electronvolt, and cold plasma tech: add a carrier wave that swells and fades around each packet's spot on a wire to the path, up to height above and below it
+            for (const packet of packets) {
+                let x = 0, y = 0, isStart = true
+                let first = 0, last = 0 //indexes of the first and last wire points under this piece of the wave
+                const finish = () => { //end a piece of the wave, isFilled traces back along the wire under it, so filling it fills each hump between the wave and the wire
+                    ctx.lineTo(x, y)
+                    if (!isFilled) return
+                    for (let k = last; k >= first; k--) ctx.lineTo(wire[k].x, wire[k].y)
+                    ctx.closePath()
+                }
+                for (let i = 0, len = wire.length; i < len; i++) {
+                    const p = wire[i]
+                    const d = p.born - packet.at
+                    if (d < -7 || d > 7) continue
+                    const a = i && !p.isBranch ? wire[i - 1] : p
+                    const c = i + 1 < len && !wire[i + 1].isBranch ? wire[i + 1] : p
+                    const dx = c.x - a.x
+                    const dy = c.y - a.y
+                    const fit = (this.fitMob(a) + 2 * this.fitMob(p) + this.fitMob(c)) / 4 //blended with its neighbors, so the wave eases in and out where the wire wraps a mob
+                    const off = fit * height * Math.exp(-0.09 * d * d) * Math.sin(1.3 * p.born - 0.8 * simulation.cycle) / (Math.sqrt(dx * dx + dy * dy) || 1)
+                    const nx = p.x - dy * off
+                    const ny = p.y + dx * off
+                    if (isStart || p.isBranch) {
+                        if (!isStart) finish()
+                        ctx.moveTo(nx, ny)
+                        isStart = false
+                        first = i
+                    } else {
+                        ctx.quadraticCurveTo(x, y, (x + nx) / 2, (y + ny) / 2)
+                    }
+                    x = nx
+                    y = ny
+                    last = i
+                }
+                if (!isStart) finish()
+            }
+        },
     },
     lightning(where, velocity) {
         const speed = Vector.magnitude(velocity)
@@ -3397,6 +4123,7 @@ const b = {
         simulation.ephemera.push({
             count: 0,
             end: Math.floor(100 + 50 * Math.random()),
+            isProjectile: true,
             position: { x: where.x, y: where.y },
             look: { x: where.x, y: where.y },
             steeringVelocity: { x: velocity.x, y: velocity.y },
@@ -3554,89 +4281,6 @@ const b = {
                 }
             }
         })
-    },
-    plasma() {
-        const DRAIN = 0.00075
-        if (m.energy > DRAIN) {
-            m.energy -= DRAIN;
-
-            //calculate laser collision
-            let range = tech.isPlasmaRange * (120 + (m.crouch ? 400 : 300) * Math.sqrt(Math.random())) //+ 100 * Math.sin(m.cycle * 0.3);
-            // const dir = m.angle // + 0.04 * (Math.random() - 0.5)
-            const r = 20 * player.scale
-            const path = [
-                { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) },
-                { x: m.pos.x + range * Math.cos(m.angle), y: m.pos.y + range * Math.sin(m.angle) }
-            ];
-            //check for collisions
-            let best = {
-                x: null,
-                y: null,
-                dist2: Infinity,
-                who: null,
-                v1: null,
-                v2: null
-            };
-            best = vertexCollision(path[0], path[1], [mob, map, body]);
-            if (best.dist2 != Infinity) { //if hitting something
-                path[path.length - 1] = { x: best.x, y: best.y };
-                if (best.who.alive) {
-                    const dmg = 0.9; //********** SCALE DAMAGE HERE *********************
-                    best.who.damage(dmg);
-                    best.who.locatePlayer();
-
-                    //push mobs away
-                    if (best.who.speed > 3) {
-                        const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.005 * Math.min(5, best.who.mass))
-                        Matter.Body.applyForce(best.who, path[1], force)
-                        Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.4, y: best.who.velocity.y * 0.4 });
-                    } else {
-                        const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.01 * Math.min(5, best.who.mass))
-                        Matter.Body.applyForce(best.who, path[1], force)
-                        Matter.Body.setVelocity(best.who, { x: best.who.velocity.x * 0.7, y: best.who.velocity.y * 0.7 });
-                    }
-                    //draw mob damage circle
-                    simulation.drawList.push({
-                        x: path[1].x,
-                        y: path[1].y,
-                        radius: Math.sqrt(2000 * dmg * best.who.damageReduction),
-                        color: "rgba(255,0,255,0.2)",
-                        time: simulation.drawTime * 4
-                    });
-                } else if (!best.who.isStatic) {
-                    //push blocks away
-                    const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.007 * Math.sqrt(Math.sqrt(best.who.mass)))
-                    Matter.Body.applyForce(best.who, path[1], force)
-                }
-            }
-
-            //draw blowtorch laser beam
-            ctx.strokeStyle = "rgba(255,0,255,0.1)"
-            ctx.lineWidth = 14
-            ctx.beginPath();
-            ctx.moveTo(path[0].x, path[0].y);
-            ctx.lineTo(path[1].x, path[1].y);
-            ctx.stroke();
-            ctx.strokeStyle = "#f0f";
-            ctx.lineWidth = 2
-            ctx.stroke();
-
-            //draw electricity
-            const Dx = Math.cos(m.angle);
-            const Dy = Math.sin(m.angle);
-            let x = m.pos.x + 20 * Dx;
-            let y = m.pos.y + 20 * Dy;
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            const step = Vector.magnitude(Vector.sub(path[0], path[1])) / 10
-            for (let i = 0; i < 8; i++) {
-                x += step * (Dx + 1.5 * (Math.random() - 0.5))
-                y += step * (Dy + 1.5 * (Math.random() - 0.5))
-                ctx.lineTo(x, y);
-            }
-            ctx.lineWidth = 2 * Math.random();
-            ctx.stroke();
-        }
     },
     laser(where = {
         x: m.pos.x + 20 * Math.cos(m.angle),
@@ -3893,6 +4537,20 @@ const b = {
             endCycle: Infinity,
             lookFrequency: 0,
             range: 700 - 300 * tech.isFoamMine,
+            childScale: 1,
+            onEnlarge(scale) {
+                this.childScale = scale
+            },
+            fireChildren(fire) { //only shots emitted by this mine inherit its size, including delayed foam
+                if (this.childScale === 1) return fire()
+                const start = bullet.length
+                const bubbleStart = b.bubbles().length
+                const result = fire()
+                for (let i = start; i < bullet.length; i++) b.enlarge(bullet[i], this.childScale)
+                const bubbles = b.bubbles()
+                for (let i = bubbleStart; i < bubbles.length; i++) bubbles[i].radius *= this.childScale
+                return result
+            },
 
             beforeDmg() { },
             onEnd() {
@@ -3903,11 +4561,12 @@ const b = {
                         for (let i = 0; i < 12; i++) {
                             const radius = 13 + 8 * Math.random()
                             const velocity = { x: 0.5 + 5.5 * Math.random(), y: 0 }
-                            b.foam(this.position, Vector.rotate(velocity, this.angle + 1.57 + 3 * (Math.random() - 0.5)), radius) //6.28 * Math.random()
+                            this.fireChildren(() => b.foam(this.position, Vector.rotate(velocity, this.angle + 1.57 + 3 * (Math.random() - 0.5)), radius)) //6.28 * Math.random()
                         }
                         //send 50 targeted, 1 per game cycle
                         const where = { x: this.position.x, y: this.position.y }
                         const onLevel = level.onLevel
+                        const mine = this
                         let count = 0
                         simulation.ephemera.push({
                             do() {
@@ -3915,14 +4574,14 @@ const b = {
                                     simulation.removeEphemera(this)
                                 } else if (!simulation.isChoosing) {
                                     count++
-                                    b.targetedFoam(where)
+                                    mine.fireChildren(() => b.targetedFoam(where))
                                 }
                             }
                         })
                     } else if (tech.isSuperMine) {
-                        b.targetedBall(this.position, 22 + 2 * tech.extraSuperBalls)
+                        this.fireChildren(() => b.targetedBall(this.position, 22 + 2 * tech.extraSuperBalls))
                     } else {
-                        b.targetedNail(this.position, 22, 40 + 10 * Math.random(), 1200, 2.2)
+                        this.fireChildren(() => b.targetedNail(this.position, 22, 40 + 10 * Math.random(), 1200, 2.2))
                     }
                 }
             },
@@ -4006,17 +4665,17 @@ const b = {
                                                 if (!(simulation.cycle % this.lookFrequency)) { //find mob targets
                                                     if (tech.isFoamMine) {
                                                         if (b.shotCount() < 400) { //wait for foam to pop instead of firing nails
-                                                            this.shots -= 0.6 * b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
-                                                            b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false)
+                                                            this.shots -= 0.6 * this.fireChildren(() => b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false))
+                                                            this.fireChildren(() => b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false))
                                                         }
                                                     } else if (tech.isSuperMine) {
                                                         const cost = tech.oneSuperBall ? 2 : 0.7
-                                                        this.shots -= cost * b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false)
+                                                        this.shots -= cost * this.fireChildren(() => b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false))
                                                         for (let i = 0, len = tech.extraSuperBalls / 4; i < len; i++) {
-                                                            if (Math.random() < 0.33) b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false)
+                                                            if (Math.random() < 0.33) this.fireChildren(() => b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false))
                                                         }
                                                     } else {
-                                                        this.shots -= b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, 2.3)
+                                                        this.shots -= this.fireChildren(() => b.targetedNail(this.position, 1, 45 + 5 * Math.random(), 1100, 2.3))
                                                     }
                                                     if (this.shots < 0) this.endCycle = 0
                                                     if (!(simulation.cycle % (this.lookFrequency * 6))) {
@@ -4088,16 +4747,7 @@ const b = {
                 }
             },
             onEnd() {
-                if (tech.isMutualism && this.isMutualismActive) {
-                    if (tech.isEnergyHealth) {
-                        m.addEnergy(0.02)
-                        simulation.energyGenGraphic()
-                    } else {
-                        m.health += 0.02
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
-                    }
-                }
+                b.refundMutualism(this)
             },
             tailCycle: 6.28 * Math.random(),
             do() {
@@ -4205,16 +4855,7 @@ const b = {
                 }
             },
             onEnd() {
-                if (tech.isMutualism && this.isMutualismActive) {
-                    if (tech.isEnergyHealth) {
-                        m.addEnergy(0.01)
-                        simulation.energyGenGraphic()
-                    } else {
-                        m.health += 0.01
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
-                    }
-                }
+                b.refundMutualism(this)
             },
             do() {
                 if (this.lockedOn && this.lockedOn.alive) {
@@ -4320,6 +4961,7 @@ const b = {
         let reflectCount = tech.waveReflections //waveReflections counts legs, so bound state reflects 1 time per stack
         simulation.ephemera.push({
             name: "wave",
+            isProjectile: true,
             count: 0,
             position: where,
             radius: 25,
@@ -4465,6 +5107,7 @@ const b = {
         }
         simulation.ephemera.push({
             name: "wave",
+            isProjectile: true,
             position: where,
             radius: 25,
             end: end,
@@ -4693,21 +5336,7 @@ const b = {
                 }
             },
             onEnd() {
-                // if (tech.isMutualism && this.isMutualismActive && !tech.isEnergyHealth) {
-                //     m.health += 0.02
-                //     if (m.health > m.maxHealth) m.health = m.maxHealth;
-                //     m.displayHealth();
-                // }
-                if (tech.isMutualism && this.isMutualismActive) {
-                    if (tech.isEnergyHealth) {
-                        m.addEnergy(0.02)
-                        simulation.energyGenGraphic()
-                    } else {
-                        m.health += 0.02
-                        if (m.health > m.maxHealth) m.health = m.maxHealth;
-                        m.displayHealth();
-                    }
-                }
+                b.refundMutualism(this)
             },
             gravity: 0.002 + 0.002 * tech.isSporeFollow,
             do() {
@@ -5478,7 +6107,7 @@ const b = {
         let gap = 250;
         for (let i = 0; i < mob.length; i++) {
             const other = mob[i];
-            if (other === who || !other.alive || other.isBadTarget || other.isMobBullet || other.isShield || other.isInvulnerable || other.isStatic) continue;
+            if (other === who || !other.alive || other.isBadTarget || other.isMobBullet || other.shield || other.isInvulnerable || other.isStatic) continue;
             const dx = other.position.x - who.position.x;
             const dy = other.position.y - who.position.y;
             const range = gap + who.radius + other.radius;
@@ -5580,6 +6209,7 @@ const b = {
                             if (Math.random() < 0.5) mobs.statusDoT(this.target, 2, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
                         } else if (tech.nanoparticles === 8) {
                             if (Math.random() < 0.33) simulation.ephemera.push({
+                                isProjectile: true,
                                 count: 120, //cycles before it self removes
                                 cleared: level.levelsCleared,
                                 who: this,
@@ -5737,7 +6367,7 @@ const b = {
         if (best < radius * radius || Matter.Vertices.contains(v, center)) return { x, y }
         return null
     },
-    bubbles() { //every bubble, empty after a new level or game since those remove the bubbles ephemera
+    bubbles() { //every bubble, emptied with other live shots by b.clearProjectiles()
         return simulation.ephemera.find(who => who.name === "bubbles")?.list ?? []
     },
     shotCount() { //bullets and bubbles, for limits that keep the game from slowing down
@@ -5746,8 +6376,13 @@ const b = {
     bubbleEphemera() { //all bubbles share this ephemera, so they move and draw in one batch, see b.bubble()
         return {
             name: "bubbles",
+            isProjectile: true,
             list: [],
             stuck: new Map(), //mob: the bubble on it
+            onClear() {
+                this.list = []
+                this.stuck.clear()
+            },
             mergedRadius(who, weight) { //one bubble just covers the mob at 1.1x its radius, each bubble merged in adds less, it never reaches 5x
                 return who.radius * (5 - 3.9 / (1 + 0.015 * (weight - 1)))
             },
@@ -5832,7 +6467,7 @@ const b = {
             force: { x: 0, y: 0 }, //force / mass is the acceleration like a body, so code that pushes bullets pushes bubbles the same way
             mass: 1,
             frictionAir: 0.003,
-            damage: 1.2 * tech.foamDamage * (tech.isFastFoam ? 2.8 : 1) * (tech.isBulletTeleport ? 1.53 : 1), //damage done each cycle while on a mob, 1.2x foam's, merged bubbles catching more shots brings it to about 1.6x, aerogel changes both the same way
+            damage: 1.4 * tech.foamDamage * (tech.isFastFoam ? 2.8 : 1) * (tech.isBulletTeleport ? 1.53 : 1), //damage done each cycle while on a mob, 1.4x foam's, merged bubbles catching more shots brings it to about 1.7x on a mob that lives long, aerogel changes both the same way
             weight: 1, //how many bubbles merged into this one
             scale: 1 - 0.006 / tech.bulletsLastLonger * (tech.isFastFoam ? 1.65 : 1) / (tech.nanoparticles === 6 ? 1.6 : 1), //shrinks like foam, so a bubble lasts as long as foam
             collisionFilter: { group: 0, category: cat.bullet, mask: cat.mob | cat.mobBullet }, //the mobs it can stick to, checked with Matter.Detector.canCollide
@@ -5887,6 +6522,7 @@ const b = {
                         } else if (tech.nanoparticles === 8) {
                             const relative = Vector.rotate(Vector.sub(this.contact, who.position), -who.angle) //stuck bubbles sit at the mob's center, so the laser fires out from where it hit
                             if (Math.random() < 0.33) simulation.ephemera.push({
+                                isProjectile: true,
                                 count: 120, //cycles before it self removes
                                 cleared: level.levelsCleared,
                                 do() {
@@ -7458,7 +8094,8 @@ const b = {
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
                     if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
-                        m.energy -= 0.001
+                        const energyScale = tech.isElectronvolt ? b.electronvoltBotScale : 1 //electronvolt tech: 0.75x energy
+                        m.energy -= 0.001 * energyScale
                         //calculate laser collision
                         let best;
                         let range = tech.isPlasmaRange * (120 + 300 * Math.sqrt(Math.random()))
@@ -7472,6 +8109,12 @@ const b = {
                                 const dmg = 1.4 * this.dmgScale; //********** SCALE DAMAGE HERE *********************
                                 best.who.damage(dmg);
                                 best.who.locatePlayer();
+                                if (tech.isPlasmaFreeze) b.coldPlasma(best.who)
+                                const solitonBonus = tech.isSoliton ? b.solitonReady(this, energyScale * b.solitonCost, 0.02 / energyScale) : 0 //spend energy for a burst of bonus damage, electronvolt tech: 0.75x energy for the same damage
+                                if (solitonBonus) {
+                                    best.who.damage(b.solitonDamage * solitonBonus * this.dmgScale)
+                                    b.solitonSparks(path[1].x, path[1].y)
+                                }
                                 //push mobs away
                                 // const force = Vector.mult(Vector.normalise(Vector.sub(m.pos, path[1])), -0.007 * Math.min(5, best.who.mass))
                                 // Matter.Body.applyForce(best.who, path[1], force)
@@ -9180,6 +9823,10 @@ const b = {
                 }
             },
             mode: "stab", //stab, sweep, or railgun, alternator and railgun let you pick it from a drop down when paused
+            railAmmoRemainder: 0, //railgun rounds left over while the displayed ammo is in whole retracting harpoons
+            onAmmoReset() {
+                this.railAmmoRemainder = 0
+            },
             modes() { //the modes you can pick right now
                 const modes = ["stab"]
                 if (tech.isRailEnergy) modes.push("sweep") //alternator
@@ -9198,10 +9845,12 @@ const b = {
                     tech.harpoonDensity += isRail ? 0.003 : -0.003
                     if (isRail) {
                         this.ammoPack *= 3
-                        this.ammo *= 6
+                        this.ammo = this.ammo * 6 + this.railAmmoRemainder
+                        this.railAmmoRemainder = 0
                     } else {
                         this.ammoPack /= 3
-                        this.ammo = Math.ceil(this.ammo / 6)
+                        this.railAmmoRemainder = Number.isFinite(this.ammo) ? this.ammo % 6 : 0
+                        this.ammo = Math.floor(this.ammo / 6)
                     }
                     simulation.updateGunHUD()
                 }
