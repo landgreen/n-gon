@@ -53,21 +53,23 @@ const level = {
                 m.maxHealth = m.health = 100
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
-                // m.maxEnergy = m.energy = 10000000
+                m.maxEnergy = m.energy = 10
 
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                // b.giveGuns(8)
-                // b.guns[b.inventory[0]].ammo = 100000
+                b.giveGuns(8)
+                b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
+                tech.giveTech("laminar flow")
                 tech.giveTech("electronvolt")
-                // tech.giveTech("soliton")
+                tech.giveTech("soliton")
                 tech.giveTech("electric potential")
-                // tech.giveTech("cold plasma")
-                for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
-                for (let i = 0; i < 3; i++) tech.giveTech("plasma jet")
-                for (let i = 0; i < 1; i++) tech.giveTech("Maxwells demon")
-                // for (let i = 0; i < 1; i++) tech.giveTech("plasma ball")
+                tech.giveTech("cold plasma")
+                // for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
+                // for (let i = 0; i < 3; i++) tech.giveTech("plasma jet")
+                // for (let i = 0; i < 1; i++) tech.giveTech("Maxwells demon")
+                for (let i = 0; i < 1; i++) tech.giveTech("plasma ball")
+                // tech.giveTech("plasma ring")
                 // for (let i = 0; i < 3; i++) tech.giveTech("nail-bot")
                 // level.constraint.find(c => c.description === "slow bots").effect()
                 // for (let i = 0; i < 1; ++i) tech.giveTech("optical resonator")
@@ -3221,6 +3223,15 @@ const level = {
         }
         return velocity
     },
+    portalBringDarkMatter() { //dark matter jumps to the player after they go through a portal, unless MACHO wants it away from them
+        if (tech.isNotDarkMatter) return
+        for (let i = 0; i < mob.length; i++) {
+            if (mob[i].isDarkMatter) {
+                Matter.Body.setPosition(mob[i], player.position)
+                Matter.Body.setVelocity(mob[i], { x: 0, y: 0 })
+            }
+        }
+    },
     portalExtent(who, axis) { //how far the solid parts of who reach along axis from its position, bounds can't be used because they stretch with velocity
         let min = Infinity
         let max = -Infinity
@@ -3295,6 +3306,7 @@ const level = {
                 const velocity = exitVelocity(player, this, to)
                 simulation.translatePlayerAndCamera(exitPosition(player, to))
                 Matter.Body.setVelocity(player, velocity);
+                level.portalBringDarkMatter()
                 if (tech.isHealAttract) { //send nearby heals out of the other portal
                     for (let i = 0; i < powerUp.length; i++) {
                         if (powerUp[i].name === "heal" && Vector.magnitudeSquared(Vector.sub(powerUp[i].position, this.portal.position)) < 1000000) {
@@ -3624,6 +3636,7 @@ const level = {
                     m.buttonCD_jump = 0 //disable short jumps when letting go of jump key
                     if (m.immuneCycle < m.cycle + 30) m.immuneCycle = m.cycle + 30; //not m.collisionImmuneCycles so Pauli exclusion doesn't trigger
                     simulation.translatePlayerAndCamera(where)
+                    level.portalBringDarkMatter()
                 } else {
                     Matter.Body.setPosition(who, where)
                 }

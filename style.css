@@ -991,6 +991,7 @@ body.has-autosave #start-button {
     user-select: none;
     font-size: 1.2em;
     font-family: monospace;
+    overflow-wrap: anywhere;
 }
 
 .color-text {
@@ -1163,6 +1164,30 @@ button [data-help] {
     stroke-linejoin: round;
     vector-effect: non-scaling-stroke;
     opacity: 0.45;
+}
+
+.hover-help-foam-bubbles {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.hover-help-foam-bubbles circle {
+    fill: rgba(0, 0, 0, 0.04);
+    stroke: #777;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+    opacity: 0.5;
+}
+
+.hover-help-foam-copy {
+    position: relative;
+    z-index: 1;
 }
 
 .hover-help-laser-copy {

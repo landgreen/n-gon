@@ -494,7 +494,7 @@ ${fullscreenRow}
 <details id = "console-log-details" style="padding: 0 8px;">
 <summary>console log</summary>
 <div class="pause-details">
-    <div class="pause-grid-module" style="background-color: #e2e9ec;font-size: 0.85em; font-family: monospace;">${document.getElementById("text-log").innerHTML}</div>
+    <div class="pause-grid-module" style="background-color: #e2e9ec;font-size: 0.85em; font-family: monospace; white-space: normal; overflow-wrap: anywhere;">${document.getElementById("text-log").innerHTML}</div>
     ${pauseConsole.html}
 </div>
 </details>

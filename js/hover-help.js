@@ -124,6 +124,13 @@ portal: +1 energy after going through a portal
         },
         plasma: `// <strong class="color-plasma">plasma</strong> damages<br>and slows mobs it touches
         <br><br>// <em>plasma is an ionized state of matter containing freely moving charged particles</em>`,
+        foam: `<svg class="hover-help-foam-bubbles" viewBox="0 0 200 120" preserveAspectRatio="xMaxYMax slice" aria-hidden="true" focusable="false">
+            <circle cx="182" cy="100" r="14"></circle><circle cx="158" cy="110" r="8"></circle><circle cx="190" cy="74" r="7"></circle>
+            <circle cx="164" cy="86" r="5"></circle><circle cx="140" cy="114" r="4"></circle><circle cx="176" cy="58" r="3.5"></circle>
+        </svg><span class="hover-help-foam-copy">// <strong>foam</strong> bubbles stick to mobs, <strong class="color-s">slow</strong> them, and do <strong class="color-d">damage</strong> over time
+        <br><br>// bubbles shrink until they pop, so bigger bubbles last longer
+        <br><br>// if their mob dies they come loose and stick to the next mob they touch
+        <br><br>// <em>foam is a substance made by trapping pockets of gas in a liquid or solid</em></span>`,
         laser: `<svg class="hover-help-laser-path" viewBox="0 0 200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
             <polyline points="0,94 200,34 87,0 0,26 200,86"></polyline>
         </svg><span class="hover-help-laser-copy">// <strong class="color-laser">laser</strong> beams bounce<br>off walls and instantly<br>damage mobs

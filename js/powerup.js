@@ -802,8 +802,8 @@ const powerUps = {
             if (tech.isCasimirRandom) {
                 if (Math.random() < 0.25) {
                     m.energy = 0.001
-                } else if (m.energy < 10) {
-                    m.addEnergy(10 - m.energy)
+                } else if (m.energy < 6 * m.maxEnergy) {
+                    m.energy = 6 * m.maxEnergy
                     for (let i = 0; i < 6; i++) simulation.energyGenGraphic()
                 }
             }

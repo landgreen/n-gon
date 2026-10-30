@@ -2688,7 +2688,7 @@ const tech = {
     {
         name: "foam-bot",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">foam-bot</a>`,
-        description: "construct a <strong class='color-bot' data-help='bot'>bot</strong> that sprays sticky <strong>foam</strong> at mobs",
+        description: "construct a <strong class='color-bot' data-help='bot'>bot</strong> that sprays sticky <strong data-help='foam'>foam</strong> at mobs",
         maxCount: 9,
         count: 0,
         frequency: 1,
@@ -5989,7 +5989,7 @@ const tech = {
         name: "vacuum energy",
         descriptionFunction() {
             return `after using ${powerUps.orb.coupling(1)} ${powerUps.orb.ammo(1)} ${powerUps.orb.boost(1)} ${powerUps.orb.heal(1)} ${powerUps.orb.Casimir(1)} ${powerUps.orb.research(1)} ${powerUps.orb.qubit(1)}<br>
-            set <strong class='energy' data-help='energy'>energy</strong> to <strong>1000</strong>, or <strong>25%</strong> of the time set it to <strong>0</strong>`
+            set <strong class='energy' data-help='energy'>energy</strong> to <strong>${(600 * m.maxEnergy).toFixed(0)}</strong>, or <strong>25%</strong> of the time set it to <strong>0</strong>`
         },
         maxCount: 1,
         count: 0,
@@ -7863,7 +7863,7 @@ const tech = {
     },
     {
         name: "foam-shot",
-        description: "<strong>shotgun</strong> sprays sticky <strong>foam</strong> bubbles",
+        description: "<strong>shotgun</strong> sprays sticky <strong data-help='foam'>foam</strong> bubbles",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -8132,7 +8132,7 @@ const tech = {
     {
         name: "polyurethane foam",
         descriptionFunction() {
-            return `<strong>super balls</strong> and ${b.guns[9].harpoonName()} colliding with mobs<br>catalyzes a reaction that yields <strong>foam</strong> bubbles`
+            return `<strong>super balls</strong> and ${b.guns[9].harpoonName()} colliding with mobs<br>catalyzes a reaction that yields <strong data-help='foam'>foam</strong> bubbles`
         },
         isGunTech: true,
         maxCount: 1,
@@ -9146,7 +9146,7 @@ const tech = {
     },
     {
         name: "elephants toothpaste",
-        description: "instead of nails <strong>mines</strong> catalyze a reaction<br>that yields <strong>foam</strong> bubbles",
+        description: "instead of nails <strong>mines</strong> catalyze a reaction<br>that yields <strong data-help='foam'>foam</strong> bubbles",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9375,7 +9375,7 @@ const tech = {
     },
     {
         name: "necrophage",
-        description: "if <strong>foam</strong>, <strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>fleas</strong>, or <strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>they grow <strong>2-3</strong> <strong>copies</strong>",
+        description: "if <strong data-help='foam'>foam</strong>, <strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>fleas</strong>, or <strong class='spore' data-help='spore' style='letter-spacing: -0.8px;'>worms</strong> <strong>kill</strong> their target<br>they grow <strong>2-3</strong> <strong>copies</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9763,7 +9763,7 @@ const tech = {
     },
     {
         name: "adhesive",
-        description: "<strong>foam</strong> makes mobs <strong>stick together</strong><br><strong>foam</strong> lasts <strong>2x</strong> longer and <strong class='color-s' data-help='slow'>slows</strong> mobs more",
+        description: "<strong data-help='foam'>foam</strong> makes mobs <strong>stick together</strong><br><strong data-help='foam'>foam</strong> lasts <strong>2x</strong> longer and <strong class='color-s' data-help='slow'>slows</strong> mobs more",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9782,7 +9782,7 @@ const tech = {
     },
     {
         name: "electrostatic induction",
-        description: "<strong>foam</strong> bubbles are electrically charged<br>causing <strong>attraction</strong> to nearby mobs",
+        description: "<strong data-help='foam'>foam</strong> bubbles are electrically charged<br>causing <strong>attraction</strong> to nearby mobs",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9801,7 +9801,7 @@ const tech = {
     },
     {
         name: "uncertainty principle",
-        description: "<strong>foam</strong>, <strong>wave</strong>, <strong>super ball</strong> positions are erratic<br><strong>1.5x</strong> <strong>foam</strong>, <strong>wave</strong>, <strong>super ball</strong> <strong class='color-d' data-help='damage'>damage</strong>",
+        description: "<strong data-help='foam'>foam</strong>, <strong>wave</strong>, <strong>super ball</strong> positions are erratic<br><strong>1.5x</strong> <strong data-help='foam'>foam</strong>, <strong>wave</strong>, <strong>super ball</strong> <strong class='color-d' data-help='damage'>damage</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9820,7 +9820,7 @@ const tech = {
     },
     {
         name: "surfactant",
-        description: `trade your <strong>foam</strong> ${powerUps.orb.gun()}<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span><br>for <strong>2</strong> <strong class='color-bot' data-help='bot'>foam-bots</strong> and <strong class='color-bot' data-help='bot'>foam-bot upgrade</strong>`,
+        description: `trade your <strong data-help='foam'>foam</strong> ${powerUps.orb.gun()}<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span><br>for <strong>2</strong> <strong class='color-bot' data-help='bot'>foam-bots</strong> and <strong class='color-bot' data-help='bot'>foam-bot upgrade</strong>`,
         // isGunTech: true,
         isRemoveGun: true,
         maxCount: 1,
@@ -9858,16 +9858,16 @@ const tech = {
     },
     {
         name: "surface tension",
-        description: "<strong>foam</strong> forms <strong>bubbles</strong> that <strong>merge</strong> on mobs<br>and catch more <strong>foam</strong>, <strong>1.4x</strong> <strong>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
+        description: "<strong data-help='foam'>foam</strong> forms <strong>bubbles</strong> that <strong>merge</strong> on mobs<br>and catch more <strong data-help='foam'>foam</strong>, <strong>1.4x</strong> <strong data-help='foam'>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return tech.hasFoamSourceCheck()
+            return tech.hasFoamSourceCheck() && !tech.isLaminarFoam
         },
-        requires: "foam",
+        requires: "foam, not laminar flow",
         effect() {
             tech.isFoamBubble = true
         },
@@ -9877,7 +9877,7 @@ const tech = {
     },
     {
         name: "aerogel",
-        description: "<strong>foam</strong> bubbles <strong>float</strong> with <strong>0.5x</strong> <strong>foam</strong> duration<br><strong>2.8x</strong> <strong>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
+        description: "<strong data-help='foam'>foam</strong> bubbles <strong>float</strong> with <strong>0.5x</strong> <strong data-help='foam'>foam</strong> duration<br><strong>2.8x</strong> <strong data-help='foam'>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9898,7 +9898,7 @@ const tech = {
     },
     {
         name: "Marangoni effect",
-        description: "<strong>1.4x</strong> <strong>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
+        description: "<strong>1.4x</strong> <strong data-help='foam'>foam</strong> <strong class='color-d' data-help='damage'>damage</strong>",
         isGunTech: true,
         maxCount: 9,
         count: 0,
@@ -9909,10 +9909,10 @@ const tech = {
         },
         requires: "foam",
         effect() {
-            tech.foamDamage += 0.01 * 0.4
+            tech.foamDamage += 0.0115 * 0.4
         },
         remove() {
-            tech.foamDamage = 0.01;
+            tech.foamDamage = 0.0115;
         }
     },
     {
@@ -9934,7 +9934,7 @@ const tech = {
             <option value="8" ${isSel(8)}>active laser medium - (2s laser)</option>
         </select>`;
             }
-            return `when <span class="color-paused" data-help="pause">PAUSED</span> you can select a <strong>foam</strong> <strong>effect</strong><br>${menu}`;
+            return `when <span class="color-paused" data-help="pause">PAUSED</span> you can select a <strong data-help='foam'>foam</strong> <strong>effect</strong><br>${menu}`;
         },
         isGunTech: true,
         maxCount: 1,
@@ -9954,7 +9954,7 @@ const tech = {
     },
     {
         name: "cavitation",
-        description: "<strong>25%</strong> chance to discharge a huge <strong>foam</strong> bubble<br><strong>2x</strong> <strong>foam</strong> gun <strong>recoil</strong>",
+        description: "<strong>25%</strong> chance to discharge a huge <strong data-help='foam'>foam</strong> bubble<br><strong>2x</strong> <strong data-help='foam'>foam</strong> gun <strong>recoil</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9975,7 +9975,7 @@ const tech = {
     },
     {
         name: "foam fractionation",
-        description: "if you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong><br><strong>2x</strong> <strong>foam</strong> bubble <strong>size</strong>",
+        description: "if you have below <strong>300</strong> <strong class='color-ammo'>ammo</strong><br><strong>2x</strong> <strong data-help='foam'>foam</strong> bubble <strong>size</strong>",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -9993,8 +9993,27 @@ const tech = {
         }
     },
     {
+        name: "laminar flow",
+        description: "<strong data-help='foam'>foam</strong> bubbles are <strong>identical</strong> and <strong>fall</strong> faster<br><strong>2x</strong> velocity, <strong>2x</strong> <strong class='color-s' data-help='slow'>slow</strong>, <strong>1.3x</strong> duration",
+        isGunTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return tech.haveGunCheck("foam") && !tech.isFoamBubble
+        },
+        requires: "foam, not surface tension",
+        effect() {
+            tech.isLaminarFoam = true
+        },
+        remove() {
+            tech.isLaminarFoam = false
+        }
+    },
+    {
         name: "ideal gas law",
-        description: `<strong>6x</strong> <strong>foam</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`, //remove <strong>all</strong> current <strong>foam</strong> <strong class='color-ammo'>ammo</strong><br>
+        description: `<strong>6x</strong> <strong data-help='foam'>foam</strong> <strong class='color-ammo'>ammo</strong> per ${powerUps.orb.ammo(1)}`, //remove <strong>all</strong> current <strong data-help='foam'>foam</strong> <strong class='color-ammo'>ammo</strong><br>
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -10021,7 +10040,7 @@ const tech = {
     },
     {
         name: "pressure vessel",
-        description: "build up <strong>charge</strong> while firing <strong>foam</strong><br>after firing <strong>discharge</strong> <strong>foam</strong> bubbles",
+        description: "build up <strong>charge</strong> while firing <strong data-help='foam'>foam</strong><br>after firing <strong>discharge</strong> <strong data-help='foam'>foam</strong> bubbles",
         isGunTech: true,
         maxCount: 1,
         count: 0,
@@ -10043,7 +10062,7 @@ const tech = {
     {
         name: "capacitor bank",
         descriptionFunction() {
-            return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style='font-size:85%;'><strong class='block' data-help='block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>`
+            return `<strong>charge</strong> effects build up almost <strong>instantly</strong><br><em style='font-size:85%;'><strong class='block' data-help='block'>blocks</strong>, ${tech.haveGunCheck("foam", false) ? "<strong data-help='foam'>foam</strong>" : "foam"}, ${tech.isPlasmaBall ? "<strong>plasma ball</strong>" : "plasma ball"}, ${tech.isRailGun ? "<strong>railgun</strong>" : "railgun"}, ${tech.isPulseLaser ? "<strong>pulse</strong>" : "pulse"}, ${tech.isTokamak ? "<strong>tokamak</strong>" : "tokamak"}</em>`
         },
         isGunTech: true,
         maxCount: 1,
@@ -11966,7 +11985,10 @@ const tech = {
     {
         name: "plasma-bot",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Robot' class="link">plasma-bot</a>`,
-        description: `trade your ${powerUps.orb.field()} for a<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span><br><strong class='color-bot' data-help='bot'>bot</strong> that uses <strong class='energy' data-help='energy'>energy</strong> to emit <strong class='color-plasma' data-help='plasma'>plasma</strong>`,
+        descriptionFunction() {
+            const cost = 6 * (tech.isElectronvolt ? b.electronvoltBotScale : 1) //b.plasmaBot drains 0.001 energy each cycle while firing, 6 per second
+            return `<span class='color-remove' data-help='eject'>eject</span> your ${powerUps.orb.field()} for a<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(3)}</span> <strong class='color-bot' data-help='bot'>bot</strong> that uses<br><strong>${cost}</strong> <strong class='energy' data-help='energy'>energy</strong> per second to emit <strong class='color-plasma' data-help='plasma'>plasma</strong>`
+        },
         // isFieldTech: true,
         isInstant: true,
         maxCount: 1,
@@ -11976,7 +11998,7 @@ const tech = {
         isBot: true,
         isBotTech: true,
         allowed() {
-            return m.fieldMode === 5 && !tech.isPlasmaBall && !tech.isPlasmaBoost && tech.extruderRange === 15 && !tech.isElectricPotential && (build.isExperimentSelection || powerUps.research.count > 1) //extruderRange is above 15 with refractory metal
+            return m.fieldMode === 5 && !tech.isPlasmaBall && !tech.isPlasmaBoost && tech.extruderRange === 15 && !tech.isElectricPotential && (build.isExperimentSelection || powerUps.research.count > 2) //extruderRange is above 15 with refractory metal
         },
         requires: "plasma torch, not plasma ball, refractory metal, electric potential, dielectric",
         effect() {
@@ -11987,7 +12009,8 @@ const tech = {
                 document.getElementById("field-0").classList.add("build-field-selected");
             }
             m.setField("field emitter")
-            powerUps.research.expend(2)
+            if (!build.isExperimentSelection) powerUps.spawn(m.pos.x, m.pos.y + 30, "field"); //eject plasma torch as a field power up that drops to the ground
+            powerUps.research.expend(3)
         },
         remove() {
             if (this.count > 0) {
@@ -12001,7 +12024,7 @@ const tech = {
                         document.getElementById("field-" + m.fieldMode).classList.add("build-field-selected");
                     }
                 }
-                powerUps.research.changeRerolls(2)
+                powerUps.research.changeRerolls(3)
             }
         }
     },
@@ -12033,11 +12056,11 @@ const tech = {
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Plasma_(physics)' class="link">plasma jet</a>`,
         descriptionFunction() {
             if (tech.isPlasmaBall) {
-                return `<strong>1.2x</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong> <strong>ball</strong> radius<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>${this.count ? `<br><em style ="float: right;">(${(0.6 + 0.4 * tech.isPlasmaRange).toFixed(1)}x)</em>&nbsp;` : ""}` //the ball's reach is 0.6 + 0.4 * isPlasmaRange of its size
+                return `<strong>1.2x</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong> <strong>ball</strong> radius<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(1)}</span>${this.count ? `<br><em style ="float: right;">(${(0.6 + 0.4 * tech.isPlasmaRange).toFixed(1)}x)</em>&nbsp;` : ""}` //the ball's reach is 0.6 + 0.4 * isPlasmaRange of its size
             } else if (m.fieldMode === 5) {
-                return `<strong>1.5x</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong> stream length<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>${this.count ? `<br><em style ="float: right;">(${tech.isPlasmaRange}x)</em>&nbsp;` : ""}`
+                return `<strong>1.5x</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong> stream length<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(1)}</span>${this.count ? `<br><em style ="float: right;">(${tech.isPlasmaRange}x)</em>&nbsp;` : ""}`
             } else {
-                return `<strong>1.5x</strong> <strong class='color-plasma' data-help='plasma'>plasma-bot</strong> range<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(2)}</span>${this.count ? `<br><em style ="float: right;">(${tech.isPlasmaRange}x)</em>&nbsp;` : ""}`
+                return `<strong>1.5x</strong> <strong class='color-plasma' data-help='plasma'>plasma-bot</strong> range<span style ="float: right;"><span class="expend" data-help="expend">expend</span> ${powerUps.orb.research(1)}</span>${this.count ? `<br><em style ="float: right;">(${tech.isPlasmaRange}x)</em>&nbsp;` : ""}`
             }
         },
         isFieldTech: true,
@@ -12046,16 +12069,16 @@ const tech = {
         frequency: 3,
         frequencyDefault: 3,
         allowed() {
-            return (tech.plasmaBotCount || m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 1)
+            return (tech.plasmaBotCount || m.fieldMode === 5) && (build.isExperimentSelection || powerUps.research.count > 0)
         },
         requires: "plasma torch",
         effect() {
             tech.isPlasmaRange += 0.5;
-            powerUps.research.expend(2)
+            powerUps.research.expend(1)
         },
         remove() {
             tech.isPlasmaRange = 1;
-            if (this.count > 0) powerUps.research.changeRerolls(2 * this.count)
+            if (this.count > 0) powerUps.research.changeRerolls(this.count)
         }
     },
     {
@@ -12084,7 +12107,7 @@ const tech = {
     },
     {
         name: "electric potential",
-        description: `your <strong class='color-plasma' data-help='plasma'>plasma</strong> stream is <strong>attracted</strong> to mobs<br>and <strong>2x</strong> longer while near them`,
+        description: `your <strong class='color-plasma' data-help='plasma'>plasma</strong> stream is <strong>attracted</strong> to mobs<br>and <strong>1.5x</strong> longer while near them`,
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -12109,14 +12132,14 @@ const tech = {
             const energy = `<strong class='energy' data-help='energy'>energy</strong>`
             const damage = `<strong class='color-d' data-help='damage'>damage</strong>`
             //the burst compared to one second of each mode's damage, the stream fully wrapped on a mob, plasma ball's contact, or plasma-bot's beam
-            const burst = (power, x) => `<strong>${(power * b.solitonDamage / (60 * x)).toFixed(1)}x</strong> ${damage}`
+            const burst = seconds => `<strong>${seconds.toFixed(1)}x</strong> ${damage}`
             const cost = (spend, perExcess) => `for <strong>${Number((100 * spend).toFixed(1))}</strong> ${energy}, <strong>+${Number(perExcess.toFixed(3))}x</strong> per excess ${energy}`
             if (tech.plasmaBotCount && m.fieldMode !== 5) {
                 const scale = tech.isElectronvolt ? b.electronvoltBotScale : 1 //electronvolt tech: 0.75x energy for the same damage
-                return `every <strong>${b.solitonDelay / 60}</strong> seconds <strong class='color-bot' data-help='bot'>plasma-bot</strong> sparks ${burst(1, 1.4)}<br>${cost(scale * b.solitonCost, 0.02 / scale)}`
+                return `every <strong>${b.solitonDelay / 60}</strong> seconds <strong class='color-bot' data-help='bot'>plasma-bot</strong> sparks ${burst(b.solitonDamage / (60 * 1.4))}<br>${cost(scale * b.solitonCost, 0.02 / scale)}`
             }
-            if (tech.isPlasmaBall) return `every <strong>${b.solitonDelay / 60}</strong> seconds ${plasma} ball bursts a ${burst(1, 0.7)} ring<br>${cost(b.solitonCost, 0.02)}`
-            return `<span style = 'font-size:90%;'>every <strong>${b.solitonDelay / 60}</strong> seconds a wave travels down your ${plasma} stream<br>${burst(b.extruder.solitonPower, b.extruder.dmg)} ${cost(b.extruder.solitonCost, b.extruder.solitonExcess)} </span>`
+            if (tech.isPlasmaBall && m.plasmaBall) return `every <strong>${b.solitonDelay / 60}</strong> seconds ${plasma} pulses ${burst(m.plasmaBall.solitonCycles / 60)}<br>${cost(b.solitonCost, 0.01)}`
+            return `<span style = 'font-size:90%;'>every <strong>${b.solitonDelay / 60}</strong> seconds a wave travels down your ${plasma} stream<br>${burst(b.extruder.solitonCycles / 60)} ${cost(b.extruder.solitonCost, b.extruder.solitonExcess)} </span>`
         },
         isFieldTech: true,
         maxCount: 1,
@@ -12141,7 +12164,7 @@ const tech = {
             const plasma = `<strong class='color-plasma' data-help='plasma'>plasma</strong>`
             const energy = `<strong class='energy' data-help='energy'>energy</strong>`
             if (tech.plasmaBotCount && m.fieldMode !== 5) return `<strong class='color-bot' data-help='bot'>plasma-bot</strong> uses<br><strong>${b.electronvoltBotScale}x</strong> ${energy}`
-            if (tech.isPlasmaBall) return `when your ${plasma} ball <strong>explodes</strong> get back<br><strong>0.75x</strong> the ${energy} it used`
+            if (tech.isPlasmaBall) return `mobs your ${plasma} ball damages send<br><strong>100</strong> ${energy} every <strong>${m.plasmaBall ? m.plasmaBall.electronvoltDelay / 60 : 3}</strong> seconds back to you`
             return `mobs touching the ${plasma} stream send<br><strong>100</strong> ${energy} per second upstream to you`
         },
         isFieldTech: true,
@@ -12190,7 +12213,7 @@ const tech = {
     },
     {
         name: "plasma ball",
-        description: "<strong>grow</strong> an expanding <strong>ball</strong> of <strong class='color-plasma' data-help='plasma'>plasma</strong>",
+        description: "<strong>grow</strong> a squishy <strong>ball</strong> of <strong class='color-plasma' data-help='plasma'>plasma</strong><br>it <strong>pushes</strong> you off surfaces and <strong>pops</strong> on walls",
         isFieldTech: true,
         maxCount: 1,
         count: 0,
@@ -12203,8 +12226,9 @@ const tech = {
         warmUp() { //see simulation.warmShaders
             if (m.plasmaBall) {
                 m.draw()
-                m.plasmaBall.draw(m.pos, 60, 0.7)
-                for (const alpha of [1, 0.5, 0.1]) m.plasmaBall.draw(m.pos, 300, alpha) //explosions fade out
+                const ring = radius => m.plasmaBall.ring.map(p => ({ x: m.pos.x + radius * p.ux, y: m.pos.y + radius * p.uy }))
+                m.plasmaBall.drawBlob(ring(60), m.pos.x, m.pos.y, 0.7)
+                for (const alpha of [1, 0.5, 0.1]) m.plasmaBall.drawBlob(ring(300), m.pos.x, m.pos.y, alpha) //explosions fade out
             }
         },
         effect() {
@@ -12256,6 +12280,29 @@ const tech = {
         },
         remove() {
             tech.isControlPlasma = false;
+        }
+    },
+    {
+        name: "plasma ring",
+        link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Vortex_ring' class="link">plasma ring</a>`,
+        description: "a <strong>bouncing</strong>, spinning <strong>loop</strong> of <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>2x</strong> <strong class='color-d' data-help='damage'>damage</strong>, but only along the loop",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 5 && tech.isPlasmaBall
+        },
+        requires: "plasma ball",
+        warmUp() { //see simulation.warmShaders
+            if (m.plasmaBall) m.plasmaBall.drawRing(m.plasmaBall.ring.map(p => ({ x: m.pos.x + 60 * p.ux, y: m.pos.y + 60 * p.uy })), 10, 0.7)
+        },
+        effect() {
+            tech.isPlasmaRing = true
+        },
+        remove() {
+            tech.isPlasmaRing = false
         }
     },
     {
@@ -16259,6 +16306,7 @@ const tech = {
     // isLaserMine: null,
     // isFoamMine: null,
     // isAmmoFoamSize: null,
+    // isLaminarFoam: null,
     // isIceIX: null,
     // isDupDamage: null,
     // isDupEnergy: null,
@@ -16374,6 +16422,7 @@ const tech = {
     // isDronesTravel: null,
     // isTechDebt: null,
     // isPlasmaBall: null,
+    // isPlasmaRing: null,
     // isPlasmaFreeze: null,
     // isElectricPotential: null,
     // isSoliton: null,

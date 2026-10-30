@@ -2332,8 +2332,8 @@ const b = {
                         }
                     }
                 }
-                if (tech.isFoamBall && this.foamSpawned < 55) {
-                    for (let i = 0, len = Math.min(33, 3 + 4 * Math.sqrt(this.mass)); i < len; i++) {
+                if (tech.isFoamBall && this.foamSpawned < 39) {
+                    for (let i = 0, len = 0.7 * Math.min(33, 3 + 4 * Math.sqrt(this.mass)); i < len; i++) {
                         const radius = 5 + 9 * Math.random()
                         const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
@@ -2994,8 +2994,8 @@ const b = {
                 });
                 if (tech.isLessDamageReduction && !who.shield) who.damageReduction *= who.isBoss ? (who.isFinalBoss ? 1.0005 : 1.0025) : 1.05
                 if (tech.fragments) b.targetedNail(touch, tech.fragments * Math.floor(2 + Math.random()))
-                if (tech.isFoamBall && h.foamSpawned < 55) {
-                    for (let j = 0, len = Math.min(33, 3 + 4 * Math.sqrt(mass)); j < len; j++) {
+                if (tech.isFoamBall && h.foamSpawned < 39) {
+                    for (let j = 0, len = 0.7 * Math.min(33, 3 + 4 * Math.sqrt(mass)); j < len; j++) {
                         const radius = 5 + 9 * Math.random()
                         b.foam(touch, Vector.rotate({ x: Math.max(0.5, 2 - radius * 0.1), y: 0 }, 6.28 * Math.random()), radius)
                         h.foamSpawned++
@@ -3323,7 +3323,7 @@ const b = {
         who.solitonSpent = cost + excess
         return 1 + perExcess * 100 * excess
     },
-    solitonDamage: 64, //soliton tech: damage for each plasma ball or plasma-bot burst, the stream's wave does solitonPower times this
+    solitonDamage: 64, //soliton tech: damage for each plasma-bot burst, the stream's wave and the plasma ball's pulse do their solitonCycles times their own base damage
     solitonCost: 0.1, //soliton tech: energy each plasma ball or plasma-bot burst costs
     solitonDelay: 240, //soliton tech: cycles between bursts, 4 seconds
     electronvoltBotScale: 0.75, //electronvolt tech: plasma-bot's beam and soliton bursts use this much energy
@@ -3371,13 +3371,12 @@ const b = {
         lowGap: 12, //gaps lower than this are too tight for the wire, so it treats them as walls
         range: 37, //cycles a point lasts, which sets how long the wire is, before plasma jet
         mobRange: 48, //cycles a point lasts while any of the wire touches a mob, before plasma jet
-        potentialRange: 74, //electric potential tech: cycles a point lasts once the wire bends toward or touches a mob, 2x range, before plasma jet
+        potentialRange: 56, //electric potential tech: cycles a point lasts once the wire bends toward or touches a mob, 1.5x range, before plasma jet
         potentialStretch: 24, //electric potential tech: the wire stretches this many cycles of travel between a point on a mob and its neighbor before it breaks, instead of breakGap
         potentialReach: 150, //electric potential tech: points flying free or riding the wave curve toward mobs this close to their edge
         potentialTurn: 0.3, //electric potential tech: how hard they curve each cycle, as a share of their speed
         life: 37, //cycles a point lasts right now, before plasma jet, it grows toward mobRange while the wire touches a mob and shrinks back after, 1 per cycle, so the whole wire stretches and shrinks together
         holdCycle: 0, //the wire keeps growing until this cycle, set by touching a mob, so even a quick touch stretches it all the way
-        hoseGravity: 0.6, //plasma torch's secret combo: how much a free point's speed turns downward each cycle
         mobReach: 20, //the wire flying this close to a mob's edge curves in and catches on it
         powerUpReach: 80, //the wire pulls in power ups this close to its edge, so the top of a 100 high arch still reaches one sitting on the floor under it
         breakGap: 6, //the wire breaks between neighbors farther apart than this many cycles of travel
@@ -3385,7 +3384,7 @@ const b = {
         healMobGap: 1.5, //healGap for a break with an end on a mob
         tuckGap: 2.5, //neighbors on surfaces whose line crosses the map or a block, with bases this many cycles of travel apart or closer, are wrapping the same corner, so they tuck in against it instead of breaking
         healWait: 3, //cycles in a row the two ends of a break have to stay close and not pull apart before it heals, so ends that only pass by each other stay broken
-        dmg: 0.66, //damage each cycle to a mob with fullHits points of the wire on it, the old plasma torch beam did 0.9 but only to one mob in a straight line
+        dmg: 0.3564, //damage each cycle to a mob with fullHits points of the wire on it, the old plasma torch beam did 0.9 but only to one mob in a straight line
         fullHits: 25, //points of the wire on a mob for full damage, about 2 wraps around a normal mob, more points add a little more
         kneeHits: 45, //past this many points on a mob, more than a normal wire wraps, damage grows as (hits / kneeHits) ** wrapPower instead of fading out
         wrapPower: 0.75, //between square root and linear, so a long wire coiled up on one mob never stops adding damage
@@ -3406,9 +3405,9 @@ const b = {
         solitons: [], //soliton tech: wave packets traveling down the wire, each is { at, hits, dmg, bonus }, at is the born cycle of the point it's on, counting down toward the tip, hits are the mobs it already burned
         solitonCycle: 0, //the next wave packet can start after this cycle
         solitonCost: 0.05, //energy each wave packet costs
-        solitonPower: 2, //each wave packet does this times b.solitonDamage, about 194 cycles of the stream's full damage
+        solitonCycles: 194, //each wave packet does this many cycles of the stream's full damage, so it scales with dmg
         solitonExcess: 0.01, //each 1 energy above max a wave packet spends adds this times its damage
-        drain: 0.00075, //energy the stream costs each cycle, on top of the field's drain that cancels its regen, same as the old plasma torch beam
+        drain: 0.0009, //energy the stream costs each cycle, on top of the field's drain that cancels its regen, 1.2x the old plasma torch beam
         charges: [], //electronvolt tech: wave packets riding the wire back to the player from a wrapped mob, each is { at }, the born cycle of the point it's on, counting up toward the nose
         cold: null, //cold plasma tech: the one wave bouncing along the wire, { at, isOut }, at is the born cycle of the point it's on, isOut while it heads for the tip
         clear() {
@@ -3563,7 +3562,7 @@ const b = {
             this.tidy(wire, solid, walls, [blocks, grips], this.wasFiring)
             const isTouching = this.damage(mobs, wire)
             if (powerUp.length) this.pushPowerUps(wire, minX, maxX, minY, maxY)
-            const longest = tech.isElectricPotential ? this.potentialRange : this.mobRange //electric potential tech: 2x longer once it bends toward a mob
+            const longest = tech.isElectricPotential ? this.potentialRange : this.mobRange //electric potential tech: 1.5x longer once it bends toward a mob
             if (isTouching || isAttracted) this.holdCycle = simulation.cycle + longest - this.range
             this.life = Math.max(this.range, Math.min(longest, this.life + (simulation.cycle < this.holdCycle ? 1 : -1)))
         },
@@ -3763,7 +3762,6 @@ const b = {
         },
         fly(p, older, newer, solid) { //move a free point in a straight line, and with the player, landing on whatever it hits
             //older and newer are the points fired just before and after it, it moves with most of the player's velocity, so the free wire moves almost as one piece
-            if (m.fieldUpgrades[5].isHose) p.vy += this.hoseGravity //plasma torch's secret combo: it falls like water from a hose
             const dx = p.vx + 0.7 * player.velocity.x
             const dy = p.vy + 0.7 * player.velocity.y
             const end = { x: p.x + dx, y: p.y + dy }
@@ -3871,11 +3869,11 @@ const b = {
             this.trace(this.wire)
             if (isFiring) ctx.lineTo(noseX, noseY)
             ctx.lineWidth = Math.min(80, tech.extruderRange) //the glow shows refractory metal's reach, but a very wide stroke is slow to draw
-            const isHose = m.fieldUpgrades[5].isHose //plasma torch's secret combo: a watery violet, less saturated than cold plasma's blue
-            ctx.strokeStyle = isHose ? "rgba(140,110,255,0.08)" : "rgba(255,0,110,0.06)"
+            const isHighPower = m.fieldUpgrades[5].isHighPower //plasma torch's secret combo: lavender, less saturated than cold plasma's blue
+            ctx.strokeStyle = isHighPower ? "rgba(140,110,255,0.08)" : "rgba(255,0,110,0.06)"
             ctx.stroke()
             ctx.lineWidth = 4
-            ctx.strokeStyle = isHose ? "rgb(140,110,255)" : "#f07"
+            ctx.strokeStyle = isHighPower ? "rgb(140,110,255)" : "#f07"
             ctx.stroke()
             if (this.cold) { //a filled blue wave, the color of frozen mobs' outline
                 ctx.beginPath()
@@ -3910,7 +3908,7 @@ const b = {
             const wire = this.wire
             if (isFiring && wire.length > 14) { //wait for the wire to grow, so it has somewhere to ride
                 const bonus = b.solitonReady(this, this.solitonCost, this.solitonExcess)
-                if (bonus) this.solitons.push({ at: wire[wire.length - 1].born, hits: [], dmg: this.solitonPower * b.solitonDamage * bonus, bonus })
+                if (bonus) this.solitons.push({ at: wire[wire.length - 1].born, hits: [], dmg: this.solitonCycles * this.dmg * bonus, bonus })
             } else if (this.solitonCycle < simulation.cycle + 20) { //the last third of a second of cooldown only ticks once the wire is ready, so a packet doesn't start right with cold plasma's wave
                 this.solitonCycle = simulation.cycle + 20
             }
@@ -3956,19 +3954,26 @@ const b = {
                 const isPushed = who.streamPushCycle > simulation.cycle
                 const r = who.size + reach + (isPushed ? 25 : 0) //a power up already on the wire holds on from a bit farther
                 if (x > minX - r && x < maxX + r && y > minY - r && y < maxY + r) {
+                    //use the closest checked point, the first one in reach can be several points toward the tip, since reach is much wider than the gap between points
+                    let closest = -1
+                    let closestDist2 = r * r
                     for (let i = simulation.cycle % stride, len = wire.length; i < len; i += stride) {
-                        const p = wire[i]
-                        const dx = p.x - x
-                        const dy = p.y - y
-                        if (dx * dx + dy * dy > r * r) continue
-                        let next = m.pos //aim at a point 3 closer to the nose, so it's pulled onto the wire as it goes, or straight to the player from the end of a line
-                        for (let j = i + 1; j < len && j < i + 4 && !wire[j].isBranch; j++) next = wire[j]
+                        const dx = wire[i].x - x
+                        const dy = wire[i].y - y
+                        const dist2 = dx * dx + dy * dy
+                        if (dist2 < closestDist2) {
+                            closest = i
+                            closestDist2 = dist2
+                        }
+                    }
+                    if (closest > -1) {
+                        let next = m.pos //aim at a point 5 closer to the nose, past the closest point skipped by the stride, so it's pulled onto the wire as it goes, or straight to the player from the end of a line
+                        for (let j = closest + 1; j < wire.length && j < closest + 6 && !wire[j].isBranch; j++) next = wire[j]
                         const ux = next.x - x
                         const uy = next.y - y
                         const length = Math.sqrt(ux * ux + uy * uy) || 1
                         who.streamPush = { x: ux / length, y: uy / length }
                         who.streamPushCycle = simulation.cycle + 2 * stride
-                        break
                     }
                 }
                 if (who.streamPushCycle > simulation.cycle) { //friction and a strong pull, easing toward 27 speed down the wire, with no gravity
@@ -5903,7 +5908,7 @@ const b = {
             if (!who.isInvulnerable) {
                 if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                 if (tech.isFoamBall) {
-                    for (let i = 0, len = 8 * this.mass; i < len; i++) {
+                    for (let i = 0, len = 5.6 * this.mass; i < len; i++) {
                         const radius = 6 + 9 * Math.random()
                         const velocity = { x: Math.max(0.5, 2 - radius * 0.1), y: 0 }
                         b.foam(this.position, Vector.rotate(velocity, 6.28 * Math.random()), radius)
@@ -6098,6 +6103,13 @@ const b = {
         }
         return shotsFired
     },
+    laminarGravity: 0.001, //laminar flow foam falls, much more than normal foam
+    laminarPush(who, velocity) { //laminar flow foam pushes the mob it hits along the foam's path, less for heavy mobs
+        if (who.isStatic || who.isBadTarget) return
+        const dir = Vector.normalise(velocity)
+        if (Vector.dot(who.velocity, dir) > 3) return //already moving away, so mobs don't get pushed out of range
+        Matter.Body.setVelocity(who, Vector.add(who.velocity, Vector.mult(dir, Math.min(0.6, 0.8 / Math.sqrt(who.mass)))))
+    },
     foamAdhesion(who) {
         // All bubbles on this mob share one proximity check and pull per cycle.
         if (who.foamAdhesionCycle === simulation.cycle) return;
@@ -6168,9 +6180,11 @@ const b = {
             targetRelativePosition: null,
             portFrequency: 7 + Math.floor(5 * Math.random()),
             nextPortCycle: Infinity, //disabled unless you have the teleport tech
+            isLaminar: false, //set by laminar flow
             beforeDmg(who) {
                 if (!this.target && who.alive && !who.isInvulnerable) {
                     this.target = who;
+                    if (this.isLaminar) b.laminarPush(who, this.velocity)
                     if (who.radius < 20) {
                         this.targetRelativePosition = { x: 0, y: 0 } //find relative position vector for zero mob rotation
                     } else {
@@ -6255,13 +6269,13 @@ const b = {
                     } else {
                         Matter.Body.setPosition(this, Vector.add(Vector.add(rotate, this.target.velocity), this.target.position))
                     }
-                    if (this.target.isBoss) {
-                        if (this.target.speed > 6.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.975))
+                    if (this.target.isBoss) { //laminar flow slows 2x
+                        if (this.target.speed > 6.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, this.isLaminar ? 0.95 : 0.975))
                     } else {
-                        if (this.target.speed > 2.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, 0.94))
+                        if (this.target.speed > 2.5) Matter.Body.setVelocity(this.target, Vector.mult(this.target.velocity, this.isLaminar ? 0.88 : 0.94))
                     }
 
-                    Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9);
+                    Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * (this.isLaminar ? 0.81 : 0.9));
                     // Matter.Body.setAngularVelocity(this.target, this.target.angularVelocity * 0.9)
                     if (this.target.isShielded) {
                         this.target.damage(this.damage, true, this.position); //shield damage bypass
@@ -6308,7 +6322,7 @@ const b = {
                     Matter.Body.scale(this, SCALE, SCALE);
                     this.radius *= SCALE;
                 } else {
-                    this.force.y += this.mass * tech.foamGravity; //gravity
+                    this.force.y += this.mass * (this.isLaminar ? b.laminarGravity : tech.foamGravity); //gravity
                     if (tech.isFoamAttract) {
                         for (let i = 0, len = mob.length; i < len; i++) {
                             const range = Vector.magnitude(Vector.sub(mob[i].position, this.position))
@@ -8069,11 +8083,12 @@ const b = {
                 const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
                 if (distanceToPlayer > 150) this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration) //if far away move towards player
                 Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
+                const rangeScale = tech.isPlasmaRange * tech.bulletsLastLonger //plasma jet tech and anti-shear topology tech, each one's stacks add up, and the two multiply
 
                 if (!(simulation.cycle % this.lookFrequency)) { //find closest
                     this.lockedOn = null;
                     if (!m.isCloak) {
-                        let closeDist = tech.isPlasmaRange * 1000;
+                        let closeDist = rangeScale * 1000;
                         for (let i = 0, len = mob.length; i < len; ++i) {
                             const DIST = Vector.magnitude(Vector.sub(this.position, mob[i].position)) - mob[i].radius;
                             if (
@@ -8093,12 +8108,12 @@ const b = {
                     const sub = Vector.sub(this.lockedOn.position, this.position)
                     const DIST = Vector.magnitude(sub);
                     const unit = Vector.normalise(sub)
-                    if (DIST < tech.isPlasmaRange * 450 && m.energy > this.drainThreshold) {
+                    if (DIST < rangeScale * 450 && m.energy > this.drainThreshold) {
                         const energyScale = tech.isElectronvolt ? b.electronvoltBotScale : 1 //electronvolt tech: 0.75x energy
                         m.energy -= 0.001 * energyScale
                         //calculate laser collision
                         let best;
-                        let range = tech.isPlasmaRange * (120 + 300 * Math.sqrt(Math.random()))
+                        let range = rangeScale * (120 + 300 * Math.sqrt(Math.random()))
                         const path = [{ x: this.position.x, y: this.position.y }, { x: this.position.x + range * unit.x, y: this.position.y + range * unit.y }];
                         //check for collisions
                         best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
@@ -9692,7 +9707,7 @@ const b = {
         {
             name: "foam", //8
             descriptionFunction() {
-                return `spray bubbly <strong>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s' data-help='slow'>slows</strong> mobs and does <strong class='color-d' data-help='damage'>damage</strong> over time<br><strong>${Number((0.5 * this.ammoPack).toFixed(1))}</strong> bubbles per ${powerUps.orb.ammo()}`
+                return `spray bubbly <strong data-help='foam'>foam</strong> that <strong>sticks</strong> to mobs<br><strong class='color-s' data-help='slow'>slows</strong> mobs and does <strong class='color-d' data-help='damage'>damage</strong> over time<br><strong>${Number((0.5 * this.ammoPack).toFixed(1))}</strong> bubbles per ${powerUps.orb.ammo()}`
             },
             ammo: 0,
             ammoPack: 12.6,
@@ -9735,16 +9750,21 @@ const b = {
             },
             doStream() { },
             sprayBubble(spread, speedFromRadius) { //fire 1 bubble from in front of the player
-                const radius = 5 + 8 * Math.random() + (tech.isAmmoFoamSize && this.ammo < 300) * 12
-                const SPEED = speedFromRadius(radius)
-                const dir = m.angle + 0.15 * (Math.random() - 0.5)
+                if (tech.isLaminarFoam) spread = 0 //laminar flow: every bubble has the same size, speed, and direction
+                const radius = (tech.isLaminarFoam ? 9 : 5 + 8 * Math.random()) + (tech.isAmmoFoamSize && this.ammo < 300) * 12
+                const SPEED = speedFromRadius(radius) * (tech.isLaminarFoam ? 2 : 1)
+                const dir = m.angle + (tech.isLaminarFoam ? 0 : 0.15 * (Math.random() - 0.5))
                 const velocity = {
                     x: 0.7 * player.velocity.x + SPEED * Math.cos(dir),
                     y: 0.5 * player.velocity.y + SPEED * Math.sin(dir)
                 }
                 const r = 30 * player.scale
                 const position = { x: m.pos.x + r * Math.cos(m.angle), y: m.pos.y + r * Math.sin(m.angle) }
-                b.foam(position, Vector.rotate(velocity, spread), radius)
+                const foam = b.foam(position, Vector.rotate(velocity, spread), radius)
+                if (tech.isLaminarFoam) { //falls, slows mobs more, and pushes them back
+                    foam.isLaminar = true
+                    foam.scale = Math.pow(foam.scale, 1 / 1.3) //shrinks slower, 1.3x duration
+                }
                 this.applyKnock(velocity)
             },
             fireStream() {
@@ -10135,7 +10155,7 @@ const b = {
             have: false,
             nameString(suffix = "") {
                 if (tech.isFoamMine) {
-                    return `<strong>foam</strong>`
+                    return `<strong data-help='foam'>foam</strong>`
                 } else if (tech.isSuperMine) {
                     return `<strong>super ball${suffix}</strong>`
                 } else {

@@ -3584,7 +3584,7 @@ const m = {
             m.fieldRegen = 0.002 //12 energy per second molecular assembler
             m.fieldRegen += 0.0001667 * m.coupling
         } else if (m.fieldMode === 5) {
-            m.fieldRegen = 0.001667 //10 energy per second  plasma torch
+            m.fieldRegen = m.fieldUpgrades[5].isHighPower ? 0.0005 : 0.001667 //10 energy per second  plasma torch, 3 with its secret combo
         } else if (m.fieldMode === 8) {
             m.fieldRegen = 0.001667 //10 energy per second pilot wave
         } else if (m.fieldMode === 9) {
@@ -4587,13 +4587,7 @@ const m = {
         if (m.fieldMode === 2) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldPosition<span class='color-symbol'>+=</span>10 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">← → ← → ↧</em>`);
         if (m.fieldMode === 3) simulation.inGameConsole(`body<span class='color-symbol'>[i].</span>force <span class='color-symbol'>=</span> push &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↑→↑↑</em>`);
         if (m.fieldMode === 4) simulation.inGameConsole(`simulation<span class='color-symbol'>.</span>molecularMode <span class='color-symbol'>=</span> ${m.fieldUpgrades[4].modeText()} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↓→↓←↑↑↓</em>`);
-        if (m.fieldMode === 5) {
-            if (tech.isPlasmaBall) {
-                simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.08 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↧</em>`);
-            } else {
-                simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHose <span class='color-symbol'>=</span> ${m.fieldUpgrades[5].isHose} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↓</em>`);
-            }
-        }
+        if (m.fieldMode === 5) simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHighPower <span class='color-symbol'>=</span> ${m.fieldUpgrades[5].isHighPower} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">←↓→→↓</em>`);
         if (m.fieldMode === 6) simulation.inGameConsole(`m<span class='color-symbol'>.</span>history<span class='color-symbol'>[(</span>m<span class='color-symbol'>.</span>cycle<span class='color-symbol'>-</span>200<span class='color-symbol'>)</span><span class='color-symbol'>%</span>600<span class='color-symbol'>]</span> <em style="float: right;font-family: monospace;font-size: 0.9rem;color: #055;">←↓→↑←↓→↑</em>`);
         if (m.fieldMode === 7) simulation.inGameConsole(`<strong>4</strong><span class='color-symbol'>→</span><strong>5.5x</strong> <strong class='color-cloaked' data-help='cloaking'>decloaking</strong> <strong class='color-d' data-help='damage'>damage</strong> <em style="float: right;font-family: monospace;font-size: 1rem;color: #055;">↑↓←↓→</em>`);
         if (m.fieldMode === 8) simulation.inGameConsole(`Composite<span class='color-symbol'>.</span>add<span class='color-symbol'>(</span>engine.world<span class='color-symbol'>,</span> block<span class='color-symbol'>)</span> <em style ="float: right; font-family: monospace;font-size:1rem;color:#055;">↓↓→↓←↓↓</em>`);
@@ -5731,11 +5725,12 @@ const m = {
             descriptionFunction() {
                 const isBall = tech.isPlasmaBall && m.plasmaBall
                 const energy = `<strong class='energy' data-help='energy'>energy</strong>`
-                const drain = (6000 * (isBall ? m.plasmaBall.drain : b.extruder.drain)).toFixed(1) //while it's on, regen stops and this drains, per second
-                return `use ${energy} to ${isBall ? "grow a <strong>ball</strong> of" : "<strong>stream</strong> a jet of"} hot <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>1.5x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>10</strong> ${energy} per second, <strong>-${drain}</strong> while ${isBall ? "charging" : "streaming"}<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">${tech.isPlasmaBall ? "←↓→→↧" : "←↓→→↓"}</em>`
+                const drain = isBall ? m.plasmaBall.drain * (tech.isCapacitor ? 2 : 1) : b.extruder.drain //per cycle while streaming or charging
+                const cost = Number((6000 * drain).toFixed(1)) //fieldOn() also cancels the 10 energy per second regen, so it counts toward the cost
+                return `use <strong>${cost}</strong> ${energy} per second to <strong>stream</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 4 : 2.5}x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 3 : 10}</strong> ${energy} per second<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>`
             },
             keyLog: [null, null, null, null, null],
-            isHose: false, //secret combo: the free plasma stream droops under gravity, like water from a hose
+            isHighPower: false, //secret combo: 4x damage instead of 2.5x, but 3 energy per second regen instead of 10, see m.setFieldRegen()
             fieldOn(isDraining = true) { //used by every plasma mode while the field button is held, isDraining false lets energy regenerate while the stream is out of energy
                 if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
                 if (isDraining && m.energy > m.fieldRegen) m.energy -= m.fieldRegen
@@ -5751,101 +5746,19 @@ const m = {
                     const patternB = [input.key.left, input.key.down, input.key.right, input.key.right, input.key.down]
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[5].keyLog, patternA) || arraysEqual(m.fieldUpgrades[5].keyLog, patternB)) {
-                        if (!tech.isPlasmaBall) { //the stream toggles hose mode, plasma ball keeps the old combo, holding down to pull in arcs
-                            m.fieldUpgrades[5].isHose = !m.fieldUpgrades[5].isHose
-                            simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHose <span class='color-symbol'>=</span> ${m.fieldUpgrades[5].isHose} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>`);
-                            return
-                        }
-                        simulation.ephemera.push({
-                            do() {
-                                if (!input.down || input.field || input.fire || m.fieldMode !== 5) {
-                                    simulation.removeEphemera(this)
-                                    return
-                                }
-                                if (!(simulation.cycle % 6)) {
-                                    //look for closest mob in player's LoS
-                                    const closest = { distance: 1500, target: null }
-                                    const dir = { x: Math.cos(m.angle), y: Math.sin(m.angle) };
-                                    for (let i = 0, len = mob.length; i < len; ++i) {
-                                        if (!mob[i].isInvulnerable && mob[i].alive) {
-                                            const sub = Vector.sub(mob[i].position, m.pos)
-                                            const dist = Vector.magnitude(sub)
-                                            //target closest mob that player is looking at and can see
-                                            if (dist < closest.distance && Vector.dot(dir, sub) > 0.65 * dist && !Matter.Query.rayAny(map, m.pos, mob[i].position)) {
-                                                closest.distance = dist
-                                                if (closest.target === null || Math.random() < 0.5) closest.target = mob[i]
-                                            }
-                                        }
-                                    }
-
-                                    let where
-                                    if (closest.target) {
-                                        where = closest.target.vertices[Math.floor(closest.target.vertices.length * Math.random())]
-                                    } else {
-                                        where = Vector.add(m.pos, Vector.rotate(Vector.mult(dir, Math.floor(300 + 800 * Math.random())), (Math.random() - 0.5)))
-                                    }
-                                    simulation.ephemera.push({
-                                        count: 25,
-                                        isProjectile: true, //an arc on its way to the player, b.clearProjectiles() discards it
-                                        who: closest.target,
-                                        where: where,
-                                        isReady: true,
-                                        path: [where],
-                                        do() {
-                                            this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this)
-                                            if (this.isReady) {
-                                                if (Vector.magnitudeSquared(Vector.sub(m.pos, this.where)) > 1000) { //walk the arc toward the player
-                                                    const v = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.where)), 20 + Math.floor(60 * Math.random()))
-                                                    this.path.push(this.where)
-                                                    this.where = Vector.add(this.where, Vector.rotate(v, 1 * (Math.random() - 0.5)))
-                                                } else if (this.who) { //arc reached the player
-                                                    this.isReady = false
-                                                    m.addEnergy(0.08)
-                                                    simulation.energyGenGraphic()
-                                                    this.who.damage(0.08);
-                                                    //mob vertex
-                                                    simulation.drawList.push({
-                                                        x: this.path[0].x,
-                                                        y: this.path[0].y,
-                                                        radius: 8,
-                                                        color: "rgba(136,136,255,0.9)",
-                                                        time: simulation.drawTime
-                                                    });
-                                                    //near player
-                                                    simulation.drawList.push({
-                                                        x: this.path[this.path.length - 1].x,
-                                                        y: this.path[this.path.length - 1].y,
-                                                        radius: 6 + Math.floor(5 * Math.random()),
-                                                        color: "rgba(136,136,255,0.9)",
-                                                        time: simulation.drawTime
-                                                    });
-                                                    const slow = this.who.speed > 1 ? 0.1 : 0.3
-                                                    Matter.Body.setVelocity(this.who, { x: this.who.velocity.x * slow, y: this.who.velocity.y * slow });
-                                                }
-                                            }
-                                            ctx.beginPath();
-                                            ctx.moveTo(this.path[0].x, this.path[0].y);
-                                            for (let i = 0, len = this.path.length; i < len; i++) ctx.lineTo(this.path[i].x, this.path[i].y);
-                                            ctx.strokeStyle = "#88f";
-                                            ctx.lineWidth = 1 + 1 * Math.random();
-                                            ctx.stroke();
-                                            ctx.strokeStyle = "rgba(136,136,255,0.15)";
-                                            ctx.lineWidth = 15 + 10 * Math.random();
-                                            ctx.stroke();
-
-                                        },
-                                    })
-                                }
-                            },
-                        })
-                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>energy <span class='color-symbol'>+=</span> 0.08 &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↧</em>`);
+                        m.fieldUpgrades[5].isHighPower = !m.fieldUpgrades[5].isHighPower //trade energy regen for damage
+                        m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.5
+                        m.setFieldRegen()
+                        const isOn = m.fieldUpgrades[5].isHighPower
+                        simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHighPower <span class='color-symbol'>=</span> ${isOn} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>
+                            <br><span class='color-var'>m</span>.<span class='color-d'>fieldDamage</span> <span class='color-symbol'>=</span> ${m.fieldDamage} <em>//${isOn ? "more damage" : "back to normal damage"}</em>
+                            <br><span class='color-var'>m</span>.<span class='energy'>fieldRegen</span> <span class='color-symbol'>=</span> ${Number((6000 * m.fieldRegen).toFixed(1))} <em>//energy per second${isOn ? ", traded away for damage" : ", back to normal regen"}</em>`);
                     }
                 }
                 window.addEventListener("keydown", m.fieldEvent);
 
                 b.extruder.clear()
-                m.fieldDamage = 1.5
+                m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.5 //secret combo
                 if (m.plasmaBall) {
                     Matter.Composite.remove(engine.world, m.plasmaBall);
                     m.plasmaBall = null
@@ -5858,55 +5771,512 @@ const m = {
                         alpha: 0.7,
                         isAttached: false,
                         isOn: false,
-                        drain: 0.0018,
-                        energyIn: 0, //electronvolt tech: energy spent charging, firing, and soliton rings on this ball, 0.75x comes back when it explodes
+                        drain: 0.00144, //energy each cycle while charging
+                        flyDrain: 0.375, //a fired ball keeps draining this share of drain each cycle while it's out
+                        electronvoltDelay: 180, //electronvolt tech: each mob the ball damages sends 100 energy back at most this often, the stream's is every 60
+                        releaseSpeed: 0, //cyclotron tech: a slowed ball speeds back up to this
                         radiusLimit: 10,
-                        damage: 0.7,
+                        damage: 0.3864, //each cycle to mobs touching the ball, and its explosion does this each cycle
+                        arcDamage: 13.56, //each electric arc does this times damage
+                        solitonCycles: 120, //soliton tech: the ball's pulse does this many cycles of its damage, 2 seconds of touching it, so it scales with damage, plasma ring and cyclotron multiply it like the rest
+                        growRate: 16, //how fast the ball grows while charging, slower as it gets bigger, capacitor bank tech is 3x
+                        pressedGrowth: 1.7, //growth slows by this times pressed, down to 0.5x, so charging over the floor grows about 0.7x as fast
+                        squeezeFree: 0.025, //squeezed less than this, the ball grows like normal, more and it shrinks, pressed against the floor is about 0.02
+                        squeezeStop: 0.045, //squeezed this much or more, the ball stops growing, its growth fades out from squeezeFree to here
+                        squeezeShrink: 0.05, //how fast a squeezed ball shrinks each cycle, times how far squeezed is past squeezeFree
                         effectRadius: 10,
+                        ring: Array.from({ length: 24 }, (_, i) => ({ x: Math.cos(2 * Math.PI * i / 24), y: Math.sin(2 * Math.PI * i / 24), ux: Math.cos(2 * Math.PI * i / 24), uy: Math.sin(2 * Math.PI * i / 24), vx: 0, vy: 0, fx: 0, fy: 0, mx: 0, my: 0, wx: 0, wy: 0 })), //the ball is a soft body, a ring of points around its center, x, y is from the center, ux, uy is the way to its spot when round, mx, my is the push from mobs this cycle, wx, wy is where it was in the world last cycle
+                        ringRadius: 1, //the ball's size the ring was last scaled to
+                        near: [], //map bodies close enough for the ring to touch, found each cycle
+                        stiffness: 0.03, //how hard each point springs back to its spot when round
+                        pressure: 0.5, //how hard the ball pushes out to keep its area when it's squished
+                        damping: 0.95, //share of a point's speed it keeps each cycle
+                        ripple: 0.02, //small random kicks keep the ring rippling, each is up to this times the ball's size
+                        rippleKicks: 3, //points kicked each cycle
+                        mobReach: 0.3, //the ring reaches toward mobs this close to it, times the ball's size
+                        mobPull: 0.012, //how hard the ring reaches toward a close mob, times the ball's size, strongest at the mob's edge
+                        mobPush: 0.1, //how hard a mob pushes the ring out of itself, times how far in it is, soft so mobs can poke through
+                        mobCouple: 0.01, //share of the push and pull between the ring and mobs that moves a fired ball, so it slows and swerves around them
+                        mobForce: { x: 0, y: 0 }, //the push and pull between the ring and mobs this cycle
+                        ringDamage: 2, //plasma ring tech: all its damage is this times the ball's, touching the ring, arcs, soliton, and explosion, its description says 2x
+                        ringWidth: 0.3, //plasma ring tech: how thick the ring is, times the ball's size
+                        ringOval: 0.35, //plasma ring tech: how stretched the oval is, its long side is about 1 + this times the ball's size and its short side 1 / that, so it keeps its area
+                        ringSpinRate: 0.006, //plasma ring tech: how fast the oval turns each cycle on average, about once every 17 seconds, it speeds up and slows down
+                        ringRipple: 0.016, //plasma ring tech: ripple for the ring, its kicks are lumps instead of single points
+                        ringRippleSpread: 3, //plasma ring tech: points on each side of a kicked point that get kicked too, less and less further out
+                        ringMobSpread: 2, //plasma ring tech: a mob's push and pull on a point is shared with this many points on each side, less and less further out, so the ring bends in wide curves instead of kinks
+                        ringSpin: 0, //plasma ring tech: which way the oval points
+                        squash: 0, //how far the most squished point is pushed in toward the center by the map, 0 to 1
+                        pressed: 0, //how far the map pushes the ring in on average over all its points, 0 to 1, a light touch is near 0
+                        squeezed: 0, //how much of pressed comes from opposite sides, so it cancels out instead of pushing, near 0 against one surface, high in a space smaller than the ball
+                        fill: 1, //share of its area the ring has right now
+                        push: { x: 0, y: 0 }, //which way the map pushes the ball, longer the more squished it is
+                        pushPower: 3.25, //an attached ball squished against the map pushes the player away from it, up to about this times gravity
+                        squashDrag: 0.1, //a fired ball squishing into the map slows down by this share of its speed each cycle, times squash
+                        popSquash: 0.55, //a fired ball pops when it's squished this much while it's moving into the map, so it can still slide along the floor
+                        bounceSquash: 0.35, //plasma ring tech: a fired ring bounces back once it's squished this much while it's moving into the map
+                        bounciness: 0.9, //plasma ring tech: share of its speed into the map a ring keeps when it bounces
                         setPositionToNose() {
                             const r = 27 * player.scale
                             const unit = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
                             Matter.Body.setPosition(this, Vector.add(m.pos, Vector.mult(unit, r + 2 * this.circleRadius)));
                         },
-                        draw(position, radius, alpha) { //glowing ball, used by the ball and its explosion
-                            radius = radius * (0.99 + 0.02 * Math.random()) + 3 * Math.random()
-                            const gradient = ctx.createRadialGradient(position.x, position.y, 0, position.x, position.y, radius);
+                        fitToMap() { //pull the ball back toward the player until its center is out of the map, so aiming it into the floor squishes it instead
+                            const dx = this.position.x - m.pos.x
+                            const dy = this.position.y - m.pos.y
+                            const d = Math.sqrt(dx * dx + dy * dy)
+                            if (d === 0) return
+                            let best = 1 //how far along from the player to the center it hits the map
+                            for (const who of map) {
+                                if (Math.max(m.pos.x, this.position.x) < who.bounds.min.x || Math.min(m.pos.x, this.position.x) > who.bounds.max.x || Math.max(m.pos.y, this.position.y) < who.bounds.min.y || Math.min(m.pos.y, this.position.y) > who.bounds.max.y) continue
+                                const v = who.vertices
+                                for (let i = 0, len = v.length; i < len; i++) {
+                                    const a = v[i]
+                                    const b = v[(i + 1) % len]
+                                    const ex = b.x - a.x
+                                    const ey = b.y - a.y
+                                    const den = ey * dx - ex * dy
+                                    if (den === 0) continue
+                                    const t = (ex * (m.pos.y - a.y) - ey * (m.pos.x - a.x)) / den //along the line from the player
+                                    const s = (dx * (m.pos.y - a.y) - dy * (m.pos.x - a.x)) / den //along the edge
+                                    if (t > 0 && t < best && s >= 0 && s <= 1) best = t
+                                }
+                            }
+                            if (best < 1) Matter.Body.setPosition(this, { x: m.pos.x + dx / d * Math.max(0, best * d - 2), y: m.pos.y + dy / d * Math.max(0, best * d - 2) })
+                        },
+                        resetRing(radius) { //a round ring at rest
+                            for (let i = 0, n = this.ring.length; i < n; i++) {
+                                const p = this.ring[i]
+                                p.x = radius * Math.cos(2 * Math.PI * i / n)
+                                p.y = radius * Math.sin(2 * Math.PI * i / n)
+                                p.vx = p.vy = 0
+                                p.wx = this.position.x + p.x
+                                p.wy = this.position.y + p.y
+                            }
+                            this.ringRadius = radius
+                        },
+                        pushOut(p, cx, cy) { //move a ring point that's in the map back out to its surface, and stop it moving into it
+                            for (const who of this.near) {
+                                for (let j = who.parts.length === 1 ? 0 : 1; j < who.parts.length; j++) {
+                                    const part = who.parts[j]
+                                    const x = cx + p.x
+                                    const y = cy + p.y
+                                    if (!Matter.Bounds.contains(part.bounds, { x, y }) || !Matter.Vertices.contains(part.vertices, { x, y })) continue
+                                    //the edge it crossed since last cycle, or if it didn't cross one, like when it was already in, the closest edge
+                                    const v = part.vertices
+                                    const mx = x - p.wx
+                                    const my = y - p.wy
+                                    let best = Infinity
+                                    let to = null
+                                    let edge = 0
+                                    if (mx * mx + my * my < this.effectRadius * this.effectRadius) {
+                                        for (let i = 0, len = v.length; i < len; i++) {
+                                            const a = v[i]
+                                            const b = v[(i + 1) % len]
+                                            const ex = b.x - a.x
+                                            const ey = b.y - a.y
+                                            const den = ey * mx - ex * my
+                                            if (den === 0) continue
+                                            const t = (ex * (p.wy - a.y) - ey * (p.wx - a.x)) / den
+                                            const s = (mx * (p.wy - a.y) - my * (p.wx - a.x)) / den
+                                            if (t >= 0 && t <= 1 && s >= 0 && s <= 1 && t < best) {
+                                                best = t
+                                                to = { x: p.wx + t * mx, y: p.wy + t * my }
+                                                edge = i
+                                            }
+                                        }
+                                    }
+                                    if (!to) {
+                                        for (let i = 0, len = v.length; i < len; i++) {
+                                            const a = v[i]
+                                            const b = v[(i + 1) % len]
+                                            const ex = b.x - a.x
+                                            const ey = b.y - a.y
+                                            const len2 = ex * ex + ey * ey || 1
+                                            const s = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / len2))
+                                            const d2 = (a.x + s * ex - x) * (a.x + s * ex - x) + (a.y + s * ey - y) * (a.y + s * ey - y)
+                                            if (d2 < best) {
+                                                best = d2
+                                                to = { x: a.x + s * ex, y: a.y + s * ey }
+                                                edge = i
+                                            }
+                                        }
+                                    }
+                                    if (!to) continue
+                                    const a = v[edge]
+                                    const b = v[(edge + 1) % v.length]
+                                    const len = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)) || 1
+                                    let nx = (b.y - a.y) / len
+                                    let ny = (a.x - b.x) / len
+                                    if (nx * (to.x - part.position.x) + ny * (to.y - part.position.y) < 0) { //point out of the part
+                                        nx = -nx
+                                        ny = -ny
+                                    }
+                                    p.x = to.x + nx - cx
+                                    p.y = to.y + ny - cy
+                                    p.isOnMap = true
+                                    p.nx = nx //which way the map pushes it
+                                    p.ny = ny
+                                    const into = p.vx * nx + p.vy * ny
+                                    if (into < 0) {
+                                        p.vx -= into * nx
+                                        p.vy -= into * ny
+                                    }
+                                    p.vx *= 0.8 //friction
+                                    p.vy *= 0.8
+                                }
+                            }
+                        },
+                        soften() { //move the ring like a soft body, springs to its round spots plus air pressure, keep it out of the map, and find how squashed it is
+                            const R = this.effectRadius
+                            const ring = this.ring
+                            const n = ring.length
+                            const cx = this.position.x
+                            const cy = this.position.y
+                            if (this.ringRadius !== R) { //the ball grew or shrank, so scale the ring with it, then only the map squishes it
+                                const k = R / this.ringRadius
+                                for (const p of ring) {
+                                    p.x *= k
+                                    p.y *= k
+                                }
+                                this.ringRadius = R
+                            }
+                            const reach = 1.6 * R + this.speed
+                            this.near.length = 0
+                            for (const who of map) {
+                                if (who.bounds.max.x > cx - reach && who.bounds.min.x < cx + reach && who.bounds.max.y > cy - reach && who.bounds.min.y < cy + reach) this.near.push(who)
+                            }
+                            if (tech.isPlasmaRing) { //plasma ring tech: each point springs to its spot on a slowly turning oval that breathes a little
+                                this.ringSpin += this.ringSpinRate * (1 + 0.6 * Math.sin(0.0107 * simulation.cycle) + 0.35 * Math.sin(0.0283 * simulation.cycle + 1.3)) //two waves that never line up, so it speeds up and slows down without a pattern, never backwards
+                                const stretch = 1 + this.ringOval * (0.85 + 0.15 * Math.sin(0.013 * simulation.cycle))
+                                const major = R * stretch
+                                const minor = R / stretch
+                                const cos = Math.cos(this.ringSpin)
+                                const sin = Math.sin(this.ringSpin)
+                                for (const p of ring) {
+                                    p.ax = major * p.ux * cos - minor * p.uy * sin
+                                    p.ay = major * p.ux * sin + minor * p.uy * cos
+                                }
+                            } else {
+                                for (const p of ring) { //springs pull each point to its spot when round
+                                    p.ax = R * p.ux
+                                    p.ay = R * p.uy
+                                }
+                            }
+                            this.feelMobs(ring, cx, cy, R)
+                            this.fill = this.springs(ring, R)
+                            let squash = 0
+                            let pressed = 0
+                            let px = 0
+                            let py = 0
+                            for (const p of ring) {
+                                p.isOnMap = false
+                                if (this.near.length) this.pushOut(p, cx, cy)
+                                p.wx = cx + p.x
+                                p.wy = cy + p.y
+                                const spot2 = p.ax * p.ax + p.ay * p.ay || 1
+                                const crush = p.isOnMap ? Math.max(0, 1 - (p.x * p.ax + p.y * p.ay) / spot2) : 0 //pushed in from its spot toward the center by the map, mobs dent it too but don't pop it or push the player
+                                if (crush > 0) {
+                                    if (crush > squash) squash = crush
+                                    pressed += crush
+                                    px += crush * p.nx //out of the surface it's on, so pushes from one surface never cancel out, but pushes from opposite sides do
+                                    py += crush * p.ny
+                                }
+                            }
+                            this.squash = squash
+                            this.pressed = pressed / n
+                            this.push.x = px / n
+                            this.push.y = py / n
+                            this.squeezed = Math.max(0, this.pressed - Math.sqrt(this.push.x * this.push.x + this.push.y * this.push.y))
+                        },
+                        feelMobs(ring, cx, cy, R) { //mobs push the ring out of themselves where they touch it, and pull on it a little where they're close, so it wraps around them
+                            let fx = 0
+                            let fy = 0
+                            let isFelt = false
+                            const band = this.mobReach * R
+                            for (const who of mob) {
+                                if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable) continue
+                                const mx = who.position.x - cx //from the ball's center, like the ring
+                                const my = who.position.y - cy
+                                const reach = who.radius + band
+                                const edge = 1.5 * R + reach
+                                if (mx * mx + my * my > edge * edge) continue
+                                for (const p of ring) {
+                                    const dx = p.x - mx
+                                    const dy = p.y - my
+                                    const d2 = dx * dx + dy * dy
+                                    if (d2 > reach * reach) continue
+                                    const d = Math.sqrt(d2) || 1
+                                    const f = d < who.radius ? this.mobPush * (who.radius - d) : -this.mobPull * R * (1 - (d - who.radius) / band) //out of the mob, or toward it
+                                    p.mx += f * dx / d
+                                    p.my += f * dy / d
+                                    isFelt = true
+                                    fx += f * dx / d
+                                    fy += f * dy / d
+                                }
+                            }
+                            this.mobForce.x = fx
+                            this.mobForce.y = fy
+                            if (!isFelt) return
+                            const n = ring.length
+                            const spread = tech.isPlasmaRing ? this.ringMobSpread : 0
+                            const share = j => 0.5 + 0.5 * Math.cos(Math.PI * j / (spread + 1))
+                            let total = 0
+                            for (let j = -spread; j <= spread; j++) total += share(j)
+                            for (let i = 0; i < n; i++) { //share each point's push with its neighbors, the shares add up to 1, so the total push is the same
+                                const p = ring[i]
+                                if (!p.mx && !p.my) continue
+                                for (let j = -spread; j <= spread; j++) {
+                                    const q = ring[(i + j + n) % n]
+                                    const k = share(j) / total
+                                    q.vx += k * p.mx
+                                    q.vy += k * p.my
+                                }
+                                p.mx = 0
+                                p.my = 0
+                            }
+                        },
+                        springs(ring, size) { //move a ring of points one cycle like a soft body, a spring to each point's spot (ax, ay), air pressure, and small random ripples, returns the share of its spots' area it has
+                            const n = ring.length
+                            let area = 0
+                            let area0 = 0
+                            for (let i = 0; i < n; i++) {
+                                const p = ring[i]
+                                const q = ring[(i + 1) % n]
+                                area += p.x * q.y - q.x * p.y
+                                area0 += p.ax * q.ay - q.ax * p.ay
+                            }
+                            const fill = area0 > 0 ? area / area0 : 1
+                            const pressure = this.pressure * (1 - fill)
+                            for (let i = 0; i < n; i++) {
+                                const p = ring[i]
+                                const prev = ring[(i - 1 + n) % n]
+                                const next = ring[(i + 1) % n]
+                                p.fx = this.stiffness * (p.ax - p.x) + 0.5 * pressure * (next.y - prev.y) //a spring to its spot, and pressure out from the ring, as long as the stretch of ring around this point
+                                p.fy = this.stiffness * (p.ay - p.y) + 0.5 * pressure * (prev.x - next.x)
+                            }
+                            const spread = tech.isPlasmaRing ? this.ringRippleSpread : 0 //plasma ring tech: lumpy ripples
+                            const ripple = tech.isPlasmaRing ? this.ringRipple : this.ripple
+                            for (let k = 0; k < this.rippleKicks; k++) {
+                                const at = Math.floor(Math.random() * n)
+                                const kick = 2 * ripple * size * (Math.random() - 0.5)
+                                for (let j = -spread; j <= spread; j++) { //the kicked point, and its neighbors less and less
+                                    const p = ring[(at + j + n) % n]
+                                    const share = 0.5 + 0.5 * Math.cos(Math.PI * j / (spread + 1))
+                                    p.fx += share * kick * p.ux
+                                    p.fy += share * kick * p.uy
+                                }
+                            }
+                            for (const p of ring) {
+                                p.vx = (p.vx + p.fx) * this.damping
+                                p.vy = (p.vy + p.fy) * this.damping
+                                p.x += p.vx
+                                p.y += p.vy
+                            }
+                            return fill
+                        },
+                        loopPath(points) { //a smooth closed loop through the points
+                            const n = points.length
+                            ctx.beginPath();
+                            ctx.moveTo((points[n - 1].x + points[0].x) / 2, (points[n - 1].y + points[0].y) / 2)
+                            for (let i = 0; i < n; i++) {
+                                const next = points[(i + 1) % n]
+                                ctx.quadraticCurveTo(points[i].x, points[i].y, (points[i].x + next.x) / 2, (points[i].y + next.y) / 2)
+                            }
+                            ctx.closePath()
+                        },
+                        drawRing(points, width, alpha) { //plasma ring tech: a glowing loop, a wide faint stroke under a pink one and a wide bright core, it leaves the loop as the path for cyclotron's stroke
+                            this.loopPath(points)
+                            const flicker = 0.85 + 0.3 * Math.random()
+                            alpha += 0.15 * Math.random()
+                            const isHighPower = m.fieldUpgrades[5].isHighPower //plasma torch's secret combo: lavender
+                            ctx.lineJoin = "round"
+                            ctx.strokeStyle = isHighPower ? `rgba(150,120,255,${0.25 * alpha})` : `rgba(255,75,255,${0.25 * alpha})`
+                            ctx.lineWidth = 2.2 * width * flicker
+                            ctx.stroke();
+                            ctx.strokeStyle = isHighPower ? `rgba(190,170,255,${0.7 * alpha})` : `rgba(255,150,255,${0.7 * alpha})`
+                            ctx.lineWidth = 1.25 * width * flicker
+                            ctx.stroke();
+                            ctx.strokeStyle = isHighPower ? `rgba(245,242,255,${alpha})` : `rgba(255,245,255,${alpha})`
+                            ctx.lineWidth = 0.7 * width * flicker
+                            ctx.stroke();
+                        },
+                        isOnRing(points, who, halfWidth) { //plasma ring tech: a mob touching the ring's band, its body counts
+                            const x = who.position.x
+                            const y = who.position.y
+                            const reach = halfWidth + who.radius
+                            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                                const a = points[i]
+                                const ex = points[j].x - a.x
+                                const ey = points[j].y - a.y
+                                const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / (ex * ex + ey * ey || 1)))
+                                const dx = a.x + t * ex - x
+                                const dy = a.y + t * ey - y
+                                if (dx * dx + dy * dy < reach * reach) return true
+                            }
+                            return false
+                        },
+                        drawBlob(points, x, y, alpha) { //the glowing ball in the shape of its ring, used by the ball and its explosion
+                            //a radial gradient stretched into an ellipse fitted to the ring, so the glow follows the squished shape in one fill
+                            const n = points.length
+                            let cx = 0
+                            let cy = 0
+                            for (const p of points) {
+                                cx += p.x
+                                cy += p.y
+                            }
+                            cx /= n
+                            cy /= n
+                            let xx = 0
+                            let yy = 0
+                            let xy = 0
+                            for (const p of points) {
+                                xx += (p.x - cx) * (p.x - cx)
+                                yy += (p.y - cy) * (p.y - cy)
+                                xy += (p.x - cx) * (p.y - cy)
+                            }
+                            const mid = (xx + yy) / (2 * n)
+                            const spread = Math.sqrt((xx - yy) * (xx - yy) / (4 * n * n) + xy * xy / (n * n))
+                            const flicker = 0.99 + 0.02 * Math.random()
+                            const major = Math.max(1, flicker * Math.sqrt(2 * (mid + spread))) //points spread evenly around a circle have half its radius squared as their variance
+                            const minor = Math.max(1, flicker * Math.sqrt(2 * Math.max(0, mid - spread)))
+
+                            this.loopPath(points)
                             alpha += 0.15 * Math.random()
                             const stop = 0.75 + 0.1 * Math.random()
+                            const isHighPower = m.fieldUpgrades[5].isHighPower //plasma torch's secret combo: lavender
+                            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
                             gradient.addColorStop(0, `rgba(255,255,255,${alpha})`);
-                            gradient.addColorStop(stop, `rgba(255,245,255,${alpha})`);
-                            gradient.addColorStop(stop + 0.1, `rgba(255,200,255,${alpha})`);
-                            gradient.addColorStop(1, `rgba(255,75,255,${alpha})`);
+                            gradient.addColorStop(stop, isHighPower ? `rgba(245,242,255,${alpha})` : `rgba(255,245,255,${alpha})`);
+                            gradient.addColorStop(stop + 0.1, isHighPower ? `rgba(215,200,255,${alpha})` : `rgba(255,200,255,${alpha})`);
+                            gradient.addColorStop(1, isHighPower ? `rgba(150,120,255,${alpha})` : `rgba(255,75,255,${alpha})`); //past the ellipse it stays this color
                             ctx.fillStyle = gradient
-                            ctx.beginPath();
-                            ctx.arc(position.x, position.y, radius, 0, 2 * Math.PI);
-                            ctx.fill();
-                            return radius
+                            ctx.save()
+                            ctx.translate(cx, cy)
+                            ctx.rotate(0.5 * Math.atan2(2 * xy, xx - yy))
+                            ctx.scale(major, minor)
+                            ctx.fill(); //the path was built before the transform, so only the gradient stretches
+                            ctx.restore()
+                            ctx.strokeStyle = isHighPower ? `rgba(130,95,255,${alpha})` : `rgba(255,0,230,${alpha})` //a bright edge, and it leaves the outline as the path for cyclotron's stroke
+                            ctx.lineWidth = 2
+                            ctx.stroke();
                         },
                         fire() {
                             const drain = 0.06
-                            if (m.energy > drain) {
-                                m.energy -= drain
-                                this.energyIn += drain
-                            }
+                            if (m.energy > drain) m.energy -= drain
                             this.isAttached = false;
                             const speed = 5 + Math.min(15, 80 / this.mass) //scale speed with mass
                             Matter.Body.setVelocity(this, {
                                 x: player.velocity.x * 0.4 + speed * Math.cos(m.angle),
                                 y: speed * Math.sin(m.angle)
                             });
+                            this.releaseSpeed = Vector.magnitude(this.velocity)
                             m.plasmaBall.setPositionToNose()
+                            this.fitToMap()
                         },
                         scale(scale) {
                             if (this.circleRadius > this.radiusLimit) Matter.Body.scale(m.plasmaBall, scale, scale); //shrink fast
                         },
-                        isSolitonInReach() { //soliton tech: hold the ring until a mob is close enough for it to reach
+                        isSolitonInReach() { //soliton tech: hold the ring until a mob is close enough for it to reach, returns that mob or null
                             const end = 1.4 * this.effectRadius + 40
+                            const band = this.ringWidth * this.effectRadius
+                            const points = tech.isPlasmaRing ? this.ring.map(p => ({ x: this.position.x + p.x, y: this.position.y + p.y })) : null
                             for (const who of mob) {
                                 if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable) continue
-                                if (Vector.magnitude(Vector.sub(this.position, who.position)) < end + who.radius) return true
+                                const d = Vector.magnitude(Vector.sub(this.position, who.position))
+                                if (tech.isPlasmaRing) { //plasma ring tech: close to the loop, the wave doesn't reach the middle
+                                    if (d < 1.6 * this.effectRadius + band + who.radius && this.isOnRing(points, who, band / 2 + 40)) return who
+                                } else if (d < end + who.radius) {
+                                    return who
+                                }
                             }
-                            return false
+                            return null
+                        },
+                        solitonWaveSpeed: 0.4, //soliton tech with plasma ring tech: ring points the wave moves each cycle, so it goes around the 24 in about a second
+                        solitonWaveLength: 4, //soliton tech with plasma ring tech: ring points the wave stretches back from its front
+                        solitonWave(dmg, who) { //soliton tech with plasma ring tech: a black wave runs once around the loop counterclockwise, starting next to who, bonus damage to each mob it passes
+                            const ball = this
+                            const n = this.ring.length
+                            let start = 0
+                            let best = Infinity
+                            for (let i = 0; i < n; i++) {
+                                const p = this.ring[i]
+                                const dx = this.position.x + p.x - who.position.x
+                                const dy = this.position.y + p.y - who.position.y
+                                if (dx * dx + dy * dy < best) {
+                                    best = dx * dx + dy * dy
+                                    start = i
+                                }
+                            }
+                            const hits = []
+                            const wave = [] //points along the wave, front first
+                            simulation.ephemera.push({
+                                isProjectile: true, //b.clearProjectiles() discards it
+                                traveled: 0,
+                                do() {
+                                    this.traveled += ball.solitonWaveSpeed
+                                    if (!ball.isOn || this.traveled > n) {
+                                        simulation.removeEphemera(this)
+                                        return
+                                    }
+                                    const cx = ball.position.x
+                                    const cy = ball.position.y
+                                    const front = start - this.traveled //lower index is counterclockwise on screen, since y points down
+                                    const length = Math.min(ball.solitonWaveLength, this.traveled) //it grows out of where it started
+                                    wave.length = 0
+                                    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+                                    for (let k = 0; k <= 8; k++) { //along the ring from the front back to the tail, between ring points
+                                        const at = ((front + k * length / 8) % n + n) % n
+                                        const i = Math.floor(at)
+                                        const t = at - i
+                                        const a = ball.ring[i]
+                                        const next = ball.ring[(i + 1) % n]
+                                        const x = cx + a.x + t * (next.x - a.x)
+                                        const y = cy + a.y + t * (next.y - a.y)
+                                        wave.push({ x, y })
+                                        if (x < minX) minX = x
+                                        if (x > maxX) maxX = x
+                                        if (y < minY) minY = y
+                                        if (y > maxY) maxY = y
+                                    }
+                                    const band = ball.ringWidth * ball.effectRadius
+                                    for (const who of mob) {
+                                        if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable || hits.includes(who)) continue
+                                        const reach = band / 2 + who.radius
+                                        const x = who.position.x
+                                        const y = who.position.y
+                                        if (x < minX - reach || x > maxX + reach || y < minY - reach || y > maxY + reach) continue //too far from this part of the wave
+                                        for (let k = 0; k < wave.length - 1; k++) {
+                                            const a = wave[k]
+                                            const ex = wave[k + 1].x - a.x
+                                            const ey = wave[k + 1].y - a.y
+                                            const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / (ex * ex + ey * ey || 1)))
+                                            const dx = a.x + t * ex - x
+                                            const dy = a.y + t * ey - y
+                                            if (dx * dx + dy * dy < reach * reach) {
+                                                hits.push(who)
+                                                who.damage(dmg)
+                                                break
+                                            }
+                                        }
+                                    }
+                                    //a thin fifth of a circle across the ring at the front, bowed a little the way it's going, like a wave front
+                                    const ahead = ((front - 0.5) % n + n) % n
+                                    const i = Math.floor(ahead)
+                                    const a = ball.ring[i]
+                                    const next = ball.ring[(i + 1) % n]
+                                    const t = ahead - i
+                                    const angle = Math.atan2(cy + a.y + t * (next.y - a.y) - wave[0].y, cx + a.x + t * (next.x - a.x) - wave[0].x)
+                                    const half = Math.PI / 5 //half the arc's angle, a fifth of a circle
+                                    const r = 1.25 * band / (2 * Math.sin(half)) //its ends span the ring's pink stroke
+                                    const back = r * Math.cos(half) //its center is this far behind the front, so its ends are across the ring from each other at the front
+                                    ctx.beginPath()
+                                    ctx.arc(wave[0].x - back * Math.cos(angle), wave[0].y - back * Math.sin(angle), r, angle - half, angle + half)
+                                    ctx.lineWidth = Math.max(1.5, 0.04 * band)
+                                    ctx.strokeStyle = "rgba(0,0,0,0.85)"
+                                    ctx.stroke()
+                                },
+                            })
                         },
                         soliton(dmg) { //soliton tech: a black ring grows out of the ball over 15 cycles, bonus damage to each mob it reaches
                             const ball = this
@@ -5943,62 +6313,120 @@ const m = {
                             Matter.Body.scale(this, scale, scale); //grow
                             this.alpha = 0.7
                             this.isOn = false
-                            this.energyIn = 0 //electronvolt tech: a ball that's reset without exploding, like at a new level, doesn't refund its energy later
+                            this.pressed = 0
+                            this.squeezed = 0
+                            this.resetRing(2 * this.circleRadius)
                             // this.isAttached = true;
                         },
                         do() {
                             if (this.isOn) {
                                 this.effectRadius = 2 * m.plasmaBall.circleRadius * (0.6 + 0.4 * tech.isPlasmaRange)
-                                if (tech.isSoliton && !(this.solitonCycle > simulation.cycle) && this.isSolitonInReach()) { //skip looking for mobs while the burst is cooling down
-                                    const bonus = b.solitonReady(this)
+                                const solitonTarget = tech.isSoliton && !(this.solitonCycle > simulation.cycle) && this.isSolitonInReach() //skip looking for mobs while the burst is cooling down
+                                if (solitonTarget) {
+                                    const bonus = b.solitonReady(this, b.solitonCost, 0.01) //each excess energy adds 0.01x
                                     if (bonus) {
-                                        this.energyIn += this.solitonSpent //electronvolt tech: the ring's energy comes back too
-                                        this.soliton(b.solitonDamage * bonus)
+                                        const dmg = this.solitonCycles * this.damage * bonus * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1) * (tech.isPlasmaRing ? this.ringDamage : 1) //cyclotron tech, plasma ring tech
+                                        if (tech.isPlasmaRing) {
+                                            this.solitonWave(dmg, solitonTarget)
+                                        } else {
+                                            this.soliton(dmg)
+                                        }
                                     }
                                 }
 
-                                if (Matter.Query.collides(this, map).length > 0) {
-                                    if (this.isAttached) {
-                                        this.scale(Math.max(0.9, 0.99 - 0.1 / this.circleRadius))
-                                    } else {
-                                        m.plasmaBall.explode()
+                                if (this.isAttached) {
+                                    this.fitToMap()
+                                    this.soften()
+                                    if (this.squeezed > this.squeezeFree) this.scale(1 - this.squeezeShrink * (this.squeezed - this.squeezeFree)) //squeezed into a space smaller than the ball, it shrinks to fit
+                                    //squished against the map, the ball pushes the player away from it, so charging over the floor floats you up
+                                    player.force.x += this.pushPower * this.push.x * player.mass * simulation.g
+                                    player.force.y += this.pushPower * this.push.y * player.mass * simulation.g
+                                } else {
+                                    const previousPosition = { x: this.positionPrev.x, y: this.positionPrev.y } //keep the actual incoming path before forces, drag, or a bounce change velocity
+                                    const drain = this.flyDrain * this.drain * (tech.isCapacitor ? 2 : 1) //a light drain while it's out, capacitor bank tech drains 2x while charging, so this too
+                                    if (m.energy > drain) m.energy -= drain
+                                    this.soften()
+                                    if (this.mobForce.x || this.mobForce.y) Matter.Body.setVelocity(this, { x: this.velocity.x + this.mobCouple * this.mobForce.x, y: this.velocity.y + this.mobCouple * this.mobForce.y }) //the mobs pushing and pulling on the ring push and pull the ball
+                                    const push = Vector.magnitude(this.push)
+                                    const isRubber = tech.isPlasmaRing //plasma ring tech: it bounces instead of popping
+                                    let into = 0 //how much it's moving into the map it's squished against, 0 sliding along it, 1 straight in
+                                    if (push > 0 && this.speed > 0) {
+                                        into = Math.max(0, -(this.velocity.x * this.push.x + this.velocity.y * this.push.y) / (push * this.speed))
+                                        if (!isRubber) Matter.Body.setVelocity(this, Vector.mult(this.velocity, 1 - this.squashDrag * this.squash * into)) //slows down squishing in
+                                    }
+                                    if (isRubber && this.squash > this.bounceSquash && into > 0) { //bounce off the way the map pushes it, the ring stays squished and springs back as it leaves
+                                        const nx = this.push.x / push
+                                        const ny = this.push.y / push
+                                        const vn = this.velocity.x * nx + this.velocity.y * ny
+                                        Matter.Body.setVelocity(this, { x: this.velocity.x - (1 + this.bounciness) * vn * nx, y: this.velocity.y - (1 + this.bounciness) * vn * ny })
+                                    }
+                                    if ((!isRubber && this.squash > this.popSquash && into > 0.3) || this.squash > 0.9 || Matter.Query.segmentAny(this.near, previousPosition, this.position)) { //squished in too far, or its center reached the map
+                                        this.explode()
                                         Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         this.reset()
+                                        return
                                     }
                                 }
 
                                 //damage nearby mobs
-                                const dmg = this.damage * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1)
+                                const dmg = this.damage * ((tech.isControlPlasma && !this.isAttached) ? 2 : 1) * (tech.isPlasmaRing ? this.ringDamage : 1) //cyclotron tech, plasma ring tech, for touching and arcs
+                                const points = this.ring.map(p => ({ x: this.position.x + p.x, y: this.position.y + p.y })) //the ring in the world
+                                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+                                for (const p of points) {
+                                    if (p.x < minX) minX = p.x
+                                    if (p.x > maxX) maxX = p.x
+                                    if (p.y < minY) minY = p.y
+                                    if (p.y > maxY) maxY = p.y
+                                }
+                                const ringBand = this.ringWidth * this.effectRadius //plasma ring tech
                                 const arcList = []
                                 const dischargeRange = 150 + 1600 * tech.plasmaDischarge + 1.3 * this.effectRadius
                                 for (let i = 0, len = mob.length; i < len; i++) {
                                     if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
                                         const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                                        if (sub < this.effectRadius + mob[i].radius) {
+                                        const reach = mob[i].radius + (tech.isPlasmaRing ? ringBand / 2 : 0)
+                                        const isNear = mob[i].position.x >= minX - reach && mob[i].position.x <= maxX + reach && mob[i].position.y >= minY - reach && mob[i].position.y <= maxY + reach
+                                        if (isNear && (tech.isPlasmaRing ? this.isOnRing(points, mob[i], ringBand / 2) : this.isInBlob(points, mob[i]))) { //touch the squished shape, or only its band with plasma ring
                                             mob[i].damage(dmg);
+                                            this.electronvolt(mob[i])
                                             if (tech.isPlasmaFreeze) b.coldPlasma(mob[i])
                                             if (mob[i].speed > 5) {
                                                 Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.6, y: mob[i].velocity.y * 0.6 });
                                             } else {
                                                 Matter.Body.setVelocity(mob[i], { x: mob[i].velocity.x * 0.93, y: mob[i].velocity.y * 0.93 });
                                             }
-                                        } else if (sub < dischargeRange + mob[i].radius && !Matter.Query.rayAny(map, mob[i].position, this.position)) {
-                                            arcList.push(mob[i]) //populate electrical arc list
+                                        } else if (sub < dischargeRange + mob[i].radius) {
+                                            arcList.push(mob[i]) //populate electrical arc list, line of sight is only checked once an arc fires
                                         }
                                     }
                                 }
+                                let visible = null //arc targets the ball can see
                                 for (let i = 0; i < arcList.length; i++) {
                                     if (tech.plasmaDischarge > Math.random()) {
-                                        const who = arcList[Math.floor(Math.random() * arcList.length)]
-                                        who.damage(dmg * 4);
+                                        if (!visible) visible = arcList.filter(who => !Matter.Query.segmentAny(map, who.position, this.position))
+                                        if (!visible.includes(arcList[i])) continue //a mob behind a wall doesn't add a chance for an arc
+                                        const who = visible[Math.floor(Math.random() * visible.length)]
+                                        who.damage(dmg * this.arcDamage);
+                                        this.electronvolt(who)
                                         if (tech.isPlasmaFreeze) b.coldPlasma(who)
-                                        //draw arcs
-                                        const sub = Vector.sub(who.position, this.position)
+                                        //draw arcs, plasma ring tech: from the closest point of the ring
+                                        let from = this.position
+                                        if (tech.isPlasmaRing) {
+                                            let best = Infinity
+                                            for (const p of points) {
+                                                const d2 = (p.x - who.position.x) * (p.x - who.position.x) + (p.y - who.position.y) * (p.y - who.position.y)
+                                                if (d2 < best) {
+                                                    best = d2
+                                                    from = p
+                                                }
+                                            }
+                                        }
+                                        const sub = Vector.sub(who.position, from)
                                         const unit = Vector.normalise(sub)
                                         let len = 12
                                         const step = Vector.magnitude(sub) / (len + 2)
-                                        let x = this.position.x
-                                        let y = this.position.y
+                                        let x = from.x
+                                        let y = from.y
                                         ctx.beginPath();
                                         ctx.moveTo(x, y);
                                         for (let i = 0; i < len; i++) {
@@ -6023,26 +6451,32 @@ const m = {
                                 }
 
                                 //graphics
-                                const radius = this.draw(this.position, this.effectRadius, this.alpha)
+                                if (tech.isPlasmaRing) {
+                                    this.drawRing(points, ringBand, this.alpha)
+                                } else {
+                                    this.drawBlob(points, this.position.x, this.position.y, this.alpha)
+                                }
                                 if (tech.isControlPlasma) {
                                     if (!this.isAttached) {
                                         //extra stroke to show 2x damage
-                                        ctx.strokeStyle = "rgb(255, 0, 212)";
+                                        ctx.strokeStyle = m.fieldUpgrades[5].isHighPower ? "rgb(120,80,255)" : "rgb(255, 0, 212)"; //plasma torch's secret combo: lavender
                                         ctx.lineWidth = Math.max(2, 0.04 * this.effectRadius);
                                         ctx.stroke();
                                     }
                                     //mouse control
                                     const mouseUnit = Vector.normalise(Vector.sub(simulation.mouseInGame, this.position))
-                                    const speed = Vector.magnitude(this.velocity) //save current speed
+                                    let speed = Vector.magnitude(this.velocity) //save current speed
+                                    if (!this.isAttached && speed < this.releaseSpeed) speed += 0.01 * (this.releaseSpeed - speed) //a slowed ball eases back up to its release speed over about 5 seconds
                                     const push = Vector.mult(mouseUnit, 0.008 * Math.pow(speed, 1.8)) //roughly optimized to produce similar turing radius for different sizes
                                     Matter.Body.setVelocity(this, Vector.add(push, this.velocity));
-                                    Matter.Body.setVelocity(this, Vector.mult(Vector.normalise(this.velocity), speed)); //keep speed constant
+                                    const direction = Vector.magnitude(this.velocity) > 0.01 ? Vector.normalise(this.velocity) : mouseUnit //a stopped ball starts back up towards the mouse
+                                    Matter.Body.setVelocity(this, Vector.mult(direction, speed)); //keep speed constant
                                 }
 
-                                //draw arc from radius inward in a random walk
+                                //draw arc from the edge inward in a random walk
                                 ctx.beginPath();
-                                const unit = Vector.rotate({ x: 1, y: 0 }, Math.random() * 6.28)
-                                let where = Vector.add(this.position, Vector.mult(unit, 0.98 * radius))
+                                const edge = this.ring[Math.floor(Math.random() * this.ring.length)]
+                                let where = { x: this.position.x + 0.98 * edge.x, y: this.position.y + 0.98 * edge.y }
                                 ctx.moveTo(where.x, where.y)
                                 const sub = Vector.normalise(Vector.sub(this.position, where))
                                 for (let i = 0, len = 7; i < len; i++) {
@@ -6055,36 +6489,109 @@ const m = {
                                 ctx.stroke();
                             }
                         },
-                        explode() {
-                            const ball = this
-                            if (tech.isElectronvolt && this.energyIn > 0) {
-                                m.energy += 0.75 * this.energyIn //not m.addEnergy(), so the refund isn't lost while you're immune after a hit
-                                simulation.energyGenGraphic()
+                        electronvolt(who) { //electronvolt tech: a mob the ball, its arcs, or its explosion damages sends 100 energy back, at most every electronvoltDelay cycles for each mob, but not from shields, mob bullets, or mobs that can't be hurt, like the stream
+                            if (!tech.isElectronvolt || who.isInvulnerable || who.isShielded || who.shield || who.isMobBullet || who.electronvoltCycle > simulation.cycle) return
+                            who.electronvoltCycle = simulation.cycle + this.electronvoltDelay
+                            m.energy += 1 //not m.addEnergy(), so it isn't lost while you're immune after a hit
+                            simulation.energyGenGraphic()
+                        },
+                        isInBlob(points, who) { //a mob's center is inside the shape, or its body reaches over the edge
+                            const x = who.position.x
+                            const y = who.position.y
+                            const r2 = who.radius * who.radius
+                            let isInside = false
+                            for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+                                const a = points[i]
+                                const b = points[j]
+                                if ((a.y > y) !== (b.y > y) && x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x) isInside = !isInside //crossings to the right
+                                const ex = b.x - a.x
+                                const ey = b.y - a.y
+                                const t = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / (ex * ex + ey * ey || 1)))
+                                const dx = a.x + t * ex - x
+                                const dy = a.y + t * ey - y
+                                if (dx * dx + dy * dy < r2) return true
                             }
-                            this.energyIn = 0
+                            return isInside
+                        },
+                        explode() { //a blast that grows out of the ball's squished shape and stops at the map, damaging mobs inside it, plasma ring tech: it collapses inward instead
+                            const ball = this
+                            const x = this.position.x
+                            const y = this.position.y
+                            const R = this.effectRadius //the ball resets right after, so keep its size
+                            const fade = 0.05 / tech.bulletsLastLonger //anti-shear topology tech: lasts longer, so it keeps growing
+                            const isRing = tech.isPlasmaRing //plasma ring tech: a ring shockwave that shrinks inward, it only burns mobs its band passes over
+                            const rate = isRing ? 0.95 : 1.05 //how much it grows each cycle
+                            const growth = Math.max(1, Math.pow(rate, 1 / fade)) //how much it grows over its life
+                            const ring = this.ring.map(p => { //a copy of the ring that keeps rippling as it grows, each point grows out from the center along its own line, until the map
+                                const r = Math.sqrt(p.x * p.x + p.y * p.y) || 1
+                                const hit = vertexCollision({ x, y }, { x: x + growth * p.x, y: y + growth * p.y }, [map])
+                                return { x: p.x, y: p.y, vx: p.vx, vy: p.vy, fx: 0, fy: 0, ax: p.x, ay: p.y, ux: p.x / r, uy: p.y / r, r, wall: hit.who ? Math.sqrt(hit.dist2) : growth * r }
+                            })
+                            for (let i = 0, n = ring.length; i < n; i++) { //a ring tangled over itself, like a plasma ring knotted around mobs, collapses as a clean loop instead, its points back in order around the center
+                                const p = ring[i]
+                                const q = ring[(i + 1) % n]
+                                if (p.x * q.y - p.y * q.x < 0) {
+                                    ring.sort((a, b) => Math.atan2(a.y, a.x) - Math.atan2(b.y, b.x))
+                                    break
+                                }
+                            }
+                            const points = ring.map(() => ({ x, y }))
+                            const band = this.ringWidth * R
+                            const dmg = this.damage * (tech.isControlPlasma ? 2 : 1) * (isRing ? this.ringDamage : 1) //cyclotron tech: a released ball does 2x damage, and it's always released when it explodes
                             simulation.ephemera.push({
                                 isProjectile: true, //b.clearProjectiles() discards it
-                                position: { x: this.position.x, y: this.position.y },
-                                radius: this.effectRadius,
+                                size: 1,
                                 alpha: 1,
                                 do() {
                                     //grow and fade
-                                    this.radius *= 1.05
-                                    this.alpha -= 0.05
-                                    if (this.alpha < 0) simulation.removeEphemera(this)
-                                    ball.draw(this.position, this.radius, this.alpha)
-                                    //damage nearby mobs
-                                    const dmg = ball.damage
+                                    this.size *= rate
+                                    this.alpha -= fade
+                                    if (this.alpha < 0) {
+                                        simulation.removeEphemera(this)
+                                        return
+                                    }
+                                    const gap = isRing ? 1.1 * band * this.size : 0 //plasma ring tech: keep the ring's glow off the map, it's drawn over it
+                                    const keepOut = p => { //back off the map along its line
+                                        const out = p.x * p.ux + p.y * p.uy - Math.max(0, p.wall - gap)
+                                        if (out > 0) {
+                                            p.x -= out * p.ux
+                                            p.y -= out * p.uy
+                                        }
+                                    }
+                                    for (const p of ring) { //grow with it, then only the map and the ripples change its shape
+                                        p.x *= rate
+                                        p.y *= rate
+                                        p.vx *= rate
+                                        p.vy *= rate
+                                        keepOut(p)
+                                        const r = Math.min(Math.max(0, p.wall - gap), p.r * this.size)
+                                        p.ax = r * p.ux
+                                        p.ay = r * p.uy
+                                    }
+                                    ball.springs(ring, R * this.size)
+                                    let reach = 0
+                                    for (let i = 0; i < ring.length; i++) {
+                                        const p = ring[i]
+                                        keepOut(p)
+                                        points[i].x = x + p.x
+                                        points[i].y = y + p.y
+                                        reach = Math.max(reach, Math.abs(p.x) + Math.abs(p.y))
+                                    }
+                                    if (isRing) {
+                                        ball.drawRing(points, band * this.size, this.alpha)
+                                    } else {
+                                        ball.drawBlob(points, x, y, this.alpha)
+                                    }
+                                    //damage mobs inside the blast
                                     for (let i = 0, len = mob.length; i < len; i++) {
                                         if (mob[i].alive && (!mob[i].isBadTarget || mob[i].isMobBullet) && !mob[i].isInvulnerable) {
-                                            const sub = Vector.magnitude(Vector.sub(this.position, mob[i].position))
-                                            if (sub < this.radius + mob[i].radius) {
+                                            if (Vector.magnitude(Vector.sub({ x, y }, mob[i].position)) < reach + mob[i].radius && (isRing ? ball.isOnRing(points, mob[i], band * this.size / 2) : ball.isInBlob(points, mob[i]))) {
                                                 mob[i].damage(dmg);
+                                                ball.electronvolt(mob[i])
                                                 if (tech.isPlasmaFreeze) b.coldPlasma(mob[i])
                                             }
                                         }
                                     }
-
                                 },
                             })
                         }
@@ -6112,22 +6619,21 @@ const m = {
 
                                     }
                                 } else if (m.energy > m.plasmaBall.drain) { //charge up when attached
-                                    const energyBefore = m.energy
+                                    const grow = m.plasmaBall.growRate * Math.max(0.5, 1 - m.plasmaBall.pressedGrowth * m.plasmaBall.pressed) * Math.min(1, Math.max(0, (m.plasmaBall.squeezeStop - m.plasmaBall.squeezed) / (m.plasmaBall.squeezeStop - m.plasmaBall.squeezeFree))) //squished into the map it grows slower, and squeezed into a small space it stops
                                     if (tech.isCapacitor) {
                                         m.energy -= m.plasmaBall.drain * 2;
-                                        const scale = 1 + 48 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                        const scale = 1 + 3 * grow * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                         Matter.Body.scale(m.plasmaBall, scale, scale); //grow
                                     } else {
                                         m.energy -= m.plasmaBall.drain;
-                                        const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                        const scale = 1 + grow * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                         Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                     }
                                     if (m.energy > m.maxEnergy) {
                                         m.energy -= m.plasmaBall.drain * 2;
-                                        const scale = 1 + 16 * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
+                                        const scale = 1 + grow * Math.pow(Math.max(1, m.plasmaBall.circleRadius), -1.8)
                                         Matter.Body.scale(m.plasmaBall, scale, scale); //grow    
                                     }
-                                    m.plasmaBall.energyIn += energyBefore - m.energy
                                     m.plasmaBall.setPositionToNose()
 
                                     //float
