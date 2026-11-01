@@ -1,35 +1,14 @@
+settings: level editor
+settings: level pool
 
 
-tech: plasma jet - costs 1 research instead of 2
-plasma torch gives 2.5x damage instead of 1.5x 
-tech: electronvolt - with plasma ball, each mob it damages sends 100 energy back every 3 seconds, like the stream, instead of refunding energy when it explodes
-secret combo: plasma torch's ←↓→→↓ trades regen for damage, 4x damage but 3 energy per second, it replaces the hose
-soliton with plasma ring sends a wave once around the ring in about a second, instead of a pulse out from the center
-plasma ball uses 0.8x energy while charging, and drains 3/8 as much energy while it's flying as while it's charging
-tech: plasma ring - your plasma ball is a bouncing, spinning oval ring, 2x damage but only along the ring, it bounces off walls instead of popping, its explosion is a ring shockwave
-tech: plasma ball - the ball is a soft body, it squishes against walls, pushes you off surfaces while charging, grows slower while squished and shrinks to fit tight spaces, and explodes when fired into a wall
-tech: plasma-bot - ejects your field as a field power up instead of trading it away, costs 3 research
-tech: anti-shear topology - also gives plasma-bot 1.3x range per stack, and makes plasma ball explosions last longer
-
-foam does 1.15x damage
-polyurethane foam - makes 0.7x as many foam bubbles
-tech: laminar flow - foam bubbles are identical and fall faster, 2x velocity, 2x slow, 1.3x duration, push mobs back
-foam has its own hover tip
-
-
-bug fixes
-  dark matter moves to you after you go through a portal, unless you have MACHO
-  long lines in the pause menu console log wrap to the next line instead of getting cut off
-  the plasma stream pulls power ups back toward you again, instead of pushing them toward the tip or holding them in place
 
 
 
 *********************************************************** TODO *****************************************************
 
-rename plasma torch?
-  just plasma?
-  plasma field?
-  plasma ______
+
+
 
 add alternator-like swing code to other situations
   every 3 swings make one with a much bigger range?

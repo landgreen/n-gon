@@ -267,7 +267,7 @@ const saveGame = {
             simulation.inGameConsole(saveGame.pendingMessage)
             saveGame.pendingMessage = ""
         }
-        if (level.levelsCleared < 1 || simulation.isTraining || build.isExperimentRun || !m.alive) return
+        if (level.levelsCleared < 1 || simulation.isTraining || build.isExperimentRun || !m.alive || levelEditor.isActive) return //the level editor sets levelsCleared to test mobs
         if (level.levels[level.onLevel] === "null") return //the run was already won on final, and the save was cleared
         try {
             saveGame.latest = saveGame.create()

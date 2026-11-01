@@ -12164,7 +12164,7 @@ const tech = {
             const plasma = `<strong class='color-plasma' data-help='plasma'>plasma</strong>`
             const energy = `<strong class='energy' data-help='energy'>energy</strong>`
             if (tech.plasmaBotCount && m.fieldMode !== 5) return `<strong class='color-bot' data-help='bot'>plasma-bot</strong> uses<br><strong>${b.electronvoltBotScale}x</strong> ${energy}`
-            if (tech.isPlasmaBall) return `mobs your ${plasma} ball damages send<br><strong>100</strong> ${energy} every <strong>${m.plasmaBall ? m.plasmaBall.electronvoltDelay / 60 : 3}</strong> seconds back to you`
+            if (tech.isPlasmaBall) return `mobs damaged by ${plasma} ball<br>generate <strong>100</strong> ${energy} every <strong>${m.plasmaBall ? m.plasmaBall.electronvoltDelay / 60 : 3}</strong> seconds`
             return `mobs touching the ${plasma} stream send<br><strong>100</strong> ${energy} per second upstream to you`
         },
         isFieldTech: true,

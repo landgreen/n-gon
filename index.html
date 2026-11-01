@@ -29,6 +29,16 @@
     <div id="defense-bar"></div>
     <div id="dmg"></div>
     <div id='construct'></div>
+    <div id="level-editor-left" class="le-panel"></div>
+    <div id="level-editor-right" class="le-panel"></div>
+    <div id="level-editor-status" class="le-status"></div>
+    <div id="level-editor-hint" class="le-hint"></div>
+    <div id="level-editor-history" class="le-history-box le-history-pop" hidden><div class="le-history" data-history></div></div>
+    <div id="level-editor-code" class="le-panel">
+        <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="closeCode">close</button></span></div>
+        <textarea readonly spellcheck="false"></textarea>
+        <div class="le-report" hidden></div>
+    </div>
     <canvas id="canvas"></canvas>
     <div id="choose-grid"></div>
     <div id="experiment-grid"></div>
@@ -40,6 +50,10 @@
     </div>
     <svg class="SVG-button SVG-button-splash" id="start-button" width="82" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame()">
         <text x="10" y="32">start</text>
+    </svg>
+    <svg class="SVG-button SVG-button-splash" id="level-editor-splash-button" width="96" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="levelEditor.open()">
+        <title>level editor</title>
+        <text x="10" y="32">editor</text>
     </svg>
     <svg class="SVG-button SVG-button-splash" id="training-button" width="120" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
         <text x="10" y="32">training</text>
@@ -57,7 +71,7 @@
         <div>
             <details id='settings-details' name="front-page-group">
                 <summary>settings</summary>
-                <div class="details-div" style="max-width: 24rem; line-height: 150%;">
+                <div class="details-div" style="line-height: 150%;">
                     <input onclick="build.hideHUD()" type="checkbox" id="hide-hud" name="hide-hud" style="width:17px; height:17px;">
                     <label for="hide-hud" title="hide: tech, damage taken bar, in game console, final boss health bar, tech: filament, tech: pair production, duplication animation, eigen animation, lower max body caps, fewer grappling hook rope wraps, no stroke on blocks">performance mode</label>
                     <br>
@@ -80,16 +94,6 @@
                     </select>
                     <br>
                     <br>
-                    <input type="checkbox" id="community-maps" name="community-maps" style="width:17px; height:17px;">
-                    <label for="community-maps" title="add about 20 player made levels to the random n-gon level pool">community maps</label>
-                    <br>
-                    <label for="banned" title="type banned levels with a space between them.  Example:  run temple biohazard">banned levels:</label>
-                    <input id="banned" name="banned" placeholder="list levels by name" autocomplete="off" spellcheck="false" style="width: 182px;" />
-                    <br>
-                    <label for="seed" title="the seed determines level order, tech choices, and mob types">randomization seed:</label>
-                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
-                    <br><span id="previous-seed" style="color:#bbb"></span>
-                    <br>
                     <label for="import-save-text" data-help="checkpoint">import checkpoint:</label>
                     <button onclick="document.getElementById('import-save-file').click()" class='sort-button' style="font-size:1em;">load file</button>
                     <input type="file" id="import-save-file" accept=".ngon,.txt,text/plain" style="display: none;" onchange="saveGame.importFromFile(this)">
@@ -97,6 +101,13 @@
                     <input id="import-save-text" name="import-save-text" placeholder="paste checkpoint code" autocomplete="off" spellcheck="false" style="width: 192px;" onkeydown="if (event.key === 'Enter') saveGame.importFromBox()" />:
                     <button onclick="saveGame.importFromBox()" class='sort-button' style="font-size:1em;">load code</button>
                     <br>
+                    <br>
+                    <button id="level-pool-button" popovertarget="level-pool" class='sort-button' style="font-size:1em;" title="choose which levels can show up in a run">level pool</button>
+                    <button id="level-editor-button" onclick="levelEditor.open()" class='sort-button' style="font-size:1em;" title="make local levels">level editor</button>
+                    <br>
+                    <label for="seed" title="the seed determines level order, tech choices, and mob types">randomization seed:</label>
+                    <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
+                    <br><span id="previous-seed" style="color:#bbb"></span>
                     <!-- gamepad support, disabled for now, might add it back later
                     <br>
                     <br>
@@ -397,6 +408,7 @@
         </g>
     </svg>
     <div id="hover-help" popover="hint" role="tooltip"></div>
+    <div id="level-pool" popover="manual"></div>
     <script src='lib/matter.min.js'></script>
     <script src="js/query-ray-any.js"></script>
     <script src="js/simulation.js"></script>
@@ -408,6 +420,10 @@
     <script src="js/mob.js"></script>
     <script src="js/spawn.js"></script>
     <script src="js/level.js"></script>
+    <script src="js/level-elements.js"></script>
+    <script src="js/level-data.js"></script>
+    <script src="js/level-analysis.js"></script>
+    <script src="js/level-editor.js"></script>
     <!-- <script src="js/level2.js"></script> -->
     <script src="js/lore.js"></script>
     <script src="js/engine.js"></script>

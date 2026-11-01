@@ -229,6 +229,27 @@ body.has-autosave #start-button {
     bottom: 160px;
 }
 
+/* local levels add the level editor right below start, and move start up one slot */
+#level-editor-splash-button {
+    display: none;
+    position: absolute;
+    bottom: 108px;
+    right: 4px;
+    z-index: 12;
+}
+
+body.has-autosave #level-editor-splash-button {
+    bottom: 160px;
+}
+
+body.has-level-editor #start-button {
+    bottom: 160px;
+}
+
+body.has-autosave.has-level-editor #start-button {
+    bottom: 212px;
+}
+
 
 
 
@@ -775,6 +796,157 @@ body.has-autosave #start-button {
     border-radius: 8px;
     border: 2px #333 solid;
     background-color: var(--card-color);
+}
+
+#settings-details>.details-div {
+    max-width: 24rem;
+}
+
+/* level pool pop up, opened by the button at the bottom of settings, see levelPoolMenu in js/index.js
+levelPoolMenu.place() sets its position, width, and height */
+#level-pool {
+    inset: auto;
+    margin: 0;
+    box-sizing: border-box;
+    overflow-y: auto;
+    padding: 10px;
+    border: 2px #333 solid;
+    border-radius: 8px;
+    background-color: var(--card-color);
+    color: #000;
+    font-size: 0.825rem;
+    line-height: 130%;
+}
+
+.level-pool-button-open {
+    background-color: var(--hover-card-color);
+}
+
+.level-pool-header {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    margin: 12px 0 4px;
+    font-size: 1.1em;
+}
+
+#level-pool>.level-pool-header:first-child {
+    margin-top: 0;
+}
+
+.level-pool-button {
+    margin-left: auto;
+    font-size: 0.85em;
+    padding: 1px 7px;
+}
+
+/* about the size of the words in settings */
+.level-route {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.25rem;
+    margin-top: 12px;
+}
+
+/* a dash and the step after it wrap together */
+.level-route-step {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.level-route-dash,
+.level-route-locked {
+    color: #aaa;
+}
+
+.level-route-random {
+    white-space: nowrap;
+}
+
+/* levels packed together like the experiment grid, each level draws the line on its right and bottom into the 1px gaps */
+.level-pool-zone {
+    --level-pool-line: #444; /* the same as the card lines in experiment mode */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.6em, 1fr));
+    gap: 1px;
+    min-height: 1.9em;
+    border: 1px solid var(--level-pool-line);
+    transition: background-color 0.1s;
+}
+
+.level-pool-target {
+    outline: 1px dashed #333;
+    outline-offset: 1px;
+    background-color: var(--hover-card-color);
+}
+
+.level-pool-empty {
+    grid-column: 1 / -1;
+    align-self: center;
+    text-align: center;
+    color: #4a525e;
+}
+
+.level-pool-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+}
+
+.level-chip {
+    padding: 4px 8px;
+    background-color: var(--card-color);
+    box-shadow: 1px 0 0 var(--level-pool-line), 0 1px 0 var(--level-pool-line);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: grab;
+    user-select: none;
+}
+
+.level-chip:hover {
+    background-color: var(--hover-card-color);
+}
+
+.level-chip:active {
+    cursor: grabbing;
+}
+
+.level-chip:focus-visible {
+    outline: 2px solid #333;
+    outline-offset: -2px;
+}
+
+/* levels waiting outside the pool */
+.level-chip-out {
+    color: #888;
+}
+
+.level-chip-out:hover {
+    color: #000;
+}
+
+.level-chip-dragging {
+    opacity: 0.3;
+}
+
+.level-pool-shake {
+    animation: level-pool-shake 0.3s;
+}
+
+@keyframes level-pool-shake {
+
+    25%,
+    75% {
+        transform: translateX(-3px);
+    }
+
+    50% {
+        transform: translateX(3px);
+    }
 }
 
 
@@ -2267,4 +2439,1188 @@ the gaps show the border color through, so the lines are only between options an
     padding: 7px;
     margin-bottom: 10px;
     /* box-shadow: 4px 4px 4px hsla(240, 0%, 17%, 0.14); */
+}
+/* level editor, see js/level-editor.js
+the panels show while body has .level-editor, the HUD it replaces is hidden */
+.le-panel {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    box-sizing: border-box;
+    max-height: calc(100vh - 80px); /* above the status bar */
+    overflow-y: auto;
+    scrollbar-width: thin;
+    padding: 6px;
+    border: 2px solid #333;
+    border-radius: 8px;
+    background-color: var(--card-color);
+    color: #000;
+    font-size: 13px;
+    line-height: 1.35;
+    cursor: auto;
+    user-select: none;
+}
+
+body.level-editor .le-panel {
+    display: block;
+}
+
+/* the bar along the bottom, like VS Code's status bar, see renderStatus() */
+.le-status {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    zoom: 1.2; /* bigger, easier to read, it's 31px tall */
+    height: 26px;
+    padding: 0 10px;
+    align-items: center;
+    gap: 28px; /* the mouse, grid, zoom, and tools on the left, issues, history, and tab hide on the right */
+    border-top: 1px solid #333;
+    background-color: #e2e9ec;
+    color: #000;
+    font-size: 12px;
+    cursor: auto;
+    user-select: none;
+}
+
+body.level-editor .le-status {
+    display: flex;
+}
+
+/* smaller screens shrink the status bar, only once the blank middle is used up */
+@media (max-width: 1060px) {
+    .le-status {
+        zoom: 1;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 840px) {
+    .le-status {
+        zoom: 0.9;
+        gap: 12px;
+        padding: 0 6px;
+    }
+}
+
+@media (max-width: 700px) {
+    .le-status {
+        zoom: 0.8;
+        gap: 8px;
+    }
+}
+
+.le-status-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.le-status-icon {
+    flex: none;
+}
+
+.le-status-right {
+    margin-left: auto;
+}
+
+.le-status-item.le-segment {
+    gap: 0;
+}
+
+/* a short window cuts text off instead of wrapping it to a second line */
+.le-status,
+.le-status * {
+    white-space: nowrap;
+}
+
+.le-status {
+    overflow: hidden;
+}
+
+.le-status .le-button {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.le-status input,
+.le-status .le-label {
+    flex: none;
+}
+
+.le-status-item .le-label {
+    min-width: 0;
+}
+
+.le-status-mouse {
+    flex: 0 0 110px; /* fixed, so the bar doesn't move as the mouse does */
+    min-width: 0;
+    overflow: hidden;
+    font-family: monospace;
+}
+
+/* tab hide, on the far right, clicking it hides the panels too */
+.le-status-tab {
+    flex: none;
+    padding: 0;
+    border: none;
+    background: none;
+    color: #555;
+    font: inherit;
+    cursor: pointer;
+}
+
+.le-status-problems {
+    font-family: monospace;
+}
+
+.le-status-problems.le-status-fix {
+    color: #c00;
+}
+
+/* the in game console sits above the status bar */
+body.level-editor #text-log {
+    bottom: 42px;
+}
+
+/* test and JS test at the top of the simulation menu */
+.le-run {
+    margin-bottom: 6px;
+}
+
+/* the inspector's js view, the lines this element writes in export JS */
+.le-js-view {
+    margin: 4px 0;
+    padding: 4px;
+    max-height: 300px;
+    overflow: auto;
+    background-color: #f0f3f5;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    user-select: text;
+}
+
+/* tab hides the panels, a hint says how to get them back */
+body.level-editor.le-panels-hidden .le-panel,
+body.level-editor.le-panels-hidden .le-status {
+    display: none;
+}
+
+.le-hint {
+    display: none;
+    position: absolute;
+    z-index: 2;
+    right: 10px;
+    bottom: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background-color: rgba(255, 255, 255, 0.6);
+    color: #777;
+    font-size: 12px;
+    pointer-events: none;
+}
+
+body.level-editor.le-panels-hidden .le-hint {
+    display: block;
+}
+
+/* explorer, every element by type, see explorerHtml() */
+.le-explore-group>summary {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    list-style: none;
+    font-size: 13px;
+    margin: 0;
+    padding: 1px 0;
+}
+
+.le-explore-group>summary::-webkit-details-marker {
+    display: none;
+}
+
+.le-explore-group>summary::before {
+    content: "▸";
+    width: 12px;
+}
+
+.le-explore-group[open]>summary::before {
+    content: "▾";
+}
+
+.le-explore-type {
+    flex: 1;
+    min-width: 0;
+}
+
+.le-explore-row {
+    display: flex;
+    padding-left: 12px;
+}
+
+.le-explore-row.le-selected {
+    background-color: #dbeefa;
+}
+
+.le-button.le-explore-name {
+    flex: 1;
+    padding: 1px 2px;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: left;
+    border: none;
+    background: none;
+    font-family: monospace;
+    font-size: 11px;
+}
+
+.le-explore-group .le-button:not(.le-explore-name) {
+    width: 34px;
+    padding: 0 3px;
+    font-size: 11px;
+    line-height: 1.3;
+}
+
+/* hide and lock touch, only the stroke between them, and each element's pair touches the one above, like a table */
+.le-explore-group>summary {
+    gap: 0;
+}
+
+.le-explore-group .le-button:not(.le-explore-name)+.le-button {
+    border-left: none;
+}
+
+.le-explore-row {
+    gap: 0;
+    align-items: stretch;
+}
+
+.le-explore-group>summary+.le-explore-row {
+    margin-top: 3px;
+}
+
+.le-explore-row+.le-explore-row .le-button:not(.le-explore-name) {
+    border-top: none;
+}
+
+.le-explore-group[open] {
+    margin-bottom: 3px;
+}
+
+/* undo, redo, and history at the right end of the status bar, the history list pops up over them */
+.le-history-pop {
+    position: absolute;
+    z-index: 4;
+    right: 10px;
+    bottom: 38px;
+    width: 300px;
+    zoom: 1.1;
+    background-color: var(--card-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.le-history-pop[hidden] {
+    display: none;
+}
+
+body:not(.level-editor) .le-history-pop,
+body.level-editor.le-panels-hidden .le-history-pop {
+    display: none;
+}
+
+.le-status .le-history-box {
+    flex: none;
+}
+
+body.level-editor #guns,
+body.level-editor #field,
+body.level-editor #right-HUD,
+body.level-editor #right-HUD-constraint {
+    display: none !important;
+}
+
+/* under the health bar, gray like the pause menu's open menus, the open menus inside are the lighter card color */
+#level-editor-left {
+    zoom: 1.1; /* everything in it 10% bigger, easier to read, top, left, and sizes are before the zoom */
+    top: 40px;
+    left: 9px;
+    width: 260px; /* 8px wider for the padding, so the menus inside keep their width */
+    max-height: calc((100vh - 92px) / 1.1); /* above the status bar */
+    padding: 10px;
+    background-color: #e2e9ec;
+}
+
+#level-editor-right {
+    top: 10px;
+    right: 10px;
+    width: 270px;
+    font-family: monospace;
+}
+
+/* like the pause menu's left column, no lines between menus, an open one's inside is a box */
+.le-section+.le-section {
+    margin-top: 4px;
+}
+
+.le-panel summary {
+    cursor: pointer;
+    color: #000;
+    margin-bottom: 3px;
+}
+
+.le-details {
+    background-color: var(--card-color); /* lighter than the gray panel around it */
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 7px;
+    margin-bottom: 6px;
+}
+
+/* one wide button, like add code's + code */
+.le-grid.le-one {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+/* difficulty has no orb, it's a black circle in the level */
+.le-difficulty-icon {
+    display: inline-block;
+    width: 0.8em;
+    height: 0.8em;
+    border-radius: 50%;
+    background-color: #000;
+    margin-bottom: -0.1em;
+}
+
+.le-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+}
+
+.le-row+.le-row {
+    margin-top: 4px;
+}
+
+.le-fill {
+    flex: 1;
+}
+
+.le-label {
+    min-width: 34px;
+    color: #777;
+}
+
+.le-button {
+    padding: 1px 6px;
+    border: 1px solid #333;
+    border-radius: 0;
+    background-color: #fff;
+    color: #000;
+    font: inherit;
+    line-height: 1.35;
+}
+
+.le-button:hover {
+    background-color: var(--hover-card-color);
+}
+
+.le-button:disabled {
+    border-color: #ccc;
+    color: #aaa;
+    background-color: #fff;
+}
+
+/* close to how the map looks */
+.le-button.le-on {
+    background-color: #666;
+    color: #fff;
+}
+
+/* the status bar's draw tools are tiny drawings, the one in use gets a light background so the dark map still shows */
+.le-tool-icons .le-button {
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+}
+
+.le-history-box [data-command="undo"],
+.le-history-box [data-command="redo"] {
+    display: flex;
+    align-items: center;
+    padding: 2px 5px;
+}
+
+.le-tool-icons .le-button.le-on {
+    background-color: #b4c2c9;
+}
+
+.le-tool-icon {
+    display: block;
+}
+
+/* joined buttons, one is on */
+.le-segment {
+    display: inline-flex;
+}
+
+.le-segment .le-button {
+    border-radius: 0;
+}
+
+.le-segment .le-button+.le-button {
+    border-left: none;
+}
+
+/* buttons packed together like the level pool, each draws the line on its right and bottom into the 1px gaps */
+.le-grid,
+.le-shapes {
+    --le-line: #333;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    border: 1px solid var(--le-line);
+}
+
+.le-grid .le-button,
+.le-shapes .le-button,
+.le-grid>.le-pair {
+    border: none;
+    box-shadow: 1px 0 0 var(--le-line), 0 1px 0 var(--le-line);
+}
+
+.le-grid .le-button {
+    padding: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* the add menu's level elements, mobs, power ups, and code, untitled, stacked flush in one box with a line between */
+.le-details:has(> .le-add-part) {
+    padding: 0;
+    overflow: hidden;
+}
+
+.le-add-part {
+    --le-pad: 0px;
+}
+
+.le-add-part+.le-add-part {
+    border-top: 1px solid #333;
+}
+
+.le-add-part> :first-child {
+    border-top-width: 0;
+}
+
+.le-add-part> :last-child {
+    border-bottom-width: 0;
+}
+
+/* export, the local levels, and import, apart from each other */
+.le-details .le-gap-above {
+    margin-top: 14px;
+}
+
+.le-load-group summary {
+    margin: 8px 0 2px;
+}
+
+/* an empty line between n-gon, community, training, and testing */
+.le-load-group .le-load-header {
+    margin-top: 16px;
+}
+
+.le-load-group .le-load-header:first-of-type {
+    margin-top: 4px;
+}
+
+.le-grid.le-two {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* the inspector's bottom buttons, each line split evenly however many there are */
+.le-grid.le-even {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+}
+
+.le-actions {
+    margin-top: 6px;
+}
+
+/* type an angle, a cell in the turns line */
+.le-angle {
+    min-width: 0;
+    padding: 2px 4px;
+    border: none;
+    border-radius: 0;
+    box-shadow: 1px 0 0 var(--le-line), 0 1px 0 var(--le-line);
+    font-family: monospace;
+    font-size: 12px;
+    text-align: center;
+}
+
+.le-shapes+.le-grid {
+    margin-top: 4px;
+}
+
+/* the main row and the rest in add mobs and add power ups, one box */
+.le-grid+.le-grid {
+    border-top: none;
+}
+
+/* buttons and lists out to the outline of the menu or inspector they're in, after .le-grid so their borders win, its border is their side lines
+   -x reaches the sides, -top and -bottom also the top or bottom, rounded like its inside corners */
+.le-details {
+    --le-pad: 7px;
+    --le-inner-radius: 4px;
+}
+
+#level-editor-right {
+    --le-pad: 6px;
+    --le-inner-radius: 6px;
+}
+
+.le-flush-x {
+    margin-left: calc(-1 * var(--le-pad));
+    margin-right: calc(-1 * var(--le-pad));
+}
+
+.le-flush-x.le-grid,
+.le-flush-x.le-shapes,
+.le-flush-x.le-mob-list,
+.le-flush-x .le-grid {
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.le-flush-x.le-mob-list {
+    width: calc(100% + 2 * var(--le-pad));
+}
+
+.le-mob-list:not(.le-rich-list) {
+    padding: 3px 6px; /* like the customizable lists next to it */
+}
+
+.le-flush-top {
+    margin-top: calc(-1 * var(--le-pad));
+    border-top-width: 0;
+    border-radius: var(--le-inner-radius) var(--le-inner-radius) 0 0;
+    overflow: hidden;
+}
+
+.le-flush-bottom {
+    margin-bottom: calc(-1 * var(--le-pad));
+    border-bottom-width: 0;
+    border-radius: 0 0 var(--le-inner-radius) var(--le-inner-radius);
+    overflow: hidden;
+}
+
+/* a list right under its buttons joins them, like the add menu's level element, mob by name, and power up by name */
+.le-grid+.le-mob-list,
+.le-shapes+.le-mob-list {
+    margin-top: 0;
+    border-top: none;
+}
+
+.le-orb {
+    display: inline-block;
+    margin-right: 0.3em;
+    font-size: 0.85em;
+}
+
+.le-orb .circle-grid {
+    margin-bottom: -0.3em;
+}
+
+.le-tall .le-button {
+    line-height: 1.2;
+    padding: 2px 1px 3px;
+}
+
+.le-tall .le-orb {
+    margin: 0 0.08em;
+}
+
+/* the power ups a button can be, written like an array */
+.le-options {
+    color: #999;
+}
+
+/* the mob, boss, and 2nd boss buttons' example pictures, in a line like the power up buttons' orbs */
+.le-mob-examples {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.le-mob-examples .le-mob-icon {
+    margin: 0;
+}
+
+/* a power up's name, and its orb on the right */
+.le-split {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2px 0 4px;
+}
+
+.le-split .le-orb {
+    margin: 0;
+}
+
+.le-row.le-gap {
+    margin-top: 20px;
+}
+
+.le-block-icon {
+    display: inline-block;
+    width: 0.7em;
+    height: 0.6em;
+    margin-bottom: -0.05em;
+    background-color: rgba(140, 140, 140, 0.85);
+}
+
+.le-number.le-short {
+    width: 20px;
+    padding: 1px 2px;
+}
+
+.le-check {
+    min-width: 0;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.le-check input {
+    margin: 0;
+}
+
+/* a code element, written out, click it to edit */
+.le-code-view {
+    max-height: 320px;
+    margin: 4px 0;
+    padding: 4px;
+    overflow: auto;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    font-size: 11px;
+    line-height: 1.35;
+    white-space: pre;
+    cursor: text;
+}
+
+.le-code-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid #ccc;
+    background-color: #ccc;
+}
+
+.le-button.le-code-item {
+    border: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.le-link-list {
+    max-width: 100%;
+    font: inherit;
+}
+
+.le-mob-list {
+    width: 100%;
+    margin-top: 4px;
+    border: 1px solid #333;
+    border-radius: 0;
+    background-color: #fff;
+    font: inherit;
+}
+
+/* power up by name and mob by name, the options show orbs and mob pictures where the browser lets a select hold more than text */
+.le-rich-list,
+.le-rich-list::picker(select) {
+    appearance: base-select;
+}
+
+.le-rich-list::picker(select) {
+    border: 1px solid #333;
+    border-radius: 0;
+    background-color: #fff;
+}
+
+.le-rich-list option {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 6px;
+}
+
+.le-rich-list option:hover,
+.le-rich-list option:focus-visible {
+    background-color: var(--hover-card-color);
+}
+
+.le-rich-list option::checkmark {
+    display: none;
+}
+
+.le-rich-list::picker(select) {
+    max-height: 60vh;
+}
+
+.le-mob-icon {
+    flex: none;
+    display: block;
+    margin-right: 4px;
+}
+
+/* the level's name at the top of the left panel */
+.le-info {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* preset shapes, each button is a little drawing of its shape */
+.le-shapes {
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.le-button.le-shape {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 0;
+    color: #444;
+}
+
+/* a command's key, on the right of a row or a menu title */
+.le-key-cap {
+    font-size: 12px;
+}
+
+.le-panel summary .le-key-cap {
+    float: right;
+}
+
+.le-number {
+    width: 40px;
+    padding: 1px 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.le-load {
+    margin-top: 4px;
+}
+
+.le-load .le-label {
+    margin: 4px 0 2px;
+}
+
+.le-load-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+/* history menu, a list of every change, click one to rewind to it */
+.le-history {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    border: 1px solid #ccc;
+    background-color: #ccc;
+    max-height: 98px; /* the last 7 steps, about 12.8px each with 1px gaps, scroll for more */
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+/* long steps wrap, so the details at the end show */
+.le-step {
+    flex: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 8px;
+    overflow-wrap: anywhere;
+    border: none;
+}
+
+/* the current step, the next one undo takes away, a faint pink so it's there if you look */
+.le-button.le-step.le-on {
+    background-color: #fbeef1;
+    color: #000;
+}
+
+.le-step.le-undone {
+    color: #aaa;
+}
+
+.le-storage {
+    font-size: 11px;
+    color: #999;
+}
+
+.le-storage-full {
+    color: #c00;
+}
+
+.le-load-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* a local level and its delete button */
+.le-load-pairs {
+    --le-line: #333;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 8px;
+}
+
+.le-pair {
+    display: flex;
+    min-width: 0;
+    border: 1px solid var(--le-line);
+}
+
+.le-pair .le-button {
+    border: none;
+    box-shadow: none;
+}
+
+.le-pair .le-button:first-child {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.le-pair .le-button:last-child {
+    border-left: 1px solid var(--le-line);
+    padding: 1px 4px;
+}
+
+/* inspector, written like code */
+.le-name {
+    font-weight: bold;
+}
+
+.le-id {
+    color: #999;
+}
+
+.le-code {
+    margin: 4px 0;
+}
+
+.le-prop {
+    padding-left: 2ch;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.le-prop input.le-value {
+    max-width: calc(100% - 14ch);
+    padding: 0;
+    border: none;
+    border-bottom: 1px dashed #bbb;
+    border-radius: 0;
+    background: transparent;
+    font: inherit;
+    color: #000;
+}
+
+.le-prop input.le-value:focus {
+    border-bottom: 1px solid rgb(0, 170, 255);
+}
+
+.le-prop input.le-text,
+.le-quote {
+    color: hsl(140, 70%, 30%);
+}
+
+.le-prop input[type="checkbox"] {
+    margin: 0;
+}
+
+.le-prop select {
+    font: inherit;
+    border-radius: 4px;
+}
+
+.le-comment {
+    color: #999;
+}
+
+.le-swatch {
+    width: 16px;
+    height: 14px;
+    padding: 0;
+    border: 1px solid #999;
+    border-radius: 3px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.le-swatch::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.le-swatch::-webkit-color-swatch {
+    border: none;
+}
+
+.le-spots {
+    margin: 4px 0 2px;
+}
+
+/* collides: [player map body], names in the mask are code colored, the rest are crossed out, click toggles */
+.le-prop.le-mask {
+    white-space: normal;
+}
+
+.le-chip {
+    margin: 0 0.5ch 0 0;
+    padding: 0 2px;
+    border: 1px solid transparent;
+    background: transparent;
+    font: inherit;
+    color: #aaa;
+    text-decoration: line-through;
+    cursor: pointer;
+}
+
+.le-chip:hover {
+    border-color: #999;
+}
+
+.le-chip.le-on {
+    color: hsl(210, 80%, 40%);
+    text-decoration: none;
+}
+
+.le-chip.le-mixed {
+    color: hsl(30, 80%, 40%);
+    text-decoration: none;
+    font-style: italic;
+}
+
+/* vertex editing */
+.le-count {
+    padding: 0 0.6ch;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+    line-height: 1.35;
+}
+
+.le-path {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 2px;
+    padding: 2px 4px;
+    border: 1px dashed #bbb;
+    border-radius: 4px;
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    color: #000;
+    white-space: pre-wrap;
+    resize: vertical;
+}
+
+.le-path:focus {
+    border: 1px solid rgb(0, 170, 255);
+}
+
+.le-error {
+    color: #c00;
+    white-space: normal;
+}
+
+/* the level as javascript, opened from the export menu */
+body.level-editor #level-editor-code:not(.le-open) {
+    display: none;
+}
+
+#level-editor-code {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    width: min(900px, calc(100vw - 32px));
+    font-family: monospace;
+}
+
+#level-editor-code textarea {
+    box-sizing: border-box;
+    width: 100%;
+    height: min(70vh, 700px);
+    margin-top: 6px;
+    padding: 6px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font: inherit;
+    font-size: 12px;
+    white-space: pre;
+    resize: none;
+}
+
+#level-editor-code [hidden] {
+    display: none;
+}
+
+.le-report {
+    box-sizing: border-box;
+    max-height: min(70vh, 700px);
+    margin-top: 6px;
+    padding: 6px;
+    overflow-y: auto;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.le-report-head {
+    font-weight: bold;
+}
+
+.le-report-section {
+    margin-top: 8px;
+    color: #999;
+    font-style: italic;
+}
+
+/* the analysis in the inspector, see inspectAnalysis() */
+.le-analysis {
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.le-analysis-section {
+    margin: 8px 0 2px;
+    color: #999;
+}
+
+.le-analysis-line {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2px 3px;
+    border: none;
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 11px;
+    line-height: 1.35;
+}
+
+button.le-analysis-line {
+    cursor: pointer;
+}
+
+button.le-analysis-line:hover {
+    background-color: #e8f2fa;
+}
+
+.le-analysis-line.le-current {
+    background-color: #dbeefa;
+}
+
+.le-analysis-status {
+    font-weight: bold;
+}
+
+.le-analysis-value {
+    color: #555;
+}
+
+/* what clicking the line adds */
+.le-analysis-add {
+    float: right;
+    color: #08c;
+}
+
+.le-analysis-text {
+    display: block;
+    padding-left: 5ch;
+    color: #777;
+}
+
+.le-analysis-line.le-fix .le-analysis-status {
+    color: #d00;
+}
+
+.le-analysis-line.le-warn .le-analysis-status {
+    color: #d70;
+}
+
+.le-analysis-line.le-note .le-analysis-status {
+    color: #48a;
+}
+
+.le-analysis-line.le-ok .le-analysis-status {
+    color: #3a5;
+}
+
+.le-analysis-line.le-ok {
+    color: #888;
+}
+
+.le-report-line {
+    display: grid;
+    grid-template-columns: 5ch 20ch 12ch 1fr;
+    column-gap: 1ch;
+}
+
+.le-report-line span:first-child {
+    font-weight: bold;
+}
+
+.le-report-line.le-fix span:first-child {
+    color: #d00;
+}
+
+.le-report-line.le-warn span:first-child {
+    color: #d70;
+}
+
+.le-report-line.le-note span:first-child {
+    color: #48a;
+}
+
+.le-report-line.le-ok span:first-child {
+    color: #3a5;
+}
+
+.le-report-line.le-ok {
+    color: #888;
 }

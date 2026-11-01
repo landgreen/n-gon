@@ -596,6 +596,7 @@ const m = {
         }
     },
     death() {
+        if (levelEditor.isActive) return levelEditor.respawn() //back to the spawn instead of ending the run
         if (tech.isEigenstate && m.eigen.deathCount === 0) {
             m.eigen.deathCount++
             m.eigen.isAlive[m.eigen.state] = false
@@ -5781,14 +5782,17 @@ const m = {
                         solitonCycles: 120, //soliton tech: the ball's pulse does this many cycles of its damage, 2 seconds of touching it, so it scales with damage, plasma ring and cyclotron multiply it like the rest
                         growRate: 16, //how fast the ball grows while charging, slower as it gets bigger, capacitor bank tech is 3x
                         pressedGrowth: 1.7, //growth slows by this times pressed, down to 0.5x, so charging over the floor grows about 0.7x as fast
-                        squeezeFree: 0.025, //squeezed less than this, the ball grows like normal, more and it shrinks, pressed against the floor is about 0.02
-                        squeezeStop: 0.045, //squeezed this much or more, the ball stops growing, its growth fades out from squeezeFree to here
-                        squeezeShrink: 0.05, //how fast a squeezed ball shrinks each cycle, times how far squeezed is past squeezeFree
+                        squeezeFree: 0.1, //squeezed less than this, the ball grows like normal, more and it shrinks, about 0.1 when a big ball is in a corner
+                        squeezeStop: 0.16, //squeezed this much or more, the ball stops growing, its growth fades out from squeezeFree to here
+                        squeezeShrink: 0.15, //how fast a squeezed ball shrinks each cycle, times how far squeezed is past squeezeFree, held or fired
                         effectRadius: 10,
                         ring: Array.from({ length: 24 }, (_, i) => ({ x: Math.cos(2 * Math.PI * i / 24), y: Math.sin(2 * Math.PI * i / 24), ux: Math.cos(2 * Math.PI * i / 24), uy: Math.sin(2 * Math.PI * i / 24), vx: 0, vy: 0, fx: 0, fy: 0, mx: 0, my: 0, wx: 0, wy: 0 })), //the ball is a soft body, a ring of points around its center, x, y is from the center, ux, uy is the way to its spot when round, mx, my is the push from mobs this cycle, wx, wy is where it was in the world last cycle
                         ringRadius: 1, //the ball's size the ring was last scaled to
                         near: [], //map bodies close enough for the ring to touch, found each cycle
                         stiffness: 0.03, //how hard each point springs back to its spot when round
+                        smoothness: 0.08, //how hard each point is pulled to move like its two neighbors, so dents and bulges are wide curves instead of zigzags and spikes
+                        swallow: 0.5, //the ring passes through map that's inside its loop, where the map would push a point out more than this share away from the center
+                        maxStretch: 0.8, //a point can't get farther than this times the ball's size from its spot, so it lets go of a corner it's caught on instead of dragging out a long strand
                         pressure: 0.5, //how hard the ball pushes out to keep its area when it's squished
                         damping: 0.95, //share of a point's speed it keeps each cycle
                         ripple: 0.02, //small random kicks keep the ring rippling, each is up to this times the ball's size
@@ -5796,6 +5800,7 @@ const m = {
                         mobReach: 0.3, //the ring reaches toward mobs this close to it, times the ball's size
                         mobPull: 0.012, //how hard the ring reaches toward a close mob, times the ball's size, strongest at the mob's edge
                         mobPush: 0.1, //how hard a mob pushes the ring out of itself, times how far in it is, soft so mobs can poke through
+                        mobCrowd: 2, //this many mobs on the ring push and pull it at full strength, past that each one is weaker so the total only grows like the square root of the count, so a crowd dents it without wrecking its shape, and slows a fired ball less
                         mobCouple: 0.01, //share of the push and pull between the ring and mobs that moves a fired ball, so it slows and swerves around them
                         mobForce: { x: 0, y: 0 }, //the push and pull between the ring and mobs this cycle
                         ringDamage: 2, //plasma ring tech: all its damage is this times the ball's, touching the ring, arcs, soliton, and explosion, its description says 2x
@@ -5808,7 +5813,7 @@ const m = {
                         ringSpin: 0, //plasma ring tech: which way the oval points
                         squash: 0, //how far the most squished point is pushed in toward the center by the map, 0 to 1
                         pressed: 0, //how far the map pushes the ring in on average over all its points, 0 to 1, a light touch is near 0
-                        squeezed: 0, //how much of pressed comes from opposite sides, so it cancels out instead of pushing, near 0 against one surface, high in a space smaller than the ball
+                        squeezed: 0, //share of the ring touching the map from opposite sides, 0 against one surface, high in a space smaller than the ball
                         fill: 1, //share of its area the ring has right now
                         push: { x: 0, y: 0 }, //which way the map pushes the ball, longer the more squished it is
                         pushPower: 3.25, //an attached ball squished against the map pushes the player away from it, up to about this times gravity
@@ -5912,6 +5917,7 @@ const m = {
                                         nx = -nx
                                         ny = -ny
                                     }
+                                    if (nx * p.ax + ny * p.ay > this.swallow * Math.sqrt(p.ax * p.ax + p.ay * p.ay)) continue //the map pushes this point out away from the center, so it's inside the loop, let the point pass through it instead of wrapping around it and getting caught
                                     p.x = to.x + nx - cx
                                     p.y = to.y + ny - cy
                                     p.isOnMap = true
@@ -5969,13 +5975,29 @@ const m = {
                             let pressed = 0
                             let px = 0
                             let py = 0
+                            let touching = 0 //points on the map
+                            let tx = 0 //which way the map pushes them, added up
+                            let ty = 0
                             for (const p of ring) {
                                 p.isOnMap = false
                                 if (this.near.length) this.pushOut(p, cx, cy)
+                                const sx = p.x - p.ax
+                                const sy = p.y - p.ay
+                                const stretch2 = sx * sx + sy * sy
+                                if (stretch2 > this.maxStretch * this.maxStretch * R * R) { //caught on a corner too far from its spot, let go
+                                    const k = this.maxStretch * R / Math.sqrt(stretch2)
+                                    p.x = p.ax + k * sx
+                                    p.y = p.ay + k * sy
+                                }
                                 p.wx = cx + p.x
                                 p.wy = cy + p.y
                                 const spot2 = p.ax * p.ax + p.ay * p.ay || 1
                                 const crush = p.isOnMap ? Math.max(0, 1 - (p.x * p.ax + p.y * p.ay) / spot2) : 0 //pushed in from its spot toward the center by the map, mobs dent it too but don't pop it or push the player
+                                if (p.isOnMap) { //touching the map, count which way it's pushed, however hard
+                                    touching++
+                                    tx += p.nx
+                                    ty += p.ny
+                                }
                                 if (crush > 0) {
                                     if (crush > squash) squash = crush
                                     pressed += crush
@@ -5987,12 +6009,12 @@ const m = {
                             this.pressed = pressed / n
                             this.push.x = px / n
                             this.push.y = py / n
-                            this.squeezed = Math.max(0, this.pressed - Math.sqrt(this.push.x * this.push.x + this.push.y * this.push.y))
+                            this.squeezed = (touching - Math.sqrt(tx * tx + ty * ty)) / n //share of the ring touching the map from opposite sides, 0 on one flat surface, about 0.3 times the share touching in a corner, and the whole share touching in a corridor
                         },
                         feelMobs(ring, cx, cy, R) { //mobs push the ring out of themselves where they touch it, and pull on it a little where they're close, so it wraps around them
                             let fx = 0
                             let fy = 0
-                            let isFelt = false
+                            let felt = 0 //mobs touching or near the ring
                             const band = this.mobReach * R
                             for (const who of mob) {
                                 if (!who.alive || (who.isBadTarget && !who.isMobBullet) || who.isInvulnerable) continue
@@ -6001,6 +6023,7 @@ const m = {
                                 const reach = who.radius + band
                                 const edge = 1.5 * R + reach
                                 if (mx * mx + my * my > edge * edge) continue
+                                let isFelt = false
                                 for (const p of ring) {
                                     const dx = p.x - mx
                                     const dy = p.y - my
@@ -6014,10 +6037,12 @@ const m = {
                                     fx += f * dx / d
                                     fy += f * dy / d
                                 }
+                                if (isFelt) felt++
                             }
-                            this.mobForce.x = fx
-                            this.mobForce.y = fy
-                            if (!isFelt) return
+                            const crowd = felt > this.mobCrowd ? Math.sqrt(this.mobCrowd / felt) : 1 //a crowd shares the push, see mobCrowd
+                            this.mobForce.x = crowd * fx
+                            this.mobForce.y = crowd * fy
+                            if (!felt) return
                             const n = ring.length
                             const spread = tech.isPlasmaRing ? this.ringMobSpread : 0
                             const share = j => 0.5 + 0.5 * Math.cos(Math.PI * j / (spread + 1))
@@ -6028,7 +6053,7 @@ const m = {
                                 if (!p.mx && !p.my) continue
                                 for (let j = -spread; j <= spread; j++) {
                                     const q = ring[(i + j + n) % n]
-                                    const k = share(j) / total
+                                    const k = crowd * share(j) / total
                                     q.vx += k * p.mx
                                     q.vy += k * p.my
                                 }
@@ -6052,8 +6077,10 @@ const m = {
                                 const p = ring[i]
                                 const prev = ring[(i - 1 + n) % n]
                                 const next = ring[(i + 1) % n]
-                                p.fx = this.stiffness * (p.ax - p.x) + 0.5 * pressure * (next.y - prev.y) //a spring to its spot, and pressure out from the ring, as long as the stretch of ring around this point
-                                p.fy = this.stiffness * (p.ay - p.y) + 0.5 * pressure * (prev.x - next.x)
+                                const smoothX = 0.5 * (prev.x - prev.ax + next.x - next.ax) - (p.x - p.ax) //how much further its neighbors are from their spots than it is, so it bends with them but a round ring has none
+                                const smoothY = 0.5 * (prev.y - prev.ay + next.y - next.ay) - (p.y - p.ay)
+                                p.fx = this.stiffness * (p.ax - p.x) + this.smoothness * smoothX + 0.5 * pressure * (next.y - prev.y) //a spring to its spot, a pull to bend with its neighbors, and pressure out from the ring, as long as the stretch of ring around this point
+                                p.fy = this.stiffness * (p.ay - p.y) + this.smoothness * smoothY + 0.5 * pressure * (prev.x - next.x)
                             }
                             const spread = tech.isPlasmaRing ? this.ringRippleSpread : 0 //plasma ring tech: lumpy ripples
                             const ripple = tech.isPlasmaRing ? this.ringRipple : this.ripple
@@ -6346,6 +6373,7 @@ const m = {
                                     const drain = this.flyDrain * this.drain * (tech.isCapacitor ? 2 : 1) //a light drain while it's out, capacitor bank tech drains 2x while charging, so this too
                                     if (m.energy > drain) m.energy -= drain
                                     this.soften()
+                                    if (this.squeezed > this.squeezeFree) this.scale(1 - this.squeezeShrink * (this.squeezed - this.squeezeFree)) //squeezed into a space smaller than the ball, it shrinks to fit
                                     if (this.mobForce.x || this.mobForce.y) Matter.Body.setVelocity(this, { x: this.velocity.x + this.mobCouple * this.mobForce.x, y: this.velocity.y + this.mobCouple * this.mobForce.y }) //the mobs pushing and pulling on the ring push and pull the ball
                                     const push = Vector.magnitude(this.push)
                                     const isRubber = tech.isPlasmaRing //plasma ring tech: it bounces instead of popping

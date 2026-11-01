@@ -260,7 +260,7 @@ const titlePage = {
             const center = Vertices.centre(hull)
             titlePage.addMap(Bodies.fromVertices(center.x, center.y, [hull]))
         }
-        for (const id of ["start-button", "training-button", "experiment-button", "continue-button"]) {
+        for (const id of ["start-button", "training-button", "experiment-button", "continue-button", "level-editor-splash-button"]) {
             const rect = document.getElementById(id).getBoundingClientRect()
             if (rect.width) titlePage.addButton(rect) //hidden buttons have no size
         }
@@ -564,3 +564,7 @@ document.addEventListener("click", (event) => {
 })
 
 titlePage.queueStart(Math.max(0, 2250 - performance.now())) //timed from when the page started loading, like the CSS animations
+
+
+//remove this before uploading a new patch !!!!!!!!!!!!!!
+// levelEditor.open() //skip the title page, straight into the level editor

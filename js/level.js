@@ -25,7 +25,9 @@ const level = {
         spawn.isHigherTierMobSpawned = false
         level.surfacePortals.length = 0
         level.setConstraints()
-        if (level.levelsCleared === 0) { //this code only runs on the first level
+        if (levelEditor.isActive) { //every level start while the level editor is open is its level, see js/level-editor.js
+            levelEditor.startLevel()
+        } else if (level.levelsCleared === 0) { //this code only runs on the first level
             // if (false) {
             if (true) {
                 level.load(simulation.isTraining ? "walk" : "initial") //normal starting level **************************************************
@@ -61,10 +63,9 @@ const level = {
                 b.guns[b.inventory[0]].ammo = 100000
                 // tech.addJunkTechToPool(0.5)
                 tech.giveTech("laminar flow")
-                tech.giveTech("electronvolt")
                 tech.giveTech("soliton")
                 tech.giveTech("electric potential")
-                tech.giveTech("cold plasma")
+                tech.giveTech("electronvolt")
                 // for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
                 // for (let i = 0; i < 3; i++) tech.giveTech("plasma jet")
                 // for (let i = 0; i < 1; i++) tech.giveTech("Maxwells demon")
@@ -379,8 +380,8 @@ const level = {
         return level.moreLevelsPromise
     },
     load(name) {
-        const mapCollection = typeof level.maps[name] === "function" ? level.maps : moreLevels
-        if (typeof mapCollection[name] !== "function") throw new Error(`unknown level: ${name}`)
+        const mapCollection = [level.maps, level.localMaps, moreLevels].find(maps => typeof maps[name] === "function")
+        if (!mapCollection) throw new Error(`unknown level: ${name}`)
         mapCollection[name].call(level)
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
@@ -1384,35 +1385,19 @@ const level = {
         document.getElementById("choose-grid").style.visibility = "hidden"
         mouseMove.lock()
     },
+    localMaps: {}, //player made levels from the level editor, name: function that builds it, kept up to date by levelData.store
+    localLevels() {
+        return Object.keys(level.localMaps)
+    },
+    randomLevelPool() { //the levels shuffled into the middle of a run, set in the level pool menu at the bottom of settings
+        const pool = localSettings.levelPool || { banned: [], added: [] }
+        const levels = level.playableLevels.filter(name => !pool.banned.includes(name))
+            .concat(level.communityLevels.filter(name => pool.added.includes(name)))
+            .concat(level.localLevels().filter(name => pool.added.includes(name)))
+        return levels.length ? levels : level.playableLevels.slice(0) //the menu keeps at least one level, this is just in case
+    },
     populateLevels() {
         let pick //run a second time if URL is loaded
-        if (document.getElementById("banned").value) { //remove levels from ban list in settings
-            const banList = document.getElementById("banned").value.replace(/,/g, ' ').replace(/\s\s+/g, ' ').replace(/[^\w\s]/g, '') //replace commas with spaces, replace double spaces with single, remove strange symbols
-            const remove = banList.split(" ");
-            // console.log('remove these', remove)
-            // console.log('community levels before', level.communityLevels)
-            for (let i = 0; i < remove.length; i++) {
-                const index = level.communityLevels.indexOf(remove[i])
-                if (index !== -1) {
-                    level.communityLevels.splice(index, 1);
-                    // console.log('removed level:', remove[i])
-                    requestAnimationFrame(() => { simulation.inGameConsole(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
-                }
-            }
-            // console.log('community levels after', level.communityLevels)
-            // console.log('Landgreen levels before', level.playableLevels)
-            for (let i = 0; i < remove.length; i++) {
-                if (level.playableLevels.length + level.communityLevels.length * simulation.isCommunityMaps < 10) break //can't remove too many levels
-                const index = level.playableLevels.indexOf(remove[i])
-                if (index !== -1) {
-                    level.playableLevels.splice(index, 1);
-                    // console.log('removed level:', remove[i])
-                    requestAnimationFrame(() => { simulation.inGameConsole(`banned level: <strong style="color: '#f00';">${remove[i]}</strong>`); });
-                }
-            }
-            // console.log('Landgreen levels after', level.playableLevels)
-        }
-
         if (document.getElementById("seed").value) { //check for player entered seed in settings
             Math.initialSeed = String(document.getElementById("seed").value)
         }
@@ -1423,14 +1408,18 @@ const level = {
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) level.trainingLevels.push("diamagnetism")
         } else {
-            level.levels = level.playableLevels.slice(0) //copy array, not by just by assignment
-            if (simulation.isCommunityMaps) {
-                level.levels = level.levels.concat(level.communityLevels)
-                simulation.isHorizontalFlipped = false;
+            const pool = level.randomLevelPool()
+            if (pool.some(name => !level.playableLevels.includes(name))) {
+                simulation.isHorizontalFlipped = false; //community levels don't flip
             } else {
                 simulation.isHorizontalFlipped = (Math.seededRandom() < 0.5) ? true : false //if true, some maps are flipped horizontally
             }
-            level.levels = seededShuffle(level.levels); //shuffles order of maps with seeded random
+            level.levels = seededShuffle(pool.slice(0)); //shuffles order of maps with seeded random
+            while (level.levels.length < 9) { //a small pool repeats, but never the same level twice in a row, a pool of one level is that level every time
+                const more = seededShuffle(pool.slice(0))
+                if (more.length > 1 && more[0] === level.levels[level.levels.length - 1]) more.push(more.shift())
+                level.levels = level.levels.concat(more)
+            }
             level.levels.length = 9 //remove any extra levels past 9
             pick = ["interferometer", "factory", "reservoir"]
             // level.levels.splice(Math.floor(Math.seededRandom(level.levels.length * 0.6, level.levels.length)), 0, pick[Math.floor(Math.random() * pick.length)]); //add level to the back half of the randomized levels list
@@ -2408,10 +2397,23 @@ const level = {
     addToWorld() { //needs to be run to put bodies into the world
         for (let i = 0; i < map.length; i++) {
             map[i].collisionFilter.category = cat.map;
-            map[i].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet;
+            map[i].collisionFilter.mask = map[i].collisionMask ?? (cat.player | cat.map | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet); //collisionMask is a map piece's own mask, like one only the player hits
             Matter.Body.setStatic(map[i], true); //make static
             Composite.add(engine.world, map[i]); //add to world
         }
+    },
+    setMapPart(who, isThere) { //adds or takes away a map piece while the level runs, like a platform a button makes appear
+        if (!who.isOutOfMap === isThere) return
+        who.isOutOfMap = !isThere
+        if (isThere) {
+            map.push(who)
+            Composite.add(engine.world, who)
+        } else {
+            const index = map.indexOf(who)
+            if (index !== -1) map.splice(index, 1)
+            Composite.remove(engine.world, who)
+        }
+        simulation.draw.setPaths() //update map graphics
     },
     spinner(x, y, width, height, density = 0.001, angle = 0, frictionAir = 0.001, angularVelocity = 0) {
         x += width / 2
@@ -2496,8 +2498,8 @@ const level = {
         who.classType = "body"
         return who
     },
-    boost(x, y, speed = 1000, angle = Math.PI / 2) {
-        let query, who //height is how high the player will be flung above y
+    boost(x, y, launchHeight = 1000, angle = Math.PI / 2) {
+        let query, who //launchHeight is how high the player will be flung above y
         if (angle !== Math.PI / 2) { //angle !== 3 * Math.PI / 2
             angle *= -1
             who = map[map.length] = Matter.Bodies.fromVertices(x + 50, y + 35, Vertices.fromPath("80 40 -80 40 -50 -40 50 -40"), {
@@ -2511,7 +2513,7 @@ const level = {
                     query = (who) => {
                         const list = Matter.Query.ray(who, this.position, rayVector, 100)
                         if (list.length > 0 && !list[0].bodyA.isDarkMatter) {
-                            Matter.Body.setVelocity(list[0].bodyA, Vector.rotate({ x: 1.21 * Math.sqrt(Math.abs(speed)), y: 0 }, angle));
+                            Matter.Body.setVelocity(list[0].bodyA, Vector.rotate({ x: 1.21 * Math.sqrt(Math.abs(launchHeight)), y: 0 }, angle));
                         }
                     }
                     query(body)
@@ -2520,7 +2522,7 @@ const level = {
                     query(powerUp)
                     //player collision
                     if (Matter.Query.rayAny([player], this.position, rayVector, 100)) {
-                        Matter.Body.setVelocity(player, Vector.rotate({ x: 1.21 * Math.sqrt(Math.abs(speed)), y: 0 }, angle));
+                        Matter.Body.setVelocity(player, Vector.rotate({ x: 1.21 * Math.sqrt(Math.abs(launchHeight)), y: 0 }, angle));
                         m.buttonCD_jump = 0; // reset short jump counter to prevent short jumps on boosts
                         m.hardLandCD = 0 // disable hard landing
                     }
@@ -2575,7 +2577,7 @@ const level = {
                         if (list.length > 0 && !list[0].isDarkMatter) {
                             Matter.Body.setVelocity(list[0], {
                                 x: list[0].velocity.x + (Math.random() - 0.5) * 2.5, //add a bit of horizontal drift to reduce endless bounces
-                                y: -1.21 * Math.sqrt(Math.abs(speed)) //give a upwards velocity
+                                y: -1.21 * Math.sqrt(Math.abs(launchHeight)) //give a upwards velocity
                             });
                         }
                     }
@@ -2595,7 +2597,7 @@ const level = {
                         } else {
                             Matter.Body.setVelocity(player, {
                                 x: player.velocity.x + (Math.random() - 0.5) * 2.5,
-                                y: -1.21 * Math.sqrt(Math.abs(speed)) //give an upwards velocity that will put the player that the height desired
+                                y: -1.21 * Math.sqrt(Math.abs(launchHeight)) //give an upwards velocity that will put the player that the height desired
                             });
                         }
                     }

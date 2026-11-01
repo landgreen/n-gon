@@ -1080,11 +1080,13 @@ async function openExperimentMenu() {
     document.getElementById("experiment-button").style.display = "none";
     document.getElementById("training-button").style.display = "none";
     document.getElementById("start-button").style.display = "none";
+    document.getElementById("level-editor-splash-button").style.display = "none";
     const el = document.getElementById("experiment-grid")
     el.style.display = "grid"
     document.body.style.overflowY = "scroll";
     document.body.style.overflowX = "hidden";
     document.getElementById("info").style.display = 'none'
+    levelPoolMenu.close()
     await build.reset();
 
 }
@@ -1394,7 +1396,7 @@ window.addEventListener("keydown", function (event) {
             }
             break
         case input.key.fullscreen: {
-            //don't toggle fullscreen when typing an "o" into a text box like seed, banned levels, or sort
+            //don't toggle fullscreen when typing an "o" into a text box like seed or sort
             const isTyping = document.activeElement && document.activeElement.matches("textarea, input:not([type]), input[type='text'], input[type='search']")
             if (event.repeat || isTyping || !("pointerLockElement" in document)) break
             //the fullscreenchange event handles pointer lock and input reset
@@ -1693,7 +1695,7 @@ const mouseMove = {
     isPointerLocked: false, //tracks the pointer locked state, only set by the pointerlockchange event
     isMouseInWindow: true,
     wantsLock() { //pointer lock is only used in fullscreen during gameplay, menus need the normal mouse
-        return !!document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing
+        return !!document.fullscreenElement && !simulation.onTitlePage && !build.isExperimentSelection && !simulation.paused && !simulation.isChoosing && !levelEditor.isActive //the level editor uses the normal mouse for its panels
     },
     lock() { //call after anything that resumes gameplay, browsers only allow this after a click or key press
         if (mouseMove.wantsLock() && !document.pointerLockElement) {
@@ -1874,8 +1876,17 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
 
+    if (localSettings.levelPool === undefined) { //older settings had a typed ban list and a community maps checkbox
+        const banned = String(localSettings.banList || "").replace(/[^\w\s,]/g, '').split(/[\s,]+/)
+        localSettings.levelPool = {
+            banned: level.playableLevels.filter(name => banned.includes(name)),
+            added: localSettings.isCommunityMaps ? level.communityLevels.filter(name => !banned.includes(name)) : []
+        }
+        delete localSettings.banList
+        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+    }
+    localSettings.isCommunityMaps = localSettings.levelPool.added.some(name => level.communityLevels.includes(name))
     simulation.isCommunityMaps = localSettings.isCommunityMaps
-    document.getElementById("community-maps").checked = localSettings.isCommunityMaps
 
     if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
     if (localSettings.personalSeeds === undefined) localSettings.personalSeeds = [];
@@ -1885,13 +1896,6 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         simulation.fpsCapDefault = Number(localSettings.fpsCapDefault)
     }
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
-
-    if (!localSettings.banList) localSettings.banList = ""
-    if (localSettings.banList.length === 0 || localSettings.banList === "undefined") {
-        localSettings.banList = ""
-        localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    }
-    document.getElementById("banned").value = localSettings.banList
 
     if (!localSettings.isLoreDoesNotNeedReset) {
         localSettings.isLoreDoesNotNeedReset = true
@@ -1940,7 +1944,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     console.log('setting default localSettings') // eslint-disable-line no-console
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
-        banList: "",
+        levelPool: { banned: [], added: [] }, //official levels taken out of the pool, community and local levels put in
         isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
@@ -1967,10 +1971,8 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     };
     input.setDefault()
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    document.getElementById("community-maps").checked = localSettings.isCommunityMaps
     simulation.isCommunityMaps = localSettings.isCommunityMaps
     document.getElementById("fps-select").value = localSettings.fpsCapDefault
-    document.getElementById("banned").value = localSettings.banList
     document.getElementById("auto-fullscreen").checked = localSettings.isAutoFullscreen
 }
 simulation.difficultyOptions = localSettings.difficultyOptions ? powerUps.difficulty.normalize(localSettings.difficultyOptions) : powerUps.difficulty.fromLegacy(localSettings.difficultyMode);
@@ -2046,22 +2048,202 @@ document.getElementById("fps-select").addEventListener("input", () => {
     build.setFpsCap(document.getElementById("fps-select").value)
 });
 
-document.getElementById("banned").addEventListener("input", () => {
-    localSettings.banList = document.getElementById("banned").value
-    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-});
-
 document.getElementById("auto-fullscreen").addEventListener("input", () => {
     localSettings.isAutoFullscreen = document.getElementById("auto-fullscreen").checked
     if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
 });
 
-document.getElementById("community-maps").addEventListener("input", () => {
-    simulation.isCommunityMaps = document.getElementById("community-maps").checked
-    localSettings.isCommunityMaps = simulation.isCommunityMaps
-    if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
-    if (simulation.isCommunityMaps) level.loadMoreLevels().catch(error => console.error(error))
-});
+//**********************************************************************
+// level pool, the menu at the bottom of settings
+// drag or click a level to move it into or out of the random pool, see level.randomLevelPool()
+//**********************************************************************
+const levelPoolMenu = {
+    dragging: null, //name of the level being dragged
+    origin(name) { //where a level goes when it leaves the pool
+        if (level.playableLevels.includes(name)) return "banned"
+        if (level.communityLevels.includes(name)) return "community"
+        return "local"
+    },
+    isInPool(name) {
+        const pool = localSettings.levelPool
+        return levelPoolMenu.origin(name) === "banned" ? !pool.banned.includes(name) : pool.added.includes(name)
+    },
+    move(name, isIntoPool) {
+        if (levelPoolMenu.isInPool(name) === isIntoPool) return
+        const pool = localSettings.levelPool
+        if (!isIntoPool && level.randomLevelPool().length === 1) { //a run needs at least one level to shuffle
+            const zone = document.querySelector("#level-pool [data-zone='pool']")
+            zone.classList.remove("level-pool-shake")
+            void zone.offsetWidth //restart the animation
+            zone.classList.add("level-pool-shake")
+            return
+        }
+        const list = levelPoolMenu.origin(name) === "banned" ? "banned" : "added"
+        const isListed = (list === "banned") !== isIntoPool
+        pool[list] = pool[list].filter(n => n !== name)
+        if (isListed) pool[list].push(name)
+        levelPoolMenu.update()
+    },
+    update() { //save, then redraw
+        localSettings.isCommunityMaps = localSettings.levelPool.added.some(name => level.communityLevels.includes(name))
+        simulation.isCommunityMaps = localSettings.isCommunityMaps
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        if (simulation.isCommunityMaps) level.loadMoreLevels().catch(error => console.error(error))
+        levelPoolMenu.render()
+    },
+    chip(name) {
+        const origin = levelPoolMenu.origin(name)
+        const inPool = levelPoolMenu.isInPool(name)
+        return `<span class="level-chip level-chip-${origin}${inPool ? "" : " level-chip-out"}" draggable="true" tabindex="0" role="button" data-level="${name}">${name}</span>`
+    },
+    zone(zoneName, names, emptyText) {
+        return `<div class="level-pool-zone level-pool-zone-${zoneName}" data-zone="${zoneName}">${names.length ? names.map(name => levelPoolMenu.chip(name)).join("") : `<span class="level-pool-empty">${emptyText}</span>`}</div>`
+    },
+    header(text, button = "") {
+        return `<div class="level-pool-header"><span>${text}</span>${button}</div>`
+    },
+    render() {
+        const pool = level.randomLevelPool()
+        const banned = level.playableLevels.filter(name => !pool.includes(name))
+        const community = level.communityLevels.filter(name => !pool.includes(name))
+        const local = level.localLevels().filter(name => !pool.includes(name))
+        const locked = name => `<span class="level-route-locked">${name}</span>`
+        const random = count => `<span class="level-route-random">${count} random</span>`
+        const addAll = (zoneName, names) => names.length ? `<button class="sort-button level-pool-button" data-add-all="${zoneName}">add all</button>` : ""
+        document.getElementById("level-pool").innerHTML = `
+            ${levelPoolMenu.header("random pool", `<button class="sort-button level-pool-button" data-reset title="every n-gon level, no community levels">reset</button>`)}
+            ${levelPoolMenu.zone("pool", pool, "")}
+            <div class="level-route">
+                ${[locked("initial"), random(6), locked("reactor"), random(3), locked("reservoir / factory / interferometer"), locked("subway"), locked("final")]
+                .map((step, i) => i ? `<span class="level-route-step"><span class="level-route-dash">-</span>${step}</span>` : step).join("")}
+            </div>
+            ${levelPoolMenu.header("community", addAll("community", community))}
+            ${levelPoolMenu.zone("community", community, "")}
+            <div class="level-pool-columns">
+                <div>
+                    ${levelPoolMenu.header("banned", addAll("banned", banned))}
+                    ${levelPoolMenu.zone("banned", banned, "")}
+                </div>
+                <div>
+                    ${levelPoolMenu.header("local", addAll("local", local))}
+                    ${levelPoolMenu.zone("local", local, "")}
+                </div>
+            </div>`
+    },
+    zoneUnder(event) { //the zone a dragged level goes to, other levels only drop on the pool, pool levels drop anywhere else on the page and go back where they came from
+        if (!levelPoolMenu.dragging) return null
+        const isOverPool = !!event.target.closest?.("#level-pool [data-zone='pool']")
+        if (isOverPool === levelPoolMenu.isInPool(levelPoolMenu.dragging)) return null
+        return document.querySelector(`#level-pool [data-zone="${isOverPool ? "pool" : levelPoolMenu.origin(levelPoolMenu.dragging)}"]`)
+    },
+    clearTargets() {
+        for (const el of document.querySelectorAll("#level-pool .level-pool-target")) el.classList.remove("level-pool-target")
+    },
+    place() { //a pop up next to the settings menu, lined up with its bottom edge, or across the window above the level pool button if there isn't room
+        const card = document.querySelector("#settings-details > .details-div").getBoundingClientRect()
+        const button = document.getElementById("level-pool-button").getBoundingClientRect()
+        const menu = document.getElementById("level-pool")
+        const gap = 8
+        const room = Math.min(window.innerWidth, document.getElementById("start-button").getBoundingClientRect().left || Infinity) - card.right - 2 * gap //stay clear of the start button
+        const isBeside = room >= 480
+        const bottom = isBeside ? card.bottom : button.top - gap
+        menu.style.left = `${isBeside ? card.right + gap : gap}px`
+        menu.style.width = `${isBeside ? Math.min(1000, room) : window.innerWidth - 2 * gap}px`
+        menu.style.bottom = `${window.innerHeight - bottom}px`
+        menu.style.maxHeight = `${bottom - gap}px`
+    },
+    close() {
+        const menu = document.getElementById("level-pool")
+        if (menu.matches(":popover-open")) menu.hidePopover()
+    },
+}
+{
+    const menu = document.getElementById("level-pool")
+    menu.addEventListener("beforetoggle", (event) => {
+        if (event.newState === "open") {
+            levelPoolMenu.render() //local levels can change in the level editor
+            levelPoolMenu.place()
+        }
+    })
+    menu.addEventListener("toggle", (event) => {
+        document.getElementById("level-pool-button").classList.toggle("level-pool-button-open", event.newState === "open")
+    })
+    window.addEventListener("resize", () => {
+        if (menu.matches(":popover-open")) levelPoolMenu.place()
+    })
+    //a manual pop up, clicking outside it doesn't close it because a click on the title art starts a run
+    window.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") levelPoolMenu.close()
+    })
+    document.getElementById("settings-details").addEventListener("toggle", () => {
+        if (!document.getElementById("settings-details").open) levelPoolMenu.close()
+    })
+    menu.addEventListener("click", (event) => {
+        const chip = event.target.closest("[data-level]")
+        if (chip) {
+            if (event.detail !== 0) chip.blur() //like menus, so the field key (space) doesn't move it again
+            levelPoolMenu.move(chip.dataset.level, !levelPoolMenu.isInPool(chip.dataset.level))
+            return
+        }
+        const button = event.target.closest("button")
+        if (!button) return
+        const pool = localSettings.levelPool
+        if (button.dataset.reset !== undefined) {
+            pool.banned = []
+            pool.added = []
+        } else if (button.dataset.addAll === "banned") {
+            pool.banned = []
+        } else if (button.dataset.addAll === "community") {
+            pool.added = pool.added.filter(name => !level.communityLevels.includes(name)).concat(level.communityLevels)
+        } else if (button.dataset.addAll === "local") {
+            pool.added = pool.added.filter(name => !level.localLevels().includes(name)).concat(level.localLevels())
+        }
+        levelPoolMenu.update()
+    })
+    menu.addEventListener("keydown", (event) => {
+        const chip = event.target.closest("[data-level]")
+        if (!chip || (event.key !== "Enter" && event.key !== " ")) return
+        event.preventDefault()
+        const name = chip.dataset.level
+        levelPoolMenu.move(name, !levelPoolMenu.isInPool(name))
+        document.querySelector(`#level-pool [data-level="${name}"]`)?.focus() //keep focus on the level after it's redrawn in its new spot
+    })
+    menu.addEventListener("dragstart", (event) => {
+        const chip = event.target.closest?.("[data-level]")
+        if (!chip) return
+        levelPoolMenu.dragging = chip.dataset.level
+        event.dataTransfer.effectAllowed = "move"
+        event.dataTransfer.setData("text/plain", chip.dataset.level)
+        requestAnimationFrame(() => chip.classList.add("level-chip-dragging")) //after the browser grabs the drag image
+    })
+    menu.addEventListener("dragend", () => {
+        levelPoolMenu.dragging = null
+        levelPoolMenu.clearTargets()
+        for (const el of document.querySelectorAll("#level-pool .level-chip-dragging")) el.classList.remove("level-chip-dragging")
+    })
+    document.addEventListener("dragover", (event) => { //the whole page, so a level dragged out of the pool can be dropped anywhere
+        const zone = levelPoolMenu.zoneUnder(event)
+        if (!zone) {
+            levelPoolMenu.clearTargets()
+            return
+        }
+        event.preventDefault()
+        event.dataTransfer.dropEffect = "move"
+        if (!zone.classList.contains("level-pool-target")) { //highlights where the level will go
+            levelPoolMenu.clearTargets()
+            zone.classList.add("level-pool-target")
+        }
+    })
+    document.addEventListener("drop", (event) => {
+        const zone = levelPoolMenu.zoneUnder(event)
+        if (!zone) return
+        event.preventDefault()
+        const name = levelPoolMenu.dragging
+        levelPoolMenu.dragging = null
+        levelPoolMenu.move(name, zone.dataset.zone === "pool")
+    })
+    levelPoolMenu.render()
+}
 
 // Add the Spotify and Apple Music playlist URLs to the empty strings below.
 const musicPlaylists = {
@@ -2323,3 +2505,4 @@ function cycle() {
 }
 
 saveGame.updateContinueButton() //show continue on the title page when there is an autosave
+levelEditor.updateSplashButton() //and the level editor when there are local levels
