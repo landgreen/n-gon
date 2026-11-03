@@ -35,8 +35,9 @@
     <div id="level-editor-hint" class="le-hint"></div>
     <div id="level-editor-history" class="le-history-box le-history-pop" hidden><div class="le-history" data-history></div></div>
     <div id="level-editor-code" class="le-panel">
-        <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="closeCode">close</button></span></div>
-        <textarea readonly spellcheck="false"></textarea>
+        <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="downloadPanel" title="save it as a .js file">download</button><button class="le-button" data-command="openFile" hidden title="load a level from a .js or .txt file">open file</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="importBack" hidden title="back to the import box">back</button><button class="le-button" data-command="importNoCode" hidden title="the map, blocks, mobs, power ups, and elements with their settings, none of its javascript runs">import without code</button><button class="le-button" data-command="importRun" hidden title="only for code from people you trust">run it</button><button class="le-button" data-command="closeCode">close</button></span></div>
+        <div class="le-panel-box"><pre class="le-panel-colors" aria-hidden="true"></pre><textarea readonly spellcheck="false" wrap="off"></textarea></div>
+        <input type="file" id="level-editor-import-file" accept=".js,.txt,text/plain,text/javascript" hidden>
         <div class="le-report" hidden></div>
     </div>
     <canvas id="canvas"></canvas>
@@ -103,7 +104,7 @@
                     <br>
                     <br>
                     <button id="level-pool-button" popovertarget="level-pool" class='sort-button' style="font-size:1em;" title="choose which levels can show up in a run">level pool</button>
-                    <button id="level-editor-button" onclick="levelEditor.open()" class='sort-button' style="font-size:1em;" title="make local levels">level editor</button>
+                    <button id="level-editor-button" onclick="levelEditor.open()" class='sort-button' style="font-size:1em;" title="make local levels">level editor</button> <span style="color:#aaa; font-size:0.75em;">(beta)</span>
                     <br>
                     <label for="seed" title="the seed determines level order, tech choices, and mob types">randomization seed:</label>
                     <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">
@@ -422,8 +423,7 @@
     <script src="js/level.js"></script>
     <script src="js/level-elements.js"></script>
     <script src="js/level-data.js"></script>
-    <script src="js/level-analysis.js"></script>
-    <script src="js/level-editor.js"></script>
+    <!-- the level editor's files load when it opens, see levelEditor.loadFiles() in js/level-data.js -->
     <!-- <script src="js/level2.js"></script> -->
     <script src="js/lore.js"></script>
     <script src="js/engine.js"></script>

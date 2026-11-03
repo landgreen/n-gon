@@ -840,6 +840,17 @@ levelPoolMenu.place() sets its position, width, and height */
     padding: 1px 7px;
 }
 
+.level-pool-button+.level-pool-button {
+    margin-left: 0;
+}
+
+/* the thumbnails button while thumbnails are on */
+.level-pool-button-on,
+.level-pool-button-on:hover {
+    background-color: #666;
+    color: #fff;
+}
+
 /* about the size of the words in settings */
 .level-route {
     display: flex;
@@ -931,6 +942,37 @@ levelPoolMenu.place() sets its position, width, and height */
 
 .level-chip-dragging {
     opacity: 0.3;
+}
+
+/* thumbnails on, each level is its thumbnail with the name under it, see levelPoolMenu.thumbnail() */
+.level-pool-thumbnails .level-pool-zone {
+    grid-template-columns: repeat(auto-fill, minmax(9.5em, 1fr));
+}
+
+.level-pool-thumbnails .level-chip {
+    padding: 0;
+}
+
+.level-chip-thumbnail {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2;
+    pointer-events: none;
+}
+
+.level-chip-out .level-chip-thumbnail {
+    opacity: 0.4;
+}
+
+.level-chip-out:hover .level-chip-thumbnail {
+    opacity: 1;
+}
+
+.level-chip-name {
+    display: block;
+    padding: 3px 8px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .level-pool-shake {
@@ -2525,6 +2567,27 @@ body.level-editor .le-status {
     flex: none;
 }
 
+/* the magnifying glass is a button with no box, it goes to the level's zoom */
+.le-button.le-icon-button {
+    display: inline-flex;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+/* the browser wouldn't save, stays until a save works */
+.le-status-unsaved {
+    margin-right: 8px;
+    border-color: #c00;
+    color: #c00;
+    font-weight: bold;
+}
+
+.le-status-unsaved[hidden] {
+    display: none;
+}
+
 .le-status-right {
     margin-left: auto;
 }
@@ -2589,21 +2652,167 @@ body.level-editor #text-log {
     bottom: 42px;
 }
 
-/* test and JS test at the top of the simulation menu */
+/* the explorer's search, it lists only what matches */
+.le-explore-search {
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 6px;
+    padding: 2px 5px;
+    border: 1px solid #333;
+    border-radius: 0;
+    font: inherit;
+}
+
+.le-align-icon {
+    display: block;
+    margin: 0 auto;
+}
+
+/* the simulation menu's seed, to the right of level */
+.le-seed-label {
+    margin-left: 10px;
+}
+
+/* cut, copy, and paste's keys under the inspector's delete */
+.le-hotkeys .le-key-cap {
+    font-size: 15px;
+}
+
+/* the top of the info box, like a header */
+.le-hotkeys {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.le-hotkey-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* a key cap that's a button, clicking it does what the key does */
+.le-hotkey {
+    padding: 0;
+    border: none;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.le-hotkey:hover strong {
+    filter: brightness(0.92);
+}
+
+.le-hotkey:active strong {
+    transform: translateY(1px);
+}
+
+/* settings test export ignores, grayed out while it runs */
+.le-inactive {
+    opacity: 0.45;
+}
+
+/* quick test and test export at the top of the simulation menu */
 .le-run {
     margin-bottom: 6px;
 }
 
 /* the inspector's js view, the lines this element writes in export JS */
+/* edit and revert, flush above the code, and the box an element's code is typed into, the same place and size as the code */
+.le-code-buttons {
+    margin-top: 8px;
+}
+
+.le-actions+.le-code-buttons { /* right under the action rows, one box */
+    margin-top: 0;
+    border-top: none;
+}
+
+.le-code-buttons+.le-js-view {
+    margin-top: 0;
+}
+
+/* GitHub's light theme, the most used light code colors */
 .le-js-view {
-    margin: 4px 0;
-    padding: 4px;
+    color: #1f2328;
+}
+
+.le-hl-comment {
+    color: #6e7781;
+}
+
+.le-hl-string {
+    color: #0a3069;
+}
+
+.le-hl-number { /* and true, false, null */
+    color: #0550ae;
+}
+
+.le-hl-keyword {
+    color: #cf222e;
+}
+
+.le-hl-call {
+    color: #8250df;
+}
+
+/* the code panel's error line, under its name */
+.le-panel-error {
+    margin-top: 6px;
+}
+
+.le-hl-zone { /* the comment starting each part, runs once or every game cycle, a band so the parts stand apart, no bold so the letters keep their width */
+    color: #0550ae;
+    background-color: rgba(84, 174, 255, 0.18);
+}
+
+/* the level info box's list of code pieces and elements with edited code, each a link that selects it */
+.le-code-link {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    padding: 1px 4px;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.le-code-link span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.le-code-link:hover {
+    background-color: var(--hover-card-color);
+}
+
+.le-code-link-error {
+    color: #c00;
+}
+
+/* the settings while edited code runs instead */
+.le-overridden {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.le-js-view { /* the bottom of the inspector, out to its edges, a slightly darker region with no lines */
+    margin: 8px -6px -6px;
+    padding: 6px 8px;
     max-height: 300px;
     overflow: auto;
-    background-color: #f0f3f5;
-    border: 1px solid #ccc;
+    background-color: #eef1f3;
+    border: none;
+    border-radius: 0 0 6px 6px;
     font-family: monospace;
-    font-size: 11px;
+    font-size: 9.5px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     user-select: text;
@@ -2631,6 +2840,14 @@ body.level-editor.le-panels-hidden .le-status {
 
 body.level-editor.le-panels-hidden .le-hint {
     display: block;
+}
+
+/* the pause menu covers the left and right panels, so they hide while it's open, see build.pauseGrid() */
+body.level-editor.pause-open .le-panel,
+body.level-editor.pause-open .le-status,
+body.level-editor.pause-open .le-hint,
+body.level-editor.pause-open .le-history-pop {
+    display: none;
 }
 
 /* explorer, every element by type, see explorerHtml() */
@@ -2750,7 +2967,26 @@ body.level-editor #right-HUD-constraint {
     display: none !important;
 }
 
-/* under the health bar, gray like the pause menu's open menus, the open menus inside are the lighter card color */
+/* invincible: no health or defense bars, nothing can hurt the player, the left panel goes up where they were */
+body.level-editor.le-invincible #health,
+body.level-editor.le-invincible #health-bg,
+body.level-editor.le-invincible #defense-bar {
+    display: none !important;
+}
+
+body.level-editor.le-invincible #level-editor-left {
+    top: 9px;
+    max-height: calc((100vh - 61px) / 1.1);
+}
+
+/* the left and right panels and the code panel cast the experiment menu's shadow (.experiment-start-box), a little lighter, the status bar doesn't */
+#level-editor-left,
+#level-editor-right,
+#level-editor-code {
+    box-shadow: 8px 8px 6px rgba(0, 0, 50, 0.1);
+}
+
+/* under the health bar, a plain gray as light as the pause menu's open menus, the open menus inside are the lighter card color */
 #level-editor-left {
     zoom: 1.1; /* everything in it 10% bigger, easier to read, top, left, and sizes are before the zoom */
     top: 40px;
@@ -2758,7 +2994,7 @@ body.level-editor #right-HUD-constraint {
     width: 260px; /* 8px wider for the padding, so the menus inside keep their width */
     max-height: calc((100vh - 92px) / 1.1); /* above the status bar */
     padding: 10px;
-    background-color: #e2e9ec;
+    background-color: #e7e7e7; /* the pause menu's #e2e9ec with its blue taken out, the same lightness */
 }
 
 #level-editor-right {
@@ -2848,6 +3084,26 @@ body.level-editor #right-HUD-constraint {
     color: #fff;
 }
 
+/* quick test and test export's play is a green outline and stop a red one, the same size, unlike the menus' black arrows */
+.le-play,
+.le-stop {
+    width: 0.8em;
+    height: 0.8em;
+    margin-right: 0.15em;
+    vertical-align: -0.08em;
+    fill: none;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+}
+
+.le-play {
+    stroke: #1a9c3c;
+}
+
+.le-stop {
+    stroke: #ff5a5a; /* bright, on the dark on button */
+}
+
 /* the status bar's draw tools are tiny drawings, the one in use gets a light background so the dark map still shows */
 .le-tool-icons .le-button {
     display: flex;
@@ -2879,7 +3135,8 @@ body.level-editor #right-HUD-constraint {
     border-radius: 0;
 }
 
-.le-segment .le-button+.le-button {
+/* the line between two buttons is the left one's, a hidden one before it doesn't count, like the code panel's apply after the hidden import */
+.le-segment .le-button:not([hidden])~.le-button {
     border-left: none;
 }
 
@@ -2929,6 +3186,15 @@ body.level-editor #right-HUD-constraint {
     border-bottom-width: 0;
 }
 
+/* level element, mob by name, and power up by name stack in one part above + code */
+.le-add-part>.le-list {
+    margin-top: 0;
+}
+
+.le-list+.le-list {
+    border-top: none;
+}
+
 /* export, the local levels, and import, apart from each other */
 .le-details .le-gap-above {
     margin-top: 14px;
@@ -2936,6 +3202,37 @@ body.level-editor #right-HUD-constraint {
 
 .le-load-group summary {
     margin: 8px 0 2px;
+}
+
+/* the help menu's guide */
+.le-help summary {
+    margin: 2px 0;
+}
+
+.le-help-text {
+    margin: 2px 0 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: #333;
+    user-select: text;
+}
+
+.le-help-text p {
+    margin: 4px 0;
+}
+
+.le-help-text ol,
+.le-help-text ul {
+    margin: 4px 0;
+    padding-left: 18px;
+}
+
+.le-help-text li+li {
+    margin-top: 3px;
+}
+
+.le-help-text code {
+    font-size: 11px;
 }
 
 /* an empty line between n-gon, community, training, and testing */
@@ -2949,6 +3246,33 @@ body.level-editor #right-HUD-constraint {
 
 .le-grid.le-two {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* export/import's buttons, new, import, and export a third each, fork and add to level pool a half */
+.le-grid.le-sixths {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.le-grid.le-sixths .le-button.le-third {
+    grid-column: span 2;
+}
+
+.le-grid.le-sixths .le-button.le-half {
+    grid-column: span 3;
+}
+
+/* the inspector's action buttons, flips a quarter, vertices, constraint, and delete a half */
+.le-grid.le-quarters {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.le-grid.le-quarters .le-button.le-half {
+    grid-column: span 2;
+}
+
+/* a button across the whole grid, like add to level pool */
+.le-grid .le-button.le-wide {
+    grid-column: 1 / -1;
 }
 
 /* the inspector's bottom buttons, each line split evenly however many there are */
@@ -3002,17 +3326,17 @@ body.level-editor #right-HUD-constraint {
 
 .le-flush-x.le-grid,
 .le-flush-x.le-shapes,
-.le-flush-x.le-mob-list,
+.le-flush-x.le-list,
 .le-flush-x .le-grid {
     border-left-width: 0;
     border-right-width: 0;
 }
 
-.le-flush-x.le-mob-list {
+.le-flush-x.le-list {
     width: calc(100% + 2 * var(--le-pad));
 }
 
-.le-mob-list:not(.le-rich-list) {
+.le-list:not(.le-rich-list) {
     padding: 3px 6px; /* like the customizable lists next to it */
 }
 
@@ -3030,9 +3354,9 @@ body.level-editor #right-HUD-constraint {
     overflow: hidden;
 }
 
-/* a list right under its buttons joins them, like the add menu's level element, mob by name, and power up by name */
-.le-grid+.le-mob-list,
-.le-shapes+.le-mob-list {
+/* a list right under its buttons joins them */
+.le-grid+.le-list,
+.le-shapes+.le-list {
     margin-top: 0;
     border-top: none;
 }
@@ -3072,18 +3396,6 @@ body.level-editor #right-HUD-constraint {
     margin: 0;
 }
 
-/* a power up's name, and its orb on the right */
-.le-split {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 2px 0 4px;
-}
-
-.le-split .le-orb {
-    margin: 0;
-}
-
 .le-row.le-gap {
     margin-top: 20px;
 }
@@ -3101,20 +3413,6 @@ body.level-editor #right-HUD-constraint {
     padding: 1px 2px;
 }
 
-.le-check {
-    min-width: 0;
-    font-size: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    white-space: nowrap;
-    cursor: pointer;
-}
-
-.le-check input {
-    margin: 0;
-}
-
 /* a code element, written out, click it to edit */
 .le-code-view {
     max-height: 320px;
@@ -3129,30 +3427,12 @@ body.level-editor #right-HUD-constraint {
     cursor: text;
 }
 
-.le-code-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    border: 1px solid #ccc;
-    background-color: #ccc;
-}
-
-.le-button.le-code-item {
-    border: none;
-    text-align: left;
-    font-family: monospace;
-    font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 .le-link-list {
     max-width: 100%;
     font: inherit;
 }
 
-.le-mob-list {
+.le-list {
     width: 100%;
     margin-top: 4px;
     border: 1px solid #333;
@@ -3193,6 +3473,46 @@ body.level-editor #right-HUD-constraint {
     max-height: 60vh;
 }
 
+/* the add menu's lists in two columns, each group's title (its legend) across both, smaller names, a long one is cut off */
+/* options right in the list, like power up by name, make the columns themselves, the first "pick one" option and groups go across */
+.le-two-col::picker(select) {
+    width: 320px;
+}
+
+.le-two-col::picker(select):popover-open { /* only while open, a display here would show it closed too */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+}
+
+.le-two-col option[value=""],
+.le-two-col optgroup {
+    grid-column: 1 / -1;
+}
+
+.le-two-col optgroup {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.le-two-col legend {
+    grid-column: 1 / -1;
+    padding: 3px 4px 1px;
+    font-weight: bold;
+}
+
+.le-two-col option {
+    min-width: 0;
+    font-size: 11px;
+}
+
+.le-two-col option span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .le-mob-icon {
     flex: none;
     display: block;
@@ -3212,6 +3532,15 @@ body.level-editor #right-HUD-constraint {
     grid-template-columns: repeat(7, 1fr);
 }
 
+/* the drawing row under them: fill, draw path, exit fill, text */
+.le-shapes.le-draws {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.le-shapes+.le-shapes {
+    border-top: none;
+}
+
 .le-button.le-shape {
     display: flex;
     align-items: center;
@@ -3223,6 +3552,11 @@ body.level-editor #right-HUD-constraint {
 /* a command's key, on the right of a row or a menu title */
 .le-key-cap {
     font-size: 12px;
+}
+
+/* the editor's key caps are lighter than the pause menu's, still darker than buttons */
+.le-key-cap .key-input-train {
+    background-color: #e6e6e6;
 }
 
 .le-panel summary .le-key-cap {
@@ -3345,6 +3679,10 @@ body.level-editor #right-HUD-constraint {
     overflow: hidden;
 }
 
+.le-prop .color-var[title] {
+    cursor: help;
+}
+
 .le-prop input.le-value {
     max-width: calc(100% - 14ch);
     padding: 0;
@@ -3401,7 +3739,8 @@ body.level-editor #right-HUD-constraint {
 }
 
 /* collides: [player map body], names in the mask are code colored, the rest are crossed out, click toggles */
-.le-prop.le-mask {
+.le-prop.le-mask,
+.le-prop.le-wrap {
     white-space: normal;
 }
 
@@ -3429,6 +3768,27 @@ body.level-editor #right-HUD-constraint {
     color: hsl(30, 80%, 40%);
     text-decoration: none;
     font-style: italic;
+}
+
+/* veto: [hydraBoss], vetoed mobs and bosses are crossed out like collides' names, in the list under it too */
+.le-chip .le-mob-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 2px;
+    opacity: 0.5;
+}
+
+.le-veto-list {
+    margin-top: 2px;
+}
+
+.le-rich-list option.le-vetoed {
+    color: #aaa;
+    text-decoration: line-through;
+}
+
+.le-rich-list option.le-vetoed .le-mob-icon {
+    opacity: 0.4;
 }
 
 /* vertex editing */
@@ -3477,22 +3837,127 @@ body.level-editor #level-editor-code:not(.le-open) {
     font-family: monospace;
 }
 
-#level-editor-code textarea {
+/* the code panel's box is see-through over a pre with its text in colors, like the info box's code box */
+.le-panel-box {
+    position: relative;
+    margin-top: 6px;
+}
+
+#level-editor-code textarea,
+.le-panel-colors {
     box-sizing: border-box;
     width: 100%;
     height: min(70vh, 700px);
-    margin-top: 6px;
+    margin: 0;
     padding: 6px;
     border: 1px solid #bbb;
     border-radius: 4px;
     font: inherit;
     font-size: 12px;
+    line-height: 1.35;
     white-space: pre;
+}
+
+#level-editor-code textarea {
+    position: relative;
+    display: block;
+    background: transparent;
+    color: transparent;
+    caret-color: #000;
     resize: none;
+}
+
+#level-editor-code textarea::placeholder {
+    color: #888;
+}
+
+#level-editor-code textarea::selection {
+    background-color: rgba(0, 120, 255, 0.25);
+}
+
+.le-panel-colors {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-color: transparent;
+    background-color: #fff;
+    color: #1f2328;
+    pointer-events: none;
 }
 
 #level-editor-code [hidden] {
     display: none;
+}
+
+/* an element's or the level's code: runs once, level.custom, and level.customTopLayer stacked like a sandwich, drag the lines between them, a folded part is a strip with its name */
+.le-parts {
+    display: flex;
+    flex-direction: column;
+    height: min(70vh, 700px);
+    margin-top: 6px;
+}
+
+.le-part {
+    display: flex;
+    flex: 0 1 0;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.le-part.le-folded {
+    flex: 0 0 auto;
+}
+
+.le-part-name {
+    padding: 2px 6px;
+    overflow: hidden;
+    border: none;
+    border-radius: 4px 4px 0 0;
+    background-color: rgba(84, 174, 255, 0.18); /* the part comment's band, .le-hl-zone */
+    color: #0550ae;
+    font: inherit;
+    font-size: 12px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.le-part.le-folded .le-part-name {
+    border-radius: 4px;
+}
+
+.le-part-box {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+.le-part.le-folded .le-part-box {
+    display: none;
+}
+
+#level-editor-code .le-part-box textarea,
+#level-editor-code .le-part-box .le-panel-colors {
+    height: 100%;
+    border-radius: 0 0 4px 4px;
+}
+
+.le-part-line {
+    flex: 0 0 9px;
+    background: linear-gradient(to bottom, transparent 4px, #bbb 4px, #bbb 5px, transparent 5px);
+    cursor: row-resize;
+}
+
+.le-part-line:hover,
+.le-part-line.le-dragging {
+    background: linear-gradient(to bottom, transparent 3px, #0969da 3px, #0969da 6px, transparent 6px);
+}
+
+body.le-part-dragging {
+    cursor: row-resize;
+    user-select: none;
 }
 
 .le-report {
@@ -3516,6 +3981,24 @@ body.level-editor #level-editor-code:not(.le-open) {
     margin-top: 8px;
     color: #999;
     font-style: italic;
+}
+
+/* the import warning, a pasted level's javascript before it runs, see confirmImport() */
+.le-import-warning {
+    color: #c00;
+}
+
+.le-import-flags code {
+    color: #c00;
+}
+
+.le-import-code {
+    margin: 2px 0 0;
+    padding: 4px 6px;
+    overflow-x: auto;
+    background-color: #eef1f3;
+    color: #1f2328;
+    white-space: pre;
 }
 
 /* the analysis in the inspector, see inspectAnalysis() */

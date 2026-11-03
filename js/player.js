@@ -951,6 +951,7 @@ const m = {
         return tech.isRewindAvoidDeath && m.energy > 0.85 * Math.min(1, m.maxEnergy) && dmg > 0;
     },
     takeDamage(dmg, isDefense = true) {
+        if (levelEditor.isActive && levelEditor.isInvincible) return //the level editor's invincible checkbox
         if (m.canRewindDamage(dmg)) {
             const steps = Math.floor(Math.min(299, 150 * m.energy)) //150 * m.energy
             simulation.inGameConsole(`<span class='color-var'>m</span>.rewind(${steps})`)

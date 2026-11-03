@@ -1,26 +1,26 @@
 "use strict";
-//checks a local level against the written levels, the analysis button in the level editor's export menu
+//checks a local level against the standard levels, the analysis button in the level editor's export menu
 //  levelAnalysis.run(data, { isLive }) returns { sections: [{ title, lines: [{ status, label, value, text }] }] }
 //  status is "fix", "warn", "note", or "ok", isLive adds what the editor measures while the level runs
 //add a check with levelAnalysis.check(section, context => lines), see docs/level-editor.md
 const levelAnalysis = {
     //from the 22 playable levels in js/level.js (labs through refinery), run in headless Chrome at levelsCleared 5
     norms: {
-        mobPlaces: 13, //spawn.randomMobFromArray() spawns up to 13 mobs by the end of a run, written levels have 6 to 38 spots, most about 17
-        groups: 5, //written levels have 0 to 5 random groups
+        mobPlaces: 13, //spawn.randomMobFromArray() spawns up to 13 mobs by the end of a run, standard levels have 6 to 38 spots, most about 17
+        groups: 5, //standard levels have 0 to 5 random groups, a note past double
         healAmmo: [2, 12], //heal and ammo power ups, random power ups plus 15% of debris
-        debris: 40, //written levels scatter about 16
-        zoom: [1000, 3000], //written levels use 1300 to 2600
-        size: [30000, 15000], //written levels are up to 21000 wide and 9000 tall
-        near: { mob: 450, boss: 1400, secondaryBoss: 750, startingPowerUps: 500, exit: 450 }, //the closest a written level puts each to the spawn
-        bossApart: 400, //the closest a written level puts its 2 bosses
-        map: [100, 200], //map pieces, written levels have up to 82, the community levels that lag have 300 to 900
+        debris: 40, //standard levels scatter about 16
+        zoom: [1000, 3000], //standard levels use 1300 to 2600
+        size: [21000, 9000], //the widest and tallest standard levels, a note past double
+        near: { mob: 450, boss: 1400, secondaryBoss: 750, startingPowerUps: 500, exit: 450 }, //the closest a standard level puts each to the spawn
+        bossApart: 400, //the closest a standard level puts its 2 bosses
+        map: [100, 200], //map pieces, standard levels have up to 82, the community levels that lag have 300 to 900
         mapVertices: 1500, //refinery has the most, 1251, from its round shapes
-        blocks: [50, 100], //blocks and debris, written levels have up to 38, ace has 236
+        blocks: [50, 100], //blocks and debris, standard levels have up to 38, ace has 236
         blockVertices: 400, //blocks with many vertices collide slowly
-        most: { boost: 7, mover: 12, elevator: 3, vanish: 16, spinner: 12, wind: 8, slime: 3, laser: 12, decor: 32 }, //the most in one written level
-        frameMs: [0.35, 0.5], //elements' custom and top layers, written levels take under 0.31 ms a frame
-        bodies: 250, //physics bodies the elements make, written levels have up to 122 with their mobs
+        most: { boost: 7, mover: 12, elevator: 3, vanish: 16, spinner: 12, wind: 8, slime: 3, laser: 12, fill: 32 }, //the most in one standard level, a note past double, wind costs about 30 µs a frame each, 10 times the others, elements a frame catches too many
+        frameMs: [0.35, 0.5], //elements' custom and top layers, standard levels take under 0.31 ms a frame
+        bodies: 250, //physics bodies the elements make, standard levels have up to 122 with their mobs
     },
     debrisPowerUp: 0.15, //chance each debris is a heal or ammo, see spawn.debris()
     checks: [],
@@ -52,7 +52,7 @@ const levelAnalysis = {
         const ground = of("map").slice()
         if (spawn && spawn.bump) ground.push({ type: "map", x: spawn.x - 50, y: spawn.y + 40, width: 100, height: 20 }) //the bumps the doors stand on
         if (exit && exit.bump) ground.push({ type: "map", x: exit.x, y: exit.y + 20, width: 100, height: 20 })
-        const code = data.elements.filter(el => levelElements.types[el.type]?.isCode).map(el => el.code).join("\n")
+        const code = levelData.codeText(data) //code elements and the level code
         return { data, of, spawn, exit, ground, code, inCode: text => code.includes(text), norms: levelAnalysis.norms, live: options.isLive ? levelAnalysis.live(data) : null }
     },
     live(data) { //what each element made and what its custom and top layers cost a frame, from levelData's runtimes
@@ -61,12 +61,13 @@ const levelAnalysis = {
             if (!runtime) return { el, ms: 0, bodies: 0, constraints: 0 }
             return {
                 el,
+                error: runtime.error || null, //building it, or its custom or top layer, threw
                 ms: (runtime.customMs || 0) + (runtime.topMs || 0),
                 bodies: (runtime.maps || []).length + (runtime.bodies || []).length + (runtime.composite || []).length,
                 constraints: (runtime.cons || []).length + (runtime.consBB || []).length + (runtime.constraints || []).length,
             }
         })
-        return { elements, ms: elements.reduce((sum, e) => sum + e.ms, 0), bodies: elements.reduce((sum, e) => sum + e.bodies, 0) }
+        return { elements, ms: elements.reduce((sum, e) => sum + e.ms, 0), bodies: elements.reduce((sum, e) => sum + e.bodies, 0), codeError: levelData.codeError || null }
     },
 
     //*********************************************************************
@@ -192,6 +193,15 @@ const levelAnalysis = {
 //*********************************************************************
 // checks, in the order they're shown
 //*********************************************************************
+levelAnalysis.check("errors", c => { //javascript that throws while the level runs, only known in the editor, the level isn't ready until it's fixed
+    if (!c.live) return []
+    const lines = c.live.elements.filter(e => e.error && !levelElements.isCode(e.el)).map(e => levelAnalysis.line("fix", levelElements.nameOf(e.el.type), "error", String(e.error.message || e.error), [e.el]))
+    const codeElements = c.live.elements.filter(e => e.error && levelElements.isCode(e.el))
+    const codeError = c.live.codeError || codeElements[0]?.error
+    if (codeError) lines.push(levelAnalysis.line("fix", "code", "error", String(codeError.message || codeError), codeElements.map(e => e.el)))
+    return lines
+})
+
 levelAnalysis.check("bosses", c => {
     const { line, at, distance } = levelAnalysis
     const lines = []
@@ -206,18 +216,18 @@ levelAnalysis.check("bosses", c => {
         firsts.push(list[0])
         const places = list.flatMap(el => levelElements.types[type].places(el).map(([x, y]) => ({ x, y })))
         lines.push(list.length > 1 ?
-            line("warn", label, list.length, "written levels have 1, give it more spots instead", list) :
+            line("warn", label, list.length, "standard levels have 1, give it more spots instead", list) :
             line("ok", label, 1, places.length > 1 ? `${places.length} spots` : ""))
         const placesOf = el => levelElements.types[type].places(el).map(([x, y]) => ({ x, y }))
         if (c.spawn) {
             const near = places.filter(p => distance(p, c.spawn) < c.norms.near[type])
-            if (near.length) lines.push(line("warn", `${label} near enter`, `${Math.round(distance(near[0], c.spawn))} away`, `at ${at(near[0].x, near[0].y)}, written levels keep it ${c.norms.near[type]}+ from the enter`, list.filter(el => placesOf(el).some(p => distance(p, c.spawn) < c.norms.near[type]))))
+            if (near.length) lines.push(line("warn", `${label} near enter`, `${Math.round(distance(near[0], c.spawn))} away`, `at ${at(near[0].x, near[0].y)}, standard levels keep it ${c.norms.near[type]}+ from the enter`, list.filter(el => placesOf(el).some(p => distance(p, c.spawn) < c.norms.near[type]))))
         }
         const stuck = places.filter(p => levelAnalysis.inMap(c, p))
         if (stuck.length) lines.push(line("warn", `${label} in the map`, stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, list.filter(el => placesOf(el).some(p => levelAnalysis.inMap(c, p)))))
     }
     if (firsts.length === 2 && distance(firsts[0], firsts[1]) < c.norms.bossApart) {
-        lines.push(line("note", "bosses together", `${Math.round(distance(firsts[0], firsts[1]))} apart`, `written levels keep them ${c.norms.bossApart}+ apart`))
+        lines.push(line("note", "bosses together", `${Math.round(distance(firsts[0], firsts[1]))} apart`, `standard levels keep them ${c.norms.bossApart}+ apart`))
     }
     return lines
 })
@@ -233,19 +243,19 @@ levelAnalysis.check("mobs", c => {
     } else if (!places) {
         lines.push(line("fix", "mob places", 0, "add some with mob in add mobs", [], "mobSpot"))
     } else if (places < c.norms.mobPlaces) {
-        lines.push(line("warn", "mob places", places, `up to ${c.norms.mobPlaces} mobs spawn late in a run, written levels have about 17 spots`, [], "mobSpot"))
+        lines.push(line("warn", "mob places", places, `up to ${c.norms.mobPlaces} mobs spawn late in a run, standard levels have about 17 spots`, [], "mobSpot"))
     } else {
         lines.push(line("ok", "mob places", places))
     }
-    if (singles.length && !spots.length) lines.push(line("note", "random mobs", singles.length, "written levels use spots, each level picks how many mobs to spawn from them"))
+    if (singles.length && !spots.length) lines.push(line("note", "random mobs", singles.length, "standard levels use spots, each level picks how many mobs to spawn from them"))
     const groups = c.of("mobGroup").length
-    if (groups > c.norms.groups) lines.push(line("note", "groups", groups, `written levels have up to ${c.norms.groups}`))
+    if (groups > 2 * c.norms.groups) lines.push(line("note", "groups", groups, `standard levels have up to ${c.norms.groups}`))
     else lines.push(line("ok", "groups", groups))
     const all = spots.concat(singles, c.of("mobGroup"), c.of("namedMob"))
     if (c.spawn && all.length) {
         const nearest = all.reduce((a, b) => distance(a, c.spawn) < distance(b, c.spawn) ? a : b)
         const d = distance(nearest, c.spawn)
-        if (d < c.norms.near.mob) lines.push(line("warn", "mob near enter", `${Math.round(d)} away`, `at ${at(nearest.x, nearest.y)}, written levels keep mobs ${c.norms.near.mob}+ from the enter`, [nearest]))
+        if (d < c.norms.near.mob) lines.push(line("warn", "mob near enter", `${Math.round(d)} away`, `at ${at(nearest.x, nearest.y)}, standard levels keep mobs ${c.norms.near.mob}+ from the enter`, [nearest]))
     }
     const stuck = all.filter(el => levelAnalysis.inMap(c, el))
     if (stuck.length) lines.push(line("warn", "mobs in the map", stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, stuck))
@@ -258,10 +268,11 @@ levelAnalysis.check("power ups", c => {
     const starting = c.of("startingPowerUps")
     if (!starting.length && c.inCode("spawnStartingPowerUps")) lines.push(line("ok", "starting", "in code"))
     else if (!starting.length) lines.push(line("warn", "starting", 0, "add one, it gives a gun or tech early in a run", [], "startingPowerUps"))
-    else if (starting.length > 1) lines.push(line("warn", "starting", starting.length, "written levels have 1", starting))
+    else if (starting.length > 1) lines.push(line("warn", "starting", starting.length, "standard levels have 1", starting))
     else lines.push(line("ok", "starting", 1))
-    if (starting.length && c.spawn && distance(starting[0], c.spawn) < c.norms.near.startingPowerUps) {
-        lines.push(line("note", "starting at enter", `${Math.round(distance(starting[0], c.spawn))} away`, "written levels put it out in the level"))
+    const nearEnter = c.spawn ? starting.filter(el => distance(el, c.spawn) < c.norms.near.startingPowerUps) : []
+    if (nearEnter.length) { //a gun or field right at the start is no search at all
+        lines.push(line("warn", "starting near enter", `${Math.round(distance(nearEnter[0], c.spawn))} away`, `at ${at(nearEnter[0].x, nearEnter[0].y)}, it's best deeper in the level, so the player has to search a little for the gun or tech, standard levels keep it ${c.norms.near.startingPowerUps}+ from the enter`, nearEnter))
     }
     const placed = name => c.of("powerUp").filter(el => el.name === name).reduce((sum, el) => sum + el.count, 0)
     const debris = c.of("debris").reduce((sum, el) => sum + el.count, 0)
@@ -272,7 +283,7 @@ levelAnalysis.check("power ups", c => {
     else if (healAmmo > many) lines.push(line("warn", "heal and ammo", value, `levels should have ${few} to ${many}`))
     else lines.push(line("ok", "heal and ammo", value))
     const free = ["tech", "gun", "field"].filter(name => placed(name))
-    if (free.length) lines.push(line("warn", "free " + free.join(" "), free.reduce((sum, name) => sum + placed(name), 0), "written levels give these from the boss and the starting power up", c.of("powerUp").filter(el => free.includes(el.name))))
+    if (free.length) lines.push(line("warn", "free " + free.join(" "), free.reduce((sum, name) => sum + placed(name), 0), "standard levels give these from the boss and the starting power up", c.of("powerUp").filter(el => free.includes(el.name))))
     if (placed("research")) lines.push(line("note", "research", placed("research"), "levels with mobs already get 1 on a random mob"))
     if (debris > c.norms.debris) lines.push(line("warn", "debris", debris, "many levels scatter about 16"))
     else lines.push(line(debris ? "ok" : "note", "debris", debris, debris ? "" : "many levels scatter about 16", [], debris ? "" : "debris"))
@@ -288,8 +299,8 @@ levelAnalysis.check("layout", c => {
     const { line, at, distance } = levelAnalysis
     const lines = []
     const maps = c.of("map")
-    if (c.code) lines.push(line("note", "code", c.of("code").length, "these checks can't see what it makes"))
-    if (!maps.length) return lines.concat(c.code ? [] : [line("fix", "map", 0, "draw some ground", [], "map")])
+    if (c.code.trim()) lines.push(line("note", "code", c.of("code").length + (c.data.levelCode.trim() ? 1 : 0), "these checks can't see what it makes"))
+    if (!maps.length) return lines.concat(c.code.trim() ? [] : [line("fix", "map", 0, "draw some ground", [], "map")])
     if (c.spawn) {
         if (levelAnalysis.inMap(c, c.spawn)) lines.push(line("fix", "enter in the map", "", `at ${at(c.spawn.x, c.spawn.y)}`, [c.spawn]))
         else if (!levelAnalysis.isGroundBelow(c, c.spawn)) lines.push(line("warn", "enter", "", "nothing below it", [c.spawn]))
@@ -303,7 +314,7 @@ levelAnalysis.check("layout", c => {
     const b = levelElements.boundsOf(maps.flatMap(el => levelElements.points(el)))
     const [wide, tall] = c.norms.size
     const size = `${Math.round(b.width)} × ${Math.round(b.height)}`
-    if (b.width > wide || b.height > tall) lines.push(line("note", "size", size, "bigger than written levels, up to 21000 × 9000"))
+    if (b.width > 2 * wide || b.height > 2 * tall) lines.push(line("note", "size", size, `standard levels are up to ${wide} × ${tall}`))
     else lines.push(line("ok", "size", size))
     const blocks = c.of("block")
     const inMap = levelAnalysis.overlapping(blocks, maps)
@@ -331,8 +342,8 @@ levelAnalysis.check("settings", c => {
     const { line } = levelAnalysis
     const lines = []
     const [close, far] = c.norms.zoom
-    lines.push(c.data.zoom < close || c.data.zoom > far ? line("note", "zoom", c.data.zoom, "written levels use 1300 to 2600") : line("ok", "zoom", c.data.zoom))
-    if (c.data.gravity !== 1) lines.push(line("note", "gravity", `× ${c.data.gravity}`, "written levels use 1, mobs ignore it"))
+    lines.push(c.data.zoom < close || c.data.zoom > far ? line("note", "zoom", c.data.zoom, "standard levels use 1300 to 2600") : line("ok", "zoom", c.data.zoom))
+    if (c.data.gravity !== 1) lines.push(line("note", "gravity", `× ${c.data.gravity}`, "standard levels use 1, mobs ignore it"))
     const mapContrast = levelAnalysis.contrast(c.data.mapColor, c.data.background)
     if (mapContrast !== null) {
         lines.push(mapContrast < 1.5 ?
@@ -351,18 +362,18 @@ levelAnalysis.check("performance", c => {
     const vertices = list => list.reduce((sum, el) => sum + levelElements.points(el).length, 0)
     const maps = c.of("map")
     const mapStatus = grade(maps.length, c.norms.map)
-    lines.push(line(mapStatus, "map pieces", maps.length, mapStatus === "ok" ? "" : `written levels have up to 82${mapStatus === "warn" ? ", join pieces into bigger ones" : ""}`))
+    lines.push(line(mapStatus, "map pieces", maps.length, mapStatus === "ok" ? "" : `standard levels have up to 82${mapStatus === "warn" ? ", join pieces into bigger ones" : ""}`))
     const mapVertices = vertices(maps)
-    if (mapVertices > c.norms.mapVertices) lines.push(line("warn", "map vertices", mapVertices, `written levels have up to ${c.norms.mapVertices}`))
+    if (mapVertices > c.norms.mapVertices) lines.push(line("warn", "map vertices", mapVertices, `standard levels have up to ${c.norms.mapVertices}`))
     const debris = c.of("debris").reduce((sum, el) => sum + el.count, 0)
     const blocks = c.of("block").length + Math.round(debris * (1 - levelAnalysis.debrisPowerUp))
     const blockStatus = grade(blocks, c.norms.blocks)
-    lines.push(line(blockStatus, "blocks", blocks, blockStatus === "ok" ? "" : "written levels have up to 38, with debris"))
+    lines.push(line(blockStatus, "blocks", blocks, blockStatus === "ok" ? "" : "standard levels have up to 38, with debris"))
     const blockVertices = vertices(c.of("block"))
     if (blockVertices > c.norms.blockVertices) lines.push(line("warn", "block vertices", blockVertices, `blocks with many sides collide slowly, keep it under ${c.norms.blockVertices}`))
     for (const [type, most] of Object.entries(c.norms.most)) {
         const count = c.of(type).length
-        if (count > most) lines.push(line("note", type, count, `more than any written level, ${most}`))
+        if (count > 2 * most) lines.push(line("note", type, count, `standard levels have up to ${most}`))
     }
     if (c.live) {
         const [slow, slower] = c.norms.frameMs
@@ -371,8 +382,8 @@ levelAnalysis.check("performance", c => {
         const byType = {} //each type's total, many cheap lasers can cost more than one slow element
         for (const e of c.live.elements) byType[e.el.type] = (byType[e.el.type] || 0) + e.ms
         const slowest = Object.entries(byType).filter(([, typeMs]) => typeMs > 0.01).sort((a, b) => b[1] - a[1]).slice(0, 3)
-        lines.push(line(status, "elements a frame", `${ms.toFixed(2)} ms`, status === "ok" ? "" : `written levels take under 0.31 ms, slowest: ${slowest.map(([type, typeMs]) => `${type} ${typeMs.toFixed(2)}`).join(", ")}`))
-        if (c.live.bodies > c.norms.bodies) lines.push(line("warn", "physics bodies", c.live.bodies, `written levels have up to 122, with mobs`))
+        lines.push(line(status, "elements a frame", `${ms.toFixed(2)} ms`, status === "ok" ? "" : `standard levels take under 0.31 ms, slowest: ${slowest.map(([type, typeMs]) => `${type} ${typeMs.toFixed(2)}`).join(", ")}`))
+        if (c.live.bodies > c.norms.bodies) lines.push(line("warn", "physics bodies", c.live.bodies, `standard levels have up to 122, with mobs`))
     }
     return lines
 })

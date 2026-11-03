@@ -223,7 +223,11 @@ const spawn = {
         }
     },
     randomMobPositions: [],
-    randomMobFromArray() {
+    randomMobFromArray(veto = []) { //veto: mob names this level's spots won't spawn, the level's other mob types spawn instead, or others from its tier
+        const isAllowed = name => !veto.includes(name)
+        let pickList = spawn.pickList.filter(isAllowed)
+        if (!pickList.length) pickList = (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23 ? spawn.fullPickList : spawn.tier[spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]] || []).filter(isAllowed)
+        if (!pickList.length) pickList = spawn.pickList
         seededShuffle(spawn.randomMobPositions)
         const maxMobs = (simulation.difficultyMode === 1) ? 2 : Math.ceil(5 * Math.log(level.levelsCleared + 1))
         const mobsInLevel = mob.filter(who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet).length
@@ -234,20 +238,20 @@ const spawn = {
                 const num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0)
                 const size = 16 + Math.ceil(Math.random() * 15)
                 for (let j = 0; j < num; j++) {
-                    const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                    const pick = pickList[Math.floor(Math.random() * pickList.length)]
                     spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
                 }
                 if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                     for (let j = 0; j < num; j++) {
-                        const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                        const pick = pickList[Math.floor(Math.random() * pickList.length)]
                         spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
                     }
                 }
             } else {
-                const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                const pick = pickList[Math.floor(Math.random() * pickList.length)]
                 spawn[pick](position.x, position.y)
                 if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
-                    const pick = spawn.pickList[Math.floor(Math.random() * spawn.pickList.length)]
+                    const pick = pickList[Math.floor(Math.random() * pickList.length)]
                     spawn[pick](position.x, position.y)
                 }
             }
@@ -307,17 +311,25 @@ const spawn = {
             }
         }
     },
-    randomLevelBoss(x, y, options = []) {
+    randomLevelBoss(x, y, options = [], veto = []) { //veto: boss names this level won't spawn, a vetoed boss stays next in line for later levels
+        const isAllowed = name => !veto.includes(name)
+        const randomBossList = spawn.randomBossList.filter(isAllowed).length ? spawn.randomBossList.filter(isAllowed) : spawn.randomBossList
         if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
-            const pick = spawn.randomBossList[Math.floor(Math.random() * spawn.randomBossList.length)]
+            const pick = randomBossList[Math.floor(Math.random() * randomBossList.length)]
             spawn[pick](x, y)
         } else {
             if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
                 if (options.length === 0) {
                     const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
-                    const name = spawn.bossTier[t][spawn.bossTierIndex[t]]
-                    if (!name) { //not sure if this is needed, but I'm trying to fix a rare bug
-                        const pick = spawn.randomBossList[Math.floor(Math.random() * spawn.randomBossList.length)]
+                    const list = spawn.bossTier[t]
+                    const index = spawn.bossTierIndex[t]
+                    const swap = list.findIndex((name, i) => i > index && isAllowed(name)) //the next boss this level allows trades places with the vetoed one
+                    if (!isAllowed(list[index]) && swap !== -1) [list[index], list[swap]] = [list[swap], list[index]]
+                    const name = isAllowed(list[index]) ? list[index] : undefined
+                    if (!name) { //not sure if this is needed, but I'm trying to fix a rare bug, also every boss left in the tier's order is vetoed
+                        const allowedTier = list.filter(isAllowed)
+                        const pickFrom = veto.length && allowedTier.length ? allowedTier : randomBossList
+                        const pick = pickFrom[Math.floor(Math.random() * pickFrom.length)]
                         spawn[pick](x, y)
                     } else {
                         spawn[name](x, y)
@@ -332,9 +344,9 @@ const spawn = {
             }
         }
     },
-    secondaryBossChance(x, y, options = []) {
+    secondaryBossChance(x, y, options = [], veto = []) {
         if (simulation.difficultyOptions.isSecondBoss) {
-            spawn.randomLevelBoss(x, y, options);
+            spawn.randomLevelBoss(x, y, options, veto);
             powerUps.spawn(x - 30, y, "ammo");
             powerUps.spawn(x + 30, y, "ammo");
         } else {

@@ -10,7 +10,7 @@ const levelElements = {
     //*********************************************************************
     // properties, shown and edited in the editor's inspector
     //*********************************************************************
-    //{ key, kind: "number" | "bool" | "text" | "select" | "mask", step, min, max, options, read(el), write(el, value) }
+    //{ key, kind: "number" | "bool" | "text" | "select" | "mask" | "veto", step, min, max, options, read(el), write(el, value) }
     //read and write are for values worked out from other values, like a block's mass from its density
     prop: {
         number(key, settings = {}) { return { key, kind: "number", ...settings } },
@@ -20,6 +20,7 @@ const levelElements = {
         select(key, options, settings = {}) { return { key, kind: "select", options, ...settings } },
         ref(key, types, settings = {}) { return { key, kind: "ref", types, ...settings } }, //another element's id or null, types are the kinds it can be
         mask(key, settings = {}) { return { key, kind: "mask", ...settings } }, //collision categories as names, like "player map body", see levelElements.collision
+        veto(key, tiers, noun, settings = {}) { return { key, kind: "veto", tiers, noun, ...settings } }, //mob or boss names it won't spawn, tiers() is [[label, names], ...], each tier keeps at least one, noun is "mob" or "boss"
     },
 
     //*********************************************************************
@@ -59,13 +60,14 @@ const levelElements = {
             return levelElements.collision.names.filter(name => levelElements.collision.isBack(type, name))
         },
         mask(text) { return String(text).split(" ").filter(Boolean).reduce((mask, name) => mask | cat[name], 0) },
-        code(text) { return String(text).split(" ").filter(Boolean).map(name => `cat.${name}`).join(" | ") || "0" },
+        code(text) { return String(text).split(" ").filter(name => levelElements.collision.names.includes(name)).map(name => `cat.${name}`).join(" | ") || "0" },
         isDefault(el) { return el.collides === levelElements.collision.defaults[el.type] },
     },
     linkSources: ["button", "toggle", "keyhole", "zone", "timer"], //turn linked elements on and off, each has linkOn(el, runtime) and linkCode(el, name), see button
     orLinkProp() { return levelElements.prop.ref("orLink", levelElements.linkSources, { isShown: el => el.orLink !== null && el.orLink !== undefined }) }, //a second link, on while either is, set by linking a second button to it, only shown once it's set
     isLinkedTo: (el, source) => el.link === source.id || el.orLink === source.id,
-    tidyLinks(el) { //orLink moves up when link goes away, so link is set whenever either is
+    tidyLinks(el) { //orLink moves up when link goes away, so link is set whenever either is, and they're never the same
+        if (el.orLink && el.orLink === el.link) el.orLink = null
         if (!el.link && el.orLink) {
             el.link = el.orLink
             el.orLink = null
@@ -112,6 +114,12 @@ const levelElements = {
         const b = levelElements.bounds(el)
         return [{ x: b.x, y: b.y }, { x: b.x + b.width, y: b.y }, { x: b.x + b.width, y: b.y + b.height }, { x: b.x, y: b.y + b.height }]
     },
+    unionBounds(elements) { //the bounds around all of them
+        return levelElements.boundsOf(elements.flatMap(el => {
+            const b = levelElements.bounds(el)
+            return [{ x: b.x, y: b.y }, { x: b.x + b.width, y: b.y + b.height }]
+        }))
+    },
     boundsOf(points) {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity
         for (const p of points) {
@@ -139,13 +147,13 @@ const levelElements = {
         const type = levelElements.types[el.type]
         if (type && type.handles) return type.handles(el)
         if (el.width === undefined && !el.vertices) return []
-        const { x, y, width: w, height: h } = el.vertices ? levelElements.bounds(el) : el
-        return [
-            { id: "nw", x, y }, { id: "n", x: x + w / 2, y }, { id: "ne", x: x + w, y },
-            { id: "e", x: x + w, y: y + h / 2 }, { id: "se", x: x + w, y: y + h }, { id: "s", x: x + w / 2, y: y + h },
-            { id: "sw", x, y: y + h }, { id: "w", x, y: y + h / 2 },
-        ]
+        return levelElements.rectHandles(el.vertices ? levelElements.bounds(el) : el)
     },
+    rectHandles: ({ x, y, width: w, height: h }) => [ //the 8 resize handles around a rect, the ids dragHandle() reads
+        { id: "nw", x, y }, { id: "n", x: x + w / 2, y }, { id: "ne", x: x + w, y },
+        { id: "e", x: x + w, y: y + h / 2 }, { id: "se", x: x + w, y: y + h }, { id: "s", x: x + w / 2, y: y + h },
+        { id: "sw", x, y: y + h }, { id: "w", x, y: y + h / 2 },
+    ],
     dragHandle(el, id, point, min) { //move a handle to point, min is the smallest size
         const type = levelElements.types[el.type]
         if (type && type.dragHandle) return type.dragHandle(el, id, point, min)
@@ -203,6 +211,32 @@ const levelElements = {
         if (!levelElements.isRotatable(el)) return levelElements.orbit(el, degrees, center)
         levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.rotatePoint(p, center, degrees)))
     },
+    //flipping, the inspector's flip buttons, axis "x" mirrors left and right, "y" up and down, around center
+    //shapes and paths mirror their outline, a type with flip(el, axis, center) mirrors its own way, anything else only moves
+    flipPoint: (p, axis, center) => axis === "x" ? { x: 2 * center.x - p.x, y: p.y } : { x: p.x, y: 2 * center.y - p.y },
+    flipAngle: (degrees, axis) => axis === "x" ? Number((180 - degrees).toFixed(3)) : Number((-degrees).toFixed(3)), //degrees counterclockwise, like boost
+    canFlip(el) { //flipping it on its own changes something: its outline, its angle, or its ends, anything else just stays where it is
+        const type = levelElements.types[el.type]
+        return !!type && ((!!type.flip && !type.isMirrorSymmetric) || type.group === "shape" || !!type.isVertexEditable)
+    },
+    flip(el, axis, center = levelElements.pivot(el)) {
+        const type = levelElements.types[el.type]
+        if (type && type.flip) return type.flip(el, axis, center)
+        if (type && (type.group === "shape" || type.isVertexEditable)) return levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.flipPoint(p, axis, center)))
+        levelElements.flipPosition(el, axis, center)
+    },
+    flipPosition(el, axis, center) { //moves it so the middle of its bounds mirrors, its shape stays
+        const b = levelElements.bounds(el)
+        const to = levelElements.flipPoint({ x: b.x + b.width / 2, y: b.y + b.height / 2 }, axis, center)
+        levelElements.move(el, to.x - b.x - b.width / 2, to.y - b.y - b.height / 2, true)
+    },
+    flipEnds(el, axis, center, pairs) { //mirror several x, y keys, like a laser's two ends
+        for (const [x, y] of pairs) {
+            const p = levelElements.flipPoint({ x: el[x], y: el[y] }, axis, center)
+            el[x] = p.x
+            el[y] = p.y
+        }
+    },
     stretch(el, box) { //fit a shape with vertices to a new bounds box
         const from = levelElements.bounds(el)
         const round = n => Math.round(n * 1000) / 1000
@@ -210,38 +244,28 @@ const levelElements = {
             x: round(box.x + (p.x - from.x) * box.width / (from.width || 1)),
             y: round(box.y + (p.y - from.y) * box.height / (from.height || 1)),
         })))
+        if (el.handles) el.handles = el.handles.map(h => h && [round(h[0] * box.width / (from.width || 1)), round(h[1] * box.height / (from.height || 1))]) //a path's curves stretch too
     },
     //*********************************************************************
     // presets, common shapes from written levels for the editor's add menu, made as map, or block when the block tool is on
-    // points(w, h) is the outline in a w × h box with its top left at 0, 0, rects(w, h) makes several rects instead, like stairs
+    // points(w, h) is the outline in a w × h box with its top left at 0, 0, rects(w, h) makes several rects instead, like stairs, their button pictures are saved in levelEditor.shapeIcons
     //*********************************************************************
-    presets: [
+    presets: [ //no two are the same shape turned or mirrored, flip and rotate make the rest
+        { name: "square", size: [200, 200], rects: (w, h) => [[0, 0, w, h]] }, //a plain rect
         { name: "rounded rect", size: [400, 200], points: (w, h, c = Math.min(50, w / 4, h / 4)) => [[c, 0], [w - c, 0], [w, c], [w, h - c], [w - c, h], [c, h], [0, h - c], [0, c]] }, //like spawn.bodyRectCorner
         { name: "rounded bottom", size: [150, 400], points: (w, h, c = Math.min(40, w / 4, h / 4)) => [[0, 0], [w, 0], [w, h - c], [w - c, h], [c, h], [0, h - c]] },
         { name: "trapezoid", size: [400, 100], points: (w, h) => [[w / 4, 0], [w * 3 / 4, 0], [w, h], [0, h]] },
         { name: "dome", size: [400, 200], points: (w, h, n = 12) => Array.from({ length: n + 1 }, (_, i) => [w / 2 - w / 2 * Math.cos(Math.PI * i / n), h - h * Math.sin(Math.PI * i / n)]) }, //like the half circles in written levels, turn it for a bowl
-        { name: "ramp up right", size: [400, 200], points: (w, h) => [[w, 0], [w, h], [0, h]] },
-        { name: "ramp up left", size: [400, 200], points: (w, h) => [[0, 0], [w, h], [0, h]] },
+        { name: "ramp", size: [400, 200], points: (w, h) => [[w, 0], [w, h], [0, h]] }, //up to the right, flip it for the other way
+        { name: "hexagon", size: [300, 260], points: (w, h) => [[w / 4, 0], [w * 3 / 4, 0], [w, h / 2], [w * 3 / 4, h], [w / 4, h], [0, h / 2]] }, //the game's namesake, flat on top
         { name: "pointed ends", size: [600, 150], points: (w, h, c = Math.min(h * 0.75, w / 4)) => [[c, 0], [w - c, 0], [w, h / 2], [w - c, h], [c, h], [0, h / 2]] },
         { name: "circle", size: [300, 300], points: (w, h, n = 16) => Array.from({ length: n }, (_, i) => [w / 2 + w / 2 * Math.cos(2 * Math.PI * i / n), h / 2 + h / 2 * Math.sin(2 * Math.PI * i / n)]) },
         { name: "point up", size: [300, 500], points: (w, h) => [[w / 2, 0], [w, h * 0.15], [w, h], [0, h], [0, h * 0.15]] },
         { name: "diamond", size: [300, 400], points: (w, h) => [[w / 2, 0], [w, h / 2], [w / 2, h], [0, h / 2]] },
         { name: "spike", size: [200, 200], points: (w, h) => [[w / 2, 0], [w, h], [0, h]] },
-        { name: "stairs up right", size: [600, 300], rects: (w, h, steps = 4) => Array.from({ length: steps }, (_, i) => [w * i / steps, h * (steps - 1 - i) / steps, w / steps, h * (i + 1) / steps]) }, //like spawn.spawnStairs
-        { name: "stairs up left", size: [600, 300], rects: (w, h, steps = 4) => Array.from({ length: steps }, (_, i) => [w * i / steps, h * i / steps, w / steps, h * (steps - i) / steps]) },
+        { name: "stairs", size: [600, 300], rects: (w, h, steps = 4) => Array.from({ length: steps }, (_, i) => [w * i / steps, h * (steps - 1 - i) / steps, w / steps, h * (i + 1) / steps]) }, //like spawn.spawnStairs, up to the right, flip it for the other way
         { name: "arch", size: [400, 300], rects: (w, h, t = Math.min(w, h) / 5) => [[0, 0, w, t], [0, t, t, h - t], [w - t, t, t, h - t]] }, //a beam on two pillars, three rects
     ],
-    presetIcon(preset, size = 18) { //a tiny drawing of the preset for its button
-        const [w, h] = preset.size
-        const k = (size - 2) / Math.max(w, h)
-        const ox = (size - w * k) / 2
-        const oy = (size - h * k) / 2
-        const xy = (x, y) => `${(ox + x * k).toFixed(1)},${(oy + y * k).toFixed(1)}`
-        const shapes = preset.rects ?
-            preset.rects(w, h).map(([x, y, rw, rh]) => `<rect x="${(ox + x * k).toFixed(1)}" y="${(oy + y * k).toFixed(1)}" width="${(rw * k).toFixed(1)}" height="${(rh * k).toFixed(1)}"/>`).join("") :
-            `<polygon points="${preset.points(w, h).map(([x, y]) => xy(x, y)).join(" ")}"/>`
-        return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="currentColor" stroke="none" aria-hidden="true">${shapes}</svg>`
-    },
 
     //*********************************************************************
     // making elements
@@ -313,6 +337,13 @@ const levelElements = {
             y += (a.y + b.y) * cross
         }
         return { x: x / (6 * area), y: y / (6 * area) }
+    },
+    isCode: el => !!levelElements.types[el.type]?.isCode, //javascript the player wrote, it runs in list order and isn't drawn or copied
+    unfinished(message) { //an error for an element that isn't set up yet, the editor shows it without logging it every rebuild
+        return Object.assign(new Error(message), { isUnfinished: true })
+    },
+    isHeld(el, data = levelData.data) { //a constraint or another element points at it, a held block always shows up, chance would leave its constraint without a body
+        return !!data && data.elements.some(other => other !== el && levelElements.refKeys(other).some(key => other[key] === el.id))
     },
     center(el) { //what vertices are written around, the centroid for shapes, the middle for rects
         return el.vertices ? { x: el.x, y: el.y } : { x: el.x + el.width / 2, y: el.y + el.height / 2 }
@@ -424,7 +455,7 @@ const levelElements = {
     // setup runs once when the level loads, name is a variable name for it like boost1, custom and top run each cycle
     //*********************************************************************
     args(...values) { //numbers without float noise, strings quoted, like they'd be written by hand
-        return values.map(value => typeof value === "number" ? String(Number(value.toFixed(6))) : typeof value === "string" ? JSON.stringify(value) : value).join(", ")
+        return values.map(value => typeof value === "number" ? String(Number(value.toFixed(6))) : JSON.stringify(value)?.replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029")).join(", ")
     },
     marker(el, radius, fill, text) { //where a mob or power up spawns, the editor draws it with type.overlay()
         ctx.setLineDash([])
@@ -520,6 +551,7 @@ levelElements.define("map", {
     color: "#444",
     isLinkable: true,
     handlesLink: true, //appears or disappears instead of only running while it's on
+    writesLink: true, //its code() uses context.link, edited, its link can't change
     defaults: () => ({ x: 0, y: 0, width: 100, height: 100, friction: 0.1, restitution: 0, collides: levelElements.collision.defaults.map, link: null, orLink: null, on: "appears" }),
     props: [
         ...levelElements.rect(),
@@ -531,13 +563,13 @@ levelElements.define("map", {
         levelElements.prop.select("on", ["appears", "disappears"]), //what it does while its link is on
     ],
     overlay(el) { //a linked map piece can be gone, so its outline always shows
-        if (!el.link) return
+        if (!el.link && !el.orLink) return
         levelElements.outlineShape(el)
     },
     build(el) {
         const who = map[map.length] = levelElements.matterBody(el, { friction: el.friction, restitution: el.restitution })
         if (!levelElements.collision.isDefault(el)) who.collisionMask = levelElements.collision.mask(el.collides) //level.addToWorld() uses it in place of the usual mask
-        if (!el.link) return
+        if (!el.link && !el.orLink) return
         return {
             custom() {
                 const state = levelData.linkOn(el)
@@ -554,7 +586,7 @@ levelElements.define("map", {
         const link = context && context.link(el)
         if (!link) return { setup }
         setup.push(`const ${name} = map[map.length - 1];`)
-        return { setup, custom: [`level.setMapPart(${name}, ${el.on === "appears" ? link.on : link.off}); //${el.on} while it's on`] }
+        return { setup, custom: [`level.setMapPart(${name}, ${el.on === "appears" ? link.on : link.off}); //${el.on === "appears" ? "appears" : "disappears"} while it's on`] }
     },
 })
 
@@ -581,10 +613,10 @@ levelElements.define("block", {
         levelElements.prop.bool("noSpin"), //inertia Infinity, it slides but never turns
         levelElements.prop.bool("immutable"), //isImmutable, like a key, tech can't destroy, split, grow, or freeze it, and falling out of the level brings it back instead of removing it
         levelElements.prop.mask("collides"),
-        levelElements.prop.number("chance", { step: 0.1, min: 0 }), //of showing up each time the level loads, like spawn.bodyRect's chance, always shows in the editor
+        levelElements.prop.number("chance", { step: 0.1, min: 0, isShown: el => !levelElements.isHeld(el) }), //of showing up each time the level loads, like spawn.bodyRect's chance, always shows in the editor, a block a constraint holds always shows up
     ],
     overlay(el) { //blocks that don't always show up are labeled with their chance
-        if (el.chance >= 1) return
+        if (el.chance >= 1 || levelElements.isHeld(el)) return
         const b = levelElements.bounds(el)
         ctx.font = `${Math.max(14, Math.min(40, b.height * 0.4))}px monospace`
         ctx.textAlign = "center"
@@ -595,7 +627,7 @@ levelElements.define("block", {
         ctx.textAlign = "left"
     },
     build(el, options) { //like spawn.bodyRect
-        if (!options.isEditor && el.chance < 1 && Math.random() >= el.chance) return
+        if (!options.isEditor && el.chance < 1 && !levelElements.isHeld(el) && Math.random() >= el.chance) return
         const who = body[body.length] = levelElements.matterBody(el, { friction: el.friction, frictionStatic: el.frictionStatic, frictionAir: el.frictionAir, restitution: el.restitution })
         Matter.Body.setDensity(who, el.density)
         if (el.noSpin) Matter.Body.setInertia(who, Infinity) //after the density, setting it sets the inertia too
@@ -656,6 +688,10 @@ levelElements.define("boost", {
     rotate(el, degrees, center) { //turns where it launches, the pad stays flat
         levelElements.orbit(el, degrees, center)
         el.angle = Number((el.angle - degrees).toFixed(3))
+    },
+    flip(el, axis, center) { //where it launches mirrors, the pad stays flat
+        levelElements.flipPosition(el, axis, center)
+        el.angle = levelElements.flipAngle(el.angle, axis)
     },
     build(el) {
         const boost = level.boost(el.x, el.y, el.launchHeight, el.angle * Math.PI / 180)
@@ -782,6 +818,11 @@ levelElements.define("spinner", { //block pinned at its center
         levelElements.orbit(el, degrees, center)
         el.angle = Number((el.angle - degrees).toFixed(3))
     },
+    isMirrorSymmetric: true, //mirrored it's the same as turned, so one alone has rotate and no flip buttons, flip() still turns it right in a flipped selection
+    flip(el, axis, center) { //a bar looks the same turned 180°, so mirroring only turns it the other way
+        levelElements.flipPosition(el, axis, center)
+        el.angle = Number((-el.angle).toFixed(3))
+    },
     overlay(el) { //the bar at its starting angle, the selection outline is its unturned rect
         if (!el.angle) return
         const c = { x: el.x + el.width / 2, y: el.y + el.height / 2 }
@@ -833,6 +874,7 @@ levelElements.define("slime", { //level.hazard
     tip: "hurts the player while they're inside it, with rise it starts empty and fills up, linked it fills while on and drains while off",
     group: "element",
     handlesLink: true, //with rise it drains while off instead of stopping
+    writesLink: true, //its code() uses context.link
     defaults: () => ({ x: 0, y: -100, width: 400, height: 100, damage: 0.0025, rise: 0 }),
     props: [
         ...levelElements.rect(),
@@ -898,6 +940,7 @@ levelElements.segment = { //geometry for a line between two points, x, y and x2,
             el.y2 = point.y
         }
     },
+    flip: (el, axis, center) => levelElements.flipEnds(el, axis, center, [["x", "y"], ["x2", "y2"]]),
     overlay(el) {
         ctx.beginPath()
         ctx.moveTo(el.x, el.y)
@@ -906,26 +949,87 @@ levelElements.segment = { //geometry for a line between two points, x, y and x2,
     },
 }
 
+levelElements.laserAngle = el => { //the laser's angle now, radians: where x2, y2 points, plus spin and swing, by simulation.cycle like written levels' oscillating lasers
+    let angle = Math.atan2(el.y2 - el.y, el.x2 - el.x)
+    if (el.spin) angle += el.spin * Math.PI / 180 / 60 * simulation.cycle
+    if (el.swing) angle += el.swing * Math.PI / 180 * Math.sin(2 * Math.PI / el.swingTime * simulation.cycle)
+    return angle
+}
 levelElements.define("laser", {
-    tip: "beam between two points that hurts the player, drag either end",
+    tip: "beam between two points that hurts the player, drag either end, spin and swing turn it around x, y, motion makes it a motion sensor",
     group: "element",
-    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12 }),
+    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12, spin: 0, swing: 0, swingTime: 240, motion: false }),
     props: [
         ...levelElements.position(),
         levelElements.prop.number("x2", { isGrid: true }),
         levelElements.prop.number("y2", { isGrid: true }),
         levelElements.prop.number("damage", { step: 0.02, min: 0 }),
+        levelElements.prop.number("spin", { step: 15 }), //degrees a second around x, y
+        levelElements.prop.number("swing", { step: 5, min: 0 }), //degrees each way
+        levelElements.prop.number("swingTime", { step: 30, min: 10, isShown: el => el.swing > 0 }), //frames for one swing there and back
+        levelElements.prop.bool("motion"), //level.laser's motionQuery()
     ],
     ...levelElements.segment,
+    flip(el, axis, center) { //the ends mirror, and it spins the other way
+        levelElements.segment.flip(el, axis, center)
+        if (el.spin) el.spin = -el.spin
+    },
+    overlay(el) { //the line, and where it turns: a circle for spin, the two ends of a swing
+        levelElements.segment.overlay(el)
+        if (!el.spin && !el.swing) return
+        const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
+        const base = Math.atan2(el.y2 - el.y, el.x2 - el.x)
+        const reach = el.swing * Math.PI / 180
+        ctx.save()
+        ctx.setLineDash([12, 8])
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "rgba(255,0,0,0.35)"
+        ctx.beginPath()
+        if (el.spin) {
+            ctx.arc(el.x, el.y, length, 0, 2 * Math.PI)
+        } else {
+            for (const side of [-1, 1]) {
+                ctx.moveTo(el.x, el.y)
+                ctx.lineTo(el.x + length * Math.cos(base + side * reach), el.y + length * Math.sin(base + side * reach))
+            }
+            ctx.moveTo(el.x + length * Math.cos(base - reach), el.y + length * Math.sin(base - reach))
+            ctx.arc(el.x, el.y, length, base - reach, base + reach)
+        }
+        ctx.stroke()
+        ctx.restore()
+    },
     summary: el => `laser(${[el.x, el.y, el.x2, el.y2].map(n => Number(n.toFixed(2))).join(", ")})`,
     build(el) {
         const laser = level.laser({ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }, el.damage)
-        return { custom() { laser.query() } }
+        const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
+        return {
+            custom() {
+                if (el.spin || el.swing) {
+                    const angle = levelElements.laserAngle(el)
+                    laser.look = { x: el.x + length * Math.cos(angle), y: el.y + length * Math.sin(angle) }
+                }
+                if (el.motion) laser.motionQuery()
+                else laser.query()
+            },
+        }
     },
-    code: (el, name) => ({
-        setup: [`const ${name} = level.laser({ x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)} }, { x: ${levelElements.args(el.x2)}, y: ${levelElements.args(el.y2)} }, ${levelElements.args(el.damage)});`],
-        custom: [`${name}.query();`],
-    }),
+    code(el, name) {
+        const a = levelElements.args
+        const custom = []
+        if (el.spin || el.swing) { //like written levels' oscillating lasers
+            const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
+            const base = Math.atan2(el.y2 - el.y, el.x2 - el.x)
+            const parts = base ? [a(base)] : [] //pointing right is 0
+            if (el.spin) parts.push(`${a(el.spin * Math.PI / 180 / 60)} * simulation.cycle`)
+            if (el.swing) parts.push(`${a(el.swing * Math.PI / 180)} * Math.sin(${a(2 * Math.PI / el.swingTime)} * simulation.cycle)`)
+            custom.push(`const ${name}Angle = ${parts.join(" + ")};`, `${name}.look = { x: ${a(el.x)} + ${a(length)} * Math.cos(${name}Angle), y: ${a(el.y)} + ${a(length)} * Math.sin(${name}Angle) };`)
+        }
+        custom.push(el.motion ? `${name}.motionQuery();` : `${name}.query();`)
+        return {
+            setup: [`const ${name} = level.laser({ x: ${a(el.x)}, y: ${a(el.y)} }, { x: ${a(el.x2)}, y: ${a(el.y2)} }, ${a(el.damage)});`],
+            custom,
+        }
+    },
 })
 
 levelElements.define("fizzler", { //level.fizzler
@@ -954,7 +1058,11 @@ levelElements.define("fizzler", { //level.fizzler
 //a link source can be linked to another link source, then it's only on while both are, see levelData.linkState()
 //a link source has linkOn(el, runtime), true while on, and linkCode(el, name), the javascript for on and off
 levelElements.isLinkSource = el => !!levelElements.types[el.type]?.linkOn
-levelElements.runsProp = () => levelElements.prop.select("runs", ["while on", "while off"], { isShown: el => !!el.link }) //what a linked element does with its link, only shown once it has one
+levelElements.isCodeEditable = el => { //its code can be edited in the info box: not code, the enter and exit, mob spots' shared list, or a timer, its code is only a comment
+    const type = levelElements.types[el.type] //code naming other elements, like a door's button or a constraint's block, keeps up with their names, see levelData.editedRefs()
+    return !!type && !!type.code && !type.codeAll && !type.isCode && !type.isSingleton && type.canEditCode !== false
+}
+levelElements.runsProp = () => levelElements.prop.select("runs", ["while on", "while off"], { isShown: el => !!(el.link || el.orLink) }) //what a linked element does with its link, only shown once it has one
 levelElements.keyColors = ["yellow", "pink", "teal"] //level.keyColors by name
 levelElements.keyColor = name => level.keyColors[Math.max(0, levelElements.keyColors.indexOf(name))]
 levelElements.drawLinks = (el, from) => { //a dashed line from a button or toggle to each element linked to it
@@ -1021,7 +1129,7 @@ levelElements.define("toggle", { //level.toggle, a lever the player flips
         }
     },
     code: (el, name) => ({
-        setup: [`const ${name} = level.toggle(${levelElements.args(el.x, el.y)}${el.isOn || el.staysOn ? `, ${el.isOn}` : ""}${el.staysOn ? ", true" : ""});${el.staysOn ? " //stays on once it's flipped" : ""}`],
+        setup: [`const ${name} = level.toggle(${levelElements.args(el.x, el.y)}${el.isOn || el.staysOn ? `, ${!!el.isOn}` : ""}${el.staysOn ? ", true" : ""});${el.staysOn ? " //stays on once it's flipped" : ""}`],
         custom: [`${name}.query();`],
     }),
 })
@@ -1083,27 +1191,69 @@ levelElements.zoneWho = { //what a zone notices, and the same as javascript
     mob: { list: () => mob, code: "mob" },
     any: { list: () => [player].concat(body, mob), code: "[player].concat(body, mob)" },
 }
-levelElements.define("zone", { //a trigger, a link source that's on while the player is inside, only the editor draws it
-    tip: "invisible box, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in",
+levelElements.define("zone", { //a trigger, a link source that's on while the player is inside, only the editor draws it, a box, or with circle a circle around x, y
+    tip: "invisible box or circle, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in",
     group: "element",
     isBackground: true, //it's often big, lock it so the mouse goes through
-    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, who: "player", on: "inside" }),
+    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, radius: 200, circle: false, who: "player", on: "inside" }),
     props: [
-        ...levelElements.rect(),
+        ...levelElements.rect().map(prop => prop.key === "width" || prop.key === "height" ? { ...prop, isShown: el => !el.circle } : prop),
+        levelElements.prop.number("radius", { isGrid: true, min: 1, isShown: el => !!el.circle }),
+        levelElements.prop.bool("circle", { write: (el, value) => levelElements.types.zone.setCircle(el, value) }),
         levelElements.prop.select("who", Object.keys(levelElements.zoneWho)),
         levelElements.prop.select("on", ["inside", "stays on"]), //stays on once it's been entered
     ],
+    setCircle(el, isCircle) { //a box becomes the circle in its middle, as big as the box on average, and back to the box around the circle, x, y is a circle's center
+        if (!!el.circle === !!isCircle) return
+        if (isCircle) {
+            el.radius = Math.max(1, Math.round((el.width + el.height) / 4))
+            el.x += el.width / 2
+            el.y += el.height / 2
+        } else {
+            el.width = el.height = 2 * el.radius
+            el.x -= el.radius
+            el.y -= el.radius
+        }
+        el.circle = !!isCircle
+    },
+    bounds: el => el.circle ? { x: el.x - el.radius, y: el.y - el.radius, width: 2 * el.radius, height: 2 * el.radius } : { x: el.x, y: el.y, width: el.width, height: el.height },
+    contains(el, p) {
+        if (el.circle) return Math.hypot(p.x - el.x, p.y - el.y) <= el.radius
+        return p.x >= el.x && p.x <= el.x + el.width && p.y >= el.y && p.y <= el.y + el.height
+    },
+    handles: el => el.circle ? [{ id: "radius", x: el.x + el.radius, y: el.y }] : levelElements.rectHandles(el),
+    dragHandle(el, id, point, min) {
+        if (id === "radius") return el.radius = Math.max(1, Math.round(Math.hypot(point.x - el.x, point.y - el.y)))
+        const box = { x: el.x, y: el.y, width: el.width, height: el.height }
+        levelElements.dragHandle(box, id, point, min) //a plain box, like any rect
+        Object.assign(el, box)
+    },
+    summary: el => el.circle ? `zone(${levelElements.args(el.x, el.y, el.radius)})` : `zone(${levelElements.args(el.x, el.y, el.width, el.height)})`,
     overlay(el) {
         ctx.fillStyle = "rgba(255,80,80,0.06)"
-        ctx.fillRect(el.x, el.y, el.width, el.height)
-        ctx.strokeRect(el.x, el.y, el.width, el.height)
-        levelElements.drawLinks(el, { x: el.x + el.width / 2, y: el.y + el.height / 2 })
+        if (el.circle) {
+            ctx.beginPath()
+            ctx.arc(el.x, el.y, el.radius, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.stroke()
+        } else {
+            ctx.fillRect(el.x, el.y, el.width, el.height)
+            ctx.strokeRect(el.x, el.y, el.width, el.height)
+        }
+        levelElements.drawLinks(el, el.circle ? el : { x: el.x + el.width / 2, y: el.y + el.height / 2 })
     },
     linkOn: (el, runtime) => runtime.zone ? runtime.zone.isOn : null,
     linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
     build(el) {
-        const zone = { isOn: false, min: { x: el.x, y: el.y }, max: { x: el.x + el.width, y: el.y + el.height } }
         const who = levelElements.zoneWho[el.who] || levelElements.zoneWho.player
+        if (el.circle) { //a body is in once its center is
+            const zone = { isOn: false, x: el.x, y: el.y, radius: el.radius }
+            return {
+                zone,
+                custom() { if (el.on !== "stays on" || !zone.isOn) zone.isOn = who.list().some(body => Vector.magnitude(Vector.sub(body.position, zone)) < zone.radius) },
+            }
+        }
+        const zone = { isOn: false, min: { x: el.x, y: el.y }, max: { x: el.x + el.width, y: el.y + el.height } }
         return {
             zone,
             custom() { if (el.on !== "stays on" || !zone.isOn) zone.isOn = Matter.Query.region(who.list(), zone).length > 0 },
@@ -1111,9 +1261,10 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
     },
     code(el, name) {
         const who = levelElements.zoneWho[el.who] || levelElements.zoneWho.player
-        const check = `${name}.isOn = Matter.Query.region(${who.code}, ${name}).length > 0;`
+        const check = el.circle ? `${name}.isOn = ${who.code}.some(body => Vector.magnitude(Vector.sub(body.position, ${name})) < ${name}.radius);` : `${name}.isOn = Matter.Query.region(${who.code}, ${name}).length > 0;`
+        const setup = el.circle ? `const ${name} = { isOn: false, x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)}, radius: ${levelElements.args(el.radius)} }; //trigger zone, a circle` : `const ${name} = { isOn: false, min: { x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)} }, max: { x: ${levelElements.args(el.x + el.width)}, y: ${levelElements.args(el.y + el.height)} } }; //trigger zone`
         return {
-            setup: [`const ${name} = { isOn: false, min: { x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)} }, max: { x: ${levelElements.args(el.x + el.width)}, y: ${levelElements.args(el.y + el.height)} } }; //trigger zone`],
+            setup: [setup],
             custom: [el.on === "stays on" ? `if (!${name}.isOn) ${check} //stays on once it's been entered` : check],
         }
     },
@@ -1121,6 +1272,7 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
 
 levelElements.timerCode = el => `${el.offset ? `(simulation.cycle + ${levelElements.args(el.offset)})` : "simulation.cycle"} % ${levelElements.args(el.onTime + el.offTime)} < ${levelElements.args(el.onTime)}`
 levelElements.define("timer", { //a link source that's on for onTime cycles, then off for offTime, over and over
+    canEditCode: false, //what's linked to it writes the check, its own code is only a comment
     tip: "linked doors open and linked elements run for onTime cycles, then stop for offTime, over and over, 60 cycles is a second, offset shifts when",
     group: "element",
     defaults: () => ({ x: 0, y: -200, onTime: 60, offTime: 60, offset: 0 }),
@@ -1154,10 +1306,11 @@ levelElements.define("timer", { //a link source that's on for onTime cycles, the
     linkOn: el => (simulation.cycle + el.offset) % (el.onTime + el.offTime) < el.onTime,
     linkCode: el => ({ on: levelElements.timerCode(el), off: `!(${levelElements.timerCode(el)})` }),
     build: () => ({}),
-    code: (el, name) => ({ setup: [`//${name}: on ${el.onTime} cycles, off ${el.offTime}, what's linked to it checks ${levelElements.timerCode(el)}`] }),
+    code: (el, name) => ({ setup: [`//${name}: on ${Number(el.onTime)} cycles, off ${Number(el.offTime)}, what's linked to it checks ${levelElements.timerCode(el)}`] }),
 })
 
 levelElements.define("door", {
+    writesLink: true, //its code() uses context.link
     tip: "slides up to open, link it to a button or toggle, without one it stays shut",
     group: "element",
     isLinkable: true,
@@ -1210,8 +1363,35 @@ for (const name of ["boost", "mover", "transport", "laser", "wind", "slime", "fi
 for (const name of levelElements.linkSources) { //a link source linked to another is only on while both are, set with the other one's link button, the row only shows once it's set
     const type = levelElements.types[name]
     const defaults = type.defaults
-    type.defaults = () => ({ ...defaults(), link: null, orLink: null })
-    type.props.push(levelElements.prop.ref("link", levelElements.linkSources, { isShown: el => el.link !== null && el.link !== undefined }), levelElements.orLinkProp())
+    type.defaults = () => ({ ...defaults(), log: "", link: null, orLink: null })
+    type.props.push(levelElements.prop.text("log"), levelElements.prop.ref("link", levelElements.linkSources, { isShown: el => el.link !== null && el.link !== undefined }), levelElements.orLinkProp())
+    const build = type.build
+    type.build = (el, options) => { //with a log, writes it in the in-game console each time it turns on, not if it's on when the level starts
+        const runtime = build(el, options)
+        if (!String(el.log).trim()) return runtime
+        const custom = runtime.custom
+        let wasOn = null
+        runtime.custom = () => {
+            if (custom) custom.call(runtime)
+            const isOn = type.linkOn(el, runtime) === true && levelData.linkState(el) !== false //and what it's linked to
+            if (wasOn === false && isOn) simulation.inGameConsole(levelData.safeHtml(el.log)) //html that can't run javascript
+            wasOn = isOn
+        }
+        return runtime
+    }
+    const code = type.code
+    type.code = (el, varName, context) => { //the same in export, a WasOn variable and two lines after its own custom lines
+        const lines = code(el, varName, context)
+        if (!String(el.log).trim()) return lines
+        const own = type.linkCode(el, varName).on
+        const above = context && el.link ? context.link(el) : null
+        const on = above ? `${own} && ${above.on.includes("||") ? `(${above.on})` : above.on}` : own
+        return {
+            ...lines,
+            setup: [...(lines.setup || []), `let ${varName}WasOn = null; //its log shows each time it turns on`],
+            custom: [...(lines.custom || []), `if (${varName}WasOn === false && (${on})) simulation.inGameConsole(${levelElements.args(levelData.safeHtml(el.log))});`, `${varName}WasOn = ${on};`],
+        }
+    }
 }
 
 //a pair of portals, one element so the two ends stay together, end A is x, y, angle and end B is x2, y2, angle2
@@ -1248,6 +1428,11 @@ levelElements.define("portal", {
     },
     handles: el => [{ id: "a", x: el.x, y: el.y }, { id: "b", x: el.x2, y: el.y2 }],
     pivot: el => ({ x: (el.x + el.x2) / 2, y: (el.y + el.y2) / 2 }),
+    flip(el, axis, center) { //both ends mirror, and face their mirrored way
+        levelElements.flipEnds(el, axis, center, [["x", "y"], ["x2", "y2"]])
+        el.angle = levelElements.flipAngle(el.angle, axis)
+        el.angle2 = levelElements.flipAngle(el.angle2, axis)
+    },
     rotate(el, degrees, center) { //both ends turn around the center, and face their new way
         const a = levelElements.rotatePoint({ x: el.x, y: el.y }, center, degrees)
         const b = levelElements.rotatePoint({ x: el.x2, y: el.y2 }, center, degrees)
@@ -1306,7 +1491,7 @@ levelElements.define("portal", {
     },
     code(el, name) {
         const end = (x, y) => `{ x: ${levelElements.args(x)}, y: ${levelElements.args(y)} }`
-        const exit = el.exit === "momentum" ? "" : `, level.portalExit.${el.exit}, level.portalExit.${el.exit}`
+        const exit = !["straight", "launch"].includes(el.exit) ? "" : `, level.portalExit.${el.exit}, level.portalExit.${el.exit}`
         return {
             setup: [`const ${name} = level.portal(${end(el.x, el.y)}, ${levelElements.angleCode(el.angle)}, ${end(el.x2, el.y2)}, ${levelElements.angleCode(el.angle2)}${exit});`],
             custom: [`${name}.query();`],
@@ -1315,46 +1500,103 @@ levelElements.define("portal", {
     },
 })
 
-levelElements.define("decor", { //colored rect drawn behind or in front of the player, like the fillRect shading in written levels
-    tip: "colored rect drawn behind or in front of the player, for shading and backgrounds",
+levelElements.layers = ["under player", "over player"] //a drawing's layer: level.custom under the player, blocks, and mobs, or level.customTopLayer over them, older saves say back and front, see levelData.normalize()
+levelElements.isOver = el => el.layer === "over player"
+levelElements.define("fill", { //colored rect drawn behind or in front of the player, like the fillRect shading in written levels, older saves call it decor, see levelData.normalize()
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
+    tip: "colored rect drawn behind or in front of the player, for shading and backgrounds, rect, circle, or ellipse in its info box changes its shape",
     group: "element",
-    label: "fill color",
+    label: "fill",
+    rounds: ["fill", "circle", "ellipse"], //the info box switches between them, see the round command and levelElements.roundShape()
     isBackground: true, //lock background colors in editor settings makes the mouse go through it
-    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, color: "rgba(0,0,0,0.1)", layer: "back" }),
-    names: ["exit fill", "shadow fill"], //each gets a button in the add menu
+    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, color: "rgba(0,0,0,0.1)", layer: "under player" }),
+    names: ["exit fill"], //the add menu's exit fill button
     tips: {
         "exit fill": "the light cyan room color behind the exit, placed around the exit door",
-        "shadow fill": "see-through dark rect drawn in front of the player, like the shading in written levels",
     },
     preset(name, data) { //x and y place it, otherwise it goes in the middle of the view
-        if (name === "shadow fill") return { color: "rgba(0,0,0,0.1)", layer: "front" } //written levels mostly shade in customTopLayer
         const exit = data && data.elements.find(el => el.type === "exit")
-        const room = { width: 400, height: 350, color: "#d4f4f4", layer: "back" } //the light cyan room behind the exit in written levels
+        const room = { width: 400, height: 350, color: "#d4f4f4", layer: "under player" } //the light cyan room behind the exit in written levels
         return exit ? { ...room, x: exit.x - 150, y: exit.y + 20 - room.height } : room
     },
-    props: [...levelElements.rect(), levelElements.prop.color("color"), levelElements.prop.select("layer", ["back", "front"])],
+    props: [...levelElements.rect(), levelElements.prop.color("color"), levelElements.prop.select("layer", levelElements.layers)],
     build(el) {
         const draw = () => {
             ctx.fillStyle = el.color
             ctx.fillRect(el.x, el.y, el.width, el.height)
         }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
     },
     code(el) {
         const lines = [`ctx.fillStyle = ${levelElements.args(el.color)};`, `ctx.fillRect(${levelElements.args(el.x, el.y, el.width, el.height)});`]
-        return el.layer === "front" ? { top: lines } : { custom: lines }
+        return levelElements.isOver(el) ? { top: lines } : { custom: lines }
     },
 })
 
+levelElements.roundShape = (el, typeName) => { //a fill, circle, or ellipse's size as another of them, around the same middle: a rect fits the ellipse, a circle is as big as both radii on average
+    const round = n => Number(n.toFixed(3))
+    const half = el.type === "fill" ? { x: el.width / 2, y: el.height / 2 } : el.type === "circle" ? { x: el.radius, y: el.radius } : { x: el.radiusX, y: el.radiusY }
+    const center = el.type === "fill" ? { x: el.x + half.x, y: el.y + half.y } : { x: el.x, y: el.y }
+    if (typeName === "fill") return { x: round(center.x - half.x), y: round(center.y - half.y), width: round(2 * half.x), height: round(2 * half.y) } //an ellipse's turn is dropped
+    if (typeName === "circle") return { ...center, radius: Math.max(1, Math.round((half.x + half.y) / 2)) }
+    return { ...center, radiusX: round(half.x), radiusY: round(half.y), angle: el.angle || 0 }
+}
 levelElements.isNoColor = color => !color || color === "none" || color === "transparent"
+//a path's curves: handles[i] is null for a corner, or [dx, dy] for a curved vertex, its handle out toward the next vertex, mirrored toward the one before
+//the line between two vertices is a bezier from each end's handle, or straight when neither has one
+levelElements.pathSegments = el => { //[{ a, c1, c2, b, isCurve }] in world space, works for any outline, maps have no handles so they're all straight
+    const points = levelElements.points(el)
+    const handles = el.handles || []
+    const count = levelElements.isOpen(el) ? points.length - 1 : points.length
+    const segments = []
+    for (let i = 0; i < count; i++) {
+        const j = (i + 1) % points.length
+        const a = points[i]
+        const b = points[j]
+        const ha = handles[i]
+        const hb = handles[j]
+        segments.push({ a, b, c1: ha ? { x: a.x + ha[0], y: a.y + ha[1] } : a, c2: hb ? { x: b.x - hb[0], y: b.y - hb[1] } : b, isCurve: !!(ha || hb) })
+    }
+    return segments
+}
+levelElements.cubicAt = (s, t) => { //a point on a segment
+    const u = 1 - t
+    return {
+        x: u * u * u * s.a.x + 3 * u * u * t * s.c1.x + 3 * u * t * t * s.c2.x + t * t * t * s.b.x,
+        y: u * u * u * s.a.y + 3 * u * u * t * s.c1.y + 3 * u * t * t * s.c2.y + t * t * t * s.b.y,
+    }
+}
+levelElements.pathOutline = el => { //world points along the path, each curve as 16 short lines, for clicking, bounds, and outlines
+    const segments = levelElements.pathSegments(el)
+    if (!segments.length) return levelElements.points(el)
+    const points = [segments[0].a]
+    for (const s of segments) {
+        if (s.isCurve) for (let k = 1; k <= 16; k++) points.push(levelElements.cubicAt(s, k / 16))
+        else points.push(s.b)
+    }
+    if (!levelElements.isOpen(el)) points.pop() //back at the start
+    return points
+}
+levelElements.autoHandle = (el, index) => { //a smooth curve through the vertex, its handle along the line from the vertex before to the one after
+    const points = levelElements.points(el)
+    const isOpen = levelElements.isOpen(el)
+    const p = points[index]
+    const prev = points[index - 1] || (isOpen ? p : points[points.length - 1])
+    const next = points[index + 1] || (isOpen ? p : points[0])
+    const scale = prev === p || next === p ? 1 / 3 : 1 / 6 //an open path's ends point at their one neighbor
+    const round = n => Math.round(n * 1000) / 1000
+    return [round((next.x - prev.x) * scale), round((next.y - prev.y) * scale)]
+}
 levelElements.define("path", { //lines and shapes of any outline, drawn behind or in front of the player, the add menu's path button draws one point at a time
-    tip: "draw lines or filled shapes, click to add points, click the first point to close it, enter or right click to finish",
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
+    tip: "draw lines or filled shapes, click to add points, drag while clicking to curve, click the first point to close it, enter or right click to finish, later double click a vertex to curve it or make it a corner",
     group: "element",
     label: "draw path",
     isBackground: true, //lock background colors in editor settings makes the mouse go through it
     isVertexEditable: true,
+    hasCurves: true, //vertex editing shows handles, double click a vertex to curve it or make it a corner
     addCommand: "drawPath", //its add button draws instead of adding one
-    defaults: () => ({ x: 0, y: -300, vertices: [[-200, 0], [200, 0]], closed: false, fill: "none", stroke: "rgba(0,0,0,0.25)", lineWidth: 10, layer: "back" }),
+    defaults: () => ({ x: 0, y: -300, vertices: [[-200, 0], [200, 0]], handles: [], closed: false, fill: "none", stroke: "rgba(0,0,0,0.25)", lineWidth: 10, layer: "under player" }), //handles: see levelElements.pathSegments()
     styles: { //what a newly drawn path looks like
         closed: { fill: "rgba(0,0,0,0.1)", stroke: "none" },
         open: { fill: "none", stroke: "rgba(0,0,0,0.25)" },
@@ -1365,11 +1607,11 @@ levelElements.define("path", { //lines and shapes of any outline, drawn behind o
         levelElements.prop.color("fill"), //"none" for no fill
         levelElements.prop.color("stroke"), //"none" for no line
         levelElements.prop.number("lineWidth", { step: 1, min: 0 }),
-        levelElements.prop.select("layer", ["back", "front"]),
+        levelElements.prop.select("layer", levelElements.layers),
     ],
     isOpen: el => !el.closed,
     contains(el, p) { //inside a filled path, or near its line
-        const points = levelElements.points(el)
+        const points = levelElements.pathOutline(el)
         if (el.closed && !levelElements.isNoColor(el.fill) && levelElements.isInside(points, p)) return true
         const reach = Math.max(8, el.lineWidth / 2 + 4)
         const count = el.closed ? points.length : points.length - 1
@@ -1397,13 +1639,31 @@ levelElements.define("path", { //lines and shapes of any outline, drawn behind o
         el.y = round(b.y + b.height / 2)
         el.vertices = points.map(p => [round(p.x - el.x), round(p.y - el.y)])
     },
-    summary: el => `path(${levelElements.args(el.x, el.y)}, ${el.vertices.length} points)`,
+    bounds: el => levelElements.boundsOf(levelElements.pathOutline(el)), //around the curves
+    outlinePoints: el => levelElements.pathOutline(el), //what the editor outlines when it's selected
+    rotate(el, degrees, center) { //the outline and its handles turn
+        levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.rotatePoint(p, center, degrees)))
+        el.handles = el.handles.map(h => {
+            if (!h) return h
+            const p = levelElements.rotatePoint({ x: h[0], y: h[1] }, { x: 0, y: 0 }, degrees)
+            return [p.x, p.y]
+        })
+    },
+    flip(el, axis, center) { //the outline and its handles mirror
+        levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.flipPoint(p, axis, center)))
+        el.handles = el.handles.map(h => h && (axis === "x" ? [-h[0], h[1]] : [h[0], -h[1]]))
+    },
+    summary: el => `path(${levelElements.args(el.x, el.y)}, ${el.vertices.length} points${el.handles.some(Boolean) ? `, ${el.handles.filter(Boolean).length} curved` : ""})`,
     build(el) {
         const draw = () => {
-            const points = levelElements.points(el)
+            const segments = levelElements.pathSegments(el)
+            const start = levelElements.points(el)[0]
             ctx.beginPath()
-            ctx.moveTo(points[0].x, points[0].y)
-            for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y)
+            ctx.moveTo(start.x, start.y)
+            for (const s of segments) {
+                if (s.isCurve) ctx.bezierCurveTo(s.c1.x, s.c1.y, s.c2.x, s.c2.y, s.b.x, s.b.y)
+                else ctx.lineTo(s.b.x, s.b.y)
+            }
             if (el.closed) ctx.closePath()
             if (el.closed && !levelElements.isNoColor(el.fill)) {
                 ctx.fillStyle = el.fill
@@ -1415,52 +1675,27 @@ levelElements.define("path", { //lines and shapes of any outline, drawn behind o
                 ctx.stroke()
             }
         }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
     },
     code(el) {
-        const points = levelElements.points(el)
-        const lines = ["ctx.beginPath();", `ctx.moveTo(${levelElements.args(points[0].x, points[0].y)});`, ...points.slice(1).map(p => `ctx.lineTo(${levelElements.args(p.x, p.y)});`)]
+        const a = levelElements.args
+        const start = levelElements.points(el)[0]
+        const segments = levelElements.pathSegments(el)
+        if (el.closed && !segments[segments.length - 1].isCurve) segments.pop() //closePath draws the last straight line
+        const lines = ["ctx.beginPath();", `ctx.moveTo(${a(start.x, start.y)});`, ...segments.map(s => s.isCurve ? `ctx.bezierCurveTo(${a(s.c1.x, s.c1.y, s.c2.x, s.c2.y, s.b.x, s.b.y)});` : `ctx.lineTo(${a(s.b.x, s.b.y)});`)]
         if (el.closed) lines.push("ctx.closePath();")
         if (el.closed && !levelElements.isNoColor(el.fill)) lines.push(`ctx.fillStyle = ${levelElements.args(el.fill)};`, "ctx.fill();")
         if (!levelElements.isNoColor(el.stroke) && el.lineWidth > 0) lines.push(`ctx.strokeStyle = ${levelElements.args(el.stroke)};`, `ctx.lineWidth = ${levelElements.args(el.lineWidth)};`, "ctx.stroke();")
-        return el.layer === "front" ? { top: lines } : { custom: lines }
+        return levelElements.isOver(el) ? { top: lines } : { custom: lines }
     },
 })
 
 //*********************************************************************
-levelElements.define("drip", { //level.drip, a drop that falls over and over
-    tip: "a drop that falls from x, y, over and over, drag the bottom to change how far",
-    group: "element",
-    defaults: () => ({ x: 0, y: -600, length: 600, period: 100, color: "hsla(160, 100%, 35%, 0.5)" }),
-    props: [
-        ...levelElements.position(),
-        levelElements.prop.number("length", { isGrid: true, min: 10 }), //how far it falls
-        levelElements.prop.number("period", { step: 10, min: 1 }), //cycles between drops, plus up to 40 at random
-        levelElements.prop.color("color"),
-    ],
-    bounds: el => ({ x: el.x - 10, y: el.y - 10, width: 20, height: el.length + 20 }),
-    handles: el => [{ id: "end", x: el.x, y: el.y + el.length }],
-    dragHandle(el, id, point) { el.length = Math.max(10, point.y - el.y) },
-    overlay(el) {
-        ctx.beginPath()
-        ctx.moveTo(el.x, el.y)
-        ctx.lineTo(el.x, el.y + el.length)
-        ctx.stroke()
-    },
-    build(el) {
-        const drip = level.drip(el.x, el.y, el.y + el.length, el.period, el.color)
-        return { custom() { drip.draw() } }
-    },
-    code: (el, name) => ({
-        setup: [`const ${name} = level.drip(${levelElements.args(el.x, el.y, el.y + el.length, el.period, el.color)});`],
-        custom: [`${name}.draw();`],
-    }),
-})
-
 levelElements.define("text", { //words in the game's stroke font, like the constraint and level name at the start of a level, it doesn't jitter when the camera moves slowly like fillText does
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
     tip: "words drawn in the game's line font, like the level name at the start, letters, numbers, and . , ! ? : ' - + = / ( ) %, x, y is the top left, or the top middle when centered",
     group: "element",
-    defaults: () => ({ x: 0, y: -300, text: "text", size: 40, color: "rgba(0,0,0,0.5)", lineWidth: 3, align: "left", layer: "back" }),
+    defaults: () => ({ x: 0, y: -300, text: "text", size: 40, color: "rgba(0,0,0,0.5)", lineWidth: 3, align: "left", layer: "under player" }),
     props: [
         ...levelElements.position(),
         levelElements.prop.text("text"),
@@ -1468,7 +1703,7 @@ levelElements.define("text", { //words in the game's stroke font, like the const
         levelElements.prop.color("color"),
         levelElements.prop.number("lineWidth", { step: 1, min: 0.5 }),
         levelElements.prop.select("align", ["left", "center", "right"]),
-        levelElements.prop.select("layer", ["back", "front"]),
+        levelElements.prop.select("layer", levelElements.layers),
     ],
     textBox(el) { //where the letters go, each letter and space is 29 wide at size 40
         const width = Math.max(1, String(el.text).toLowerCase().replace(/[^a-z0-9.,!?:'\-+=/()% ]/g, "").length) * 29 * el.size / 40 //the characters simulation.draw.font has, it skips others
@@ -1485,29 +1720,32 @@ levelElements.define("text", { //words in the game's stroke font, like the const
             ctx.lineWidth = el.lineWidth
             ctx.stroke(word)
         }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
     },
     code(el, name) {
         const box = levelElements.types.text.textBox(el)
         const lines = [`ctx.strokeStyle = ${levelElements.args(el.color)};`, `ctx.lineWidth = ${levelElements.args(el.lineWidth)};`, `ctx.stroke(${name});`]
         return {
             setup: [`const ${name} = simulation.draw.font.path(${levelElements.args(String(el.text), box.x, box.y)}${el.size !== 40 ? `, ${levelElements.args(el.size)}` : ""});${el.align === "left" ? "" : ` //${el.align === "center" ? "centered on" : "right side at"} x = ${levelElements.args(el.x)}`}`],
-            [el.layer === "front" ? "top" : "custom"]: lines,
+            [levelElements.isOver(el) ? "top" : "custom"]: lines,
         }
     },
 })
 
 levelElements.define("circle", { //a filled circle drawn behind or in front of the player, the shape written levels draw most
-    tip: "colored circle drawn behind or in front of the player, drag the handle to change its radius",
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
+    tip: "colored circle drawn behind or in front of the player, drag the handle to change its radius, rect or ellipse in its info box changes its shape",
     group: "element",
     label: "circle fill",
+    rounds: ["fill", "circle", "ellipse"],
+    isAddedAs: "fill", //not in the add menu, a fill's info box turns it into one
     isBackground: true, //lock background colors in editor settings makes the mouse go through it
-    defaults: () => ({ x: 0, y: -200, radius: 100, color: "rgba(0,0,0,0.1)", layer: "back" }),
+    defaults: () => ({ x: 0, y: -200, radius: 100, color: "rgba(0,0,0,0.1)", layer: "under player" }),
     props: [
         ...levelElements.position(),
         levelElements.prop.number("radius", { isGrid: true, min: 1 }),
         levelElements.prop.color("color"),
-        levelElements.prop.select("layer", ["back", "front"]),
+        levelElements.prop.select("layer", levelElements.layers),
     ],
     bounds: el => ({ x: el.x - el.radius, y: el.y - el.radius, width: 2 * el.radius, height: 2 * el.radius }),
     contains: (el, p) => Math.hypot(p.x - el.x, p.y - el.y) <= el.radius,
@@ -1521,27 +1759,30 @@ levelElements.define("circle", { //a filled circle drawn behind or in front of t
             ctx.fillStyle = el.color
             ctx.fill()
         }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
     },
     code(el) {
         const lines = ["ctx.beginPath();", `ctx.arc(${levelElements.args(el.x, el.y, el.radius)}, 0, 2 * Math.PI);`, `ctx.fillStyle = ${levelElements.args(el.color)};`, "ctx.fill();"]
-        return el.layer === "front" ? { top: lines } : { custom: lines }
+        return levelElements.isOver(el) ? { top: lines } : { custom: lines }
     },
 })
 
 levelElements.define("ellipse", { //a filled ellipse, angle turns it, degrees counterclockwise like boost
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
     tip: "colored ellipse drawn behind or in front of the player, drag its handles to change each radius, rotate turns it",
     group: "element",
     label: "ellipse fill",
+    rounds: ["fill", "circle", "ellipse"],
+    isAddedAs: "fill", //not in the add menu, a fill's info box turns it into one
     isBackground: true, //lock background colors in editor settings makes the mouse go through it
-    defaults: () => ({ x: 0, y: -200, radiusX: 150, radiusY: 75, angle: 0, color: "rgba(0,0,0,0.1)", layer: "back" }),
+    defaults: () => ({ x: 0, y: -200, radiusX: 150, radiusY: 75, angle: 0, color: "rgba(0,0,0,0.1)", layer: "under player" }),
     props: [
         ...levelElements.position(),
         levelElements.prop.number("radiusX", { isGrid: true, min: 1 }),
         levelElements.prop.number("radiusY", { isGrid: true, min: 1 }),
         levelElements.prop.number("angle", { step: 15 }),
         levelElements.prop.color("color"),
-        levelElements.prop.select("layer", ["back", "front"]),
+        levelElements.prop.select("layer", levelElements.layers),
     ],
     axes(el) { //unit vectors along radiusX and radiusY in world space
         const a = levelElements.radians(el.angle)
@@ -1572,6 +1813,13 @@ levelElements.define("ellipse", { //a filled ellipse, angle turns it, degrees co
         levelElements.orbit(el, degrees, center)
         el.angle = Number((el.angle - degrees).toFixed(3))
     },
+    isMirrorSymmetric: true, //mirrored it's the same as turned, so one alone has rotate and no flip buttons, flip() still turns it right in a flipped selection
+    flip(el, axis, center) { //an ellipse looks the same turned 180°
+        const to = levelElements.flipPoint(el, axis, center)
+        el.x = to.x
+        el.y = to.y
+        el.angle = Number((-el.angle).toFixed(3))
+    },
     summary: el => `ellipse(${levelElements.args(el.x, el.y, el.radiusX, el.radiusY)})`,
     build(el) {
         const draw = () => {
@@ -1580,122 +1828,49 @@ levelElements.define("ellipse", { //a filled ellipse, angle turns it, degrees co
             ctx.fillStyle = el.color
             ctx.fill()
         }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
     },
     code(el) {
         const lines = ["ctx.beginPath();", `ctx.ellipse(${levelElements.args(el.x, el.y, el.radiusX, el.radiusY)}, ${el.angle ? levelElements.angleCode(el.angle) : "0"}, 0, 2 * Math.PI);`, `ctx.fillStyle = ${levelElements.args(el.color)};`, "ctx.fill();"]
-        return el.layer === "front" ? { top: lines } : { custom: lines }
-    },
-})
-
-levelElements.bezierPoints = el => [{ x: el.x, y: el.y }, { x: el.cx1, y: el.cy1 }, { x: el.cx2, y: el.cy2 }, { x: el.x2, y: el.y2 }] //start, its control, the end's control, end
-levelElements.bezierAt = (el, t) => { //a point on the curve
-    const [a, b, c, d] = levelElements.bezierPoints(el)
-    const s = 1 - t
-    return {
-        x: s * s * s * a.x + 3 * s * s * t * b.x + 3 * s * t * t * c.x + t * t * t * d.x,
-        y: s * s * s * a.y + 3 * s * s * t * b.y + 3 * s * t * t * c.y + t * t * t * d.y,
-    }
-}
-levelElements.define("bezier", { //a curved line, ctx.bezierCurveTo, drag either end or either control point
-    tip: "curved line from x, y to x2, y2, drag the ends and the two control points that bend it",
-    group: "element",
-    label: "bezier",
-    isBackground: true, //lock background colors in editor settings makes the mouse go through it
-    defaults: () => ({ x: -200, y: -200, cx1: -100, cy1: -450, cx2: 100, cy2: -450, x2: 200, y2: -200, stroke: "rgba(0,0,0,0.25)", lineWidth: 10, layer: "back" }),
-    props: [
-        ...levelElements.position(),
-        ...["cx1", "cy1", "cx2", "cy2", "x2", "y2"].map(key => levelElements.prop.number(key, { isGrid: true })),
-        levelElements.prop.color("stroke"),
-        levelElements.prop.number("lineWidth", { step: 1, min: 0 }),
-        levelElements.prop.select("layer", ["back", "front"]),
-    ],
-    samples: el => Array.from({ length: 33 }, (_, i) => levelElements.bezierAt(el, i / 32)),
-    bounds(el) { //the curve, not its control points
-        const b = levelElements.boundsOf(levelElements.types.bezier.samples(el))
-        const pad = Math.max(10, el.lineWidth / 2)
-        return { x: b.x - pad, y: b.y - pad, width: b.width + 2 * pad, height: b.height + 2 * pad }
-    },
-    contains(el, p) { //near the curve
-        const points = levelElements.types.bezier.samples(el)
-        const reach = Math.max(8, el.lineWidth / 2 + 4)
-        for (let i = 0; i < points.length - 1; i++) {
-            const a = points[i]
-            const dx = points[i + 1].x - a.x
-            const dy = points[i + 1].y - a.y
-            const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)))
-            if (Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy) < reach) return true
-        }
-        return false
-    },
-    move(el, dx, dy) {
-        for (const [x, y] of [["x", "y"], ["cx1", "cy1"], ["cx2", "cy2"], ["x2", "y2"]]) {
-            el[x] += dx
-            el[y] += dy
-        }
-    },
-    handles: el => [{ id: "start", x: el.x, y: el.y }, { id: "c1", x: el.cx1, y: el.cy1 }, { id: "c2", x: el.cx2, y: el.cy2 }, { id: "end", x: el.x2, y: el.y2 }],
-    dragHandle(el, id, point) {
-        const [x, y] = { start: ["x", "y"], c1: ["cx1", "cy1"], c2: ["cx2", "cy2"], end: ["x2", "y2"] }[id]
-        el[x] = point.x
-        el[y] = point.y
-    },
-    pivot: el => ({ x: (el.x + el.x2) / 2, y: (el.y + el.y2) / 2 }),
-    rotate(el, degrees, center) {
-        for (const [x, y] of [["x", "y"], ["cx1", "cy1"], ["cx2", "cy2"], ["x2", "y2"]]) {
-            const p = levelElements.rotatePoint({ x: el[x], y: el[y] }, center, degrees)
-            el[x] = p.x
-            el[y] = p.y
-        }
-    },
-    overlay(el) { //each end to its control point
-        ctx.beginPath()
-        ctx.moveTo(el.x, el.y)
-        ctx.lineTo(el.cx1, el.cy1)
-        ctx.moveTo(el.x2, el.y2)
-        ctx.lineTo(el.cx2, el.cy2)
-        ctx.stroke()
-    },
-    summary: el => `bezier(${levelElements.args(el.x, el.y, el.x2, el.y2)})`,
-    build(el) {
-        const draw = () => {
-            if (levelElements.isNoColor(el.stroke) || el.lineWidth <= 0) return
-            ctx.beginPath()
-            ctx.moveTo(el.x, el.y)
-            ctx.bezierCurveTo(el.cx1, el.cy1, el.cx2, el.cy2, el.x2, el.y2)
-            ctx.strokeStyle = el.stroke
-            ctx.lineWidth = el.lineWidth
-            ctx.stroke()
-        }
-        return el.layer === "front" ? { top: draw } : { custom: draw }
-    },
-    code(el) {
-        const lines = ["ctx.beginPath();", `ctx.moveTo(${levelElements.args(el.x, el.y)});`, `ctx.bezierCurveTo(${levelElements.args(el.cx1, el.cy1, el.cx2, el.cy2, el.x2, el.y2)});`, `ctx.strokeStyle = ${levelElements.args(el.stroke)};`, `ctx.lineWidth = ${levelElements.args(el.lineWidth)};`, "ctx.stroke();"]
-        return el.layer === "front" ? { top: lines } : { custom: lines }
+        return levelElements.isOver(el) ? { top: lines } : { custom: lines }
     },
 })
 
 // constraints, a Matter.js constraint from a point in the level to a block, made with the inspector's constraint button
 // x, y is the point in the level, bx, by is where it holds the block, from the block's center
 //*********************************************************************
-levelElements.constraintEnd = el => { //where it holds its body in the level, from the block's data, or its body while the level runs
+levelElements.turned = (offset, angle) => ({ x: offset.x * Math.cos(angle) - offset.y * Math.sin(angle), y: offset.x * Math.sin(angle) + offset.y * Math.cos(angle) }) //an offset on a body turned with it, like Matter turns a constraint's points
+levelElements.constraintEnd = el => { //where it holds its body in the level, from the block's data, or its body while the level runs, turned with it
     const target = levelData.data && levelData.find(levelData.data, el.body)
     const runtime = target && levelData.runtimes.get(target.id)
     const who = runtime && runtime.bodies && runtime.bodies[0]
-    if (who) return { x: who.position.x + el.bx, y: who.position.y + el.by }
+    if (who) {
+        const offset = levelElements.turned({ x: el.bx, y: el.by }, who.angle)
+        return { x: who.position.x + offset.x, y: who.position.y + offset.y }
+    }
     if (target) {
         const c = levelElements.center(target)
         return { x: c.x + el.bx, y: c.y + el.by }
     }
     return null
 }
+levelElements.constraintStart = el => { //its other end, the point in the level, or on its anchor block, which it moves with while the level runs
+    const anchor = el.anchor && levelData.data && levelData.find(levelData.data, el.anchor)
+    const runtime = anchor && levelData.runtimes.get(anchor.id)
+    const who = runtime && runtime.bodies && runtime.bodies[0]
+    if (!who) return { x: el.x, y: el.y }
+    const c = levelElements.center(anchor)
+    const offset = levelElements.turned({ x: el.x - c.x, y: el.y - c.y }, who.angle)
+    return { x: who.position.x + offset.x, y: who.position.y + offset.y }
+}
 levelElements.define("constraint", {
-    tip: "a Matter.js constraint from a point in the level to a block",
+    tip: "a Matter.js constraint from a point in the level to a block, pick another block as its anchor to tie two blocks together, like a chain or a pendulum",
     group: "constraint",
-    rebuildWithRefs: true, //its block is a new body after the block is rebuilt
-    defaults: () => ({ x: 0, y: -300, body: null, bx: 0, by: 0, stiffness: 1, damping: 0, length: 200 }),
+    rebuildWithRefs: true, //its blocks are new bodies after they're rebuilt
+    defaults: () => ({ x: 0, y: -300, anchor: null, body: null, bx: 0, by: 0, stiffness: 1, damping: 0, length: 200 }),
     props: [
-        ...levelElements.position(), //pointA
+        ...levelElements.position(), //pointA, in the level, on the anchor block if it has one
+        levelElements.prop.ref("anchor", ["block"], { tip: "pick a block to tie this one to, the circle end moves with it, null pins it to the level" }), //bodyA
         levelElements.prop.ref("body", ["block"]), //bodyB
         levelElements.prop.number("bx", { isGrid: true }), //pointB, from the block's center
         levelElements.prop.number("by", { isGrid: true }),
@@ -1705,38 +1880,47 @@ levelElements.define("constraint", {
     ],
     bounds: el => ({ x: el.x - 12, y: el.y - 12, width: 24, height: 24 }),
     contains(el, p) { //its point, or near the line to the block
-        if (Math.hypot(p.x - el.x, p.y - el.y) < 12) return true
+        const start = levelElements.constraintStart(el)
+        if (Math.hypot(p.x - start.x, p.y - start.y) < 12) return true
         const end = levelElements.constraintEnd(el)
         if (!end) return false
-        const dx = end.x - el.x
-        const dy = end.y - el.y
-        const t = Math.max(0, Math.min(1, ((p.x - el.x) * dx + (p.y - el.y) * dy) / (dx * dx + dy * dy || 1)))
-        return Math.hypot(p.x - el.x - t * dx, p.y - el.y - t * dy) < 8
+        const dx = end.x - start.x
+        const dy = end.y - start.y
+        const t = Math.max(0, Math.min(1, ((p.x - start.x) * dx + (p.y - start.y) * dy) / (dx * dx + dy * dy || 1)))
+        return Math.hypot(p.x - start.x - t * dx, p.y - start.y - t * dy) < 8
     },
     handles(el) {
         const end = levelElements.constraintEnd(el)
         return end ? [{ id: "end", x: end.x, y: end.y }] : []
     },
-    dragHandle(el, id, point) { //moves where it holds the block
-        const end = levelElements.constraintEnd({ ...el, bx: 0, by: 0 })
-        if (!end) return
-        el.bx = Math.round((point.x - end.x) * 1000) / 1000
-        el.by = Math.round((point.y - end.y) * 1000) / 1000
+    dragHandle(el, id, point) { //moves where it holds the block, turned back by the block's angle, bx and by are on the unturned block
+        const center = levelElements.constraintEnd({ ...el, bx: 0, by: 0 })
+        if (!center) return
+        const who = levelData.runtimes.get(el.body)?.bodies?.[0]
+        const offset = levelElements.turned({ x: point.x - center.x, y: point.y - center.y }, -(who ? who.angle : 0))
+        el.bx = Math.round(offset.x * 1000) / 1000
+        el.by = Math.round(offset.y * 1000) / 1000
     },
-    summary: el => `constraint(${levelElements.args(el.x, el.y)})${el.body ? ` to #${el.body}` : ""}`,
+    flip(el, axis, center) { //the point mirrors, and where it holds the block mirrors on the block
+        levelElements.flipEnds(el, axis, center, [["x", "y"]])
+        if (axis === "x") el.bx = -el.bx
+        else el.by = -el.by
+    },
+    summary: el => `constraint(${levelElements.args(el.x, el.y)})${el.anchor ? ` from #${el.anchor}` : ""}${el.body ? ` to #${el.body}` : ""}`,
     overlay(el) {
+        const start = levelElements.constraintStart(el)
         const end = levelElements.constraintEnd(el)
         ctx.setLineDash([])
         ctx.lineWidth = 2
         ctx.strokeStyle = end ? "rgba(0,0,0,0.6)" : "rgba(220,0,0,0.8)"
-        ctx.fillStyle = "#fff"
+        ctx.fillStyle = el.anchor ? "rgba(0,0,0,0.6)" : "#fff" //filled when it's on a block
         ctx.beginPath()
-        ctx.arc(el.x, el.y, 8, 0, 2 * Math.PI)
+        ctx.arc(start.x, start.y, 8, 0, 2 * Math.PI)
         ctx.fill()
         ctx.stroke()
         if (!end) return
         ctx.beginPath()
-        ctx.moveTo(el.x, el.y)
+        ctx.moveTo(start.x, start.y)
         ctx.lineTo(end.x, end.y)
         ctx.stroke()
         ctx.beginPath()
@@ -1744,20 +1928,30 @@ levelElements.define("constraint", {
         ctx.fillStyle = "rgba(0,0,0,0.6)"
         ctx.fill()
     },
+    pointA(el, data) { //x, y in the level, or from the anchor block's center, how Matter wants it
+        const anchor = el.anchor && levelData.find(data, el.anchor)
+        if (!anchor) return { x: el.x, y: el.y }
+        const c = levelElements.center(anchor)
+        return { x: Math.round((el.x - c.x) * 1000) / 1000, y: Math.round((el.y - c.y) * 1000) / 1000 }
+    },
     build(el) {
-        const runtime = levelData.runtimes.get(el.body)
-        const who = runtime && runtime.bodies && runtime.bodies[0]
-        if (!who) throw new Error("needs a body, pick a block")
-        cons[cons.length] = Constraint.create({ pointA: { x: el.x, y: el.y }, bodyB: who, pointB: { x: el.bx, y: el.by }, stiffness: el.stiffness, damping: el.damping, length: el.length })
+        const bodyOf = id => levelData.runtimes.get(id)?.bodies?.[0]
+        const who = bodyOf(el.body)
+        if (!who) throw levelElements.unfinished("needs a body, pick a block")
+        const anchor = el.anchor ? bodyOf(el.anchor) : null
+        if (el.anchor && !anchor) throw levelElements.unfinished("its anchor block is missing")
+        cons[cons.length] = Constraint.create({ ...(anchor ? { bodyA: anchor } : {}), pointA: levelElements.types.constraint.pointA(el, levelData.data), bodyB: who, pointB: { x: el.bx, y: el.by }, stiffness: el.stiffness, damping: el.damping, length: el.length })
         Composite.add(engine.world, cons[cons.length - 1])
     },
     code(el, name, context) {
         const body = context && context.nameOf(el.body)
         if (!body) return { setup: [`//${levelElements.summary(el)} has no block`] }
+        const anchor = el.anchor && context.nameOf(el.anchor)
         const a = levelElements.args
+        const point = levelElements.types.constraint.pointA(el, context.data || levelData.data)
         return {
             setup: [
-                `cons[cons.length] = Constraint.create({ pointA: { x: ${a(el.x)}, y: ${a(el.y)} }, bodyB: ${body}, pointB: { x: ${a(el.bx)}, y: ${a(el.by)} }, stiffness: ${a(el.stiffness)}, damping: ${a(el.damping)}, length: ${a(el.length)} });`,
+                `cons[cons.length] = Constraint.create({ ${anchor ? `bodyA: ${anchor}, ` : ""}pointA: { x: ${a(point.x)}, y: ${a(point.y)} }, bodyB: ${body}, pointB: { x: ${a(el.bx)}, y: ${a(el.by)} }, stiffness: ${a(el.stiffness)}, damping: ${a(el.damping)}, length: ${a(el.length)} });`,
                 "Composite.add(engine.world, cons[cons.length - 1]);",
             ],
         }
@@ -1772,6 +1966,7 @@ levelElements.define("mobSpot", { //a place a random mob might spawn, spawn.rand
     tip: "a place a random mob might spawn, each level spawns mobs at some of its spots, more as the run goes on, small spots get a few small mobs",
     group: "mob",
     label: "mob", //its add button, the data and export still call it a spot
+    levelProps: ["mobVeto"], //the level's mob veto shows in its inspector too, it's for every spot
     defaults: () => ({ x: 0, y: -300, small: false }),
     props: [...levelElements.position(), levelElements.prop.bool("small")], //small spots get a few small mobs instead of one
     bounds: el => ({ x: el.x - 20, y: el.y - 20, width: 40, height: 40 }),
@@ -1780,13 +1975,22 @@ levelElements.define("mobSpot", { //a place a random mob might spawn, spawn.rand
     build(el, options) {
         if (options.isSpawning) spawn.randomMobPositions.push({ x: el.x, y: el.y, isSmall: el.small }) //levelData.play() calls spawn.randomMobFromArray() after
     },
-    codeAll: elements => [ //every spot goes in one list
+    codeAll: (elements, data) => [ //every spot goes in one list, the level's mobVeto goes with them
         "spawn.randomMobPositions = [",
         ...elements.map(el => `    [${levelElements.args(el.x, el.y)}${el.small ? ", true" : ""}],`),
         "].map(([x, y, isSmall = false]) => ({ x, y, isSmall }));",
-        "spawn.randomMobFromArray()",
+        `spawn.randomMobFromArray(${data.mobVeto.length ? levelElements.namesCode(data.mobVeto) : ""})`,
     ],
 })
+levelElements.namesCode = names => `[${names.map(name => JSON.stringify(name)).join(", ")}]`
+levelElements.vetoTiers = { //what veto lists show, by tier, spawn.js isn't loaded in the unit tests
+    mob: () => typeof spawn === "undefined" ? [] : spawn.tier.slice(1, 5).map((names, i) => [`tier ${i + 1}`, names.slice().sort()]), //tier 0 is only starter, tier 5 only spawns as next TIER mobs
+    boss: () => typeof spawn === "undefined" ? [] : spawn.bossTier.map((names, i) => [`tier ${i}`, names.slice().sort()]).filter(([, names]) => names.length),
+}
+levelElements.vetoBlocks = (prop, veto, name) => { //why name can't be vetoed: it's the last one its tier has left, or ""
+    const tier = prop.tiers().find(([, names]) => names.includes(name))
+    return tier && !veto.includes(name) && tier[1].every(other => other === name || veto.includes(other)) ? `every other ${tier[0]} ${prop.noun} is vetoed, a tier needs one` : ""
+}
 
 levelElements.mobType = (spawnName, label, radius, fill, hasChance, text = label) => ({ //text is what the editor writes on its marker
     group: "mob",
@@ -1806,7 +2010,7 @@ levelElements.mobType = (spawnName, label, radius, fill, hasChance, text = label
         return { setup: [`spawn.${spawnName}(${levelElements.args(el.x, el.y)}${chance});`] }
     },
 })
-levelElements.define("mob", { ...levelElements.mobType("randomMob", "mob", 40, "rgba(255,80,80,0.35)", true), tip: "one random mob in this exact spot, chance is how likely, written levels use spots instead" })
+levelElements.define("mob", { ...levelElements.mobType("randomMob", "mob", 40, "rgba(255,80,80,0.35)", true), tip: "one random mob in this exact spot, chance is how likely, standard levels use spots instead" })
 levelElements.define("smallMobs", { ...levelElements.mobType("randomSmallMob", "small mobs", 30, "rgba(255,120,80,0.35)", true, "small"), tip: "a few small random mobs, more on harder difficulties" })
 levelElements.define("mobGroup", { ...levelElements.mobType("randomGroup", "group", 50, "rgba(255,80,160,0.35)", true), tip: "a group of random mobs linked together, only after the first few levels" })
 levelElements.mobNames = () => typeof spawn === "undefined" ? ["starter"] : [...new Set([...spawn.tier.flat(), ...spawn.bossTier.flat()])] //every mob and boss by tier, spawn.js isn't loaded in the unit tests
@@ -1822,13 +2026,14 @@ levelElements.define("namedMob", { //one mob picked by name, for levels that wan
     overlay: el => levelElements.marker(el, 40, "rgba(255,40,40,0.35)", el.name),
     summary: el => `${el.name}(${levelElements.args(el.x, el.y)})`,
     build(el, options) {
-        if (options.isSpawning && typeof spawn[el.name] === "function") spawn[el.name](el.x, el.y)
+        if (options.isSpawning && levelElements.mobNames().includes(el.name) && typeof spawn[el.name] === "function") spawn[el.name](el.x, el.y)
     },
-    code: el => ({ setup: [`spawn.${el.name}(${levelElements.args(el.x, el.y)});`] }),
+    code: el => ({ setup: levelElements.mobNames().includes(el.name) ? [`spawn[${JSON.stringify(el.name)}](${levelElements.args(el.x, el.y)});`] : [] }),
 })
 levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns at its spot or one of its other spots, picked at random each time the level loads
     ...levelElements.mobType(spawnName, label, radius, fill, false),
-    defaults: () => ({ x: 0, y: -300, spots: [] }), //spots: [[x, y], ...] other places it could spawn, the editor shows them as handles to drag
+    defaults: () => ({ x: 0, y: -300, spots: [], veto: [] }), //spots: [[x, y], ...] other places it could spawn, the editor shows them as handles to drag, veto: boss names it won't be
+    props: [...levelElements.position(), levelElements.prop.veto("veto", levelElements.vetoTiers.boss, "boss")],
     places: el => [[el.x, el.y], ...el.spots],
     contains: (el, p) => levelElements.types[el.type].places(el).some(([x, y]) => Math.hypot(p.x - x, p.y - y) < radius),
     move(el, dx, dy, isWhole) { //dragging the boss leaves its other spots where they are, copies take them along
@@ -1874,14 +2079,15 @@ levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns 
         if (!options.isSpawning) return
         const places = levelElements.types[el.type].places(el)
         const [x, y] = places[Math.floor(Math.random() * places.length)]
-        spawn[spawnName](x, y)
+        spawn[spawnName](x, y, [], el.veto)
     },
     code(el, name) {
         const spot = ([x, y]) => `{ x: ${levelElements.args(x)}, y: ${levelElements.args(y)} }`
-        if (!el.spots.length) return { setup: [`spawn.${spawnName}(${levelElements.args(el.x, el.y)});`] }
+        const veto = el.veto.length ? `, [], ${levelElements.namesCode(el.veto)}` : "" //spawn.randomLevelBoss(x, y, options, veto)
+        if (!el.spots.length) return { setup: [`spawn.${spawnName}(${levelElements.args(el.x, el.y)}${veto});`] }
         const places = levelElements.types[el.type].places(el)
         const pick = places.length === 2 ? `Math.random() < 0.5 ? ${spot(places[0])} : ${spot(places[1])}` : `[${places.map(spot).join(", ")}][Math.floor(Math.random() * ${places.length})]` //like written levels pick a boss spot
-        return { setup: [`const ${name} = ${pick}`, `spawn.${spawnName}(${name}.x, ${name}.y);`] }
+        return { setup: [`const ${name} = ${pick}`, `spawn.${spawnName}(${name}.x, ${name}.y${veto});`] }
     },
 })
 levelElements.define("boss", { ...levelElements.bossType("randomLevelBoss", "boss", 80, "rgba(200,0,60,0.35)"), tip: "the level's boss, picked by the run's tier, add spots in the inspector for other places it could spawn" })
@@ -1898,7 +2104,7 @@ levelElements.define("powerUp", {
         heal: "restores health",
         ammo: "adds ammo to all the player's guns",
         research: "rerolls gun, field, and tech choices, levels with mobs already get 1",
-        tech: "a choice of 3 tech, written levels give tech from the boss and the starting power up",
+        tech: "a choice of 3 tech, standard levels give tech from the boss and the starting power up",
         gun: "a choice of 2 guns",
         field: "a choice of 2 fields",
         coupling: "improves the player's field",
@@ -1920,7 +2126,7 @@ levelElements.define("powerUp", {
     build(el, options) {
         if (options.isSpawning) for (let i = 0; i < el.count; i++) powerUps.spawn(el.x + 25 * i, el.y, el.name) //25 apart, power ups in the same spot lag while they push apart
     },
-    code: el => ({ setup: [el.count > 1 ? `for (let i = 0; i < ${el.count}; i++) powerUps.spawn(${levelElements.args(el.x)} + 25 * i, ${levelElements.args(el.y, el.name)});` : `powerUps.spawn(${levelElements.args(el.x, el.y, el.name)});`] }),
+    code: el => ({ setup: [el.count > 1 ? `for (let i = 0; i < ${Number(el.count)}; i++) powerUps.spawn(${levelElements.args(el.x)} + 25 * i, ${levelElements.args(el.y, el.name)});` : `powerUps.spawn(${levelElements.args(el.x, el.y, el.name)});`] }),
 })
 
 levelElements.powerUpCall = (call, label, fill) => ({ //a powerUps function that picks for the player, like the starting power ups
@@ -1940,7 +2146,7 @@ levelElements.define("randomPowerUp", { ...levelElements.powerUpCall("chooseRand
 levelElements.define("startingPowerUps", { ...levelElements.powerUpCall("spawnStartingPowerUps", "starting", "rgba(30,90,200,0.3)"), tip: "every level has 1, early in a run it gives the first gun or tech, later it's a few random power ups, put it far from the entrance so the player explores to find it" })
 
 levelElements.define("debris", { //random small blocks and power ups along a line, written levels use about 16
-    tip: "small random blocks along a line, about 15% are heal or ammo instead, written levels use about 16",
+    tip: "small random blocks along a line, about 15% are heal or ammo instead, standard levels use about 16",
     group: "powerUp",
     defaults: () => ({ x: 0, y: -300, width: 1000, count: 16 }),
     props: [...levelElements.position(), levelElements.prop.number("width", { isGrid: true, min: 1 }), levelElements.prop.number("count", { step: 1, min: 1 })],
@@ -1972,9 +2178,112 @@ levelElements.define("debris", { //random small blocks and power ups along a lin
 })
 
 //settings for the whole level, in the editor's level properties menu, levelData.applySettings() uses them
+//*********************************************************************
+// property tips, the inspector shows them when the mouse is over a property's name
+// typeTips[type][key] is for one type, tips[key] for every type with that key, a prop's own tip wins
+//*********************************************************************
+levelElements.tips = {
+    x: "left edge, or the middle for points and shapes with vertices, in game units, y goes down",
+    y: "top edge, or the middle for points and shapes with vertices, in game units, y goes down",
+    width: "game units, the player is about 50 wide",
+    height: "game units, a jump is about 390 high",
+    bump: "a small step under the door, older levels have one",
+    friction: "how much things slide on it while moving, 0 is ice, 1 is very grippy",
+    frictionStatic: "how hard it is to start sliding, Matter's default is 0.5",
+    frictionAir: "drag, slows it down every frame, 0.001 is normal, 0.05 is like moving through water",
+    restitution: "bounciness, 0 doesn't bounce, 1 bounces back as high as it fell",
+    collides: "what it bumps into, click a name to turn it off, crossed out names go through it",
+    link: "the button, toggle, zone, timer, or keyhole that turns it on and off",
+    orLink: "a second control, it's on while either one is",
+    runs: "while on runs it while its link is on, while off is the other way around",
+    density: "mass per area, 0.001 is a normal block, more is heavier and harder to push",
+    mass: "density times area, change either one",
+    velocityX: "how fast it's moving right when the level starts, negative is left, game units a frame",
+    velocityY: "how fast it's moving down when the level starts, negative is up, game units a frame",
+    holdable: "unchecked, the field can't pick it up",
+    noSpin: "it slides but never turns",
+    immutable: "tech can't destroy, split, grow, or freeze it, and falling out of the level brings it back",
+    chance: "probability it shows up each time the level loads, 0 to 1, 0.5 is half the time",
+    angle: "degrees, counterclockwise, 0 points right and 90 points up",
+    speed: "game units a frame, negative goes the other way",
+    distance: "how far it moves, game units",
+    damage: "how much it hurts each hit, before difficulty scaling",
+    color: "any css color, like #444, rgba(0,0,0,0.1), or hsl(200, 50%, 50%)",
+    layer: "under or over the player, blocks, and mobs, to top and to bottom order it among the other drawings in its layer",
+    stroke: "line color, any css color, or none",
+    fill: "fill color, any css color, or none",
+    lineWidth: "line thickness, game units",
+    length: "game units",
+    name: "",
+    count: "how many",
+    spin: "keeps turning around x, y, degrees a second, negative turns the other way, 0 doesn't",
+    swing: "sways back and forth around x, y, this many degrees each way from where it points, 0 doesn't",
+    swingTime: "frames for one swing there and back, 60 is a second",
+    motion: "a motion sensor: a faint white beam, when the player crosses it, it flashes white for a second, then hurts like a laser for about 10 seconds",
+    who: "what turns it on by being inside: the player, a block, a mob, or any of them",
+    on: "",
+    small: "a few small mobs instead of one",
+    veto: "bosses it won't be, pick one to cross it out or bring it back, a vetoed boss's turn goes to the next one in its tier",
+    mobVeto: "mobs the level's mob spots won't spawn, pick one to cross it out or bring it back, the level's other mob types spawn instead",
+    log: "a message in the in-game console each time it turns on, text or html like <b>bold</b>, <br> for a new line, or <span class='color-var'>, no other tags or attributes, empty logs nothing",
+    x2: "the other end's x, game units",
+    y2: "the other end's y, game units",
+}
+levelElements.typeTips = {
+    map: { on: "what it does while its link is on" },
+    button: { on: "when its links are on: while pressed (down), while not (up), or for good once pressed (stays down)" },
+    keyhole: { on: "on while the key is in, or for good once it's been in", color: "the key of this color fits" },
+    key: { color: "fits the keyhole of this color" },
+    zone: { on: "on while something's inside, or for good once something has been", circle: "a circle around x, y instead of a box, something is inside once its center is", radius: "game units, from x, y" },
+    boost: { launchHeight: "about how high it throws the player, game units" },
+    transport: { distance: "how far it slides from its start, game units" },
+    door: { distance: "how far up it slides to open, game units", speed: "how fast it opens and closes" },
+    elevator: { travel: "how far up it goes, game units", force: "how hard it pushes, more is faster", onTouch: "only moves while the player stands on it" },
+    vanish: { vertical: "shrinks sideways instead of down" },
+    spinner: { spin: "how fast it's turning when the level starts, radians a frame", motor: "keeps it turning, negative turns the other way, its link turns the motor on and off", frictionAir: "slows its turning too, so a motor tops out sooner" },
+    wind: { vx: "push to the right a frame, negative pushes left", vy: "push down a frame, negative pushes up", float: "cancels gravity inside it" },
+    slime: { rise: "how fast it fills, game units a frame, 0 is always full, linked it drains while off" },
+    toggle: { isOn: "how it starts", staysOn: "once it's on it can't be flipped back" },
+    timer: { onTime: "frames it's on, 60 is a second", offTime: "frames it's off, 60 is a second", offset: "frames to shift it, so timers can take turns" },
+    portal: { angle: "which way end A faces, degrees, 0 is right, 90 up", angle2: "which way end B faces, degrees", exit: "how things come out: keep their momentum, straight out, or launched" },
+    path: { closed: "joins the last point to the first and fills it" },
+    text: { text: "letters, numbers, and . , ! ? : ' - + = / ( ) %", size: "how tall the letters are, 40 is the font's own size", align: "which side of x the text is on" },
+    circle: { radius: "game units" },
+    ellipse: { radiusX: "half its width before turning, game units", radiusY: "half its height before turning, game units" },
+    constraint: {
+        x: "the circle end, in the level, or on its anchor block",
+        y: "the circle end, in the level, or on its anchor block",
+        body: "the block it holds",
+        bx: "where it holds the block, right of its center, game units",
+        by: "where it holds the block, below its center, game units",
+        stiffness: "1 is a rigid rod, small numbers are a soft spring",
+        damping: "0 bounces freely, more settles down faster",
+        length: "its resting length, game units",
+    },
+    powerUp: { name: "which power up", count: "how many" },
+    debris: { count: "how many little blocks, about 15% are heal or ammo" },
+    namedMob: { name: "which mob" },
+    level: {
+        name: "letters, numbers, - and _, no spaces, it's the save name and the level pool name",
+        author: "who made it, plain text, when it loads the in-game console says the level's name and who made it, empty says nothing",
+        log: "a message in the in-game console when the level starts, after the author's, text or html like <b>bold</b>, <br> for a new line, or <span class='color-var'>, no other tags or attributes",
+        zoom: "how far the camera sees, standard levels use 1300 to 2600",
+        background: "the color behind everything",
+        mapColor: "the color of the map",
+        blockColor: "the color of blocks",
+        gravity: "times normal, for the player, blocks, and power ups",
+        fall: "falling off the bottom goes back to the enter (spawn), or keeps falling from the sky",
+        constraintTextX: "where the run's constraint text shows, right of the enter",
+        constraintTextY: "where the run's constraint text shows, below the enter",
+    },
+}
+levelElements.tipOf = (typeName, prop) => prop.tip || levelElements.typeTips[typeName]?.[prop.key] || levelElements.tips[prop.key] || ""
+
 levelElements.level = {
     props: [
         levelElements.prop.text("name"),
+        levelElements.prop.text("author"), //who made it, the level logs its name and author when it loads, see levelData.authorLog()
+        levelElements.prop.text("log"), //a message in the in-game console when the level starts, after the author's
         levelElements.prop.number("zoom", { step: 100, min: 200 }), //level.defaultZoom when it's played
         levelElements.prop.color("background"),
         levelElements.prop.color("mapColor"),
@@ -1983,8 +2292,9 @@ levelElements.level = {
         levelElements.prop.select("fall", ["spawn", "sky"]), //falling off the bottom sends the player back to the spawn, or keeps them falling from the sky above it
         levelElements.prop.number("constraintTextX", { isGrid: true }), //where the run's constraint shows, from the spawn, level.announceText()
         levelElements.prop.number("constraintTextY", { isGrid: true }),
+        levelElements.prop.veto("mobVeto", levelElements.vetoTiers.mob, "mob", { isShown: data => data.elements.some(el => el.type === "mobSpot") }), //each mob spot shows it too
     ],
-    defaults: () => ({ zoom: 2000, background: "#dcdcde", mapColor: "#444", blockColor: "rgba(140,140,140,0.85)", gravity: 1, fall: "spawn", constraintTextX: 0, constraintTextY: 75 }), //what written levels use most, and the level properties default button
+    defaults: () => ({ zoom: 2000, background: "#dcdcde", mapColor: "#444", blockColor: "rgba(140,140,140,0.85)", gravity: 1, fall: "spawn", constraintTextX: 0, constraintTextY: 75, mobVeto: [] }), //what written levels use most, and the level properties default button
 }
 
 //*********************************************************************

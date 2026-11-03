@@ -368,6 +368,7 @@ const build = {
         document.getElementById("health").style.display = "none"
         document.getElementById("health-bg").style.display = "none"
         document.getElementById("defense-bar").style.display = "none"
+        document.body.classList.add("pause-open") //the level editor hides its panels under the pause menu
         //show in game console
         simulation.lastLogTime = m.cycle
     },
@@ -737,6 +738,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         document.getElementById("pause-grid-right").style.display = "none"
         document.getElementById("pause-grid-right").style.opacity = "1"
         document.getElementById("pause-grid-left").style.opacity = "1"
+        document.body.classList.remove("pause-open")
         window.scrollTo(0, 0);
     },
     isExperimentSelection: false,
@@ -1885,6 +1887,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         delete localSettings.banList
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
+    if (localSettings.isLevelPoolThumbnails === undefined) localSettings.isLevelPoolThumbnails = true
     localSettings.isCommunityMaps = localSettings.levelPool.added.some(name => level.communityLevels.includes(name))
     simulation.isCommunityMaps = localSettings.isCommunityMaps
 
@@ -1945,6 +1948,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
         levelPool: { banned: [], added: [] }, //official levels taken out of the pool, community and local levels put in
+        isLevelPoolThumbnails: true, //the level pool menu's thumbnails button
         isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
@@ -2056,9 +2060,14 @@ document.getElementById("auto-fullscreen").addEventListener("input", () => {
 //**********************************************************************
 // level pool, the menu at the bottom of settings
 // drag or click a level to move it into or out of the random pool, see level.randomLevelPool()
+// its thumbnails button shows a zoomed out picture above each level, they only load while the menu is open with thumbnails on
 //**********************************************************************
 const levelPoolMenu = {
     dragging: null, //name of the level being dragged
+    isShowingThumbnails: false, //set in render()
+    thumbnailPath: "img/levels/", //made by tools/level-thumbnails.js, run "npm run level-thumbnails" after adding a level or changing how one looks
+    thumbnailSize: [320, 160], //about twice the size they show at
+    localThumbnails: {}, //local levels' thumbnails are drawn from their data each time the menu opens, they can change in the level editor
     origin(name) { //where a level goes when it leaves the pool
         if (level.playableLevels.includes(name)) return "banned"
         if (level.communityLevels.includes(name)) return "community"
@@ -2094,7 +2103,57 @@ const levelPoolMenu = {
     chip(name) {
         const origin = levelPoolMenu.origin(name)
         const inPool = levelPoolMenu.isInPool(name)
-        return `<span class="level-chip level-chip-${origin}${inPool ? "" : " level-chip-out"}" draggable="true" tabindex="0" role="button" data-level="${name}">${name}</span>`
+        const text = levelPoolMenu.isShowingThumbnails ? `${levelPoolMenu.thumbnail(name)}<span class="level-chip-name">${name}</span>` : name
+        return `<span class="level-chip level-chip-${origin}${inPool ? "" : " level-chip-out"}" draggable="true" tabindex="0" role="button" data-level="${name}">${text}</span>`
+    },
+    thumbnail(name) {
+        let src = `${levelPoolMenu.thumbnailPath}${name}.webp`
+        if (levelPoolMenu.origin(name) === "local") {
+            if (levelPoolMenu.localThumbnails[name] === undefined) {
+                const data = levelData.store.get(name)
+                levelPoolMenu.localThumbnails[name] = data ? levelPoolMenu.thumbnailOfData(data) : ""
+            }
+            src = levelPoolMenu.localThumbnails[name]
+        }
+        return `<img class="level-chip-thumbnail" src="${src}" alt="" loading="lazy" draggable="false" onerror="this.style.visibility = 'hidden'">` //a level without one yet keeps the space
+    },
+    thumbnailOfData(data) { //a local level's map and blocks
+        const outlines = type => data.elements.filter(el => el.type === type).map(el => levelElements.points(el))
+        return levelPoolMenu.drawThumbnail({ background: data.background, mapColor: data.mapColor, blockColor: data.blockColor, map: outlines("map"), blocks: outlines("block") }).toDataURL()
+    },
+    drawThumbnail({ background, mapColor, blockColor, map, blocks, view }) { //a new canvas with the whole level zoomed out to fit, map and blocks are lists of outlines, each a list of { x, y }, view is an optional { minX, minY, maxX, maxY } to fit instead
+        const [width, height] = levelPoolMenu.thumbnailSize
+        const canvas = document.createElement("canvas")
+        canvas.width = width
+        canvas.height = height
+        const c = canvas.getContext("2d")
+        c.fillStyle = background
+        c.fillRect(0, 0, width, height)
+        const points = (map.length ? map : blocks).flat() //the map sets the size, blocks can be thrown far away
+        if (!points.length) return canvas
+        const { minX, minY, maxX, maxY } = view || {
+            minX: Math.min(...points.map(p => p.x)), maxX: Math.max(...points.map(p => p.x)),
+            minY: Math.min(...points.map(p => p.y)), maxY: Math.max(...points.map(p => p.y)),
+        }
+        const pad = 6
+        const scale = Math.min((width - 2 * pad) / Math.max(1, maxX - minX), (height - 2 * pad) / Math.max(1, maxY - minY))
+        c.setTransform(scale, 0, 0, scale, (width - (maxX + minX) * scale) / 2, (height - (maxY + minY) * scale) / 2) //centered
+        const fill = (outlines, color) => { //one path like simulation.draw.setPaths(), so overlaps match the game
+            c.beginPath()
+            for (const outline of outlines) {
+                c.moveTo(outline[0].x, outline[0].y)
+                for (let i = 1; i < outline.length; i++) c.lineTo(outline[i].x, outline[i].y)
+                c.closePath()
+            }
+            c.fillStyle = color
+            c.fill()
+            c.strokeStyle = color
+            c.lineWidth = 1 / scale //thin floors stay visible zoomed out
+            c.stroke()
+        }
+        fill(blocks, blockColor)
+        fill(map, mapColor)
+        return canvas
     },
     zone(zoneName, names, emptyText) {
         return `<div class="level-pool-zone level-pool-zone-${zoneName}" data-zone="${zoneName}">${names.length ? names.map(name => levelPoolMenu.chip(name)).join("") : `<span class="level-pool-empty">${emptyText}</span>`}</div>`
@@ -2102,7 +2161,10 @@ const levelPoolMenu = {
     header(text, button = "") {
         return `<div class="level-pool-header"><span>${text}</span>${button}</div>`
     },
-    render() {
+    render(isOpening = false) {
+        const menu = document.getElementById("level-pool")
+        levelPoolMenu.isShowingThumbnails = !!localSettings.isLevelPoolThumbnails && (isOpening || menu.matches(":popover-open")) //not while it's closed, so they don't load with the title page
+        menu.classList.toggle("level-pool-thumbnails", levelPoolMenu.isShowingThumbnails)
         const pool = level.randomLevelPool()
         const banned = level.playableLevels.filter(name => !pool.includes(name))
         const community = level.communityLevels.filter(name => !pool.includes(name))
@@ -2110,8 +2172,9 @@ const levelPoolMenu = {
         const locked = name => `<span class="level-route-locked">${name}</span>`
         const random = count => `<span class="level-route-random">${count} random</span>`
         const addAll = (zoneName, names) => names.length ? `<button class="sort-button level-pool-button" data-add-all="${zoneName}">add all</button>` : ""
-        document.getElementById("level-pool").innerHTML = `
-            ${levelPoolMenu.header("random pool", `<button class="sort-button level-pool-button" data-reset title="every n-gon level, no community levels">reset</button>`)}
+        const thumbnailsButton = `<button class="sort-button level-pool-button${localSettings.isLevelPoolThumbnails ? " level-pool-button-on" : ""}" data-thumbnails aria-pressed="${!!localSettings.isLevelPoolThumbnails}" title="show a zoomed out picture of each level">thumbnails</button>`
+        menu.innerHTML = `
+            ${levelPoolMenu.header("random pool", `${thumbnailsButton}<button class="sort-button level-pool-button" data-reset title="every n-gon level, no community levels">reset</button>`)}
             ${levelPoolMenu.zone("pool", pool, "")}
             <div class="level-route">
                 ${[locked("initial"), random(6), locked("reactor"), random(3), locked("reservoir / factory / interferometer"), locked("subway"), locked("final")]
@@ -2161,7 +2224,8 @@ const levelPoolMenu = {
     const menu = document.getElementById("level-pool")
     menu.addEventListener("beforetoggle", (event) => {
         if (event.newState === "open") {
-            levelPoolMenu.render() //local levels can change in the level editor
+            levelPoolMenu.localThumbnails = {}
+            levelPoolMenu.render(true) //local levels can change in the level editor
             levelPoolMenu.place()
         }
     })
@@ -2188,7 +2252,9 @@ const levelPoolMenu = {
         const button = event.target.closest("button")
         if (!button) return
         const pool = localSettings.levelPool
-        if (button.dataset.reset !== undefined) {
+        if (button.dataset.thumbnails !== undefined) {
+            localSettings.isLevelPoolThumbnails = !localSettings.isLevelPoolThumbnails
+        } else if (button.dataset.reset !== undefined) {
             pool.banned = []
             pool.added = []
         } else if (button.dataset.addAll === "banned") {

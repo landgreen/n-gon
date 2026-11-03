@@ -1,6 +1,18 @@
-settings: level editor
-settings: level pool
+level editor: camera - the player hides and WASD flies the view anywhere, turning it off drops the player there, replaces the velocity drawing
+level editor: import asks before running a level's javascript, shows you the code first, or imports it without the code
+community maps and level editor code can read your saves and settings but can't change them
+level editor: the level element list is just elements and triggers, drawings use the drawing buttons, shadow fill and drip are gone
+level editor: fill - rect, circle, and ellipse buttons in its info box, circle fill and bezier are out of the add menu, paths curve
+level editor: zones, buttons, toggles, keyholes, linked slime, maps, and doors, and constraints can have their code edited
+level editor: zone - circle option, a round trigger with a radius
+level editor: code opens in three boxes stacked top to bottom, runs once, level.custom, and level.customTopLayer, drag the lines between them
+level pool: thumbnails - a button in the level pool menu shows a zoomed out picture of each level
+level editor: log - buttons, toggles, keyholes, zones, timers, and the level itself can write a message in the in-game console
+level editor: author - the level's info box has an author, the level says its name and who made it in the in-game console when it loads
 
+bug fixes
+  level editor: constraints no longer happen while editing, like spawn wimps sending wimps after you
+  level editor: pausing hides the editor's menus, they used to stick out from under the pause menu
 
 
 
