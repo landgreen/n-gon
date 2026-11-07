@@ -6993,7 +6993,7 @@ Object.assign(moreLevels, {
         level.custom = () => {
             level.enter.draw();
             level.exit.drawAndCheck();
-            ctx.drawImage(yy, 0 - 500, 0 - 500, 1000, 1000)
+            if (yy.complete && yy.naturalWidth) ctx.drawImage(yy, 0 - 500, 0 - 500, 1000, 1000) //a picture that didn't download throws every frame
             portal[0].draw();
             portal[1].draw();
             portal[2].query();
@@ -14013,6 +14013,8 @@ Object.assign(moreLevels, {
             dong.collisionFilter.category = cat.body;
             dong.collisionFilter.mask = cat.body | cat.player | cat.bullet | cat.mobBullet | cat.mob //| cat.map 
         }, 1000);
+        const omega = new Image(); //the seal hehe, made once, not every frame
+        omega.src = "https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/MOSHED-2023-4-20-12-55-58-removebg-preview.png"; //"https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/omegafr.png";
         level.custom = () => {
             ctx.save()
             ctx.beginPath()
@@ -14211,11 +14213,9 @@ Object.assign(moreLevels, {
                 ctx.fill();
                 ctx.restore()
 
-                const omega = new Image(); //the seal hehe
                 let width = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
                 let length = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
-                omega.src = "https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/MOSHED-2023-4-20-12-55-58-removebg-preview.png"; //"https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/omegafr.png";
-                ctx.drawImage(omega, 2775 + 50 - width, -650 - 50 - length, width * 2, length * 2)
+                if (omega.complete && omega.naturalWidth) ctx.drawImage(omega, 2775 + 50 - width, -650 - 50 - length, width * 2, length * 2)
                 ctx.save()
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
                 ctx.beginPath()
@@ -33215,7 +33215,7 @@ Object.assign(moreLevels, {
             for (let i = 0; i < respawnX.length; i++) respawnX[i].query();
             ctx.fillStyle = "gray";
             ctx.fillRect(1175, -6650, 2400, 2375);
-            ctx.drawImage(image, 1175 + 1200 - 250, -6650 + (2375 / 2) - 250, 500, 500)
+            if (image.complete && image.naturalWidth) ctx.drawImage(image, 1175 + 1200 - 250, -6650 + (2375 / 2) - 250, 500, 500) //a picture that didn't download throws every frame
             if (m.immuneCycle > m.cycle) {
                 m.energy = m.maxEnergy
                 Matter.Body.setPosition(player, {

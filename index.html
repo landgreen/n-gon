@@ -35,7 +35,7 @@
     <div id="level-editor-hint" class="le-hint"></div>
     <div id="level-editor-history" class="le-history-box le-history-pop" hidden><div class="le-history" data-history></div></div>
     <div id="level-editor-code" class="le-panel">
-        <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="downloadPanel" title="save it as a .js file">download</button><button class="le-button" data-command="openFile" hidden title="load a level from a .js or .txt file">open file</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="importBack" hidden title="back to the import box">back</button><button class="le-button" data-command="importNoCode" hidden title="the map, blocks, mobs, power ups, and elements with their settings, none of its javascript runs">import without code</button><button class="le-button" data-command="importRun" hidden title="only for code from people you trust">run it</button><button class="le-button" data-command="closeCode">close</button></span></div>
+        <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="codeNext" hidden title="go to the next place its code is">next part</button></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="downloadPanel" title="save it as a .js file">download</button><button class="le-button" data-command="openFile" hidden title="load a level from a .js or .txt file">open file</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="importBack" hidden title="back to the import box">back</button><button class="le-button" data-command="importNoCode" hidden title="the map, blocks, mobs, power ups, and elements with their settings, none of its javascript runs">import without code</button><button class="le-button" data-command="importRun" hidden title="only for code from people you trust">run it</button><button class="le-button" data-command="closeCode">close</button></span></div>
         <div class="le-panel-box"><pre class="le-panel-colors" aria-hidden="true"></pre><textarea readonly spellcheck="false" wrap="off"></textarea></div>
         <input type="file" id="level-editor-import-file" accept=".js,.txt,text/plain,text/javascript" hidden>
         <div class="le-report" hidden></div>
@@ -422,7 +422,9 @@
     <script src="js/spawn.js"></script>
     <script src="js/level.js"></script>
     <script src="js/level-elements.js"></script>
+    <script src="js/level-code.js"></script>
     <script src="js/level-data.js"></script>
+    <!-- lib/level-parser.js and js/level-program.js load only for local levels with code and the level editor, see levelData.loadProgram() in js/level-data.js -->
     <!-- the level editor's files load when it opens, see levelEditor.loadFiles() in js/level-data.js -->
     <!-- <script src="js/level2.js"></script> -->
     <script src="js/lore.js"></script>

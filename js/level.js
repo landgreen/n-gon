@@ -382,7 +382,7 @@ const level = {
     load(name) {
         const mapCollection = [level.maps, level.localMaps, moreLevels].find(maps => typeof maps[name] === "function")
         if (!mapCollection) throw new Error(`unknown level: ${name}`)
-        const map = mapCollection === moreLevels && level.communityLevels.includes(name) ? levelData.communityLevel(name) : mapCollection[name] //community levels can read saves and settings but not change them
+        const map = mapCollection === moreLevels && level.communityLevels.includes(name) ? levelCode.communityLevel(name) : mapCollection[name] //community levels use read-only stand-ins for saves and settings
         map.call(level)
     },
     newLevelOrPhase() { //runs on each new level but also on final boss phases
@@ -2434,7 +2434,7 @@ const level = {
         Matter.Body.setAngularVelocity(who, angularVelocity);
         Matter.Body.setDensity(who, density)
         Composite.add(engine.world, who); //add to world
-        who.classType = "body"
+        who.classType = "map" //counts as part of the level, so its wobble doesn't do block damage to mobs
 
         const constraint = Constraint.create({ //fix rotor in place, but allow rotation
             pointA: {
@@ -2496,7 +2496,7 @@ const level = {
             }
         }
         Composite.add(engine.world, who); //add to world
-        who.classType = "body"
+        who.classType = "map" //counts as part of the level, so its wobble doesn't do block damage to mobs
         return who
     },
     boost(x, y, launchHeight = 1000, angle = Math.PI / 2) {
@@ -2651,18 +2651,19 @@ const level = {
                 }
                 Matter.Body.setVelocity(this, { x: 0, y: this.velocity.y });
             },
-            move() { //goes up and down on its own
-                if (!m.isTimeDilated) this.travel(true)
+            move(isOn = true) { //goes up and down on its own, while off it finishes its trip and waits at the bottom
+                if (!m.isTimeDilated) this.travel(isOn)
                 //edge limits
                 if (this.position.y < maxHeight) {
                     Matter.Body.setPosition(this, { x: this.holdX, y: maxHeight });
                 } else if (this.position.y > y) {
                     Matter.Body.setPosition(this, { x: this.holdX, y: y });
+                    if (!isOn) this.force.y -= this.mass * simulation.g; //waiting at the bottom, undoing force of gravity like moveOnTouch
                 }
                 // hold horizontal position
                 Matter.Body.setPosition(this, { x: this.holdX, y: this.position.y });
             },
-            moveOnTouch() { //waits at the bottom until the player touches it
+            moveOnTouch(isOn = true) { //waits at the bottom until the player touches it, while off touching it doesn't start it
                 if (!m.isTimeDilated) this.travel(false)
                 //draw line to show how far to will extend
                 ctx.beginPath();
@@ -2690,7 +2691,7 @@ const level = {
                     Matter.Body.setPosition(this, { x: this.holdX, y: y });
                     //undoing force of gravity
                     this.force.y -= this.mass * simulation.g;
-                    if (Matter.Query.collides(this, [player]).length) {
+                    if (isOn && Matter.Query.collides(this, [player]).length) {
                         this.isUp = true
                         this.frictionAir = friction.up
                     }
@@ -2723,7 +2724,7 @@ const level = {
         });
         Matter.Body.setDensity(who, 0.01) //10x density for added stability
         Composite.add(engine.world, who); //add to world
-        who.classType = "body"
+        who.classType = "map" //still collides like a block, but counts as part of the level like a door, so it doesn't do block damage when it rams mobs
         return who
     },
     toggle(x, y, isOn = false, isLockOn = false) {
@@ -2954,11 +2955,15 @@ const level = {
         }
     },
     button(x, y, width = 126, isSpawnBase = true, isInvertedVertical = false, color = "hsl(0, 100%, 70%)") {
-        if (isSpawnBase) {
+        if (isSpawnBase) { //its wide side goes 2 into the floor (or ceiling) under it, so no thin line shows between them, moved so its narrow side stays put, Matter centers a shape on its center of mass
             if (isInvertedVertical) {
-                spawn.mapVertex(x + 65, y - 3, "100 -10 -100 -10 -70 10 70 10");
+                const bottom = Matter.Bodies.fromVertices(x + 65, y - 3, Vertices.fromPath("100 -10 -100 -10 -70 10 70 10")).bounds.max.y
+                spawn.mapVertex(x + 65, y - 3, "103 -12 -103 -12 -70 10 70 10");
+                Matter.Body.translate(map[map.length - 1], { x: 0, y: bottom - map[map.length - 1].bounds.max.y })
             } else {
-                spawn.mapVertex(x + 65, y + 2, "100 10 -100 10 -70 -10 70 -10");
+                const top = Matter.Bodies.fromVertices(x + 65, y + 2, Vertices.fromPath("100 10 -100 10 -70 -10 70 -10")).bounds.min.y
+                spawn.mapVertex(x + 65, y + 2, "103 12 -103 12 -70 -10 70 -10");
+                Matter.Body.translate(map[map.length - 1], { x: 0, y: top - map[map.length - 1].bounds.min.y })
             }
             map[map.length - 1].restitution = 0;
             map[map.length - 1].friction = 1;
@@ -3011,6 +3016,102 @@ const level = {
                     ctx.fillRect(this.min.x, this.min.y + drawOffset.down, this.width, 25)
                 }
             }
+        }
+    },
+    scale(x, y, width = 189, mass = 6) { //a trigger shaped like a taller, wider level.button, an amber pad that's on while at least mass sits on it, stacks count, the player is 5 and a 50 × 50 block is 2.5, the gauge on its base fills as weight goes on, run query() and draw() in level.custom, it draws its gauge over the map itself with an ephemera
+        const half = width / 2
+        const lift = 10 //how much taller its base is than a button's, its bottom is in the same place
+        const h = 10 + lift / 2 //half its base's height
+        const run = 3 * h //the slope's width, as steep as a button's
+        const outline = (extra = 0) => `${half + 7 + run * (1 + extra / (2 * h))} ${h + extra} ${-half - 7 - run * (1 + extra / (2 * h))} ${h + extra} ${-half - 7} ${-h} ${half + 7} ${-h}` //the sloped base, like a button's, extra goes on its bottom, the slopes keep going
+        const topY = Matter.Bodies.fromVertices(x + half + 2, y + 2 - lift / 2, Vertices.fromPath(outline())).bounds.min.y //where its top is without the extra, Matter centers a shape on its center of mass
+        spawn.mapVertex(x + half + 2, y + 2 - lift / 2, outline(2)) //2 into the floor under it, so no thin line shows between them
+        const base = map[map.length - 1]
+        Matter.Body.translate(base, { x: 0, y: topY - base.bounds.min.y }) //its top stays put
+        base.restitution = 0;
+        base.friction = 1;
+        base.frictionStatic = 1;
+        const top = { min: { x: x + 2, y: y - 11 - lift }, max: { x: x + width, y: y - 10 - lift } } //on top of the base, like a button's sensor strip
+        const scale = {
+            isOn: false,
+            load: 0, //the mass on it
+            query() {
+                const on = new Set(Matter.Query.region(body, top).filter(who => !who.isStatic))
+                if (Matter.Bounds.overlaps(player.bounds, top) && Matter.Query.region([player], top).length) on.add(player)
+                for (const who of Matter.Query.region(mob, top)) if (who.alive) on.add(who)
+                if (on.size) { //what rests on those, a few layers up a stack
+                    const pairs = engine.pairs.list
+                    for (let pass = 0; pass < 4; pass++) {
+                        const added = on.size
+                        for (let i = 0; i < pairs.length; i++) {
+                            const pair = pairs[i]
+                            if (!pair.isActive || pair.isSensor) continue
+                            const a = pair.bodyA.parent, b = pair.bodyB.parent
+                            if (on.has(a) && !on.has(b) && !b.isStatic && b.position.y < a.position.y) on.add(b)
+                            else if (on.has(b) && !on.has(a) && !a.isStatic && a.position.y < b.position.y) on.add(a)
+                        }
+                        if (on.size === added) break
+                    }
+                }
+                let load = 0
+                for (const who of on) if (who === player || body.includes(who) || mob.includes(who)) load += who.mass
+                this.load = load
+                this.isOn = load >= mass
+            },
+            color() { return this.isOn ? "hsl(130, 60%, 55%)" : "hsl(40, 100%, 62%)" },
+            draw() { //the pad, amber and up like a button, green and pressed down while on
+                ctx.fillStyle = this.color()
+                ctx.fillRect(x + 2, (this.isOn ? y - 14 : y - 21) - lift, width, this.isOn ? 25 : 20)
+            },
+            drawGauge() { //on the base's face, over the map, it fills as weight goes on, the tick at its end is enough
+                const mid = y + 2 - lift / 2 //the middle of the base's face
+                ctx.fillStyle = "rgba(255,255,255,0.14)"
+                ctx.fillRect(x + 8, mid - 3, width - 12, 6)
+                ctx.fillStyle = this.color()
+                ctx.fillRect(x + 8, mid - 3, (width - 12) * Math.min(1, this.load / mass), 6)
+                ctx.fillStyle = "rgba(255,255,255,0.6)"
+                ctx.fillRect(x + width - 6, mid - 5, 2, 10)
+            },
+            gauge: { //an ephemera, they're drawn after the map, it goes away with its base when the level changes
+                name: "scale gauge",
+                do() {
+                    if (!map.includes(base)) return simulation.removeEphemera(this)
+                    scale.drawGauge()
+                },
+            },
+            remove() { simulation.removeEphemera(scale.gauge) }, //for the editor
+        }
+        simulation.ephemera.push(scale.gauge)
+        return scale
+    },
+    cleared(x, y, width, height, who = "box", staysOn = true) { //a trigger that's on once no mobs are left, who is "box" for mobs in the box, "level" for every mob, or "bosses", run query() in level.custom
+        const box = { min: { x: x, y: y }, max: { x: x + width, y: y + height } }
+        const counts = target => target.alive && !target.shield && !target.isMobBullet && target.collisionFilter.category !== cat.mobBullet && (who !== "bosses" || target.isBoss)
+        return {
+            isOn: false,
+            query() {
+                if (staysOn && this.isOn) return
+                const list = who === "box" ? Matter.Query.region(mob, box) : mob
+                this.isOn = !list.some(counts)
+            },
+        }
+    },
+    delay(cycles) { //a link that answers late, state(isOn) is what isOn was cycles ago, so a laser linked to a button turns on and off a second after it with 60, call it every cycle
+        return {
+            changes: [], //[cycle, isOn] each time the link changed, the oldest one still in effect first
+            last: null,
+            initial: null, //how it starts, before the link has a past that old
+            state(isOn) {
+                isOn = !!isOn
+                const now = simulation.cycle
+                if (this.initial === null) this.initial = isOn
+                if (isOn !== this.last) {
+                    this.changes.push([now, isOn])
+                    this.last = isOn
+                }
+                while (this.changes.length > 1 && this.changes[1][0] <= now - cycles) this.changes.shift()
+                return this.changes[0][0] <= now - cycles ? this.changes[0][1] : this.initial
+            },
         }
     },
     vanish(x, y, width, height, isVertical = false) { //platform that shrinks away after the player touches it, then comes back
@@ -3165,15 +3266,25 @@ const level = {
                                 Matter.Query.collides(this, body).length === 0 &&
                                 Matter.Query.collides(this, mob).length === 0
                             ) {
-                                Matter.Body.setPosition(this, { x: this.position.x, y: Math.min(y, this.position.y + speed) })
+                                this.moveTo(Math.min(y, this.position.y + speed))
                                 if (isSetPaths) simulation.draw.requestMapPathRebuild()
                             }
                         }
                     } else if (this.position.y > y - distance) { //try to open
-                        Matter.Body.setPosition(this, { x: this.position.x, y: Math.max(y - distance, this.position.y - speed) })
+                        this.moveTo(Math.max(y - distance, this.position.y - speed))
                         if (isSetPaths) simulation.draw.requestMapPathRebuild()
                     }
                 }
+            },
+            moveTo(newY) { //mines stuck to the door ride along with it
+                const dy = newY - this.position.y
+                for (let i = 0; i < bullet.length; i++) {
+                    const who = bullet[i]
+                    if (who.attachedMap === this && who.isStatic) {
+                        Matter.Body.setPosition(who, { x: who.position.x, y: who.position.y + dy })
+                    }
+                }
+                Matter.Body.setPosition(this, { x: this.position.x, y: newY })
             },
             isClosed() {
                 return this.position.y > y - 1
@@ -3969,6 +4080,408 @@ const level = {
             }
         }
     },
+    decorationWrap(value, size) { //value % size, always from 0 to size, a negative speed moves it the other way instead of out of its box
+        return ((value % size) + size) % size
+    },
+    decorationRandom(i) { //the same number from 0 to 1 for the same i, so a decoration needs no saved particles and stays put
+        const s = Math.sin(i * 12.9898) * 43758.5453
+        return s - Math.floor(s)
+    },
+    decorationKinds: { //what level.decoration() can draw, each is (d, t), d is { x, y, width, height, color }, t is cycles times its speed, counts are capped so a big one stays cheap
+        rain(d, t) {
+            const rnd = level.decorationRandom
+            const count = Math.min(250, Math.ceil(d.width * d.height / 2200))
+            const fall = d.height + 40
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = 2.5
+            ctx.beginPath()
+            for (let i = 0; i < count; i++) {
+                const top = d.y + level.decorationWrap(rnd(i + 0.5) * fall + t * (14 + 8 * rnd(i + 0.3)), fall) - 40
+                const x = d.x + rnd(i) * d.width
+                ctx.moveTo(x, Math.max(d.y, top))
+                ctx.lineTo(x, Math.max(d.y, Math.min(d.y + d.height, top + 30)))
+            }
+            ctx.stroke()
+        },
+        snow(d, t) {
+            const rnd = level.decorationRandom
+            const count = Math.min(250, Math.ceil(d.width * d.height / 3000))
+            ctx.fillStyle = d.color
+            ctx.beginPath()
+            for (let i = 0; i < count; i++) {
+                const x = d.x + level.decorationWrap(rnd(i) * d.width + 18 * Math.sin(t * 0.02 + i), d.width)
+                const y = d.y + level.decorationWrap(rnd(i + 0.5) * d.height + t * (0.7 + rnd(i + 0.3)), d.height)
+                const radius = 3 + 4 * rnd(i + 0.7)
+                ctx.moveTo(x + radius, y)
+                ctx.arc(x, y, radius, 0, 2 * Math.PI)
+            }
+            ctx.fill()
+        },
+        sparks(d, t) { //rising from the bottom and fading
+            const rnd = level.decorationRandom
+            const count = Math.min(90, Math.ceil(d.width / 5))
+            ctx.fillStyle = d.color
+            ctx.beginPath()
+            for (let i = 0; i < count; i++) { //one fill for all of them, they shrink away instead of each fading
+                const life = level.decorationWrap(t * 0.007 * (0.6 + rnd(i + 0.2)) + rnd(i), 1)
+                const size = 9 * (1 - life) + 0.5
+                ctx.rect(d.x + rnd(i + 0.1) * d.width + 24 * life * Math.sin(life * 7 + i), d.y + d.height - life * d.height, size, size)
+            }
+            ctx.fill()
+        },
+        steam(d, t) { //puffs that rise, grow, and fade
+            const count = Math.min(14, Math.ceil(d.height / 35))
+            ctx.fillStyle = d.color
+            for (let i = 0; i < count; i++) {
+                const life = level.decorationWrap(t * 0.004 + i / count, 1)
+                ctx.globalAlpha = 1 - life
+                ctx.beginPath()
+                ctx.arc(d.x + d.width / 2 + d.width * 0.25 * life * Math.sin(life * 5 + i), d.y + d.height - life * (d.height - d.width * 0.3) - d.width * 0.1, d.width * (0.1 + 0.2 * life), 0, 2 * Math.PI)
+                ctx.fill()
+            }
+        },
+        vent(d) { //a frame with slats across it
+            if (!d.path) {
+                d.path = new Path2D()
+                const count = Math.max(2, Math.min(16, Math.round(d.height / 24)))
+                for (let i = 0; i < count; i++) d.path.rect(d.x + 8, d.y + (i + 0.3) * d.height / count, d.width - 16, 0.42 * d.height / count)
+            }
+            ctx.fillStyle = "rgba(0,0,0,0.1)"
+            ctx.fillRect(d.x, d.y, d.width, d.height)
+            ctx.fillStyle = d.color
+            ctx.fill(d.path)
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = 4
+            ctx.strokeRect(d.x, d.y, d.width, d.height)
+        },
+        truss(d) { //a steel girder along its longer side
+            if (!d.path) {
+                d.path = new Path2D()
+                const isAcross = d.width >= d.height
+                const length = isAcross ? d.width : d.height
+                const thick = isAcross ? d.height : d.width
+                const point = (along, across) => isAcross ? [d.x + along, d.y + across] : [d.x + across, d.y + along]
+                const line = (a, b) => {
+                    d.path.moveTo(...point(...a))
+                    d.path.lineTo(...point(...b))
+                }
+                const count = Math.max(1, Math.min(40, Math.round(length / Math.max(thick, 10))))
+                const bay = length / count
+                line([0, 0], [length, 0])
+                line([0, thick], [length, thick])
+                for (let i = 0; i <= count; i++) line([i * bay, 0], [i * bay, thick])
+                for (let i = 0; i < count; i++) line(i % 2 ? [i * bay, thick] : [i * bay, 0], i % 2 ? [(i + 1) * bay, 0] : [(i + 1) * bay, thick])
+            }
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = 4
+            ctx.stroke(d.path)
+        },
+        piston(d, t) { //a rod pumping up and down out of a cylinder at the bottom
+            const middle = d.x + d.width / 2
+            const cylinder = d.height * 0.4
+            const travel = d.height * 0.3 * (0.5 + 0.5 * Math.sin(t * 0.06))
+            const headY = d.y + travel
+            ctx.fillStyle = d.color
+            ctx.beginPath() //one fill, so see through parts don't get darker where they overlap
+            ctx.rect(middle - d.width * 0.1, headY, d.width * 0.2, d.y + d.height - cylinder - headY) //the rod
+            ctx.rect(d.x + d.width * 0.1, headY - 4, d.width * 0.8, Math.max(8, d.height * 0.08)) //its head
+            ctx.rect(d.x + d.width * 0.2, d.y + d.height - cylinder, d.width * 0.6, cylinder) //the cylinder
+            ctx.rect(d.x, d.y + d.height - 10, d.width, 10) //its base
+            ctx.fill()
+            ctx.fillStyle = "rgba(255,255,255,0.1)"
+            ctx.fillRect(d.x + d.width * 0.28, d.y + d.height - cylinder, d.width * 0.08, cylinder - 10) //a shine
+        },
+        belt(d, t) { //a drive belt on a big pulley and a small one, the small one spins faster
+            const big = Math.min(d.height / 2, d.width * 0.3)
+            const small = big * 0.6
+            const y = d.y + d.height / 2
+            const left = d.x + big
+            const right = d.x + d.width - small
+            const lean = Math.asin((big - small) / (right - left)) //the belt's straight parts touch each pulley where it's perpendicular to the radius
+            const top = lean - Math.PI / 2
+            const travel = t * 1.6 //how far the belt has moved
+            ctx.fillStyle = d.color
+            ctx.beginPath()
+            for (const [x, radius] of [[left, big], [right, small]]) { //one fill, each pulley with a hub and lightening holes cut out
+                ctx.moveTo(x + radius, y)
+                ctx.arc(x, y, radius, 0, 2 * Math.PI)
+                ctx.moveTo(x + radius * 0.14, y)
+                ctx.arc(x, y, radius * 0.14, 0, 2 * Math.PI)
+                for (let i = 0; i < 4; i++) {
+                    const angle = travel / radius + i * Math.PI / 2
+                    const holeX = x + radius * 0.56 * Math.cos(angle)
+                    const holeY = y + radius * 0.56 * Math.sin(angle)
+                    ctx.moveTo(holeX + radius * 0.16, holeY)
+                    ctx.arc(holeX, holeY, radius * 0.16, 0, 2 * Math.PI)
+                }
+            }
+            ctx.fill("evenodd")
+            ctx.beginPath()
+            ctx.arc(right, y, small, top, -top)
+            ctx.arc(left, y, big, -top, 2 * Math.PI + top)
+            ctx.closePath()
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = Math.max(2, big * 0.09)
+            ctx.stroke() //the belt
+            ctx.lineWidth = Math.max(1, big * 0.04)
+            ctx.setLineDash([2, 8]) //its teeth
+            ctx.lineDashOffset = -travel
+            ctx.stroke()
+            ctx.setLineDash([])
+        },
+        waves(d, t) { //three see through layers of water
+            const step = Math.max(15, d.width / 150)
+            ctx.fillStyle = d.color
+            ctx.globalAlpha = 0.45
+            for (let layer = 0; layer < 3; layer++) {
+                const top = d.y + 10 + layer * Math.min(30, d.height / 4)
+                ctx.beginPath()
+                ctx.moveTo(d.x, d.y + d.height)
+                for (let x = 0; x <= d.width + step; x += step) {
+                    const at = Math.min(x, d.width)
+                    ctx.lineTo(d.x + at, top + 7 * Math.sin(at * 0.015 + t * 0.03 * (layer % 2 ? -1 : 1) + layer * 2))
+                }
+                ctx.lineTo(d.x + d.width, d.y + d.height)
+                ctx.fill()
+            }
+        },
+        fan(d, t) {
+            const radius = Math.min(d.width, d.height) / 2
+            const x = d.x + d.width / 2
+            const y = d.y + d.height / 2
+            const turn = t * 0.12
+            ctx.fillStyle = d.color
+            ctx.beginPath()
+            for (let i = 0; i < 5; i++) {
+                const angle = turn + i * 2 * Math.PI / 5
+                ctx.moveTo(x, y)
+                ctx.ellipse(x + 0.52 * radius * Math.cos(angle), y + 0.52 * radius * Math.sin(angle), 0.42 * radius, 0.16 * radius, angle, 0, 2 * Math.PI)
+            }
+            ctx.moveTo(x + 0.14 * radius, y)
+            ctx.arc(x, y, 0.14 * radius, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = Math.max(2, 0.06 * radius)
+            ctx.beginPath()
+            ctx.arc(x, y, radius * 0.97, 0, 2 * Math.PI)
+            ctx.stroke()
+        },
+        gear(d, t) {
+            const radius = Math.min(d.width, d.height) / 2
+            const x = d.x + d.width / 2
+            const y = d.y + d.height / 2
+            const teeth = 12
+            ctx.fillStyle = d.color
+            ctx.beginPath()
+            for (let i = 0; i < teeth * 4; i++) { //each tooth is up, across, down, and across
+                const angle = t * 0.012 + i * Math.PI / (teeth * 2)
+                const at = i % 4 < 2 ? radius : radius * 0.78
+                ctx.lineTo(x + at * Math.cos(angle), y + at * Math.sin(angle))
+            }
+            ctx.closePath()
+            ctx.moveTo(x + radius * 0.3, y)
+            ctx.arc(x, y, radius * 0.3, 0, 2 * Math.PI, true) //the hole, the other way around
+            ctx.fill()
+        },
+        beacon(d, t) { //a warning light that pulses, its glow is see through circles, not a shadow
+            const radius = Math.min(d.width, d.height) / 2
+            const x = d.x + d.width / 2
+            const y = d.y + d.height / 2
+            const pulse = 0.5 + 0.5 * Math.sin(t * 0.08)
+            ctx.fillStyle = d.color
+            ctx.globalAlpha = 0.12 * pulse
+            ctx.beginPath()
+            ctx.arc(x, y, radius, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.globalAlpha = 0.25 * pulse
+            ctx.beginPath()
+            ctx.arc(x, y, radius * 0.62, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.globalAlpha = 0.35 + 0.65 * pulse
+            ctx.beginPath()
+            ctx.arc(x, y, radius * 0.28, 0, 2 * Math.PI)
+            ctx.fill()
+        },
+        panel(d, t) { //a computer's blinking lights
+            const rnd = level.decorationRandom
+            const columns = Math.max(1, Math.min(20, Math.floor(d.width / 24)))
+            const rows = Math.max(1, Math.min(14, Math.floor(d.height / 24)))
+            ctx.fillStyle = "rgba(0,0,0,0.12)"
+            ctx.fillRect(d.x, d.y, d.width, d.height)
+            ctx.fillStyle = d.color
+            for (const isLit of [true, false]) { //one fill each for on and off
+                ctx.globalAlpha = isLit ? 1 : 0.15
+                ctx.beginPath()
+                for (let i = 0; i < columns * rows; i++) {
+                    const isOn = rnd(i * 7.1 + Math.floor(t / (20 + 90 * rnd(i)))) > 0.5
+                    if (isOn === isLit) ctx.rect(d.x + (i % columns + 0.5) * d.width / columns - 4, d.y + (Math.floor(i / columns) + 0.5) * d.height / rows - 4, 8, 8)
+                }
+                ctx.fill()
+            }
+        },
+        grate(d) { //diagonal mesh in a frame
+            if (!d.path) {
+                d.path = new Path2D() //a path that crosses itself is slow to stroke, so each direction is its own
+                d.path2 = new Path2D()
+                const gap = Math.max(28, (d.width + d.height) / 40) //a wider mesh in a giant box, not thousands of lines
+                for (let at = gap; at < d.width + d.height; at += gap) { //each line stops at the edges, so nothing needs clipping
+                    const startDown = Math.max(0, at - d.width)
+                    const endAcross = Math.max(0, at - d.height)
+                    d.path.moveTo(d.x + at - startDown, d.y + startDown)
+                    d.path.lineTo(d.x + endAcross, d.y + at - endAcross)
+                    d.path2.moveTo(d.x + d.width - at + startDown, d.y + startDown)
+                    d.path2.lineTo(d.x + d.width - endAcross, d.y + at - endAcross)
+                }
+            }
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = 2
+            ctx.stroke(d.path)
+            ctx.stroke(d.path2)
+            ctx.lineWidth = 6
+            ctx.strokeRect(d.x, d.y, d.width, d.height)
+        },
+        stripes(d) { //hazard stripes
+            if (!d.path) {
+                d.path = new Path2D()
+                const size = Math.max(40, (d.width + d.height) / 120) //wider stripes in a giant box, not thousands of them
+                for (let at = -d.height; at < d.width; at += 2 * size) {
+                    d.path.moveTo(d.x + at, d.y + d.height)
+                    d.path.lineTo(d.x + at + size, d.y + d.height)
+                    d.path.lineTo(d.x + at + size + d.height, d.y)
+                    d.path.lineTo(d.x + at + d.height, d.y)
+                    d.path.closePath()
+                }
+            }
+            ctx.beginPath()
+            ctx.rect(d.x, d.y, d.width, d.height)
+            ctx.clip()
+            ctx.fillStyle = "rgba(0,0,0,0.12)"
+            ctx.fillRect(d.x, d.y, d.width, d.height)
+            ctx.fillStyle = d.color
+            ctx.fill(d.path)
+        },
+        pipe(d) { //along its longer side, with joints
+            const isAcross = d.width >= d.height
+            const length = isAcross ? d.width : d.height
+            const thick = isAcross ? d.height : d.width
+            ctx.fillStyle = d.color
+            ctx.fillRect(d.x, d.y, d.width, d.height)
+            ctx.fillStyle = "rgba(255,255,255,0.1)" //a shine along it
+            if (isAcross) ctx.fillRect(d.x, d.y + thick * 0.2, d.width, thick * 0.18)
+            else ctx.fillRect(d.x + thick * 0.2, d.y, thick * 0.18, d.height)
+            ctx.fillStyle = "rgba(0,0,0,0.08)"
+            const count = Math.max(1, Math.round(length / 200))
+            for (let i = 0; i <= count; i++) {
+                const at = (length - 14) * i / count
+                if (isAcross) ctx.fillRect(d.x + at, d.y - 3, 14, d.height + 6)
+                else ctx.fillRect(d.x - 3, d.y + at, d.width + 6, 14)
+            }
+        },
+        wires(d, t) { //hanging from its top corners, height is how far they sag, if it doesn't move it keeps one path
+            const { count = 3, thickness = 2.5, spread = 7, droop = 0.2, sway = 3, tilt = 0, clamps = false } = d.options
+            const wires = Math.max(1, Math.min(12, Math.round(count)))
+            const isStill = !sway || !d.speed
+            const write = (path, time) => {
+                for (let i = 0; i < wires; i++) {
+                    const swing = sway * Math.sin(time * 0.02 + i * 2)
+                    const y = d.y + i * spread
+                    path.moveTo(d.x, y)
+                    path.quadraticCurveTo(d.x + d.width / 2 + swing * 3, y + tilt / 2 + 2 * d.height * Math.max(0, 1 - i * droop) + swing, d.x + d.width, y + tilt)
+                }
+                if (clamps) { //a bracket holding each end
+                    const height = (wires - 1) * spread + 12
+                    path.rect(d.x - 6, d.y - 6, 12, height)
+                    path.rect(d.x + d.width - 6, d.y + tilt - 6, 12, height)
+                }
+            }
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = thickness
+            if (isStill) {
+                if (!d.path) {
+                    d.path = new Path2D()
+                    write(d.path, 0)
+                }
+                ctx.stroke(d.path)
+            } else {
+                ctx.beginPath()
+                write(ctx, t)
+                ctx.stroke()
+            }
+        },
+        grass(d, t) { //blades swaying from the bottom
+            const rnd = level.decorationRandom
+            const count = Math.min(220, Math.ceil(d.width / 6))
+            ctx.strokeStyle = d.color
+            ctx.lineWidth = 2
+            ctx.beginPath()
+            for (let i = 0; i < count; i++) {
+                const x = d.x + (i + rnd(i)) * d.width / count
+                const height = Math.min(150, d.height) * (0.4 + 0.6 * rnd(i + 0.5)) //long blades are slow to paint, a taller box doesn't make them longer
+                const sway = 0.3 * height * (rnd(i + 0.2) - 0.5) + 5 * Math.sin(t * 0.03 + x * 0.02)
+                ctx.moveTo(x, d.y + d.height)
+                ctx.quadraticCurveTo(x, d.y + d.height - height * 0.6, x + sway, d.y + d.height - height)
+            }
+            ctx.stroke()
+        },
+        vines(d, t) { //hanging from the top, with leaves
+            const rnd = level.decorationRandom
+            const count = Math.max(1, Math.min(14, Math.round(d.width / 50)))
+            ctx.strokeStyle = d.color
+            ctx.fillStyle = d.color
+            ctx.lineWidth = 2.5
+            for (let i = 0; i < count; i++) {
+                const x = d.x + (i + 0.5) * d.width / count
+                const length = d.height * (0.45 + 0.55 * rnd(i + 0.3))
+                const place = at => ({ x: x + at * at * 14 * Math.sin(t * 0.02 + i) + 6 * Math.sin(at * 7 + i), y: d.y + at * length })
+                ctx.beginPath()
+                ctx.moveTo(x, d.y)
+                for (let step = 1; step <= 10; step++) {
+                    const { x: px, y: py } = place(step / 10)
+                    ctx.lineTo(px, py)
+                }
+                ctx.stroke()
+                ctx.beginPath()
+                for (let step = 1; step <= 5; step++) {
+                    const { x: px, y: py } = place(step / 5)
+                    const side = step % 2 ? 7 : -7
+                    ctx.moveTo(px + side + 6, py)
+                    ctx.ellipse(px + side, py, 6, 3.5, side > 0 ? 0.5 : -0.5, 0, 2 * Math.PI)
+                }
+                ctx.fill()
+            }
+        },
+    },
+    decoration(kind, x, y, width, height, color, speed = 1, options = {}) { //something only drawn, for looks, call draw() in level.custom to go under the player or level.customTopLayer to go over, see level.decorationKinds
+        const d = { x, y, width, height, color, speed, options } //what it can keep between frames goes on here, like a path
+        const drawKind = Object.hasOwn(level.decorationKinds, kind) ? level.decorationKinds[kind] : () => { }
+        return {
+            draw() {
+                const view = ctx.getTransform() //skip it while it's off screen, what it draws past its box counts too, like tilted wires
+                const pad = 50 + view.a * (Math.abs(options.tilt || 0) + (options.spread || 0) * (options.count || 0))
+                if (!view.b && !view.c && (view.a * (x + width) + view.e < -pad || view.a * x + view.e > canvas.width + pad || view.d * (y + height) + view.f < -pad || view.d * y + view.f > canvas.height + pad)) return
+                ctx.save()
+                ctx.setLineDash([])
+                drawKind(d, simulation.cycle * speed)
+                ctx.restore()
+            },
+        }
+    },
+    pushBody(who, strength = 1, angle = 0, period = 0, isCarrying = false) { //call do() each cycle in level.custom, strength 1 is as strong as gravity for any size of body, angle is radians counterclockwise, 0 is right, with a period it's a sine wave that goes both ways, on a constraint it swings, isCarrying moves the player standing on it along with it
+        const x = Math.cos(angle)
+        const y = -Math.sin(angle)
+        return {
+            do() {
+                if (isCarrying && m.onGround && m.standingOn === who) {
+                    m.moverX = who.velocity.x //helps sync leg movements
+                    m.Vx = player.velocity.x - who.velocity.x //adds blocks velocity to player
+                }
+                if (m.isTimeDilated) return
+                const push = strength * who.mass * simulation.g * (period ? Math.sin(2 * Math.PI * simulation.cycle / period) : 1)
+                who.force.x += x * push
+                who.force.y += y * push
+            },
+        }
+    },
     //consider switching coordinate system to starting and ending points to make angled wind easier
     wind(x, y, width, height, velocity = { x: 10, y: 0 }, isFloat = false) {
         return {
@@ -4026,18 +4539,50 @@ const level = {
             position: p1,
             look: p2,
             color: color,
+            isArc: false, //set it for electricity instead of a beam, it hits a little wider, see hitsPlayer()
+            arcHitWidth: 24, //a beam is one thin ray
+            hitsPlayer(best) {
+                if (best.who === playerBody || best.who === playerHead) return true
+                if (!this.isArc || m.isCloak) return false
+                return Matter.Query.rayAny([player], this.position, best.dist2 === Infinity ? this.look : best, this.arcHitWidth) //only tests the player, a beam's vertexCollision() tests every body
+            },
+            hitSpot(best) { //where the damage shows, an arc can touch the player without its middle hitting
+                return best.who === playerBody || best.who === playerHead ? best : player.position
+            },
+            drawArc(end) { //jumps around its line every frame, about as wide as a beam, a see through stroke then a thin one, not a shadow
+                const dx = end.x - this.position.x
+                const dy = end.y - this.position.y
+                const length = Math.hypot(dx, dy)
+                if (!length) return
+                const segments = Math.max(2, Math.min(24, Math.round(length / 28)))
+                ctx.beginPath()
+                ctx.moveTo(this.position.x, this.position.y)
+                for (let i = 1; i < segments; i++) {
+                    const jump = (Math.random() - 0.5) * 16 / length
+                    ctx.lineTo(this.position.x + dx * i / segments - dy * jump, this.position.y + dy * i / segments + dx * jump)
+                }
+                ctx.lineTo(end.x, end.y)
+                ctx.strokeStyle = this.color
+                ctx.globalAlpha = 0.3
+                ctx.lineWidth = 7
+                ctx.stroke()
+                ctx.globalAlpha = 1
+                ctx.lineWidth = 2.5
+                ctx.stroke()
+            },
             query() {
                 if (!m.isTimeDilated) {
                     let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
                     best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
                     // hitting player
-                    if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) {
+                    if (m.immuneCycle < m.cycle && this.hitsPlayer(best)) {
+                        const spot = this.hitSpot(best)
                         m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                         const dmg = damage * spawn.dmgToPlayerByLevelsCleared();
                         m.takeDamage(dmg);
                         simulation.drawList.push({ //add dmg to draw queue
-                            x: best.x,
-                            y: best.y,
+                            x: spot.x,
+                            y: spot.y,
                             radius: dmg * 1500,
                             color: "rgba(255,0,0,0.5)",
                             time: 20
@@ -4045,6 +4590,10 @@ const level = {
                     }
                     //draw
                     if (best.dist2 === Infinity) best = this.look;
+                    if (this.isArc) {
+                        this.drawArc(best)
+                        return
+                    }
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
                     ctx.lineTo(best.x, best.y);
@@ -4063,8 +4612,9 @@ const level = {
                     let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null }
                     best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
 
+                    let isFiring = false
                     if (this.countDown === 0) {
-                        if ((best.who === playerBody || best.who === playerHead)) this.countDown = this.countTotal // hitting player
+                        if (this.hitsPlayer(best)) this.countDown = this.countTotal // hitting player
                         ctx.strokeStyle = `rgba(255,255,255,0.4)`;
                         ctx.lineWidth = 8 + 3 * Math.sin(simulation.cycle * 0.3);
                     } else if (this.countDown > this.countDelay) {
@@ -4073,13 +4623,15 @@ const level = {
                         this.countDown--
                     } else {
                         this.countDown--
-                        if ((best.who === playerBody || best.who === playerHead) && m.immuneCycle < m.cycle) { // hitting player
+                        isFiring = true
+                        if (m.immuneCycle < m.cycle && this.hitsPlayer(best)) { // hitting player
+                            const spot = this.hitSpot(best)
                             m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
                             const dmg = damage * spawn.dmgToPlayerByLevelsCleared()
                             m.takeDamage(dmg);
                             simulation.drawList.push({ //add dmg to draw queue
-                                x: best.x,
-                                y: best.y,
+                                x: spot.x,
+                                y: spot.y,
                                 radius: dmg * 1500,
                                 color: "rgba(255,0,0,0.5)",
                                 time: 20
@@ -4091,6 +4643,11 @@ const level = {
                     }
                     //draw
                     if (best.dist2 === Infinity) best = this.look;
+                    if (isFiring && this.isArc) {
+                        ctx.setLineDash([]);
+                        this.drawArc(best)
+                        return
+                    }
                     ctx.beginPath();
                     ctx.moveTo(this.position.x, this.position.y);
                     ctx.lineTo(best.x, best.y);
@@ -4150,6 +4707,782 @@ const level = {
                 }
             },
         }
+    },
+    oneWaySurfaces: new Map(), //only populated by oneWay(), no body collision filters are changed
+    watchOneWay(platform, passing) {
+        const surfaces = level.oneWaySurfaces
+        surfaces.set(platform, passing)
+        if (surfaces.size !== 1) return
+        const update = pairs => {
+            for (const pair of pairs) {
+                const a = pair.bodyA.parent, b = pair.bodyB.parent
+                const fromA = surfaces.get(a), fromB = surfaces.get(b)
+                if (!fromA && !fromB) continue
+                pair.isSensor = pair.bodyA.isSensor || pair.bodyB.isSensor || !!(fromA?.has(b) || fromB?.has(a))
+            }
+        }
+        const start = event => update(event.pairs) //new pairs, before Matter resolves them
+        const before = () => {
+            const present = new Set(composite)
+            for (const surface of surfaces.keys()) if (!present.has(surface)) surfaces.delete(surface)
+            if (!surfaces.size) { //clearMap removed the last platform, ordinary levels keep no listener
+                Matter.Events.off(engine, "beforeUpdate", before)
+                Matter.Events.off(engine, "collisionStart", start)
+                return
+            }
+            update(engine.pairs.list) //ongoing pairs, before the next physics step
+        }
+        Matter.Events.on(engine, "collisionStart", start)
+        Matter.Events.on(engine, "beforeUpdate", before)
+    },
+    oneWay(x, y, width, height = 20, angle = Math.PI / 2) { //platform the player, blocks, mobs, and power ups go through from behind and land on from the front, angle is the way its front faces, counterclockwise like boost, Math.PI / 2 is up, hold down on it to drop through, run query() and draw() in level.custom
+        //the player goes through by the platform taking cat.player out of its own mask, so each platform of a ladder lets the player through or not on its own
+        //blocks, mobs, and power ups pass through only this platform via per-pair sensors, so overlapping platforms and original collision groups stay independent
+        const center = { x: x + width / 2, y: y + height / 2 }
+        const platform = composite[composite.length] = Bodies.rectangle(center.x, center.y, width, height, {
+            angle: Math.PI / 2 - angle, //Matter turns clockwise, its front starts facing up
+            collisionFilter: {
+                category: cat.map,
+                mask: cat.player | cat.body | cat.powerUp | cat.mob //bullets go through both ways
+            },
+            isNonStick: true,
+            friction: 0.1,
+        });
+        Matter.Body.setStatic(platform, true);
+        Composite.add(engine.world, platform);
+        const front = { x: Math.cos(angle), y: -Math.sin(angle) } //out of the side things land on
+        const face = height / 2 //how far the front is from the center
+        const depth = who => { //how far a body's nearest and farthest points are in front of the center
+            let min = Infinity, max = -Infinity
+            const v = who.vertices
+            for (let i = 0; i < v.length; i++) {
+                const d = (v[i].x - center.x) * front.x + (v[i].y - center.y) * front.y
+                if (d < min) min = d
+                if (d > max) max = d
+            }
+            return { min, max }
+        }
+        const passing = new Set() //bodies going through right now
+        level.watchOneWay(platform, passing)
+        const reach = 40 //how far around the platform to look, so things coming toward it get through before they hit it
+        const region = { min: { x: platform.bounds.min.x - reach, y: platform.bounds.min.y - reach }, max: { x: platform.bounds.max.x + reach, y: platform.bounds.max.y + reach } }
+        const pass = who => {
+            passing.add(who)
+            if (who === player) {
+                platform.collisionFilter.mask &= ~cat.player
+            }
+        }
+        const stopPassing = who => {
+            passing.delete(who)
+            if (who === player) {
+                platform.collisionFilter.mask |= cat.player
+            }
+        }
+        const toward = who => who.velocity.x * front.x + who.velocity.y * front.y //moving out its front
+        let dropCycle = 0 //the player dropped through until this cycle
+        const seenCycle = new WeakMap() //the last cycle each body was near it
+        return {
+            platform,
+            query() {
+                //what each body near it should do: all of it behind the front and touching, it goes through, it can't be standing on it, like a head poking up into the next platform of a ladder
+                //partly in front, it keeps going through if it was, until it's all the way in front, or it lands, decided when it first comes near, landing sinks in a little over a few cycles
+                const seen = new Set()
+                const decide = who => {
+                    seen.add(who)
+                    const isNew = seenCycle.get(who) !== simulation.cycle - 1
+                    seenCycle.set(who, simulation.cycle)
+                    const d = depth(who)
+                    let isThrough
+                    if (who === player && dropCycle > simulation.cycle) {
+                        isThrough = true
+                    } else if (d.max <= face + 1) {
+                        const margin = 5 + who.speed //touching, or will be next cycle
+                        isThrough = who.bounds.min.x < platform.bounds.max.x + margin && who.bounds.max.x > platform.bounds.min.x - margin && who.bounds.min.y < platform.bounds.max.y + margin && who.bounds.max.y > platform.bounds.min.y - margin
+                    } else if (passing.has(who)) {
+                        isThrough = d.min <= face - 1
+                    } else {
+                        isThrough = isNew && d.min - toward(who) < face - 10 //it was behind the front last cycle, it came through fast
+                    }
+                    if (isThrough) pass(who)
+                    else stopPassing(who)
+                }
+                if (Matter.Bounds.overlaps(player.bounds, region)) {
+                    if (input.down && m.onGround && m.standingOn === platform && !passing.has(player)) dropCycle = simulation.cycle + 15
+                    decide(player)
+                }
+                const lists = [body, mob, powerUp]
+                for (let i = 0; i < lists.length; i++) {
+                    const near = Matter.Query.region(lists[i], region)
+                    for (let j = 0; j < near.length; j++) decide(near[j])
+                }
+                for (const who of passing) if (!seen.has(who)) stopPassing(who) //out of reach
+            },
+            draw() {
+                ctx.save()
+                ctx.translate(center.x, center.y)
+                ctx.rotate(platform.angle)
+                ctx.fillStyle = "rgba(68,68,68,0.45)"
+                ctx.fillRect(-width / 2, -height / 2, width, height)
+                ctx.fillStyle = color.map
+                ctx.fillRect(-width / 2, -height / 2, width, Math.min(5, height)) //the side things land on
+                ctx.restore()
+            },
+            remove() { //the next physics step retires the removed platform and its watcher
+                for (const who of passing) stopPassing(who)
+            },
+        }
+    },
+    sawTeeth(radius, teeth, depth = 0.78) { //a ring of slanted saw teeth, depth is how far in the gaps go
+        const path = new Path2D()
+        for (let i = 0; i < teeth; i++) {
+            const angle = i * 2 * Math.PI / teeth
+            const back = angle - 0.8 * 2 * Math.PI / teeth
+            path.lineTo(depth * radius * Math.cos(back), depth * radius * Math.sin(back))
+            path.lineTo(radius * Math.cos(angle), radius * Math.sin(angle))
+        }
+        path.closePath()
+        return path
+    },
+    buzzsawLooks: { //how a buzzsaw draws, ctx is at its middle, saw.angle is its spin, saw.isOn is false while a link stops it, saw.shape(key, make) makes a Path2D once
+        blade(saw) { //a gray saw blade
+            const r = saw.radius
+            const blade = saw.shape("blade", () => level.sawTeeth(r, Math.max(8, Math.round(r / 3.5))))
+            ctx.rotate(saw.angle)
+            ctx.fillStyle = saw.isOn ? "#555" : "#888"
+            ctx.fill(blade)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "#000"
+            ctx.stroke(blade)
+        },
+        rotor(saw) { //fast fan blades with no guard, they reach its edge
+            const r = saw.radius
+            ctx.beginPath()
+            ctx.arc(0, 0, r, 0, 2 * Math.PI)
+            ctx.fillStyle = saw.isOn ? "rgba(0,0,0,0.1)" : "rgba(0,0,0,0.04)" //the blur of the blades
+            ctx.fill()
+            const blades = saw.shape("rotor", () => {
+                const path = new Path2D()
+                for (let i = 0; i < 3; i++) {
+                    const a = i * 2 * Math.PI / 3
+                    const c = Math.cos(a), s = Math.sin(a)
+                    const at = (along, side) => [along * c - side * s, along * s + side * c]
+                    path.moveTo(...at(0.15 * r, -0.1 * r))
+                    path.quadraticCurveTo(...at(0.65 * r, -0.34 * r), ...at(0.98 * r, -0.14 * r)) //the tips reach its edge, where it hurts
+                    path.lineTo(...at(0.99 * r, 0.06 * r))
+                    path.quadraticCurveTo(...at(0.55 * r, 0.04 * r), ...at(0.15 * r, 0.1 * r))
+                    path.closePath()
+                }
+                return path
+            })
+            ctx.rotate(3 * saw.angle)
+            ctx.fillStyle = saw.isOn ? "#555" : "#999"
+            ctx.fill(blades)
+            ctx.lineWidth = 1.5
+            ctx.stroke(blades)
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.2 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = "#222"
+            ctx.fill()
+        },
+        spikes(saw) { //a spiked mine with a blinking light
+            const r = saw.radius
+            const mine = saw.shape("spikes", () => {
+                const path = new Path2D()
+                const spikes = Math.max(8, Math.round(r / 5))
+                for (let i = 0; i < spikes; i++) {
+                    const a = i * 2 * Math.PI / spikes
+                    const w = 0.35 * Math.PI / spikes
+                    path.lineTo(0.55 * r * Math.cos(a - w), 0.55 * r * Math.sin(a - w))
+                    path.lineTo(r * Math.cos(a), r * Math.sin(a))
+                    path.lineTo(0.55 * r * Math.cos(a + w), 0.55 * r * Math.sin(a + w))
+                    path.arc(0, 0, 0.55 * r, a + w, a + 2 * Math.PI / spikes - w)
+                }
+                path.closePath()
+                return path
+            })
+            ctx.rotate(saw.angle)
+            ctx.fillStyle = saw.isOn ? "#444" : "#888"
+            ctx.fill(mine)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "#000"
+            ctx.stroke(mine)
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.18 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = saw.isOn ? `rgba(255,0,0,${0.5 + 0.5 * Math.sin(m.cycle * 0.15)})` : "#555"
+            ctx.fill()
+            ctx.stroke()
+        },
+        plasma(saw) { //a flickering ball of magenta plasma
+            const r = saw.radius
+            const glow = saw.isOn ? 1 : 0.35
+            ctx.beginPath()
+            ctx.arc(0, 0, r, 0, 2 * Math.PI)
+            ctx.fillStyle = `rgba(255,0,255,${0.12 * glow})`
+            ctx.fill()
+            ctx.beginPath()
+            const bumps = 18
+            for (let i = 0; i < bumps; i++) { //a lumpy edge that changes every frame
+                const a = saw.angle + i * 2 * Math.PI / bumps
+                const rr = r * (saw.isOn ? 0.68 + 0.22 * Math.random() : 0.75)
+                ctx.lineTo(rr * Math.cos(a), rr * Math.sin(a))
+            }
+            ctx.closePath()
+            ctx.fillStyle = `rgba(255,0,255,${0.35 * glow})`
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.4 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = `rgba(255,200,255,${0.9 * glow})`
+            ctx.fill()
+        },
+        tesla(saw) { //a metal ball throwing arcs of electricity
+            const r = saw.radius
+            if (saw.isOn) {
+                ctx.strokeStyle = "rgb(0,170,255)"
+                ctx.lineWidth = Math.max(3, 0.07 * r)
+                ctx.lineJoin = "round"
+                ctx.beginPath()
+                for (let i = 0; i < 5; i++) { //jagged bolts out to the edge, new every frame
+                    const a = (i + 0.7 * Math.random()) * 2 * Math.PI / 5 //spread around, a little different each frame
+                    ctx.moveTo(0.3 * r * Math.cos(a), 0.3 * r * Math.sin(a))
+                    for (let step = 1; step <= 4; step++) {
+                        const along = r * (0.3 + 0.7 * step / 4)
+                        const bend = a + (step < 4 ? 0.5 * (Math.random() - 0.5) : 0)
+                        ctx.lineTo(along * Math.cos(bend), along * Math.sin(bend))
+                    }
+                }
+                ctx.stroke()
+                ctx.beginPath()
+                ctx.arc(0, 0, r, 0, 2 * Math.PI)
+                ctx.lineWidth = 1
+                ctx.strokeStyle = "rgba(0,200,255,0.3)"
+                ctx.stroke()
+            }
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.32 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = saw.isOn ? "#444" : "#888"
+            ctx.fill()
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "#000"
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(-0.1 * r, -0.1 * r, 0.08 * r, 0, 2 * Math.PI) //a shine
+            ctx.fillStyle = "rgba(255,255,255,0.5)"
+            ctx.fill()
+        },
+        vortex(saw) { //a dark swirl, like a small black hole
+            const r = saw.radius
+            ctx.beginPath()
+            ctx.arc(0, 0, r, 0, 2 * Math.PI)
+            ctx.fillStyle = "rgba(0,0,0,0.07)"
+            ctx.fill()
+            const arms = saw.shape("vortex", () => {
+                const path = new Path2D()
+                for (let k = 0; k < 4; k++) {
+                    for (let t = 0; t <= 1.001; t += 0.1) {
+                        const a = k * Math.PI / 2 + 2.6 * t
+                        const rr = r * (0.28 + 0.72 * t)
+                        if (t === 0) path.moveTo(rr * Math.cos(a), rr * Math.sin(a))
+                        else path.lineTo(rr * Math.cos(a), rr * Math.sin(a))
+                    }
+                }
+                return path
+            })
+            ctx.rotate(-2 * saw.angle)
+            ctx.lineWidth = Math.max(2, 0.08 * r)
+            ctx.strokeStyle = saw.isOn ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.2)"
+            ctx.stroke(arms)
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.3 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = saw.isOn ? "#000" : "#555"
+            ctx.fill()
+        },
+        field(saw) { //a field emitter's bubble, a hexagon core with arcs of energy around it
+            const r = saw.radius
+            const glow = saw.isOn ? 1 : 0.4
+            ctx.beginPath()
+            ctx.arc(0, 0, r, 0, 2 * Math.PI)
+            ctx.fillStyle = `rgba(110,170,200,${0.2 * glow})`
+            ctx.fill()
+            ctx.lineWidth = Math.max(3, 0.1 * r)
+            ctx.strokeStyle = `rgba(110,170,200,${0.8 * glow})`
+            ctx.beginPath()
+            for (let i = 0; i < 3; i++) {
+                const a = saw.angle + i * 2 * Math.PI / 3
+                ctx.moveTo(0.88 * r * Math.cos(a), 0.88 * r * Math.sin(a))
+                ctx.arc(0, 0, 0.88 * r, a, a + 1.2)
+            }
+            ctx.stroke()
+            ctx.rotate(-saw.angle)
+            ctx.beginPath()
+            for (let i = 0; i < 6; i++) ctx.lineTo(0.35 * r * Math.cos(i * Math.PI / 3), 0.35 * r * Math.sin(i * Math.PI / 3))
+            ctx.closePath()
+            ctx.fillStyle = saw.isOn ? "#333" : "#888"
+            ctx.fill()
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "#000"
+            ctx.stroke()
+        },
+        laser(saw) { //a turret sweeping red beams out to its edge
+            const r = saw.radius
+            ctx.rotate(saw.angle)
+            if (saw.isOn) {
+                ctx.beginPath()
+                for (let i = 0; i < 3; i++) {
+                    const a = i * 2 * Math.PI / 3
+                    ctx.moveTo(0.4 * r * Math.cos(a), 0.4 * r * Math.sin(a))
+                    ctx.lineTo(r * Math.cos(a), r * Math.sin(a))
+                }
+                ctx.lineWidth = 2
+                ctx.strokeStyle = "rgb(255,0,0)"
+                ctx.stroke()
+            }
+            ctx.beginPath()
+            for (let i = 0; i < 3; i++) { //a rounded triangle housing with an emitter at each corner
+                const a = i * 2 * Math.PI / 3
+                ctx.lineTo(0.45 * r * Math.cos(a), 0.45 * r * Math.sin(a))
+                ctx.lineTo(0.3 * r * Math.cos(a + Math.PI / 3), 0.3 * r * Math.sin(a + Math.PI / 3))
+            }
+            ctx.closePath()
+            ctx.fillStyle = saw.isOn ? "#444" : "#888"
+            ctx.fill()
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "#000"
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.arc(0, 0, 0.1 * r, 0, 2 * Math.PI)
+            ctx.fillStyle = saw.isOn ? "rgb(255,0,0)" : "#555"
+            ctx.fill()
+        },
+    },
+    buzzsaw(points, radius = 40, speed = 4, damage = 0.1, spin = 0.25, isLoop = false, start = 0, look = "blade") { //a spinning blade that rides back and forth along points, [[x, y], ...], or around and around with isLoop, one point stays put, start is how far along it starts, look is one of level.buzzsawLooks, run query() in level.custom and draw() in level.customTopLayer, the map draws over it so it can come out of a wall
+        const route = isLoop && points.length > 2 ? [...points, points[0]] : points
+        const lengths = [0] //how far along the route each point is
+        for (let i = 1; i < route.length; i++) lengths.push(lengths[i - 1] + Math.hypot(route[i][0] - route[i - 1][0], route[i][1] - route[i - 1][1]))
+        const total = lengths[lengths.length - 1]
+        let segment = 0 //the part of the route it's on, it only moves a little each cycle
+        const shapes = {} //Path2Ds its look made, made the first time it's drawn
+        const drawLook = level.buzzsawLooks[look] || level.buzzsawLooks.blade
+        const saw = {
+            position: { x: route[0][0], y: route[0][1] },
+            radius,
+            isOn: true,
+            angle: 0,
+            shape(key, make) { return shapes[key] || (shapes[key] = make()) },
+            along: 0, //how far along the route it is
+            direction: 1, //-1 on its way back, its spin turns around with it
+            moveTo(along) {
+                this.along = along
+                while (segment < route.length - 2 && lengths[segment + 1] < along) segment++
+                while (segment > 0 && lengths[segment] > along) segment--
+                const next = Math.min(segment + 1, route.length - 1)
+                const t = (along - lengths[segment]) / (lengths[next] - lengths[segment] || 1)
+                this.position.x = route[segment][0] + t * (route[next][0] - route[segment][0])
+                this.position.y = route[segment][1] + t * (route[next][1] - route[segment][1])
+            },
+            travel() {
+                if (!total) return
+                let along = this.along + this.direction * speed
+                if (isLoop) {
+                    along = (along % total + total) % total
+                } else if (along > total) {
+                    along = Math.max(0, 2 * total - along)
+                    this.direction = -1
+                } else if (along < 0) {
+                    along = Math.min(total, -along)
+                    this.direction = 1
+                }
+                this.moveTo(along)
+            },
+            hitsPlayer() { //the player's body or head is inside or within reach of its middle, a little short of its teeth so a graze doesn't count
+                const reach = 0.9 * radius
+                const { x, y } = this.position
+                if (x + reach < player.bounds.min.x || x - reach > player.bounds.max.x || y + reach < player.bounds.min.y || y - reach > player.bounds.max.y) return false
+                for (const part of [playerBody, playerHead]) {
+                    if (Matter.Vertices.contains(part.vertices, this.position)) return true
+                    for (let i = 0; i < part.vertices.length; i++) {
+                        const a = part.vertices[i]
+                        const b = part.vertices[(i + 1) % part.vertices.length]
+                        const dx = b.x - a.x
+                        const dy = b.y - a.y
+                        const t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)))
+                        if (Math.hypot(x - a.x - t * dx, y - a.y - t * dy) < reach) return true
+                    }
+                }
+                return false
+            },
+            query(isOn = true) { //isOn false stops it where it is and it doesn't hurt, for a button or toggle
+                this.isOn = isOn
+                if (!isOn || m.isTimeDilated) return
+                this.angle += spin * this.direction
+                this.travel()
+                if (m.immuneCycle < m.cycle && this.hitsPlayer()) {
+                    m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second, to get out of its way
+                    const dmg = damage * spawn.dmgToPlayerByLevelsCleared();
+                    m.takeDamage(dmg);
+                    simulation.drawList.push({ //add dmg to draw queue
+                        x: player.position.x,
+                        y: player.position.y,
+                        radius: dmg * 1500,
+                        color: "rgba(255,0,0,0.5)",
+                        time: 20
+                    });
+                }
+            },
+            draw() {
+                ctx.save()
+                ctx.translate(this.position.x, this.position.y)
+                drawLook(this)
+                ctx.restore()
+            },
+        }
+        saw.moveTo(Math.max(0, Math.min(total, start)))
+        return saw
+    },
+    gravityZone(x, y, width, height, gravity = 0) { //gravity is times normal inside, 0 floats, negative falls up, it works on the player, blocks, and power ups, run do() in level.custom
+        const zone = { min: { x: x, y: y }, max: { x: x + width, y: y + height } }
+        const add = (who, scale) => { who.force.y += (gravity - 1) * who.mass * simulation.g * scale }
+        return {
+            min: zone.min,
+            max: zone.max,
+            gravity,
+            isOn: true,
+            do(isOn = true) { //isOn false turns it off, for a button or toggle
+                this.isOn = isOn
+                if (!isOn) return
+                if (Matter.Bounds.overlaps(player.bounds, zone)) add(player, 1)
+                if (!m.isTimeDilated) { //simulation.gravity() skips blocks and power ups while time is stopped
+                    const blocks = Matter.Query.region(body, zone)
+                    for (let i = 0; i < blocks.length; i++) if (!blocks[i].isStatic) add(blocks[i], 1)
+                    const ups = Matter.Query.region(powerUp, zone)
+                    for (let i = 0; i < ups.length; i++) add(ups[i], 1)
+                }
+            },
+            draw() {
+                ctx.fillStyle = gravity < 0 ? "rgba(255,90,0,0.06)" : "rgba(120,0,255,0.06)"
+                ctx.fillRect(x, y, width, height)
+                if (gravity === 1 || !this.isOn) return
+                //chevrons drifting the way things fall, faster with stronger gravity, none move at 0
+                const direction = gravity < 0 ? -1 : 1
+                const speed = gravity === 0 ? 0 : 0.4 + 0.6 * Math.min(3, Math.abs(gravity))
+                const gap = 120
+                const offset = (simulation.cycle * speed) % gap
+                ctx.beginPath()
+                for (let cx = x + gap / 2; cx < x + width; cx += gap) {
+                    for (let row = -1; row < height / gap + 1; row++) {
+                        const cy = direction > 0 ? y + row * gap + offset : y + height - row * gap - offset
+                        if (cy < y + 10 || cy > y + height - 10) continue
+                        if (gravity === 0) { //floating, a small ring
+                            ctx.moveTo(cx + 6, cy)
+                            ctx.arc(cx, cy, 6, 0, 2 * Math.PI)
+                        } else {
+                            ctx.moveTo(cx - 10, cy - 6 * direction)
+                            ctx.lineTo(cx, cy + 4 * direction)
+                            ctx.lineTo(cx + 10, cy - 6 * direction)
+                        }
+                    }
+                }
+                ctx.strokeStyle = gravity < 0 ? "rgba(255,90,0,0.25)" : "rgba(120,0,255,0.2)"
+                ctx.lineWidth = 2
+                ctx.stroke()
+            },
+        }
+    },
+    effectZone(zone, { force = 0, angle = Math.PI / 2, drag = 0, damage = 0, energy = 0, who = "player body mob bullet powerUp" } = {}) { //run do() in level.custom, draw() too if players should see it
+        //zone is a box { min, max } (a body's bounds touching it is inside) or a circle { x, y, radius } (a body's center inside)
+        //force 1 is as strong as gravity for any size of body, angle is radians counterclockwise, 0 is right
+        //drag is the share of speed lost each cycle, 0.05 is thick air, 1 stops everything
+        //damage and energy are per second, 0.1 damage is a tenth of the player's health, negative energy charges it
+        //who is names like "player body mob bullet powerUp", the things it does them to
+        const names = String(who).split(" ")
+        const isCircle = zone.radius !== undefined
+        const isIn = isCircle ? b => (b.position.x - zone.x) ** 2 + (b.position.y - zone.y) ** 2 < zone.radius ** 2 : b => Matter.Bounds.overlaps(b.bounds, zone)
+        const push = { x: force * Math.cos(angle) * simulation.g, y: -force * Math.sin(angle) * simulation.g }
+        const keep = Math.max(0, 1 - drag)
+        const move = b => {
+            if (force) {
+                b.force.x += push.x * b.mass
+                b.force.y += push.y * b.mass
+            }
+            if (keep !== 1) {
+                Matter.Body.setVelocity(b, { x: b.velocity.x * keep, y: b.velocity.y * keep })
+                if (b !== player) Matter.Body.setAngularVelocity(b, b.angularVelocity * keep)
+            }
+        }
+        const lists = { body: () => body, mob: () => mob, bullet: () => bullet, powerUp: () => powerUp }
+        const others = names.filter(name => lists[name])
+        const isMoving = force !== 0 || keep !== 1
+        const hit = damage / 6 //damage lands every 10 cycles, so its numbers don't flood the screen, the same per second
+        return {
+            isOn: true,
+            do(isOn = true) { //isOn false turns it off, for a button or toggle
+                this.isOn = isOn
+                if (!isOn) return
+                const isHit = damage > 0 && !(simulation.cycle % 10)
+                if (names.includes("player") && isIn(player)) {
+                    if (isMoving) move(player)
+                    if (isHit && m.immuneCycle < m.cycle && !m.isCloak) m.takeDamage(hit * spawn.dmgToPlayerByLevelsCleared())
+                    if (energy > 0) {
+                        m.energy = Math.max(0, m.energy - energy / 60)
+                    } else if (energy < 0 && m.energy < m.maxEnergy) {
+                        m.energy = Math.min(m.maxEnergy, m.energy - energy / 60)
+                    }
+                }
+                if (m.isTimeDilated) return //stopped time stops it for everything but the player
+                for (const name of others) {
+                    const list = lists[name]()
+                    for (let i = list.length - 1; i > -1; i--) { //backwards, damage can kill a mob
+                        const b = list[i]
+                        if (b.isStatic || !isIn(b)) continue
+                        if (isMoving) move(b)
+                        if (name === "mob" && isHit && b.alive) b.damage(hit, true)
+                    }
+                }
+            },
+            draw() { //a tint, red for damage, blue for draining energy, green for charging, with arrows drifting the way it pushes
+                const color = damage > 0 ? "255,0,60" : energy > 0 ? "0,100,255" : energy < 0 ? "0,200,120" : "120,120,140"
+                const shape = new Path2D()
+                if (isCircle) shape.arc(zone.x, zone.y, zone.radius, 0, 2 * Math.PI)
+                else shape.rect(zone.min.x, zone.min.y, zone.max.x - zone.min.x, zone.max.y - zone.min.y)
+                ctx.fillStyle = `rgba(${color},${this.isOn ? 0.08 : 0.03})`
+                ctx.fill(shape)
+                if (!force || !this.isOn) return
+                const center = isCircle ? zone : { x: (zone.min.x + zone.max.x) / 2, y: (zone.min.y + zone.max.y) / 2 }
+                const reach = isCircle ? zone.radius : Math.hypot(zone.max.x - zone.min.x, zone.max.y - zone.min.y) / 2
+                const gap = 120
+                const offset = (simulation.cycle * (0.4 + 0.6 * Math.min(3, Math.abs(force)))) % gap
+                const sign = force < 0 ? -1 : 1
+                ctx.save()
+                ctx.clip(shape)
+                ctx.translate(center.x, center.y)
+                ctx.rotate(-angle)
+                ctx.beginPath()
+                for (let along = -reach - gap; along < reach + gap; along += gap) {
+                    for (let across = -reach; across < reach; across += gap) {
+                        const ax = sign * (along + offset)
+                        ctx.moveTo(ax - 6 * sign, across - 10)
+                        ctx.lineTo(ax + 4 * sign, across)
+                        ctx.lineTo(ax - 6 * sign, across + 10)
+                    }
+                }
+                ctx.strokeStyle = `rgba(${color},0.25)`
+                ctx.lineWidth = 2
+                ctx.stroke()
+                ctx.restore()
+            },
+        }
+    },
+    breakable(x, y, width, height, strength = 150) { //glass the player stands on, it cracks and shatters from fast blocks and bullets hitting it, strength is about how much momentum, run query() in level.custom
+        //it's not in the map, so lasers and mobs can see through it
+        const glass = composite[composite.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, {
+            collisionFilter: {
+                category: cat.map,
+                mask: cat.player | cat.body | cat.bullet | cat.powerUp | cat.mob | cat.mobBullet
+            },
+            isNonStick: true,
+            friction: 0.1,
+        });
+        Matter.Body.setStatic(glass, true);
+        Composite.add(engine.world, glass);
+        const hitCycle = new WeakMap() //each body only hits once every 20 cycles, a block resting on it doesn't keep hitting
+        const reach = 6
+        let seed = Math.abs(Math.round(x * 7 + y * 13)) //cracks are the same every time
+        const random = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+        const cracks = [] //each a line of points from a spot where it was hit
+        const crack = (from, damage) => { //a few lines out from where it was hit, longer for harder hits, up to 60 lines so a strong pane under a nail gun doesn't get slow to draw
+            if (cracks.length > 60) return
+            const lines = 1 + Math.min(3, Math.floor(damage * 4))
+            for (let i = 0; i < lines; i++) {
+                const angle = random() * 2 * Math.PI
+                const points = [{ x: from.x, y: from.y }]
+                let px = from.x, py = from.y
+                const steps = 2 + Math.floor(random() * 3)
+                for (let j = 0; j < steps; j++) {
+                    const a = angle + (random() - 0.5)
+                    const length = 10 + random() * 30 * (0.5 + damage)
+                    px = Math.max(x, Math.min(x + width, px + length * Math.cos(a)))
+                    py = Math.max(y, Math.min(y + height, py + length * Math.sin(a)))
+                    points.push({ x: px, y: py })
+                }
+                cracks.push(points)
+            }
+        }
+        return {
+            glass,
+            health: 1,
+            isBroken: false,
+            hit(who, minSpeed, isBullet) {
+                if (who.speed < minSpeed || (hitCycle.get(who) || -Infinity) > simulation.cycle) return
+                hitCycle.set(who, simulation.cycle + 20)
+                const momentum = who.mass * who.speed
+                const damage = (isBullet ? 3 * Math.sqrt(momentum) : momentum) / strength //bullets' masses are all over the place, the square root keeps a shotgun from being 15 times a nail gun
+                this.health -= damage
+                const where = { x: Math.max(x, Math.min(x + width, who.position.x)), y: Math.max(y, Math.min(y + height, who.position.y)) }
+                crack(where, damage)
+                if (this.health <= 0) this.shatter()
+            },
+            shatter() {
+                this.isBroken = true
+                Matter.Composite.remove(engine.world, glass)
+                const index = composite.indexOf(glass)
+                if (index > -1) composite.splice(index, 1)
+                const count = Math.min(40, 6 + Math.floor(width * height / 2500))
+                for (let i = 0; i < count; i++) { //shards
+                    simulation.drawList.push({
+                        x: x + Math.random() * width,
+                        y: y + Math.random() * height,
+                        radius: 3 + 9 * Math.random(),
+                        color: "rgba(180,220,255,0.7)",
+                        time: 10 + Math.floor(20 * Math.random())
+                    });
+                }
+            },
+            query() {
+                if (this.isBroken) return
+                const region = { min: { x: glass.bounds.min.x - reach, y: glass.bounds.min.y - reach }, max: { x: glass.bounds.max.x + reach, y: glass.bounds.max.y + reach } }
+                const bullets = Matter.Query.region(bullet, region)
+                for (let i = 0; i < bullets.length && !this.isBroken; i++) this.hit(bullets[i], 3, true)
+                const blocks = Matter.Query.region(body, region)
+                for (let i = 0; i < blocks.length && !this.isBroken; i++) if (!blocks[i].isStatic) this.hit(blocks[i], 12, false)
+            },
+            draw() {
+                if (this.isBroken) return
+                ctx.fillStyle = "rgba(190,225,255,0.45)"
+                ctx.fillRect(x, y, width, height)
+                ctx.beginPath()
+                ctx.moveTo(x + 0.2 * width, y + 0.15 * height) //a shine
+                ctx.lineTo(x + 0.08 * width, y + 0.45 * height)
+                for (const points of cracks) {
+                    ctx.moveTo(points[0].x, points[0].y)
+                    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y)
+                }
+                ctx.strokeStyle = "rgba(255,255,255,0.8)"
+                ctx.lineWidth = 2
+                ctx.stroke()
+                ctx.strokeStyle = "rgba(110,150,190,0.9)"
+                ctx.lineWidth = 2
+                ctx.strokeRect(x, y, width, height)
+            },
+        }
+    },
+    dispenser(x, y, size = 50, period = 180, max = 3, angle = -Math.PI / 2, speed = 0) { //makes a block at x, y every period cycles, until max of its blocks are in the level, angle is the way they come out, counterclockwise like boost, -Math.PI / 2 is down, speed launches them, run query() and draw() in level.custom, it isn't solid, blocks come out over it
+        const blocks = [] //its blocks still in the level
+        const half = size / 2
+        const turn = -angle - Math.PI / 2 //clockwise, the chute is drawn opening down, then turned to face angle
+        let count = period //cycles until the next block
+        return {
+            blocks,
+            query(isOn = true) { //isOn false stops it, for a button or toggle
+                for (let i = blocks.length - 1; i > -1; i--) if (!body.includes(blocks[i])) blocks.splice(i, 1) //fizzled, destroyed, or eaten by tech
+                if (!isOn || blocks.length >= max || m.isTimeDilated) return
+                count--
+                if (count > 0) return
+                const spot = { min: { x: x - half, y: y - half }, max: { x: x + half, y: y + half } }
+                if (Matter.Query.region(body, spot).length || Matter.Query.region(mob, spot).length || Matter.Bounds.overlaps(player.bounds, spot)) { //wait for the spot to clear
+                    count = 10
+                    return
+                }
+                count = period
+                spawn.bodyRect(x - half, y - half, size, size)
+                const who = body[body.length - 1]
+                if (this.collisionMask !== undefined) who.collisionFilter.mask = this.collisionMask //set this to change what its blocks bump into
+                Matter.Body.setAngle(who, turn) //lined up with the chute
+                if (speed) Matter.Body.setVelocity(who, { x: speed * Math.cos(angle), y: -speed * Math.sin(angle) })
+                blocks.push(who)
+            },
+            draw() { //a mount that isn't solid: a back plate, dashed sides open the way blocks go, the plate's bar is the time until the next one, and the next block fades in where it will show up
+                const r = half + 10
+                const progress = blocks.length >= max ? 1 : 1 - Math.max(0, count) / period
+                ctx.save()
+                ctx.translate(x, y)
+                ctx.rotate(turn) //+y is the way blocks come out
+                ctx.fillStyle = "rgba(0,150,140,0.07)"
+                ctx.fillRect(-r, -r, 2 * r, 2 * r)
+                ctx.beginPath()
+                ctx.moveTo(-r, r)
+                ctx.lineTo(-r, -r)
+                ctx.lineTo(r, -r)
+                ctx.lineTo(r, r)
+                ctx.setLineDash([8, 6])
+                ctx.strokeStyle = "rgba(0,150,140,0.6)"
+                ctx.lineWidth = 2
+                ctx.stroke()
+                ctx.setLineDash([])
+                ctx.fillStyle = "rgba(0,150,140,0.45)"
+                ctx.fillRect(-r, -r - 10, 2 * r, 10) //the back plate, against a wall
+                ctx.fillStyle = blocks.length >= max ? "rgba(255,255,255,0.35)" : "rgb(0,230,200)"
+                ctx.fillRect(-r + 4, -r - 7, (2 * r - 8) * progress, 4)
+                ctx.fillRect(-r - 2, r - 2, 6, 4) //the corners of its mouth
+                ctx.fillRect(r - 4, r - 2, 6, 4)
+                if (blocks.length < max && progress > 0.5) { //the next block fades in
+                    ctx.strokeStyle = `rgba(0,150,140,${(progress - 0.5) * 1.2})`
+                    ctx.lineWidth = 2
+                    ctx.strokeRect(-half, -half, size, size)
+                }
+                ctx.restore()
+            },
+            remove() { //its blocks go with it, for the editor
+                for (const who of blocks) {
+                    const index = body.indexOf(who)
+                    if (index > -1) body.splice(index, 1)
+                    Matter.Composite.remove(engine.world, who)
+                    if (who === m.holdingTarget) m.drop()
+                }
+                blocks.length = 0
+            },
+        }
+    },
+    nest(x, y, name = "random", period = 300, max = 4, radius = 60) { //a mob that doesn't move and makes other mobs while it sees the player, until max of them are alive, name is a spawn mob name or "random" for one of the level's mob types
+        mobs.spawn(x, y, 6, radius, "rgb(150,40,120)");
+        const me = mob[mob.length - 1];
+        me.stroke = "transparent"
+        me.damageReduction = 0.25 //tougher than a normal mob
+        me.frictionAir = 1
+        me.leaveBody = false
+        me.memory = 240
+        me.seePlayerFreq = 20
+        me.children = []
+        me.nestCount = Math.floor(period / 2) //the first one comes sooner
+        me.nestPeriod = period
+        const anchor = { x, y }
+        me.makeChild = function () {
+            const names = name === "random" ? spawn.pickList : [name]
+            const pick = names[Math.floor(Math.random() * names.length)]
+            if (typeof spawn[pick] !== "function") return
+            const angle = 2 * Math.PI * Math.random()
+            const count = mob.length
+            spawn[pick](x + (radius + 20) * Math.cos(angle), y + (radius + 20) * Math.sin(angle))
+            if (mob.length === count) return //it didn't make one, don't adopt some other mob
+            const child = mob[mob.length - 1]
+            child.isDropPowerUp = false //no farming power ups from a nest
+            child.leaveBody = false
+            Matter.Body.setVelocity(child, { x: 8 * Math.cos(angle), y: 8 * Math.sin(angle) })
+            this.children.push(child)
+            simulation.drawList.push({ x: child.position.x, y: child.position.y, radius: 40, color: "rgba(150,40,120,0.3)", time: 12 });
+        }
+        me.do = function () {
+            Matter.Body.setPosition(this, anchor) //it stays put
+            Matter.Body.setVelocity(this, { x: 0, y: 0 })
+            Matter.Body.setAngularVelocity(this, 0.005)
+            this.seePlayerByDistOrLOS()
+            this.checkStatus()
+            if (!this.alive) return
+            if (this.seePlayer.recall) this.healthBar1()
+            for (let i = this.children.length - 1; i > -1; i--) if (!this.children[i].alive) this.children.splice(i, 1)
+            if (this.seePlayer.recall && this.children.length < max) {
+                this.nestCount--
+                if (this.nestCount < 1) {
+                    this.nestCount = this.nestPeriod
+                    this.makeChild()
+                }
+            }
+            //a glow that swells before the next mob, drawn after the mob, so it's over its body
+            const grow = this.children.length < max ? 1 - Math.max(0, this.nestCount) / this.nestPeriod : 0
+            ctx.beginPath()
+            ctx.arc(this.position.x, this.position.y, radius * (0.25 + 0.4 * grow), 0, 2 * Math.PI)
+            ctx.fillStyle = `rgba(255,120,220,${0.25 + 0.5 * grow})`
+            ctx.fill()
+        };
+        return me
     },
     isHazardRise: false,
     hazard(x, y, width, height, damage = 0.0025) {
@@ -7128,7 +8461,6 @@ const level = {
                 ctx.fillRect(-775, -1100, 985, 350);
             };
             // }
-            powerUps.addResearchToLevel() //needs to run after mobs are spawned
         },
         chute() {
             level.announceMobTypes()
@@ -9630,6 +10962,11 @@ const level = {
                 offset.x = i * 2100
                 columns[i]()
             }
+            //thick outer walls so fast things can't slip out of the map
+            spawn.mapRect(-1600, -4300, 1600, 5900); //left map wall
+            spawn.mapRect(6200, -4300, 1600, 5900); //right map wall
+            spawn.mapRect(-1600, -4300, 9400, 1600); //map ceiling
+            spawn.mapRect(-1600, 0, 9400, 1600); //floor
             spawn.randomMobFromArray()
             level.custom = () => {
                 for (let i = 0, len = doCustom.length; i < len; i++) doCustom[i]() //runs all the active code from each room
@@ -10103,7 +11440,7 @@ const level = {
                 frictionStatic: 1,
                 restitution: 0,
                 frictionAir: 1,
-                classType: "body",
+                classType: "map", //counts as part of the level, so it doesn't do block damage when it rams mobs
                 holdX: 1712,
                 maxHeight: -1580,
                 minHeight: 90,

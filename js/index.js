@@ -2180,18 +2180,12 @@ const levelPoolMenu = {
                 ${[locked("initial"), random(6), locked("reactor"), random(3), locked("reservoir / factory / interferometer"), locked("subway"), locked("final")]
                 .map((step, i) => i ? `<span class="level-route-step"><span class="level-route-dash">-</span>${step}</span>` : step).join("")}
             </div>
-            ${levelPoolMenu.header("community", addAll("community", community))}
+            ${levelPoolMenu.header("local", addAll("local", local))}
+            ${levelPoolMenu.zone("local", local, "")}
+            ${levelPoolMenu.header(`community<a class="level-pool-site-link" href="https://whyisthisnotavalable.github.io/n-vote/" target="_blank" rel="noopener" title="n-vote, a fan site for n-gon maps: upload your levels, download other players' maps, and rate them. import a download in the level editor, then add it to the pool">upload, download, and rate maps on <span class="site-link-name">n-vote</span></a>`, addAll("community", community))}
             ${levelPoolMenu.zone("community", community, "")}
-            <div class="level-pool-columns">
-                <div>
-                    ${levelPoolMenu.header("banned", addAll("banned", banned))}
-                    ${levelPoolMenu.zone("banned", banned, "")}
-                </div>
-                <div>
-                    ${levelPoolMenu.header("local", addAll("local", local))}
-                    ${levelPoolMenu.zone("local", local, "")}
-                </div>
-            </div>`
+            ${levelPoolMenu.header("banned", addAll("banned", banned))}
+            ${levelPoolMenu.zone("banned", banned, "")}`
     },
     zoneUnder(event) { //the zone a dragged level goes to, other levels only drop on the pool, pool levels drop anywhere else on the page and go back where they came from
         if (!levelPoolMenu.dragging) return null
@@ -2561,6 +2555,7 @@ function cycle() {
                 level.start();
                 consoleMirror.showTitleLogs()
             }
+            if (simulation.extraCycles) simulation.timeSkip(simulation.extraCycles)
             simulation.loop();
         } catch (error) {
             consoleMirror.showError(error)

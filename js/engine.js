@@ -412,12 +412,17 @@ function trackLastTouchedBlock(event) {
 }
 
 
+const playerSweep = { body: null, x: 0, y: 0 }
 Events.on(engine, "collisionStart", function (event) {
+    const beforeX = player?.position.x
+    const beforeY = player?.position.y
     for (let i = 0; i < level.surfacePortals.length; i++) level.surfacePortals[i].collide(event) //first, it removes pairs going through a portal
     playerOnGroundCheck(event);
     trackLastTouchedBlock(event);
     // playerHeadCheck(event);
     collisionChecks(event);
+    //Collision effects can relocate the player, for example by rewinding after damage.
+    if (player?.position.x !== beforeX || player?.position.y !== beforeY) playerSweep.body = null
 
 
     // //do we need to also check bodyB
@@ -433,7 +438,37 @@ Events.on(engine, "collisionStart", function (event) {
     //     }
     // }
 });
-Events.on(engine, "afterUpdate", function () {
+//the player can tunnel through a thin wall when one physics step moves it past its middle, then the wall pushes it out the far side
+//each step remembers where the player started, and if it was fast and its center crossed a wall it's put back
+//blocks are left alone, checking every fast block against the whole map each step costs too much
+Events.on(engine, "beforeUpdate", function () {
+    playerSweep.body = player
+    if (player) {
+        playerSweep.x = player.position.x
+        playerSweep.y = player.position.y
+    }
+});
+function stopTunneling(who, fromX, fromY) {
+    const dx = who.position.x - fromX
+    const dy = who.position.y - fromY
+    const stepSquared = dx * dx + dy * dy
+    if (!Number.isFinite(stepSquared) || stepSquared < 400) return
+    for (let i = 0; i < level.surfacePortals.length; i++) { //going into a surface portal passes through the map on purpose
+        const pending = level.surfacePortals[i].pending
+        for (let j = 0; j < pending.length; j++) if (pending[j].who === who) return
+    }
+    const from = { x: fromX, y: fromY }
+    const walls = map.filter(wall => !wall.isSensor && Matter.Detector.canCollide(who.collisionFilter, wall.collisionFilter))
+    if (Matter.Query.point(walls, from).length) return //already stuck inside the map, let the engine push it out
+    if (!Matter.Query.segmentAny(walls, from, who.position)) return
+    //its center crossed a wall, put it back and drop its speed toward the wall
+    Matter.Body.setPosition(who, from)
+    const step = Math.sqrt(stepSquared)
+    const into = (who.velocity.x * dx + who.velocity.y * dy) / step
+    if (into > 0) Matter.Body.setVelocity(who, { x: who.velocity.x - into * dx / step, y: who.velocity.y - into * dy / step })
+}
+Events.on(engine, "afterUpdate", function () { //before portals teleport anything
+    if (player && player === playerSweep.body) stopTunneling(player, playerSweep.x, playerSweep.y)
     for (let i = 0; i < level.surfacePortals.length; i++) level.surfacePortals[i].update()
 });
 Events.on(engine, "collisionActive", function (event) {

@@ -5,13 +5,13 @@ Object.assign(levelEditor, {
     help: [ //the help menu, a guide from a blank level to a submitted one, each [title, html] folds on its own
         ["start here", `
             <p>You don't need to write any JavaScript to make a level. The editor writes it for you and saves your changes in this browser as you go.</p>
-            <p><b>Map</b> pieces are solid ground and walls that stay in place. <b>Blocks</b> can move and be pushed around. Every level also has an <b>enter</b>, where the player starts, and an <b>exit</b>.</p>
+            <p><b>Map</b> pieces are solid ground and walls that stay in place. <b>Blocks</b> can move and be pushed around. Every level also has an <b>entrance</b>, where the player starts, and an <b>exit</b>.</p>
             <ol>
                 <li>Draw the ground and walls with the <b>map</b> tool.</li>
-                <li>Select and drag <b>enter</b> and <b>exit</b> into place.</li>
+                <li>Select and drag <b>entrance</b> and <b>exit</b> into place.</li>
                 <li>Open <b>add</b> to place <b>mob</b> spots, a <b>boss</b>, and a <b>starting</b> power up.</li>
                 <li>Press <b>▶ quick test</b> in <b>simulation</b> to play. Press <b>■ stop</b> to return to editing.</li>
-                <li>Click the issues count in the bottom bar to check for problems. When you're ready to share, use <b>export</b> in <b>export/import</b>.</li>
+                <li>Click the issues count in the bottom bar to check for problems. When you're ready to share, use <b>export</b> in <b>import/export</b>.</li>
             </ol>`],
         ["drawing", `
             <ul>
@@ -36,9 +36,9 @@ Object.assign(levelEditor, {
         ["a good level", `
             <p>These are starting points based on the game's existing levels, not strict rules.</p>
             <ul>
-                <li>Give the player a clear route from the enter, through a few rooms or climbs, to the exit. Existing levels keep the exit at least 450 units from the enter.</li>
+                <li>Give the player a clear route from the entrance, through a few rooms or climbs, to the exit. Existing levels keep the exit at least 450 units from the entrance.</li>
                 <li>Drag with the <b>measure</b> tool from where the player stands to check a jump. Green means it should be reachable. A normal jump reaches about 390 units up or 570 across at full speed; test the jump yourself too.</li>
-                <li>Put the <b>boss</b> at least 1400 units from the enter. Place the <b>starting</b> power up away from the enter too, so players explore to find it.</li>
+                <li>Put the <b>boss</b> at least 1400 units from the entrance. Place the <b>starting</b> power up away from the entrance too, so players explore to find it.</li>
                 <li>Spread 15 to 20 <b>mob</b> spots around the level. These are possible spawn locations: the game uses some of them, with more mobs later in a run.</li>
                 <li>Aim for 2 to 12 heal and ammo power ups in total. <b>Random</b> places a heal or ammo, and <b>debris</b> scatters small blocks and power ups.</li>
                 <li>Keep it light: aim for fewer than about 100 map pieces and 50 blocks. Fewer, larger pieces usually run better than many small ones.</li>
@@ -48,7 +48,7 @@ Object.assign(levelEditor, {
             </ul>`],
         ["testing", `
             <ul>
-                <li><b>▶ quick test</b> returns the player to the enter and puts blocks back where they started. Turn on <b>mobs</b> to include mobs and power ups in the test, and <b>invincible</b> to explore without taking damage.</li>
+                <li><b>▶ quick test</b> returns the player to the entrance and puts blocks back where they started. Turn on <b>mobs</b> to include mobs and power ups in the test, and <b>invincible</b> to explore without taking damage.</li>
                 <li><b>level</b> sets how far into a run you're testing. Try 1 and 10 to see how the fights change. At 0, random mobs don't spawn.</li>
                 <li><b>▶ test export</b> runs the code that <b>export</b> produces, with the normal game camera and mouse controls. It always includes mobs and power ups. You don't need to know JavaScript to use it; try it before sharing your level.</li>
                 <li><b>Time</b> slows the game so you can watch something closely. Test export ignores it, and grays out the settings it doesn't use.</li>
@@ -56,20 +56,20 @@ Object.assign(levelEditor, {
                 <li>Play all the way to the exit, and try falling off the edges. The exit won't take you to another level while you're in the editor.</li>
             </ul>`],
         ["buttons and moving parts", `
-            <p>Open <b>add → level element</b> for boosts, conveyors, elevators, portals, hazards, controls, and decorations.</p>
-            <p>A <b>button</b>, <b>toggle</b>, <b>zone</b>, <b>timer</b>, or <b>keyhole</b> can control other objects. A button responds to weight, a toggle is a lever, a zone detects something inside it, a timer switches on and off, and a keyhole needs a matching key.</p>
+            <p>Open the <b>element</b> and <b>trigger</b> lists in <b>add</b> for boosts, conveyors, elevators, portals, hazards, controls, and decorations.</p>
+            <p>A <b>button</b>, <b>toggle</b>, <b>zone</b>, <b>keyhole</b>, or <b>logic</b> timer can control other objects. A button responds to weight, a toggle is a lever, a zone detects something inside it, a timer switches on and off, and a keyhole needs a matching key.</p>
             <p>Select a control, press <b>link</b>, then click the object you want it to control. For example, a linked <b>door</b> opens while the button is pressed. Press esc to stop linking.</p>
             <p>A block's <b>constraint</b> can pin it to a point in the level, or set its <b>anchor</b> to another block to tie the two together, like a chain or a pendulum.</p>
-            <p>Link two controls to the same object and either can turn it on. Link one control to another and both must be on. For example, link a zone to a timer, then the timer to a laser, to make the laser pulse only while something is in the zone.</p>`],
+            <p>Link two controls to the same object and either can turn it on. Link one control to another and both must be on. For example, link a zone to a logic timer, then the timer to a laser, to make the laser pulse only while something is in the zone.</p>`],
         ["code", `
-            <p>Code is optional. For behavior the editor's tools can't make, <b>+ code</b> at the bottom of the level's info box (click empty space) lets you add your own JavaScript.</p>
-            <p>To explore how existing levels work, open one from <b>load more levels</b> in <b>export/import</b>. This makes a local copy, so you can experiment without changing the original.</p>
+            <p>Code is optional. For behavior the editor's tools can't make, <b>code</b> at the bottom of the level's info box (click empty space) lets you add your own JavaScript.</p>
+            <p>To explore how existing levels work, open one from <b>load more levels</b> in <b>import/export</b>. This makes a local copy, so you can experiment without changing the original.</p>
             <p>If you're writing code: each code element runs when the level loads and can use variables defined in earlier code elements. Put behavior that needs to repeat each frame in <code>level.custom</code>.</p>`],
         ["sharing and submitting", `
             <ul>
                 <li>Your levels are saved in this browser. Use <b>export</b>, then <b>download</b> to save a backup file, or <b>copy</b> to share the text. If the bottom bar ever says <b>not saved</b>, export a backup right away.</li>
                 <li>Keep the whole export, including its final <code>//level editor:</code> line. That line lets <b>import</b> restore all the editable objects.</li>
-                <li><b>Import</b> replaces the level you're editing, paste the text or use <b>open file</b>. Use <b>new</b> or <b>fork</b> first if you want to keep the current level as well. <b>Fork</b> is also an easy way to experiment on a copy.</li>
+                <li><b>Import</b> saves a new local level, paste the text or use <b>open file</b>. Your current level is kept, and an imported name already in use gets a number added. <b>Fork</b> is also an easy way to experiment on a copy.</li>
                 <li><b>Add to level pool</b> includes the level in your own runs. It doesn't publish it.</li>
                 <li>Before submitting, play from start to finish with mobs on and try <b>test export</b>. Resolve the <b>fix</b> items in the issues list and review any warnings.</li>
                 <li>To suggest your level for the game, open an issue on <a href="https://github.com/landgreen/n-gon/issues" target="_blank" rel="noopener">github.com/landgreen/n-gon</a> titled <i>New community map: your level's name</i> and paste the full export into it.</li>

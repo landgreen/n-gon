@@ -74,6 +74,7 @@ const simulation = {
         simulation.drawCursor();
     },
     isTimeSkipping: false,
+    extraCycles: 0, //timeSkip this many more each frame, before the frame's wipe so they don't show, the level editor's 2× time
     timeSkip(cycles = 60) {
         simulation.isTimeSkipping = true;
         for (let i = 0; i < cycles; i++) {
@@ -1421,120 +1422,7 @@ const simulation = {
     },
     sight: { //credit to Cornbread2100 for adding this algorithm to n-gon
         // square: 0,
-        intersectMap: [], //this is precalculated in simulation.draw.lineOfSightPrecalculation()
-        getIntersection(v1, v1End, domain) {
-            const intersections = simulation.sight.getIntersections(v1, v1End, domain);
-            var best = { x: v1End.x, y: v1End.y, dist: (v1End.x - v1.x) ** 2 + (v1End.y - v1.y) ** 2 }
-            for (const intersection of intersections) {
-                const dist = (intersection.x - v1.x) ** 2 + (intersection.y - v1.y) ** 2;
-                if (dist < best.dist) best = { x: intersection.x, y: intersection.y, dist: dist }
-            }
-            best.dist = Math.sqrt(best.dist)
-            return best;
-        },
-        // getIntersections(v1, v1End, domain) {
-        //     const intersections = [];
-        //     for (const obj of domain) {
-        //         for (var i = 0; i < obj.vertices.length - 1; i++) {
-        //             results = simulation.checkLineIntersection(v1, v1End, obj.vertices[i], obj.vertices[i + 1]);
-        //             if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
-        //         }
-        //         results = simulation.checkLineIntersection(v1, v1End, obj.vertices[obj.vertices.length - 1], obj.vertices[0]);
-        //         if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
-        //     }
-        //     return intersections;
-        // },
-
-        // (Only adds an AABB guard + declares `results` with let.)
-        getIntersections(v1, v1End, domain) {
-            const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
-            const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
-            const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
-            const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
-
-            function edgeBboxOverlapsRay(q1, q2) {
-                const edgeMinX = q1.x < q2.x ? q1.x : q2.x;
-                const edgeMaxX = q1.x > q2.x ? q1.x : q2.x;
-                const edgeMinY = q1.y < q2.y ? q1.y : q2.y;
-                const edgeMaxY = q1.y > q2.y ? q1.y : q2.y;
-                return !(rayMaxX < edgeMinX || edgeMaxX < rayMinX || rayMaxY < edgeMinY || edgeMaxY < rayMinY);
-            }
-
-            const intersections = [];
-
-            for (const obj of domain) {
-                const bounds = obj.bounds; //skip the whole body if it's away from the ray
-                if (rayMaxX < bounds.min.x || bounds.max.x < rayMinX || rayMaxY < bounds.min.y || bounds.max.y < rayMinY) continue;
-                // iterate edges [i] -> [i+1]
-                for (let i = 0; i < obj.vertices.length - 1; i++) {
-                    const a = obj.vertices[i];
-                    const b = obj.vertices[i + 1];
-
-                    // Cheap reject: skip if segment bbox doesn't overlap ray bbox
-                    if (!edgeBboxOverlapsRay(a, b)) continue;
-
-                    const results = simulation.checkLineIntersection(v1, v1End, a, b);
-                    if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
-                }
-
-                // close the polygon: last -> first
-                const a = obj.vertices[obj.vertices.length - 1];
-                const b = obj.vertices[0];
-
-                if (edgeBboxOverlapsRay(a, b)) {
-                    const results = simulation.checkLineIntersection(v1, v1End, a, b);
-                    if (results.onLine1 && results.onLine2) intersections.push({ x: results.x, y: results.y });
-                }
-            }
-
-            return intersections;
-        },
-
-        appendMapIntersections(v1, v1End, excludedBodyIndex, target) {
-            const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
-            const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
-            const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
-            const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
-            const rayDx = v1End.x - v1.x;
-            const rayDy = v1End.y - v1.y;
-
-            for (let bodyIndex = 0; bodyIndex < map.length; bodyIndex++) {
-                if (bodyIndex === excludedBodyIndex) continue;
-                const obj = map[bodyIndex];
-                if (obj.isRay) continue //tech: ray, you can see through the line left behind
-                const bounds = obj.bounds;
-                if (rayMaxX < bounds.min.x || bounds.max.x < rayMinX ||
-                    rayMaxY < bounds.min.y || bounds.max.y < rayMinY) continue;
-
-                const vertices = obj.vertices;
-                for (let edgeIndex = 0; edgeIndex < vertices.length; edgeIndex++) {
-                    const edgeStart = vertices[edgeIndex];
-                    const edgeEnd = vertices[(edgeIndex + 1) % vertices.length];
-                    const edgeMinX = edgeStart.x < edgeEnd.x ? edgeStart.x : edgeEnd.x;
-                    const edgeMaxX = edgeStart.x > edgeEnd.x ? edgeStart.x : edgeEnd.x;
-                    const edgeMinY = edgeStart.y < edgeEnd.y ? edgeStart.y : edgeEnd.y;
-                    const edgeMaxY = edgeStart.y > edgeEnd.y ? edgeStart.y : edgeEnd.y;
-                    if (rayMaxX < edgeMinX || edgeMaxX < rayMinX ||
-                        rayMaxY < edgeMinY || edgeMaxY < rayMinY) continue;
-
-                    const edgeDx = edgeEnd.x - edgeStart.x;
-                    const edgeDy = edgeEnd.y - edgeStart.y;
-                    const denominator = edgeDy * rayDx - edgeDx * rayDy;
-                    if (denominator === 0) continue;
-                    const offsetY = v1.y - edgeStart.y;
-                    const offsetX = v1.x - edgeStart.x;
-                    const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator;
-                    const edgeFraction = (rayDx * offsetY - rayDy * offsetX) / denominator;
-                    if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) {
-                        target.push({
-                            x: v1.x + rayFraction * rayDx,
-                            y: v1.y + rayFraction * rayDy
-                        });
-                    }
-                }
-            }
-        },
-
+        intersectMap: [], //each wall's corners and where other walls cross it, simulation.sight.buildIntersectMap() keeps it up to date with the map
         circleLineCollisionsLegacy(a, b, c, radius) {
             const angleOffset = Math.atan2(b.y - a.y, b.x - a.x);
             const sideB = Math.sqrt((a.x - c.x) ** 2 + (a.y - c.y) ** 2);
@@ -1636,13 +1524,14 @@ const simulation = {
         },
 
         circleLoS(pos, radius) {
-            const solid = map.some(who => who.isRay) ? map.filter(who => !who.isRay) : map //tech: ray, you can see through the line left behind
+            simulation.sight.updateMapGrid()
+            const solid = simulation.sight.mapGrid.solid //tech: ray, you can see through the line left behind
+            const isPosInWall = simulation.sight.isPointInWall(pos) //seeing nothing is the same for every sight line, so only check once
             let test
             function allCircleLineCollisions(c, radius, domain) {
                 var lines = [];
                 for (const obj of domain) {
-                    const bounds = obj.bounds; //skip bodies away from the circle, the extra 1 matches the distance check below
-                    if (c.x + radius + 1 < bounds.min.x || bounds.max.x < c.x - radius - 1 || c.y + radius + 1 < bounds.min.y || bounds.max.y < c.y - radius - 1) continue;
+                    if (!simulation.sight.isBoundsOnCircle(obj.bounds, c, radius)) continue;
                     for (var i = 0; i < obj.vertices.length - 1; i++) lines.push(simulation.sight.circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
                     lines.push(simulation.sight.circleLineCollisions(obj.vertices[obj.vertices.length - 1], obj.vertices[0], c, radius));
                 }
@@ -1680,17 +1569,17 @@ const simulation = {
                     // const queryPoint = { x: Math.cos(angleToVertex) * (distanceToVertex - 1) + pos.x, y: Math.sin(angleToVertex) * (distanceToVertex - 1) + pos.y }
                     const queryPoint = { x: Math.cos(angleToVertex + Math.PI) + vertex.x, y: Math.sin(angleToVertex + Math.PI) + vertex.y }
 
-                    if (!Matter.Query.segmentAny(solid, pos, queryPoint)) {
+                    if (!isPosInWall && !simulation.sight.isSightBlocked(pos, queryPoint)) {
                         var distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
                         var endPoint = { x: vertex.x, y: vertex.y }
 
-                        var best = simulation.sight.getIntersection(pos, endPoint, solid);
+                        var best = simulation.sight.getIntersection(pos, endPoint);
                         if (best.dist >= distance) best = { x: endPoint.x, y: endPoint.y, dist: distance }
                         vertices.push(best)
 
                         var angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                         endPoint = { x: Math.cos(angle + 0.001) * radius + pos.x, y: Math.sin(angle + 0.001) * radius + pos.y }
-                        best = simulation.sight.getIntersection(pos, endPoint, solid);
+                        best = simulation.sight.getIntersection(pos, endPoint);
 
                         if (best.dist >= radius) best = { x: endPoint.x, y: endPoint.y, dist: radius }
                         vertices.push(best)
@@ -1698,7 +1587,7 @@ const simulation = {
                         angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                         endPoint = { x: Math.cos(angle - 0.001) * radius + pos.x, y: Math.sin(angle - 0.001) * radius + pos.y }
 
-                        best = simulation.sight.getIntersection(pos, endPoint, solid);
+                        best = simulation.sight.getIntersection(pos, endPoint);
                         if (best.dist >= radius) best = { x: endPoint.x, y: endPoint.y, dist: radius }
                         vertices.push(best)
                     }
@@ -1712,7 +1601,7 @@ const simulation = {
                     const distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2)
                     const angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                     const queryPoint = { x: Math.cos(angle + Math.PI) + vertex.x, y: Math.sin(angle + Math.PI) + vertex.y }
-                    if (Math.abs(distance - radius) < 1 && !Matter.Query.segmentAny(solid, pos, queryPoint)) circleCollisions.push(vertex)
+                    if (Math.abs(distance - radius) < 1 && !isPosInWall && !simulation.sight.isSightBlocked(pos, queryPoint)) circleCollisions.push(vertex)
                 }
             }
             for (var i = 0; i < circleCollisions.length; i++) {
@@ -1742,7 +1631,7 @@ const simulation = {
 
                 // shoot ray between them
                 var endPoint = { x: Math.cos(newAngle) * radius + pos.x, y: Math.sin(newAngle) * radius + pos.y }
-                var best = simulation.sight.getIntersection(pos, endPoint, solid);
+                var best = simulation.sight.getIntersection(pos, endPoint);
                 vertices.push(vertex);
                 if (best.dist <= radius) vertices.push({ x: best.x, y: best.y })
             }
@@ -1751,6 +1640,369 @@ const simulation = {
             }
             vertices.sort((a, b) => Math.atan2(a.y - pos.y, a.x - pos.x) - Math.atan2(b.y - pos.y, b.x - pos.x));
             return vertices;
+        },
+
+        isBoundsOnCircle(bounds, c, radius) { //only walls near the edge of the circle can cross it, the extra 1 matches the distance check in circleLoS
+            const nearX = Math.max(bounds.min.x - c.x, 0, c.x - bounds.max.x);
+            const nearY = Math.max(bounds.min.y - c.y, 0, c.y - bounds.max.y);
+            if (nearX * nearX + nearY * nearY > (radius + 1) * (radius + 1)) return false;
+            if (radius <= 1) return true;
+            const farX = Math.max(Math.abs(bounds.min.x - c.x), Math.abs(bounds.max.x - c.x));
+            const farY = Math.max(Math.abs(bounds.min.y - c.y), Math.abs(bounds.max.y - c.y));
+            return farX * farX + farY * farY >= (radius - 1) * (radius - 1);
+        },
+
+        mapGrid: { //every wall edge sorted into square cells, so a sight line only tests the walls it passes near
+            minCellSize: 256,
+            maxCells: 65536,
+            maxCellsWide: 4096,
+            pad: 0.000001, //much bigger than rounding error, so a cell is never missed by a tiny amount
+            bodies: [], //the map when the grid was built, updateMapGrid compares this to the map
+            state: new Float64Array(0), //bounds, angle, and isRay of each of those bodies
+            solid: [], //map without tech: ray's lines
+            cols: 0,
+            rows: 0,
+            cellSize: 1,
+            originX: 0,
+            originY: 0,
+            edgeCells: [], //edges in each cell
+            bodyCells: [], //bodies with bounds that touch each cell
+            edges: new Float64Array(0), //x1, y1, x2, y2 of each edge
+            edgeKinds: new Uint8Array(0), //1 is for blocking sight, 2 is for the nearest hit, they only differ for compound bodies
+            edgeStamps: new Float64Array(0), //the last sight line to test each edge, long edges are in several cells
+            edgeBodies: new Int32Array(0), //the map index of each edge's body
+            edgeNumbers: new Int32Array(0), //each outline edge's place in its body, the edge from vertices[n] to vertices[n + 1]
+            stamp: 0,
+            lineCells: [], //the cells on the current sight line, from its start to its end
+        },
+        updateMapGrid() { //runs each frame, finds any change to the map by itself and rebuilds the grid and the corners in intersectMap, so moving doors and walls added during a level don't need a manual rebuild
+            const grid = simulation.sight.mapGrid;
+            const state = grid.state;
+            let isCurrent = grid.bodies.length === map.length;
+            for (let i = 0, j = 0; isCurrent && i < map.length; i++, j += 6) {
+                const who = map[i];
+                const min = who.bounds.min;
+                const max = who.bounds.max;
+                isCurrent = grid.bodies[i] === who && state[j] === min.x && state[j + 1] === min.y && state[j + 2] === max.x && state[j + 3] === max.y &&
+                    state[j + 4] === who.angle && state[j + 5] === (who.isRay ? 1 : 0);
+            }
+            if (!isCurrent) simulation.sight.buildMapGrid();
+        },
+        buildMapGrid() {
+            const grid = simulation.sight.mapGrid;
+            grid.bodies = map.slice();
+            if (grid.state.length !== map.length * 6) grid.state = new Float64Array(map.length * 6);
+            grid.solid = [];
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity, edgeCount = 0;
+            for (let i = 0, j = 0; i < map.length; i++, j += 6) {
+                const who = map[i];
+                const min = who.bounds.min;
+                const max = who.bounds.max;
+                grid.state[j] = min.x;
+                grid.state[j + 1] = min.y;
+                grid.state[j + 2] = max.x;
+                grid.state[j + 3] = max.y;
+                grid.state[j + 4] = who.angle;
+                grid.state[j + 5] = who.isRay ? 1 : 0;
+                if (who.isRay) continue;
+                grid.solid.push(who);
+                if (min.x < minX) minX = min.x;
+                if (min.y < minY) minY = min.y;
+                if (max.x > maxX) maxX = max.x;
+                if (max.y > maxY) maxY = max.y;
+                edgeCount += who.vertices.length;
+                for (let k = 1; k < who.parts.length; k++) edgeCount += who.parts[k].vertices.length;
+            }
+
+            if (!grid.solid.length || !(maxX - minX < Infinity) || !(maxY - minY < Infinity)) {
+                grid.cols = grid.rows = 0;
+                simulation.sight.intersectMap = [];
+                return;
+            }
+            const wide = maxX - minX;
+            const tall = maxY - minY;
+            const cellSize = Math.max(grid.minCellSize, Math.ceil(Math.sqrt(wide * tall / grid.maxCells)), Math.ceil(Math.max(wide, tall) / grid.maxCellsWide));
+            const originX = minX - 1;
+            const originY = minY - 1;
+            const cols = Math.floor((maxX + 1 - originX) / cellSize) + 1;
+            const rows = Math.floor((maxY + 1 - originY) / cellSize) + 1;
+            if (grid.cols !== cols || grid.rows !== rows || grid.cellSize !== cellSize || grid.edgeCells.length !== cols * rows) { //a moving door usually doesn't change the layout
+                grid.edgeCells = [];
+                grid.bodyCells = [];
+                for (let i = 0; i < cols * rows; i++) {
+                    grid.edgeCells.push([]);
+                    grid.bodyCells.push([]);
+                }
+            } else {
+                for (let i = 0; i < cols * rows; i++) {
+                    grid.edgeCells[i].length = 0;
+                    grid.bodyCells[i].length = 0;
+                }
+            }
+            grid.cols = cols;
+            grid.rows = rows;
+            grid.cellSize = cellSize;
+            grid.originX = originX;
+            grid.originY = originY;
+
+            if (grid.edgeKinds.length < edgeCount) {
+                grid.edges = new Float64Array(edgeCount * 4);
+                grid.edgeKinds = new Uint8Array(edgeCount);
+                grid.edgeStamps = new Float64Array(edgeCount);
+                grid.edgeBodies = new Int32Array(edgeCount);
+                grid.edgeNumbers = new Int32Array(edgeCount);
+            }
+            let edgeIndex = 0;
+            function addEdges(vertices, kind, bodyIndex) {
+                let a = vertices[vertices.length - 1];
+                for (let i = 0; i < vertices.length; i++) {
+                    const b = vertices[i];
+                    grid.edges[edgeIndex * 4] = a.x;
+                    grid.edges[edgeIndex * 4 + 1] = a.y;
+                    grid.edges[edgeIndex * 4 + 2] = b.x;
+                    grid.edges[edgeIndex * 4 + 3] = b.y;
+                    grid.edgeKinds[edgeIndex] = kind;
+                    grid.edgeBodies[edgeIndex] = bodyIndex;
+                    grid.edgeNumbers[edgeIndex] = i === 0 ? vertices.length - 1 : i - 1; //the edge from vertex i - 1 to vertex i
+                    const count = simulation.sight.findLineCells(a.x, a.y, b.x, b.y);
+                    for (let j = 0; j < count; j++) grid.edgeCells[grid.lineCells[j]].push(edgeIndex);
+                    edgeIndex++;
+                    a = b;
+                }
+            }
+            for (let bodyIndex = 0; bodyIndex < map.length; bodyIndex++) {
+                const who = map[bodyIndex];
+                if (who.isRay) continue;
+                if (who.parts.length === 1) {
+                    addEdges(who.vertices, 3, bodyIndex);
+                } else { //Matter.Query.segmentAny tests the parts of a compound body, the nearest hit uses its outline
+                    addEdges(who.vertices, 2, bodyIndex);
+                    for (let k = 1; k < who.parts.length; k++) addEdges(who.parts[k].vertices, 1, bodyIndex);
+                }
+                const startCol = Math.floor((who.bounds.min.x - grid.pad - originX) / cellSize);
+                const endCol = Math.floor((who.bounds.max.x + grid.pad - originX) / cellSize);
+                const startRow = Math.floor((who.bounds.min.y - grid.pad - originY) / cellSize);
+                const endRow = Math.floor((who.bounds.max.y + grid.pad - originY) / cellSize);
+                for (let col = Math.max(startCol, 0); col <= endCol && col < cols; col++) {
+                    for (let row = Math.max(startRow, 0); row <= endRow && row < rows; row++) grid.bodyCells[col * rows + row].push(who);
+                }
+            }
+            simulation.sight.buildIntersectMap();
+        },
+        buildIntersectMap() { //each wall's corners plus where other walls cross its edges, the grid rebuilds it whenever the map changes
+            const grid = simulation.sight.mapGrid;
+            const edges = grid.edges;
+            const edgeKinds = grid.edgeKinds;
+            const edgeStamps = grid.edgeStamps;
+            const edgeBodies = grid.edgeBodies;
+            const edgeNumbers = grid.edgeNumbers;
+            const intersectMap = [];
+            const found = [];
+            const byOrder = (a, b) => a.body - b.body || a.edge - b.edge; //the same order as a scan of every wall
+            for (let bodyIndex = 0; bodyIndex < grid.bodies.length; bodyIndex++) {
+                const obj = grid.bodies[bodyIndex];
+                if (obj.isRay) continue //tech: ray, you can see through the line left behind
+                const vertices = obj.vertices;
+                const newVertices = [];
+                for (let j = 0; j < vertices.length; j++) {
+                    const v1 = vertices[j];
+                    const v1End = vertices[(j + 1) % vertices.length];
+                    newVertices.push(v1);
+                    const rayMinX = v1.x < v1End.x ? v1.x : v1End.x;
+                    const rayMaxX = v1.x > v1End.x ? v1.x : v1End.x;
+                    const rayMinY = v1.y < v1End.y ? v1.y : v1End.y;
+                    const rayMaxY = v1.y > v1End.y ? v1.y : v1End.y;
+                    const rayDx = v1End.x - v1.x;
+                    const rayDy = v1End.y - v1.y;
+                    const stamp = ++grid.stamp;
+                    found.length = 0;
+                    const cellCount = simulation.sight.findLineCells(v1.x, v1.y, v1End.x, v1End.y);
+                    for (let c = 0; c < cellCount; c++) {
+                        const cellEdges = grid.edgeCells[grid.lineCells[c]];
+                        for (let k = 0; k < cellEdges.length; k++) {
+                            const edge = cellEdges[k];
+                            if (edgeStamps[edge] === stamp) continue;
+                            edgeStamps[edge] = stamp;
+                            if (!(edgeKinds[edge] & 2) || edgeBodies[edge] === bodyIndex) continue; //other walls' outlines
+                            const startX = edges[edge * 4];
+                            const startY = edges[edge * 4 + 1];
+                            const endX = edges[edge * 4 + 2];
+                            const endY = edges[edge * 4 + 3];
+                            if (rayMaxX < (startX < endX ? startX : endX) || (startX > endX ? startX : endX) < rayMinX ||
+                                rayMaxY < (startY < endY ? startY : endY) || (startY > endY ? startY : endY) < rayMinY) continue;
+                            const edgeDx = endX - startX;
+                            const edgeDy = endY - startY;
+                            const denominator = edgeDy * rayDx - edgeDx * rayDy;
+                            if (denominator === 0) continue;
+                            const offsetY = v1.y - startY;
+                            const offsetX = v1.x - startX;
+                            const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator;
+                            const edgeFraction = (rayDx * offsetY - rayDy * offsetX) / denominator;
+                            if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) {
+                                found.push({ body: edgeBodies[edge], edge: edgeNumbers[edge], x: v1.x + rayFraction * rayDx, y: v1.y + rayFraction * rayDy });
+                            }
+                        }
+                    }
+                    if (found.length > 1) found.sort(byOrder);
+                    for (let k = 0; k < found.length; k++) newVertices.push({ x: found[k].x, y: found[k].y });
+                }
+                intersectMap.push({ vertices: newVertices });
+            }
+            simulation.sight.intersectMap = intersectMap;
+        },
+        findLineCells(x1, y1, x2, y2) { //lists every cell the line touches into grid.lineCells in order from start to end, returns how many
+            const grid = simulation.sight.mapGrid;
+            const lineCells = grid.lineCells;
+            const cols = grid.cols;
+            const rows = grid.rows;
+            if (cols === 0) return 0;
+            const size = grid.cellSize;
+            const pad = grid.pad;
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const stepCol = dx < 0 ? -1 : 1;
+            const stepRow = dy < 0 ? -1 : 1;
+            let col = Math.floor((x1 - stepCol * pad - grid.originX) / size);
+            let lastCol = Math.floor((x2 + stepCol * pad - grid.originX) / size);
+            col = col < 0 ? 0 : col >= cols ? cols - 1 : col;
+            lastCol = lastCol < 0 ? 0 : lastCol >= cols ? cols - 1 : lastCol;
+            let count = 0;
+            for (let i = (lastCol - col) * stepCol; i >= 0; i--, col += stepCol) {
+                let enter = 0;
+                let exit = 1;
+                if (dx !== 0) { //the part of the line in this column
+                    const left = grid.originX + col * size - pad;
+                    const right = left + size + 2 * pad;
+                    enter = ((stepCol > 0 ? left : right) - x1) / dx;
+                    exit = ((stepCol > 0 ? right : left) - x1) / dx;
+                    if (enter < 0) enter = 0;
+                    if (exit > 1) exit = 1;
+                    if (enter > exit) continue;
+                }
+                let row = Math.floor((y1 + enter * dy - stepRow * pad - grid.originY) / size);
+                let lastRow = Math.floor((y1 + exit * dy + stepRow * pad - grid.originY) / size);
+                row = row < 0 ? 0 : row >= rows ? rows - 1 : row;
+                lastRow = lastRow < 0 ? 0 : lastRow >= rows ? rows - 1 : lastRow;
+                for (let j = (lastRow - row) * stepRow; j >= 0; j--, row += stepRow) lineCells[count++] = col * rows + row;
+            }
+            return count;
+        },
+        isPointInWall(point) { //same as a zero length Matter.Query.segmentAny, only checks the walls in the point's cell
+            const grid = simulation.sight.mapGrid;
+            if (grid.cols === 0) return false;
+            const col = Math.floor((point.x - grid.originX) / grid.cellSize);
+            const row = Math.floor((point.y - grid.originY) / grid.cellSize);
+            if (!(col >= 0 && col < grid.cols && row >= 0 && row < grid.rows)) return false;
+            return Matter.Query.segmentAny(grid.bodyCells[col * grid.rows + row], point, point);
+        },
+        isSightBlocked(start, end) { //same as Matter.Query.segmentAny on the map, circleLoS checks the start with isPointInWall
+            const grid = simulation.sight.mapGrid;
+            const x1 = start.x;
+            const y1 = start.y;
+            const x2 = end.x;
+            const y2 = end.y;
+            const rayMinX = x1 < x2 ? x1 : x2;
+            const rayMaxX = x1 > x2 ? x1 : x2;
+            const rayMinY = y1 < y2 ? y1 : y2;
+            const rayMaxY = y1 > y2 ? y1 : y2;
+            const rayDx = x2 - x1;
+            const rayDy = y2 - y1;
+            const edges = grid.edges;
+            const edgeKinds = grid.edgeKinds;
+            const edgeStamps = grid.edgeStamps;
+            const stamp = ++grid.stamp;
+            const cellCount = simulation.sight.findLineCells(x1, y1, x2, y2);
+            for (let i = 0; i < cellCount; i++) {
+                const cell = grid.edgeCells[grid.lineCells[i]];
+                for (let j = 0; j < cell.length; j++) {
+                    const id = cell[j];
+                    if (edgeStamps[id] === stamp || !(edgeKinds[id] & 1)) continue;
+                    edgeStamps[id] = stamp;
+                    const ax = edges[id * 4];
+                    const ay = edges[id * 4 + 1];
+                    const bx = edges[id * 4 + 2];
+                    const by = edges[id * 4 + 3];
+                    if ((ax < bx ? bx : ax) < rayMinX || rayMaxX < (ax < bx ? ax : bx) || (ay < by ? by : ay) < rayMinY || rayMaxY < (ay < by ? ay : by)) continue;
+                    const edgeDx = bx - ax;
+                    const edgeDy = by - ay;
+                    const denominator = edgeDy * rayDx - edgeDx * rayDy;
+                    if (denominator === 0) continue;
+                    const offsetY = y1 - ay;
+                    const offsetX = x1 - ax;
+                    const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator;
+                    const edgeFraction = (rayDx * offsetY - rayDy * offsetX) / denominator;
+                    if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) return true;
+                }
+            }
+            return simulation.sight.isPointInWall(end);
+        },
+        getIntersection(v1, v1End) { //the nearest wall from v1 to v1End, or v1End if there's nothing in the way
+            const grid = simulation.sight.mapGrid;
+            const x1 = v1.x;
+            const y1 = v1.y;
+            const x2 = v1End.x;
+            const y2 = v1End.y;
+            const rayMinX = x1 < x2 ? x1 : x2;
+            const rayMaxX = x1 > x2 ? x1 : x2;
+            const rayMinY = y1 < y2 ? y1 : y2;
+            const rayMaxY = y1 > y2 ? y1 : y2;
+            const rayDx = x2 - x1;
+            const rayDy = y2 - y1;
+            const stepCol = rayDx < 0 ? -1 : 1;
+            const stepRow = rayDy < 0 ? -1 : 1;
+            const rows = grid.rows;
+            const edges = grid.edges;
+            const edgeKinds = grid.edgeKinds;
+            const edgeStamps = grid.edgeStamps;
+            const stamp = ++grid.stamp;
+            let bestX = x2;
+            let bestY = y2;
+            let bestDist = rayDx * rayDx + rayDy * rayDy;
+            let stopRank = Infinity;
+            const cellCount = simulation.sight.findLineCells(x1, y1, x2, y2);
+            for (let i = 0; i < cellCount; i++) {
+                const cellIndex = grid.lineCells[i];
+                const cell = grid.edgeCells[cellIndex];
+                for (let j = 0; j < cell.length; j++) {
+                    const id = cell[j];
+                    if (edgeStamps[id] === stamp || !(edgeKinds[id] & 2)) continue;
+                    edgeStamps[id] = stamp;
+                    const ax = edges[id * 4];
+                    const ay = edges[id * 4 + 1];
+                    const bx = edges[id * 4 + 2];
+                    const by = edges[id * 4 + 3];
+                    if ((ax < bx ? bx : ax) < rayMinX || rayMaxX < (ax < bx ? ax : bx) || (ay < by ? by : ay) < rayMinY || rayMaxY < (ay < by ? ay : by)) continue;
+                    const edgeDx = bx - ax;
+                    const edgeDy = by - ay;
+                    const denominator = edgeDy * rayDx - edgeDx * rayDy;
+                    if (denominator === 0) continue;
+                    const offsetY = y1 - ay;
+                    const offsetX = x1 - ax;
+                    const rayFraction = (edgeDx * offsetY - edgeDy * offsetX) / denominator;
+                    const edgeFraction = (rayDx * offsetY - rayDy * offsetX) / denominator;
+                    if (rayFraction > 0 && rayFraction < 1 && edgeFraction > 0 && edgeFraction < 1) {
+                        const hitX = x1 + rayFraction * rayDx;
+                        const hitY = y1 + rayFraction * rayDy;
+                        const dist = (hitX - x1) ** 2 + (hitY - y1) ** 2;
+                        if (dist < bestDist) {
+                            bestX = hitX;
+                            bestY = hitY;
+                            bestDist = dist;
+                            //a long wall in a near cell can be hit far away, so keep going until the line reaches the hit's cell, anything closer is in a cell before that
+                            let col = Math.floor((hitX + stepCol * grid.pad - grid.originX) / grid.cellSize);
+                            let row = Math.floor((hitY + stepRow * grid.pad - grid.originY) / grid.cellSize);
+                            col = col < 0 ? 0 : col >= grid.cols ? grid.cols - 1 : col;
+                            row = row < 0 ? 0 : row >= rows ? rows - 1 : row;
+                            stopRank = stepCol * col * rows + stepRow * row;
+                        }
+                    }
+                }
+                if (stopRank !== Infinity) {
+                    const col = (cellIndex - cellIndex % rows) / rows;
+                    if (stepCol * col * rows + stepRow * (cellIndex % rows) >= stopRank) break;
+                }
+            }
+            return { x: bestX, y: bestY, dist: Math.sqrt(bestDist) };
         },
     },
     draw: {
@@ -1762,8 +2014,7 @@ const simulation = {
         flushMapPathRebuild() {
             if (!simulation.draw.isMapPathRebuildPending) return false;
             simulation.draw.isMapPathRebuildPending = false;
-            simulation.draw.setPaths();
-            simulation.draw.lineOfSightPrecalculation();
+            simulation.draw.setPaths(); //line of sight picks up the moved walls by itself, see simulation.sight.updateMapGrid()
             return true;
         },
 
@@ -1780,7 +2031,6 @@ const simulation = {
                 }
                 simulation.draw.mapPath.lineTo(vertices[0].x, vertices[0].y);
             }
-            if (simulation.draw.drawMapPath === simulation.draw.drawMapSightSetting) simulation.draw.lineOfSightPrecalculation() //keep the line of sight setting up to date when the map changes
         },
         isLineOfSight() { //subway, the line of sight setting, and community maps with line of sight all replace drawMapPath
             return simulation.draw.drawMapPath !== simulation.draw.drawMapPathDefault
@@ -1796,32 +2046,8 @@ const simulation = {
                 simulation.draw.drawMapPath = simulation.draw.drawMapPathDefault
             }
         },
-        lineOfSightPrecalculation() {
-            simulation.sight.intersectMap = [];
-            for (let i = 0; i < map.length; i++) {
-                const obj = map[i];
-                if (obj.isRay) continue //tech: ray, you can see through the line left behind
-                const newVertices = [];
-                for (let j = 0; j < obj.vertices.length; j++) {
-                    const vertex = obj.vertices[j];
-                    newVertices.push(vertex);
-                    simulation.sight.appendMapIntersections(
-                        vertex,
-                        obj.vertices[(j + 1) % obj.vertices.length],
-                        i,
-                        newVertices
-                    );
-                }
-                //draw the vertices as black circles for debugging
-                // for (const vertex of newVertices) {
-                //     ctx.beginPath();
-                //     ctx.moveTo(vertex.x, vertex.y);
-                //     ctx.arc(vertex.x, vertex.y, 10, 0, 2 * Math.PI);
-                //     ctx.fillStyle = '#000';
-                //     ctx.fill()
-                // }
-                simulation.sight.intersectMap.push({ vertices: newVertices });
-            }
+        lineOfSightPrecalculation() { //rebuilds the sight grid and the corners in intersectMap now, circleLoS also rebuilds them by itself whenever the map changes
+            simulation.sight.buildMapGrid()
         },
         drawMapPath() { },
         drawMapPathDefault() {
@@ -1829,6 +2055,9 @@ const simulation = {
             ctx.fill(simulation.draw.mapPath);
         },
         drawMapSightSetting() {
+            simulation.draw.drawMapSight(true)
+        },
+        drawMapSightLevel() { //a level that's always line of sight, like the level editor's line of sight setting, the pause menu's setting can't turn it off
             simulation.draw.drawMapSight(true)
         },
         drawMapSight(isShadeSight = false) {

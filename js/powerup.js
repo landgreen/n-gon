@@ -485,7 +485,21 @@ const powerUps = {
         size() {
             return 30
         },
-        load(name) {
+        async load(name) {
+            if (name && !level.maps[name] && !level.localMaps[name]) { //community and training levels are in level2.js, which only loads when community maps are on
+                try {
+                    await level.loadMoreLevels()
+                } catch (error) {
+                    return console.error(error)
+                }
+            }
+            if (name && level.localMaps[name]) { //a local level with code needs its code program, see levelData.loadProgram()
+                try {
+                    await levelData.loadProgram()
+                } catch (error) {
+                    return console.error(error)
+                }
+            }
             if (name) level.levels[level.onLevel + 1] = name
             powerUps.warp.exit()
             level.nextLevel();
@@ -1807,11 +1821,13 @@ const powerUps = {
             powerUps.spawn(x, y, "ammo", false);
         }
     },
-    addResearchToLevel() { //add a research to a location that has a mob, gives each level a research
+    addResearchToLevel() { //add a research to a location that has a mob, or by the exit with no mobs, gives each level a research
         if (simulation.difficultyOptions.isFewerResearch) return;
         if (mob.length) {
             const index = Math.floor(Math.random() * mob.length)
             powerUps.spawn(mob[index].position.x, mob[index].position.y, "research");
+        } else {
+            powerUps.spawn(level.exit.x + 50, level.exit.y - 50, "research", false); //not moving, so it lands at the door
         }
     },
     spawnStartingPowerUps(x, y) { //used for map specific power ups, mostly to give player a starting gun
@@ -1924,9 +1940,20 @@ const powerUps = {
         }
     },
     randomize(where) { //makes a random power up convert into a random different power up
-        //put 10 power ups close together
-        const len = Math.min(10, powerUp.length)
-        for (let i = 0; i < len; i++) { //collide the first 10 power ups
+        //put 10 random power ups close together, only these collide
+        const smallNames = ["heal", "research", "ammo", "coupling", "boost", "Casimir", "qubit"]
+        const bigNames = ["tech", "gun", "field"]
+        const eligible = []
+        for (let i = 0; i < powerUp.length; i++) {
+            if (tech.isPowerUpsVanish && powerUp[i].isDuplicated) continue //metastability duplicates can't become normal power ups that don't explode
+            if (smallNames.includes(powerUp[i].name) || bigNames.includes(powerUp[i].name)) eligible.push(i)
+        }
+        const chosen = []
+        while (chosen.length < 10 && eligible.length) chosen.push(eligible.splice(Math.floor(Math.random() * eligible.length), 1)[0])
+        chosen.sort((a, b) => a - b) //merges remove from the end so the other indexes stay correct
+        const bigIndexes = chosen.filter(i => bigNames.includes(powerUp[i].name))
+        const smallIndexes = chosen.filter(i => smallNames.includes(powerUp[i].name))
+        for (const i of chosen) {
             powerUp[i].cycle = 1
             const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
             Matter.Body.setPosition(powerUp[i], Vector.add(where, Vector.mult(unit, 20 + 45 * Math.random())));
@@ -1935,48 +1962,47 @@ const powerUps = {
 
         //count big power ups and small power ups
 
-        let options = [powerUps.healGiveMaxEnergy ? "Casimir" : "heal", "research"]
+        const options = [powerUps.healGiveMaxEnergy ? "Casimir" : "heal"]
+        if (!tech.isSuperDeterminism) options.push("research")
         if (!tech.isBoostReplaceAmmo) options.push("ammo")
         if (m.coupling || tech.isBoostReplaceAmmo) options.push("coupling")
         if (tech.isBoostPowerUps || tech.isBoostReplaceAmmo) options.push("boost")
         if (tech.isBoostReplaceAmmo) options.push("Casimir")
 
-        const smallNames = ["heal", "research", "ammo", "coupling", "boost", "Casimir", "qubit"]
-        let bigIndexes = []
-        let smallIndexes = []
-        for (let i = 0; i < powerUp.length; i++) {
-            if (powerUp[i].name === "tech" || powerUp[i].name === "gun" || powerUp[i].name === "field") {
-                bigIndexes.push(i)
-            } else if (smallNames.includes(powerUp[i].name)) {
-                smallIndexes.push(i)
-            }
-        }
-
-        if (smallIndexes.length > 2 && Math.random() < 0.66) { //3 small combine into 1 big
-            for (let j = 2; j > -1; j--) { //remove from the end so the other indexes stay correct
+        const roll = Math.random()
+        const mergeChance = smallIndexes.length > 2 ? 0.33 : 0
+        const mergeCost = Math.random() < 0.5 ? 3 : 4 //if there aren't enough small for the cost they swap flavors instead
+        if (roll < mergeChance && smallIndexes.length >= mergeCost) { //3 or 4 small combine into 1 big
+            for (let j = mergeCost - 1; j > -1; j--) { //remove from the end so the other indexes stay correct
                 Matter.Composite.remove(engine.world, powerUp[smallIndexes[j]]);
                 powerUp.splice(smallIndexes[j], 1);
             }
 
-            options = ["tech", "tech", "tech", "gun", "gun", "field"]
-            const name = options[Math.floor(Math.random() * options.length)]
+            const bigOptions = ["tech", "tech", "tech", "gun", "gun", "field"]
+            const name = bigOptions[Math.floor(Math.random() * bigOptions.length)]
             if (tech.isGUT && (name === "gun" || name === "field")) {
                 powerUps.spawn(where.x, where.y, name, false)
             } else {
                 powerUps.directSpawn(where.x, where.y, name, false)
             }
-        } else if (bigIndexes.length > 0 && Math.random() < 0.5) { //1 big splits into 3 small
+        } else if (bigIndexes.length > 0 && roll >= mergeChance && roll < 0.5) { //1 big splits into 3 small
             const index = bigIndexes[Math.floor(Math.random() * bigIndexes.length)]
             for (let i = 0; i < 3; i++) powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
 
             Matter.Composite.remove(engine.world, powerUp[index]);
             powerUp.splice(index, 1);
-        } else if (smallIndexes.length > 0) { //1 small swaps flavors
-            const index = smallIndexes[Math.floor(Math.random() * smallIndexes.length)]
-            options = options.filter(e => e !== powerUp[index].name); //don't repeat the current power up type
-            powerUps.directSpawn(where.x, where.y, options[Math.floor(Math.random() * options.length)], false)
-            Matter.Composite.remove(engine.world, powerUp[index]);
-            powerUp.splice(index, 1);
+        } else if (smallIndexes.length > 0) { //up to 3 small swap flavors
+            const swapIndexes = []
+            for (let i = 0, len = Math.min(3, smallIndexes.length); i < len; i++) {
+                swapIndexes.push(smallIndexes.splice(Math.floor(Math.random() * smallIndexes.length), 1)[0])
+            }
+            swapIndexes.sort((a, b) => b - a) //remove from the end so the other indexes stay correct
+            for (const index of swapIndexes) {
+                const flavors = options.filter(e => e !== powerUp[index].name); //don't repeat the current power up type
+                powerUps.directSpawn(where.x, where.y, flavors[Math.floor(Math.random() * flavors.length)], false)
+                Matter.Composite.remove(engine.world, powerUp[index]);
+                powerUp.splice(index, 1);
+            }
         }
     },
     spawn(x, y, name, moving = true, size = powerUps[name].size()) {

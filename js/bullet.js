@@ -4592,15 +4592,20 @@ const b = {
             },
             do() {
                 this.force.y += this.mass * 0.002; //extra gravity
-                let collide = Matter.Query.collides(this, map) //check if collides with map
+                const collide = Matter.Query.collides(this, map)
                 if (collide.length > 0) {
+                    const surfaceOf = hit => hit.parentA === this ? hit.parentB : hit.parentA
                     for (let i = 0; i < collide.length; i++) {
-                        if (collide[i].bodyA.collisionFilter.category === cat.map) { // || collide[i].bodyB.collisionFilter.category === cat.map) {
-                            const angle = Vector.angle(collide[i].normal, { x: 1, y: 0 })
-                            Matter.Body.setAngle(this, Math.atan2(collide[i].tangent.y, collide[i].tangent.x))
+                        const surface = surfaceOf(collide[i])
+                        if (surface.collisionFilter.category === cat.map) {
+                            const normal = collide[i].parentA === this ? Vector.neg(collide[i].normal) : collide[i].normal
+                            const angle = Vector.angle(normal, { x: 1, y: 0 })
+                            Matter.Body.setAngle(this, Math.atan2(normal.x, -normal.y))
                             for (let j = 0; j < 10; j++) { //move until touching map again after rotation
-                                if (Matter.Query.collides(this, map).length > 0) { //touching map
+                                const contacts = Matter.Query.collides(this, map)
+                                if (contacts.length > 0) {
                                     if (angle > -0.2 || angle < -1.5) { //don't stick to level ground
+                                        this.attachedMap = contacts.some(hit => surfaceOf(hit) === surface) ? surface : surfaceOf(contacts[0])
                                         Matter.Body.setVelocity(this, { x: 0, y: 0 });
                                         Matter.Body.setStatic(this, true) //don't set to static if not touching map
                                         this.collisionFilter.category = 0
@@ -4629,7 +4634,7 @@ const b = {
                                     })
                                     break
                                 }
-                                Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(collide[i].normal, 2))) //move until you are touching the wall
+                                Matter.Body.setPosition(this, Vector.add(this.position, Vector.mult(normal, 2))) //move until you are touching the wall
                             }
                             break
                         }
@@ -9123,6 +9128,7 @@ const b = {
             },
             CDcount: 0,
             fire360Longitudinal() {
+                if (this.waveFireCD >= m.cycle) return //pressing fire calls this directly, so clicking can't beat the fire rate
                 const timeSlow = m.isTimeDilated ? 2 : 1
                 const s = Math.floor(timeSlow * (m.crouch ? 10 : 15) * b.fireCDscale)
                 if (tech.amplitudeCount) {
@@ -9145,6 +9151,7 @@ const b = {
                 this.autoFire();
             },
             fireLongitudinal() {
+                if (this.waveFireCD >= m.cycle) return //pressing fire calls this directly, so clicking can't beat the fire rate
                 const timeSlow = m.isTimeDilated ? 2 : 1
                 this.waveFireCD = m.cycle + Math.floor(timeSlow * (m.crouch ? 10 : 15) * b.fireCDscale); // cool down
 

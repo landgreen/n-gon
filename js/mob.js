@@ -2009,6 +2009,7 @@ const mobs = {
                             consBB[i].bodyB.do = function () { this.death() }
                         }
                         consBB[i].bodyA = consBB[i].bodyB;
+                        Composite.remove(engine.world, consBB[i]);
                         consBB.splice(i, 1);
                         this.removeConsBB();
                         break;
@@ -2017,6 +2018,7 @@ const mobs = {
                             consBB[i].bodyA.do = function () { this.death() }
                         }
                         consBB[i].bodyB = consBB[i].bodyA;
+                        Composite.remove(engine.world, consBB[i]);
                         consBB.splice(i, 1);
                         this.removeConsBB();
                         break;
@@ -2027,11 +2029,13 @@ const mobs = {
                 for (let i = 0, len = cons.length; i < len; ++i) {
                     if (cons[i].bodyA === this) {
                         cons[i].bodyA = cons[i].bodyB;
+                        Composite.remove(engine.world, cons[i]);
                         cons.splice(i, 1);
                         this.removeCons();
                         break;
                     } else if (cons[i].bodyB === this) {
                         cons[i].bodyB = cons[i].bodyA;
+                        Composite.remove(engine.world, cons[i]);
                         cons.splice(i, 1);
                         this.removeCons();
                         break;

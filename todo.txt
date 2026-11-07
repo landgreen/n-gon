@@ -1,25 +1,74 @@
-level editor: camera - the player hides and WASD flies the view anywhere, turning it off drops the player there, replaces the velocity drawing
-level editor: import asks before running a level's javascript, shows you the code first, or imports it without the code
-community maps and level editor code can read your saves and settings but can't change them
-level editor: the level element list is just elements and triggers, drawings use the drawing buttons, shadow fill and drip are gone
-level editor: fill - rect, circle, and ellipse buttons in its info box, circle fill and bezier are out of the add menu, paths curve
-level editor: zones, buttons, toggles, keyholes, linked slime, maps, and doors, and constraints can have their code edited
-level editor: zone - circle option, a round trigger with a radius
-level editor: code opens in three boxes stacked top to bottom, runs once, level.custom, and level.customTopLayer, drag the lines between them
+level editor: zone effects - check effects on a zone to push, slow, hurt, or drain energy from what's inside, and pick if it hits the player, blocks, mobs, bullets, or power ups
+n-vote - a link to the fan site for uploading, downloading, and rating maps, in the level pool and the level editor's import/export
+line of sight: runs about 3x faster and up to 10x on big maps - walls are sorted into a grid, sight only checks the walls near it, and the grid follows doors and other map changes by itself, moving doors on big maps update about 30x faster
+tech: collider - merges happen half as often and big power ups cost 3->(3 or 4) small power ups
+community maps and level editor code use read-only helpers to prevent accidental changes to saves and settings, only run javascript you trust
 level pool: thumbnails - a button in the level pool menu shows a zoomed out picture of each level
-level editor: log - buttons, toggles, keyholes, zones, timers, and the level itself can write a message in the in-game console
-level editor: author - the level's info box has an author, the level says its name and who made it in the in-game console when it loads
+
+level editor
+  the issues warn when lots of power ups are piled in one spot, it slows the physics and drops the frame rate
+  line of sight - a checkbox in the level's info box makes the level line of sight like subway, it shows in quick test and test export, not while editing
+  element names in code stay with their elements when you add or reorder things
+  editing an element's code doesn't lock its info box anymore - typed values and checkbox lines change its settings, and dragging it or changing its settings updates its code, keeping what you typed
+  the code button shows the whole level as one piece of javascript, it opens at your element's lines, type anywhere and your lines stay where you put them
+  all of a level's code shares one scope now - the level code, edited elements, and imported code can see each other's variables, and level code can name elements like button1, older levels that declare a variable twice need one renamed
+  stop time - a button in the simulation menu that freezes everything but the player while you edit, time speeds are now 0.1×, 0.5×, 1×, and 2×
+  buzzsaw - a spinning blade that hurts you, hit draw next to its path to draw one, or pick a draw path you've made, and it travels back and forth along it, around and around on a closed path, link it to a button to stop it, 8 looks to choose from like rotor, plasma, tesla, and laser
+  import saves a new local level and keeps the level you were editing
+  carry player - a checkbox on blocks with a force, on to start, the player standing on the block moves along with it
+  blocks can have a force, steady or a back and forth wave, at any angle and strength, on a constraint they swing
+  drawings can link to a button, zone, or other trigger, and only show while it's on
+  laser - pick its color, and an arc look that's electricity and hits a little wider
+  draw - customizable wires, fan, gear, vent, piston, belt, beacon, panel, pipe, truss, grate, stripes, rain, snow, sparks, steam, waves, grass, and vines, the analysis warns when a level draws too much
+  mobs and bosses can link to a button, zone, or other trigger to spawn when it turns on, without one they spawn when the level starts
+  collides - movers, vanishes, transports, elevators, spinners, doors, and the blocks dispensers make can pick what they bump into, like maps and blocks
+  button, scale, and toggle are one entry in level elements, the top of its info box switches between them
+  logic - and, or, not, and timer in triggers, link buttons and other triggers to it, then link it to what they should run, the top of its info box switches between them, older levels' timers still work
+  element, power up, mob, trigger, draw, and boss buttons in the add menu open one list of buttons at a time, leave it open and drag from it onto the level
+  recently used - the 4 buttons above the add menu's lists fill up in turn with what you pick from the lists and stay in place
+  delay - anything linked to a button, toggle, or other trigger has a delay, it follows the trigger that many cycles late
+  mob clear - a trigger that's on once the mobs in its box, the whole level, or the bosses are dead, for arena rooms
+  scale - an amber button that's on while enough weight sits on it, a gauge on its base fills as you add weight, stacks of blocks count
+  nest - in the mobs list, a mob that stays put and makes mobs while it sees you, its mobs don't drop power ups
+  dispenser - a wall mount that makes a block every few seconds, up to a max, snaps onto walls, aim it any direction and launch them, waits while its spot is blocked, link it to a button to drop on demand
+  gravity - a zone with its own gravity, 0 floats, negative falls up, link it to flip it on and off, it can be invisible
+  one way - a platform you jump up through and land on, turn it to any angle, hold down to drop through, blocks and mobs pass through it too
+  drag a number or its name in the info box left or right to change it, shift for faster
+  smart snap - maps, blocks, platforms, doors, buttons, and keys snap to each other's edges and middles with guide lines, the snap button turns it off, alt places freely
+  elevators can be linked to triggers, while off they finish their trip and wait at the bottom
+  ghost (G) - the player hides and WASD flies the view anywhere through walls, G again drops the player there, replaces the velocity drawing
+  import asks before running a level's javascript, shows you the code first, or imports it without the code
+  the level element list is just elements and triggers, drawings use the drawing buttons, shadow fill is gone
+  fill - rect, circle, and ellipse buttons in its info box, circle fill and bezier are out of the add menu, paths curve
+  zones, buttons, toggles, keyholes, linked slime, maps, and doors, and constraints can have their code edited
+  zone - circle option, a round trigger with a radius
+  log - buttons, toggles, keyholes, zones, timers, and the level itself can write a message in the in-game console
+  author - the level's info box has an author, the level says its name and who made it in the in-game console when it loads
 
 bug fixes
+  fast movement, like with grappling hook, checks for thin walls crossed between physics steps
+  collider no longer makes research with superdeterminism
+  elevators and spinners: no longer kill mobs they run into, they push them instead of doing block damage
+  wave: spam clicking fire can't beat the fire rate anymore
+  research: a level with no mobs when it loads puts its research by the exit, it used to give none
+  level editor: linking a third trigger to something that has two is refused, it no longer replaces the first link
+  collider: pulls 10 random power ups to the mob and only those collide, power ups across the map used to merge without moving
+  collider: metastability duplicates can't collide anymore, they used to turn into normal power ups that don't explode
+  deflecting: heavy mobs in standing wave's field no longer launch you at huge speeds or get dragged along with you
+  buttons: no more thin line between a button's base and the floor under it
+  bosses that pin themselves in place, and mobs losing their links or shields, no longer leave invisible constraints behind for the rest of the run
+  labs: thick outer walls, fast things can't slip out of the map anymore
   level editor: constraints no longer happen while editing, like spawn wimps sending wimps after you
   level editor: pausing hides the editor's menus, they used to stick out from under the pause menu
+  level editor: no more crash when opening the editor before it finished downloading, like clicking it twice on your first visit
+  community maps: yingYang and diamagnetism no longer throw an error every frame when their picture can't download, underpass stops downloading its picture every frame
+  testing: warp (9) to a community or training level works when community maps are off
+  mines: mines stuck to doors, like on subway, move with the door instead of floating in the air
 
 
 
 
 *********************************************************** TODO *****************************************************
-
-
 
 
 add alternator-like swing code to other situations
@@ -846,7 +895,7 @@ metamaterial cloaking, cloaked vs decloaked   ~6 µs (noise)              noise 
 20 starter mobs, radius 16, active AI         ~45 µs                     ~65 µs                   ~15 / ~20 µs
 final boss, full health, before damage        ~6 µs (noise)              ~9 µs (noise)            <1 / ~1.2 µs
 final boss, damaged, first active attack      ~580 µs                    ~760 µs                  ~505 / ~610 µs
-line-of-sight setting on                      ~240 µs                    ~5,150 µs                ~220 / ~4,950 µs
+line-of-sight setting on (before sight grid)  ~240 µs                    ~5,150 µs                ~220 / ~4,950 µs
 16 base shotgun pellets, one airborne volley  ~30 µs                     ~30 µs                   ~17 / ~20 µs
 10 longitudinal wave arcs, radius 200-300     ~140 µs                    ~375 µs                  ~125 / ~360 µs
 10 base missiles in flight, no targets        ~15 µs                     ~20 µs (noisy)           ~3 / ~3 µs
@@ -893,7 +942,8 @@ measurement details and limits:
   these are CPU execution/Canvas submission timings, not complete GPU/presentation times or measured fps
   asynchronous graphics work can add costs that these timings miss, particularly fields using compositing
   this harness differs from the earlier three-row chart; compare rows within this block, not absolute numbers across the two
-  on ruins, line of sight uses about 31% of a 60 fps frame budget in measured added CPU time; damaged boss about 4.6%, foam about 3%
+  before the sight grid, line of sight on ruins used about 31% of a 60 fps frame budget in added CPU time
+  the damaged boss used about 4.6% of the frame budget and foam used about 3%
   costs depend on hardware, camera position, collisions, targets, and tech combinations; rows are reference cases and do not simply add together
 
 additional projectile, block, mirror, and exit setup notes:

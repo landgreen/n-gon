@@ -6,6 +6,7 @@ const levelElements = {
     types: {},
     groups: { core: [], shape: [], element: [], constraint: [], mob: [], powerUp: [], code: [] }, //type names in the order they were defined, element, mob, and powerUp are the editor's add menus
     buildOrder: ["core", "shape", "element", "constraint", "mob", "powerUp", "code"], //mobs and power ups go in after the map they stand on, like in written levels, constraints after what they hold, a level with code builds in its list order instead
+    maxPowerUpCount: 1000, //per editor element, also enforced when loading local level data
 
     //*********************************************************************
     // properties, shown and edited in the editor's inspector
@@ -29,10 +30,17 @@ const levelElements = {
     //*********************************************************************
     collision: {
         names: ["player", "map", "body", "bullet", "powerUp", "mob", "mobBullet", "mobShield"], //cat.phased is past 32 bits, Matter's masks can't hold it
-        category: { map: "map", block: "body" },
-        defaults: { //the mask each type gets in level.addToWorld() and spawn.bodyRect()
+        category: { map: "map", block: "body", mover: "map", vanish: "map", transport: "body", elevator: "body", spinner: "body", door: "body", dispenser: "body" },
+        defaults: { //the mask each type gets in level.addToWorld(), spawn.bodyRect(), and its level.* helper
             map: "player map body bullet powerUp mob mobBullet",
             block: "player map body bullet mob mobBullet",
+            mover: "player map body bullet powerUp mob mobBullet", //it's in map, so level.addToWorld() sets it
+            vanish: "player body bullet powerUp mob mobBullet",
+            transport: "player body bullet powerUp mob mobBullet",
+            elevator: "player body bullet mob mobBullet",
+            spinner: "player body bullet powerUp mob mobBullet",
+            door: "player body bullet powerUp mob mobBullet",
+            dispenser: "player map body bullet mob mobBullet", //the blocks it makes, like spawn.bodyRect()
         },
         others: { //the masks the game usually gives each category, so the editor only lists what collides back, guns and mobs vary
             player: "map body mob mobBullet mobShield",
@@ -53,7 +61,7 @@ const levelElements = {
         },
         isBack(type, name) { //does name's usual mask have this type's category, static maps never hit each other
             const category = levelElements.collision.category[type]
-            if (type === "map" && name === "map") return false
+            if (category === "map" && name === "map") return false
             return levelElements.collision.has(levelElements.collision.others[name], category)
         },
         choices(type) { //the names worth checking for a type, the others never collide with it whatever its mask
@@ -63,9 +71,10 @@ const levelElements = {
         code(text) { return String(text).split(" ").filter(name => levelElements.collision.names.includes(name)).map(name => `cat.${name}`).join(" | ") || "0" },
         isDefault(el) { return el.collides === levelElements.collision.defaults[el.type] },
     },
-    linkSources: ["button", "toggle", "keyhole", "zone", "timer"], //turn linked elements on and off, each has linkOn(el, runtime) and linkCode(el, name), see button
+    linkSources: ["button", "toggle", "keyhole", "zone", "scale", "mobClear", "logic"], //turn linked elements on and off, each has linkOn(el, runtime) and linkCode(el, name), see button
     orLinkProp() { return levelElements.prop.ref("orLink", levelElements.linkSources, { isShown: el => el.orLink !== null && el.orLink !== undefined }) }, //a second link, on while either is, set by linking a second button to it, only shown once it's set
     isLinkedTo: (el, source) => el.link === source.id || el.orLink === source.id,
+    isLinkFull: el => !!el.link && !!el.orLink, //two links is the most, a third is refused, see levelEditor.linkTo()
     tidyLinks(el) { //orLink moves up when link goes away, so link is set whenever either is, and they're never the same
         if (el.orLink && el.orLink === el.link) el.orLink = null
         if (!el.link && el.orLink) {
@@ -207,6 +216,7 @@ const levelElements = {
     },
     rotate(el, degrees, center = levelElements.pivot(el)) { //clockwise, negative turns counterclockwise
         const type = levelElements.types[el.type]
+        if (el.forceAngle !== undefined) el.forceAngle = Number((el.forceAngle - degrees).toFixed(3)) //a block's force turns with it
         if (type && type.rotate) return type.rotate(el, degrees, center)
         if (!levelElements.isRotatable(el)) return levelElements.orbit(el, degrees, center)
         levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.rotatePoint(p, center, degrees)))
@@ -221,6 +231,7 @@ const levelElements = {
     },
     flip(el, axis, center = levelElements.pivot(el)) {
         const type = levelElements.types[el.type]
+        if (el.forceAngle !== undefined) el.forceAngle = levelElements.flipAngle(el.forceAngle, axis) //a block's force mirrors with it
         if (type && type.flip) return type.flip(el, axis, center)
         if (type && (type.group === "shape" || type.isVertexEditable)) return levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.flipPoint(p, axis, center)))
         levelElements.flipPosition(el, axis, center)
@@ -270,7 +281,7 @@ const levelElements = {
     //*********************************************************************
     // making elements
     //*********************************************************************
-    nameOf(typeName) { //what the editor calls a type, the spawn is enter
+    nameOf(typeName) { //what the editor calls a type, the spawn is entrance
         return levelElements.types[typeName]?.editorName || typeName
     },
     define(name, type) {
@@ -339,6 +350,7 @@ const levelElements = {
         return { x: x / (6 * area), y: y / (6 * area) }
     },
     isCode: el => !!levelElements.types[el.type]?.isCode, //javascript the player wrote, it runs in list order and isn't drawn or copied
+    isSnappable: el => !!levelElements.types[el.type]?.isSnappable, //made of map or body pieces, smart snap only moves and lines up with these
     unfinished(message) { //an error for an element that isn't set up yet, the editor shows it without logging it every rebuild
         return Object.assign(new Error(message), { isUnfinished: true })
     },
@@ -444,7 +456,7 @@ const levelElements = {
         if (el.vertices) {
             args = [n(el.x), n(el.y), `${el.vertices.length} vertices`]
         } else if (el.width !== undefined) {
-            args = [el.x, el.y, el.width, el.height].map(n)
+            args = [el.x, el.y, el.width, el.height].filter(value => value !== undefined).map(n) //a scale has no height
         } else {
             args = [n(el.x), n(el.y)]
         }
@@ -457,7 +469,7 @@ const levelElements = {
     args(...values) { //numbers without float noise, strings quoted, like they'd be written by hand
         return values.map(value => typeof value === "number" ? String(Number(value.toFixed(6))) : JSON.stringify(value)?.replace(/\u2028/g, "\\u2028").replace(/\u2029/g, "\\u2029")).join(", ")
     },
-    marker(el, radius, fill, text) { //where a mob or power up spawns, the editor draws it with type.overlay()
+    marker(el, radius, fill, text, fontSize = Math.max(16, radius * 0.5)) { //where a mob or power up spawns, the editor draws it with type.overlay()
         ctx.setLineDash([])
         ctx.beginPath()
         ctx.arc(el.x, el.y, radius, 0, 2 * Math.PI)
@@ -466,7 +478,7 @@ const levelElements = {
         ctx.lineWidth = 2
         ctx.strokeStyle = "rgba(0,0,0,0.5)"
         ctx.stroke()
-        ctx.font = `${Math.max(16, radius * 0.5)}px monospace`
+        ctx.font = `${fontSize}px monospace`
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
         ctx.fillStyle = "#000"
@@ -489,11 +501,11 @@ const levelElements = {
 //*********************************************************************
 // core, every level has one of each
 //*********************************************************************
-levelElements.define("spawn", { //still "spawn" in the data, the editor calls it enter, like level.enter
+levelElements.define("spawn", { //still "spawn" in the data, the editor calls it entrance, like level.enter
     group: "core",
-    label: "enter",
-    editorName: "enter",
-    summary: el => `enter(${levelElements.args(el.x, el.y)})`,
+    label: "entrance",
+    editorName: "entrance",
+    summary: el => `entrance(${levelElements.args(el.x, el.y)})`,
     isSingleton: true,
     defaults: () => ({ x: 0, y: -50, bump: true }),
     props: [...levelElements.position(), levelElements.prop.bool("bump")],
@@ -547,6 +559,7 @@ levelElements.define("exit", {
 // shapes, drawn with the editor's draw tool, a rect or a list of vertices around x, y
 //*********************************************************************
 levelElements.define("map", {
+    isSnappable: true, //smart snap lines it up with other snappable pieces, see docs/level-editor.md
     group: "shape",
     color: "#444",
     isLinkable: true,
@@ -591,9 +604,10 @@ levelElements.define("map", {
 })
 
 levelElements.define("block", {
+    isSnappable: true,
     group: "shape",
     color: "rgba(140,140,140,0.85)",
-    defaults: () => ({ x: 0, y: 0, width: 50, height: 50, density: 0.001, friction: 0.05, frictionStatic: 0.5, frictionAir: 0.001, restitution: 0, velocityX: 0, velocityY: 0, holdable: true, noSpin: false, immutable: false, collides: levelElements.collision.defaults.block, chance: 1 }),
+    defaults: () => ({ x: 0, y: 0, width: 50, height: 50, density: 0.001, friction: 0.05, frictionStatic: 0.5, frictionAir: 0.001, restitution: 0, velocityX: 0, velocityY: 0, hasForce: false, force: 0.5, forceAngle: 0, forceMode: "steady", forcePeriod: 120, carryPlayer: true, holdable: true, noSpin: false, immutable: false, collides: levelElements.collision.defaults.block, chance: 1 }),
     props: [
         ...levelElements.rect(),
         levelElements.prop.number("density", { step: 0.0005, min: 0.00001 }),
@@ -609,15 +623,42 @@ levelElements.define("block", {
         levelElements.prop.number("restitution", { step: 0.1, min: 0 }),
         levelElements.prop.number("velocityX", { step: 1 }), //how fast it's moving when the level starts
         levelElements.prop.number("velocityY", { step: 1 }),
+        levelElements.prop.number("force", { step: 0.1, tip: "how hard it pushes each moment, 1 is as strong as gravity, any size of block moves the same", isShown: el => el.hasForce }),
+        levelElements.prop.number("forceAngle", { step: 15, tip: "the way it pushes in degrees, 0 is right, 90 is up", isShown: el => el.hasForce }),
+        levelElements.prop.select("forceMode", ["steady", "wave"], { tip: "steady always pushes, wave pushes back and forth, on a constraint it swings", isShown: el => el.hasForce }),
+        levelElements.prop.number("forcePeriod", { step: 10, min: 2, tip: "frames for one push there and back, 60 is a second, on a constraint a period near how long it takes to swing builds up the biggest swing", isShown: el => el.hasForce && el.forceMode === "wave" }),
+        levelElements.prop.bool("carryPlayer", { label: "carry player", tip: "the player standing on it moves along with it", isShown: el => el.hasForce }),
         levelElements.prop.bool("holdable"), //false is isNotHoldable, the field can't pick it up
         levelElements.prop.bool("noSpin"), //inertia Infinity, it slides but never turns
         levelElements.prop.bool("immutable"), //isImmutable, like a key, tech can't destroy, split, grow, or freeze it, and falling out of the level brings it back instead of removing it
         levelElements.prop.mask("collides"),
         levelElements.prop.number("chance", { step: 0.1, min: 0, isShown: el => !levelElements.isHeld(el) }), //of showing up each time the level loads, like spawn.bodyRect's chance, always shows in the editor, a block a constraint holds always shows up
     ],
-    overlay(el) { //blocks that don't always show up are labeled with their chance
-        if (el.chance >= 1 || levelElements.isHeld(el)) return
+    overlay(el) { //an arrow the way a force pushes, both ways for a wave, and blocks that don't always show up are labeled with their chance
         const b = levelElements.bounds(el)
+        if (el.hasForce && el.force) {
+            const middle = { x: b.x + b.width / 2, y: b.y + b.height / 2 }
+            const sign = Math.sign(el.force)
+            const d = { x: sign * Math.cos(el.forceAngle * Math.PI / 180), y: -sign * Math.sin(el.forceAngle * Math.PI / 180) }
+            const length = Math.max(b.width, b.height) / 2 + 20 + 40 * Math.min(2, Math.abs(el.force))
+            const head = direction => {
+                const tip = { x: middle.x + direction * d.x * length, y: middle.y + direction * d.y * length }
+                ctx.moveTo(tip.x - direction * 12 * d.x - 8 * d.y, tip.y - direction * 12 * d.y + 8 * d.x)
+                ctx.lineTo(tip.x, tip.y)
+                ctx.lineTo(tip.x - direction * 12 * d.x + 8 * d.y, tip.y - direction * 12 * d.y - 8 * d.x)
+            }
+            const isWave = el.forceMode === "wave"
+            ctx.setLineDash([])
+            ctx.beginPath()
+            ctx.moveTo(middle.x - (isWave ? d.x * length : 0), middle.y - (isWave ? d.y * length : 0))
+            ctx.lineTo(middle.x + d.x * length, middle.y + d.y * length)
+            head(1)
+            if (isWave) head(-1)
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "rgba(0,110,190,0.7)"
+            ctx.stroke()
+        }
+        if (el.chance >= 1 || levelElements.isHeld(el)) return
         ctx.font = `${Math.max(14, Math.min(40, b.height * 0.4))}px monospace`
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
@@ -638,6 +679,9 @@ levelElements.define("block", {
         who.collisionFilter.mask = levelElements.collision.mask(el.collides)
         Composite.add(engine.world, who)
         who.classType = "body"
+        if (!el.hasForce) return
+        const push = level.pushBody(who, el.force, el.forceAngle * Math.PI / 180, el.forceMode === "wave" ? el.forcePeriod : 0, el.carryPlayer)
+        return { custom() { push.do() } }
     },
     code(el, name, context) { //spawn.bodyRect's properties default to { friction: 0.05, frictionAir: 0.001 }, spawn.bodyVertex has no defaults
         const isHeld = !!(context && context.isReferenced(el.id)) //a constraint holds it, so it gets a name and always shows up
@@ -652,13 +696,22 @@ levelElements.define("block", {
         if (!el.holdable) setup.push(`body[body.length - 1].isNotHoldable = true;`)
         if (el.immutable) setup.push(`body[body.length - 1].isImmutable = true;`)
         if (!levelElements.collision.isDefault(el)) setup.push(`body[body.length - 1].collisionFilter.mask = ${levelElements.collision.code(el.collides)};`)
+        const forceName = `${name}Force`
+        const hasChance = el.chance < 1 && !isHeld
+        if (el.hasForce) { //angle in radians, written as degrees like a laser's, the period only for a wave, and carrying the player after it
+            const isWave = el.forceMode === "wave"
+            const period = isWave || el.carryPlayer ? `, ${isWave ? levelElements.args(el.forcePeriod) : 0}` : ""
+            const carry = el.carryPlayer ? ", true" : ""
+            setup.push(`${hasChance ? "" : "const "}${forceName} = level.pushBody(body[body.length - 1], ${levelElements.args(el.force)}, ${levelElements.args(el.forceAngle)} * Math.PI / 180${period}${carry});`)
+        }
+        const force = el.hasForce ? { custom: [`${hasChance ? `if (${forceName}) ` : ""}${forceName}.do();`] } : {}
         if (isHeld) setup.push(`const ${name} = body[body.length - 1];`)
-        if (el.chance >= 1 || isHeld) return { setup }
+        if (el.chance >= 1 || isHeld) return { setup, ...force }
         if (setup.length === 1 && !el.vertices) { //spawn.bodyRect has a chance argument
             setup[0] = isDefault ? setup[0].replace(/\);$/, `, ${levelElements.args(el.chance)});`) : setup[0].replace(", 1, {", `, ${levelElements.args(el.chance)}, {`)
             return { setup }
         }
-        return { setup: [`if (Math.random() < ${levelElements.args(el.chance)}) {`, ...setup.map(line => "    " + line), "}"] }
+        return { setup: [...(el.hasForce ? [`let ${forceName} = null;`] : []), `if (Math.random() < ${levelElements.args(el.chance)}) {`, ...setup.map(line => "    " + line), "}"], ...force }
     },
 })
 
@@ -676,6 +729,7 @@ levelElements.angleCode = degrees => { //Matter's angle written the way written 
 }
 
 levelElements.define("boost", {
+    isSnappable: true,
     tip: "launches the player, launchHeight is about how high, angle 90 is straight up",
     group: "element",
     defaults: () => ({ x: 0, y: -10, launchHeight: 1000, angle: 90 }),
@@ -704,6 +758,7 @@ levelElements.define("boost", {
 })
 
 levelElements.define("mover", { //conveyor belt
+    isSnappable: true,
     tip: "conveyor belt, pushes the player, blocks, and mobs along it, speed sets the direction",
     group: "element",
     defaults: () => ({ x: 0, y: -25, width: 500, height: 25, speed: -6 }),
@@ -723,6 +778,7 @@ levelElements.define("mover", { //conveyor belt
 })
 
 levelElements.define("transport", { //platform that slides back and forth
+    isSnappable: true,
     tip: "platform that slides back and forth, distance is how far",
     group: "element",
     defaults: () => ({ x: 0, y: -200, width: 300, height: 25, speed: 4, distance: 1000 }),
@@ -765,8 +821,11 @@ levelElements.define("transport", { //platform that slides back and forth
 })
 
 levelElements.define("elevator", {
-    tip: "platform that rises and falls, or only when the player stands on it with onTouch",
+    isSnappable: true,
+    tip: "platform that rises and falls, or only when the player stands on it with onTouch, linked it only starts a trip while on",
     group: "element",
+    handlesLink: true, //while off it finishes its trip and waits at the bottom, without move() it would fall through the map
+    writesLink: true, //its code() uses context.link
     defaults: () => ({ x: 0, y: -25, width: 200, height: 25, travel: 500, force: 0.003, onTouch: false }),
     props: [
         ...levelElements.rect(),
@@ -776,18 +835,31 @@ levelElements.define("elevator", {
     ],
     build(el) {
         const elevator = level.elevator(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)
-        return { custom: el.onTouch ? () => elevator.moveOnTouch() : () => elevator.move() }
+        return {
+            custom() {
+                const isOn = levelData.linkOn(el) !== false
+                if (el.onTouch) {
+                    elevator.moveOnTouch(isOn)
+                } else {
+                    elevator.move(isOn)
+                }
+            },
+        }
     },
     overlay(el) {
         ctx.strokeRect(el.x, el.y - el.travel, el.width, el.height + el.travel)
     },
-    code: (el, name) => ({
-        setup: [`const ${name} = level.elevator(${levelElements.args(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)});`],
-        custom: [`${name}.${el.onTouch ? "moveOnTouch" : "move"}();`],
-    }),
+    code(el, name, context) {
+        const link = context && context.link(el)
+        return {
+            setup: [`const ${name} = level.elevator(${levelElements.args(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)});`],
+            custom: [`${name}.${el.onTouch ? "moveOnTouch" : "move"}(${link ? link.on : ""});`],
+        }
+    },
 })
 
 levelElements.define("vanish", { //platform that shrinks away after the player touches it, then comes back
+    isSnappable: true,
     tip: "platform that shrinks away after the player touches it, then comes back",
     group: "element",
     defaults: () => ({ x: 0, y: -25, width: 200, height: 25, vertical: false }),
@@ -803,6 +875,7 @@ levelElements.define("vanish", { //platform that shrinks away after the player t
 })
 
 levelElements.define("spinner", { //block pinned at its center
+    isSnappable: true,
     tip: "block pinned at its center, it turns when pushed, or on its own with motor, linked its motor only runs while on, frictionAir slows it",
     group: "element",
     defaults: () => ({ x: 0, y: -300, width: 400, height: 25, angle: 0, density: 0.001, frictionAir: 0.001, spin: 0, motor: 0 }),
@@ -955,15 +1028,17 @@ levelElements.laserAngle = el => { //the laser's angle now, radians: where x2, y
     if (el.swing) angle += el.swing * Math.PI / 180 * Math.sin(2 * Math.PI / el.swingTime * simulation.cycle)
     return angle
 }
+levelElements.laserStyles = { beam: "#ff0000", arc: "#46aaff" } //the top of its info box switches them, each with the color it starts with
 levelElements.define("laser", {
-    tip: "beam between two points that hurts the player, drag either end, spin and swing turn it around x, y, motion makes it a motion sensor",
+    tip: "beam between two points that hurts the player, drag either end, the top of its info box makes it an arc of electricity that hits a little wider, spin and swing turn it around x, y, motion makes it a motion sensor",
     group: "element",
-    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12, spin: 0, swing: 0, swingTime: 240, motion: false }),
+    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12, color: levelElements.laserStyles.beam, style: "beam", spin: 0, swing: 0, swingTime: 240, motion: false }),
     props: [
         ...levelElements.position(),
         levelElements.prop.number("x2", { isGrid: true }),
         levelElements.prop.number("y2", { isGrid: true }),
         levelElements.prop.number("damage", { step: 0.02, min: 0 }),
+        levelElements.prop.color("color"),
         levelElements.prop.number("spin", { step: 15 }), //degrees a second around x, y
         levelElements.prop.number("swing", { step: 5, min: 0 }), //degrees each way
         levelElements.prop.number("swingTime", { step: 30, min: 10, isShown: el => el.swing > 0 }), //frames for one swing there and back
@@ -1000,7 +1075,8 @@ levelElements.define("laser", {
     },
     summary: el => `laser(${[el.x, el.y, el.x2, el.y2].map(n => Number(n.toFixed(2))).join(", ")})`,
     build(el) {
-        const laser = level.laser({ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }, el.damage)
+        const laser = level.laser({ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }, el.damage, el.color)
+        laser.isArc = el.style === "arc"
         const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
         return {
             custom() {
@@ -1026,8 +1102,93 @@ levelElements.define("laser", {
         }
         custom.push(el.motion ? `${name}.motionQuery();` : `${name}.query();`)
         return {
-            setup: [`const ${name} = level.laser({ x: ${a(el.x)}, y: ${a(el.y)} }, { x: ${a(el.x2)}, y: ${a(el.y2)} }, ${a(el.damage)});`],
+            setup: [`const ${name} = level.laser({ x: ${a(el.x)}, y: ${a(el.y)} }, { x: ${a(el.x2)}, y: ${a(el.y2)} }, ${a(el.damage)}${el.color === levelElements.laserStyles.beam ? "" : `, ${a(el.color)}`});`, ...(el.style === "arc" ? [`${name}.isArc = true; //electricity, hits a little wider`] : [])],
             custom,
+        }
+    },
+})
+
+levelElements.sawRoute = (el, data) => { //{ points, isLoop, start, at }, the buzzsaw's path as short straight lines, and how far along and where it's closest to x, y, that's where it starts, with no path it stays at x, y
+    const path = el.path && data ? levelData.find(data, el.path) : null
+    if (!path || path.type !== "path") return { points: [[el.x, el.y]], isLoop: false, start: 0, at: { x: el.x, y: el.y } }
+    const outline = levelElements.pathOutline(path)
+    const route = path.closed ? [...outline, outline[0]] : outline
+    let along = 0
+    let best = { start: 0, at: route[0], distance: Infinity }
+    for (let i = 0; i < route.length - 1; i++) {
+        const a = route[i]
+        const b = route[i + 1]
+        const dx = b.x - a.x
+        const dy = b.y - a.y
+        const length = Math.hypot(dx, dy)
+        const t = Math.max(0, Math.min(1, ((el.x - a.x) * dx + (el.y - a.y) * dy) / (length * length || 1)))
+        const at = { x: a.x + t * dx, y: a.y + t * dy }
+        const distance = Math.hypot(el.x - at.x, el.y - at.y)
+        if (distance < best.distance) best = { start: along + t * length, at, distance }
+        along += length
+    }
+    return { points: outline.map(p => [p.x, p.y]), isLoop: !!path.closed, start: best.start, at: best.at }
+}
+levelElements.define("buzzsaw", { //level.buzzsaw
+    tip: "spinning blade that hurts the player, give it a path to travel: draw one with its path's draw button, or pick a draw path you've made, it goes back and forth along it, around and around on a closed path, without one it stays put, linked it only runs while on",
+    group: "element",
+    handlesLink: true, //off it stops where it is, it doesn't disappear
+    writesLink: true, //its code() uses context.link
+    rebuildWithRefs: true, //it follows the path as it was when it was built
+    outlivesRefs: true, //deleting its path leaves it where it is, a constraint goes with its block
+    defaults: () => ({ x: 0, y: -200, radius: 40, path: null, speed: 4, damage: 0.1, spin: 0.25, look: "blade" }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("radius", { isGrid: true, min: 5 }),
+        levelElements.prop.ref("path", ["path"], {
+            write(el, id) { //goes to the closest spot on the new path, so it's where it'll start
+                el.path = id
+                const { at } = levelElements.sawRoute(el, levelData.data)
+                el.x = Math.round(at.x)
+                el.y = Math.round(at.y)
+            },
+        }),
+        levelElements.prop.number("speed", { step: 1, min: 0 }),
+        levelElements.prop.number("damage", { step: 0.01, min: 0 }),
+        levelElements.prop.number("spin", { step: 0.05 }),
+        levelElements.prop.select("look", Object.keys(level.buzzsawLooks)),
+    ],
+    bounds: el => ({ x: el.x - el.radius, y: el.y - el.radius, width: 2 * el.radius, height: 2 * el.radius }),
+    contains: (el, p) => Math.hypot(p.x - el.x, p.y - el.y) <= el.radius,
+    handles: el => [{ id: "radius", x: el.x + el.radius, y: el.y }],
+    dragHandle(el, id, point) { el.radius = Math.max(5, Math.round(Math.hypot(point.x - el.x, point.y - el.y))) },
+    overlay(el) { //where it starts, it's moving along its path while editing, and a line to the path if it's been dragged off
+        const { at } = levelElements.sawRoute(el, levelData.data)
+        ctx.beginPath()
+        ctx.arc(at.x, at.y, el.radius, 0, 2 * Math.PI)
+        if (Math.hypot(el.x - at.x, el.y - at.y) > 1) {
+            ctx.moveTo(el.x + el.radius, el.y)
+            ctx.arc(el.x, el.y, el.radius, 0, 2 * Math.PI)
+            ctx.moveTo(el.x, el.y)
+            ctx.lineTo(at.x, at.y)
+        }
+        ctx.stroke()
+    },
+    build(el) {
+        const { points, isLoop, start } = levelElements.sawRoute(el, levelData.data)
+        const saw = level.buzzsaw(points, el.radius, el.speed, el.damage, el.spin, isLoop, start, el.look)
+        return {
+            containsPoint: point => Math.hypot(point.x - saw.position.x, point.y - saw.position.y) <= el.radius, //clicking the moving blade selects it
+            custom() { saw.query(levelData.linkOn(el) !== false) },
+            top() { saw.draw() },
+        }
+    },
+    code(el, name, context) {
+        const link = context && context.link(el)
+        const route = levelElements.sawRoute(el, context ? context.data : levelData.data)
+        const round = n => Math.round(n * 10) / 10
+        const args = [el.radius, el.speed, el.damage, el.spin, route.isLoop, round(route.start), el.look || "blade"]
+        const defaults = [40, 4, 0.1, 0.25, false, 0, "blade"]
+        while (args.length && args[args.length - 1] === defaults[args.length - 1]) args.pop() //leave out what's the default
+        return {
+            setup: [`const ${name} = level.buzzsaw(${JSON.stringify(route.points.map(p => p.map(round)))}${args.length ? `, ${levelElements.args(...args)}` : ""});`],
+            custom: [`${name}.query(${link ? link.on : ""});`],
+            top: [`${name}.draw();`],
         }
     },
 })
@@ -1053,12 +1214,190 @@ levelElements.define("fizzler", { //level.fizzler
     }),
 })
 
+levelElements.define("oneWay", { //level.oneWay, x, y, width, height is its rect before it's turned, it turns around the middle
+    isSnappable: true,
+    label: "one way",
+    tip: "platform things go through from behind and land on from the front, angle is the way its front faces, 90 is up, hold down on it to drop through, bullets pass both ways",
+    group: "element",
+    defaults: () => ({ x: 0, y: -200, width: 300, height: 20, angle: 90 }),
+    props: [...levelElements.rect(), levelElements.prop.number("angle", { step: 15 })], //degrees, counterclockwise like boost
+    turned(el) { //its center, along its length, and out its front, on screen
+        const a = el.angle * Math.PI / 180
+        return { c: { x: el.x + el.width / 2, y: el.y + el.height / 2 }, u: { x: Math.sin(a), y: Math.cos(a) }, n: { x: Math.cos(a), y: -Math.sin(a) } }
+    },
+    outlinePoints(el) { //its corners turned, what the editor outlines
+        const { c, u, n } = this.turned(el)
+        const w = el.width / 2, h = el.height / 2
+        return [[-w, h], [w, h], [w, -h], [-w, -h]].map(([along, out]) => ({ x: c.x + u.x * along + n.x * out, y: c.y + u.y * along + n.y * out }))
+    },
+    bounds(el) { return levelElements.boundsOf(this.outlinePoints(el)) },
+    contains(el, point) { return levelElements.isInside(this.outlinePoints(el), point) },
+    handles(el) { //its two ends for length, its front and back for thickness
+        const { c, u, n } = this.turned(el)
+        const w = el.width / 2, h = el.height / 2
+        return [{ id: "e", x: c.x + u.x * w, y: c.y + u.y * w }, { id: "w", x: c.x - u.x * w, y: c.y - u.y * w }, { id: "n", x: c.x + n.x * h, y: c.y + n.y * h }, { id: "s", x: c.x - n.x * h, y: c.y - n.y * h }]
+    },
+    dragHandle(el, id, point, min) { //the other side stays put
+        const { c, u, n } = this.turned(el)
+        const axis = id === "e" || id === "w" ? u : n
+        const sign = id === "e" || id === "n" ? 1 : -1
+        const key = axis === u ? "width" : "height"
+        const fixed = { x: c.x - sign * axis.x * el[key] / 2, y: c.y - sign * axis.y * el[key] / 2 }
+        const size = Math.max(min, sign * ((point.x - fixed.x) * axis.x + (point.y - fixed.y) * axis.y))
+        const center = { x: fixed.x + sign * axis.x * size / 2, y: fixed.y + sign * axis.y * size / 2 }
+        el[key] = Number(size.toFixed(3))
+        el.x = Number((center.x - el.width / 2).toFixed(3))
+        el.y = Number((center.y - el.height / 2).toFixed(3))
+    },
+    rotate(el, degrees, center) {
+        levelElements.orbit(el, degrees, center)
+        el.angle = Number((el.angle - degrees).toFixed(3))
+    },
+    flip(el, axis, center) {
+        levelElements.flipPosition(el, axis, center)
+        el.angle = levelElements.flipAngle(el.angle, axis)
+    },
+    build(el) {
+        const platform = level.oneWay(el.x, el.y, el.width, el.height, el.angle * Math.PI / 180)
+        return {
+            custom() {
+                platform.query()
+                platform.draw()
+            },
+            remove() { platform.remove() },
+        }
+    },
+    code(el, name) {
+        const extra = el.angle !== 90 ? `, ${levelElements.args(el.height)}, ${levelElements.args(el.angle)} * Math.PI / 180` : el.height !== 20 ? `, ${levelElements.args(el.height)}` : ""
+        return {
+            setup: [`const ${name} = level.oneWay(${levelElements.args(el.x, el.y, el.width)}${extra});`],
+            custom: [`${name}.query();`, `${name}.draw();`],
+        }
+    },
+})
+
+levelElements.define("gravityZone", { //level.gravityZone
+    label: "gravity",
+    tip: "changes gravity inside for the player, blocks, and power ups, 0 floats, 0.5 is half, negative falls up, uncheck visible to hide it from players, linked it only pulls while on",
+    group: "element",
+    handlesLink: true, //off it still draws its box
+    writesLink: true, //its code() uses context.link
+    defaults: () => ({ x: 0, y: -500, width: 500, height: 500, gravity: 0, visible: true }),
+    props: [
+        ...levelElements.rect(),
+        levelElements.prop.number("gravity", { step: 0.25 }),
+        levelElements.prop.bool("visible", { tip: "unchecked, players don't see the zone or its arrows, the editor still outlines it" }),
+    ],
+    overlay(el) { //an invisible zone gets a dashed outline in the editor
+        if (el.visible) return
+        ctx.setLineDash([10, 8])
+        ctx.lineWidth = 2
+        ctx.strokeStyle = el.gravity < 0 ? "rgba(255,90,0,0.5)" : "rgba(120,0,255,0.45)"
+        ctx.strokeRect(el.x, el.y, el.width, el.height)
+        ctx.setLineDash([])
+    },
+    build(el) {
+        const zone = level.gravityZone(el.x, el.y, el.width, el.height, el.gravity)
+        return {
+            custom() {
+                zone.do(levelData.linkOn(el) !== false)
+                if (el.visible) zone.draw()
+            },
+        }
+    },
+    code(el, name, context) {
+        const link = context && context.link(el)
+        return {
+            setup: [`const ${name} = level.gravityZone(${levelElements.args(el.x, el.y, el.width, el.height)}${el.gravity === 0 ? "" : `, ${levelElements.args(el.gravity)}`});`],
+            custom: [`${name}.do(${link ? link.on : ""});`, ...(el.visible ? [`${name}.draw();`] : [])],
+        }
+    },
+})
+
+levelElements.define("dispenser", { //level.dispenser, x, y is where blocks show up, its back plate goes against a wall
+    isSnappable: true, //its back plate snaps flush to a wall or ceiling
+    tip: "makes a block every period cycles (60 is a second) until max of its blocks are in the level, angle is the way they come out, 90 is up, put its back plate on a wall, speed launches them, it waits while the spot is blocked, linked it only makes blocks while on",
+    group: "element",
+    handlesLink: true, //off it still draws its mount
+    writesLink: true, //its code() uses context.link
+    defaults: () => ({ x: 0, y: -400, size: 50, period: 180, max: 3, angle: -90, speed: 0, collides: levelElements.collision.defaults.dispenser }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("size", { step: 5, min: 10 }), //each block is size × size
+        levelElements.prop.number("period", { step: 30, min: 1 }),
+        levelElements.prop.number("max", { step: 1, min: 1 }),
+        levelElements.prop.number("angle", { step: 15 }), //degrees, counterclockwise like boost, -90 is down
+        levelElements.prop.number("speed", { step: 1, min: 0 }),
+        levelElements.prop.mask("collides", { tip: "what its blocks bump into, click a name to turn it off, crossed out names go through them" }),
+    ],
+    outlinePoints(el) { //its mount turned to face angle, the back plate behind the block, like level.dispenser draws it
+        const a = el.angle * Math.PI / 180
+        const out = { x: Math.cos(a), y: -Math.sin(a) } //the way blocks come out
+        const side = { x: -Math.sin(a), y: -Math.cos(a) }
+        const r = el.size / 2 + 10
+        return [[-r, -r - 10], [r, -r - 10], [r, r], [-r, r]].map(([across, along]) => ({ x: el.x + side.x * across + out.x * along, y: el.y + side.y * across + out.y * along }))
+    },
+    bounds(el) { return levelElements.boundsOf(this.outlinePoints(el)) },
+    contains(el, point) { return levelElements.isInside(this.outlinePoints(el), point) },
+    rotate(el, degrees, center) { //turns around the block's spot, so it stays where blocks show up
+        const before = { x: el.x, y: el.y }
+        const to = levelElements.rotatePoint(before, center, degrees)
+        el.x = to.x
+        el.y = to.y
+        el.angle = Number((el.angle - degrees).toFixed(3))
+    },
+    pivot: el => ({ x: el.x, y: el.y }),
+    flip(el, axis, center) {
+        const to = levelElements.flipPoint(el, axis, center)
+        el.x = to.x
+        el.y = to.y
+        el.angle = levelElements.flipAngle(el.angle, axis)
+    },
+    overlay(el) { //an arrow the way blocks come out
+        const a = el.angle * Math.PI / 180
+        const d = { x: Math.cos(a), y: -Math.sin(a) }
+        const from = { x: el.x + d.x * (el.size / 2 + 14), y: el.y + d.y * (el.size / 2 + 14) }
+        const tip = { x: from.x + d.x * 40, y: from.y + d.y * 40 }
+        ctx.setLineDash([])
+        ctx.beginPath()
+        ctx.moveTo(from.x, from.y)
+        ctx.lineTo(tip.x, tip.y)
+        ctx.moveTo(tip.x - 10 * d.x - 7 * d.y, tip.y - 10 * d.y + 7 * d.x)
+        ctx.lineTo(tip.x, tip.y)
+        ctx.lineTo(tip.x - 10 * d.x + 7 * d.y, tip.y - 10 * d.y - 7 * d.x)
+        ctx.stroke()
+    },
+    build(el) {
+        const dispenser = level.dispenser(el.x, el.y, el.size, el.period, el.max, el.angle * Math.PI / 180, el.speed)
+        if (!levelElements.collision.isDefault(el)) dispenser.collisionMask = levelElements.collision.mask(el.collides)
+        return {
+            custom() {
+                dispenser.query(levelData.linkOn(el) !== false)
+                dispenser.draw()
+            },
+            remove() { dispenser.remove() },
+        }
+    },
+    code(el, name, context) {
+        const link = context && context.link(el)
+        const values = [el.size, el.period, el.max, `${levelElements.args(el.angle)} * Math.PI / 180`, el.speed]
+        const isDefault = [el.size === 50, el.period === 180, el.max === 3, el.angle === -90, !el.speed]
+        let count = values.length
+        while (count && isDefault[count - 1]) count-- //leave out the defaults at the end
+        const extra = values.slice(0, count).map(v => typeof v === "string" ? v : levelElements.args(v))
+        return {
+            setup: [`const ${name} = level.dispenser(${[levelElements.args(el.x, el.y), ...extra].join(", ")});`, ...(levelElements.collision.isDefault(el) ? [] : [`${name}.collisionMask = ${levelElements.collision.code(el.collides)}; //what its blocks bump into`])],
+            custom: [`${name}.query(${link ? link.on : ""});`, `${name}.draw();`],
+        }
+    },
+})
+
 //buttons and toggles turn linked elements on and off, a linked element's link is the button's or toggle's id
 //doors open while it's on, other linkable elements only run while it's on, or with runs: "while off" the other way, see levelData.linkOn() and levelData.code()
 //a link source can be linked to another link source, then it's only on while both are, see levelData.linkState()
 //a link source has linkOn(el, runtime), true while on, and linkCode(el, name), the javascript for on and off
 levelElements.isLinkSource = el => !!levelElements.types[el.type]?.linkOn
-levelElements.isCodeEditable = el => { //its code can be edited in the info box: not code, the enter and exit, mob spots' shared list, or a timer, its code is only a comment
+levelElements.isCodeEditable = el => { //its code can be edited in the info box: not code, the entrance and exit, mob spots' shared list, or logic, its code is only a comment
     const type = levelElements.types[el.type] //code naming other elements, like a door's button or a constraint's block, keeps up with their names, see levelData.editedRefs()
     return !!type && !!type.code && !type.codeAll && !type.isCode && !type.isSingleton && type.canEditCode !== false
 }
@@ -1079,8 +1418,25 @@ levelElements.drawLinks = (el, from) => { //a dashed line from a button or toggl
     ctx.stroke()
     ctx.setLineDash([])
 }
+levelElements.triggerModes = ["button", "scale", "toggle"] //the add menu only has button, its info box switches between them, see the triggerMode command and levelElements.triggerMode()
+levelElements.triggerMode = (el, typeName) => { //el's values as another of them, in the same spot on the floor, a toggle's y is 10 above a button's and a scale's is the same, what they don't share goes back to the defaults
+    const floor = el.type === "toggle" ? el.y + 10 : el.y
+    const stays = el.on === "stays down" || el.staysOn === true
+    return {
+        x: el.x,
+        y: typeName === "toggle" ? floor - 10 : floor,
+        log: el.log,
+        link: el.link,
+        orLink: el.orLink,
+        ...(el.group ? { group: el.group } : {}),
+        ...(stays && typeName === "button" ? { on: "stays down" } : {}),
+        ...(stays && typeName === "toggle" ? { staysOn: true } : {}),
+    }
+}
 levelElements.define("button", {
-    tip: "pressed by the player or a block, linked doors open and linked elements run, on says when",
+    isSnappable: true,
+    modes: levelElements.triggerModes,
+    tip: "pressed by the player or a block, linked doors open and linked elements run, on says when, the top of its info box switches it to a scale or a toggle",
     group: "element",
     defaults: () => ({ x: 0, y: 0, on: "down" }),
     props: [
@@ -1109,6 +1465,9 @@ levelElements.define("button", {
 })
 
 levelElements.define("toggle", { //level.toggle, a lever the player flips
+    isSnappable: true,
+    isAddedAs: "button", //not in the add menu, a button's info box turns it into one
+    modes: levelElements.triggerModes,
     tip: "lever the player or a block flips, linked doors open and linked elements run while it's on, staysOn can't be flipped back",
     group: "element",
     defaults: () => ({ x: 0, y: -10, isOn: false, staysOn: false }),
@@ -1135,6 +1494,7 @@ levelElements.define("toggle", { //level.toggle, a lever the player flips
 })
 
 levelElements.define("keyhole", { //level.keyButton, a link source the matching key turns on
+    isSnappable: true,
     tip: "cradle a key of the same color fits in, linked doors open and linked elements run while the key is in, stays on once it's been in",
     group: "element",
     defaults: () => ({ x: 0, y: 0, color: "yellow", on: "key in" }),
@@ -1166,6 +1526,7 @@ levelElements.define("keyhole", { //level.keyButton, a link source the matching 
 })
 
 levelElements.define("key", { //level.key, an immutable block that turns on the keyhole of its color
+    isSnappable: true,
     tip: "glowing block that fits the keyhole of its color, it can't be destroyed",
     group: "element",
     defaults: () => ({ x: 0, y: -100, color: "yellow" }),
@@ -1192,16 +1553,24 @@ levelElements.zoneWho = { //what a zone notices, and the same as javascript
     any: { list: () => [player].concat(body, mob), code: "[player].concat(body, mob)" },
 }
 levelElements.define("zone", { //a trigger, a link source that's on while the player is inside, only the editor draws it, a box, or with circle a circle around x, y
-    tip: "invisible box or circle, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in",
+    tip: "invisible box or circle, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in, check effects to push, slow, hurt, or drain what's inside",
     group: "element",
     isBackground: true, //it's often big, lock it so the mouse goes through
-    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, radius: 200, circle: false, who: "player", on: "inside" }),
+    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, radius: 200, circle: false, who: "player", on: "inside", effects: false, force: 0, forceAngle: 90, drag: 0, damage: 0, energy: 0, affects: "player body bullet powerUp mob", visible: true }),
     props: [
         ...levelElements.rect().map(prop => prop.key === "width" || prop.key === "height" ? { ...prop, isShown: el => !el.circle } : prop),
         levelElements.prop.number("radius", { isGrid: true, min: 1, isShown: el => !!el.circle }),
         levelElements.prop.bool("circle", { write: (el, value) => levelElements.types.zone.setCircle(el, value) }),
         levelElements.prop.select("who", Object.keys(levelElements.zoneWho)),
         levelElements.prop.select("on", ["inside", "stays on"]), //stays on once it's been entered
+        levelElements.prop.bool("effects", { tip: "does things to what's inside: pushes, slows, hurts, or drains energy, level.effectZone()" }), //off keeps the settings
+        levelElements.prop.number("force", { step: 0.1, tip: "how hard it pushes what's inside, 1 is as strong as gravity for any size, negative pushes the other way", isShown: el => el.effects }),
+        levelElements.prop.number("forceAngle", { step: 15, tip: "the way it pushes in degrees, 0 is right, 90 is up", isShown: el => el.effects && el.force !== 0 }),
+        levelElements.prop.number("drag", { step: 0.01, min: 0, max: 1, tip: "air friction, the share of speed lost each frame, 0.02 is thick air, 0.1 is mud, 1 stops everything", isShown: el => el.effects }),
+        levelElements.prop.number("damage", { step: 0.05, min: 0, tip: "damage each second to the player and mobs inside, 0.1 is a tenth of the player's health, it goes up with levels cleared like other hazards", isShown: el => el.effects }),
+        levelElements.prop.number("energy", { step: 0.1, tip: "energy drained from the player each second, 1 is a full bar, negative charges it up to max", isShown: el => el.effects }),
+        levelElements.prop.mask("affects", { names: ["player", "body", "mob", "bullet", "powerUp"], tip: "what the effects happen to, damage only hurts the player and mobs, energy is only the player's", isShown: el => el.effects }),
+        levelElements.prop.bool("visible", { tip: "players see a tint, red for damage, blue for draining, green for charging, and arrows the way it pushes, the editor always draws it", isShown: el => el.effects }),
     ],
     setCircle(el, isCircle) { //a box becomes the circle in its middle, as big as the box on average, and back to the box around the circle, x, y is a circle's center
         if (!!el.circle === !!isCircle) return
@@ -1244,72 +1613,288 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
     },
     linkOn: (el, runtime) => runtime.zone ? runtime.zone.isOn : null,
     linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
+    affectsText: el => levelElements.collision.toggle(el.affects, "map", false).split(" ").filter(name => ["player", "body", "bullet", "powerUp", "mob"].includes(name)).join(" "), //only names it knows, it's written into code
+    hasEffects: el => !!el.effects && (el.force !== 0 || el.drag > 0 || el.damage > 0 || el.energy !== 0) && !!levelElements.types.zone.affectsText(el),
+    effectOptions(el) { //level.effectZone()'s options, only what isn't its default
+        const options = {}
+        if (el.force !== 0) {
+            options.force = el.force
+            if (el.forceAngle !== 90) options.angle = el.forceAngle
+        }
+        for (const key of ["drag", "damage", "energy"]) if (el[key] !== 0) options[key] = el[key]
+        const affects = levelElements.types.zone.affectsText(el)
+        if (affects !== "player body bullet powerUp mob") options.who = affects
+        return options
+    },
     build(el) {
         const who = levelElements.zoneWho[el.who] || levelElements.zoneWho.player
-        if (el.circle) { //a body is in once its center is
-            const zone = { isOn: false, x: el.x, y: el.y, radius: el.radius }
-            return {
-                zone,
-                custom() { if (el.on !== "stays on" || !zone.isOn) zone.isOn = who.list().some(body => Vector.magnitude(Vector.sub(body.position, zone)) < zone.radius) },
-            }
-        }
-        const zone = { isOn: false, min: { x: el.x, y: el.y }, max: { x: el.x + el.width, y: el.y + el.height } }
+        const type = levelElements.types.zone
+        const zone = el.circle ? { isOn: false, x: el.x, y: el.y, radius: el.radius } : { isOn: false, min: { x: el.x, y: el.y }, max: { x: el.x + el.width, y: el.y + el.height } }
+        const check = el.circle ? () => who.list().some(body => Vector.magnitude(Vector.sub(body.position, zone)) < zone.radius) : () => Matter.Query.region(who.list(), zone).length > 0 //a circle has a body in once its center is
+        const options = type.hasEffects(el) ? type.effectOptions(el) : null
+        const effects = options && level.effectZone(zone, { ...options, angle: (options.angle ?? 90) * Math.PI / 180 })
         return {
             zone,
-            custom() { if (el.on !== "stays on" || !zone.isOn) zone.isOn = Matter.Query.region(who.list(), zone).length > 0 },
+            custom() {
+                if (el.on !== "stays on" || !zone.isOn) zone.isOn = check()
+                if (!effects) return
+                effects.do(levelData.linkState(el) !== false) //a zone linked to a trigger only does its effects while that's on
+                if (el.visible) effects.draw()
+            },
+        }
+    },
+    code(el, name, context) {
+        const who = levelElements.zoneWho[el.who] || levelElements.zoneWho.player
+        const type = levelElements.types.zone
+        const check = el.circle ? `${name}.isOn = ${who.code}.some(body => Vector.magnitude(Vector.sub(body.position, ${name})) < ${name}.radius);` : `${name}.isOn = Matter.Query.region(${who.code}, ${name}).length > 0;`
+        const setup = [el.circle ? `const ${name} = { isOn: false, x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)}, radius: ${levelElements.args(el.radius)} }; //trigger zone, a circle` : `const ${name} = { isOn: false, min: { x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)} }, max: { x: ${levelElements.args(el.x + el.width)}, y: ${levelElements.args(el.y + el.height)} } }; //trigger zone`]
+        const custom = [el.on === "stays on" ? `if (!${name}.isOn) ${check} //stays on once it's been entered` : check]
+        if (type.hasEffects(el)) {
+            const options = type.effectOptions(el)
+            const fields = Object.entries(options).map(([key, value]) => key === "angle" ? `angle: ${levelElements.args(value)} * Math.PI / 180` : key === "who" ? `who: "${value}"` : `${key}: ${levelElements.args(value)}`)
+            setup.push(`const ${name}Effects = level.effectZone(${name}${fields.length ? `, { ${fields.join(", ")} }` : ""});`)
+            const link = (el.link || el.orLink) && context && context.link(el)
+            custom.push(`${name}Effects.do(${link ? link.on : ""});`)
+            if (el.visible) custom.push(`${name}Effects.draw();`)
+        }
+        return { setup, custom }
+    },
+})
+
+levelElements.define("scale", { //level.scale, shaped like a button, a pad that's on while enough mass sits on it
+    isSnappable: true,
+    isAddedAs: "button", //not in the add menu, a button's info box turns it into one
+    modes: levelElements.triggerModes,
+    tip: "amber pad like a taller, wider button that's on while at least mass sits on it, its gauge fills as weight goes on, stacks count, the player is 5 and a 50 × 50 block is 2.5, linked doors open and linked elements run while it's on",
+    group: "element",
+    defaults: () => ({ x: 0, y: 0, width: 189, mass: 6 }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("width", { isGrid: true, min: 40 }), //the pad's, its sloped base is 104 wider
+        levelElements.prop.number("mass", { step: 0.5, min: 0.1 }),
+    ],
+    bounds: el => ({ x: el.x - 50, y: el.y - 32, width: el.width + 104, height: 44 }), //the pad and its sloped base, a button's 10 taller, see level.scale()
+    handles: el => [{ id: "w", x: el.x + 2, y: el.y - 21 }, { id: "e", x: el.x + 2 + el.width, y: el.y - 21 }], //only the pad's width resizes, it has no height
+    dragHandle(el, id, point, min) { //the other end stays put
+        const right = el.x + el.width
+        if (id === "w") {
+            el.x = Math.min(point.x - 2, right - Math.max(min, 40))
+            el.width = right - el.x
+        } else {
+            el.width = Math.max(min, 40, point.x - 2 - el.x)
+        }
+    },
+    overlay: el => levelElements.drawLinks(el, { x: el.x + el.width / 2, y: el.y - 20 }),
+    linkOn: (el, runtime) => runtime.scale ? runtime.scale.isOn : null,
+    linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
+    build(el) {
+        const scale = level.scale(el.x, el.y, el.width, el.mass)
+        return {
+            scale,
+            custom() {
+                scale.query()
+                scale.draw()
+            },
+            remove() { scale.remove() }, //its gauge
         }
     },
     code(el, name) {
-        const who = levelElements.zoneWho[el.who] || levelElements.zoneWho.player
-        const check = el.circle ? `${name}.isOn = ${who.code}.some(body => Vector.magnitude(Vector.sub(body.position, ${name})) < ${name}.radius);` : `${name}.isOn = Matter.Query.region(${who.code}, ${name}).length > 0;`
-        const setup = el.circle ? `const ${name} = { isOn: false, x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)}, radius: ${levelElements.args(el.radius)} }; //trigger zone, a circle` : `const ${name} = { isOn: false, min: { x: ${levelElements.args(el.x)}, y: ${levelElements.args(el.y)} }, max: { x: ${levelElements.args(el.x + el.width)}, y: ${levelElements.args(el.y + el.height)} } }; //trigger zone`
+        const extra = el.mass !== 6 ? [el.width, el.mass] : el.width !== 189 ? [el.width] : []
         return {
-            setup: [setup],
-            custom: [el.on === "stays on" ? `if (!${name}.isOn) ${check} //stays on once it's been entered` : check],
+            setup: [`const ${name} = level.scale(${levelElements.args(el.x, el.y, ...extra)});`],
+            custom: [`${name}.query();`, `${name}.draw();`],
+        }
+    },
+})
+
+levelElements.waitingMobs = (el, data) => data.elements.filter(other => { //the linked mobs a mob clear counts, it can't be clear until they've spawned
+    if (levelElements.types[other.type]?.group !== "mob" || (!other.link && !other.orLink) || other.edited) return false
+    const isBoss = other.type === "boss" || other.type === "secondaryBoss" || (other.type === "namedMob" && typeof spawn !== "undefined" && spawn.bossTier.flat().includes(other.name))
+    if (el.who === "bosses") return isBoss
+    if (el.who === "level") return true
+    return [[other.x, other.y], ...(other.spots || [])].some(([x, y]) => x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height)
+})
+levelElements.define("mobClear", { //level.cleared, on once the mobs are gone
+    tip: "on once no mobs are left in its box, or in the whole level, or no bosses, stays on after, linked doors open and linked elements run, like an arena that opens when it's cleared",
+    label: "mob clear",
+    group: "element",
+    isBackground: true, //it's often big, lock it so the mouse goes through
+    defaults: () => ({ x: 0, y: -400, width: 600, height: 400, who: "box", on: "stays on" }),
+    props: [
+        ...levelElements.rect().map(prop => prop.key === "width" || prop.key === "height" ? { ...prop, isShown: el => el.who === "box" } : prop),
+        levelElements.prop.select("who", ["box", "level", "bosses"]), //mobs in the box, every mob, or only bosses
+        levelElements.prop.select("on", ["stays on", "while clear"]), //while clear turns off again if a mob comes back
+    ],
+    bounds: el => el.who === "box" ? { x: el.x, y: el.y, width: el.width, height: el.height } : { x: el.x - 30, y: el.y - 30, width: 60, height: 60 },
+    handles: el => el.who === "box" ? levelElements.rectHandles(el) : [],
+    summary: el => el.who === "box" ? `mobClear(${levelElements.args(el.x, el.y, el.width, el.height)})` : `mobClear(${el.who})`,
+    overlay(el) { //the box, or a marker for the whole level or bosses, green once it's on
+        const runtime = levelData.runtimes.get(el.id)
+        const isOn = !!(runtime && runtime.mobClear && runtime.mobClear.isOn)
+        const b = levelElements.bounds(el)
+        ctx.setLineDash([10, 8])
+        ctx.lineWidth = 2
+        ctx.fillStyle = isOn ? "rgba(80,200,120,0.08)" : "rgba(150,40,120,0.06)"
+        ctx.strokeStyle = isOn ? "rgba(80,200,120,0.6)" : "rgba(150,40,120,0.5)"
+        if (el.who === "box") {
+            ctx.fillRect(b.x, b.y, b.width, b.height)
+            ctx.strokeRect(b.x, b.y, b.width, b.height)
+        } else {
+            ctx.beginPath()
+            ctx.arc(el.x, el.y, 30, 0, 2 * Math.PI)
+            ctx.fill()
+            ctx.stroke()
+        }
+        ctx.setLineDash([])
+        ctx.font = "16px monospace"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.fillStyle = "rgba(0,0,0,0.5)"
+        ctx.fillText(el.who === "box" ? "mob clear" : el.who, b.x + b.width / 2, b.y + b.height / 2)
+        ctx.textBaseline = "alphabetic"
+        ctx.textAlign = "left"
+        levelElements.drawLinks(el, { x: b.x + b.width / 2, y: b.y + b.height / 2 })
+    },
+    linkOn: (el, runtime) => runtime.mobClear ? runtime.mobClear.isOn : null,
+    linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
+    build(el) {
+        const clear = level.cleared(el.x, el.y, el.width, el.height, el.who, el.on === "stays on")
+        return {
+            mobClear: clear,
+            custom() {
+                if (levelElements.waitingMobs(el, levelData.data).some(other => levelData.runtimes.get(other.id)?.isSpawned === false)) return //none spawned isn't clear
+                clear.query()
+            },
+        }
+    },
+    code(el, name, context) {
+        const waiting = context ? levelElements.waitingMobs(el, context.data).map(other => `${context.nameOf(other.id)}Spawned`) : []
+        const args = el.on === "stays on" ? (el.who === "box" ? [el.x, el.y, el.width, el.height] : [el.x, el.y, el.width, el.height, el.who]) : [el.x, el.y, el.width, el.height, el.who, false]
+        return {
+            setup: [`const ${name} = level.cleared(${levelElements.args(...args)});${el.on === "stays on" ? "" : " //turns off again if a mob comes back"}`],
+            custom: [`${waiting.length ? `if (${waiting.join(" && ")}) ` : ""}${name}.query();${waiting.length ? " //none spawned isn't clear" : ""}`],
         }
     },
 })
 
 levelElements.timerCode = el => `${el.offset ? `(simulation.cycle + ${levelElements.args(el.offset)})` : "simulation.cycle"} % ${levelElements.args(el.onTime + el.offTime)} < ${levelElements.args(el.onTime)}`
-levelElements.define("timer", { //a link source that's on for onTime cycles, then off for offTime, over and over
-    canEditCode: false, //what's linked to it writes the check, its own code is only a comment
-    tip: "linked doors open and linked elements run for onTime cycles, then stop for offTime, over and over, 60 cycles is a second, offset shifts when",
+//a logic element is a link source that only combines other link sources, nothing to see in a run, link and orLink are its inputs, more inputs is one linked to another
+levelElements.gates = { //what its gate setting can be, the inspector switches between them, needs is how many inputs it takes to be useful, see the analysis, path draws it in its 50 × 50 bounds
+    and: {
+        needs: 2,
+        tip: "on while both of its inputs are on",
+        textX: -3,
+        path(x, y) { //flat on the left, round on the right
+            ctx.moveTo(x - 25, y - 20)
+            ctx.lineTo(x + 5, y - 20)
+            ctx.arc(x + 5, y, 20, -Math.PI / 2, Math.PI / 2)
+            ctx.lineTo(x - 25, y + 20)
+        },
+        isOn: inputs => inputs.length > 0 && inputs.every(Boolean),
+        on: inputs => inputs.map(on => on.includes("||") ? `(${on})` : on).join(" && ") || "false",
+    },
+    or: {
+        needs: 2,
+        tip: "on while either of its inputs is on",
+        textX: 0,
+        path(x, y) { //a curved back and a point, like a plug
+            ctx.moveTo(x - 25, y - 20)
+            ctx.quadraticCurveTo(x + 5, y - 20, x + 25, y)
+            ctx.quadraticCurveTo(x + 5, y + 20, x - 25, y + 20)
+            ctx.quadraticCurveTo(x - 12, y, x - 25, y - 20)
+        },
+        isOn: inputs => inputs.some(Boolean),
+        on: inputs => inputs.join(" || ") || "false",
+    },
+    not: {
+        needs: 1,
+        tip: "on while its input is off, with no input it's always on",
+        textX: -9,
+        path(x, y) { //a triangle pointing right
+            ctx.moveTo(x - 25, y - 23)
+            ctx.lineTo(x + 25, y)
+            ctx.lineTo(x - 25, y + 23)
+        },
+        isOn: inputs => !inputs.some(Boolean),
+        on: inputs => inputs.length ? `!(${inputs.join(" || ")})` : "true",
+        off: inputs => inputs.join(" || ") || "false",
+    },
+    timer: {
+        needs: 0,
+        tip: "on for onTime cycles, then off for offTime, over and over, 60 cycles is a second, offset shifts when, with inputs it only runs while one is on",
+        draw(el, isOn) { //a clock, the hand goes around once a period, green while on
+            const period = el.onTime + el.offTime
+            const phase = ((simulation.cycle + el.offset) % period) / period
+            ctx.setLineDash([])
+            ctx.beginPath()
+            ctx.moveTo(el.x, el.y)
+            ctx.arc(el.x, el.y, 22, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * el.onTime / period)
+            ctx.closePath()
+            ctx.fillStyle = "rgba(80,200,120,0.35)"
+            ctx.fill()
+            ctx.beginPath()
+            ctx.arc(el.x, el.y, 22, 0, 2 * Math.PI)
+            ctx.fillStyle = isOn ? "rgba(80,200,120,0.3)" : "rgba(255,255,255,0.4)"
+            ctx.fill()
+            ctx.moveTo(el.x, el.y)
+            ctx.lineTo(el.x + 20 * Math.sin(2 * Math.PI * phase), el.y - 20 * Math.cos(2 * Math.PI * phase))
+            ctx.lineWidth = 2
+            ctx.strokeStyle = "rgba(0,0,0,0.6)"
+            ctx.stroke()
+        },
+        isOn: (inputs, el) => (simulation.cycle + el.offset) % (el.onTime + el.offTime) < el.onTime && (!inputs.length || inputs.some(Boolean)),
+        on: (inputs, el) => inputs.length ? `${levelElements.timerCode(el)} && ${inputs.length > 1 || inputs[0].includes("||") ? `(${inputs.join(" || ")})` : inputs[0]}` : levelElements.timerCode(el),
+    },
+}
+levelElements.gateName = el => Object.hasOwn(levelElements.gates, el.gate) ? el.gate : "and"
+levelElements.gateOf = el => levelElements.gates[levelElements.gateName(el)]
+levelElements.define("logic", {
+    canEditCode: false, //what's linked to it writes the check, its own code is only a comment, like a timer
+    isGate: true,
+    tip: "and, or, not, or timer, it turns triggers linked to it into one, or pulses on and off, link it to what they should run",
     group: "element",
-    defaults: () => ({ x: 0, y: -200, onTime: 60, offTime: 60, offset: 0 }),
+    defaults: () => ({ x: 0, y: -200, gate: "and", onTime: 60, offTime: 60, offset: 0 }),
     props: [
         ...levelElements.position(),
-        levelElements.prop.number("onTime", { step: 10, min: 1 }),
-        levelElements.prop.number("offTime", { step: 10, min: 0 }),
-        levelElements.prop.number("offset", { step: 10, min: 0 }),
+        ...[["onTime", 1], ["offTime", 0], ["offset", 0]].map(([key, min]) => levelElements.prop.number(key, { step: 10, min, isShown: el => levelElements.gateName(el) === "timer" })),
     ],
-    overlay(el) { //a clock, the hand goes around once a period, green while on
-        const period = el.onTime + el.offTime
-        const phase = ((simulation.cycle + el.offset) % period) / period
+    summary: el => `${levelElements.gateName(el)}(${levelElements.args(el.x, el.y)})`,
+    overlay(el) { //its gate's shape with its name, green while on
+        const gate = levelElements.gateOf(el)
+        if (gate.draw) {
+            gate.draw(el, levelElements.types.logic.linkOn(el))
+            return levelElements.drawLinks(el, el)
+        }
         ctx.setLineDash([])
         ctx.beginPath()
-        ctx.moveTo(el.x, el.y)
-        ctx.arc(el.x, el.y, 22, -Math.PI / 2, -Math.PI / 2 + 2 * Math.PI * el.onTime / period)
+        gate.path(el.x, el.y)
         ctx.closePath()
-        ctx.fillStyle = "rgba(80,200,120,0.35)"
+        ctx.fillStyle = levelElements.types.logic.linkOn(el) ? "rgba(80,200,120,0.45)" : "rgba(255,255,255,0.5)"
         ctx.fill()
-        ctx.beginPath()
-        ctx.arc(el.x, el.y, 22, 0, 2 * Math.PI)
-        ctx.fillStyle = levelElements.types.timer.linkOn(el) ? "rgba(80,200,120,0.3)" : "rgba(255,255,255,0.4)"
-        ctx.fill()
-        ctx.moveTo(el.x, el.y)
-        ctx.lineTo(el.x + 20 * Math.sin(2 * Math.PI * phase), el.y - 20 * Math.cos(2 * Math.PI * phase))
         ctx.lineWidth = 2
-        ctx.strokeStyle = "rgba(0,0,0,0.6)"
+        ctx.strokeStyle = "rgba(0,0,0,0.5)"
         ctx.stroke()
+        ctx.font = "16px monospace"
+        ctx.textAlign = "center"
+        ctx.textBaseline = "middle"
+        ctx.fillStyle = "#000"
+        ctx.fillText(levelElements.gateName(el), el.x + gate.textX, el.y)
+        ctx.textBaseline = "alphabetic"
         levelElements.drawLinks(el, el)
     },
-    linkOn: el => (simulation.cycle + el.offset) % (el.onTime + el.offTime) < el.onTime,
-    linkCode: el => ({ on: levelElements.timerCode(el), off: `!(${levelElements.timerCode(el)})` }),
+    linkOn: (el, runtime, depth = 0) => depth < 8 && levelElements.gateOf(el).isOn(levelData.linkInputs(el, depth + 1).filter(state => state !== null), el), //depth stops gates linked in a loop
+    linkCode(el, name, context, depth = 0) {
+        const gate = levelElements.gateOf(el)
+        const inputs = context ? context.inputs(el, depth + 1) : []
+        const on = gate.on(inputs, el)
+        return { on, off: gate.off ? gate.off(inputs) : `!(${on})` }
+    },
     build: () => ({}),
-    code: (el, name) => ({ setup: [`//${name}: on ${Number(el.onTime)} cycles, off ${Number(el.offTime)}, what's linked to it checks ${levelElements.timerCode(el)}`] }),
+    code: (el, name, context) => ({ setup: [`//${name}: what's linked to it checks ${levelElements.types.logic.linkCode(el, name, context).on}`] }),
 })
 
 levelElements.define("door", {
+    isSnappable: true,
     writesLink: true, //its code() uses context.link
     tip: "slides up to open, link it to a button or toggle, without one it stays shut",
     group: "element",
@@ -1352,6 +1937,35 @@ levelElements.define("door", {
     },
 })
 
+for (const name of ["mover", "transport", "elevator", "vanish", "spinner", "door"]) { //what it bumps into, like a map's or block's, the wrappers only touch one that isn't the default, so the rest build and export the same as written levels
+    const type = levelElements.types[name]
+    const defaults = type.defaults
+    const isInMap = name === "mover" //a map's mask is set by level.addToWorld(), so it needs collisionMask
+    type.defaults = () => ({ ...defaults(), collides: levelElements.collision.defaults[name] })
+    type.props.push(levelElements.prop.mask("collides"))
+    const build = type.build
+    type.build = (el, options) => {
+        const list = isInMap ? map : body
+        const before = list.length
+        const runtime = build(el, options)
+        if (!levelElements.collision.isDefault(el)) {
+            const mask = levelElements.collision.mask(el.collides)
+            for (const who of list.slice(before)) {
+                who.collisionFilter.mask = mask
+                if (isInMap) who.collisionMask = mask
+            }
+        }
+        return runtime
+    }
+    const code = type.code
+    type.code = (el, varName, context) => {
+        const lines = code(el, varName, context)
+        if (levelElements.collision.isDefault(el)) return lines
+        const mask = levelElements.collision.code(el.collides)
+        return { ...lines, setup: [...(lines.setup || []), isInMap ? `map[map.length - 1].collisionMask = ${mask}; //level.addToWorld() uses it in place of the usual mask` : `body[body.length - 1].collisionFilter.mask = ${mask};`] }
+    }
+}
+
 levelElements.linkable = name => { //a link prop, so a button or toggle can turn it on and off, and runs, only shown once it's linked
     const type = levelElements.types[name]
     const defaults = type.defaults
@@ -1359,12 +1973,16 @@ levelElements.linkable = name => { //a link prop, so a button or toggle can turn
     type.defaults = () => ({ ...defaults(), link: null, orLink: null, runs: "while on" })
     type.props.push(levelElements.prop.ref("link", levelElements.linkSources), levelElements.orLinkProp(), levelElements.runsProp())
 }
-for (const name of ["boost", "mover", "transport", "laser", "wind", "slime", "fizzler", "spinner"]) levelElements.linkable(name)
+for (const name of ["boost", "mover", "transport", "elevator", "laser", "buzzsaw", "wind", "slime", "fizzler", "spinner", "gravityZone", "dispenser"]) levelElements.linkable(name)
 for (const name of levelElements.linkSources) { //a link source linked to another is only on while both are, set with the other one's link button, the row only shows once it's set
     const type = levelElements.types[name]
     const defaults = type.defaults
     type.defaults = () => ({ ...defaults(), log: "", link: null, orLink: null })
-    type.props.push(levelElements.prop.text("log"), levelElements.prop.ref("link", levelElements.linkSources, { isShown: el => el.link !== null && el.link !== undefined }), levelElements.orLinkProp())
+    const inputTip = "a button, toggle, or other trigger, or another gate, this gate reads"
+    type.props.push(levelElements.prop.text("log"), ...(type.isGate ? [ //a gate's links are what it's for, so they always show, a not only shows a second once it's set
+        levelElements.prop.ref("link", levelElements.linkSources, { label: "input", tip: inputTip }),
+        levelElements.prop.ref("orLink", levelElements.linkSources, { label: "input2", tip: inputTip, isShown: el => levelElements.gateOf(el).needs > 1 || (el.orLink !== null && el.orLink !== undefined) }),
+    ] : [levelElements.prop.ref("link", levelElements.linkSources, { isShown: el => el.link !== null && el.link !== undefined }), levelElements.orLinkProp()]))
     const build = type.build
     type.build = (el, options) => { //with a log, writes it in the in-game console each time it turns on, not if it's on when the level starts
         const runtime = build(el, options)
@@ -1373,7 +1991,7 @@ for (const name of levelElements.linkSources) { //a link source linked to anothe
         let wasOn = null
         runtime.custom = () => {
             if (custom) custom.call(runtime)
-            const isOn = type.linkOn(el, runtime) === true && levelData.linkState(el) !== false //and what it's linked to
+            const isOn = type.linkOn(el, runtime) === true && (type.isGate || levelData.linkState(el) !== false) //and what it's linked to, a gate's links are its inputs
             if (wasOn === false && isOn) simulation.inGameConsole(levelData.safeHtml(el.log)) //html that can't run javascript
             wasOn = isOn
         }
@@ -1383,8 +2001,8 @@ for (const name of levelElements.linkSources) { //a link source linked to anothe
     type.code = (el, varName, context) => { //the same in export, a WasOn variable and two lines after its own custom lines
         const lines = code(el, varName, context)
         if (!String(el.log).trim()) return lines
-        const own = type.linkCode(el, varName).on
-        const above = context && el.link ? context.link(el) : null
+        const own = type.linkCode(el, varName, context).on
+        const above = !type.isGate && context && (el.link || el.orLink) ? context.link(el) : null //a gate's links are its inputs
         const on = above ? `${own} && ${above.on.includes("||") ? `(${above.on})` : above.on}` : own
         return {
             ...lines,
@@ -1691,6 +2309,115 @@ levelElements.define("path", { //lines and shapes of any outline, drawn behind o
 })
 
 //*********************************************************************
+levelElements.define("drip", { //level.drip, a drop that falls from x, y over and over
+    isDrawing: true, //only drawn, to top and to bottom change what's on top
+    tip: "a drop that falls over and over and disappears, length is how far, period is cycles between drops (60 is a second), it's only for looks",
+    group: "element",
+    defaults: () => ({ x: 0, y: -600, length: 600, period: 100, color: "hsla(160, 100%, 35%, 0.5)", layer: "under player" }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("length", { isGrid: true, min: 10 }),
+        levelElements.prop.number("period", { step: 10, min: 1 }),
+        levelElements.prop.color("color"),
+        levelElements.prop.select("layer", levelElements.layers),
+    ],
+    bounds: el => ({ x: el.x - 12, y: el.y - 12, width: 24, height: el.length + 24 }),
+    handles: el => [{ id: "end", x: el.x, y: el.y + el.length }],
+    dragHandle(el, id, point, min) { el.length = Math.max(min, 10, point.y - el.y) },
+    overlay(el) { //the way it falls
+        ctx.setLineDash([6, 8])
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "rgba(0,0,0,0.25)"
+        ctx.beginPath()
+        ctx.moveTo(el.x, el.y)
+        ctx.lineTo(el.x, el.y + el.length)
+        ctx.stroke()
+        ctx.setLineDash([])
+    },
+    build(el) {
+        const drip = level.drip(el.x, el.y, el.y + el.length, el.period, el.color)
+        const draw = () => drip.draw()
+        return levelElements.isOver(el) ? { top: draw } : { custom: draw }
+    },
+    code(el, name) {
+        const draw = [`${name}.draw();`]
+        return { setup: [`const ${name} = level.drip(${levelElements.args(el.x, el.y, el.y + el.length, el.period, el.color)});`], ...(levelElements.isOver(el) ? { top: draw } : { custom: draw }) }
+    },
+})
+//you can't touch these, so what reads as part of the room (a fan, a pipe) starts soft and see through, behind the map, weather and light can be brighter, players may never change the color
+levelElements.decorations = { //level.decoration() as elements in the add menu's draw list, each also has a function in level.decorationKinds and a picture in levelEditor.elementIcons
+    //width, height, and color are how it starts, isAnimated gives it a speed, isInFront starts it over the player, settings are its own, like a wire's count
+    //parts is about how many shapes it draws a frame, for the analysis, without one it counts as 1, worked out from how long each took to paint in software, 1000 is about 3 ms there, big areas and long lines count since they're slow to paint
+    wires: {
+        label: "wires",
+        tip: "wires hanging from its top corners, height is how far they sag, still wires are cheaper, with sway or speed at 0 they're only worked out once",
+        width: 600,
+        height: 80,
+        color: "rgba(0,0,0,0.28)",
+        isAnimated: true,
+        parts: el => Math.min(12, el.count),
+        settings: [
+            { key: "count", value: 3, prop: { step: 1, min: 1, tip: "how many wires, up to 12" } },
+            { key: "thickness", value: 2.5, prop: { step: 0.5, min: 0.5, tip: "how thick each wire is" } },
+            { key: "spread", value: 7, prop: { step: 1, min: 0, tip: "how far apart they start, 0 is one bundle" } },
+            { key: "droop", value: 0.2, prop: { step: 0.05, min: 0, tip: "how much less each wire after the first sags, 0 is all the same" } },
+            { key: "sway", value: 3, prop: { step: 1, min: 0, tip: "how much they swing, 0 hangs still" } },
+            { key: "tilt", value: 0, prop: { step: 25, tip: "how much lower the right end is, negative is higher" } },
+            { key: "clamps", value: false, prop: { tip: "a bracket holding each end" } },
+        ],
+    },
+    fan: { label: "fan", tip: "a spinning fan, it doesn't push anything, add wind for that", width: 150, height: 150, color: "rgba(0,0,0,0.16)", isAnimated: true },
+    gear: { label: "gear", tip: "a slowly turning cog, a negative speed turns the other way", width: 200, height: 200, color: "rgba(0,0,0,0.14)", isAnimated: true },
+    vent: { label: "vent", tip: "a frame with slats across it", width: 200, height: 120, color: "rgba(0,0,0,0.12)", parts: el => el.width * el.height / 20000 },
+    piston: { label: "piston", tip: "a rod pumping up and down out of a cylinder", width: 120, height: 300, color: "rgba(0,0,0,0.15)", isAnimated: true },
+    belt: { label: "belt", tip: "a drive belt on a big pulley and a small one, the small one spins faster", width: 400, height: 100, color: "rgba(0,0,0,0.2)", isAnimated: true },
+    beacon: { label: "beacon", tip: "a warning light that pulses", width: 120, height: 120, color: "rgba(255,70,50,0.55)", isAnimated: true, parts: el => el.width * el.height / 20000 },
+    panel: { label: "panel", tip: "a computer panel of blinking lights", width: 200, height: 120, color: "rgba(40,150,90,0.5)", isAnimated: true, parts: el => Math.min(280, el.width * el.height / 576) },
+    pipe: { label: "pipe", tip: "a pipe with joints along its longer side", width: 500, height: 40, color: "rgba(0,0,0,0.15)" },
+    truss: { label: "truss", tip: "a steel girder along its longer side", width: 600, height: 60, color: "rgba(0,0,0,0.18)" },
+    grate: { label: "grate", tip: "a diagonal mesh in a frame", width: 300, height: 200, color: "rgba(0,0,0,0.12)", parts: el => Math.min(800, (el.width + el.height) * 1.5) },
+    stripes: { label: "stripes", tip: "black and yellow hazard stripes", width: 400, height: 40, color: "rgba(190,145,20,0.3)", parts: el => el.width * el.height / 8000 },
+    rain: { label: "rain", tip: "streaks of rain falling through its box, a bigger box draws more", width: 500, height: 500, color: "rgba(70,110,175,0.6)", isAnimated: true, isInFront: true, parts: el => Math.min(250, el.width * el.height / 2200) },
+    snow: { label: "snow", tip: "flakes drifting down through its box, a bigger box draws more, on a dark background try white", width: 500, height: 500, color: "rgba(140,165,205,0.85)", isAnimated: true, isInFront: true, parts: el => Math.min(250, el.width * el.height / 3000) },
+    sparks: { label: "sparks", tip: "sparks rising from the bottom of its box, a wider box draws more", width: 300, height: 300, color: "rgb(255,150,40)", isAnimated: true, isInFront: true, parts: el => Math.min(90, el.width / 5) },
+    steam: { label: "steam", tip: "puffs rising from the bottom of its box, growing and fading, on a dark background try white", width: 120, height: 400, color: "rgba(125,130,140,0.4)", isAnimated: true, isInFront: true, parts: el => Math.min(14, el.height / 35) + el.width * el.height / 20000 },
+    waves: { label: "waves", tip: "layers of moving water, only for looks, it doesn't push or hurt anything, big see through layers are the costliest to draw", width: 600, height: 150, color: "rgba(60,130,200,0.5)", isAnimated: true, parts: el => 3 * el.width * el.height / 20000 },
+    grass: { label: "grass", tip: "blades of grass swaying from the bottom of its box, a wider box draws more", width: 500, height: 40, color: "rgba(60,120,60,0.45)", isAnimated: true, isInFront: true, parts: el => Math.min(220, el.width / 6) * Math.min(150, el.height) / 40 },
+    vines: { label: "vines", tip: "leafy vines hanging from the top of its box, a wider box draws more", width: 400, height: 250, color: "rgba(60,110,60,0.4)", isAnimated: true, isInFront: true, parts: el => 8 * Math.min(14, el.width / 50) },
+}
+for (const [name, { label, tip, width, height, color, isAnimated, isInFront, settings = [] }] of Object.entries(levelElements.decorations)) {
+    const optionsOf = el => Object.fromEntries(settings.filter(({ key, value }) => el[key] !== value).map(({ key, value }) => [key, typeof value === "boolean" ? !!el[key] : Number(el[key])])) //only what isn't the default, plain numbers and booleans
+    levelElements.define(name, {
+        isDrawing: true, //only drawn, to top and to bottom change what's on top
+        isBackground: true, //lock background colors in editor settings makes the mouse go through it
+        label,
+        tip,
+        group: "element",
+        defaults: () => ({ x: 0, y: -height, width, height, color, ...(isAnimated ? { speed: 1 } : {}), ...Object.fromEntries(settings.map(({ key, value }) => [key, value])), layer: isInFront ? "over player" : "under player" }),
+        props: [
+            ...levelElements.rect(),
+            levelElements.prop.color("color"),
+            ...(isAnimated ? [levelElements.prop.number("speed", { step: 0.25, tip: "how fast it moves, 0 stops it" })] : []),
+            ...settings.map(({ key, value, prop }) => typeof value === "boolean" ? levelElements.prop.bool(key, prop) : levelElements.prop.number(key, prop)),
+            levelElements.prop.select("layer", levelElements.layers),
+        ],
+        build(el) {
+            const decoration = level.decoration(name, el.x, el.y, el.width, el.height, el.color, isAnimated ? el.speed : 1, optionsOf(el))
+            const draw = () => decoration.draw()
+            return levelElements.isOver(el) ? { top: draw } : { custom: draw }
+        },
+        code(el, varName) {
+            const draw = [`${varName}.draw();`]
+            const options = optionsOf(el)
+            const hasOptions = Object.keys(options).length > 0
+            const speed = isAnimated && (el.speed !== 1 || hasOptions) ? [el.speed] : hasOptions ? [1] : []
+            const optionsCode = hasOptions ? `, { ${Object.entries(options).map(([key, value]) => `${key}: ${value}`).join(", ")} }` : ""
+            return { setup: [`const ${varName} = level.decoration(${levelElements.args(name, el.x, el.y, el.width, el.height, el.color, ...speed)}${optionsCode});`], ...(levelElements.isOver(el) ? { top: draw } : { custom: draw }) }
+        },
+    })
+}
+
+levelElements.types.wires.contains = (el, p) => p.x >= el.x && p.x <= el.x + el.width && p.y >= Math.min(el.y, el.y + el.tilt) - 10 && p.y <= Math.max(el.y, el.y + el.tilt) + el.height + 10 //a tilted end is outside its box
 levelElements.define("text", { //words in the game's stroke font, like the constraint and level name at the start of a level, it doesn't jitter when the camera moves slowly like fillText does
     isDrawing: true, //only drawn, to top and to bottom change what's on top
     tip: "words drawn in the game's line font, like the level name at the start, letters, numbers, and . , ! ? : ' - + = / ( ) %, x, y is the top left, or the top middle when centered",
@@ -1969,11 +2696,17 @@ levelElements.define("mobSpot", { //a place a random mob might spawn, spawn.rand
     levelProps: ["mobVeto"], //the level's mob veto shows in its inspector too, it's for every spot
     defaults: () => ({ x: 0, y: -300, small: false }),
     props: [...levelElements.position(), levelElements.prop.bool("small")], //small spots get a few small mobs instead of one
-    bounds: el => ({ x: el.x - 20, y: el.y - 20, width: 40, height: 40 }),
-    contains: (el, p) => Math.hypot(p.x - el.x, p.y - el.y) < 20,
-    overlay: el => levelElements.marker(el, 20, "rgba(255,80,80,0.2)", el.small ? "s" : "?"),
+    radius: el => el.small ? 25 : 45, //about the size of the mobs it spawns
+    bounds(el) { const r = this.radius(el); return { x: el.x - r, y: el.y - r, width: 2 * r, height: 2 * r } },
+    contains(el, p) { return Math.hypot(p.x - el.x, p.y - el.y) < this.radius(el) },
+    overlay(el) { levelElements.marker(el, this.radius(el), "rgba(255,80,80,0.2)", el.small ? "s" : "mob", 22) },
     build(el, options) {
         if (options.isSpawning) spawn.randomMobPositions.push({ x: el.x, y: el.y, isSmall: el.small }) //levelData.play() calls spawn.randomMobFromArray() after
+    },
+    spawnLinked: el => spawn.randomMobAt(el.x, el.y, el.small, levelData.data.mobVeto), //linked, it isn't in the list and always spawns
+    code(el, name, context) { //only linked ones, see levelData.isTogether()
+        const veto = context ? context.data.mobVeto : []
+        return { setup: [`spawn.randomMobAt(${levelElements.args(el.x, el.y)}${el.small || veto.length ? `, ${!!el.small}` : ""}${veto.length ? `, ${levelElements.namesCode(veto)}` : ""});`] }
     },
     codeAll: (elements, data) => [ //every spot goes in one list, the level's mobVeto goes with them
         "spawn.randomMobPositions = [",
@@ -2013,6 +2746,30 @@ levelElements.mobType = (spawnName, label, radius, fill, hasChance, text = label
 levelElements.define("mob", { ...levelElements.mobType("randomMob", "mob", 40, "rgba(255,80,80,0.35)", true), tip: "one random mob in this exact spot, chance is how likely, standard levels use spots instead" })
 levelElements.define("smallMobs", { ...levelElements.mobType("randomSmallMob", "small mobs", 30, "rgba(255,120,80,0.35)", true, "small"), tip: "a few small random mobs, more on harder difficulties" })
 levelElements.define("mobGroup", { ...levelElements.mobType("randomGroup", "group", 50, "rgba(255,80,160,0.35)", true), tip: "a group of random mobs linked together, only after the first few levels" })
+levelElements.nestNames = () => ["random", ...(typeof spawn === "undefined" ? ["starter"] : [...new Set(spawn.tier.flat())])] //random is one of the level's mob types, spawn.js isn't loaded in the unit tests
+levelElements.define("nest", { //level.nest
+    tip: "a mob that stays put and makes mobs while it sees the player, until max are alive, period is cycles between them (60 is a second), its mobs don't drop power ups",
+    group: "mob",
+    defaults: () => ({ x: 0, y: -300, name: "random", period: 300, max: 4, radius: 60 }),
+    props: [
+        ...levelElements.position(),
+        { key: "name", kind: "select", get options() { return levelElements.nestNames() } },
+        levelElements.prop.number("period", { step: 30, min: 1 }),
+        levelElements.prop.number("max", { step: 1, min: 1 }),
+        levelElements.prop.number("radius", { step: 5, min: 20 }),
+    ],
+    bounds: el => ({ x: el.x - el.radius, y: el.y - el.radius, width: 2 * el.radius, height: 2 * el.radius }),
+    contains: (el, p) => Math.hypot(p.x - el.x, p.y - el.y) < el.radius,
+    overlay: el => levelElements.marker(el, el.radius, "rgba(150,40,120,0.35)", "nest"), //it's a mob, so it only spawns with mobs on
+    summary: el => `nest(${levelElements.args(el.x, el.y, el.name)})`,
+    build(el, options) {
+        if (options.isSpawning) level.nest(el.x, el.y, el.name, el.period, el.max, el.radius)
+    },
+    code(el) {
+        const extra = el.radius !== 60 ? [el.period, el.max, el.radius] : el.max !== 4 ? [el.period, el.max] : el.period !== 300 ? [el.period] : []
+        return { setup: [`level.nest(${levelElements.args(el.x, el.y, el.name, ...extra)});`] }
+    },
+})
 levelElements.mobNames = () => typeof spawn === "undefined" ? ["starter"] : [...new Set([...spawn.tier.flat(), ...spawn.bossTier.flat()])] //every mob and boss by tier, spawn.js isn't loaded in the unit tests
 levelElements.define("namedMob", { //one mob picked by name, for levels that want a specific mob
     ...levelElements.mobType("namedMob", "mob by name", 40, "rgba(255,40,40,0.35)", false),
@@ -2030,7 +2787,7 @@ levelElements.define("namedMob", { //one mob picked by name, for levels that wan
     },
     code: el => ({ setup: levelElements.mobNames().includes(el.name) ? [`spawn[${JSON.stringify(el.name)}](${levelElements.args(el.x, el.y)});`] : [] }),
 })
-levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns at its spot or one of its other spots, picked at random each time the level loads
+levelElements.bossType = (spawnName, label, radius, fill, fontSize) => ({ //a boss spawns at its spot or one of its other spots, picked at random each time the level loads, fontSize for a long label
     ...levelElements.mobType(spawnName, label, radius, fill, false),
     defaults: () => ({ x: 0, y: -300, spots: [], veto: [] }), //spots: [[x, y], ...] other places it could spawn, the editor shows them as handles to drag, veto: boss names it won't be
     props: [...levelElements.position(), levelElements.prop.veto("veto", levelElements.vetoTiers.boss, "boss")],
@@ -2065,7 +2822,7 @@ levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns 
             ctx.fill()
             ctx.stroke()
             ctx.setLineDash([])
-            ctx.font = `${Math.max(16, radius * 0.4)}px monospace`
+            ctx.font = `${fontSize ?? Math.max(16, radius * 0.4)}px monospace`
             ctx.textAlign = "center"
             ctx.textBaseline = "middle"
             ctx.fillStyle = "rgba(0,0,0,0.6)"
@@ -2073,7 +2830,7 @@ levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns 
             ctx.textBaseline = "alphabetic"
             ctx.textAlign = "left"
         })
-        levelElements.marker(el, radius, fill, el.spots.length ? `${label} 1` : label)
+        levelElements.marker(el, radius, fill, el.spots.length ? `${label} 1` : label, fontSize)
     },
     build(el, options) {
         if (!options.isSpawning) return
@@ -2091,7 +2848,41 @@ levelElements.bossType = (spawnName, label, radius, fill) => ({ //a boss spawns 
     },
 })
 levelElements.define("boss", { ...levelElements.bossType("randomLevelBoss", "boss", 80, "rgba(200,0,60,0.35)"), tip: "the level's boss, picked by the run's tier, add spots in the inspector for other places it could spawn" })
-levelElements.define("secondaryBoss", { ...levelElements.bossType("secondaryBossChance", "2nd boss", 70, "rgba(160,0,100,0.3)"), tip: "a second boss, it only spawns with the 2 bosses difficulty option" })
+levelElements.define("secondaryBoss", { ...levelElements.bossType("secondaryBossChance", "2nd boss", 85, "rgba(160,0,100,0.3)", 27), tip: "a second boss, it only spawns with the 2 bosses difficulty option" })
+for (const name of ["mobSpot", "mob", "smallMobs", "mobGroup", "nest", "namedMob", "boss", "secondaryBoss"]) { //no link spawns when the level starts, linked it spawns once, the first time what it's linked to turns on
+    levelElements.linkable(name)
+    const type = levelElements.types[name]
+    type.handlesLink = true //it runs to watch its link, not only while it's on
+    type.writesLink = true //its code() uses context.link
+    type.props.find(prop => prop.key === "link").tip = "a button, zone, or other trigger that spawns it, once, the first time it turns on, null spawns it when the level starts"
+    type.props.find(prop => prop.key === "runs").tip = "while on spawns it the first time its link turns on, while off the first time its link is off"
+    const build = type.build
+    type.build = (el, options) => {
+        if (!el.link && !el.orLink) return build(el, options)
+        if (!options.isSpawning) return {}
+        const runtime = {
+            isSpawned: false, //a mob clear waits for it
+            custom() {
+                if (runtime.isSpawned || levelData.linkOn(el) !== true) return
+                runtime.isSpawned = true
+                if (type.spawnLinked) type.spawnLinked(el)
+                else build(el, options)
+            },
+        }
+        return runtime
+    }
+    const code = type.code
+    type.code = (el, varName, context) => {
+        const lines = code(el, varName, context)
+        const link = context && context.link(el)
+        if (!link) return lines
+        const flag = `${varName}Spawned`
+        return {
+            setup: [`let ${flag} = false; //it spawns once, the first time what it's linked to turns on`],
+            custom: [`if (!${flag} && ${link.on.includes("||") ? `(${link.on})` : link.on}) {`, `    ${flag} = true;`, ...(lines.setup || []).map(line => "    " + line), "}"],
+        }
+    }
+}
 
 //*********************************************************************
 // power ups, the editor's power ups menu
@@ -2118,7 +2909,10 @@ levelElements.define("powerUp", {
     props: [
         ...levelElements.position(),
         { key: "name", kind: "select", get options() { return levelElements.types.powerUp.names } },
-        levelElements.prop.number("count", { step: 1, min: 1 }),
+        levelElements.prop.number("count", {
+            step: 1, min: 1, tip: `how many, up to ${levelElements.maxPowerUpCount} per element`,
+            write(el, value) { el.count = Math.max(1, Math.min(levelElements.maxPowerUpCount, Math.round(value))) },
+        }),
     ],
     bounds: el => ({ x: el.x - 25, y: el.y - 25, width: 50, height: 50 }),
     summary: el => `${el.name}(${levelElements.args(el.x, el.y)})${el.count > 1 ? ` × ${el.count}` : ""}`,
@@ -2193,9 +2987,10 @@ levelElements.tips = {
     frictionAir: "drag, slows it down every frame, 0.001 is normal, 0.05 is like moving through water",
     restitution: "bounciness, 0 doesn't bounce, 1 bounces back as high as it fell",
     collides: "what it bumps into, click a name to turn it off, crossed out names go through it",
-    link: "the button, toggle, zone, timer, or keyhole that turns it on and off",
+    link: "the button, zone, logic, or other trigger that turns it on and off",
     orLink: "a second control, it's on while either one is",
     runs: "while on runs it while its link is on, while off is the other way around",
+    delay: "cycles it waits to follow its link, 60 is a second, it turns on that long after its link does and off that long after",
     density: "mass per area, 0.001 is a normal block, more is heavier and harder to push",
     mass: "density times area, change either one",
     velocityX: "how fast it's moving right when the level starts, negative is left, game units a frame",
@@ -2237,6 +3032,7 @@ levelElements.typeTips = {
     zone: { on: "on while something's inside, or for good once something has been", circle: "a circle around x, y instead of a box, something is inside once its center is", radius: "game units, from x, y" },
     boost: { launchHeight: "about how high it throws the player, game units" },
     transport: { distance: "how far it slides from its start, game units" },
+    buzzsaw: { radius: "how big it is, game units", path: "the path it travels along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put", spin: "how fast it turns, radians a cycle, negative turns it the other way", look: "how it's drawn, it hurts the same in every look" },
     door: { distance: "how far up it slides to open, game units", speed: "how fast it opens and closes" },
     elevator: { travel: "how far up it goes, game units", force: "how hard it pushes, more is faster", onTouch: "only moves while the player stands on it" },
     vanish: { vertical: "shrinks sideways instead of down" },
@@ -2244,7 +3040,7 @@ levelElements.typeTips = {
     wind: { vx: "push to the right a frame, negative pushes left", vy: "push down a frame, negative pushes up", float: "cancels gravity inside it" },
     slime: { rise: "how fast it fills, game units a frame, 0 is always full, linked it drains while off" },
     toggle: { isOn: "how it starts", staysOn: "once it's on it can't be flipped back" },
-    timer: { onTime: "frames it's on, 60 is a second", offTime: "frames it's off, 60 is a second", offset: "frames to shift it, so timers can take turns" },
+    logic: { onTime: "frames it's on, 60 is a second", offTime: "frames it's off, 60 is a second", offset: "frames to shift it, so timers can take turns" },
     portal: { angle: "which way end A faces, degrees, 0 is right, 90 up", angle2: "which way end B faces, degrees", exit: "how things come out: keep their momentum, straight out, or launched" },
     path: { closed: "joins the last point to the first and fills it" },
     text: { text: "letters, numbers, and . , ! ? : ' - + = / ( ) %", size: "how tall the letters are, 40 is the font's own size", align: "which side of x the text is on" },
@@ -2272,9 +3068,9 @@ levelElements.typeTips = {
         mapColor: "the color of the map",
         blockColor: "the color of blocks",
         gravity: "times normal, for the player, blocks, and power ups",
-        fall: "falling off the bottom goes back to the enter (spawn), or keeps falling from the sky",
-        constraintTextX: "where the run's constraint text shows, right of the enter",
-        constraintTextY: "where the run's constraint text shows, below the enter",
+        fall: "falling off the bottom goes back to the entrance (spawn), or keeps falling from the sky",
+        constraintTextX: "where the run's constraint text shows, right of the entrance",
+        constraintTextY: "where the run's constraint text shows, below the entrance",
     },
 }
 levelElements.tipOf = (typeName, prop) => prop.tip || levelElements.typeTips[typeName]?.[prop.key] || levelElements.tips[prop.key] || ""
@@ -2290,11 +3086,12 @@ levelElements.level = {
         levelElements.prop.color("blockColor"),
         levelElements.prop.number("gravity", { step: 0.1, min: 0.1 }), //times normal gravity, for the player, blocks, and power ups, mobs have their own
         levelElements.prop.select("fall", ["spawn", "sky"]), //falling off the bottom sends the player back to the spawn, or keeps them falling from the sky above it
+        levelElements.prop.bool("lineOfSight", { label: "line of sight", tip: "only what the player can see is drawn, like subway, it shows in quick test and test export, not while editing" }),
         levelElements.prop.number("constraintTextX", { isGrid: true }), //where the run's constraint shows, from the spawn, level.announceText()
         levelElements.prop.number("constraintTextY", { isGrid: true }),
         levelElements.prop.veto("mobVeto", levelElements.vetoTiers.mob, "mob", { isShown: data => data.elements.some(el => el.type === "mobSpot") }), //each mob spot shows it too
     ],
-    defaults: () => ({ zoom: 2000, background: "#dcdcde", mapColor: "#444", blockColor: "rgba(140,140,140,0.85)", gravity: 1, fall: "spawn", constraintTextX: 0, constraintTextY: 75, mobVeto: [] }), //what written levels use most, and the level properties default button
+    defaults: () => ({ zoom: 2000, background: "#dcdcde", mapColor: "#444", blockColor: "rgba(140,140,140,0.85)", gravity: 1, fall: "spawn", lineOfSight: false, constraintTextX: 0, constraintTextY: 75, mobVeto: [] }), //what written levels use most, and the level properties default button
 }
 
 //*********************************************************************
@@ -2322,4 +3119,31 @@ levelElements.define("code", {
 levelElements.codeTitle = el => { //its first line of code, short
     const line = el.code.split("\n").map(row => row.trim()).find(row => row && !row.startsWith("//")) || "empty"
     return line.length > 32 ? line.slice(0, 31) + "…" : line
+}
+
+for (const name of Object.keys(levelElements.types).filter(name => levelElements.types[name].isDrawing)) { //a trigger can show and hide any drawing
+    levelElements.linkable(name)
+    const type = levelElements.types[name]
+    type.props.find(prop => prop.key === "link").tip = "a button, zone, or other trigger that shows it while it's on, null always shows"
+    const overlay = type.overlay
+    type.overlay = (el, ...rest) => {
+        if (overlay) overlay.call(type, el, ...rest)
+        if ((!el.link && !el.orLink) || levelData.linkOn(el) !== false) return
+        const b = levelElements.bounds(el) //off it isn't drawn, a faint outline so it can still be found while editing
+        ctx.setLineDash([8, 8])
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "rgba(0,0,0,0.25)"
+        ctx.strokeRect(b.x, b.y, b.width, b.height)
+        ctx.setLineDash([])
+    }
+}
+
+//every element a button, toggle, or other link source can turn on and off gets a delay, cycles it waits to follow its link, the row only shows once it's linked, see levelData.linkState() and level.delay()
+for (const name of Object.keys(levelElements.types)) {
+    const type = levelElements.types[name]
+    if (levelElements.linkSources.includes(name) || !type.props.some(prop => prop.key === "link")) continue
+    const defaults = type.defaults
+    type.defaults = () => ({ ...defaults(), delay: 0 })
+    const after = Math.max(...["link", "orLink", "runs", "on"].map(key => type.props.findIndex(prop => prop.key === key)))
+    type.props.splice(after + 1, 0, levelElements.prop.number("delay", { step: 10, min: 0, isShown: el => !!(el.link || el.orLink) }))
 }

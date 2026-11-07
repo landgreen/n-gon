@@ -4364,15 +4364,16 @@ const m = {
             if (tech.stunField) mobs.statusStun(who, tech.stunField)
             //knock backs
             const massRoot = Math.sqrt(Math.min(12, Math.max(0.15, who.mass))); // masses above 12 can start to overcome the push back
-            Matter.Body.setVelocity(who, { x: player.velocity.x - (15 * unit.x) / massRoot, y: player.velocity.y - (15 * unit.y) / massRoot });
+            const pushSpeed = 15 / massRoot
+            const pushNeeded = pushSpeed - Vector.dot(Vector.sub(player.velocity, who.velocity), unit) //only push until the mob and player are moving apart at pushSpeed, a mob stays in range for many deflects and each one would stack more speed on both
+            if (pushNeeded > 0) {
+                Matter.Body.setVelocity(who, Vector.sub(who.velocity, Vector.mult(unit, pushNeeded))) //only along the line to the player, so the mob doesn't get dragged along with the player
+                const recoil = Math.min(1, pushNeeded / pushSpeed) * (m.crouch ? 0.1 : 1) * m.blockingRecoil * massRoot
+                Matter.Body.setVelocity(player, Vector.add(player.velocity, Vector.mult(unit, recoil)));
+            }
             if (who.isUnstable) {
                 if (m.fieldCDcycle < m.cycle + 30) m.fieldCDcycle = m.cycle + 10
                 who.death();
-            }
-            if (m.crouch) {
-                Matter.Body.setVelocity(player, { x: player.velocity.x + 0.1 * m.blockingRecoil * unit.x * massRoot, y: player.velocity.y + 0.1 * m.blockingRecoil * unit.y * massRoot });
-            } else {
-                Matter.Body.setVelocity(player, { x: player.velocity.x + m.blockingRecoil * unit.x * massRoot, y: player.velocity.y + m.blockingRecoil * unit.y * massRoot });
             }
         }
     },

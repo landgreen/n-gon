@@ -141,6 +141,7 @@ const spawn = {
         spawn.afterDelay(cycles, () => {
             if (!who.alive) return
             who.constraint = Constraint.create({ pointA: { x: who.position.x, y: who.position.y }, bodyB: who, stiffness, damping });
+            cons.push(who.constraint) //in cons so clearing the map removes it with the boss
             Composite.add(engine.world, who.constraint);
         })
     },
@@ -223,39 +224,46 @@ const spawn = {
         }
     },
     randomMobPositions: [],
-    randomMobFromArray(veto = []) { //veto: mob names this level's spots won't spawn, the level's other mob types spawn instead, or others from its tier
+    allowedPickList(veto = []) { //the level's mob types without veto, or others from its tier if that's all of them
         const isAllowed = name => !veto.includes(name)
         let pickList = spawn.pickList.filter(isAllowed)
         if (!pickList.length) pickList = (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23 ? spawn.fullPickList : spawn.tier[spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]] || []).filter(isAllowed)
         if (!pickList.length) pickList = spawn.pickList
-        seededShuffle(spawn.randomMobPositions)
-        const maxMobs = (simulation.difficultyMode === 1) ? 2 : Math.ceil(5 * Math.log(level.levelsCleared + 1))
-        const mobsInLevel = mob.filter(who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet).length
-        const mobsToSpawn = Math.min(spawn.randomMobPositions.length, Math.max(0, maxMobs - mobsInLevel) * (simulation.difficultyOptions.isDoubleMobs ? 2 : 1))
-        for (let i = 0; i < mobsToSpawn; i++) {
-            const position = spawn.randomMobPositions[i]
-            if (position.isSmall) {
-                const num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0)
-                const size = 16 + Math.ceil(Math.random() * 15)
+        return pickList
+    },
+    mobAtPosition(position, pickList) { //a mob, or a few small ones, at { x, y, isSmall }
+        if (position.isSmall) {
+            const num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0)
+            const size = 16 + Math.ceil(Math.random() * 15)
+            for (let j = 0; j < num; j++) {
+                const pick = pickList[Math.floor(Math.random() * pickList.length)]
+                spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
+            }
+            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 for (let j = 0; j < num; j++) {
                     const pick = pickList[Math.floor(Math.random() * pickList.length)]
                     spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
                 }
-                if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
-                    for (let j = 0; j < num; j++) {
-                        const pick = pickList[Math.floor(Math.random() * pickList.length)]
-                        spawn[pick](position.x + Math.round((Math.random() - 0.5) * 20) + j * size * 2.5, position.y + Math.round((Math.random() - 0.5) * 20), size)
-                    }
-                }
-            } else {
+            }
+        } else {
+            const pick = pickList[Math.floor(Math.random() * pickList.length)]
+            spawn[pick](position.x, position.y)
+            if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
                 const pick = pickList[Math.floor(Math.random() * pickList.length)]
                 spawn[pick](position.x, position.y)
-                if (tech.isDuplicateMobs && Math.random() < tech.duplicationChance()) {
-                    const pick = pickList[Math.floor(Math.random() * pickList.length)]
-                    spawn[pick](position.x, position.y)
-                }
             }
         }
+    },
+    randomMobAt(x, y, isSmall = false, veto = []) { //one spot's mobs right now, not limited by how many are in the level, for a mob spot linked to a trigger
+        spawn.mobAtPosition({ x, y, isSmall }, spawn.allowedPickList(veto))
+    },
+    randomMobFromArray(veto = []) { //veto: mob names this level's spots won't spawn, the level's other mob types spawn instead, or others from its tier
+        const pickList = spawn.allowedPickList(veto)
+        seededShuffle(spawn.randomMobPositions)
+        const maxMobs = (simulation.difficultyMode === 1) ? 2 : Math.ceil(5 * Math.log(level.levelsCleared + 1))
+        const mobsInLevel = mob.filter(who => who.alive && who.isDropPowerUp && !who.isBoss && !who.shield && !who.isMobBullet && who.collisionFilter.category !== cat.mobBullet).length
+        const mobsToSpawn = Math.min(spawn.randomMobPositions.length, Math.max(0, maxMobs - mobsInLevel) * (simulation.difficultyOptions.isDoubleMobs ? 2 : 1))
+        for (let i = 0; i < mobsToSpawn; i++) spawn.mobAtPosition(spawn.randomMobPositions[i], pickList)
     },
     randomSmallMob(x, y,
         num = Math.max(Math.min(Math.round(Math.random() * simulation.difficulty * 0.2), 4), 0),
