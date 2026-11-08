@@ -11201,10 +11201,8 @@ const tech = {
         descriptionFunction() {
             const field = m.fieldUpgrades[2]
             if (tech.isRay) {
-                const stacks = Array.from({ length: this.maxCount }, (_, i) => i + 1)
-                const lengths = stacks.map(count => Number((field.rayScale(count) / field.rayScale(0)).toFixed(2)))
                 const length = field.rayLength ? `<em style ="float: right;">(${Math.round(field.rayLength(this.count))})</em>` : ""
-                return `<strong>${stacks.join(" / ")}</strong> stacks give <strong>perfect diamagnetism</strong><br><strong>${lengths.join("x / ")}x</strong> total length${length}`
+                return `<strong>1.6x</strong> <strong>perfect diamagnetism</strong> length${length}`
             }
             const radius = Number((field.membraneRange(1) / field.membraneRange(0)).toFixed(2))
             const arc = Math.round(360 * (field.membraneArc(1) - field.membraneArc(0)))

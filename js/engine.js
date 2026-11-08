@@ -154,41 +154,26 @@ function playerOnGroundCheck(event) {
 
 
     for (let i = 0, j = event.pairs.length; i != j; ++i) {
-        if (event.pairs[i].bodyA === jumpSensor) {
-            m.standingOn = event.pairs[i].bodyB; //keeping track to correctly provide recoil on jump
-            if (m.standingOn.alive !== true || m.immuneCycle > m.cycle) enter();
-        }
-
-        //doesn't seem to need to check bodyB (this might be because the player is added so it's earlier in array?)
-        // else if (event.pairs[i].bodyB === jumpSensor) {
-        //     m.standingOn = event.pairs[i].bodyA; //keeping track to correctly provide recoil on jump
-        //     if (m.standingOn.alive !== true || m.immuneCycle > m.cycle) enter();
-        // }
+        const { bodyA, bodyB } = event.pairs[i]
+        const support = bodyA === jumpSensor ? bodyB : bodyB === jumpSensor ? bodyA : null
+        if (!support || (support.alive === true && !(m.immuneCycle > m.cycle))) continue
+        m.standingOn = support
+        enter()
     }
-    m.numTouching = 0;
 }
 
 function playerOffGroundCheck(event) {
     //runs on collisions events
+    if (!m.onGround || m.numTouching) return
     const pairs = event.pairs;
     for (let i = 0, j = pairs.length; i != j; ++i) {
-        if (pairs[i].bodyA === jumpSensor) { //|| pairs[i].bodyB === jumpSensor) {
-            if (m.onGround && m.numTouching === 0) {
-                m.onGround = false;
-                // m.groundCount = 0
-                m.lastOnGroundCycle = m.cycle;
-                m.hardLandCD = 0 // disable hard landing
-                // if (m.checkHeadClear()) {
-                //     if (m.crouch) {
-                //         m.undoCrouch();
-                //     }
-                //     m.yOffGoal = m.yOffWhen.jump;
-                // }
-                if (m.crouch && m.checkHeadClear()) {
-                    m.undoCrouch();
-                }
-                m.yOffGoal = m.crouch ? m.yOffWhen.crouch : m.yOffWhen.jump;
-            }
+        if (pairs[i].bodyA === jumpSensor || pairs[i].bodyB === jumpSensor) {
+            m.onGround = false
+            m.lastOnGroundCycle = m.cycle
+            m.hardLandCD = 0
+            if (m.crouch && m.checkHeadClear()) m.undoCrouch()
+            m.yOffGoal = m.crouch ? m.yOffWhen.crouch : m.yOffWhen.jump
+            return
         }
     }
 }
@@ -444,6 +429,7 @@ Events.on(engine, "collisionStart", function (event) {
 Events.on(engine, "beforeUpdate", function () {
     playerSweep.body = player
     if (player) {
+        m.numTouching = 0 //collisionStart and collisionActive both count support before collisionEnd
         playerSweep.x = player.position.x
         playerSweep.y = player.position.y
     }

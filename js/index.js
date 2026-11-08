@@ -1122,16 +1122,17 @@ const input = {
     right: false,
     isPauseKeyReady: true,
     isMenuKeyFocus: false, //Tab navigation keeps the normal keyboard controls in menus
+    movementKeys: new Set(),
     // isMouseInside: true,
     // lastDown: null,
     reset() {
+        input.movementKeys.clear()
         input.fire = false
         input.field = false
         input.up = false
         input.upPressCycle = -Infinity
         input.down = false
         input.left = false
-        input.fire = false
         input.right = false
     },
     key: {
@@ -1289,23 +1290,25 @@ document.getElementById("control-details").addEventListener("toggle", function (
 
 document.getElementById("control-reset").addEventListener('click', input.setDefault);
 
+window.addEventListener("blur", () => input.reset())
 window.addEventListener("keyup", function (event) {
+    input.movementKeys.delete(event.code)
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":
-            input.right = false
+            input.right = input.movementKeys.has(input.key.right) || input.movementKeys.has("ArrowRight")
             break;
         case input.key.left:
         case "ArrowLeft":
-            input.left = false
+            input.left = input.movementKeys.has(input.key.left) || input.movementKeys.has("ArrowLeft")
             break;
         case input.key.up:
         case "ArrowUp":
-            input.up = false
+            input.up = input.movementKeys.has(input.key.up) || input.movementKeys.has("ArrowUp")
             break;
         case input.key.down:
         case "ArrowDown":
-            input.down = false
+            input.down = input.movementKeys.has(input.key.down) || input.movementKeys.has("ArrowDown")
             break;
         case input.key.fire:
             input.fire = false
@@ -1343,19 +1346,23 @@ window.addEventListener("keydown", function (event) {
     switch (event.code) {
         case input.key.right:
         case "ArrowRight":
+            input.movementKeys.add(event.code)
             input.right = true
             break;
         case input.key.left:
         case "ArrowLeft":
+            input.movementKeys.add(event.code)
             input.left = true
             break;
         case input.key.up:
         case "ArrowUp":
+            if (!event.repeat && !input.up) input.upPressCycle = m.cycle
+            input.movementKeys.add(event.code)
             input.up = true
-            if (!event.repeat) input.upPressCycle = m.cycle
             break;
         case input.key.down:
         case "ArrowDown":
+            input.movementKeys.add(event.code)
             input.down = true
             break;
         case input.key.fire:
@@ -1745,7 +1752,9 @@ document.body.addEventListener("mousemove", (e) => {
 });
 //the browser can grant, refuse, or drop pointer lock on its own (ESC, switching programs), so only trust these events
 document.addEventListener("pointerlockchange", () => {
+    const wasLocked = mouseMove.isPointerLocked
     mouseMove.isPointerLocked = document.pointerLockElement === canvas
+    if (wasLocked && !mouseMove.isPointerLocked) input.reset()
     mouseMove.reset()
     if (mouseMove.isPointerLocked && !mouseMove.wantsLock()) mouseMove.unlock() //a slow lock request finished after a menu opened
 });

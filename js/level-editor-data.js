@@ -425,6 +425,7 @@ Object.assign(levelData, {
         const isHorizontalFlipped = simulation.isHorizontalFlipped
         try {
             simulation.isHorizontalFlipped = false
+            simulation.resetLook() //so it only keeps the colors this level sets, not the last level's, a community map's clear map color would hide a training level's map
             level.load(name) //for the zoom and colors it sets
             return levelData.normalize({
                 name: levelData.freeName(name + "-copy"),

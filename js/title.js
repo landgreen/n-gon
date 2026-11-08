@@ -543,7 +543,6 @@ document.body.addEventListener("mousemove", (event) => {
 window.addEventListener("blur", () => { //keys let go in another window never send keyup here
     if (!simulation.onTitlePage) return
     titlePage.releaseKeys()
-    input.reset()
 })
 window.addEventListener("resize", () => { //window.onresize in index.js has already resized the canvas
     if (!titlePage.isOn) return

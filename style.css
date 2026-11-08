@@ -2744,8 +2744,7 @@ body.level-editor #text-log {
     font: inherit;
 }
 
-.le-explore-search:focus,
-.le-angle:focus {
+.le-explore-search:focus {
     outline: 1px solid var(--le-accent);
     outline-offset: -1px;
 }
@@ -3363,6 +3362,11 @@ body.level-editor.le-invincible #level-editor-left {
     vertical-align: 1px;
 }
 
+/* while one list is open the other tabs fade so the open one stands out, hovering one brings it back */
+.le-grid:has(> .le-add-tab.le-on)>.le-add-tab:not(.le-on):not(:hover) {
+    color: var(--le-faint);
+}
+
 .le-add-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     border-left-width: 0;
@@ -3482,6 +3486,10 @@ body.level-editor.le-invincible #level-editor-left {
     grid-column: span 3;
 }
 
+.le-grid.le-sixths .le-button.le-wide {
+    grid-column: span 6;
+}
+
 /* the inspector's action buttons, flips a quarter, vertices, constraint, and delete a half */
 .le-grid.le-quarters {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3505,18 +3513,6 @@ body.level-editor.le-invincible #level-editor-left {
 
 .le-actions {
     margin-top: 6px;
-}
-
-/* type an angle, a cell in the turns line */
-.le-angle {
-    min-width: 0;
-    padding: 2px 4px;
-    border: none;
-    border-radius: 0;
-    box-shadow: 1px 0 0 var(--le-line), 0 1px 0 var(--le-line);
-    font-family: monospace;
-    font-size: 12px;
-    text-align: center;
 }
 
 .le-shapes+.le-grid {
@@ -3839,6 +3835,35 @@ body.level-editor.le-invincible #level-editor-left {
 
 .le-step.le-undone {
     color: var(--le-off);
+}
+
+/* the history menu's saved versions, under this session's steps, they stay after the editor closes, automatic ones are faded */
+.le-versions-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 4px 3px 6px;
+    font-size: 9px;
+}
+
+.le-version-name {
+    flex: 1;
+    min-width: 0;
+    margin: 0 4px;
+    padding: 1px 4px;
+    font-family: monospace;
+    font-size: 9px;
+    border: 1px solid var(--le-rule-light);
+    border-radius: 3px;
+}
+
+.le-versions-head .le-button {
+    font-size: 9px;
+    padding: 1px 6px;
+}
+
+.le-versions {
+    max-height: 96px;
 }
 
 .le-storage {
@@ -4254,6 +4279,36 @@ button.le-analysis-line:hover {
     display: block;
     padding-left: 5ch;
     color: var(--le-muted);
+}
+
+/* a fix the editor can do to the line above's elements, see levelAnalysis.repair() */
+.le-analysis-repair {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 1px 3px 3px 5ch;
+    border: none;
+    border-radius: 0;
+    background: none;
+    text-align: left;
+    font-family: monospace;
+    font-size: 11px;
+    color: var(--le-code-string);
+    cursor: pointer;
+}
+
+.le-minimap {
+    display: block;
+    width: calc(100% + 2 * var(--le-pad));
+    height: 80px;
+    margin: calc(-1 * var(--le-pad)) calc(-1 * var(--le-pad)) 6px;
+    border-radius: var(--le-inner-radius) var(--le-inner-radius) 0 0;
+    border-bottom: 1px solid var(--le-rule-light);
+    cursor: crosshair;
+}
+
+.le-analysis-repair:hover {
+    background-color: var(--le-hover);
 }
 
 .le-analysis-line.le-fix .le-analysis-status {

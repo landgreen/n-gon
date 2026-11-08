@@ -30,7 +30,7 @@ const levelElements = {
     //*********************************************************************
     collision: {
         names: ["player", "map", "body", "bullet", "powerUp", "mob", "mobBullet", "mobShield"], //cat.phased is past 32 bits, Matter's masks can't hold it
-        category: { map: "map", block: "body", mover: "map", vanish: "map", transport: "body", elevator: "body", spinner: "body", door: "body", dispenser: "body" },
+        category: { map: "map", block: "body", mover: "map", vanish: "map", transport: "body", elevator: "body", train: "body", spinner: "body", door: "body", dispenser: "body" },
         defaults: { //the mask each type gets in level.addToWorld(), spawn.bodyRect(), and its level.* helper
             map: "player map body bullet powerUp mob mobBullet",
             block: "player map body bullet mob mobBullet",
@@ -38,6 +38,7 @@ const levelElements = {
             vanish: "player body bullet powerUp mob mobBullet",
             transport: "player body bullet powerUp mob mobBullet",
             elevator: "player body bullet mob mobBullet",
+            train: "player body bullet mob mobBullet",
             spinner: "player body bullet powerUp mob mobBullet",
             door: "player body bullet powerUp mob mobBullet",
             dispenser: "player map body bullet mob mobBullet", //the blocks it makes, like spawn.bodyRect()
@@ -214,9 +215,37 @@ const levelElements = {
         const to = levelElements.rotatePoint(from, center, degrees)
         levelElements.move(el, to.x - from.x, to.y - from.y, true)
     },
+    //turnOf() is how far it's turned clockwise from how it's made, for the angle in the info box of types without one of their own, see the loop at the end
+    //a type with an angle reads it from that (angles are counterclockwise), two ends from the way one points to the other, anything else keeps turned, what rotate() has added up
+    wrapTurn(degrees) { //0 up to 360
+        const turn = Number((((degrees % 360) + 360) % 360).toFixed(3))
+        return turn === 360 ? 0 : turn
+    },
+    turnSource(el) { //"angle", "ends", or "turned"
+        const type = levelElements.types[el.type]
+        const made = type.defaults()
+        if (type.props.some(prop => prop.key === "angle" && !prop.isTurn) && typeof made.angle === "number") return "angle"
+        if (typeof made.x2 === "number" && typeof made.y2 === "number") return "ends"
+        return "turned"
+    },
+    turnOf(el) { //degrees clockwise from how it's made, 0 up to 360, or null if it doesn't turn
+        if (!levelElements.isRotatable(el)) return null
+        const made = levelElements.types[el.type].defaults()
+        const source = levelElements.turnSource(el)
+        const pointing = (x, y, x2, y2) => Math.atan2(y2 - y, x2 - x) * 180 / Math.PI //clockwise on screen, y is down
+        if (source === "angle") return levelElements.wrapTurn(made.angle - el.angle)
+        if (source === "ends") return levelElements.wrapTurn(pointing(el.x, el.y, el.x2, el.y2) - pointing(made.x, made.y, made.x2, made.y2))
+        return levelElements.wrapTurn(el.turned || 0)
+    },
+    addTurned(el, degrees) { //turned is only kept while it isn't 0
+        const turn = levelElements.wrapTurn((el.turned || 0) + degrees)
+        if (turn) el.turned = turn
+        else delete el.turned
+    },
     rotate(el, degrees, center = levelElements.pivot(el)) { //clockwise, negative turns counterclockwise
         const type = levelElements.types[el.type]
         if (el.forceAngle !== undefined) el.forceAngle = Number((el.forceAngle - degrees).toFixed(3)) //a block's force turns with it
+        if (levelElements.isRotatable(el) && levelElements.turnSource(el) === "turned") levelElements.addTurned(el, degrees)
         if (type && type.rotate) return type.rotate(el, degrees, center)
         if (!levelElements.isRotatable(el)) return levelElements.orbit(el, degrees, center)
         levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.rotatePoint(p, center, degrees)))
@@ -232,6 +261,7 @@ const levelElements = {
     flip(el, axis, center = levelElements.pivot(el)) {
         const type = levelElements.types[el.type]
         if (el.forceAngle !== undefined) el.forceAngle = levelElements.flipAngle(el.forceAngle, axis) //a block's force mirrors with it
+        if (el.turned) levelElements.addTurned(el, -2 * el.turned) //mirrored, it's turned the other way
         if (type && type.flip) return type.flip(el, axis, center)
         if (type && (type.group === "shape" || type.isVertexEditable)) return levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.flipPoint(p, axis, center)))
         levelElements.flipPosition(el, axis, center)
@@ -304,8 +334,37 @@ const levelElements = {
         }
         return el
     },
+    checkValues(owner, props, defaults) { //each setting is the kind its prop says, or its default, so a pasted level's data line can't put a string where export writes a number, see levelData.normalize()
+        const isName = name => typeof name === "string" && /^\w+$/.test(name)
+        for (const prop of props) {
+            const key = prop.key
+            const value = owner[key]
+            if (value === undefined || prop.read) continue //missing is filled in from the defaults, and read props are worked out from others, like a shape's width
+            const fallback = () => { owner[key] = defaults[key] === undefined ? null : JSON.parse(JSON.stringify(defaults[key])) }
+            if (prop.kind === "number") {
+                if (value === null && defaults[key] === null) continue
+                const number = typeof value === "string" && value.trim() !== "" ? Number(value) : value
+                if (typeof number === "number" && Number.isFinite(number)) owner[key] = number
+                else fallback()
+            } else if (prop.kind === "bool") {
+                if (typeof value !== "boolean") fallback()
+            } else if (prop.kind === "text" || prop.kind === "color") {
+                if (typeof value !== "string" && !(value === null && defaults[key] === null)) owner[key] = typeof defaults[key] === "string" ? defaults[key] : ""
+            } else if (prop.kind === "select") {
+                const options = typeof prop.options === "function" ? prop.options(owner) : prop.options
+                if (!Array.isArray(options) || !options.includes(value)) fallback()
+            } else if (prop.kind === "mask") {
+                if (typeof value !== "string") fallback()
+                else owner[key] = value.split(" ").filter(name => levelElements.collision.names.includes(name) || (prop.names && prop.names.includes(name))).join(" ")
+            } else if (prop.kind === "veto") {
+                owner[key] = Array.isArray(value) ? value.filter(isName) : []
+            }
+        }
+        return owner
+    },
     shapeGeometry(el) { //the part of a map or block that stays when switching between them
-        return el.vertices ? { x: el.x, y: el.y, vertices: el.vertices.map(v => v.slice()) } : { x: el.x, y: el.y, width: el.width, height: el.height }
+        const turned = el.turned ? { turned: el.turned } : {} //its angle, see turnOf()
+        return el.vertices ? { x: el.x, y: el.y, vertices: el.vertices.map(v => v.slice()), ...turned } : { x: el.x, y: el.y, width: el.width, height: el.height, ...turned }
     },
     matterBody(el, properties) { //a Matter body for a map or block, rect or vertices
         if (el.vertices) return Matter.Bodies.fromVertices(el.x, el.y, [el.vertices.map(v => ({ x: v[0], y: v[1] }))], properties)
@@ -607,7 +666,7 @@ levelElements.define("block", {
     isSnappable: true,
     group: "shape",
     color: "rgba(140,140,140,0.85)",
-    defaults: () => ({ x: 0, y: 0, width: 50, height: 50, density: 0.001, friction: 0.05, frictionStatic: 0.5, frictionAir: 0.001, restitution: 0, velocityX: 0, velocityY: 0, hasForce: false, force: 0.5, forceAngle: 0, forceMode: "steady", forcePeriod: 120, carryPlayer: true, holdable: true, noSpin: false, immutable: false, collides: levelElements.collision.defaults.block, chance: 1 }),
+    defaults: () => ({ x: 0, y: 0, width: 50, height: 50, density: 0.001, friction: 0.05, frictionStatic: 0.5, frictionAir: 0.001, restitution: 0, velocityX: 0, velocityY: 0, hasForce: false, force: 0.5, forceAngle: 0, forceMode: "steady", forcePeriod: 120, holdable: true, noSpin: false, immutable: false, collides: levelElements.collision.defaults.block, chance: 1 }),
     props: [
         ...levelElements.rect(),
         levelElements.prop.number("density", { step: 0.0005, min: 0.00001 }),
@@ -627,7 +686,6 @@ levelElements.define("block", {
         levelElements.prop.number("forceAngle", { step: 15, tip: "the way it pushes in degrees, 0 is right, 90 is up", isShown: el => el.hasForce }),
         levelElements.prop.select("forceMode", ["steady", "wave"], { tip: "steady always pushes, wave pushes back and forth, on a constraint it swings", isShown: el => el.hasForce }),
         levelElements.prop.number("forcePeriod", { step: 10, min: 2, tip: "frames for one push there and back, 60 is a second, on a constraint a period near how long it takes to swing builds up the biggest swing", isShown: el => el.hasForce && el.forceMode === "wave" }),
-        levelElements.prop.bool("carryPlayer", { label: "carry player", tip: "the player standing on it moves along with it", isShown: el => el.hasForce }),
         levelElements.prop.bool("holdable"), //false is isNotHoldable, the field can't pick it up
         levelElements.prop.bool("noSpin"), //inertia Infinity, it slides but never turns
         levelElements.prop.bool("immutable"), //isImmutable, like a key, tech can't destroy, split, grow, or freeze it, and falling out of the level brings it back instead of removing it
@@ -680,7 +738,7 @@ levelElements.define("block", {
         Composite.add(engine.world, who)
         who.classType = "body"
         if (!el.hasForce) return
-        const push = level.pushBody(who, el.force, el.forceAngle * Math.PI / 180, el.forceMode === "wave" ? el.forcePeriod : 0, el.carryPlayer)
+        const push = level.pushBody(who, el.force, el.forceAngle * Math.PI / 180, el.forceMode === "wave" ? el.forcePeriod : 0)
         return { custom() { push.do() } }
     },
     code(el, name, context) { //spawn.bodyRect's properties default to { friction: 0.05, frictionAir: 0.001 }, spawn.bodyVertex has no defaults
@@ -698,11 +756,9 @@ levelElements.define("block", {
         if (!levelElements.collision.isDefault(el)) setup.push(`body[body.length - 1].collisionFilter.mask = ${levelElements.collision.code(el.collides)};`)
         const forceName = `${name}Force`
         const hasChance = el.chance < 1 && !isHeld
-        if (el.hasForce) { //angle in radians, written as degrees like a laser's, the period only for a wave, and carrying the player after it
-            const isWave = el.forceMode === "wave"
-            const period = isWave || el.carryPlayer ? `, ${isWave ? levelElements.args(el.forcePeriod) : 0}` : ""
-            const carry = el.carryPlayer ? ", true" : ""
-            setup.push(`${hasChance ? "" : "const "}${forceName} = level.pushBody(body[body.length - 1], ${levelElements.args(el.force)}, ${levelElements.args(el.forceAngle)} * Math.PI / 180${period}${carry});`)
+        if (el.hasForce) { //angle in radians, written as degrees like a laser's, the period only for a wave
+            const period = el.forceMode === "wave" ? `, ${levelElements.args(el.forcePeriod)}` : ""
+            setup.push(`${hasChance ? "" : "const "}${forceName} = level.pushBody(body[body.length - 1], ${levelElements.args(el.force)}, ${levelElements.args(el.forceAngle)} * Math.PI / 180${period});`)
         }
         const force = el.hasForce ? { custom: [`${hasChance ? `if (${forceName}) ` : ""}${forceName}.do();`] } : {}
         if (isHeld) setup.push(`const ${name} = body[body.length - 1];`)
@@ -826,15 +882,20 @@ levelElements.define("elevator", {
     group: "element",
     handlesLink: true, //while off it finishes its trip and waits at the bottom, without move() it would fall through the map
     writesLink: true, //its code() uses context.link
-    defaults: () => ({ x: 0, y: -25, width: 200, height: 25, travel: 500, force: 0.003, onTouch: false }),
+    defaults: () => ({ x: 0, y: -25, width: 200, height: 25, travel: 500, force: 0.003, downSpeed: 3.4, smoothStop: false, onTouch: false }),
     props: [
         ...levelElements.rect(),
         levelElements.prop.number("travel", { isGrid: true, min: 0 }), //how far up it goes
         levelElements.prop.number("force", { step: 0.0005, min: 0 }),
+        levelElements.prop.number("downSpeed", { step: 0.5, min: 1 }),
+        levelElements.prop.bool("smoothStop", { label: "smooth stop" }),
         levelElements.prop.bool("onTouch"),
     ],
+    friction(el) { //level.elevator's air friction on the way down, falling with gravity it settles at about downSpeed, 3.4 is the written levels' default of 0.2
+        return { up: 0.01, down: Math.round(0.68 / Math.max(1, el.downSpeed) * 10000) / 10000 }
+    },
     build(el) {
-        const elevator = level.elevator(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)
+        const elevator = level.elevator(el.x, el.y, el.width, el.height, el.y - el.travel, el.force, levelElements.types.elevator.friction(el), false, el.smoothStop)
         return {
             custom() {
                 const isOn = levelData.linkOn(el) !== false
@@ -852,7 +913,7 @@ levelElements.define("elevator", {
     code(el, name, context) {
         const link = context && context.link(el)
         return {
-            setup: [`const ${name} = level.elevator(${levelElements.args(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)});`],
+            setup: [`const ${name} = level.elevator(${levelElements.args(el.x, el.y, el.width, el.height, el.y - el.travel, el.force)}${el.downSpeed === 3.4 && !el.smoothStop ? "" : `, { up: 0.01, down: ${levelElements.args(levelElements.types.elevator.friction(el).down)} }`}${el.smoothStop ? ", false, true" : ""});`],
             custom: [`${name}.${el.onTouch ? "moveOnTouch" : "move"}(${link ? link.on : ""});`],
         }
     },
@@ -874,10 +935,12 @@ levelElements.define("vanish", { //platform that shrinks away after the player t
     }),
 })
 
-levelElements.define("spinner", { //block pinned at its center
+levelElements.define("spinner", { //block pinned at its center, a rect, or with vertices any convex shape pinned at its center of area like a block's x, y
     isSnappable: true,
-    tip: "block pinned at its center, it turns when pushed, or on its own with motor, linked its motor only runs while on, frictionAir slows it",
+    tip: "block pinned at its center, it turns when pushed, or on its own with motor, linked its motor only runs while on, frictionAir slows it, vertices makes it any shape",
     group: "element",
+    isVertexEditable: true, //like a block, the vertices button, its sides, and typed vertices
+    hasSides: true,
     defaults: () => ({ x: 0, y: -300, width: 400, height: 25, angle: 0, density: 0.001, frictionAir: 0.001, spin: 0, motor: 0 }),
     props: [
         ...levelElements.rect(),
@@ -887,19 +950,21 @@ levelElements.define("spinner", { //block pinned at its center
         levelElements.prop.number("spin", { step: 0.01 }), //starting angular velocity
         levelElements.prop.number("motor", { step: 0.0005 }), //keeps it turning, like level.rotor
     ],
-    rotate(el, degrees, center) {
-        levelElements.orbit(el, degrees, center)
+    rotate(el, degrees, center) { //its pivot goes around center, its shape stays and its angle turns
+        const from = levelElements.pivot(el)
+        const to = levelElements.rotatePoint(from, center, degrees)
+        levelElements.move(el, to.x - from.x, to.y - from.y)
         el.angle = Number((el.angle - degrees).toFixed(3))
     },
-    isMirrorSymmetric: true, //mirrored it's the same as turned, so one alone has rotate and no flip buttons, flip() still turns it right in a flipped selection
-    flip(el, axis, center) { //a bar looks the same turned 180°, so mirroring only turns it the other way
-        levelElements.flipPosition(el, axis, center)
+    flip(el, axis, center) { //a shape mirrors, then turns the other way, a rect looks the same mirrored so only its angle changes
+        if (el.vertices) levelElements.setPoints(el, levelElements.points(el).map(p => levelElements.flipPoint(p, axis, center)))
+        else levelElements.flipPosition(el, axis, center)
         el.angle = Number((-el.angle).toFixed(3))
     },
-    overlay(el) { //the bar at its starting angle, the selection outline is its unturned rect
+    overlay(el) { //its shape at its starting angle, the selection outline is its unturned shape
         if (!el.angle) return
-        const c = { x: el.x + el.width / 2, y: el.y + el.height / 2 }
-        const points = [[el.x, el.y], [el.x + el.width, el.y], [el.x + el.width, el.y + el.height], [el.x, el.y + el.height]].map(([x, y]) => levelElements.rotatePoint({ x, y }, c, -el.angle))
+        const c = levelElements.pivot(el)
+        const points = levelElements.points(el).map(p => levelElements.rotatePoint(p, c, -el.angle))
         ctx.setLineDash([10, 8])
         ctx.lineWidth = 2
         ctx.strokeStyle = "rgba(0,0,0,0.3)"
@@ -910,11 +975,13 @@ levelElements.define("spinner", { //block pinned at its center
         ctx.setLineDash([])
     },
     build(el) {
-        const rotor = level.rotor(el.x, el.y, el.width, el.height, el.density, levelElements.radians(el.angle), el.frictionAir, el.spin, el.motor)
+        const rest = [el.density, levelElements.radians(el.angle), el.frictionAir, el.spin, el.motor]
+        const rotor = el.vertices ? level.rotorVertex(el.x, el.y, levelElements.pathText(el), ...rest) : level.rotor(el.x, el.y, el.width, el.height, ...rest)
         return { custom() { if (el.motor) rotor.rotate() } }
     },
     code(el, name) {
-        const rotor = `level.rotor(${levelElements.args(el.x, el.y, el.width, el.height, el.density)}, ${levelElements.angleCode(el.angle)}, ${levelElements.args(el.frictionAir, el.spin, el.motor)});`
+        const shape = el.vertices ? `level.rotorVertex(${levelElements.args(el.x, el.y, levelElements.pathText(el), el.density)}` : `level.rotor(${levelElements.args(el.x, el.y, el.width, el.height, el.density)}`
+        const rotor = `${shape}, ${levelElements.angleCode(el.angle)}, ${levelElements.args(el.frictionAir, el.spin, el.motor)});`
         return el.motor ? { setup: [`const ${name} = ${rotor}`], custom: [`${name}.rotate();`] } : { setup: [rotor] }
     },
 })
@@ -1193,6 +1260,70 @@ levelElements.define("buzzsaw", { //level.buzzsaw
     },
 })
 
+levelElements.define("train", { //level.train
+    tip: "platform the player can ride along a path: draw one with its path's draw button, or pick a draw path you've made, it goes back and forth along it, around and around on a closed path, it goes through the map, linked it only runs while on",
+    group: "element",
+    handlesLink: true, //off it stops where it is and floats there
+    writesLink: true, //its code() uses context.link
+    rebuildWithRefs: true, //it follows the path as it was when it was built
+    outlivesRefs: true, //deleting its path leaves it where it is
+    defaults: () => ({ x: 0, y: -200, width: 200, height: 25, path: null, speed: 4 }),
+    props: [
+        ...levelElements.position(), //its middle, on the path
+        levelElements.prop.number("width", { isGrid: true, min: 10 }),
+        levelElements.prop.number("height", { isGrid: true, min: 10 }),
+        levelElements.prop.ref("path", ["path"], {
+            pathStyle: { fill: "none", stroke: "#000", lineWidth: 3 }, //a path drawn with its draw button is a thin black track
+            write(el, id) { //goes to the closest spot on the new path, so it's where it'll start
+                el.path = id
+                const { at } = levelElements.sawRoute(el, levelData.data)
+                el.x = Math.round(at.x)
+                el.y = Math.round(at.y)
+            },
+        }),
+        levelElements.prop.number("speed", { step: 1, min: 0 }),
+    ],
+    bounds: el => ({ x: el.x - el.width / 2, y: el.y - el.height / 2, width: el.width, height: el.height }),
+    handles: el => [{ id: "size", x: el.x + el.width / 2, y: el.y + el.height / 2 }],
+    dragHandle(el, id, point) { //the corner, it stays centered on its spot
+        el.width = Math.max(10, Math.round(2 * Math.abs(point.x - el.x)))
+        el.height = Math.max(10, Math.round(2 * Math.abs(point.y - el.y)))
+    },
+    overlay(el) { //where it starts, it's moving along its path while editing, and a line to the path if it's been dragged off
+        const { at } = levelElements.sawRoute(el, levelData.data)
+        ctx.beginPath()
+        ctx.rect(at.x - el.width / 2, at.y - el.height / 2, el.width, el.height)
+        if (Math.hypot(el.x - at.x, el.y - at.y) > 1) {
+            ctx.rect(el.x - el.width / 2, el.y - el.height / 2, el.width, el.height)
+            ctx.moveTo(el.x, el.y)
+            ctx.lineTo(at.x, at.y)
+        }
+        ctx.stroke()
+    },
+    build(el) {
+        const { points, isLoop, start } = levelElements.sawRoute(el, levelData.data)
+        const train = level.train(points, el.width, el.height, el.speed, isLoop, start)
+        return {
+            containsPoint: point => Matter.Bounds.contains(train.bounds, point), //clicking the moving train selects it
+            custom() { train.move(levelData.linkOn(el) !== false) },
+            top() { train.draw() },
+        }
+    },
+    code(el, name, context) {
+        const link = context && context.link(el)
+        const route = levelElements.sawRoute(el, context ? context.data : levelData.data)
+        const round = n => Math.round(n * 10) / 10
+        const args = [el.width, el.height, el.speed, route.isLoop, round(route.start)]
+        const defaults = [200, 25, 4, false, 0]
+        while (args.length && args[args.length - 1] === defaults[args.length - 1]) args.pop() //leave out what's the default
+        return {
+            setup: [`const ${name} = level.train(${JSON.stringify(route.points.map(p => p.map(round)))}${args.length ? `, ${levelElements.args(...args)}` : ""});`],
+            custom: [`${name}.move(${link ? link.on : ""});`],
+            top: [`${name}.draw();`],
+        }
+    },
+})
+
 levelElements.define("fizzler", { //level.fizzler
     tip: "line that deletes blocks that cross it, not immutable or unholdable ones, drag either end",
     group: "element",
@@ -1320,25 +1451,40 @@ levelElements.define("dispenser", { //level.dispenser, x, y is where blocks show
     group: "element",
     handlesLink: true, //off it still draws its mount
     writesLink: true, //its code() uses context.link
-    defaults: () => ({ x: 0, y: -400, size: 50, period: 180, max: 3, angle: -90, speed: 0, collides: levelElements.collision.defaults.dispenser }),
+    defaults: () => ({ x: 0, y: -400, width: 50, height: 50, period: 180, max: 3, angle: -90, speed: 0, collides: levelElements.collision.defaults.dispenser }),
     props: [
         ...levelElements.position(),
-        levelElements.prop.number("size", { step: 5, min: 10 }), //each block is size × size
+        levelElements.prop.number("width", { step: 5, min: 10 }), //across the chute
+        levelElements.prop.number("height", { step: 5, min: 10 }), //along the chute, the way blocks come out
         levelElements.prop.number("period", { step: 30, min: 1 }),
         levelElements.prop.number("max", { step: 1, min: 1 }),
         levelElements.prop.number("angle", { step: 15 }), //degrees, counterclockwise like boost, -90 is down
         levelElements.prop.number("speed", { step: 1, min: 0 }),
         levelElements.prop.mask("collides", { tip: "what its blocks bump into, click a name to turn it off, crossed out names go through them" }),
     ],
-    outlinePoints(el) { //its mount turned to face angle, the back plate behind the block, like level.dispenser draws it
+    axes(el) { //out is the way blocks come out, the block's height, side is across, its width
         const a = el.angle * Math.PI / 180
-        const out = { x: Math.cos(a), y: -Math.sin(a) } //the way blocks come out
-        const side = { x: -Math.sin(a), y: -Math.cos(a) }
-        const r = el.size / 2 + 10
-        return [[-r, -r - 10], [r, -r - 10], [r, r], [-r, r]].map(([across, along]) => ({ x: el.x + side.x * across + out.x * along, y: el.y + side.y * across + out.y * along }))
+        return { out: { x: Math.cos(a), y: -Math.sin(a) }, side: { x: -Math.sin(a), y: -Math.cos(a) } }
+    },
+    outlinePoints(el) { //its mount turned to face angle, the back plate behind the block, like level.dispenser draws it
+        const { out, side } = this.axes(el)
+        const rx = el.width / 2 + 10
+        const ry = el.height / 2 + 10
+        return [[-rx, -ry - 10], [rx, -ry - 10], [rx, ry], [-rx, ry]].map(([across, along]) => ({ x: el.x + side.x * across + out.x * along, y: el.y + side.y * across + out.y * along }))
     },
     bounds(el) { return levelElements.boundsOf(this.outlinePoints(el)) },
     contains(el, point) { return levelElements.isInside(this.outlinePoints(el), point) },
+    handles(el) { //the block's front corner, it stays centered on its spot
+        const { out, side } = this.axes(el)
+        return [{ id: "size", x: el.x + side.x * el.width / 2 + out.x * el.height / 2, y: el.y + side.y * el.width / 2 + out.y * el.height / 2 }]
+    },
+    dragHandle(el, id, point) {
+        const { out, side } = this.axes(el)
+        const d = { x: point.x - el.x, y: point.y - el.y }
+        el.width = Math.max(10, Math.round(2 * Math.abs(d.x * side.x + d.y * side.y)))
+        el.height = Math.max(10, Math.round(2 * Math.abs(d.x * out.x + d.y * out.y)))
+    },
+    summary: el => `dispenser(${levelElements.args(el.x, el.y, el.width, el.height)})`,
     rotate(el, degrees, center) { //turns around the block's spot, so it stays where blocks show up
         const before = { x: el.x, y: el.y }
         const to = levelElements.rotatePoint(before, center, degrees)
@@ -1356,7 +1502,7 @@ levelElements.define("dispenser", { //level.dispenser, x, y is where blocks show
     overlay(el) { //an arrow the way blocks come out
         const a = el.angle * Math.PI / 180
         const d = { x: Math.cos(a), y: -Math.sin(a) }
-        const from = { x: el.x + d.x * (el.size / 2 + 14), y: el.y + d.y * (el.size / 2 + 14) }
+        const from = { x: el.x + d.x * (el.height / 2 + 14), y: el.y + d.y * (el.height / 2 + 14) }
         const tip = { x: from.x + d.x * 40, y: from.y + d.y * 40 }
         ctx.setLineDash([])
         ctx.beginPath()
@@ -1368,7 +1514,7 @@ levelElements.define("dispenser", { //level.dispenser, x, y is where blocks show
         ctx.stroke()
     },
     build(el) {
-        const dispenser = level.dispenser(el.x, el.y, el.size, el.period, el.max, el.angle * Math.PI / 180, el.speed)
+        const dispenser = level.dispenser(el.x, el.y, el.width, el.height, el.period, el.max, el.angle * Math.PI / 180, el.speed)
         if (!levelElements.collision.isDefault(el)) dispenser.collisionMask = levelElements.collision.mask(el.collides)
         return {
             custom() {
@@ -1380,11 +1526,11 @@ levelElements.define("dispenser", { //level.dispenser, x, y is where blocks show
     },
     code(el, name, context) {
         const link = context && context.link(el)
-        const values = [el.size, el.period, el.max, `${levelElements.args(el.angle)} * Math.PI / 180`, el.speed]
-        const isDefault = [el.size === 50, el.period === 180, el.max === 3, el.angle === -90, !el.speed]
+        const values = [levelElements.args(el.width), levelElements.args(el.height), levelElements.args(el.period), levelElements.args(el.max), `${levelElements.args(el.angle)} * Math.PI / 180`, levelElements.args(el.speed)]
+        const isDefault = [el.width === 50, el.height === 50, el.period === 180, el.max === 3, el.angle === -90, !el.speed]
         let count = values.length
         while (count && isDefault[count - 1]) count-- //leave out the defaults at the end
-        const extra = values.slice(0, count).map(v => typeof v === "string" ? v : levelElements.args(v))
+        const extra = values.slice(0, count)
         return {
             setup: [`const ${name} = level.dispenser(${[levelElements.args(el.x, el.y), ...extra].join(", ")});`, ...(levelElements.collision.isDefault(el) ? [] : [`${name}.collisionMask = ${levelElements.collision.code(el.collides)}; //what its blocks bump into`])],
             custom: [`${name}.query(${link ? link.on : ""});`, `${name}.draw();`],
@@ -1937,7 +2083,7 @@ levelElements.define("door", {
     },
 })
 
-for (const name of ["mover", "transport", "elevator", "vanish", "spinner", "door"]) { //what it bumps into, like a map's or block's, the wrappers only touch one that isn't the default, so the rest build and export the same as written levels
+for (const name of ["mover", "transport", "elevator", "train", "vanish", "spinner", "door"]) { //what it bumps into, like a map's or block's, the wrappers only touch one that isn't the default, so the rest build and export the same as written levels
     const type = levelElements.types[name]
     const defaults = type.defaults
     const isInMap = name === "mover" //a map's mask is set by level.addToWorld(), so it needs collisionMask
@@ -1973,7 +2119,7 @@ levelElements.linkable = name => { //a link prop, so a button or toggle can turn
     type.defaults = () => ({ ...defaults(), link: null, orLink: null, runs: "while on" })
     type.props.push(levelElements.prop.ref("link", levelElements.linkSources), levelElements.orLinkProp(), levelElements.runsProp())
 }
-for (const name of ["boost", "mover", "transport", "elevator", "laser", "buzzsaw", "wind", "slime", "fizzler", "spinner", "gravityZone", "dispenser"]) levelElements.linkable(name)
+for (const name of ["boost", "mover", "transport", "elevator", "train", "laser", "buzzsaw", "wind", "slime", "fizzler", "spinner", "gravityZone", "dispenser"]) levelElements.linkable(name)
 for (const name of levelElements.linkSources) { //a link source linked to another is only on while both are, set with the other one's link button, the row only shows once it's set
     const type = levelElements.types[name]
     const defaults = type.defaults
@@ -3033,8 +3179,9 @@ levelElements.typeTips = {
     boost: { launchHeight: "about how high it throws the player, game units" },
     transport: { distance: "how far it slides from its start, game units" },
     buzzsaw: { radius: "how big it is, game units", path: "the path it travels along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put", spin: "how fast it turns, radians a cycle, negative turns it the other way", look: "how it's drawn, it hurts the same in every look" },
+    train: { width: "game units, its middle rides on the path", height: "game units", path: "the path it rides along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put" },
     door: { distance: "how far up it slides to open, game units", speed: "how fast it opens and closes" },
-    elevator: { travel: "how far up it goes, game units", force: "how hard it pushes, more is faster", onTouch: "only moves while the player stands on it" },
+    elevator: { travel: "how far up it goes, game units", force: "how hard it pushes up, more is faster", downSpeed: "about how fast it comes back down, game units each frame", smoothStop: "slows down to stop at the top, off it stops hard and flings the player up", onTouch: "only moves while the player stands on it" },
     vanish: { vertical: "shrinks sideways instead of down" },
     spinner: { spin: "how fast it's turning when the level starts, radians a frame", motor: "keeps it turning, negative turns the other way, its link turns the motor on and off", frictionAir: "slows its turning too, so a motor tops out sooner" },
     wind: { vx: "push to the right a frame, negative pushes left", vy: "push down a frame, negative pushes up", float: "cancels gravity inside it" },
@@ -3146,4 +3293,26 @@ for (const name of Object.keys(levelElements.types)) {
     type.defaults = () => ({ ...defaults(), delay: 0 })
     const after = Math.max(...["link", "orLink", "runs", "on"].map(key => type.props.findIndex(prop => prop.key === key)))
     type.props.splice(after + 1, 0, levelElements.prop.number("delay", { step: 10, min: 0, isShown: el => !!(el.link || el.orLink) }))
+}
+
+//everything that turns gets an angle in its info box, types without one of their own, like maps, blocks, paths, and lasers, get one worked out by turnOf()
+//degrees counterclockwise like boost's, 0 is how it was made, typing one turns it there around its pivot, it isn't in their code
+for (const name of Object.keys(levelElements.types)) {
+    const type = levelElements.types[name]
+    const isRotatable = type.group === "shape" || !!type.isVertexEditable || !!type.rotate
+    if (!isRotatable || type.isCode || type.props.some(prop => prop.key === "angle")) continue
+    const after = Math.max(...["x", "y", "x2", "y2", "width", "height"].map(key => type.props.findIndex(prop => prop.key === key)))
+    type.props.splice(after + 1, 0, levelElements.prop.number("angle", {
+        step: 15,
+        isTurn: true, //see turnSource()
+        read(el) {
+            const angle = levelElements.wrapTurn(-levelElements.turnOf(el))
+            return angle > 180 ? Number((angle - 360).toFixed(3)) : angle
+        },
+        write(el, value) {
+            let turn = levelElements.wrapTurn(-value - levelElements.turnOf(el)) //clockwise from where it is to -value clockwise
+            if (turn > 180) turn = Number((turn - 360).toFixed(3))
+            if (turn) levelElements.rotate(el, turn)
+        },
+    }))
 }

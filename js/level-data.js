@@ -51,6 +51,17 @@ const levelData = {
                 el.gate = "timer"
             }
             if (el.type === "bezier") levelData.bezierToPath(el) //the path's curves do it now
+            if (el.type === "block") delete el.carryPlayer //every heavy enough block carries the player now, see m.carryOnBlock()
+            if ("turned" in el) { //how far a shape or path has been turned, for the angle box, see levelElements.turnOf()
+                const turned = typeof el.turned === "number" && Number.isFinite(el.turned) ? levelElements.wrapTurn(el.turned) : 0
+                if (turned) el.turned = turned
+                else delete el.turned
+            }
+            if (el.type === "dispenser" && "size" in el) { //its blocks were size × size, now they have a width and height
+                if (el.width === undefined) el.width = el.size
+                if (el.height === undefined) el.height = el.size
+                delete el.size
+            }
             if (!isId(el.id)) el.id = data.nextId++
             levelElements.fillDefaults(el)
             for (const key of levelElements.refKeys(el)) if (!isId(el[key])) el[key] = null
@@ -71,8 +82,11 @@ const levelData = {
             if (el.vertices && el.vertices.length < (el.type === "path" ? 2 : 3)) throw new Error(`${el.type} #${el.id}: too few vertices`)
             if (el.handles !== undefined && (!Array.isArray(el.handles) || !el.handles.every(handle => handle == null || point(handle)))) throw new Error(`${el.type} #${el.id}: invalid curve handles`)
             if (el.layer === "back" || el.layer === "front") el.layer = el.layer === "back" ? "under player" : "over player" //their old names
+            const type = levelElements.types[el.type]
+            if (type) levelElements.checkValues(el, type.props, type.defaults()) //export writes settings into javascript, so each has to be its kind
             if (el.edited) levelData.normalizeEdited(el)
         }
+        levelElements.checkValues(data, levelElements.level.props.filter(prop => prop.key !== "name"), defaults)
         for (const type of levelElements.groups.core) { //every level needs a spawn and an exit, unless its code sets them, like a written level that picks a layout
             if (!data.elements.some(el => el.type === type) && !levelData.hasCode(data)) levelData.add(data, levelElements.create(type))
         }
@@ -176,6 +190,7 @@ const levelData = {
         levelData.trackEphemera(() => { }) //the last level code's effects go away, like mirrors
         levelData.codeLayers = null
         levelData.sharedElementIds = null
+        levelData.sharedLayered = null
         levelData.codeError = null //the last level's error doesn't carry into this one
         levelData.drawnByCode = levelData.hasCode(data) || data.levelCode.trim() ? levelData.codeDraws(data) : {}
         const shared = levelData.isShared(data) && levelData.isProgramLoaded()
@@ -191,11 +206,13 @@ const levelData = {
         }
         level.custom = () => {
             levelData.runCodeLayer("custom")
-            if (!shared) levelData.layer("custom")
+            if (shared) levelData.lateLayer("custom")
+            else levelData.layer("custom")
         }
         level.customTopLayer = () => {
             levelData.runCodeLayer("top")
-            if (!shared) levelData.layer("top")
+            if (shared) levelData.lateLayer("top")
+            else levelData.layer("top")
         }
         if (!levelData.isEditor) simulation.zoomTransition(data.zoom)
     },
@@ -216,7 +233,7 @@ const levelData = {
     //*********************************************************************
     typedOf: data => data.typedCode || [], //after is the line it shows under in the code panel and export: an element's id or a key from lineKey(), runsAfter is the element before it in its part, so a run matches, null is before them all
     isShared(data) {
-        return levelData.hasCode(data) || !!data.levelCode.trim() || levelData.typedOf(data).length > 0 || data.elements.some(el => el.edited)
+        return levelData.hasCode(data) || (typeof data.levelCode === "string" && !!data.levelCode.trim()) || levelData.typedOf(data).length > 0 || data.elements.some(el => el.edited)
     },
     addsResearch(data) { //a level with mobs gets a research power up, unless its code already adds one, so a puzzle level or a copy of reactor doesn't
         return data.elements.some(el => levelElements.groups.mob.includes(el.type)) && !levelData.codeHas(data, "addResearchToLevel")
@@ -285,7 +302,7 @@ const levelData = {
         }
     },
     sharedSource(data) { //instrument the same ordered program shown in the panel, without adding scopes
-        const { names, context, written } = levelData.codeNames(data)
+        const { names, context, written } = levelData.codeNames(data, levelData.isEditor)
         const broken = new Map()
         const leftOut = el => levelData.isSkipped(el) || (["mob", "powerUp"].includes(levelElements.types[el.type]?.group) && !levelData.isSpawning)
         for (const el of data.elements) {
@@ -295,6 +312,7 @@ const levelData = {
         }
         const lines = levelData.codeLines(data, true, { names, context }, true).slice(1, -1)
         const source = ['"use strict";']
+        const layered = new Set() //ids the function runs each frame, or that run as code, the rest run after it, see lateLayer()
         for (let i = 0; i < lines.length;) {
             const line = lines[i]
             const key = line.block ? `typed:${levelData.typedOf(data).indexOf(line.block)}` : line.owner === "level" ? "level" : typeof line.anchor === "number" ? line.anchor : null
@@ -311,10 +329,14 @@ const levelData = {
             const isWritten = !el || isCode || written.has(key)
             if (el && (!isWritten || leftOut(el) || broken.has(key))) {
                 if (line.part === "setup") source.push(broken.has(key) ? `__level.broken(${key});` : `__level.build(${key});`)
-                else if (!leftOut(el) && !broken.has(key)) source.push(`__level.layer(${key}, ${JSON.stringify(line.part)});`)
+                else if (!leftOut(el) && !broken.has(key)) {
+                    source.push(`__level.layer(${key}, ${JSON.stringify(line.part)});`)
+                    layered.add(key)
+                }
                 continue
             }
             const encoded = JSON.stringify(key)
+            if (typeof key === "number") layered.add(key) //code, its layers are in the function
             if (line.part === "setup") {
                 source.push(`__level.start(${encoded});`, ...group)
                 const self = el && !isCode && levelElements.types[el.type]?.linkOn ? names.get(key) : ""
@@ -323,7 +345,7 @@ const levelData = {
                 source.push(`;__level.at(${encoded});`, ...group)
             }
         }
-        return { source: source.join("\n"), broken, names }
+        return { source: source.join("\n"), broken, names, layered }
     },
     codeProblem(data) { //why the level's one function can't be read, like two elements declaring the same variable, "" if it can, nothing runs
         if (!levelData.isShared(data)) return ""
@@ -342,7 +364,8 @@ const levelData = {
         let chunk = null //the code running, to blame for an error
         let isFinished = false
         levelData.sharedElementIds = data.elements.map(el => el.id)
-        const { source, broken, names } = levelData.sharedSource(data)
+        const { source, broken, names, layered } = levelData.sharedSource(data)
+        levelData.sharedLayered = layered
         const finish = () => {
             if (isFinished) return
             isFinished = true
@@ -356,6 +379,7 @@ const levelData = {
         }
         const api = {
             at(key) { levelData.frameOwner = key },
+            forced(id) { return levelData.forced.get(id) },
             layer(id, name) {
                 const el = levelData.elementsById.get(id)
                 if (el) levelData.layerElement(el, name)
@@ -416,6 +440,11 @@ const levelData = {
     // written like an element's edited code: setup lines, then //level.custom and //level.customTopLayer and their lines, which run each frame after the elements'
     //*********************************************************************
     levelCodeRuntime: null, //{ maps, bodies, ..., custom, top } what it made and its layers
+    lateLayer(name) { //elements the level's one function doesn't run each frame, added in the editor since it started or unhidden, they run after it in list order until the level starts again, so adding one doesn't restart the level
+        const layered = levelData.sharedLayered
+        if (!layered) return
+        for (const el of levelData.data.elements) if (!layered.has(el.id)) levelData.layerElement(el, name)
+    },
     runCodeLayer(name) { //the level code's level.custom or customTopLayer, an error doesn't stop the level
         const layers = levelData.codeLayers
         if (!layers) return
@@ -495,17 +524,19 @@ const levelData = {
         return { x: spawn.x + data.constraintTextX, y: spawn.y + data.constraintTextY }
     },
     onError: null, //called when an element or the level's code throws while running, the editor recounts its issues
+    forced: new Map(), //link sources the editor holds on or off, id: true or false, so a puzzle can be tried without walking to its button, only while editing, see levelEditor's forceLink
+    sourceState(id, depth = 0) { //true while the link source with this id is on, false while off, null if it isn't one
+        const from = levelData.elementsById.get(id)
+        const runtime = from && levelElements.isLinkSource(from) && levelData.runtimes.get(from.id)
+        if (!runtime) return null
+        if (levelData.forced.has(from.id)) return levelData.forced.get(from.id)
+        const own = runtime.linkOn ? runtime.linkOn() : levelElements.types[from.type].linkOn(from, runtime, depth) //edited code's own check, see writtenRuntime()
+        if (levelElements.types[from.type].isGate) return own //its links are its inputs, not also on
+        const above = depth < 8 ? levelData.linkState(from, depth + 1) : null //a link source linked to another is only on while both are, like a timer that only runs while a button is down
+        return above === false ? false : own
+    },
     linkInputs(el, depth = 0) { //[link, orLink]: true while that trigger is on, false while off, null without one
-        const sourceState = id => {
-            const from = levelData.elementsById.get(id)
-            const runtime = from && levelElements.isLinkSource(from) && levelData.runtimes.get(from.id)
-            if (!runtime) return null
-            const own = runtime.linkOn ? runtime.linkOn() : levelElements.types[from.type].linkOn(from, runtime, depth) //edited code's own check, see writtenRuntime()
-            if (levelElements.types[from.type].isGate) return own //its links are its inputs, not also on
-            const above = depth < 8 ? levelData.linkState(from, depth + 1) : null //a link source linked to another is only on while both are, like a timer that only runs while a button is down
-            return above === false ? false : own
-        }
-        return [el.link ? sourceState(el.link) : null, el.orLink ? sourceState(el.orLink) : null]
+        return [el.link ? levelData.sourceState(el.link, depth) : null, el.orLink ? levelData.sourceState(el.orLink, depth) : null]
     },
     linkState(el, depth = 0) { //true while what el is linked to is on, false while off, null without one
         const [a, b] = levelData.linkInputs(el, depth)
@@ -599,7 +630,7 @@ const levelData = {
         custom: "//level.custom: runs every game cycle", //drawn under the player
         top: "//level.customTopLayer: runs every game cycle", //drawn over the player
     },
-    codeNames(data) { //persist names once allocated; list order never changes a code reference
+    codeNames(data, isEditorRuntime = false) { //persist names once allocated; list order never changes a code reference
         const names = new Map()
         const authored = { setup: [], custom: [], top: [] }
         for (const el of data.elements) if (levelElements.isCode(el)) authored.setup.push(el.code)
@@ -642,10 +673,10 @@ const levelData = {
             const from = levelData.find(data, id)
             if (!from || !levelElements.isLinkSource(from)) return null
             const own = levelElements.types[from.type].linkCode(from, names.get(from.id), context, depth)
-            if (levelElements.types[from.type].isGate) return own //its links are its inputs, not also on
-            const above = depth < 8 ? sourceCode(from, depth + 1) : null
-            if (!above) return own
-            const on = `${own.on} && ${above.on.includes("||") ? `(${above.on})` : above.on}`
+            const above = !levelElements.types[from.type].isGate && depth < 8 ? sourceCode(from, depth + 1) : null
+            if (!above && !isEditorRuntime) return own
+            const natural = above ? `${own.on} && ${above.on.includes("||") ? `(${above.on})` : above.on}` : own.on
+            const on = isEditorRuntime ? `(__level.forced(${id}) ?? (${natural}))` : natural
             return { on, off: `!(${on})` }
         }
         const sourceCode = (el, depth) => { //{ on, off } for what el is linked to, a link source's own link has to be on too, and its orLink is either one
@@ -785,6 +816,7 @@ const levelData = {
     //*********************************************************************
     store: {
         prefix: "localLevel:",
+        versionPrefix: "localLevelVersions:", //each level's saved versions, the editor's history menu, see levelEditor.saveVersion()
         indexKey: "localLevels", //{ names: [], recent: "" }
         levels: null, //name: data, loaded on first use
         recent: "", //the level the editor opened last
@@ -890,18 +922,19 @@ const levelData = {
             return isSaved && !levelData.store.isFailing
         },
         hasWork() { //a local level that's more than the blank one opening the editor saves, the title page shows its editor button
-            return levelData.store.names().some(name => {
-                if (!/^untitled\d*$/.test(name)) return true
-                const data = levelData.store.levels[name]
-                const blank = levelData.blank(name)
-                const withoutNames = (key, value) => key === "codeName" || key === "codeNameCounts" ? undefined : value
-                return JSON.stringify(data, withoutNames) !== JSON.stringify(blank, withoutNames)
-            })
+            return levelData.store.names().some(name => !/^untitled\d*$/.test(name) || !levelData.store.isBlank(name))
+        },
+        isBlank(name) { //the same as the blank level new makes, nothing added or changed
+            const data = levelData.store.levels[name]
+            if (!data) return false
+            const withoutNames = (key, value) => key === "codeName" || key === "codeNameCounts" || key === "name" ? undefined : value
+            return JSON.stringify(data, withoutNames) === JSON.stringify(levelData.blank(name), withoutNames)
         },
         remove(name) {
             levelData.store.load()
             delete levelData.store.levels[name]
             levelData.store.write(levelData.store.prefix + name, null)
+            levelData.store.write(levelData.store.versionPrefix + name, null)
             if (levelData.store.recent === name) levelData.store.recent = ""
             levelData.store.saveIndex()
             levelData.store.sync()
@@ -925,6 +958,8 @@ const levelData = {
                 return false
             }
             levelData.store.write(levelData.store.prefix + oldName, null) //only once the new name is saved and listed
+            const versions = levelData.store.read(levelData.store.versionPrefix + oldName)
+            if (versions && levelData.store.write(levelData.store.versionPrefix + newName, versions)) levelData.store.write(levelData.store.versionPrefix + oldName, null) //they're only backups, a failure keeps them under the old name
             levelData.store.sync()
             levelData.store.renameInPool(oldName, newName)
             return true
@@ -961,7 +996,7 @@ levelData.loadScripts = files => Promise.all(files.filter(src => !levelData.load
 })))
 levelData.programFiles = ["lib/level-parser.js", "js/level-program.js"]
 levelData.programPromise = null
-levelData.isProgramLoaded = () => typeof levelData.codeLines === "function" //js/level-program.js adds it
+levelData.isProgramLoaded = () => typeof levelParser === "function" && typeof levelData.codeLines === "function" //lib/level-parser.js and js/level-program.js add them, both, so a retry after the parser failed to download loads it again
 levelData.loadProgram = () => {
     if (levelData.isProgramLoaded()) return Promise.resolve()
     if (!levelData.programPromise) {

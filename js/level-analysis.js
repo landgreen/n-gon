@@ -25,6 +25,7 @@ const levelAnalysis = {
         frameMs: [0.35, 0.5], //elements' custom and top layers, standard levels take under 0.31 ms a frame
         bodies: 250, //physics bodies the elements make, standard levels have up to 122 with their mobs
         powerUpPile: [150, 12], //power ups within this distance of one spot, and how many before they lag, they overlap and push apart every frame
+        jump: [390, 570, 6000], //how high and far the player jumps, like the measure tool, and the most spots the reach check looks at before giving up, ruins has about 3000
     },
     debrisPowerUp: 0.15, //chance each debris is a heal or ammo, see spawn.debris()
     checks: [],
@@ -80,6 +81,7 @@ const levelAnalysis = {
     line(status, label, value = "", text = "", elements = [], add = "") { //elements are the ones it's about, the editor outlines them in the level, add is a type whose add fixes it, the editor adds one when it's clicked
         return { status, label, value: String(value), text, ids: elements.map(el => el.id).filter(id => id !== undefined), add }
     },
+    repair: (line, kind) => Object.assign(line, { repair: kind }), //a fix the editor can do to the line's elements: "ground" sets them on the map, "lift" moves them up out of it, "delete" deletes them
     at: (x, y) => `(${Math.round(x)}, ${Math.round(y)})`,
     distance: (a, b) => Math.hypot(a.x - b.x, a.y - b.y),
     inMap(context, point) { //at least 5 deep, so something resting on a surface isn't in it
@@ -99,6 +101,22 @@ const levelAnalysis = {
             }
             return false
         })
+    },
+    surfaceBelow(context, point) { //the y of the first map outline straight below point, or null
+        let best = null
+        for (const el of context.ground) {
+            const b = levelElements.bounds(el)
+            if (point.x < b.x || point.x > b.x + b.width || b.y + b.height <= point.y) continue
+            const points = levelElements.points(el)
+            for (let i = 0; i < points.length; i++) {
+                const p = points[i]
+                const q = points[(i + 1) % points.length]
+                if ((p.x - point.x) * (q.x - point.x) > 0 || p.x === q.x) continue
+                const y = p.y + (q.y - p.y) * (point.x - p.x) / (q.x - p.x)
+                if (y > point.y && (best === null || y < best)) best = y
+            }
+        }
+        return best
     },
     far(context) { //elements past an empty gap from the entrance's part of the level, on either axis, with how far and which way
         const boxes = context.data.elements.filter(el => !levelElements.isCode(el)).map(el => ({ el, b: levelElements.bounds(el) }))
@@ -172,6 +190,131 @@ const levelAnalysis = {
             }
         }
         return null
+    },
+    reach(context) { //where a normal jump can get to from the entrance, { canGet(point) }, or null without an entrance or ground, or when the level's too big to check
+        //every top edge something can stand on is a row of spots 100 apart, a spot reaches another when a jump arc from it gets there, like the measure tool's arc,
+        //walls and ceilings in the way aren't checked, so it only ever says too much is reachable, never too little
+        const { data, spawn } = context
+        if (!spawn) return null
+        const [jumpHeight, jumpDistance, most] = context.norms.jump
+        const gravity = data.gravity > 0 ? data.gravity : 1
+        const normal = { height: jumpHeight / gravity, distance: jumpDistance / gravity }
+        const canJump = (from, to) => { //a jump from standing at from lands at to, as high as it goes for half its distance, then falling
+            const across = Math.abs(to.x - from.x)
+            const half = from.jump.distance / 2
+            const height = across <= half ? from.jump.height : from.jump.height * (1 - ((across - half) / half) ** 2)
+            return from.y - to.y <= height
+        }
+        const blocking = context.ground.map(el => ({ el, b: levelElements.bounds(el) }))
+        const isCovered = point => blocking.some(({ el, b }) => point.x > b.x && point.x < b.x + b.width && point.y > b.y && point.y < b.y + b.height && levelElements.contains(el, point))
+        const spots = []
+        const links = [] //[a, b], getting to a gets to b, like a portal or riding an elevator
+        const spot = (x, y, jump = normal) => {
+            const s = { x, y, jump, links: [] }
+            spots.push(s)
+            return s
+        }
+        const tops = outline => { //the edges of an outline that face up and aren't too steep to stand on
+            const edges = []
+            for (let i = 0; i < outline.length; i++) {
+                const p = outline[i]
+                const q = outline[(i + 1) % outline.length]
+                const width = Math.abs(q.x - p.x)
+                if (width < 1 || Math.abs(q.y - p.y) > 1.2 * width) continue
+                const middle = { x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 - 3 }
+                if (!levelElements.isInside(outline, middle)) edges.push(p.x < q.x ? [p, q] : [q, p])
+            }
+            return edges
+        }
+        let sampled = 0
+        const along = ([p, q], dy = 0) => { //spots on an edge, not under another piece of the map
+            const count = Math.max(1, Math.ceil((q.x - p.x) / 100))
+            sampled += count + 1
+            if (!(sampled <= most)) return null //even covered candidates cost work
+            const made = []
+            for (let i = 0; i <= count; i++) {
+                const t = i / count
+                const x = p.x + (q.x - p.x) * t
+                const y = p.y + (q.y - p.y) * t + dy
+                if (!isCovered({ x, y: y - 40 })) made.push(spot(x, y))
+            }
+            return made
+        }
+        const outlineOf = el => {
+            const type = levelElements.types[el.type]
+            return type && type.outlinePoints ? type.outlinePoints(el) : levelElements.points(el)
+        }
+        for (const el of context.ground) {
+            for (const edge of tops(outlineOf(el))) if (!along(edge)) return null
+        }
+        for (const el of data.elements) {
+            if (el.type === "map" || !levelElements.isSnappable(el)) continue //what stands in the level, blocks too, players stack and carry them
+            if (el.type === "elevator") { //its top, and where it rises to
+                const rect = { x1: el.x, x2: el.x + el.width }
+                const low = along([{ x: rect.x1, y: el.y }, { x: rect.x2, y: el.y }])
+                const high = along([{ x: rect.x1, y: el.y - el.travel }, { x: rect.x2, y: el.y - el.travel }])
+                if (!low || !high) return null
+                if (low.length && high.length) links.push([low[0], high[0]], [high[0], low[0]])
+            } else if (el.type === "transport") { //all the way it slides
+                if (!along([{ x: el.x, y: el.y }, { x: el.x + el.width + el.distance, y: el.y }])) return null
+            } else if (el.type === "train") { //anywhere along its path
+                const path = el.path ? levelData.find(data, el.path) : null
+                const route = path && path.type === "path" ? levelElements.pathOutline(path) : [{ x: el.x, y: el.y }]
+                sampled += route.length
+                if (sampled > most) return null
+                const riding = route.map(p => spot(p.x, p.y - el.height / 2))
+                for (let i = 1; i < riding.length; i++) links.push([riding[0], riding[i]], [riding[i], riding[0]])
+            } else {
+                for (const edge of tops(outlineOf(el))) if (!along(edge)) return null
+            }
+        }
+        for (const el of context.of("boost")) { //a jump as high as it launches
+            if (++sampled > most) return null
+            const height = Math.max(normal.height, el.launchHeight / gravity)
+            spot(el.x, el.y, { height, distance: normal.distance * Math.sqrt(height / normal.height) })
+        }
+        for (const el of context.of("portal")) { //going in one end comes out the other
+            sampled += 2
+            if (sampled > most) return null
+            const a = spot(el.x, el.y)
+            const b = spot(el.x2, el.y2)
+            links.push([a, b], [b, a])
+        }
+        for (const [a, b] of links) a.links.push(b)
+        spots.sort((a, b) => a.x - b.x)
+        const xs = spots.map(s => s.x)
+        const firstAt = x => { //binary search, the first spot at or past x
+            let lo = 0, hi = xs.length
+            while (lo < hi) {
+                const mid = (lo + hi) >> 1
+                if (xs[mid] < x) lo = mid + 1
+                else hi = mid
+            }
+            return lo
+        }
+        const start = { x: spawn.x, y: spawn.y + 40, jump: normal } //the entrance's floor
+        const reached = new Set()
+        const queue = []
+        const visit = s => {
+            if (reached.has(s)) return
+            reached.add(s)
+            queue.push(s)
+        }
+        const jumpFrom = from => { //every spot a jump from it gets to, a long fall reaches farther across, about twice a jump's distance
+            const across = 2 * from.jump.distance
+            for (let i = firstAt(from.x - across); i < spots.length && spots[i].x <= from.x + across; i++) if (!reached.has(spots[i]) && canJump(from, spots[i])) visit(spots[i])
+        }
+        jumpFrom(start)
+        while (queue.length) {
+            const s = queue.pop()
+            for (const next of s.links) visit(next)
+            jumpFrom(s)
+        }
+        const from = [start, ...reached]
+        return {
+            canGet: point => from.some(s => Math.abs(point.x - s.x) <= 2 * s.jump.distance && canJump(s, point)), //could the player get to point, their feet there
+            spots: spots.length,
+        }
     },
     area(points) { //of an outline, shoelace
         let sum = 0
@@ -321,7 +464,7 @@ levelAnalysis.check("bosses", c => {
             if (near.length) lines.push(line("warn", `${label} near entrance`, `${Math.round(distance(near[0], c.spawn))} away`, `at ${at(near[0].x, near[0].y)}, standard levels keep it ${c.norms.near[type]}+ from the entrance`, list.filter(el => placesOf(el).some(p => distance(p, c.spawn) < c.norms.near[type]))))
         }
         const stuck = places.filter(p => levelAnalysis.inMap(c, p))
-        if (stuck.length) lines.push(line("warn", `${label} in the map`, stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, list.filter(el => placesOf(el).some(p => levelAnalysis.inMap(c, p)))))
+        if (stuck.length) lines.push(levelAnalysis.repair(line("warn", `${label} in the map`, stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, list.filter(el => placesOf(el).some(p => levelAnalysis.inMap(c, p)))), "ground"))
     }
     if (spotsOf.boss && spotsOf.secondaryBoss) { //the closest pair of spots, either one could be picked
         let closest = null
@@ -355,7 +498,7 @@ levelAnalysis.check("mobs", c => {
     const near = c.spawn ? all.filter(el => distance(el, c.spawn) < c.norms.near.mob).sort((a, b) => distance(a, c.spawn) - distance(b, c.spawn)) : [] //closest first
     if (near.length) lines.push(line("warn", near.length > 1 ? "mobs near entrance" : "mob near entrance", `${Math.round(distance(near[0], c.spawn))} away`, `at ${at(near[0].x, near[0].y)}${near.length > 1 ? ` and ${near.length - 1} more` : ""}, standard levels keep mobs ${c.norms.near.mob}+ from the entrance`, near))
     const stuck = all.filter(el => levelAnalysis.inMap(c, el))
-    if (stuck.length) lines.push(line("warn", "mobs in the map", stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, stuck))
+    if (stuck.length) lines.push(levelAnalysis.repair(line("warn", "mobs in the map", stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, stuck), "ground"))
     return lines
 })
 
@@ -386,7 +529,7 @@ levelAnalysis.check("power ups", c => {
     else lines.push(line(debris ? "ok" : "note", "debris", debris, debris ? "" : "many levels scatter about 16", [], debris ? "" : "debris"))
     const drops = c.of("powerUp").concat(c.of("randomPowerUp"), starting, c.of("debris").map(el => ({ ...el, x: el.x + el.width / 2 })))
     const stuck = drops.filter(el => levelAnalysis.inMap(c, el))
-    if (stuck.length) lines.push(line("warn", "power ups in map", stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, stuck))
+    if (stuck.length) lines.push(levelAnalysis.repair(line("warn", "power ups in map", stuck.length, `at ${at(stuck[0].x, stuck[0].y)}`, stuck), "ground"))
     const falling = drops.filter(el => !levelAnalysis.isGroundBelow(c, el))
     if (falling.length) lines.push(line("warn", "nothing below", falling.length, `power ups at ${at(falling[0].x, falling[0].y)} fall out of the level`, falling))
     return lines
@@ -399,12 +542,12 @@ levelAnalysis.check("layout", c => {
     if (c.code.trim()) lines.push(line("note", "code", c.of("code").length + (c.data.levelCode.trim() ? 1 : 0), "these checks can't see what it makes"))
     if (!maps.length) return lines.concat(c.code.trim() ? [] : [line("fix", "map", 0, "draw some ground", [], "map")])
     if (c.spawn) {
-        if (levelAnalysis.inMap(c, c.spawn)) lines.push(line("fix", "entrance in the map", "", `at ${at(c.spawn.x, c.spawn.y)}`, [c.spawn]))
+        if (levelAnalysis.inMap(c, c.spawn)) lines.push(levelAnalysis.repair(line("fix", "entrance in the map", "", `at ${at(c.spawn.x, c.spawn.y)}`, [c.spawn]), "ground"))
         else if (!levelAnalysis.isGroundBelow(c, c.spawn)) lines.push(line("warn", "entrance", "", "nothing below it", [c.spawn]))
     }
     if (c.exit) {
         const door = { x: c.exit.x + 50, y: c.exit.y - 50 }
-        if (levelAnalysis.inMap(c, door)) lines.push(line("fix", "exit in the map", "", `at ${at(c.exit.x, c.exit.y)}`, [c.exit]))
+        if (levelAnalysis.inMap(c, door)) lines.push(levelAnalysis.repair(line("fix", "exit in the map", "", `at ${at(c.exit.x, c.exit.y)}`, [c.exit]), "ground"))
         else if (!levelAnalysis.isGroundBelow(c, door)) lines.push(line("warn", "exit", "", "nothing below it", [c.exit]))
         if (c.spawn && distance(door, c.spawn) < c.norms.near.exit) lines.push(line("note", "exit near entrance", `${Math.round(distance(door, c.spawn))} away`, "", [c.exit]))
     }
@@ -415,25 +558,25 @@ levelAnalysis.check("layout", c => {
     else lines.push(line("ok", "size", size))
     const blocks = c.of("block")
     const inMap = levelAnalysis.overlapping(blocks, maps)
-    if (inMap.length) lines.push(line("warn", "blocks in the map", inMap.length, `${levelElements.summary(inMap[0])}, shoved out on level load`, inMap))
+    if (inMap.length) lines.push(levelAnalysis.repair(line("warn", "blocks in the map", inMap.length, `${levelElements.summary(inMap[0])}, shoved out on level load`, inMap), "lift"))
     const inBlocks = levelAnalysis.overlapping(blocks, blocks, true)
     if (inBlocks.length) lines.push(line("note", "blocks overlap", inBlocks.length, levelElements.summary(inBlocks[0]), inBlocks))
     const seen = new Set()
     const stacked = c.data.elements.filter(el => { //the same thing in the same place, usually a double paste
-        const { id, ...rest } = el
+        const { id, codeName, ...rest } = el //every element gets its own code name, so it's left out
         const key = JSON.stringify(rest)
         if (seen.has(key)) return true
         seen.add(key)
         return false
     })
-    if (stacked.length) lines.push(line("warn", "stacked copies", stacked.length, `${levelElements.summary(stacked[0])}, delete the extras`, stacked))
+    if (stacked.length) lines.push(levelAnalysis.repair(line("warn", "stacked copies", stacked.length, `${levelElements.summary(stacked[0])}, delete the extras`, stacked), "delete")) //only the extras, the first of each stays
     const isSource = id => c.data.elements.some(el => el.id === id && levelElements.isLinkSource(el))
     const shut = c.of("door").filter(el => !isSource(el.link))
     if (shut.length) lines.push(line("note", "doors", shut.length, `${levelElements.summary(shut[0])} has no button or toggle, it stays shut`, shut))
     const loose = c.of("constraint").filter(el => !c.of("block").some(block => block.id === el.body))
-    if (loose.length) lines.push(line("warn", "constraints", loose.length, `${levelElements.summary(loose[0])} has no block`, loose))
+    if (loose.length) lines.push(levelAnalysis.repair(line("warn", "constraints", loose.length, `${levelElements.summary(loose[0])} has no block`, loose), "delete"))
     const tiny = maps.concat(blocks).filter(el => levelAnalysis.area(levelElements.points(el)) < c.norms.tinyArea)
-    if (tiny.length) lines.push(line("warn", "tiny shapes", tiny.length, `${levelElements.summary(tiny[0])}, almost no area, usually a misclick`, tiny))
+    if (tiny.length) lines.push(levelAnalysis.repair(line("warn", "tiny shapes", tiny.length, `${levelElements.summary(tiny[0])}, almost no area, usually a misclick`, tiny), "delete"))
     if (c.spawn) {
         const far = levelAnalysis.far(c)
         if (far.size) {
@@ -443,6 +586,27 @@ levelAnalysis.check("layout", c => {
         }
     }
     if (c.hidden.length) lines.push(line("note", "hidden", c.hidden.length, "hidden in the editor, they're still in the level and its export", c.hidden))
+    return lines
+})
+
+levelAnalysis.check("reach", c => { //what a normal jump from the entrance can't get to, walls aren't checked, so these are surely out of reach
+    const { line, at } = levelAnalysis
+    if (!c.spawn || !c.of("map").length) return []
+    const reach = levelAnalysis.reach(c)
+    if (!reach) return [line("note", "reach", "", "too big to check")]
+    const status = c.code.trim() ? "note" : "warn" //code might make the way there
+    const how = c.code.trim() ? ", unless the level's code makes a way" : ", fields, blocks, and tech might get there"
+    const lines = []
+    if (c.exit && !reach.canGet({ x: c.exit.x + 50, y: c.exit.y + 20 })) lines.push(line(status, "exit out of reach", "", `at ${at(c.exit.x, c.exit.y)}, no normal jump from the entrance gets there${how}`, [c.exit]))
+    const targets = [
+        ["starting power up", c.of("startingPowerUps")],
+        ["power ups", c.of("powerUp").concat(c.of("randomPowerUp"))],
+        ["keys", c.of("key")],
+    ]
+    for (const [label, list] of targets) {
+        const out = list.filter(el => !reach.canGet({ x: el.x, y: el.y + 50 }))
+        if (out.length) lines.push(line(status, `${label} out of reach`, out.length, `at ${at(out[0].x, out[0].y)}${how}`, out))
+    }
     return lines
 })
 

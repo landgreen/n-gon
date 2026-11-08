@@ -653,10 +653,10 @@ const simulation = {
         } else {
             ctx.reset();
             ctx.font = "25px Arial";
+            const wasInverted = simulation.isInvertedVertical
             simulation.isInvertedVertical = false
             mouseMove.reset()
-            simulation.mouse.y = canvas.height - simulation.mouse.y
-
+            if (wasInverted) simulation.mouse.y = canvas.height - simulation.mouse.y //only flip the mouse back if it was flipped, clearMap() calls this every level, the mouse would jump to its mirror image until it moved
         }
     },
     translatePlayerAndCamera(where, isTranslateBots = true) {
@@ -1294,6 +1294,18 @@ const simulation = {
         }
     },
     clearNow: false,
+    resetLook() { //the colors and drawing a level can change, back to the game's, each level sets its own after this, see clearMap() and levelData.capture()
+        document.body.style.backgroundColor = "#eee" //"#d8dadf";
+        color = { //light
+            // background: "#ddd", // used instead:  document.body.style.backgroundColor
+            block: "rgba(140,140,140,0.85)",
+            blockS: "#222",
+            map: "#444",
+            bullet: "#000"
+        }
+        simulation.draw.drawMapPath = simulation.draw.drawMapPathDefault
+        simulation.draw.body = simulation.draw.bodyDefault //a community map can draw blocks its own way
+    },
     clearMap() {
         let len
         level.disableExit = false; //clear level-specific locks, including when starting a new run
@@ -1315,17 +1327,7 @@ const simulation = {
         tech.deathSpawnsFromBoss = 0;
         simulation.fallHeight = 3000;
         simulation.g = simulation.gDefault //a level can change gravity, see levelData.applySettings()
-        document.body.style.backgroundColor = "#eee" //"#d8dadf";
-        // color.map = "#444";
-        // color.bullet = "#FFFFFF";
-        color = { //light
-            // background: "#ddd", // used instead:  document.body.style.backgroundColor
-            block: "rgba(140,140,140,0.85)",
-            blockS: "#222",
-            map: "#444",
-            bullet: "#000"
-        }
-        simulation.draw.drawMapPath = simulation.draw.drawMapPathDefault
+        simulation.resetLook()
         m.fireCDcycle = 0
         m.drop();
         m.hole.isOn = false;

@@ -126,7 +126,8 @@ Object.assign(levelData, {
     },
 
     functionName(name) { //my-level to myLevel
-        return name.replace(/[-_]+(\w)/g, (match, letter) => letter.toUpperCase()).replace(/\W/g, "")
+        const words = String(name).replace(/[-_]+(\w)/g, (match, letter) => letter.toUpperCase()).replace(/\W/g, "")
+        return /^[A-Za-z_$]/.test(words) ? words : `level${words}` //a method name can't start with a number, an imported level's name isn't checked until it's saved
     },
     exportLines(el, name, context) { //one element's generated lines as { text, owner, part }, owner is the element when the lines are its own code, so typing in them edits it, see splitCode()
         const type = levelElements.types[el.type]

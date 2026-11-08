@@ -187,7 +187,8 @@ const m = {
         m.pos.y = playerBody.position.y - m.yOff;
         if (player.scale !== 1) m.pos.y += m.yOff * (1 - player.scale)// adjusts m.pos due to the new scale for drawing and for other various m.pos.y uses 
 
-        m.Vx = player.velocity.x;
+        m.Vx = player.velocity.x - m.carryX;
+        m.carryX = 0
         m.Vy = player.velocity.y;
 
         //tracks the last 10s of player information
@@ -309,7 +310,37 @@ const m = {
         });
     },
     moverX: 0, //used to tell the player about moving platform x velocity
+    moverY: 0, //y velocity of the block under the player's feet, ground friction slows the player toward it, not toward 0, so they don't float off a block moving down
+    carryX: 0, //x velocity from the block the player is standing on, taken off m.Vx in m.move() so the legs don't walk in place
+    carriedBy: null, //the block carrying the player last cycle, and its x velocity under their feet then
+    carriedVx: 0,
+    carryOnBlock() { //moving blocks carry the player standing on them, fading in from no carry at mass 5 to full carry at mass 8, lighter blocks slide easily, so walking on one drags it along, which carries the player faster, which drags it more
+        const who = m.standingOn && m.standingOn.parent //a concave block is made of parts, the parent has the velocity
+        const carry = m.moverX !== 0 || !who || who.isStatic || who.isMover || who === m.holdingTarget || !body.includes(who) || !m.isRidingOn(m.standingOn) ? 0 : Math.max(0, Math.min(1, (who.mass - 5) / 3)) //0 when a mover or transport already set m.moverX, or it's not a loose block the player is riding
+        if (carry === 0) {
+            m.carriedBy = null
+            return
+        }
+        const footX = jumpSensor.position.x - who.position.x //the spot under the player's feet, on a spinning or swinging block it moves differently than the block's center
+        const footY = jumpSensor.position.y - who.position.y
+        m.moverX = carry * (who.velocity.x - who.angularVelocity * footY)
+        m.moverY = carry * (who.velocity.y + who.angularVelocity * footX)
+        m.carryX = m.moverX
+        //when the block turns around or changes speed, the player changes with it, like their feet grip it, instead of sliding until ground friction catches up
+        if (m.carriedBy === who) Matter.Body.setVelocity(player, { x: player.velocity.x + m.moverX - m.carriedVx, y: player.velocity.y })
+        m.carriedBy = who
+        m.carriedVx = m.moverX
+    },
+    isRidingOn(part) { //the player is carried by a block only when their walking isn't what moves it, otherwise its speed adds to theirs, so they push it faster, and it carries them faster
+        const hit = Matter.Collision.collides(playerBody, part)
+        if (!hit) return false
+        const facing = hit.bodyA === playerBody ? hit.normal : Vector.neg(hit.normal) //which way the surface under them faces, Matter's normal points toward bodyA
+        if (-facing.y < 0.7) return false //steeper than 45°, they're touching its side, like walking into a small triangle
+        const walking = input.right && !input.left ? 1 : input.left && !input.right ? -1 : 0
+        return facing.x * walking > -0.1 //walking up its slope pushes it ahead of them, like surfing a wedge, more than about 6° counts
+    },
     groundControl() {
+        m.carryOnBlock()
         const moveX = player.velocity.x - m.moverX //account for mover platforms
         //check for crouch or jump
         if (m.crouch) {
@@ -336,16 +367,19 @@ const m = {
             }
         } else {
             const stoppingFriction = 0.92; //come to a stop if no move key is pressed
-            Matter.Body.setVelocity(player, { x: m.moverX * 0.08 + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
+            Matter.Body.setVelocity(player, { x: m.moverX * 0.08 + player.velocity.x * stoppingFriction, y: m.moverY * 0.08 + player.velocity.y * stoppingFriction });
         }
 
         if (Math.abs(moveX) > 4) { //come to a stop if fast     // if (player.speed > 4) { //come to a stop if fast 
             const stoppingFriction = (m.crouch && (input.down || !m.checkHeadClear())) ? 0.65 : 0.89; // this controls speed when crouched 
-            Matter.Body.setVelocity(player, { x: m.moverX * (1 - stoppingFriction) + player.velocity.x * stoppingFriction, y: player.velocity.y * stoppingFriction });
+            Matter.Body.setVelocity(player, { x: m.moverX * (1 - stoppingFriction) + player.velocity.x * stoppingFriction, y: m.moverY * (1 - stoppingFriction) + player.velocity.y * stoppingFriction });
         }
         m.moverX = 0 //reset the level mover offset
+        m.moverY = 0
     },
     airControl() {
+        m.moverX = 0 //a mover's speed from before the player left it, so it doesn't nudge them on landing
+        m.carriedBy = null
         if (m.crouch && m.cycle % 5 === 0 && m.checkHeadClear()) {
             m.undoCrouch();
             m.yOffGoal = m.yOffWhen.jump;

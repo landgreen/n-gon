@@ -169,6 +169,7 @@ Object.assign(levelEditor, {
         boost: `<rect x="5" y="13" width="16" height="2" fill="#444"/><path d="M13 1L18 7H15V12H11V7H8Z" fill="rgb(200,0,255)"/>`,
         mover: `<rect x="2" y="10" width="22" height="4" fill="#586370"/><path d="M6 6H19M16 3.5L19.5 6L16 8.5" fill="none" stroke="#444" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>`,
         transport: `<rect x="2" y="9" width="10" height="3" fill="#586370"/><path d="M13 10.5H21" stroke="#444" stroke-width="1.2" stroke-dasharray="2 1.5"/><path d="M19.5 8L22.5 10.5L19.5 13" fill="none" stroke="#444" stroke-width="1.2" stroke-linejoin="round"/>`,
+        train: `<path d="M2 14C8 14 9 4 15 4S22 9 24.5 9" fill="none" stroke="#444" stroke-width="1" stroke-dasharray="2 1.5"/><rect x="8" y="6" width="11" height="3.5" fill="#586370"/>`,
         elevator: `<rect x="6" y="12" width="14" height="3" fill="#586370"/><path d="M13 11V3M10 5.5L13 2L16 5.5" fill="none" stroke="#444" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>`,
         vanish: `<rect x="3" y="7" width="20" height="4" fill="rgba(88,99,112,0.3)" stroke="#586370" stroke-dasharray="2 1.5"/>`,
         spinner: `<rect x="5" y="7" width="17" height="3" fill="#999" stroke="#444" stroke-width="0.8" transform="rotate(-22 13.5 8.5)"/><circle cx="13.5" cy="8.5" r="1.5" fill="#444"/><path d="M4.5 8A8 7 0 0 1 12 1.5" fill="none" stroke="#444" stroke-width="1.1"/><path d="M12 1.5L9.4 0.5M12 1.5L9.9 3.3" stroke="#444" stroke-width="1.1" stroke-linecap="round"/>`,
