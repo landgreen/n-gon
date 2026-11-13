@@ -2,7 +2,8 @@
 
 //convert text into numbers for seed
 Math.hash = s => {
-    for (var i = 0, h = 9; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9);
+    let h = 9
+    for (let i = 0; i < s.length;) h = Math.imul(h ^ s.charCodeAt(i++), 9 ** 9);
     return h ^ h >>> 9
 }
 
@@ -17,7 +18,7 @@ Math.seededRandom = function (min = 0, max = 1) { // in order to work 'Math.seed
 
 
 function seededShuffle(array) {
-    var currentIndex = array.length,
+    let currentIndex = array.length,
         temporaryValue,
         randomIndex;
     // While there remain elements
@@ -33,49 +34,6 @@ function seededShuffle(array) {
     }
     return array;
 }
-// function vertexCollision(v1, v1End, domain, best) {
-//     let results
-//     for (let i = 0; i < domain.length; ++i) {
-//         let vertices = domain[i].vertices;
-//         const len = vertices.length - 1;
-//         for (let j = 0; j < len; j++) {
-//             results = simulation.checkLineIntersection(v1, v1End, vertices[j], vertices[j + 1]);
-//             if (results.onLine1 && results.onLine2) {
-//                 const dx = v1.x - results.x;
-//                 const dy = v1.y - results.y;
-//                 const dist2 = dx * dx + dy * dy;
-//                 if (dist2 < best.dist2 && (!domain[i].mob || domain[i].alive)) {
-//                     best = {
-//                         x: results.x,
-//                         y: results.y,
-//                         dist2: dist2,
-//                         who: domain[i],
-//                         v1: vertices[j],
-//                         v2: vertices[j + 1]
-//                     };
-//                 }
-//             }
-//         }
-//         results = simulation.checkLineIntersection(v1, v1End, vertices[0], vertices[len]);
-//         if (results.onLine1 && results.onLine2) {
-//             const dx = v1.x - results.x;
-//             const dy = v1.y - results.y;
-//             const dist2 = dx * dx + dy * dy;
-//             if (dist2 < best.dist2) {
-//                 best = {
-//                     x: results.x,
-//                     y: results.y,
-//                     dist2: dist2,
-//                     who: domain[i],
-//                     v1: vertices[0],
-//                     v2: vertices[len]
-//                 };
-//             }
-//         }
-//     }
-//     return best
-// }
-//this function is used for finding the point where a ray hits things,  used for lasers mostly
 function vertexCollision(v1, v1End, domains, minHitDistance2 = 0) {  //= [map, body, [playerBody, playerHead]]     //m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]
     let best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
     const rayX = v1End.x - v1.x;
@@ -542,11 +500,8 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
     <button onclick="build.sortTech('guntech')" class='sort-button'>${powerUps.orb.gunTech()}</button>
     <button onclick="build.sortTech('fieldtech')" class='sort-button'>${powerUps.orb.fieldTech()}</button>
     <button onclick="build.sortTech('damage')" class='sort-button'><strong class='color-d' data-help='damage'>dmg</strong></button>
-    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg</strong></button>
-    <button onclick="build.sortTech('energy')" class='sort-button'><strong class='energy' data-help='energy'>nrg</strong></button>
-    <button onclick="build.sortTech('heal')" class='sort-button'><strong class='color-h' data-help='health'>heal</strong></button>
-    <button onclick="build.sortTech('bot')" class='sort-button color-bot' data-help='bot' style="border-radius: 0px;">bot</button>
-    <button onclick="build.sortTech('duplic')" class='sort-button'><strong class='color-dup' data-help='duplicate'>dup</strong></button>
+    <button onclick="build.sortTech('damage taken')" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg taken</strong></button>
+    <input type="search" id="pause-sort-input" style="font-size: 0.6em;color:#000;" placeholder="find" />
 </div>`;
         // <input type="search" id="sort-input" style="width: 8em;font-size: 0.6em;color:#000;" placeholder="sort by" />
         // <button onclick="build.sortTech('input')" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
@@ -591,6 +546,16 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         const el = document.getElementById("pause-grid-right")
         el.style.display = "grid"
         el.innerHTML = text
+        const searchBox = document.getElementById("pause-sort-input")
+        searchBox.addEventListener('input', () => build.filterPause(searchBox.value)) //filter as you type
+        searchBox.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') { //clear the search and show everything
+                event.preventDefault()
+                searchBox.value = ""
+                build.filterPause("")
+            }
+            if (event.key === 'Enter' || event.key === 'Escape') searchBox.blur() //so the pause key works again
+        })
 
         //add event listener for pressing enter key when in sort
         // function pressEnterSort(event) {
@@ -603,11 +568,48 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         // document.getElementById("sort-input").addEventListener('keydown', pressEnterSort);
         // requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
     },
+    techMatches(t, find) { //compares against the text players see, ignoring case and html tags
+        const text = (t.descriptionFunction ? t.descriptionFunction() : t.description).replace(/<br\s*\/?>/gi, " ").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ")
+        find = find.toLowerCase()
+        return text.toLowerCase().includes(find) || t.name.toLowerCase().includes(find)
+    },
+    filterPause(find) { //hides pause menu tech that doesn't match the text you see, an empty search shows them all
+        find = find.trim().toLowerCase()
+        for (const card of document.querySelectorAll("#pause-grid-right .pause-grid-module")) {
+            card.classList.toggle("search-filtered", find !== "" && !card.textContent.replace(/\s+/g, " ").toLowerCase().includes(find))
+        }
+    },
+    experimentFilter: "",
+    filterExperiment(find) { //hides experiment tech cards that don't match, an empty search shows them all
+        find = find.trim()
+        const flags = { guntech: "isGunTech", fieldtech: "isFieldTech", heal: "isHealTech", bot: "isBotTech" }
+        for (let i = 0, len = tech.tech.length; i < len; i++) {
+            const techID = document.getElementById("tech-" + i)
+            if (!techID) continue
+            const isMatch = find === "" || (flags[find] ? tech.tech[i][flags[find]] : build.techMatches(tech.tech[i], find))
+            techID.classList.toggle("search-filtered", !isMatch)
+        }
+        build.experimentFilter = find
+    },
     sortTech(find, isExperiment = false) {
+        const isButton = find !== 'input'
         if (find === 'input') find = document.getElementById("sort-input").value.trim() //use the text typed into the sort by field
+        if (isExperiment) { //experiment mode filters instead of sorting, clicking the same button again clears it
+            if (isButton && find === build.experimentFilter) find = ""
+            build.filterExperiment(find)
+            document.getElementById("sort-input").value = find
+            const first = [...document.querySelectorAll("#experiment-grid [id^='tech-']")].find(el => el.offsetParent !== null)
+            if (first && find !== "") first.scrollIntoView(); //scroll to the first match
+            return
+        }
+        const hasKeywordCache = new Map() //each tech's description is built once, not twice per comparison
+        const hasKeyword = (t) => {
+            if (!hasKeywordCache.has(t)) hasKeywordCache.set(t, build.techMatches(t, find))
+            return hasKeywordCache.get(t)
+        }
         const sortKeyword = (a, b) => {
-            let aHasKeyword = (a.descriptionFunction ? a.descriptionFunction() : a.description).includes(find) || a.name.includes(find)
-            let bHasKeyword = (b.descriptionFunction ? b.descriptionFunction() : b.description).includes(find) || b.name.includes(find)
+            let aHasKeyword = hasKeyword(a)
+            let bHasKeyword = hasKeyword(b)
             if ((aHasKeyword) && !bHasKeyword) return -1;
             if (!aHasKeyword && bHasKeyword) return 1;
             return 0;
@@ -700,14 +702,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         } else if (find !== '') {
             tech.tech.sort(sortKeyword);
         }
-        if (isExperiment) {
-            build.populateGrid()
-            // build.updateExperimentText()
-            document.getElementById("tech-0").scrollIntoView(); //scroll to the first tech after sorting
-        } else {
-            build.generatePauseRight() //makes the right side of the pause menu with the tech            
-        }
-        if (isExperiment) document.getElementById("sort-input").value = find; //make the sorted string display in the keyword search input field
+        build.generatePauseRight() //makes the right side of the pause menu with the tech
         simulation.updateTechHUD();
     },
     unPauseGrid() {
@@ -863,26 +858,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             const techID = document.getElementById("tech-" + i)
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
-                if (tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) {
-                    if (tech.tech[i].isFieldTech) {
-                        techID.classList.remove('experiment-grid-hide');
-                        techID.innerHTML = build.fieldTechText(i)
-                    } else if (tech.tech[i].isGunTech) {
-                        techID.classList.remove('experiment-grid-hide');
-                        techID.innerHTML = build.gunTechText(i)
-                    } else if (tech.tech[i].isJunk) {
-                        techID.innerHTML = build.junkTechText(i)
-                    } else if (tech.tech[i].isSkin) {
-                        techID.classList.remove('experiment-grid-hide');
-                        techID.innerHTML = build.skinTechText(i)
-                    } else if (tech.tech[i].isSkinUpgrade) {
-                        techID.classList.remove('experiment-grid-hide');
-                        techID.innerHTML = build.skinTechUpgradeText(i)
-                    } else if (tech.tech[i].isInstant) {
-                        techID.innerHTML = build.instantTechText(i)
-                    } else {
-                        techID.innerHTML = build.techText(i)
-                    }
+                if ((tech.tech[i].allowed() || isAllowed || tech.tech[i].count > 0) && (!tech.tech[i].isInstant || localSettings.isJunkExperiment)) { //instant tech needs JUNK unlocked in experiment mode, same as populateGrid
                     //deselect selected tech options if you don't have the tech any more // for example: when bot techs are converted after a bot upgrade tech is taken
                     if (tech.tech[i].count === 0 && techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
                     if (techID.classList.contains("experiment-grid-disabled")) {
@@ -890,31 +866,30 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                         techID.setAttribute("onClick", `javascript: build.choosePowerUp(${i},'tech')`);
                     }
                 } else { //disabled color for disabled tech
-                    techID.innerHTML = `<div class="grid-title">${tech.tech[i].name}</div>${tech.tech[i].descriptionFunction ? tech.tech[i].descriptionFunction() : tech.tech[i].description}</div>`
                     if (!techID.classList.contains("experiment-grid-disabled")) {
                         techID.classList.add("experiment-grid-disabled");
                         techID.onclick = null
                     }
                     if (tech.tech[i].count > 0) tech.removeTech(i)
                     if (techID.classList.contains("build-tech-selected")) techID.classList.remove("build-tech-selected");
-                    if (tech.tech[i].isFieldTech) {
-                        techID.innerHTML = build.fieldTechText(i)
-                    } else if (tech.tech[i].isGunTech) {
-                        techID.innerHTML = build.gunTechText(i)
-                    } else if (tech.tech[i].isJunk) {
-                        techID.innerHTML = build.junkTechText(i)
-                    } else if (tech.tech[i].isSkin) {
-                        techID.innerHTML = build.skinTechText(i)
-                    } else if (tech.tech[i].isSkinUpgrade) {
-                        techID.innerHTML = build.skinTechUpgradeText(i)
-                    } else if (tech.tech[i].isInstant) {
-                        techID.innerHTML = build.instantTechText(i)
-                    } else {
-                        techID.innerHTML = build.techText(i)
-                    }
+                }
+                const html = build.experimentCardText(i)
+                if (techID.experimentHTML !== html) { //only rewrite cards whose text changed, rewriting all ~500 cards every click is slow
+                    techID.innerHTML = html
+                    techID.experimentHTML = html
                 }
             }
         }
+    },
+    experimentCardText(i) { //the inside of an experiment tech card, populateGrid and updateExperimentText share it so their text matches
+        const t = tech.tech[i]
+        if (t.isFieldTech) return build.fieldTechText(i)
+        if (t.isGunTech) return build.gunTechText(i)
+        if (t.isSkin) return build.skinTechText(i)
+        if (t.isSkinUpgrade) return build.skinTechUpgradeText(i)
+        if (t.isJunk) return build.junkTechText(i)
+        if (t.isInstant) return build.instantTechText(i)
+        return build.techText(i)
     },
 
     populateGrid() { //background-color:var(--build-bg-color);
@@ -925,14 +900,13 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         <button onclick="build.sortTech('guntech', true)" class='sort-button'>${powerUps.orb.gunTech()}</button>
         <button onclick="build.sortTech('fieldtech', true)" class='sort-button'>${powerUps.orb.fieldTech()}</button>
         <button onclick="build.sortTech('damage', true)" class='sort-button'><strong class='color-d' data-help='damage'>dmg</strong></button>
-        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg</strong></button>
+        <button onclick="build.sortTech('damage taken', true)" class='sort-button'><strong data-help='defense' style="font-weight: 100;">dmg taken</strong></button>
+        <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' data-help='bot' style="border-radius: 0px;">bot</button>
         <button onclick="build.sortTech('energy', true)" class='sort-button'><strong class='energy' data-help='energy'>energy</strong></button>
         <button onclick="build.sortTech('heal', true)" class='sort-button'><strong class='color-h' data-help='health'>heal</strong></button>
-        <button onclick="build.sortTech('bot', true)" class='sort-button color-bot' data-help='bot' style="border-radius: 0px;">bot</button>
         <button onclick="build.sortTech('duplic', true)" class='sort-button'><strong class='color-dup' data-help='duplicate'>dup</strong></button>
 
-        <input type="search" id="sort-input" style="width: 7.5em;font-size: 0.6em;color:#000;" placeholder="sort by" />
-        <button onclick="build.sortTech('input', true)" class='sort-button' style="border-radius: 0em;border: 1.5px #000 solid;font-size: 0.6em;" value="damage">sort</button>
+        <input type="search" id="sort-input" style="font-size: 0.6em;color:#000;" placeholder="search" />
     </div>
     <div>
         <div style="display: grid;grid-template-columns: repeat(3, 1fr);row-gap: 10px;column-gap: 25px;grid-auto-rows: minmax(5px, auto);margin:-5px 0px 10px 25px;line-height: 100%;">
@@ -943,10 +917,17 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                     </g>
                 </svg>
             </div>
-            <div style="grid-column: 2;grid-row: 2;">
+            <div style="grid-column: 2;grid-row: 3;">
                 <svg class="SVG-button" onclick="build.reset()" width="50" height="25">
                     <g stroke='none' fill='#333' stroke-width="2" font-size="17px" font-family="Ariel, sans-serif">
                         <text x="5" y="18">reset</text>
+                    </g>
+                </svg>
+            </div>
+            <div style="grid-column: 2 / 4;grid-row: 2;margin-left: -7px;">
+                <svg id="experiment-show-all" class="SVG-button" onclick="build.toggleShowAll()" width="64" height="25">
+                    <g stroke='none' fill='#333' stroke-width="2" font-size="15px" font-family="Ariel, sans-serif">
+                        <text x="5" y="17">show all</text>
                     </g>
                 </svg>
             </div>
@@ -967,32 +948,22 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
                             <div class="grid-title"><div class="circle-grid-title gun" onclick="speechHandler.speech('${b.guns[i].name}')"></div> &nbsp; ${build.nameLink(b.guns[i].name)}</div>
                             ${b.guns[i].descriptionFunction()}</div> </div>`
         }
+        const cardText = [] //each tech card's text, remembered after the grid is built
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             if ((!tech.tech[i].isJunk || localSettings.isJunkExperiment) && !tech.tech[i].isLore) {
+                const junkClass = tech.tech[i].isJunk ? " experiment-junk" : "" //hidden unless show all is on
                 if ((tech.tech[i].allowed() || tech.tech[i].count > 0) && (!tech.tech[i].isInstant || localSettings.isJunkExperiment)) { // || tech.tech[i].name === "+1 cardinality") { //|| tech.tech[i].name === "leveraged investment"
-                    text += `<div id="tech-${i}" class="experiment-grid-module card-background ${tech.tech[i].count ? "build-tech-selected" : ""}" onclick="build.choosePowerUp(${i},'tech')" ${hideStyle}>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module card-background${junkClass} ${tech.tech[i].count ? "build-tech-selected" : ""}" onclick="build.choosePowerUp(${i},'tech')" ${hideStyle}>`
                 } else { //disabled
-                    text += `<div id="tech-${i}" class="experiment-grid-module card-background experiment-grid-disabled" ${hideStyle}>`
+                    text += `<div id="tech-${i}" class="experiment-grid-module card-background${junkClass} experiment-grid-disabled" ${hideStyle}>`
                 }
-                if (tech.tech[i].isFieldTech) {
-                    text += build.fieldTechText(i)
-                } else if (tech.tech[i].isGunTech) {
-                    text += build.gunTechText(i)
-                } else if (tech.tech[i].isSkin) {
-                    text += build.skinTechText(i)
-                } else if (tech.tech[i].isSkinUpgrade) {
-                    text += build.skinTechUpgradeText(i)
-                } else if (tech.tech[i].isJunk) {
-                    text += build.junkTechText(i)
-                } else if (tech.tech[i].isInstant) {
-                    text += build.instantTechText(i)
-                } else {
-                    text += build.techText(i)
-                }
-                text += '</div>'
+                const cardHTML = build.experimentCardText(i)
+                cardText.push([i, cardHTML])
+                text += cardHTML + '</div>'
             }
         }
         document.getElementById("experiment-grid").innerHTML = text
+        for (const [i, cardHTML] of cardText) document.getElementById("tech-" + i).experimentHTML = cardHTML //so the first click only rewrites cards that change
 
 
         //add event listener for pressing enter key when in sort
@@ -1000,9 +971,16 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             if (event.key === 'Enter') {
                 // event.preventDefault(); // Prevent the default action to avoid form submission or any other default action
                 build.sortTech('input', true)
+            } else if (event.key === 'Escape') { //clear the search and show everything
+                event.preventDefault()
+                event.target.value = ""
+                build.filterExperiment("")
+                event.target.blur()
             }
         }
         document.getElementById("sort-input").addEventListener('keydown', pressEnterSort);
+        document.getElementById("sort-input").addEventListener('input', () => build.filterExperiment(document.getElementById("sort-input").value)); //filter as you type
+        build.experimentFilter = ""
 
         //add tooltips
         for (let i = 0, len = tech.tech.length; i < len; i++) {
@@ -1012,7 +990,17 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             }
         }
 
+        build.applyShowAll()
         requestAnimationFrame(() => { document.getElementById("sort-input").focus(); });
+    },
+    toggleShowAll() { //saved in localSettings, on by default
+        localSettings.isExperimentShowAll = !localSettings.isExperimentShowAll
+        if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
+        build.applyShowAll()
+    },
+    applyShowAll() {
+        document.getElementById("experiment-grid").classList.toggle("hide-unavailable", !localSettings.isExperimentShowAll)
+        document.getElementById("experiment-show-all").classList.toggle("is-on", !!localSettings.isExperimentShowAll)
     },
     nameLink(text) { //converts text into a clickable wikipedia search
         return `<a target="_blank" href='https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(text).replace(/' /g, '%27')}&title=Special:Search' class="link">${text}</a>`
@@ -1340,7 +1328,19 @@ window.addEventListener("keydown", function (event) {
     }
 }, true);
 
+//Cmd/Ctrl+F goes to the menu search box instead of the browser's find, when one is showing (experiment, pause)
+//pressing it again while already in the box falls through to the browser's find
 window.addEventListener("keydown", function (event) {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "f") return
+    const searchBox = ["sort-input", "pause-sort-input"].map(id => document.getElementById(id)).find(el => el && el.offsetParent !== null)
+    if (!searchBox || document.activeElement === searchBox) return
+    event.preventDefault()
+    searchBox.focus()
+    searchBox.select()
+});
+
+window.addEventListener("keydown", function (event) {
+    if (event.target.id === "sort-input" || event.target.id === "pause-sort-input") return //typing in a menu search box, don't move, switch guns, or pause
     // input.lastDown = event.code
     // console.log(event.code)
     switch (event.code) {
@@ -1388,14 +1388,12 @@ window.addEventListener("keydown", function (event) {
                         build.unPauseGrid()
                     }
                 } else if (simulation.paused) {
-                    if (document.activeElement !== document.getElementById('sort-input')) {
-                        build.unPauseGrid()
-                        simulation.paused = false;
-                        // level.levelAnnounce();
-                        document.body.style.cursor = "none";
-                        requestAnimationFrame(cycle); //restart time
-                        mouseMove.lock()
-                    }
+                    build.unPauseGrid()
+                    simulation.paused = false;
+                    // level.levelAnnounce();
+                    document.body.style.cursor = "none";
+                    requestAnimationFrame(cycle); //restart time
+                    mouseMove.lock()
                 } else {
                     simulation.paused = true;
                     build.pauseGrid()
@@ -1407,13 +1405,13 @@ window.addEventListener("keydown", function (event) {
         case input.key.fullscreen: {
             //don't toggle fullscreen when typing an "o" into a text box like seed or sort
             const isTyping = document.activeElement && document.activeElement.matches("textarea, input:not([type]), input[type='text'], input[type='search']")
-            if (event.repeat || isTyping || !("pointerLockElement" in document)) break
+            if (event.repeat || isTyping) break
             //the fullscreenchange event handles pointer lock and input reset
             if (document.fullscreenElement) { //exit fullscreen mode if in fullscreen
                 mouseMove.unlock()
                 document.exitFullscreen();
             } else if (mouseMove.isMouseInWindow) { //if mouse is in the window enter fullscreen
-                document.documentElement.requestFullscreen().catch(err => {
+                document.documentElement.requestFullscreen?.().catch(err => {
                     console.error('Error attempting to enable fullscreen:', err);
                 });
             }
@@ -1708,7 +1706,7 @@ const mouseMove = {
     },
     lock() { //call after anything that resumes gameplay, browsers only allow this after a click or key press
         if (mouseMove.wantsLock() && !document.pointerLockElement) {
-            const request = canvas.requestPointerLock()
+            const request = canvas.requestPointerLock?.()
             if (request) request.catch(() => { }) //browsers can refuse, the next click in game tries again
         }
     },
@@ -1952,6 +1950,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         localSettings.techHistory = []
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
+    if (localSettings.isExperimentShowAll === undefined) localSettings.isExperimentShowAll = true //saves from before show all start with it on
 } else {
     console.log('setting default localSettings') // eslint-disable-line no-console
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
@@ -1961,6 +1960,7 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
+        isExperimentShowAll: true, //experiment mode's show all button, off hides tech you can't take yet and JUNK
         isCommunityMaps: false,
         difficultyMode: '2',
         difficultyCompleted: [null, false, false, false, false, false, false, false],
@@ -2439,7 +2439,7 @@ updateMusicLinks()
 
 document.getElementById("updates").addEventListener("toggle", function () {
     function loadJSON(path, success, error) { //generic function to get JSON
-        var xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
@@ -2565,6 +2565,7 @@ function cycle() {
                 consoleMirror.showTitleLogs()
             }
             if (simulation.extraCycles) simulation.timeSkip(simulation.extraCycles)
+            if (autopilot.isOn) autopilot.do()
             simulation.loop();
         } catch (error) {
             consoleMirror.showError(error)

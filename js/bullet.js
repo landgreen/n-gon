@@ -1091,7 +1091,6 @@ const b = {
         return null
     },
     setGrenadeMode() {
-        let i, knock, len
         const grenadeDefault = function (where = {
             x: m.pos.x + 30 * Math.cos(m.angle),
             y: m.pos.y + 30 * Math.sin(m.angle)
@@ -8117,12 +8116,10 @@ const b = {
                         const energyScale = tech.isElectronvolt ? b.electronvoltBotScale : 1 //electronvolt tech: 0.75x energy
                         m.energy -= 0.001 * energyScale
                         //calculate laser collision
-                        let best;
                         let range = rangeScale * (120 + 300 * Math.sqrt(Math.random()))
                         const path = [{ x: this.position.x, y: this.position.y }, { x: this.position.x + range * unit.x, y: this.position.y + range * unit.y }];
                         //check for collisions
-                        best = { x: null, y: null, dist2: Infinity, who: null, v1: null, v2: null };
-                        best = vertexCollision(path[0], path[1], [mob, map, body]);
+                        let best = vertexCollision(path[0], path[1], [mob, map, body]);
                         if (best.dist2 != Infinity) { //if hitting something
                             path[path.length - 1] = { x: best.x, y: best.y };
                             if (best.who.alive) {

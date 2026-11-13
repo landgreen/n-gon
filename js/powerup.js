@@ -322,7 +322,10 @@ const powerUps = {
         simulation.warmShaders()
         powerUps.endDraft(type);
     },
+    draftId: 0, //invalidates delayed clicks when a draft is replaced or closed
     showDraft() {
+        const draftId = ++powerUps.draftId
+        const firstCard = document.getElementById("choose-grid").firstElementChild
         simulation.isChoosing = true; //stops p from un pausing on key down
 
         //disable clicking for 1/2 a second to prevent mistake clicks
@@ -330,9 +333,11 @@ const powerUps = {
         document.body.style.cursor = "none";
 
         setTimeout(() => {
+            if (draftId !== powerUps.draftId || !simulation.isChoosing || document.getElementById("choose-grid").firstElementChild !== firstCard) return
             document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.pointerEvents = "auto";
             document.getElementById("choose-grid").style.transitionDuration = "0s";
+            autopilot.chooseDraft()
         }, 200);
 
         if (!simulation.paused) {
@@ -354,6 +359,7 @@ const powerUps = {
         }
     },
     endDraft(type, isCanceled = false) { //type should be a gun, tech, or field
+        powerUps.draftId++
         if (isCanceled) {
             if (tech.isCancelDuplication) {
                 const value = 0.08
@@ -748,6 +754,10 @@ const powerUps = {
                 document.body.style.cursor = "none";
             }, { once: true });
             mouseMove.unlock();
+            const confirm = document.getElementById("choose-difficulty");
+            setTimeout(() => { //the autopilot's auto choose confirms the difficulty as it is, after the same delay as a draft
+                if (confirm.isConnected && simulation.isChoosing) autopilot.chooseDraft();
+            }, 200);
         },
     },
     qubit: {
@@ -1198,7 +1208,7 @@ const powerUps = {
             text += `<div onclick="powerUps.research.use('${type}')" class='research-card sticky' >` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             for (let i = 0, len = Math.min(powerUps.research.count, 30); i < len; i++) text += `<div class="circle-grid research" style="font-size:0.82em; position:absolute; top:0; left:${(18 - len * 0.21) * i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
-            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt'>alternate reality</span>" : "research"}</span></div></div></div>`
+            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt' data-text='alternate reality'>alternate reality</span>" : "research"}</span></div></div></div>`
         } else {
             text += `<div></div>`
         }
@@ -1214,7 +1224,7 @@ const powerUps = {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
             text += `<div class="circle-grid junk" style="position:absolute; top:0; left:0px ;opacity:0.8; border: 1px #fff solid;width: 1.15em;height: 1.15em;"></div>`
-            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt'>alternate reality</span>" : "research"}</span></div></div></span>`
+            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt' data-text='alternate reality'>alternate reality</span>" : "research"}</span></div></div></span>`
         } else if (powerUps.research.count > 0) {
             text += `<span onclick="powerUps.research.use('${type}')" class='research-card' style="width: 275px;float: left;">` // style = "margin-left: 192px; margin-right: -192px;"
             text += `<div><div><span style="position:relative;">`
@@ -1225,7 +1235,7 @@ const powerUps = {
             for (let i = 0, len = Math.min(powerUps.research.count, researchCap); i < len; i++) {
                 text += `<div class="circle-grid research" style="font-size:0.82em; position:absolute; top:0; left:${(18 - len * 0.21) * i}px ;opacity:0.8; border: 1px #fff solid;"></div>`
             }
-            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt'>alternate reality</span>" : "research"}</span></div></div></span>`
+            text += `</span>&nbsp; <span class='research-select'>${tech.isResearchReality ? "<span class='alt' data-text='alternate reality'>alternate reality</span>" : "research"}</span></div></div></span>`
         } else {
             text += `<span class='research-card' style="width: 275px;float: right; background-color: #aaa;color:#888;">research</span>` //&zwnj;
         }

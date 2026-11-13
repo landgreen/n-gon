@@ -215,42 +215,6 @@ const simulation = {
             simulation.ephemera[i]?.do(); //death can clear ephemera during a callback
         }
     },
-    // timeMobSkip() {
-    //     simulation.gravity();
-    //     Engine.update(engine, simulation.delta);
-    //     simulation.wipe();
-    //     simulation.textLog();
-    //     if (m.onGround) {
-    //         m.groundControl()
-    //     } else {
-    //         m.airControl()
-    //     }
-    //     m.move();
-    //     m.look();
-    //     simulation.camera();
-    //     level.custom();
-    //     powerUps.do();
-    //     mobs.draw();
-    //     simulation.draw.cons();
-    //     simulation.draw.body();
-    //     if (!m.isTimeDilated) {
-    //         // mobs.loop();
-    //     }
-    //     m.draw();
-    //     m.hold();
-    //     // v.draw(); //working on visibility work in progress
-    //     level.customTopLayer();
-    //     simulation.draw.drawMapPath();
-    //     b.fire();
-    //     b.bulletRemove();
-    //     b.bulletDraw();
-    //     if (!m.isTimeDilated) b.bulletDo();
-    //     simulation.drawCircle();
-    //     // simulation.clip();
-    //     ctx.restore();
-    //     simulation.drawCursor();
-    //     // simulation.pixelGraphics();
-    // },
     mouse: {
         x: canvas.width / 2,
         y: canvas.height / 2
@@ -384,11 +348,7 @@ const simulation = {
     boldActiveGunHUD() {
         if (b.inventory.length > 0) {
             for (let i = 0, len = b.inventory.length; i < len; ++i) {
-                if (b.inventory[i] === b.activeGun && document.getElementById(b.activeGun)) {
-                    document.getElementById(b.inventory[i]).style.opacity = "1";
-                } else {
-                    document.getElementById(b.inventory[i]).style.opacity = "0.3";
-                }
+                document.getElementById(b.inventory[i]).style.opacity = b.inventory[i] === b.activeGun ? "1" : "0.3";
             }
         }
     },
@@ -820,7 +780,7 @@ const simulation = {
     },
     gravity() {
         function addGravity(bodies, magnitude) {
-            for (var i = 0; i < bodies.length; i++) {
+            for (let i = 0; i < bodies.length; i++) {
                 bodies[i].force.y += bodies[i].mass * magnitude;
             }
         }
@@ -890,7 +850,7 @@ const simulation = {
         simulation.isStartingGame = true
         //request before any await so it still counts as part of the click that started the game, fullscreenchange locks the mouse
         if (localSettings.isAutoFullscreen && !document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch(err => console.error('Error attempting to enable fullscreen:', err));
+            document.documentElement.requestFullscreen?.().catch(err => console.error('Error attempting to enable fullscreen:', err));
         }
         if (simulation.isCommunityMaps || isTrainingRun) {
             try {
@@ -1529,12 +1489,11 @@ const simulation = {
             simulation.sight.updateMapGrid()
             const solid = simulation.sight.mapGrid.solid //tech: ray, you can see through the line left behind
             const isPosInWall = simulation.sight.isPointInWall(pos) //seeing nothing is the same for every sight line, so only check once
-            let test
             function allCircleLineCollisions(c, radius, domain) {
-                var lines = [];
+                const lines = [];
                 for (const obj of domain) {
                     if (!simulation.sight.isBoundsOnCircle(obj.bounds, c, radius)) continue;
-                    for (var i = 0; i < obj.vertices.length - 1; i++) lines.push(simulation.sight.circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
+                    for (let i = 0; i < obj.vertices.length - 1; i++) lines.push(simulation.sight.circleLineCollisions(obj.vertices[i], obj.vertices[i + 1], c, radius));
                     lines.push(simulation.sight.circleLineCollisions(obj.vertices[obj.vertices.length - 1], obj.vertices[0], c, radius));
                 }
                 const collisionLines = [];
@@ -1559,10 +1518,10 @@ const simulation = {
                 return collisionLines;
             }
 
-            var vertices = [];
+            const vertices = [];
             const radiusSquared = radius * radius
             for (const obj of simulation.sight.intersectMap) {
-                for (var i = 0; i < obj.vertices.length; i++) {
+                for (let i = 0; i < obj.vertices.length; i++) {
                     const vertex = obj.vertices[i];
                     //skip corners outside the circle, where walls cross the circle is found below with circleCollisions
                     if ((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2 > radiusSquared) continue
@@ -1572,14 +1531,14 @@ const simulation = {
                     const queryPoint = { x: Math.cos(angleToVertex + Math.PI) + vertex.x, y: Math.sin(angleToVertex + Math.PI) + vertex.y }
 
                     if (!isPosInWall && !simulation.sight.isSightBlocked(pos, queryPoint)) {
-                        var distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
-                        var endPoint = { x: vertex.x, y: vertex.y }
+                        const distance = Math.sqrt((vertex.x - pos.x) ** 2 + (vertex.y - pos.y) ** 2);
+                        let endPoint = { x: vertex.x, y: vertex.y }
 
-                        var best = simulation.sight.getIntersection(pos, endPoint);
+                        let best = simulation.sight.getIntersection(pos, endPoint);
                         if (best.dist >= distance) best = { x: endPoint.x, y: endPoint.y, dist: distance }
                         vertices.push(best)
 
-                        var angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
+                        let angle = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                         endPoint = { x: Math.cos(angle + 0.001) * radius + pos.x, y: Math.sin(angle + 0.001) * radius + pos.y }
                         best = simulation.sight.getIntersection(pos, endPoint);
 
@@ -1606,34 +1565,33 @@ const simulation = {
                     if (Math.abs(distance - radius) < 1 && !isPosInWall && !simulation.sight.isSightBlocked(pos, queryPoint)) circleCollisions.push(vertex)
                 }
             }
-            for (var i = 0; i < circleCollisions.length; i++) {
+            for (let i = 0; i < circleCollisions.length; i++) {
                 const vertex = circleCollisions[i];
-                var nextIndex = i + 1;
+                let nextIndex = i + 1;
                 if (nextIndex == circleCollisions.length) nextIndex = 0;
                 const nextVertex = circleCollisions[nextIndex];
                 const angle1 = Math.atan2(vertex.y - pos.y, vertex.x - pos.x);
                 const angle2 = Math.atan2(nextVertex.y - pos.y, nextVertex.x - pos.x);
-                var newAngle;
+                let newAngle;
                 if (Math.abs(angle1) > Math.PI / 2 && Math.abs(angle2) > Math.PI / 2 && angle1 / Math.abs(angle1) != angle2 / Math.abs(angle2)) {
                     // if the arc between the to points crosses over the left side (+/- pi radians)
                     const newAngle1 = (Math.PI - Math.abs(angle1)) * (angle1 / Math.abs(angle1));
                     const newAngle2 = (Math.PI - Math.abs(angle2)) * (angle2 / Math.abs(angle2));
                     newAngle = (newAngle1 + newAngle2) / 2;
-                    var multiplier;
+                    let multiplier;
                     if (newAngle == 0) {
                         multiplier = 1;
                     } else {
                         multiplier = newAngle / Math.abs(newAngle);
                     }
                     newAngle = Math.PI * multiplier - newAngle * multiplier;
-                    test = true;
                 } else {
                     newAngle = (angle1 + angle2) / 2;
                 }
 
                 // shoot ray between them
-                var endPoint = { x: Math.cos(newAngle) * radius + pos.x, y: Math.sin(newAngle) * radius + pos.y }
-                var best = simulation.sight.getIntersection(pos, endPoint);
+                const endPoint = { x: Math.cos(newAngle) * radius + pos.x, y: Math.sin(newAngle) * radius + pos.y }
+                const best = simulation.sight.getIntersection(pos, endPoint);
                 vertices.push(vertex);
                 if (best.dist <= radius) vertices.push({ x: best.x, y: best.y })
             }
@@ -2070,9 +2028,9 @@ const simulation = {
                 if (vertices.length) {
                     ctx.beginPath();
                     ctx.moveTo(vertices[0].x, vertices[0].y);
-                    for (var i = 1; i < vertices.length; i++) {
-                        var currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
-                        var newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
+                    for (let i = 1; i < vertices.length; i++) {
+                        const currentDistance = Math.sqrt((vertices[i - 1].x - pos.x) ** 2 + (vertices[i - 1].y - pos.y) ** 2);
+                        const newDistance = Math.sqrt((vertices[i].x - pos.x) ** 2 + (vertices[i].y - pos.y) ** 2);
                         if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
                             const currentAngle = Math.atan2(vertices[i - 1].y - pos.y, vertices[i - 1].x - pos.x);
                             const newAngle = Math.atan2(vertices[i].y - pos.y, vertices[i].x - pos.x);
@@ -2081,8 +2039,8 @@ const simulation = {
                             ctx.lineTo(vertices[i].x, vertices[i].y)
                         }
                     }
-                    newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
-                    currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
+                    const newDistance = Math.sqrt((vertices[0].x - pos.x) ** 2 + (vertices[0].y - pos.y) ** 2);
+                    const currentDistance = Math.sqrt((vertices[vertices.length - 1].x - pos.x) ** 2 + (vertices[vertices.length - 1].y - pos.y) ** 2);
                     if (Math.abs(currentDistance - radius) < 1 && Math.abs(newDistance - radius) < 1) {
                         const currentAngle = Math.atan2(vertices[vertices.length - 1].y - pos.y, vertices[vertices.length - 1].x - pos.x);
                         const newAngle = Math.atan2(vertices[0].y - pos.y, vertices[0].x - pos.x);
@@ -2301,14 +2259,6 @@ const simulation = {
                 this.word.lineTo(this.xPos + 17, this.yPos + 20);
                 this.word.lineTo(this.xPos + 10, this.yPos + 20);
             },
-            // g() {
-            //     this.word.moveTo(this.xPos + 17, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 10, this.yPos + 20)
-            // },
             h() {
                 this.word.moveTo(this.xPos + 0, this.yPos + 0)
                 this.word.lineTo(this.xPos + 0, this.yPos + 40)
@@ -2326,12 +2276,6 @@ const simulation = {
                 this.word.moveTo(this.xPos + 0, this.yPos + 40)
                 this.word.lineTo(this.xPos + 19, this.yPos + 40)
             },
-            // j() {
-            //     this.word.moveTo(this.xPos + 18, this.yPos + 0);
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 40);
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 40);
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 30);
-            // },
             j() {
                 // Rounded J with curved bottom
                 this.word.moveTo(this.xPos + 18, this.yPos + 0);
@@ -2378,13 +2322,6 @@ const simulation = {
                 this.word.bezierCurveTo(this.xPos + 18, this.yPos + 17, this.xPos + 15, this.yPos + 20, this.xPos + 10, this.yPos + 20);
                 this.word.lineTo(this.xPos + 0, this.yPos + 20);
             },
-            // p() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 20)
-            // },
             q() {
                 this.word.moveTo(this.xPos + 20, this.yPos + 20);
                 this.word.ellipse(this.xPos + 9, this.yPos + 20, 11, 20, 0, 0, 2 * Math.PI);
@@ -2402,22 +2339,6 @@ const simulation = {
                 this.word.moveTo(this.xPos + 8, this.yPos + 20);
                 this.word.lineTo(this.xPos + 18, this.yPos + 40);
             },
-            // r() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 19, this.yPos + 40)
-            // },
-            // s() {
-            //     this.word.moveTo(this.xPos + 18, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 20)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 40)
-            // },
             s() {
                 // Rounded S shape using curves
                 this.word.moveTo(this.xPos + 18, this.yPos + 6);
@@ -2434,12 +2355,6 @@ const simulation = {
                 this.word.moveTo(this.xPos + 10, this.yPos + 0)
                 this.word.lineTo(this.xPos + 10, this.yPos + 40)
             },
-            // u() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 40)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 0)
-            // },
             u() {
                 // Rounded U with curved bottom
                 this.word.moveTo(this.xPos + 0, this.yPos + 0);
@@ -2616,194 +2531,6 @@ const simulation = {
                 this.word.moveTo(this.xPos + 18, this.yPos + 34)
                 this.word.arc(this.xPos + 14, this.yPos + 34, 4, 0, 2 * Math.PI)
             },
-            //letters are 50 tall and 40 wide
-            // a() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 10, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 30, this.yPos + 25)
-            // },
-            // b() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 37)
-            //     this.word.lineTo(this.xPos + 10, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 12)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            // },
-            // c() {
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // d() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            // },
-            // e() {
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 25, this.yPos + 25)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // f() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 27, this.yPos + 25)
-            // },
-            // g() {
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 25)
-            // },
-            // h() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            // },
-            // i() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.moveTo(this.xPos + 17, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // j() {
-            //     this.word.moveTo(this.xPos + 34, this.yPos + 0);
-            //     this.word.lineTo(this.xPos + 34, this.yPos + 50);
-            //     this.word.lineTo(this.xPos + 3, this.yPos + 50);
-            //     this.word.lineTo(this.xPos + 3, this.yPos + 37);
-            // },
-            // k() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // l() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // m() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // n() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            // },
-            // o() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 15)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 15)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 35)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 35)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 15)
-            // },
-            // p() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
-            // },
-            // q() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 15)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 15)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 35)
-            //     this.word.lineTo(this.xPos + 18, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 35)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 15)
-            //     this.word.moveTo(this.xPos + 20, this.yPos + 30)
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
-            // },
-            // r() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 30, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 30, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // },
-            // s() {
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            // },
-            // t() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 0)
-            //     this.word.moveTo(this.xPos + 20, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 50)
-            // },
-            // u() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            // },
-            // v() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 17, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            // },
-            // w() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 25)
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 0)
-            // },
-            // x() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            //     this.word.moveTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            // },
-            // y() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0);
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 25);
-            //     this.word.lineTo(this.xPos + 40, this.yPos + 0);
-            //     this.word.moveTo(this.xPos + 20, this.yPos + 25);
-            //     this.word.lineTo(this.xPos + 20, this.yPos + 50);
-            // },
-            // z() {
-            //     this.word.moveTo(this.xPos + 0, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 0)
-            //     this.word.lineTo(this.xPos + 0, this.yPos + 50)
-            //     this.word.lineTo(this.xPos + 35, this.yPos + 50)
-            // }
         }
     },
     checkLineIntersection(v1, v1End, v2, v2End) {

@@ -163,24 +163,23 @@ const m = {
     history: new Array(600), //[], //tracks the last second of player position
     rewindCount: 0, //used with time dilation rewind mode
     resetHistory() {
-        const set = {
-            position: {
-                x: player.position.x,
-                y: player.position.y,
-            },
-            velocity: {
-                x: player.velocity.x,
-                y: player.velocity.y
-            },
-            yOff: m.yOff,
-            angle: m.angle,
-            health: m.health,
-            energy: m.energy,
-            activeGun: b.activeGun
+        for (let i = 0; i < 600; i++) { //each slot gets its own object, m.recordHistory() writes into it
+            m.history[i] = { position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } }
+            m.recordHistory(i)
         }
-        for (let i = 0; i < 600; i++) { //reset history
-            m.history[i] = set
-        }
+    },
+    recordHistory(index) { //reuses the slot's object instead of making a new one every cycle
+        let h = m.history[index]
+        if (!h) h = m.history[index] = { position: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } }
+        h.position.x = player.position.x
+        h.position.y = player.position.y
+        h.velocity.x = player.velocity.x
+        h.velocity.y = player.velocity.y
+        h.yOff = m.yOff
+        h.angle = m.angle
+        h.health = m.health
+        h.energy = m.energy
+        h.activeGun = b.activeGun
     },
     move() {
         m.pos.x = player.position.x;
@@ -192,21 +191,7 @@ const m = {
         m.Vy = player.velocity.y;
 
         //tracks the last 10s of player information
-        m.history.splice(simulation.cycle % 600, 1, {
-            position: {
-                x: player.position.x,
-                y: player.position.y,
-            },
-            velocity: {
-                x: player.velocity.x,
-                y: player.velocity.y
-            },
-            yOff: m.yOff,
-            angle: m.angle,
-            health: m.health,
-            energy: m.energy,
-            activeGun: b.activeGun
-        });
+        m.recordHistory(simulation.cycle % 600)
         // const back = 59  // 59 looks at 1 second ago //29 looks at 1/2 a second ago
         // historyIndex = (m.cycle - back) % 600
     },
@@ -331,13 +316,12 @@ const m = {
         m.carriedBy = who
         m.carriedVx = m.moverX
     },
-    isRidingOn(part) { //the player is carried by a block only when their walking isn't what moves it, otherwise its speed adds to theirs, so they push it faster, and it carries them faster
+    isRidingOn(part) { //the surface under the player is no steeper than 45°, steeper they're touching its side, like walking into a small triangle, and pushing it would carry them along with the push, faster and faster
+        //walking up a gentler slope pushes a light wedge ahead of them the same way, the carry starting at mass 5 keeps those out, a heavier block tilting as it swings carries them while they walk with it
         const hit = Matter.Collision.collides(playerBody, part)
         if (!hit) return false
         const facing = hit.bodyA === playerBody ? hit.normal : Vector.neg(hit.normal) //which way the surface under them faces, Matter's normal points toward bodyA
-        if (-facing.y < 0.7) return false //steeper than 45°, they're touching its side, like walking into a small triangle
-        const walking = input.right && !input.left ? 1 : input.left && !input.right ? -1 : 0
-        return facing.x * walking > -0.1 //walking up its slope pushes it ahead of them, like surfing a wedge, more than about 6° counts
+        return -facing.y > 0.7
     },
     groundControl() {
         m.carryOnBlock()
@@ -5764,10 +5748,10 @@ const m = {
                 const energy = `<strong class='energy' data-help='energy'>energy</strong>`
                 const drain = isBall ? m.plasmaBall.drain * (tech.isCapacitor ? 2 : 1) : b.extruder.drain //per cycle while streaming or charging
                 const cost = Number((6000 * drain).toFixed(1)) //fieldOn() also cancels the 10 energy per second regen, so it counts toward the cost
-                return `use <strong>${cost}</strong> ${energy} per second to <strong>stream</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 4 : 2.5}x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 3 : 10}</strong> ${energy} per second<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>`
+                return `use <strong>${cost}</strong> ${energy} per second to <strong>stream</strong> <strong class='color-plasma' data-help='plasma'>plasma</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 4 : 2.2}x</strong> <strong class='color-d' data-help='damage'>damage</strong><br><strong>${m.fieldUpgrades[5].isHighPower ? 3 : 10}</strong> ${energy} per second<em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>`
             },
             keyLog: [null, null, null, null, null],
-            isHighPower: false, //secret combo: 4x damage instead of 2.5x, but 3 energy per second regen instead of 10, see m.setFieldRegen()
+            isHighPower: false, //secret combo: 4x damage instead of 2.2x, but 3 energy per second regen instead of 10, see m.setFieldRegen()
             fieldOn(isDraining = true) { //used by every plasma mode while the field button is held, isDraining false lets energy regenerate while the stream is out of energy
                 if (tech.isPlasmaBoost && powerUps.boost.endCycle < simulation.cycle + 60) powerUps.boost.endCycle = simulation.cycle + 60
                 if (isDraining && m.energy > m.fieldRegen) m.energy -= m.fieldRegen
@@ -5784,7 +5768,7 @@ const m = {
                     const arraysEqual = (a, b) => a.length === b.length && a.every((val, i) => val === b[i]);
                     if (arraysEqual(m.fieldUpgrades[5].keyLog, patternA) || arraysEqual(m.fieldUpgrades[5].keyLog, patternB)) {
                         m.fieldUpgrades[5].isHighPower = !m.fieldUpgrades[5].isHighPower //trade energy regen for damage
-                        m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.5
+                        m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.2
                         m.setFieldRegen()
                         const isOn = m.fieldUpgrades[5].isHighPower
                         simulation.inGameConsole(`m<span class='color-symbol'>.</span>fieldUpgrades<span class='color-symbol'>[5].</span>isHighPower <span class='color-symbol'>=</span> ${isOn} &nbsp; &nbsp; <em style="float: right;font-family: monospace;font-size: 1rem;color: #fff;">←↓→→↓</em>
@@ -5795,7 +5779,7 @@ const m = {
                 window.addEventListener("keydown", m.fieldEvent);
 
                 b.extruder.clear()
-                m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.5 //secret combo
+                m.fieldDamage = m.fieldUpgrades[5].isHighPower ? 4 : 2.2 //secret combo
                 if (m.plasmaBall) {
                     Matter.Composite.remove(engine.world, m.plasmaBall);
                     m.plasmaBall = null
@@ -8176,21 +8160,7 @@ const m = {
                 m.Vy = player.velocity.y;
 
                 //tracks the last 10s of player information
-                m.history.splice(m.cycle % 600, 1, {
-                    position: {
-                        x: player.position.x,
-                        y: player.position.y,
-                    },
-                    velocity: {
-                        x: player.velocity.x,
-                        y: player.velocity.y
-                    },
-                    yOff: m.yOff,
-                    angle: m.angle,
-                    health: m.health,
-                    energy: m.energy,
-                    activeGun: b.activeGun
-                });
+                m.recordHistory(m.cycle % 600)
             }
 
             m.look = () => { //disable mouse aiming
@@ -8225,7 +8195,7 @@ const m = {
 
                 //thrust
                 if (input.up) {
-                    var grd2 = ctx.createLinearGradient(0, 0, -150, 0);
+                    const grd2 = ctx.createLinearGradient(0, 0, -150, 0);
                     // grd2.addColorStop(0, 'rgba(255, 255, 155, 0.8)');
                     // grd2.addColorStop(1, 'rgba(255, 200, 0, 0.1)');
                     grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
@@ -8238,7 +8208,7 @@ const m = {
                     ctx.lineTo(-50 - 100 * Math.random(), 0);
                     ctx.fill();
                 } else if (input.down) {
-                    var grd2 = ctx.createLinearGradient(0, 0, 80, 0);
+                    const grd2 = ctx.createLinearGradient(0, 0, 80, 0);
                     grd2.addColorStop(0, 'rgba(150, 200, 255, 0.7)');
                     grd2.addColorStop(1, 'rgba(150, 200, 255, 0)');
                     ctx.fillStyle = grd2;

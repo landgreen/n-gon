@@ -57,7 +57,7 @@ portal: +1 energy after going through a portal
         "orb-boost": () => `// temporarily increases damage` + spawnLine(tech.isBoostPowerUps ? 0.14 * dropScale() : 0, " if the heal, gun, field, and ammo rolls did not spawn a drop"),
         "dark-matter": `// <strong class="color-dark-matter">dark matter</strong> follows you and reduces damage taken when you are inside it
         <br><br>// <em>dark matter is hypothetical invisible matter inferred from unexplained gravity</em>`,
-        "alternate-reality": `// entering an <strong class="alt">alternate reality</strong> randomizes guns, ammo, field, tech, health, research, and coupling
+        "alternate-reality": `// entering an <strong class="alt" data-text="alternate reality">alternate reality</strong> randomizes guns, ammo, field, tech, health, research, and coupling
         <br><br>// qubits are kept, but more than 5 qubits are randomized
         <br><br>// <em>in the many-worlds interpretation, quantum events form non-interacting branches with internally consistent histories</em>`,
         "fire-rate": `// <span class="color-fire-rate">fire rate</span> controls how often a weapon fires (doesn't affect bots)<br><br>// higher <span class="color-fire-rate">fire rate</span> means less delay between shots`,

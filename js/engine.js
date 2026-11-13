@@ -206,176 +206,174 @@ function collisionChecks(event) {
     }
 
     function collideMob(who, obj, pair) {
-                    let options
-                    //player + mob collision
-                    if (
-                        m.immuneCycle < m.cycle &&
-                        (obj === playerBody || obj === playerHead) &&
-                        !who.isSlowed && !who.isStunned
-                    ) {
-                        let dmg = Math.min(Math.max(0.025 * Math.sqrt(who.mass), 0.05), 0.3) * who.damageScale();
-                        who.foundPlayer();
-                        if (m.canRewindDamage(dmg)) { //CPT reversal runs in m.takeDamage, but it stops the rest of the collision code here too
-                            m.takeDamage(dmg);
-                            return
-                        }
-                        m.takeDamage(dmg); //normal damage
+        let options
+        //player + mob collision
+        if (
+            m.immuneCycle < m.cycle &&
+            (obj === playerBody || obj === playerHead) &&
+            !who.isSlowed && !who.isStunned
+        ) {
+            let dmg = Math.min(Math.max(0.025 * Math.sqrt(who.mass), 0.05), 0.3) * who.damageScale();
+            who.foundPlayer();
+            if (m.canRewindDamage(dmg)) { //CPT reversal runs in m.takeDamage, but it stops the rest of the collision code here too
+                m.takeDamage(dmg);
+                return
+            }
+            m.takeDamage(dmg); //normal damage
 
-                        if (tech.isCollisionRealitySwitch && m.alive) {
-                            m.switchWorlds("Hilbert space")
-                            simulation.trails(90)
-                            simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
-                        }
-                        if (tech.isPiezo) {
-                            m.addEnergy(20.48 * level.isReducedRegen);
-                            for (let i = 0; i < 9; i++)simulation.energyGenGraphic()
-                        }
-                        if (tech.isConchoidal) {
-                            m.damageDone /= tech.conchoidalDamage
-                            tech.conchoidalDamage = 1
-                        }
+            if (tech.isCollisionRealitySwitch && m.alive) {
+                m.switchWorlds("Hilbert space")
+                simulation.trails(90)
+                simulation.inGameConsole(`simulation.amplitude <span class='color-symbol'>=</span> ${Math.random()}`);
+            }
+            if (tech.isPiezo) {
+                m.addEnergy(20.48 * level.isReducedRegen);
+                for (let i = 0; i < 9; i++)simulation.energyGenGraphic()
+            }
+            if (tech.isConchoidal) {
+                m.damageDone /= tech.conchoidalDamage
+                tech.conchoidalDamage = 1
+            }
 
-                        if (tech.isCouplingNoHit && m.coupling > 0) {
-                            m.couplingChange(-3)
+            if (tech.isCouplingNoHit && m.coupling > 0) {
+                m.couplingChange(-3)
 
-                            const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
-                            let where = Vector.add(m.pos, Vector.mult(unit, 17))
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: where.x,
-                                y: where.y,
-                                radius: 22,
-                                color: 'rgba(0, 171, 238, 0.33)',
-                                time: 8
-                            });
-                            where = Vector.add(m.pos, Vector.mult(unit, 60))
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: where.x,
-                                y: where.y,
-                                radius: 18,
-                                color: 'rgba(0, 171, 238, 0.5)',
-                                time: 16
-                            });
-                            where = Vector.add(m.pos, Vector.mult(unit, 100))
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: where.x,
-                                y: where.y,
-                                radius: 14,
-                                color: 'rgba(0, 171, 238, 0.6)',
-                                time: 24
-                            });
-                            where = Vector.add(m.pos, Vector.mult(unit, 135))
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: where.x,
-                                y: where.y,
-                                radius: 10,
-                                color: 'rgba(0, 171, 238, 0.7)',
-                                time: 32
-                            });
-                        }
-                        if (tech.isHarpoonDefense) { //fire harpoons at mobs after getting hit
-                            const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
-                            let count = maxCount - 1
-                            const angle = Math.atan2(who.position.y - player.position.y, who.position.x - player.position.x);
-                            const mass = 0.75 * ((tech.isLargeHarpoon) ? 1 + Math.min(0.05 * Math.sqrt(b.guns[9].ammo), 10) : 1)
-                            b.harpoon(m.pos, who, angle, mass, true, 7, false) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1) {
-                            bullet[bullet.length - 1].drain = 0
-                            for (; count > 0; count--) {
-                                b.harpoon(m.pos, who, angle + count * 2 * Math.PI / maxCount, mass, true, 7, false)
-                                bullet[bullet.length - 1].drain = 0
-                            }
-                        }
-                        if (tech.isStimulatedEmission) powerUps.ejectTech()
-                        if (who.onHit) who.onHit();
-                        if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
-                        if (tech.isExplodeContact) b.explosion(player.position, 300);
-                        //extra kick between player and mob              //this section would be better with forces but they don't work...
-                        let angle = Math.atan2(player.position.y - who.position.y, player.position.x - who.position.x);
-                        Matter.Body.setVelocity(player, { x: player.velocity.x + 8 * Math.cos(angle), y: player.velocity.y + 8 * Math.sin(angle) });
-                        Matter.Body.setVelocity(who, { x: who.velocity.x - 8 * Math.cos(angle), y: who.velocity.y - 8 * Math.sin(angle) });
-                        if (tech.isAnnihilation && !who.shield && !who.isShielded && !who.isBoss && who.isDropPowerUp && m.energy > 0.08 && who.damageReduction > 0) {
-                            m.energy -= 0.08 //* Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
-                            if (m.immuneCycle === m.cycle + m.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
-                            who.death();
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: pair.activeContacts[0].vertex.x,
-                                y: pair.activeContacts[0].vertex.y,
-                                radius: Math.sqrt(dmg) * 500,
-                                color: "rgba(255,0,255,0.2)",
-                                time: simulation.drawTime
-                            });
-                        } else {
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: pair.activeContacts[0].vertex.x,
-                                y: pair.activeContacts[0].vertex.y,
-                                radius: Math.sqrt(dmg) * 200,
-                                color: simulation.mobDmgColor,
-                                time: simulation.drawTime
-                            });
-                        }
-                        // return;
-                        // }
-                    } else {
-                        //mob + bullet collisions
-                        if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed && !m.isTimeDilated && who.damageReduction) {
+                const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
+                let where = Vector.add(m.pos, Vector.mult(unit, 17))
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: where.x,
+                    y: where.y,
+                    radius: 22,
+                    color: 'rgba(0, 171, 238, 0.33)',
+                    time: 8
+                });
+                where = Vector.add(m.pos, Vector.mult(unit, 60))
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: where.x,
+                    y: where.y,
+                    radius: 18,
+                    color: 'rgba(0, 171, 238, 0.5)',
+                    time: 16
+                });
+                where = Vector.add(m.pos, Vector.mult(unit, 100))
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: where.x,
+                    y: where.y,
+                    radius: 14,
+                    color: 'rgba(0, 171, 238, 0.6)',
+                    time: 24
+                });
+                where = Vector.add(m.pos, Vector.mult(unit, 135))
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: where.x,
+                    y: where.y,
+                    radius: 10,
+                    color: 'rgba(0, 171, 238, 0.7)',
+                    time: 32
+                });
+            }
+            if (tech.isHarpoonDefense) { //fire harpoons at mobs after getting hit
+                const maxCount = 10 + 3 * tech.extraHarpoons //scale the number of hooks fired
+                let count = maxCount - 1
+                const angle = Math.atan2(who.position.y - player.position.y, who.position.x - player.position.x);
+                const mass = 0.75 * ((tech.isLargeHarpoon) ? 1 + Math.min(0.05 * Math.sqrt(b.guns[9].ammo), 10) : 1)
+                b.harpoon(m.pos, who, angle, mass, true, 7, false) // harpoon(where, target, angle = m.angle, harpoonSize = 1, isReturn = false, totalCycles = 35, isReturnAmmo = true, thrust = 0.1)
+                bullet[bullet.length - 1].drain = 0
+                for (; count > 0; count--) {
+                    b.harpoon(m.pos, who, angle + count * 2 * Math.PI / maxCount, mass, true, 7, false)
+                    bullet[bullet.length - 1].drain = 0
+                }
+            }
+            if (tech.isStimulatedEmission) powerUps.ejectTech()
+            if (who.onHit) who.onHit();
+            if (m.immuneCycle < m.cycle + m.collisionImmuneCycles) m.immuneCycle = m.cycle + m.collisionImmuneCycles; //player is immune to damage for 30 cycles
+            if (tech.isExplodeContact) b.explosion(player.position, 300);
+            //extra kick between player and mob              //this section would be better with forces but they don't work...
+            let angle = Math.atan2(player.position.y - who.position.y, player.position.x - who.position.x);
+            Matter.Body.setVelocity(player, { x: player.velocity.x + 8 * Math.cos(angle), y: player.velocity.y + 8 * Math.sin(angle) });
+            Matter.Body.setVelocity(who, { x: who.velocity.x - 8 * Math.cos(angle), y: who.velocity.y - 8 * Math.sin(angle) });
+            if (tech.isAnnihilation && !who.shield && !who.isShielded && !who.isBoss && who.isDropPowerUp && m.energy > 0.08 && who.damageReduction > 0) {
+                m.energy -= 0.08 //* Math.max(m.maxEnergy, m.energy) //0.33 * m.energy
+                if (m.immuneCycle === m.cycle + m.collisionImmuneCycles) m.immuneCycle = 0; //player doesn't go immune to collision damage
+                who.death();
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: pair.activeContacts[0].vertex.x,
+                    y: pair.activeContacts[0].vertex.y,
+                    radius: Math.sqrt(dmg) * 500,
+                    color: "rgba(255,0,255,0.2)",
+                    time: simulation.drawTime
+                });
+            } else {
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: pair.activeContacts[0].vertex.x,
+                    y: pair.activeContacts[0].vertex.y,
+                    radius: Math.sqrt(dmg) * 200,
+                    color: simulation.mobDmgColor,
+                    time: simulation.drawTime
+                });
+            }
+        } else {
+            //mob + bullet collisions
+            if (obj.classType === "bullet" && obj.speed > obj.minDmgSpeed && !m.isTimeDilated && who.damageReduction) {
 
-                            obj.beforeDmg(who); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
-                            let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(who.velocity, obj.velocity)))
-                            if (tech.isCrit && who.isStunned) dmg *= 4
-                            if (!obj.isNotCollisionsDmg) who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
-                            if (who.alive) who.foundPlayer();
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: pair.activeContacts[0].vertex.x,
-                                y: pair.activeContacts[0].vertex.y,
-                                radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
-                                color: simulation.playerDmgColor,
-                                time: simulation.drawTime
-                            });
-                            if (tech.isLessDamageReduction && !who.shield) who.damageReduction *= who.isBoss ? (who.isFinalBoss ? 1.0005 : 1.0025) : 1.05
+                obj.beforeDmg(who); //some bullets do actions when they hits things, like despawn //forces don't seem to work here
+                let dmg = (obj.dmg + 0.15 * obj.mass * Vector.magnitude(Vector.sub(who.velocity, obj.velocity)))
+                if (tech.isCrit && who.isStunned) dmg *= 4
+                if (!obj.isNotCollisionsDmg) who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
+                if (who.alive) who.foundPlayer();
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: pair.activeContacts[0].vertex.x,
+                    y: pair.activeContacts[0].vertex.y,
+                    radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                    color: simulation.playerDmgColor,
+                    time: simulation.drawTime
+                });
+                if (tech.isLessDamageReduction && !who.shield) who.damageReduction *= who.isBoss ? (who.isFinalBoss ? 1.0005 : 1.0025) : 1.05
 
-                            return;
-                        }
-                        //mob + body collisions
-                        if (obj.classType === "body" && obj.speed > 9) {
-                            const v = Vector.magnitude(Vector.sub(who.velocity, obj.velocity));
-                            if (v > 11) {
-                                let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
-                                if (who.isShielded) dmg *= 0.7
+                return;
+            }
+            //mob + body collisions
+            if (obj.classType === "body" && obj.speed > 9) {
+                const v = Vector.magnitude(Vector.sub(who.velocity, obj.velocity));
+                if (v > 11) {
+                    let dmg = tech.blockDamage * v * obj.mass * (tech.isMobBlockFling ? 2.5 : 1) * (tech.isBlockRestitution ? 2.5 : 1) * ((m.fieldMode === 0 || m.fieldMode === 8) ? 1 + 0.05 * m.coupling : 1);
+                    if (who.isShielded) dmg *= 0.7
 
-                                if (tech.isIrradiated) {
-                                    mobs.statusDoT(who, dmg * 0.62, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
-                                    dmg *= 0.5
-                                }
-                                who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
+                    if (tech.isIrradiated) {
+                        mobs.statusDoT(who, dmg * 0.62, tech.isLongRadiation ? 715392000 : 180) // one tick every 30 cycles
+                        dmg *= 0.5
+                    }
+                    who.damage(dmg, false, { x: pair.activeContacts[0].vertex.x, y: pair.activeContacts[0].vertex.y }, true)
 
-                                if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp) {
-                                    for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) { //double beta decay rolls buckling twice
-                                        if (Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
-                                            options = ["coupling", "boost", "heal", "research", "ammo"]
-                                            powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
-                                        }
-                                    }
-                                }
-
-                                const stunTime = dmg / Math.sqrt(obj.mass)
-                                if (stunTime > 0.5 && who.memory !== Infinity) mobs.statusStun(who, 60 + 60 * Math.sqrt(stunTime))
-                                if (who.alive && who.distanceToPlayer2() < 1000000 && !m.isCloak) who.foundPlayer();
-                                if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
-                                    obj.hasFragmented = true;
-                                    b.targetedNail(obj.position, tech.fragments * 4)
-                                }
-                                if (who.damageReduction) {
-                                    simulation.drawList.push({
-                                        x: pair.activeContacts[0].vertex.x,
-                                        y: pair.activeContacts[0].vertex.y,
-                                        radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
-                                        color: simulation.playerDmgColor,
-                                        time: simulation.drawTime
-                                    });
-                                }
-                                return;
+                    if (tech.isBlockPowerUps && !who.alive && who.isDropPowerUp) {
+                        for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) { //double beta decay rolls buckling twice
+                            if (Math.random() < 0.5 * (tech.isCrystallography && powerUp.length === 0 ? 3 : 1)) {
+                                options = ["coupling", "boost", "heal", "research", "ammo"]
+                                powerUps.spawn(who.position.x, who.position.y, options[Math.floor(Math.random() * options.length)]);
                             }
                         }
                     }
+
+                    const stunTime = dmg / Math.sqrt(obj.mass)
+                    if (stunTime > 0.5 && who.memory !== Infinity) mobs.statusStun(who, 60 + 60 * Math.sqrt(stunTime))
+                    if (who.alive && who.distanceToPlayer2() < 1000000 && !m.isCloak) who.foundPlayer();
+                    if (tech.fragments && obj.speed > 10 && !obj.hasFragmented) {
+                        obj.hasFragmented = true;
+                        b.targetedNail(obj.position, tech.fragments * 4)
+                    }
+                    if (who.damageReduction) {
+                        simulation.drawList.push({
+                            x: pair.activeContacts[0].vertex.x,
+                            y: pair.activeContacts[0].vertex.y,
+                            radius: Math.log(dmg + 1.1) * 40 * who.damageReduction + 3,
+                            color: simulation.playerDmgColor,
+                            time: simulation.drawTime
+                        });
+                    }
+                    return;
+                }
+            }
+        }
     }
 }
 
@@ -404,24 +402,9 @@ Events.on(engine, "collisionStart", function (event) {
     for (let i = 0; i < level.surfacePortals.length; i++) level.surfacePortals[i].collide(event) //first, it removes pairs going through a portal
     playerOnGroundCheck(event);
     trackLastTouchedBlock(event);
-    // playerHeadCheck(event);
     collisionChecks(event);
     //Collision effects can relocate the player, for example by rewinding after damage.
     if (player?.position.x !== beforeX || player?.position.y !== beforeY) playerSweep.body = null
-
-
-    // //do we need to also check bodyB
-    // for (let i = 0, j = event.pairs.length; i != j; ++i) {
-    //     if (event.pairs[i].bodyA === jumpSensor) {
-    //         player.collision.isJump = true
-    //     } else if (event.pairs[i].bodyA === playerBody) {
-    //         player.collision.isBody = true
-    //     } else if (event.pairs[i].bodyA === playerHead) {
-    //         player.collision.isHead = true
-    //     } else if (event.pairs[i].bodyA === headSensor) {
-    //         player.collision.isHeadSensor = true
-    //     }
-    // }
 });
 //the player can tunnel through a thin wall when one physics step moves it past its middle, then the wall pushes it out the far side
 //each step remembers where the player started, and if it was fast and its center crossed a wall it's put back
@@ -459,20 +442,8 @@ Events.on(engine, "afterUpdate", function () { //before portals teleport anythin
 });
 Events.on(engine, "collisionActive", function (event) {
     playerOnGroundCheck(event);
-    // playerHeadCheck(event);
 });
 Events.on(engine, "collisionEnd", function (event) {
     playerOffGroundCheck(event);
 
-    // for (let i = 0, j = event.pairs.length; i != j; ++i) {
-    //     if (event.pairs[i].bodyA === jumpSensor) {
-    //         player.collision.isJump = false
-    //     } else if (event.pairs[i].bodyA === playerBody) {
-    //         player.collision.isBody = false
-    //     } else if (event.pairs[i].bodyA === playerHead) {
-    //         player.collision.isHead = false
-    //     } else if (event.pairs[i].bodyA === headSensor) {
-    //         player.collision.isHeadSensor = false
-    //     }
-    // }
 });

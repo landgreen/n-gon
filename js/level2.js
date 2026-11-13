@@ -31075,7 +31075,7 @@ Object.assign(moreLevels, {
         const laser = level.hazard(1057.5 + 2.5, -1625, 5, 550, 0.3)
         spawn.mapRect(1057.5 - 6.25, -1625, 22.5, 6.25)
         // const elevator1 = level.elevator(2275-100, -2500, 75, 25, -13100, 0.003)
-        const elevator2 = level.elevator(2275 - 150, -1340, 125, 25, -3000)
+        const elevator2 = level.elevator(2275 - 150, -1340, 125, 25, -3200)
         const boost1 = level.boost(4100 - 100, -1375 + 34.5 - 75, 2400, Math.PI / 12 * 7)
 
 
@@ -31122,6 +31122,7 @@ Object.assign(moreLevels, {
         // simulation.inGameConsole((simulation.mouseInGame.x > -1598 - 1.5 * waterDrained && simulation.mouseInGame.x < 189 && simulation.mouseInGame.y < ((12/19)*(x+1680)-1016) && simulation.mouseInGame.y > -1000 - Math.max((waterDrained + extraDrain), -730) + 5 * Math.sin(simulation.cycle * 0.015)))
 
         level.custom = () => {
+            elevator2.drawTrack();
             elevator2.move();
 
             level.exit.drawAndCheck();

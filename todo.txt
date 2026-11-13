@@ -1,43 +1,58 @@
-level editor
-  spinner has vertices like a block, so it can be any shape, not just a rect
-  the code buttons say edit code, revert code is just revert, the level's default button is next to edit code
-  maps, blocks, paths, and lasers have an angle in the info box, type one to turn it to that angle
-  rotate and flip buttons share one row, map and block buttons moved down next to vertices, no more 45° button
-  dispenser has a width and height instead of one size, so its blocks don't have to be squares, drag its corner handle to resize
-  issues has a reach check, it warns about an exit, power ups, or keys no normal jump from the entrance gets to
-  issues has a clear check, it says if you've reached the exit in test export since your last change, and your time
-  some issues have a fix button, move mobs and power ups onto the ground, lift blocks out of the map, delete stacked copies
-  saved versions in the history menu, one when a level opens and every 10 minutes, or name your own, click one to go back to it
-  back up all saves every local level to one file, import it to get them back
-  a button, toggle, zone, or logic can be held on or off from its info box, with a light over each trigger and what it runs
-  minimap at the top of the level info box, click it to go there
-  deleting a local level you never changed doesn't ask first
-  imported levels have every setting type checked, so a level's data can't sneak code into its export
-  while an add list is open, the other list tabs fade
-  train - a platform that rides along a draw path, the player can ride it around loops and hills
-  elevators have a down speed setting for how fast they come back down
-  elevators have a smooth stop setting, they slow down at the top instead of flinging you
 
+cloaking tech: flanking - cloaking does 3x damage to mobs that haven't noticed you (no health bar)
+JUNKtech: autopilot - n-gon plays for you
 
-tech: Meissner effect - simpler description for ray, 1.6x perfect diamagnetism length
-moving blocks carry you along when you stand on them,
-  except very light blocks
+level editor: guns toggle gives you every gun and full ammo in test export
+experiment mode: show all button, turn it off to hide tech you can't take yet and JUNK
+pause menu: search box filters your tech, cmd/ctrl+F jumps to it in pause and experiment
+  esc clears the search in pause and experiment
+physics engine: adjusted matter.js for faster collision checks, mostly when bullets are being added and removed
+  about 5% improvement in physics performance
 
+mobs
+  sucker needs line of sight to see you, sucker, big sucker, quad laser forget you sooner
+  mobs alerted by a nearby mob wake up 0.5-1.5 seconds later, sooner for higher tiers
+  more mobs look around with a vision cone while asleep, so you can sneak up behind them
+    grenadier, freezer, quad laser, flutter, stinger, stingWinger, slashers,
+    dodger, slicer, striker, launchers, laserLayer
+  more bosses forget you 4-8 seconds after losing sight of you
+    slash, jelly, power up baby, laser targeting, spider 2, hydra 2, block, caterpillar, mayfly,
+    laser layer, mantis, time skip, spider 3, tendril 3, train, train 2
+  king snake, ice block, penta laser, spider 4, roundworm 4 forget you after 7-14 seconds
+  jelly, centipede, caterpillar, mayfly, larva bodies are only aware while their core or head is
+  spider boss legs are only aware while the spider is
 
 bug fixes
-  stepping across a floor seam no longer briefly puts you in the air
-  movement keys no longer stick when you switch windows
-  the aim no longer jumps to a mirrored spot at the start of each level until you move the mouse
-  you no longer bounce or float off elevators and blocks that are moving down while you walk on them
-  landing after jumping off a mover no longer gives you a small push in the mover's direction
-  checkpoint messages show missing guns and tech as plain text
-  checkpoints tell you which maps to restore before continuing
-  community maps that draw blocks their own way no longer change how blocks look on the levels after them
+  the fullscreen shortcut works on browsers without pointer lock, including ipad safari
+  experiment mode: instant tech like research and ammo stay locked after a click until JUNK is unlocked
+  typing q or e in the experiment search box no longer switches guns
+  radiation from a dying mob can now spread to every nearby mob, one was always skipped
+  training with community maps on no longer adds extra copies of diamagnetism each run
+  factory: blocks left on the conveyor buttons are always removed when the belt reverses
+  respawn constraint: mobs no longer respawn in the next level, or while paused
+  blocks left by big mobs don't keep shrinking while the game is paused
+
 
 
 
 
 *********************************************************** TODO *****************************************************
+
+settings
+  autopilot (beta) - the player moves, fights, grabs power ups, and exits on their own
+    holding a movement key takes over
+
+
+autopilot  autopilot.toggle(true)
+make this into JUNK or keep in settings?
+is there level specific information? (not yet)
+  should we add checkpoints?
+  after a 3rd attempt on retrying the same path randomize something?
+    jump arc, jump height, follow through, landing spot, push blocks, choose new objective (new power ups, mob, button, exit), use field
+try to avoid lasers, slime, hazards?
+
+
+
 
 
 boss - based on a "stentor"  single celled ciliate

@@ -157,7 +157,6 @@ Object.assign(levelEditor, {
         "dome": `<polygon points="1,18 1.5,14.4 2.9,11 5.1,8.1 8,5.9 11.4,4.5 15,4 18.6,4.5 22,5.9 24.9,8.1 27.1,11 28.5,14.4 29,18"/>`,
         "ramp": `<polygon points="29,4 29,18 1,18"/>`,
         "hexagon": `<polygon points="9.2,1 20.8,1 26.5,11 20.8,21 9.2,21 3.5,11"/>`,
-        "pointed ends": `<polygon points="8,4.9 22,4.9 29,11 22,17.1 8,17.1 1,11"/>`,
         "circle": `<polygon points="25,11 24.2,14.8 22.1,18.1 18.8,20.2 15,21 11.2,20.2 7.9,18.1 5.8,14.8 5,11 5.8,7.2 7.9,3.9 11.2,1.8 15,1 18.8,1.8 22.1,3.9 24.2,7.2"/>`,
         "point up": `<polygon points="15,1 21,4 21,21 9,21 9,4"/>`,
         "diamond": `<polygon points="15,1 22.5,11 15,21 7.5,11"/>`,
@@ -227,6 +226,14 @@ Object.assign(levelEditor, {
     svgIcon(picture, fill = "none") { //one of the saved pictures above as a 30 × 22 svg
         return `<svg width="30" height="22" viewBox="0 0 30 22" fill="${fill}" stroke="none" aria-hidden="true">${picture}</svg>`
     },
+    shapeIcon(name) { //a preset shape's picture, solid for a map, outlined and filled with the block color for a block, see drawType
+        const picture = levelEditor.shapeIcons[name] || ""
+        if (levelEditor.drawType === "map") return levelEditor.svgIcon(picture, "currentColor")
+        return `<svg width="30" height="22" viewBox="0 0 30 22" fill="${color.block}" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" overflow="visible" aria-hidden="true">${picture}</svg>`
+    },
+    shapeTip(name) {
+        return `${name}, as a ${levelEditor.drawType}, ${levelEditor.keyText("c")} switches map and block`
+    },
     recentAddLook(arg) { //a pick from the add lists as { picture, tip }, or null if it isn't in the lists anymore, a mob's picture may not be loaded yet, then it's the name
         const [name, preset] = String(arg).split(":")
         const type = levelElements.types[name]
@@ -262,13 +269,9 @@ Object.assign(levelEditor, {
         const row = document.querySelector("#level-editor-left .le-draws")
         if (row) row.innerHTML = levelEditor.recentAddsHtml()
     },
-    toolIcon(tool) { //tiny drawings for the status bar's draw tools, simple enough to read from far away
+    toolIcon(tool) { //tiny drawings for the status bar's ruler, simple enough to read from far away
         const icons = {
-            select: `<rect x="4.5" y="0.5" width="8" height="13" rx="4" fill="#fff" stroke="#333"/><path d="M4.5 5.5 H12.5 M8.5 0.5 V5.5" stroke="#333"/><path d="M8.5 0.5 A4 4 0 0 0 4.5 4.5 V5.5 H8.5 Z" fill="#0cf"/>`,
-            map: `<rect x="1.5" y="2" width="14" height="10" fill="${color.map}"/>`,
-            block: `<rect x="2.5" y="2.5" width="12" height="9" fill="${color.block}" stroke="${color.blockS}" stroke-width="1.5"/>`,
-            measure: `<rect x="0.5" y="3.5" width="16" height="7" fill="#fd4" stroke="#333"/><path d="M4.5 3.5 V6.5 M8.5 3.5 V7.5 M12.5 3.5 V6.5" stroke="#333"/>`,
-            pan: `<path d="M8.5 1 L6.5 3 M8.5 1 L10.5 3 M8.5 13 L6.5 11 M8.5 13 L10.5 11 M2 7 L4 5 M2 7 L4 9 M15 7 L13 5 M15 7 L13 9 M8.5 1 V13 M2 7 H15" fill="none" stroke="#333" stroke-width="1.3" stroke-linecap="round"/>`,
+            measure: `<rect x="0.5" y="3.5" width="16" height="7" fill="#e6e1c8" stroke="#333"/><path d="M4.5 3.5 V6.5 M8.5 3.5 V7.5 M12.5 3.5 V6.5" stroke="#333"/>`,
         }
         return `<svg class="le-tool-icon" viewBox="0 0 17 14" width="17" height="14" aria-label="${tool}">${icons[tool]}</svg>`
     },

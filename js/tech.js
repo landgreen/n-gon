@@ -367,6 +367,13 @@ const tech = {
         }
     },
     inputHTML: {
+        autopilot(el) { //the autopilot JUNK tech's pause menu checkbox
+            if (!simulation.paused || simulation.isChoosing) {
+                el.checked = tech.isAutopilotChoose
+                return
+            }
+            tech.isAutopilotChoose = el.checked
+        },
         tunableLaser(value) {
             const entry = tech.tech.find(item => item.name === "acousto-optic modulator");
             if (!entry.count || !simulation.paused || simulation.isChoosing || (value !== "none" && !entry.modes.includes(value))) return;
@@ -390,7 +397,6 @@ const tech = {
                 tech.preserveHeal--
                 powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "heal");
                 // build.generatePauseRight()
-                const val = Number(el.value);
                 const parent = el.parentElement;
                 const label = parent.querySelector("#preserveOrbs");
                 if (label) label.innerHTML = tech.preserveHeal > 0 ? powerUps.orb.heal(tech.preserveHeal) : "<em>(empty)</em>"
@@ -401,7 +407,6 @@ const tech = {
                 tech.reserveAmmo--
                 powerUps.spawn(m.pos.x + 100 * (Math.random() - 0.5), m.pos.y + 100 * (Math.random() - 0.5), "ammo");
                 // build.generatePauseRight()
-                const val = Number(el.value);
                 const parent = el.parentElement;
                 const label = parent.querySelector("#reserveOrbs");
                 if (label) label.innerHTML = tech.reserveAmmo > 0 ? powerUps.orb.ammo(tech.reserveAmmo) : "<em>(empty)</em>"
@@ -825,7 +830,7 @@ const tech = {
     },
     {
         name: "Hilbert space",
-        description: "<strong>3x</strong> <strong class='color-d' data-help='damage'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong>",
+        description: "<strong>3x</strong> <strong class='color-d' data-help='damage'>damage</strong><br>after a <strong>collision</strong> enter an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong>",
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -853,7 +858,7 @@ const tech = {
     {
         name: "Banach space", //Euclidean space
         //${powerUps.orb.heal(1)}
-        description: `when you enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong> spawn<br> ${powerUps.orb.boost(1)} ${powerUps.orb.coupling(1)} ${powerUps.orb.ammo(1)} ${powerUps.orb.research(1)} ${powerUps.orb.Casimir(1)} ${powerUps.orb.qubit(1)} and some random <strong>bullets</strong>`,
+        description: `when you enter an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong> spawn<br> ${powerUps.orb.boost(1)} ${powerUps.orb.coupling(1)} ${powerUps.orb.ammo(1)} ${powerUps.orb.research(1)} ${powerUps.orb.Casimir(1)} ${powerUps.orb.qubit(1)} and some random <strong>bullets</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 3,
@@ -874,7 +879,7 @@ const tech = {
     },
     {
         name: "mass-energy equivalence",
-        description: `<strong>1.2x</strong> <strong class="color-speed" data-help="movement">movement</strong> and <strong>1.15x</strong> <strong>jump</strong> height<br><strong class='energy' data-help='energy'>energy</strong> replaces your <strong class='color-h' data-help='health'>health</strong>`,
+        description: `<strong class='energy' data-help='energy'>energy</strong> replaces your <strong class='color-h' data-help='health'>health</strong><br><strong>1.2x</strong> <strong class="color-speed" data-help="movement">movement</strong> and <strong>jump</strong> height`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4914,7 +4919,7 @@ const tech = {
         name: "quantum immortality",
         descriptionFunction() {
             if (tech.isImmortal || this.count === 0) {
-                return `after <strong>dying</strong> continue in an <strong class='alt' data-help='alternate-reality'>alternate reality</strong><br><strong>0.7x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>`
+                return `after <strong>dying</strong> continue in an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong><br><strong>0.7x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>`
             } else {
                 return `<strong>0.7x</strong> <strong class='color-defense' data-help='defense'>damage taken</strong>`
             }
@@ -4966,7 +4971,7 @@ const tech = {
     },
     {
         name: "many-worlds",
-        description: `at the start of each <strong>level</strong> spawn ${powerUps.orb.tech()}<br>and enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong>`,
+        description: `at the start of each <strong>level</strong> spawn ${powerUps.orb.tech()}<br>and enter an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -4986,7 +4991,7 @@ const tech = {
     {
         name: "Ψ(t) collapse",
         link: `<a target="_blank" href='https://en.wikipedia.org/wiki/Wave_function_collapse' class="link">Ψ(t) collapse</a>`,
-        description: `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(6)}<br>if you <strong class='color-r' data-help='research'>research</strong> enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong>`,
+        description: `after a <strong>boss</strong> <strong>dies</strong> spawn ${powerUps.orb.research(6)}<br>if you <strong class='color-r' data-help='research'>research</strong> enter an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong>`,
         maxCount: 1,
         count: 0,
         frequency: 1,
@@ -5026,7 +5031,7 @@ const tech = {
                 }
                 menu += `</details>`
             }
-            return `when <span class="color-paused" data-help="pause">PAUSED</span> select what doesn't <strong>change</strong> when<br>you enter an <strong class='alt' data-help='alternate-reality'>alternate reality</strong> ${menu}`
+            return `when <span class="color-paused" data-help="pause">PAUSED</span> select what doesn't <strong>change</strong> when<br>you enter an <strong class='alt' data-text='alternate reality' data-help='alternate-reality'>alternate reality</strong> ${menu}`
         },
         maxCount: 1,
         count: 0,
@@ -12513,6 +12518,25 @@ const tech = {
         }
     },
     {
+        name: "flanking",
+        description: "<strong>3x</strong> <strong class='color-d' data-help='damage'>damage</strong> to mobs that haven't noticed you<br><em style ='float: right;'>(no health bar)</em>",
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 7
+        },
+        requires: "metamaterial cloaking",
+        effect() {
+            tech.isUnseenDamage = true
+        },
+        remove() {
+            tech.isUnseenDamage = false
+        }
+    },
+    {
         name: "topological defect",
         description: "<strong>2.1x</strong> <strong class='color-d' data-help='damage'>damage</strong><br>to mobs at max <strong>durability</strong>",
         isFieldTech: true,
@@ -13101,6 +13125,31 @@ const tech = {
     //     },
     //     remove() {}
     // },
+    {
+        name: "autopilot",
+        descriptionFunction() {
+            let menu = ''
+            if (this.count && !build.isExperimentSelection) { //only changes while paused
+                const isLocked = !simulation.paused || simulation.isChoosing
+                menu = `<br><label onclick="event.stopPropagation()" style="${isLocked ? "opacity:0.5;" : "cursor:pointer;"}"><input type="checkbox" onchange="tech.inputHTML.autopilot(this)" ${tech.isAutopilotChoose ? "checked" : ""} ${isLocked ? "disabled" : ""}> it makes <strong>power up</strong> choices</label>`
+            }
+            return `<strong>n-gon</strong> plays for you${menu}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 0,
+        isJunk: true,
+        allowed: () => true,
+        requires: "",
+        effect() {
+            autopilot.set(true)
+            tech.isAutopilotChoose = true
+        },
+        remove() {
+            tech.isAutopilotChoose = false
+            if (this.count) autopilot.set(false)
+        }
+    },
     {
         name: "8-bit",
         description: "you get less <strong>pixels</strong> when you have less health",
@@ -14398,12 +14447,12 @@ const tech = {
         requires: "",
         effect() {
             String.prototype.shuf = function () {
-                var a = this.split(""),
+                const a = this.split(""),
                     n = a.length;
 
-                for (var i = n - 1; i > 0; i--) {
-                    var j = Math.floor(Math.random() * (i + 1));
-                    var tmp = a[i];
+                for (let i = n - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    const tmp = a[i];
                     a[i] = a[j];
                     a[j] = tmp;
                 }
@@ -14416,7 +14465,7 @@ const tech = {
     },
     {
         name: "quantum leap",
-        description: "become an <strong class='alt' data-help='alternate-reality'>alternate</strong> version of yourself<br>every <strong>20</strong> seconds",
+        description: "become an <strong class='alt' data-text='alternate' data-help='alternate-reality'>alternate</strong> version of yourself<br>every <strong>20</strong> seconds",
         maxCount: 1,
         count: 0,
         frequency: 0,
@@ -14537,9 +14586,9 @@ const tech = {
         requires: "",
         effect() {
             (function () {
-                var script = document.createElement('script');
+                const script = document.createElement('script');
                 script.onload = function () {
-                    var stats = new Stats();
+                    const stats = new Stats();
                     document.body.appendChild(stats.dom);
                     requestAnimationFrame(function loop() {
                         stats.update();

@@ -1,9 +1,49 @@
 "use strict";
 //create array of mobs
 let mob = [];
+//things mobs say with tech: chatter, from https://github.com/landgreen/n-gon/discussions/500
+const mobChatterQuotes = [
+    // Existing quotes
+    "I can do *anything!*",
+    "Chaos, chaos!",
+    "Let's make the devilskn-",
+    "Darmok and Jaled at Tanagra",
+    "Kiazi's children, their faces wet!",
+    "Sokath with his eyes uncovered!",
+    "Are you suggesting that coconuts can migrate?",
+    "One, Two, Five!",
+    "Is it an African swallow or a European swallow?",
+    "kept you waiting, huh?",
+    "This prison... to hold... me?",
+    "Did everyone see that? Because I will not be doing it again",
+    "I see the light... it's a [404 Error]!",
+    "I wish i took those digeridoo lessons",
+    "Your mother was a hamster, and your father smelt of elderberries",
+    "In Rod we trust",
+    "AAAAAAAA",
+    "the devil may cry?",
+    "hey Mr M? are you still mad at me?",
+
+    // New suggestions from discussion #500
+    "yippee",
+    "If you wish to defeat me train for another hundred years.",
+    "WE CALLED TO TALK ABOUT YOUR CAR'S LIMITED WARRANTY",
+    "KAMEHAMEHA!!!!!!!!!!",
+    "Who you gonna call? GHOST BUSTERS!",
+    "JARVIS evaporate this man",
+    "Squirtle use water beam!",
+    "El pollo está en llamas.",
+    "pentagon, hexagon, octagon, nevergon.. na give you up",
+    "Eat cube bozo",
+    "let's make the devilsknife!",
+    "you know, I really dislike you.",
+    "Good luck, and may the odds be ever in your favor",
+    "You dare defy the Lord of Darkness."
+];
 //method to populate the array above
 const mobs = {
-    mobDeaths: 0, //kills this run, bosses count as 10, reset in simulation
+    maxMobBody: 40, //most blocks a level can have before dead mobs stop leaving one, reset in simulation.clearMap()
+    mobDeaths: 0, //kills this run, bosses count as 100, reset in simulation
     isPacifist() { //the pacifist run allows fewer than 3 kills per level
         return mobs.mobDeaths < 3 * level.levelsCleared
     },
@@ -162,6 +202,31 @@ const mobs = {
                 })
             }
         }
+    },
+    alertEphemera() { //one shared ephemera wakes every alerted mob when its alertCycle comes, and removes itself when none are left, see alertNearByMobs()
+        let alerts = simulation.ephemera.find(e => e.name === "mob alerts")
+        if (!alerts) {
+            alerts = {
+                name: "mob alerts",
+                list: [],
+                do() {
+                    for (let i = this.list.length - 1; i >= 0; i--) {
+                        const who = this.list[i]
+                        if (simulation.cycle < who.alertCycle) continue
+                        who.alertCycle = 0
+                        if (who.alive && !who.seePlayer.recall) {
+                            who.locatePlayer()
+                            who.seePlayer.position.x = who.alertPosition.x
+                            who.seePlayer.position.y = who.alertPosition.y
+                        }
+                        this.list.splice(i, 1)
+                    }
+                    if (!this.list.length) simulation.removeEphemera(this)
+                },
+            }
+            simulation.ephemera.push(alerts)
+        }
+        return alerts
     },
     statusStun(who, cycles = 180) {
         if (!who.shield && !who.isShielded && !who.isInvulnerable) {
@@ -482,11 +547,17 @@ const mobs = {
                 this.seePlayer.position.x = player.position.x;
                 this.seePlayer.position.y = player.position.y;
             },
-            alertNearByMobs() {
+            alertCycle: 0, //cycle when a pending alert wakes this mob, 0 when none is pending, see alertNearByMobs()
+            alertNearByMobs() { //nearby sleeping mobs wake up 30 to 90 - 10 * tier cycles later, more alerts do nothing while one is pending
                 //this.alertRange2 is set at the very bottom of this mobs, after mob is made
+                let alerts = null
                 for (let i = 0; i < mob.length; i++) {
-                    if (!mob[i].seePlayer.recall && Vector.magnitudeSquared(Vector.sub(this.position, mob[i].position)) < this.alertRange2) {
-                        mob[i].locatePlayer();
+                    const who = mob[i]
+                    if (!who.seePlayer.recall && !who.alertCycle && Vector.magnitudeSquared(Vector.sub(this.position, who.position)) < this.alertRange2) {
+                        who.alertCycle = simulation.cycle + 30 + Math.floor(Math.random() * Math.max(0, 60 - 10 * (who.tier || 0)))
+                        who.alertPosition = { x: player.position.x, y: player.position.y } //where the player was when the alert went out
+                        if (!alerts) alerts = mobs.alertEphemera()
+                        alerts.list.push(who)
                     }
                 }
             },
@@ -566,12 +637,7 @@ const mobs = {
                 const dir = { x: Math.cos(this.angle), y: Math.sin(this.angle) };
                 //the dot product of diff and dir will return how much over lap between the vectors
                 const dot = Vector.dot(dir, diff);
-                // console.log(Math.cos(dot)*180/Math.PI)
-                if (dot > threshold) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return dot > threshold
             },
             lookRange: 0.2 + Math.random() * 0.2,
             lookTorque: 0.0000004 * (Math.random() > 0.5 ? -1 : 1),
@@ -600,6 +666,21 @@ const mobs = {
                     ctx.fill();
                 }
             },
+            seePlayerByLookingAtThenHistory(depth = 30) { //asleep: look around with a cone like seePlayerByLookingAt, awake: track the player like seePlayerByHistory
+                if (this.seePlayer.recall) {
+                    this.seePlayerByHistory(depth)
+                } else {
+                    this.seePlayerByLookingAt()
+                }
+            },
+            seePlayerByLookingAtForStrike() { //asleep: look around with a cone like seePlayerByLookingAt, awake: seePlayerForStrike
+                if (this.seePlayer.recall) {
+                    this.seePlayerForStrike()
+                } else {
+                    this.seePlayerByLookingAt()
+                    if (this.seePlayer.recall && this.cd === Infinity) this.cd = simulation.cycle + this.delay * 0.7 //first strike a bit after seeing the player, like seePlayerForStrike
+                }
+            },
             playerPosRandomY() {
                 const where = this.playerTarget()
                 return {
@@ -607,41 +688,6 @@ const mobs = {
                     y: where.y + (Math.random() - 0.5) * 110
                 };
             },
-            // hacked() { //set this.hackedTarget variable before running this method
-            //   //find a new target
-            //   if (!(simulation.cycle % this.seePlayerFreq)) {
-            //     this.hackedTarget = null
-            //     for (let i = 0, len = mob.length; i < len; i++) {
-            //       if (mob[i] !== this) {
-            //         // const DIST = Vector.magnitude(Vector.sub(this.position, mob[j]));
-            //         if (Matter.Query.ray(map, this.position, mob[i].position).length === 0 &&
-            //           Matter.Query.ray(body, this.position, mob[i].position).length === 0) {
-            //           this.hackedTarget = mob[i]
-            //         }
-            //       }
-            //     }
-            //   }
-            //   //acceleration towards targets
-            //   if (this.hackedTarget) {
-            //     this.force = Vector.mult(Vector.normalise(Vector.sub(this.hackedTarget.position, this.position)), this.mass * 0.0015)
-            //   }
-            // },
-            // blind(cycles = 90, brightness = 4) {
-            //     //remove other existing blind ephemera
-            //     for (let i = 0; i < simulation.ephemera.length; i++) {
-            //         if (simulation.ephemera[i].name === "blind") simulation.removeEphemera(simulation.ephemera[i])
-            //     }
-            //     simulation.ephemera.push({
-            //         name: "blind",
-            //         count: cycles,
-            //         do() {
-            //             canvas.style.filter = `brightness(${1 + (brightness - 1) * this.count / cycles})`;
-            //             this.count--
-            //             if (this.count < 0 || !m.alive) simulation.removeEphemera(this)
-            //         }
-            //     })
-            //     canvas.style.filter = `brightness(${brightness})`;
-            // },
             harmZone(zapDelay = 15) { //zaps the player every zapDelay cycles while they're in range
                 if (this.seePlayer.yes) {
                     ctx.setLineDash([125 * Math.random(), 125 * Math.random()]);
@@ -762,14 +808,6 @@ const mobs = {
                     ctx.fill();
                     //spring to random place on map
                     if (!(simulation.cycle % (this.seePlayerFreq * 4))) {
-                        best = {
-                            x: null,
-                            y: null,
-                            dist2: Infinity,
-                            who: null,
-                            v1: null,
-                            v2: null
-                        };
                         const seeRange = 3000;
                         const look = {
                             x: this.position.x + seeRange * Math.cos(this.angle),
@@ -1016,16 +1054,6 @@ const mobs = {
                     ctx.stroke();
                 }
             },
-            // pushAway(range = 700, force = 0.2) {
-            //     if (m.immuneCycle < m.cycle) {
-            //         let sub = Vector.sub(player.position, this.position);
-            //         if (Vector.magnitude(sub) < range) {
-            //             knock = Vector.mult(Vector.normalise(sub), player.mass * force);
-            //             player.force.x += knock.x;
-            //             player.force.y += knock.y - (m.onGround && !m.crouch) ? 0.1 * player.mass : 0;
-            //         }
-            //     }
-            // },
             bomb() {
                 //throw a mob/bullet at player
                 if (
@@ -1428,6 +1456,7 @@ const mobs = {
                         Matter.Body.setDensity(baby, 0.01); //extra dense //normal is 0.001 //makes effective life much larger
                         Matter.Body.setVelocity(baby, velocity);
                         Matter.Body.setAngle(baby, Math.atan2(velocity.y, velocity.x))
+                        baby.locatePlayer() //launched babies attack right away, alerts are delayed
                         who.alertNearByMobs();
                         count++
                     },
@@ -1473,6 +1502,32 @@ const mobs = {
             damageScale() {
                 return ((spawn.mobDmgDoneByTier[this.tier] && level.levelsCleared < 14) ? spawn.mobDmgDoneByTier[this.tier] : spawn.dmgToPlayerByLevelsCleared())
             },
+            damageFlash(count, fill, stroke, lineWidth = 3, isStrokeFirst = false) { //draws over the mob for a few cycles when a tech boosts the damage it takes
+                const vertices = this.vertices
+                simulation.ephemera.push({
+                    count: count, //cycles before it self removes
+                    do() {
+                        this.count--
+                        if (this.count < 0) simulation.removeEphemera(this)
+                        ctx.beginPath();
+                        ctx.moveTo(vertices[0].x, vertices[0].y);
+                        for (let j = 1, len = vertices.length; j < len; ++j) ctx.lineTo(vertices[j].x, vertices[j].y);
+                        ctx.lineTo(vertices[0].x, vertices[0].y);
+                        ctx.lineWidth = lineWidth
+                        ctx.strokeStyle = stroke
+                        ctx.fillStyle = fill
+                        if (isStrokeFirst) {
+                            ctx.stroke();
+                            ctx.lineJoin = "round"
+                            ctx.miterLimit = 5
+                            ctx.fill();
+                        } else {
+                            ctx.fill()
+                            ctx.stroke();
+                        }
+                    },
+                })
+            },
             dmgLog: 0, //used to record damage done to mob for producing damage numbers
             damage(dmg, isBypassShield = false, where = this.position, isDmgText = false) { //damage taken by this mob 
                 if ((!this.isShielded || isBypassShield) && this.alive) {
@@ -1489,31 +1544,16 @@ const mobs = {
                             return;
                         }
                         dmg *= tech.damageAdjustments()
+                        if (tech.isUnseenDamage && m.fieldMode === 7 && (!this.seePlayer.recall || simulation.cycle < this.ambushCycle + 10)) { //flanking, no recall is the same test as the health bar
+                            if (!this.seePlayer.recall) this.ambushCycle = simulation.cycle //hits for 10 cycles after the hit that wakes it also count, only stamped while asleep so it can't be extended
+                            dmg *= 3
+                            this.damageFlash(7, "rgba(255,0,100,0.15)", "#f08")
+                        }
                         if (this.isDropPowerUp) {
                             if (this.health === 1) {
                                 if (tech.isMobFullHealthCloak) {
                                     dmg *= 2.11
-                                    simulation.ephemera.push({
-                                        count: 7, //cycles before it self removes
-                                        vertices: this.vertices,
-                                        do() {
-                                            this.count--
-                                            if (this.count < 0) simulation.removeEphemera(this)
-                                            //draw body
-                                            ctx.beginPath();
-                                            const vertices = this.vertices;
-                                            ctx.moveTo(vertices[0].x, vertices[0].y);
-                                            for (let j = 1, len = vertices.length; j < len; ++j) {
-                                                ctx.lineTo(vertices[j].x, vertices[j].y);
-                                            }
-                                            ctx.lineTo(vertices[0].x, vertices[0].y);
-                                            ctx.fillStyle = `rgba(255,0,100,0.15)` //"rgba(150,150,225,0.5)";
-                                            ctx.fill()
-                                            ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
-                                            ctx.strokeStyle = `#f08` //"rgba(150,150,225,0.5)";
-                                            ctx.stroke();
-                                        },
-                                    })
+                                    this.damageFlash(7, "rgba(255,0,100,0.15)", "#f08")
                                 }
                                 if (tech.isChatter && !this.isInvulnerable) {
                                     let isTalking = false
@@ -1523,106 +1563,19 @@ const mobs = {
                                         }
                                     }
                                     if (!isTalking) {
-                                        //from https://github.com/landgreen/n-gon/discussions/500
-                                        const quotes = [
-                                            // Existing quotes
-                                            "I can do *anything!*",
-                                            "Chaos, chaos!",
-                                            "Let's make the devilskn-",
-                                            "Darmok and Jaled at Tanagra",
-                                            "Kiazi's children, their faces wet!",
-                                            "Sokath with his eyes uncovered!",
-                                            "Are you suggesting that coconuts can migrate?",
-                                            "One, Two, Five!",
-                                            "Is it an African swallow or a European swallow?",
-                                            "kept you waiting, huh?",
-                                            "This prison... to hold... me?",
-                                            "Did everyone see that? Because I will not be doing it again",
-                                            "I see the light... it's a [404 Error]!",
-                                            "I wish i took those digeridoo lessons",
-                                            "Your mother was a hamster, and your father smelt of elderberries",
-                                            "In Rod we trust",
-                                            "AAAAAAAA",
-                                            "the devil may cry?",
-                                            "hey Mr M? are you still mad at me?",
-
-                                            // New suggestions from discussion #500
-                                            "yippee",
-                                            "If you wish to defeat me train for another hundred years.",
-                                            "WE CALLED TO TALK ABOUT YOUR CAR'S LIMITED WARRANTY",
-                                            "KAMEHAMEHA!!!!!!!!!!",
-                                            "Who you gonna call? GHOST BUSTERS!",
-                                            "JARVIS evaporate this man",
-                                            "Squirtle use water beam!",
-                                            "El pollo está en llamas.",
-                                            "pentagon, hexagon, octagon, nevergon.. na give you up",
-                                            "Eat cube bozo",
-                                            "let's make the devilsknife!",
-                                            "you know, I really dislike you.",
-                                            "Good luck, and may the odds be ever in your favor",
-                                            "You dare defy the Lord of Darkness."
-                                        ];
                                         const color = `#${Math.floor(Math.random() * 76 + 180).toString(16)}${Math.floor(Math.random() * 121).toString(16).padStart(2, '0')}${Math.floor(Math.random() * 121).toString(16).padStart(2, '0')}`
-                                        const quote = quotes[Math.floor(Math.random() * quotes.length)]
-                                        // simulation.inGameConsole(`<span style="color:"${color}">${quote}</span>`, 360)
+                                        const quote = mobChatterQuotes[Math.floor(Math.random() * mobChatterQuotes.length)]
                                         level.inGameText(this.position.x, this.position.y - 50, quote, 240, color)
                                     }
-                                    // simulation.ephemera.push({
-                                    //     count: 240, //cycles before it self removes
-                                    //     vertices: this.vertices,
-                                    //     do() {
-                                    //         this.count--
-                                    //         if (this.count < 0) simulation.removeEphemera(this)
-                                    //     },
-                                    // })
                                 }
                             } else if (tech.isMobLowHealth && this.health < 0.25) {
                                 dmg *= 3
-                                simulation.ephemera.push({
-                                    count: 2, //cycles before it self removes
-                                    vertices: this.vertices,
-                                    do() {
-                                        this.count--
-                                        if (this.count < 0) simulation.removeEphemera(this)
-                                        //draw body
-                                        ctx.beginPath();
-                                        const vertices = this.vertices;
-                                        ctx.moveTo(vertices[0].x, vertices[0].y);
-                                        for (let j = 1, len = vertices.length; j < len; ++j) {
-                                            ctx.lineTo(vertices[j].x, vertices[j].y);
-                                        }
-                                        ctx.lineTo(vertices[0].x, vertices[0].y);
-                                        ctx.fillStyle = `rgba(255,50,100,0.2)` //"rgba(150,150,225,0.5)";
-                                        ctx.fill()
-                                        ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
-                                        ctx.strokeStyle = `#f38` //"rgba(150,150,225,0.5)";
-                                        ctx.stroke();
-                                    },
-                                })
+                                this.damageFlash(2, "rgba(255,50,100,0.2)", "#f38")
                             }
                         }
                         if (tech.isNegAura && m.fieldMode === 3 && this.health < 0.6 && Vector.magnitude(Vector.sub(m.pos, this.position)) < m.fieldUpgrades[3].range() + 2 * this.radius + 20) {
                             dmg *= 10
-                            simulation.ephemera.push({
-                                count: 3, //cycles before it self removes
-                                vertices: this.vertices,
-                                do() {
-                                    this.count--
-                                    if (this.count < 0) simulation.removeEphemera(this)
-
-                                    ctx.beginPath();
-                                    ctx.moveTo(this.vertices[0].x, this.vertices[0].y);
-                                    for (let j = 1, len = this.vertices.length; j < len; j += 1) ctx.lineTo(this.vertices[j].x, this.vertices[j].y);
-                                    ctx.lineTo(this.vertices[0].x, this.vertices[0].y);
-                                    ctx.lineWidth = 10;
-                                    ctx.strokeStyle = `#f07`;
-                                    ctx.stroke();
-                                    ctx.lineJoin = "round"
-                                    ctx.miterLimit = 5
-                                    ctx.fillStyle = "#000"
-                                    ctx.fill();
-                                },
-                            })
+                            this.damageFlash(3, "#000", "#f07", 10, true)
                         }
                         if (tech.isFarAwayDmg && this.isOffScreen()) dmg *= 1 + 0.7 * tech.isFarAwayDmg
                         //energy and heal drain should be calculated after damage boosts and before mass reduction
@@ -1677,34 +1630,7 @@ const mobs = {
             damageReduction: 1,
             regenPool: 0, //health left to recover from the mobs regenerate constraint
             regenRate: 0, //health recovered per cycle from regenPool
-            // damageReductionGoal: 0.001, //must add this to boss set up:   me.damageReduction = 0.25
-            // damageReductionScale: 0.004, //for bosses in this.onDamage  determines the impact of dmg on damageReductionGoal
-            // armor() { //slowly reduce damage reduction, for bosses
-            //     if (this.seePlayer.recall) {
-            //         if (this.damageReductionGoal > 0.24) {
-            //             this.damageReductionGoal = 0.25
-            //         } else {
-            //             this.damageReductionGoal = this.damageReductionGoal * 0.999 + 0.001 * 0.25 //smooth the goal towards 0.25 damage reduction
-            //         }
-            //         this.damageReduction = this.damageReduction * 0.995 + 0.005 * this.damageReductionGoal //smooth damage reduction towards the goal
-            //         // console.log(`damageReduction = ${this.damageReduction.toFixed(4)}`, `damageReductionGoal = ${this.damageReductionGoal.toFixed(4)}`)
-            //     }
-            //     //draw armor
-            //     //draw body
-            //     ctx.beginPath();
-            //     const vertices = this.vertices;
-            //     ctx.moveTo(vertices[0].x, vertices[0].y);
-            //     for (let j = 1, len = vertices.length; j < len; ++j) {
-            //         ctx.lineTo(vertices[j].x, vertices[j].y);
-            //     }
-            //     ctx.lineTo(vertices[0].x, vertices[0].y);
-            //     console.log(this.damageReduction, this.damageReductionGoal)
-            //     ctx.lineWidth = 3 //60 * (0.25 - this.damageReductionGoal)
-            //     ctx.strokeStyle = `rgba(255,255,255,${4.1*(0.25 - this.damageReductionGoal)})` //"rgba(150,150,225,0.5)";
-            //     ctx.stroke();
-            // },
             leaveBody: true,
-            maxMobBody: 40,
             isDropPowerUp: true,
             death() {
                 if (tech.collidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
@@ -1805,14 +1731,24 @@ const mobs = {
                             color: `#fff`,
                             time: 60
                         });
-                        setTimeout(() => {
-                            spawn.randomMobByLevelsCleared(this.position.x, this.position.y);
-                        }, 1000);
+                        const where = { x: this.position.x, y: this.position.y }
+                        simulation.ephemera.push({ //respawn a second later, unless the level ended first
+                            count: 60,
+                            onLevel: level.onLevel,
+                            do() {
+                                if (level.onLevel !== this.onLevel || !m.alive) {
+                                    simulation.removeEphemera(this)
+                                } else if (!m.isTimeDilated && --this.count < 0) {
+                                    simulation.removeEphemera(this)
+                                    spawn.randomMobByLevelsCleared(where.x, where.y);
+                                }
+                            },
+                        })
                     }
                     for (let i = 0, len = tech.isMobDeathRepeat ? 2 : 1; i < len; i++) this.deathTech(i > 0) //tech effects after mobs die, double beta decay repeats them
                     powerUps.spawnRandomPowerUp(this.position.x, this.position.y);
                     m.lastKillCycle = m.cycle; //tracks the last time a kill was made, mostly used in simulation.checks()
-                    mobs.mobDeaths += this.isBoss ? 100 : 1 //bosses count as 10 kills for the pacifist run
+                    mobs.mobDeaths += this.isBoss ? 100 : 1 //bosses count as 100 kills for the pacifist run
                     if (tech.isBotSpawnerReset) {
                         for (let i = 0, len = bullet.length; i < len; i++) {
                             if (bullet[i].botType && bullet[i].endCycle !== Infinity) bullet[i].endCycle = Math.max(bullet[i].endCycle, simulation.cycle + 900) //15 seconds, don't shorten longer lasting bots like barycenter's
@@ -1849,7 +1785,7 @@ const mobs = {
                                 closestIndex = i
                             }
                         }
-                        if (closestIndex) {
+                        if (closestIndex !== null) {
                             mobs.statusDoT(mob[closestIndex], dmg * (tech.isMobDeathRepeat && this.isDropPowerUp ? 2 : 1), tech.isLongRadiation ? 715392000 : 180) //double beta decay spreads it twice, but not from shields
                             ctx.beginPath();
                             ctx.moveTo(this.position.x, this.position.y);
@@ -2045,72 +1981,43 @@ const mobs = {
             //replace dead mob with a regular body
             replace(i) {
                 //if there are too many bodies don't turn into blocks to help performance
-                // if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 && this.radius > 18) {
                 if (this.leaveBody && body.length < mobs.maxMobBody && this.mass < 200 * (localSettings.isHideHUD ? 0.4 : 1) && this.mass > 1 && this.radius > 18) {
-
+                    const makeBlock = (vertices) => {
+                        const block = Matter.Bodies.fromVertices(this.position.x, this.position.y, vertices);
+                        Matter.Body.setVelocity(block, Vector.mult(this.velocity, 0.5));
+                        Matter.Body.setAngularVelocity(block, this.angularVelocity);
+                        block.collisionFilter.category = cat.body;
+                        block.collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
+                        block.classType = "body";
+                        block.frictionAir = 0.001
+                        block.friction = 0.05
+                        body.push(block)
+                        Composite.add(engine.world, block); //add to world
+                        return block
+                    }
+                    const shrink = (blocks, massLimit) => { //large mobs shrink so they don't block paths
+                        simulation.ephemera.push({
+                            onLevel: level.onLevel,
+                            do() {
+                                let mass = 0
+                                for (let j = 0; j < blocks.length; j++) mass += blocks[j].mass
+                                if (mass <= massLimit || level.onLevel !== this.onLevel) {
+                                    simulation.removeEphemera(this)
+                                } else {
+                                    for (let j = 0; j < blocks.length; j++) Matter.Body.scale(blocks[j], 0.95, 0.95);
+                                }
+                            },
+                        })
+                    }
                     let v = Matter.Vertices.hull(Matter.Vertices.clockwiseSort(this.vertices)) //might help with vertex collision issue, not sure
-                    if (v.length > 5 && body.length < 35 && Math.random() < 0.25) {
-                        const cutPoint = 3 + Math.floor((v.length - 6) * Math.random()) //Math.floor(v.length / 2)
-                        const v2 = v.slice(0, cutPoint + 1)
-                        v = v.slice(cutPoint - 1)
-                        const len = body.length;
-                        body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v2);
-                        Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
-                        Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-                        body[len].collisionFilter.category = cat.body;
-                        body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                        body[len].classType = "body";
-                        body[len].frictionAir = 0.001
-                        body[len].friction = 0.05
-                        Composite.add(engine.world, body[len]); //add to world
-
-                        const len2 = body.length;
-                        body[len2] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
-                        Matter.Body.setVelocity(body[len2], Vector.mult(this.velocity, 0.5));
-                        Matter.Body.setAngularVelocity(body[len2], this.angularVelocity);
-                        body[len2].collisionFilter.category = cat.body;
-                        body[len2].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                        body[len2].classType = "body";
-                        body[len2].frictionAir = 0.001
-                        body[len2].friction = 0.05
-                        Composite.add(engine.world, body[len2]); //add to world
-
-                        //large mobs shrink so they don't block paths
-                        if (body[len].mass + body[len2].mass > 16) {
-                            const massLimit = 8 + 6 * Math.random()
-                            const shrink = function (that1, that2) {
-                                if (that1.mass + that2.mass > massLimit) {
-                                    const scale = 0.95;
-                                    Matter.Body.scale(that1, scale, scale);
-                                    Matter.Body.scale(that2, scale, scale);
-                                    setTimeout(shrink, 20, that1, that2);
-                                }
-                            };
-                            shrink(body[len], body[len2])
-                        }
+                    if (v.length > 5 && body.length < 35 && Math.random() < 0.25) { //split into two blocks
+                        const cutPoint = 3 + Math.floor((v.length - 6) * Math.random())
+                        const block1 = makeBlock(v.slice(0, cutPoint + 1))
+                        const block2 = makeBlock(v.slice(cutPoint - 1))
+                        if (block1.mass + block2.mass > 16) shrink([block1, block2], 8 + 6 * Math.random())
                     } else {
-                        const len = body.length;
-                        body[len] = Matter.Bodies.fromVertices(this.position.x, this.position.y, v);
-                        Matter.Body.setVelocity(body[len], Vector.mult(this.velocity, 0.5));
-                        Matter.Body.setAngularVelocity(body[len], this.angularVelocity);
-                        body[len].collisionFilter.category = cat.body;
-                        body[len].collisionFilter.mask = cat.player | cat.map | cat.body | cat.bullet | cat.mob | cat.mobBullet;
-                        body[len].classType = "body";
-                        body[len].frictionAir = 0.001
-                        body[len].friction = 0.05
-                        Composite.add(engine.world, body[len]); //add to world
-                        //large mobs shrink so they don't block paths
-                        if (body[len].mass > 9) {
-                            const massLimit = 7 + 4 * Math.random()
-                            const shrink = function (that) {
-                                if (that.mass > massLimit) {
-                                    const scale = 0.95;
-                                    Matter.Body.scale(that, scale, scale);
-                                    setTimeout(shrink, 20, that);
-                                }
-                            };
-                            shrink(body[len])
-                        }
+                        const block = makeBlock(v)
+                        if (block.mass > 9) shrink([block], 7 + 4 * Math.random())
                     }
                     Matter.Composite.remove(engine.world, this);
                     mob.splice(i, 1);
@@ -2119,7 +2026,6 @@ const mobs = {
                         if (!who.isNotHoldable) {
                             b.targetedBlock(who)
                             Matter.Body.setAngularVelocity(who, (0.5 + 0.2 * Math.random()) * (Math.random() < 0.5 ? -1 : 1));
-                            // who.torque += who.inertia * 0.002 * (Math.random() - 0.5)
                         }
                     }
                 } else {
