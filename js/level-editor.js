@@ -40,6 +40,7 @@ Object.assign(levelEditor, {
     isTestSpawning: true, //the simulation menu's mobs button, mobs and power ups spawn while testing, never while editing so it isn't a fight
     isTestGuns: false, //give every gun at the start of test export
     savedLoadout: null, //the guns and ammo to put back after an armed test
+    savedAutopilot: null, //the on and draft settings to restore after using the test export button
     testLevel: 5, //level.levelsCleared while editing, for mob types, difficulty, and damage, at 0 random mobs don't spawn
     vertex: null, //{ id, active, error } while editing a map or block's vertices, active is the clicked vertex, error is why typed vertices didn't work
     pathDraw: null, //{ points, handles, forId, forKey } while drawing a path, see the drawPath command, forId is the element whose ref prop forKey gets the path when it's done (drawRef)
@@ -212,7 +213,7 @@ Object.assign(levelEditor, {
         levelEditor.keptPlayer = null
         levelEditor.loadMobPictures() //once, for the mobs list's pictures
         level.disableExit = true //the exit charges, but doesn't leave
-        levelEditor.clearRun = levelEditor.isFullTest ? { hash: levelEditor.clearHash(data), cycles: 0, deaths: 0, isAssisted: false, usedInvincibility: levelEditor.isInvincible, usedGuns: !!levelEditor.savedLoadout } : null
+        levelEditor.clearRun = levelEditor.isFullTest ? { hash: levelEditor.clearHash(data), cycles: 0, deaths: 0, isAssisted: false, usedInvincibility: levelEditor.isInvincible, usedGuns: !!levelEditor.savedLoadout, usedAutopilot: false } : null
         simulation.removeEphemera("levelEditor", true)
         simulation.ephemera.push({ name: "levelEditor", do() { if (!simulation.isTimeSkipping) levelEditor.frame() } }) //2× time's extra steps aren't drawn
         document.body.classList.add("level-editor")
@@ -223,6 +224,7 @@ Object.assign(levelEditor, {
     close() { //also called by simulation.splashReturn()
         if (!levelEditor.isActive) return
         levelEditor.restoreLoadout()
+        levelEditor.restoreAutopilot()
         levelEditor.flush()
         clearTimeout(levelEditor.problemTimer)
         levelEditor.setCamera(false, false)
@@ -268,6 +270,13 @@ Object.assign(levelEditor, {
         simulation.makeGunHUD()
         simulation.switchGun()
     },
+    restoreAutopilot() {
+        const saved = levelEditor.savedAutopilot
+        if (!saved) return
+        levelEditor.savedAutopilot = null
+        tech.isAutopilotChoose = saved.isAutoChoose
+        if (autopilot.isOn !== saved.isOn) autopilot.set(saved.isOn)
+    },
     startFullTest(data) { //guard only the editor's test session, exported levels keep their ordinary callbacks
         levelData.unbuildAll()
         levelData.isEditor = false
@@ -288,7 +297,8 @@ Object.assign(levelEditor, {
             }
             b.giveGuns("all", 1000) //same loadout as G in testing mode
         }
-        const session = levelEditor.fullTestSession = { stopped: false, effects: new Set(simulation.ephemera) }
+        //The autopilot drawer is shared across levels, including when it's added mid-test.
+        const session = levelEditor.fullTestSession = { stopped: false, effects: new Set([...simulation.ephemera, autopilot.drawer]) }
         const isCurrent = () => levelEditor.isFullTest && levelEditor.fullTestSession === session && !session.stopped
         const fail = error => {
             if (!isCurrent()) return
@@ -329,6 +339,8 @@ Object.assign(levelEditor, {
         if (!levelEditor.isFullTest) return
         levelEditor.isFullTest = false
         levelEditor.fullTestSession = null
+        levelEditor.restoreAutopilot()
+        levelEditor.picking = levelEditor.pathDraw = levelEditor.vertex = null
         levelEditor.updatePanels()
         levelEditor.renderLeft()
         levelEditor.restart()
@@ -380,7 +392,7 @@ Object.assign(levelEditor, {
         if (levelEditor.clearHash(levelEditor.data) !== run.hash) return //it changed during the try
         const seconds = Math.round(run.cycles / 6) / 10
         const usedInvincibility = run.usedInvincibility || levelEditor.isInvincible
-        const isClean = !usedInvincibility && !run.isAssisted && !run.usedGuns
+        const isClean = !usedInvincibility && !run.isAssisted && !run.usedGuns && !run.usedAutopilot
         const clears = levelEditor.clears()
         for (const name of Object.keys(clears)) if (!levelData.store.has(name)) delete clears[name] //deleted and renamed levels
         const old = clears[levelEditor.data.name]
@@ -392,7 +404,7 @@ Object.assign(levelEditor, {
             deaths: Math.min(same.deaths, run.deaths),
         }
         levelEditor.remember("levelEditorClears", clears)
-        const assists = [usedInvincibility && "invincible", run.isAssisted && "teleported", run.usedGuns && "test guns"].filter(Boolean)
+        const assists = [usedInvincibility && "invincible", run.isAssisted && "teleported", run.usedGuns && "test guns", run.usedAutopilot && "autopilot"].filter(Boolean)
         simulation.inGameConsole(`<em>//cleared in ${seconds} s${assists.map(assist => `, ${assist}`).join("")}${run.deaths ? `, ${run.deaths} death${run.deaths === 1 ? "" : "s"}` : ""}</em>`)
         if (levelEditor.isAnalysisShown) levelEditor.renderRight()
     },
@@ -403,7 +415,7 @@ Object.assign(levelEditor, {
         const body = (status, label, value, text) => `<span class="le-analysis-status">${status}</span> <span class="le-analysis-label">${escape(label)}</span>${value ? ` <span class="le-analysis-value">${escape(value)}</span>` : ""}<span class="le-analysis-text">${escape(text)}</span>`
         const test = `<span class="le-analysis-add">▶ test export</span>`
         if (isCurrent && clear.cleanSeconds !== null) return `<div class="le-analysis-line le-ok">${body("ok", "cleared", `${clear.cleanSeconds} s`, `reached the exit in test export${clear.deaths ? "" : " without dying"}, nothing changed since`)}</div>`
-        if (isCurrent) return `<button class="le-analysis-line le-note" data-command="fullTest" title="play it to the exit with invincible and guns off and no teleports">${body("note", "cleared", `${clear.seconds} s`, "assisted clear, play through with invincible and guns off and no teleports for a clean clear")}${test}</button>`
+        if (isCurrent) return `<button class="le-analysis-line le-note" data-command="fullTest" title="play it to the exit with invincible, guns, and autopilot off and no teleports">${body("note", "cleared", `${clear.seconds} s`, "assisted clear, play through with invincible, guns, and autopilot off and no teleports for a clean clear")}${test}</button>`
         return `<button class="le-analysis-line le-warn" data-command="fullTest" title="play the export and reach the exit">${body("warn", "not cleared", "", clear ? "changed since it was cleared, reach the exit in test export again" : "reach the exit in test export, like a maker game won't share a level its maker hasn't beaten")}${test}</button>`
     },
     toSpawn() {
@@ -1442,6 +1454,16 @@ Object.assign(levelEditor, {
                 levelEditor.renderLeft()
             },
         },
+        testAutopilot: {
+            label: "let autopilot play this export and choose power ups", run() {
+                if (!levelEditor.isFullTest) return
+                const isOn = !autopilot.isOn
+                levelEditor.savedAutopilot ??= { isOn: autopilot.isOn, isAutoChoose: tech.isAutopilotChoose }
+                tech.isAutopilotChoose = isOn || levelEditor.savedAutopilot.isAutoChoose
+                autopilot.set(isOn)
+                levelEditor.renderLeft()
+            },
+        },
         ghost: { //camera mode, the status bar's ghost and the simulation menu's ghost button
             label: "ghost: the player hides, WASD or the arrows fly the view anywhere through walls, shift is faster, again drops the player in the middle of the view", keys: ["g"], run() {
                 if (levelEditor.isFullTest) return //a run has a player
@@ -1496,20 +1518,21 @@ Object.assign(levelEditor, {
         test: { //start restarts the level at the spawn with blocks back in place, and mobs and power ups if the box is checked, stop restarts it without them
             label: "quick test: back to the entrance with blocks where they started, mobs and power ups if checked, again to stop", run() {
                 levelEditor.isTesting = !levelEditor.isTesting || levelEditor.isFullTest
-                levelEditor.isFullTest = false
+                if (levelEditor.isFullTest) return levelEditor.stopFullTest()
                 levelEditor.renderLeft()
                 levelEditor.restart()
             },
         },
         fullTest: { //the export JS, everything a run would do
             label: "test export: plays the javascript export writes, exactly what the game would load, mobs and power ups always spawn, editing anything stops it", run() {
-                if (levelEditor.whole && !levelEditor.isFullTest) { //what's typed is what gets tested
+                if (levelEditor.isFullTest) return levelEditor.stopFullTest()
+                if (levelEditor.whole) { //what's typed is what gets tested
                     const error = levelEditor.applyWholeCode(document.querySelector("#level-editor-code textarea").value)
                     if (error) return levelEditor.showCodeError(error)
                     levelEditor.clearCodeError()
                 }
                 levelEditor.setCamera(false, false) //a run has a player
-                levelEditor.isFullTest = !levelEditor.isFullTest
+                levelEditor.isFullTest = true
                 levelEditor.updatePanels() //the panels stay as they are, tab hides them to see the level like a player
                 levelEditor.isTesting = false
                 levelEditor.drag = null
@@ -2354,7 +2377,10 @@ Object.assign(levelEditor, {
     },
     frame() {
         levelEditor.applyTimeScale()
-        if (levelEditor.clearRun && !simulation.paused) levelEditor.clearRun.cycles++ //test export's time, it's always 1×
+        if (levelEditor.isFullTest && levelEditor.clearRun && !simulation.paused) {
+            levelEditor.clearRun.cycles++ //test export's time, it's always 1×
+            levelEditor.clearRun.usedAutopilot ||= autopilot.isOn
+        }
         if (!levelEditor.isActive || levelEditor.isFullTest) return //JS test looks like a run
         if (levelEditor.debugDraw.size) levelEditor.drawDebug()
         const point = levelEditor.mouse()
@@ -2843,6 +2869,7 @@ Object.assign(levelEditor, {
                 return `<div class="le-row le-test-settings"><span class="le-row"><span class="le-label">level</span><input class="le-number le-short" aria-label="test level" data-setting="testLevel" value="${levelEditor.testLevel}" spellcheck="false" title="how many levels into a run you're testing, it picks mob types and difficulty, at 0 random mobs don't spawn"></span>
                 <span class="le-row"><span class="le-label">seed</span><input class="le-number" aria-label="test seed" data-setting="testSeed" value="${levelEditor.escape(levelEditor.testSeed)}" placeholder="random" spellcheck="false" title="the same seed starts each test the same: mob types, which spots get mobs, bosses, power ups, and debris, what mobs do after is still random, empty is random"></span></div>
             <div class="le-grid le-two le-run le-flush-x">${levelEditor.button("test", levelEditor.isTesting ? `${stop} stop` : `${play} quick test`, "", levelEditor.isTesting)}${levelEditor.button("fullTest", isExport ? `${stop} stop` : `${play} test export`, "", isExport)}</div>
+            ${isExport ? `<div class="le-grid le-one le-flush-x">${levelEditor.button("testAutopilot", "autopilot", "", autopilot.isOn)}</div>` : ""}
             <div class="le-grid le-time le-flush-x">${levelEditor.button("timeStop", "stop time", "", levelEditor.isTimeStopped, `everything but the player freezes, you can still edit, a speed starts it again${exportNote}`, { disabled: isExport })}${[0.1, 0.5, 1, 2].map(scale => levelEditor.button("timeScale", `${scale}×`, scale, !levelEditor.isTimeStopped && levelEditor.timeScale === scale, `game speed${exportNote}`, { disabled: isExport })).join("")}</div>
             <div class="le-grid le-flush-x">${levelEditor.button("invincible", "invincible", "", levelEditor.isInvincible, "the player takes no damage, in both tests too, the health bars hide")}${levelEditor.button("testGuns", "guns", "", levelEditor.isTestGuns, "start test export with every gun and full ammo, changing this restarts the test")}${levelEditor.button("testSpawning", "mobs", "", levelEditor.isTestSpawning || isExport, `quick test spawns mobs and power ups${isExport ? ", test export always does" : ""}`, { disabled: isExport })}</div>
             <div class="le-grid le-flush-x le-flush-bottom">${levelEditor.button("mouseLook", "mouse look", "", levelEditor.isMouseLook, `the camera leans toward the mouse right away, no smoothing${exportNote}`, { disabled: isExport })}${levelEditor.debugLayers.map(([name, tip]) => levelEditor.button("debugDraw", name, name, levelEditor.debugDraw.has(name), tip + exportNote, { disabled: isExport })).join("")}</div>`

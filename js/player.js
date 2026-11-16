@@ -160,7 +160,7 @@ const m = {
     legLength2: 45,
     transX: 0,
     transY: 0,
-    history: new Array(600), //[], //tracks the last second of player position
+    history: new Array(600), //tracks the last ten seconds at 60 cycles per second
     rewindCount: 0, //used with time dilation rewind mode
     resetHistory() {
         for (let i = 0; i < 600; i++) { //each slot gets its own object, m.recordHistory() writes into it
@@ -331,7 +331,7 @@ const m = {
             if (!(input.down) && m.checkHeadClear() && m.hardLandCD < m.cycle) m.undoCrouch();
         } else if (input.down || m.hardLandCD > m.cycle) {
             m.doCrouch(); //on ground && not crouched and pressing s or down
-        } else if ((input.up || m.isJumpBuffered()) && m.buttonCD_jump + 20 < m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
+        } else if (m.buttonCD_jump + 20 < m.cycle && (m.isJumpBuffered() || input.up && !m.isAutopilotHoldingJump())) {
             // console.log("ground", m.groundCount, player.speed, player.velocity)
             m.jump()
         }
@@ -361,6 +361,10 @@ const m = {
         m.moverX = 0 //reset the level mover offset
         m.moverY = 0
     },
+    isAutopilotHoldingJump() { //holding a jump in the air must not launch another one when the feet catch a ledge
+        return typeof autopilot !== "undefined" && autopilot.isOn && autopilot.flight?.isJumped &&
+            autopilot.flight.airJumpAt === undefined && !autopilot.pending?.isJump && !input.movementKeys.size
+    },
     airControl() {
         m.moverX = 0 //a mover's speed from before the player left it, so it doesn't nudge them on landing
         m.carriedBy = null
@@ -369,7 +373,7 @@ const m = {
             m.yOffGoal = m.yOffWhen.jump;
         }
         //check for coyote time jump
-        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle) { //&& (m.groundCount > 2 || Math.abs(player.velocity) > 8)
+        if (input.up && m.buttonCD_jump + 20 < m.cycle && m.lastOnGroundCycle + m.coyoteCycles > m.cycle && !m.isAutopilotHoldingJump()) {
             // console.log("air", m.groundCount, player.speed, player.velocity)
             m.jump()
         }
@@ -4255,7 +4259,7 @@ const m = {
     },
     pullPowerUps(pull, collectRange2, isAimed) { //float power ups towards you, and collect them when they are close
         for (let i = 0, len = powerUp.length; i < len; ++i) {
-            if (powerUp[i].cycle < 10 || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
+            if (powerUp[i].cycle < 10 || !powerUps.canCollect(powerUp[i]) || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
             const dxP = m.pos.x - powerUp[i].position.x;
             const dyP = m.pos.y - powerUp[i].position.y;
             const dist2 = dxP * dxP + dyP * dyP + 10;
@@ -4446,17 +4450,21 @@ const m = {
         }
     },
     lookForBlock() { //find body to pickup
+        const reach = 80 + 70 * Math.max(1, player.scale)
+        const preferred = typeof autopilot !== "undefined" && autopilot.isOn ? autopilot.blockClear?.block : null
         const grabbing = {
             targetIndex: null,
-            targetRange: 80 + 70 * Math.max(1, player.scale),
+            targetRange: reach,
             // lookingAt: false //false to pick up object in range, but not looking at
         };
         for (let i = 0, len = body.length; i < len; ++i) { //closest block you are looking at and can see
             if (body[i].isNotHoldable) continue
+            const isPreferred = body[i] === preferred
             const dist = Vector.magnitude(Vector.sub(body[i].position, m.pos));
-            if (dist < grabbing.targetRange + 30 && m.lookingAt(body[i]) && !Matter.Query.rayAny(map, body[i].position, m.pos)) {
+            if (dist < (isPreferred ? reach : grabbing.targetRange) + 30 && m.lookingAt(body[i]) && !Matter.Query.rayAny(map, body[i].position, m.pos)) {
                 grabbing.targetRange = dist;
                 grabbing.targetIndex = i;
+                if (isPreferred) break;
             }
         }
         // set pick up target for when mouse is released
@@ -7169,7 +7177,7 @@ const m = {
 
                             //grab power ups into the field
                             for (let i = 0, len = powerUp.length; i < len; ++i) {
-                                if (powerUp[i].cycle < 10 || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
+                                if (powerUp[i].cycle < 10 || !powerUps.canCollect(powerUp[i]) || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
                                 const dxP = m.fieldPosition.x - powerUp[i].position.x;
                                 const dyP = m.fieldPosition.y - powerUp[i].position.y;
                                 const dist2 = dxP * dxP + dyP * dyP + 200;
@@ -7443,6 +7451,7 @@ const m = {
 
                         //suck power ups
                         for (let i = 0, len = powerUp.length; i < len; ++i) {
+                            if (!powerUps.canCollect(powerUp[i])) continue
                             //which hole is closer
                             const dxP1 = m.hole.pos1.x - powerUp[i].position.x;
                             const dyP1 = m.hole.pos1.y - powerUp[i].position.y;
@@ -7849,6 +7858,7 @@ const m = {
                 })
             },
             pickUp({ who, to }) { //use a power up that fell into a portal, like a wormhole does
+                if (!powerUps.canCollect(who)) return
                 simulation.ephemera.push({
                     count: 5, //cycles before it self removes
                     PposX: who.position.x,

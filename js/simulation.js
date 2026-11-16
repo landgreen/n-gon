@@ -1272,6 +1272,7 @@ const simulation = {
         // level.mirrorDoors.reset();
         level.exit.reflection = null;
         level.exit.ripple = null;
+        level.exit.pickFeedback();
         level.exit.isInverted = false;
         level.exit.bottomOffset = 20;
         level.isVerticalFLipLevel = false

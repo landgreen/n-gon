@@ -32,7 +32,7 @@ const level = {
             if (true) {
                 level.load(simulation.isTraining ? "walk" : "initial") //normal starting level **************************************************
             } else { //testing setup
-                simulation.enableConstructMode()  //used to build maps in testing mode
+                // simulation.enableConstructMode()  //used to build maps in testing mode
                 // simulation.setZoom(600) //zoom way in to see details
                 // tech.duplicateChance += 1
                 // powerUps.setPowerUpMode(); //needed after adjusting duplication chance
@@ -42,7 +42,7 @@ const level = {
                 // simulation.isCheating = true
                 // tech.giveTech("performance")
                 // m.coyoteCycles = 120
-                powerUps.research.changeRerolls(100000)
+                // powerUps.research.changeRerolls(100000)
                 // tech.addJunkTechToPool(0.5)
                 // m.couplingChange(100)
                 //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch 
@@ -52,22 +52,24 @@ const level = {
                 // m.energy = m.maxEnergy = 10
                 // m.damageDone *= 0.1//20
 
-                m.maxHealth = m.health = 100
+                // m.maxHealth = m.health = 100
                 // m.displayHealth();
                 // m.immuneCycle = Infinity //you can't take damage
-                m.maxEnergy = m.energy = 10
+                // m.maxEnergy = m.energy = 10
 
                 // 0 nail gun  1 shotgun  2 super balls 3 wave 4 missiles 5 grenades  6 spores
                 // 7 drones  8 foam  9 harpoon  10 mine  11 laser 12 sword
-                b.giveGuns(8)
-                b.guns[b.inventory[0]].ammo = 100000
+                // b.giveGuns(0)
+                // b.guns[b.inventory[0]].ammo = 0 //test the autopilot's block throws
                 // tech.addJunkTechToPool(0.5)
                 // tech.giveTech("laminar flow")
                 // tech.giveTech("soliton")
                 // tech.giveTech("electric potential")
                 // tech.giveTech("electronvolt")
-                tech.giveTech("flanking")
+                // tech.giveTech("flanking")
                 tech.giveTech("autopilot")
+                // tech.giveTech("recursion")
+                // tech.giveTech("instanton")
                 // for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
                 // for (let i = 0; i < 3; i++) tech.giveTech("plasma jet")
                 // for (let i = 0; i < 1; i++) tech.giveTech("Maxwells demon")
@@ -109,17 +111,18 @@ const level = {
                 // simulation.isHorizontalFlipped = true
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
-                level.load("vault")
-                // level.load("initial")
+                // level.load("vault")
+                level.load("initial")
                 // level.maps.testing()
+                // spawn.starter(870, -60, 42)
 
-                powerUps.spawn(-115, -433, "difficulty", false);
+                // powerUps.spawn(-115, -433, "difficulty", false);
                 // requestAnimationFrame(() => { powerUps.spawnDelay("tech", 7); });
                 // spawn.randomGroup(1300, -200, Infinity);
                 // spawn.nodeGroup(1300, -200, 'grower');
                 // for (let i = 0; i < 1; i++) spawn.mantisBoss(1300 + 10 * i, -400)
                 // for (let i = 0; i < 1; i++) spawn.roundwormBoss(1300 + 200 * i, -200, 100)
-                for (let i = 0; i < 3; i++) spawn.starter(2400 + 200 * i, -200)
+                // for (let i = 0; i < 3; i++) spawn.starter(2400 + 200 * i, -200)
                 // spawn.jellyBoss4(1300, -500)
                 // spawn.spinner5(1500, -300)
                 // spawn.focuser5(1800, -400)
@@ -2002,6 +2005,30 @@ const level = {
         bottomOffset: 20, // Distance below exit.y to the drawn bottom edge.
         chargeThreshold: 176,
         fill: "rgba(0,180,180,0.2)",
+        // Video feedback band: this slice of the arch redraws last frame's arch, shifted sideways,
+        // so echoes stream across it and fade. top and bottom are fractions of the arch height,
+        // offsetX and offsetY are world units per cycle (offsetX positive is away from the reflected edge,
+        // offsetY positive is down), zoom scales each echo around the arch center (below 1 shrinks into
+        // a tunnel, above 1 grows), gain is how much of each echo survives (0 to <1).
+        // Set to null to turn it off. pickFeedback() sets it for each level.
+        feedback: null,
+        feedbackPresets: [
+            { top: 0, bottom: 1, offsetX: 25, offsetY: 1, zoom: 0.97, gain: 0.7 },
+            { top: 0, bottom: 1, offsetX: 20, offsetY: 0, zoom: 1, gain: 0.9 },
+            { top: 0, bottom: 1, offsetX: -15, offsetY: -20, zoom: 1, gain: 0.8 },
+            { top: 0, bottom: 1, offsetX: 2, offsetY: 0, zoom: 1, gain: 0.9 },
+            { top: 0, bottom: 1, offsetX: 0, offsetY: -10, zoom: 0.9, gain: 0.7 },
+            { top: 0, bottom: 1, offsetX: -10, offsetY: 0, zoom: 1.1, gain: 0.7 },
+            { top: 0, bottom: 1, offsetX: 0, offsetY: 0, zoom: 1.03, gain: 0.98 },
+            { top: 0, bottom: 1, offsetX: -1, offsetY: -1, zoom: 1.24, gain: 0.6 },
+            { top: 0, bottom: 1, offsetX: 0, offsetY: 0, zoom: 1, gain: 0.9 },
+        ],
+        pickFeedback() {
+            // Half of levels have no feedback; the rest get a random preset.
+            const presets = level.exit.feedbackPresets;
+            level.exit.feedback = Math.random() < 0.5 ? null : { ...presets[Math.floor(Math.random() * presets.length)] };
+        },
+        feedbackCanvas: null,
         ripple: null, // Wave state for the outline stroke; cleared by clearMap.
         buildRipple(bottomOffset) {
             // Resample the stroke (up the left side, over the arch, down the right side)
@@ -2191,25 +2218,27 @@ const level = {
             level.exit.isDrawPending = false;
             const { x, y, bottomOffset } = level.exit;
             const verticalSign = level.exit.isInverted ? -1 : 1;
-            const isInside = //check
+            const isInside =
                 !level.exit.isInverted && // Inverted decorative exits keep their existing non-triggering behavior.
                 player.position.x > x &&
                 player.position.x < x + 100 &&
                 player.position.y > y - 250 &&
                 player.position.y < y + 35 &&
-                player.velocity.y < 0.15 &&
                 !level.isFlipping;
-            if (isInside) {
+            const waitForObjectives = (isInside || level.exitCount >= level.exit.chargeThreshold) &&
+                typeof autopilot !== "undefined" && autopilot.isOn && autopilot.holdExitForObjectives();
+            const canCharge = isInside && player.velocity.y < 0.15;
+            if (waitForObjectives) {
+                level.exitCount = 0
+            } else if (canCharge) {
                 level.exitCount += m.health < 0 ? 0.5 : 2
-                if (m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage while standing in the exit
             } else if (level.exitCount > 0) {
                 level.exitCount -= 2
             }
+            if (canCharge && m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage while standing in the exit
 
             // Separate grounded slowdown zone: outer quarters ramp down to a stopped center half.
-            if (m.onGround && !level.exit.isInverted && !level.isFlipping &&
-                player.position.x > x && player.position.x < x + 100 &&
-                player.position.y > y - 250 && player.position.y < y + 35) {
+            if (m.onGround && isInside && !waitForObjectives) {
                 const slowdown = Math.max(0, (Math.abs(player.position.x - (x + 50)) - 25) / 25);
                 Matter.Body.setVelocity(player, { x: player.velocity.x * slowdown, y: player.velocity.y * slowdown });
                 player.force.x += (x + 50 - player.position.x) * player.mass * 0.0005;
@@ -2302,6 +2331,41 @@ const level = {
                             -pad, -pad, 100 + 2 * pad, height + 2 * pad);
                     }
                     ctx.globalCompositeOperation = "source-over";
+                    const feedback = level.exit.feedback;
+                    if (feedback && feedback.gain > 0 && typeof document !== "undefined") {
+                        // The buffer holds the arch in door space, so camera movement doesn't smear it.
+                        let buffer = level.exit.feedbackCanvas;
+                        if (!buffer) buffer = level.exit.feedbackCanvas = document.createElement("canvas");
+                        const bufferHeight = 2 * Math.ceil(height);
+                        if (buffer.width !== 200 || buffer.height !== bufferHeight) {
+                            buffer.width = 200;
+                            buffer.height = bufferHeight;
+                            reflection.hasFeedback = false;
+                        }
+                        ctx.save();
+                        ctx.setTransform(1, 0, 0, 1, 0, 0); // The arch clip stays; work in screen pixels.
+                        if (reflection.hasFeedback) {
+                            // Band fractions are measured from the arch top in world space.
+                            const bandStart = transform.d < 0 ? 1 - feedback.bottom : feedback.top;
+                            ctx.beginPath();
+                            ctx.rect(screenX, screenY + bandStart * screenHeight, screenWidth, (feedback.bottom - feedback.top) * screenHeight);
+                            ctx.clip();
+                            ctx.globalAlpha = Math.min(0.99, feedback.gain);
+                            // Echoes drift away from the edge the reflection comes from, across the arch.
+                            const shiftX = reflection.side * (feedback.offsetX || 0) * transform.a;
+                            const shiftY = (feedback.offsetY || 0) * transform.d; // Follows world down, even with the camera flipped.
+                            const zoom = feedback.zoom > 0 ? feedback.zoom : 1;
+                            const echoWidth = screenWidth * zoom;
+                            const echoHeight = screenHeight * zoom;
+                            ctx.drawImage(buffer, 0, 0, buffer.width, buffer.height,
+                                screenX + (screenWidth - echoWidth) / 2 + shiftX, screenY + (screenHeight - echoHeight) / 2 + shiftY, echoWidth, echoHeight);
+                        }
+                        ctx.restore();
+                        const bufferCtx = buffer.getContext("2d");
+                        bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+                        bufferCtx.drawImage(canvas, screenX, screenY, screenWidth, screenHeight, 0, 0, buffer.width, buffer.height);
+                        reflection.hasFeedback = true;
+                    }
                     ctx.globalAlpha = 1; // Let the RGBA color alone control tint opacity.
                     ctx.fillStyle = level.exit.fill;
                     ctx.fillRect(-pad, -pad, 100 + 2 * pad, height + 2 * pad); // The same arch clip also bounds the cyan tint.
@@ -2323,7 +2387,7 @@ const level = {
             }
             ctx.stroke();
 
-            if (level.exitCount < level.exit.chargeThreshold) return;
+            if (waitForObjectives || level.exitCount < level.exit.chargeThreshold) return;
             level.exitCount = 0;
 
             // First-run players without a weapon get the tutorial choice; otherwise advance.
@@ -3746,7 +3810,7 @@ const level = {
                 const along = level.portalExtent(who, to.tangent)
                 const out = level.portalExtent(who, to.unit)
                 let across = -0.5 * (along.min + along.max) //centered on the portal
-                if (this.onPowerUpEnter && who.collisionFilter.category === cat.powerUp && powerUp.includes(who)) {
+                if (this.onPowerUpEnter && who.collisionFilter.category === cat.powerUp && powerUp.includes(who) && powerUps.canCollect(who)) {
                     this.onPowerUpEnter(who, to)
                     return
                 }
@@ -5980,9 +6044,9 @@ const level = {
         },
         testing() {
             // simulation.enableConstructMode() //tech.giveTech('motion sickness')  //used to build maps in testing mode
-            // level.setPosToSpawn(6172, -230); //near exit spawn
+            level.setPosToSpawn(6172, -230); //near exit spawn
             // spawn.mapRect(6100, -205, 300, 200); //something to stand on to get to exit fast
-            level.setPosToSpawn(150, -450); //original spawn
+            // level.setPosToSpawn(150, -450); //original spawn
             level.exit.x = 6507
             level.exit.y = -220
 
@@ -13248,6 +13312,7 @@ const level = {
             buttons.push(level.button(-4075, 130, 126))
             buttons.push(level.button(3925, 133, 126))
             const hazard = level.hazard(-3600, -1000, 7150, 2000, 0.0006)
+            for (const button of buttons) button.autopilotHeat = hazard
             const doors = []
             doors.push(level.door(-3650, -150, 35, 275, 225, 5))
             doors.push(level.door(3565, -150, 35, 325, 275, 5))

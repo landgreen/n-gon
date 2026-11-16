@@ -77,6 +77,9 @@ const powerUps = {
         tech(num = 1) {
             return `<div class="circle-grid tech" data-help="orb-tech" style="width: 1.32em; height: 1.32em;"></div>`
         },
+        instant() {
+            return `<div class="circle-grid-instant" data-help="orb-instant" style="box-sizing: border-box; width: 1.32em; height: 1.32em; margin-bottom: -0.3em; margin-top: 0;"></div>`
+        },
         field(num = 1) {
             return `<div class="circle-grid field" data-help="orb-field"></div>`
         },
@@ -304,7 +307,17 @@ const powerUps = {
             }
             simulation.inGameConsole(`<div class="circle-grid tech"></div> <span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${tech.tech[index].name}</strong>")`);
             const isSkin = tech.tech[index].isSkin
+            const chosen = tech.tech[index] //giveTech moves the tech to the top of the list, so keep a reference
             tech.giveTech(index)
+            if (tech.isRecursion && chosen.maxCount > 1 && chosen.name !== "recursion") { //recursion: the next stackable tech is given 3 times
+                tech.isRecursion = false
+                for (let i = 0; i < 2; i++) {
+                    if (chosen.count < chosen.maxCount) {
+                        simulation.inGameConsole(`<span class='color-var'>tech</span>.giveTech("<strong class='color-text'>${chosen.name}</strong>")<em> //recursion</em>`, 360)
+                        tech.giveTech(chosen.name)
+                    }
+                }
+            }
             if (tech.isExtraGunTech && isSkin) {
                 const pool = []
                 for (let j = 0, len = tech.tech.length; j < len; j++) {
@@ -328,7 +341,8 @@ const powerUps = {
         const firstCard = document.getElementById("choose-grid").firstElementChild
         simulation.isChoosing = true; //stops p from un pausing on key down
 
-        //disable clicking for 1/2 a second to prevent mistake clicks
+        //disable clicking briefly to prevent mistake clicks
+        const clickDelay = 200;
         document.getElementById("choose-grid").style.pointerEvents = "none";
         document.body.style.cursor = "none";
 
@@ -337,8 +351,8 @@ const powerUps = {
             document.body.style.cursor = "auto";
             document.getElementById("choose-grid").style.pointerEvents = "auto";
             document.getElementById("choose-grid").style.transitionDuration = "0s";
-            autopilot.chooseDraft()
-        }, 200);
+            autopilot.chooseDraft(clickDelay)
+        }, clickDelay);
 
         if (!simulation.paused) {
             if (!level.isNoPause) simulation.paused = true;
@@ -755,9 +769,10 @@ const powerUps = {
             }, { once: true });
             mouseMove.unlock();
             const confirm = document.getElementById("choose-difficulty");
+            const clickDelay = 200;
             setTimeout(() => { //the autopilot's auto choose confirms the difficulty as it is, after the same delay as a draft
-                if (confirm.isConnected && simulation.isChoosing) autopilot.chooseDraft();
-            }, 200);
+                if (confirm.isConnected && simulation.isChoosing) autopilot.chooseDraft(clickDelay);
+            }, clickDelay);
         },
     },
     qubit: {
@@ -1337,12 +1352,16 @@ const powerUps = {
         if (t.isInstant) return powerUps.instantTechText(choose, click)
         return powerUps.techText(choose, click)
     },
-    extraBotChoice(isSkipRecentlyShown = false) { //open-source adds a random bot tech to gun, field, and tech choices
-        if (!tech.isExtraBotOption) return ""
+    botDraftOptions() {
         const botTech = []
+        if (!tech.isExtraBotOption) return botTech
         for (let i = 0, len = tech.tech.length; i < len; i++) {
-            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !(isSkipRecentlyShown && tech.tech[i].isRecentlyShown)) botTech.push(i)
+            if (tech.tech[i].isBotTech && tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed()) botTech.push(i)
         }
+        return botTech
+    },
+    extraBotChoice(isSkipRecentlyShown = false) { //open-source adds a random bot tech to gun, field, and tech choices
+        const botTech = powerUps.botDraftOptions().filter(i => !isSkipRecentlyShown || !tech.tech[i].isRecentlyShown)
         return botTech.length ? powerUps.botTechText(botTech[Math.floor(Math.random() * botTech.length)]) : ""
     },
     incoherentTechText() {
@@ -1350,6 +1369,37 @@ const powerUps = {
                 <div class="card-text" style = "background-color: #efeff5;">
                 <div class="grid-title" style = "color: #ddd;font-weight: normal;">incoherent</div> <br> <br>
                 </div></div>`
+    },
+    draftPool(type, expanded = tech.isCancelTech && tech.cancelTechCount === 1) {
+        const isTech = type === "tech"
+        const items = isTech ? tech.tech : type === "gun" ? b.guns : m.fieldUpgrades
+        const options = []
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i]
+            if (isTech) {
+                if (item.count < item.maxCount && item.allowed() && !item.isBanished) {
+                    for (let j = 0; j < item.frequency; j++) options.push(i)
+                }
+            } else if (type === "gun" ? !item.have : i !== 0 && i !== m.fieldMode && !item.isLoreField) {
+                options.push(i)
+            }
+        }
+        let totalChoices = (isTech ? 3 : 2) + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
+        if (expanded) totalChoices *= 3
+        if (tech.isDeterminism) totalChoices = 1
+        totalChoices = Math.max(1, Math.min(totalChoices, options.length))
+        const unique = new Set(options)
+        const resetBanish = isTech && tech.isBanish && unique.size <= totalChoices
+        if (isTech && tech.tooManyTechChoices) totalChoices = unique.size
+        totalChoices = Math.min(totalChoices, unique.size)
+        // Keep the existing repeat suppression. Each removed tech uses up its draw weight.
+        let remaining = unique.size
+        for (let i = 0; i < items.length && remaining > totalChoices; i++) {
+            if (items[i].isRecentlyShown && unique.delete(i)) {
+                remaining -= isTech ? Math.ceil(items[i].frequency) : 1
+            }
+        }
+        return { items, options: options.filter(i => unique.has(i)), totalChoices, resetBanish }
     },
     gun: {
         name: "gun",
@@ -1359,42 +1409,17 @@ const powerUps = {
         },
         effect() {
             if (m.alive) {
-                let options = [];
-                for (let i = 0; i < b.guns.length; i++) {
-                    if (!b.guns[i].have) options.push(i);
-                }
+                const { options, totalChoices } = powerUps.draftPool("gun")
                 const ammoTech = tech.tech.findIndex(t => t.name === "ammo")
                 const isAmmoChoice = options.length === 0 && ammoTech > -1 && tech.tech[ammoTech].count < tech.tech[ammoTech].maxCount //you have every gun, so offer the ammo tech instead
                 if (options.length > 0 || isAmmoChoice || !tech.isSuperDeterminism) {
-                    let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
-                    if (tech.isCancelTech && tech.cancelTechCount === 1) {
-                        totalChoices *= 3
-                        tech.cancelTechCount++
-                    }
-                    if (tech.isDeterminism) totalChoices = 1
-                    totalChoices = Math.max(totalChoices, 1)
-                    totalChoices = Math.min(totalChoices, options.length)
-                    function removeOption(index) {
-                        for (let i = 0; i < options.length; i++) {
-                            if (options[i] === index) {
-                                options.splice(i, 1) //remove a previous choice from option pool
-                                return
-                            }
-                        }
-                    }
-                    //check for guns that were a choice last time and remove them
-                    for (let i = 0; i < b.guns.length; i++) {
-                        if (options.length - 1 < totalChoices) break //you have to repeat choices if there are not enough choices left to display
-                        if (b.guns[i].isRecentlyShown) removeOption(i)
-                    }
+                    if (tech.isCancelTech && tech.cancelTechCount === 1) tech.cancelTechCount++
                     for (let i = 0; i < b.guns.length; i++) b.guns[i].isRecentlyShown = false //reset recently shown back to zero
                     let text = powerUps.buildColumns(totalChoices, "gun")
                     for (let i = 0; i < totalChoices; i++) {
-                        const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
+                        const [choose] = options.splice(Math.floor(Math.seededRandom(0, options.length)), 1)
                         text += powerUps.gunText(choose, `powerUps.choose('gun',${choose})`)
                         b.guns[choose].isRecentlyShown = true
-                        removeOption(choose)
-                        if (options.length < 1) break
                     }
                     if (isAmmoChoice) text += powerUps.instantTechText(ammoTech, `powerUps.choose('tech',${ammoTech})`)
                     text += powerUps.extraBotChoice()
@@ -1413,40 +1438,16 @@ const powerUps = {
         },
         effect() {
             if (m.alive) {
-                let options = [];
-                for (let i = 1; i < m.fieldUpgrades.length; i++) { //skip field emitter
-                    if (i !== m.fieldMode && !m.fieldUpgrades[i].isLoreField) options.push(i);
-                }
-                let totalChoices = 2 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
-                if (tech.isCancelTech && tech.cancelTechCount === 1) {
-                    totalChoices *= 3
-                    tech.cancelTechCount++
-                }
-                if (tech.isDeterminism) totalChoices = 1
-                totalChoices = Math.max(1, Math.min(totalChoices, options.length))
-                function removeOption(index) {
-                    for (let i = 0; i < options.length; i++) {
-                        if (options[i] === index) {
-                            options.splice(i, 1) //remove a previous choice from option pool
-                            return
-                        }
-                    }
-                }
-                //check for fields that were a choice last time and remove them
-                for (let i = 0; i < m.fieldUpgrades.length; i++) {
-                    if (options.length - 1 < totalChoices) break //you have to repeat choices if there are not enough choices left to display
-                    if (m.fieldUpgrades[i].isRecentlyShown) removeOption(i)
-                }
+                const { options, totalChoices } = powerUps.draftPool("field")
+                if (tech.isCancelTech && tech.cancelTechCount === 1) tech.cancelTechCount++
                 for (let i = 0; i < m.fieldUpgrades.length; i++) m.fieldUpgrades[i].isRecentlyShown = false //reset recently shown back to zero
 
                 if (options.length > 0 || tech.isExtraBotOption) {
                     let text = powerUps.buildColumns(totalChoices, "field")
                     for (let i = 0; i < totalChoices; i++) {
-                        const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
+                        const [choose] = options.splice(Math.floor(Math.seededRandom(0, options.length)), 1)
                         text += powerUps.fieldText(choose, `powerUps.choose('field',${choose})`)
                         m.fieldUpgrades[choose].isRecentlyShown = true
-                        removeOption(choose)
-                        if (options.length < 1) break
                     }
                     text += powerUps.extraBotChoice()
                     document.getElementById("choose-grid").innerHTML = text
@@ -1462,62 +1463,25 @@ const powerUps = {
             return 42;
         },
         effect() {
-            let addTech, chooseJUNK, optionLengthNoDuplicates
             if (m.alive) {
-                let options = []; //generate all options
-                optionLengthNoDuplicates = 0
-                for (let i = 0; i < tech.tech.length; i++) {
-                    if (tech.tech[i].count < tech.tech[i].maxCount && tech.tech[i].allowed() && !tech.tech[i].isBanished) {
-                        if (tech.tech[i].frequency > 0) optionLengthNoDuplicates++
-                        for (let j = 0, len = tech.tech[i].frequency; j < len; j++) options.push(i);
-                    }
-                }
-                function removeOption(index) {
-                    for (let i = options.length - 1; i > -1; i--) {
-                        if (index === options[i]) {
-                            options.splice(i, 1) //remove all copies of that option form the options array (some tech are in the options array multiple times because of frequency)
-                            optionLengthNoDuplicates--
-                        }
-                        if (options.length < 1) return;
-                    }
-                }
-                //set total choices
-                let totalChoices = 3 + tech.extraChoices + (tech.isInPilot ? 6 : 3) * (m.fieldMode === 8) - level.fewerChoices
-                if (tech.isCancelTech && tech.cancelTechCount === 1) {
-                    totalChoices *= 3
-                    tech.cancelTechCount++
-                }
-                if (tech.isDeterminism) totalChoices = 1
-                totalChoices = Math.max(1, Math.min(totalChoices, options.length))
-
-                if (optionLengthNoDuplicates < totalChoices + 1) { //if not enough options for all the choices
-                    totalChoices = optionLengthNoDuplicates
-                    if (tech.isBanish) { //when you run out of options eject banish
-                        for (let i = 0, len = tech.tech.length; i < len; i++) {
-                            if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i, true)
-                        }
-                        simulation.inGameConsole(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
-                    }
-                }
-                if (tech.tooManyTechChoices) {
-                    tech.tooManyTechChoices = false
-                    totalChoices = optionLengthNoDuplicates
-                }
-                if (optionLengthNoDuplicates > totalChoices) { //check for tech that were a choice last time and remove them
+                const draft = powerUps.draftPool("tech")
+                let options = draft.options
+                const totalChoices = draft.totalChoices
+                const optionLengthNoDuplicates = new Set(options).size
+                if (tech.isCancelTech && tech.cancelTechCount === 1) tech.cancelTechCount++
+                if (draft.resetBanish) {
                     for (let i = 0; i < tech.tech.length; i++) {
-                        if (optionLengthNoDuplicates > totalChoices) {
-                            if (tech.tech[i].isRecentlyShown) removeOption(i)
-                        } else {
-                            break //you have to repeat choices if there are not enough choices left to display
-                        }
-
+                        if (tech.tech[i].name === "decoherence") powerUps.ejectTech(i, true)
                     }
+                    simulation.inGameConsole(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
                 }
+                if (tech.tooManyTechChoices) tech.tooManyTechChoices = false
                 for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
                 if (options.length > 0) {
                     let text = powerUps.buildColumns(totalChoices, "tech")
 
-                    addTech = (choose) => { text += powerUps.anyTechText(choose) }
+                    const addTech = choose => { text += powerUps.anyTechText(choose) }
+                    const removeOption = index => { options = options.filter(option => option !== index) }
                     if (tech.isRetain) { //coherence shows every tech you've been offered
                         for (let i = 0, len = powerUps.retainList.length; i < len; i++) {
                             for (let j = 0, len = tech.tech.length; j < len; j++) {
@@ -1535,7 +1499,7 @@ const powerUps = {
                             for (let i = 0; i < tech.tech.length; i++) {
                                 if (tech.tech[i].isJunk) list.push(i)
                             }
-                            chooseJUNK = list[Math.floor(Math.random() * list.length)]
+                            const chooseJUNK = list[Math.floor(Math.random() * list.length)]
                             if (tech.isRetain && !powerUps.retainList.includes(tech.tech[chooseJUNK].name)) powerUps.retainList.push(tech.tech[chooseJUNK].name)
                             text += powerUps.junkTechText(chooseJUNK, `powerUps.choose('tech',${chooseJUNK})`)
                         } else {
@@ -1548,6 +1512,17 @@ const powerUps = {
 
                             //this flag prevents this option from being shown the next time you pick up a tech power up
                             //check if not extra choices from "path integral"
+                            tech.tech[choose].isRecentlyShown = true
+                            if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
+                            addTech(choose)
+                        }
+                    }
+                    if (tech.isInstantChoices) { //instanton: +2 choices that are only instant tech
+                        for (let i = 0; i < 2; i++) {
+                            const instantOptions = options.filter(j => tech.tech[j].isInstant)
+                            if (!instantOptions.length) break
+                            const choose = instantOptions[Math.floor(Math.seededRandom(0, instantOptions.length))]
+                            removeOption(choose)
                             tech.tech[choose].isRecentlyShown = true
                             if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
                             addTech(choose)
@@ -1688,6 +1663,9 @@ const powerUps = {
     },
     resumeDelayedSpawns() {
         for (const job of powerUps.pendingSpawns) powerUps.runDelayedSpawn(job)
+    },
+    canCollect(who) {
+        return who.name !== "difficulty" || typeof autopilot === "undefined" || !autopilot.isOn;
     },
     onPickUp(who) {
         powerUps.totalUsed++

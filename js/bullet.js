@@ -1844,7 +1844,7 @@ const b = {
                     this.pickUpTarget = null
                 },
                 onEnd() {
-                    if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                    if (this.caughtPowerUp && powerUps.canCollect(this.caughtPowerUp) && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
                         let index = null //find index
                         for (let i = 0, len = powerUp.length; i < len; ++i) {
                             if (powerUp[i] === this.caughtPowerUp) index = i
@@ -1975,7 +1975,7 @@ const b = {
                         Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                     } else {
                         for (let i = 0, len = powerUp.length; i < len; ++i) {
-                            if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
+                            if (!powerUps.canCollect(powerUp[i]) || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
                             const radius = powerUp[i].circleRadius + 50
                             if (Vector.magnitudeSquared(Vector.sub(this.vertices[2], powerUp[i].position)) < radius * radius) {
                                 if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
@@ -2404,7 +2404,7 @@ const b = {
                 this.dropCaughtPowerUp()
             },
             onEnd() {
-                if (this.caughtPowerUp && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                if (this.caughtPowerUp && powerUps.canCollect(this.caughtPowerUp) && !simulation.isChoosing && (this.caughtPowerUp.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
                     let index = null //find index
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (powerUp[i] === this.caughtPowerUp) index = i
@@ -2506,7 +2506,7 @@ const b = {
                     Matter.Body.setVelocity(this.caughtPowerUp, { x: 0, y: 0 })
                 } else { //&& simulation.cycle % 2
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
-                        if (tech.isEnergyNoAmmo && powerUp[i].name === "ammo") continue
+                        if (!powerUps.canCollect(powerUp[i]) || (tech.isEnergyNoAmmo && powerUp[i].name === "ammo")) continue
                         const radius = powerUp[i].circleRadius + 50
                         if (Vector.magnitudeSquared(Vector.sub(this.vertices[grabPowerUpIndex], powerUp[i].position)) < radius * radius && !powerUp[i].isGrabbed) {  //this.vertices[2]
                             if (powerUp[i].name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal) {
@@ -3018,7 +3018,7 @@ const b = {
             grabPowerUps(h) { //grab every power up touching any part of the harpoon
                 for (let i = 0, len = powerUp.length; i < len; ++i) {
                     const who = powerUp[i]
-                    if (who.isGrabbed || (tech.isEnergyNoAmmo && who.name === "ammo") || (who.name === "heal" && m.health === m.maxHealth && !tech.isOverHeal)) continue
+                    if (who.isGrabbed || !powerUps.canCollect(who) || (tech.isEnergyNoAmmo && who.name === "ammo") || (who.name === "heal" && m.health === m.maxHealth && !tech.isOverHeal)) continue
                     const range = who.size + tune.grabRange
                     if (Vector.magnitudeSquared(Vector.sub(who.position, closest(h.pose, who.position).touch)) < range * range) {
                         who.isGrabbed = true
@@ -3034,7 +3034,7 @@ const b = {
                         if (simulation.isChoosing && m.alive) return false
                         const who = h.caught.shift()
                         const index = powerUp.indexOf(who)
-                        if (index !== -1 && m.alive && (who.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
+                        if (index !== -1 && m.alive && powerUps.canCollect(who) && (who.name !== "heal" || m.health !== m.maxHealth || tech.isOverHeal)) {
                             powerUps.onPickUp(who);
                             who.effect();
                             Matter.Composite.remove(engine.world, who);
@@ -4351,7 +4351,7 @@ const b = {
         const grabPowerUp = function () {
             if (tech.isLaserGrabPowerUp) {
                 const bestPowerUp = vertexCollision(path[path.length - 2], path[path.length - 1], [powerUp]);
-                if (bestPowerUp.who) {
+                if (bestPowerUp.who && powerUps.canCollect(bestPowerUp.who)) {
                     for (let i = 0, len = powerUp.length; i < len; ++i) {
                         if (powerUp[i] === bestPowerUp.who && !simulation.isChoosing && (powerUp[i].name !== "heal" || m.maxHealth - m.health > 0.01 || tech.isOverHeal) && !(tech.isEnergyNoAmmo && powerUp[i].name === "ammo") && powerUp[i].cycle > 30 && !simulation.paused) {
                             powerUps.onPickUp(powerUp[i]);
@@ -5435,7 +5435,7 @@ const b = {
         }
     },
     droneSkipsPowerUp(who) { //drones leave power ups you don't need
-        return (m.health > 0.94 * m.maxHealth && !tech.isOverHeal && !tech.isDroneGrab && who.name === "heal") ||
+        return !powerUps.canCollect(who) || (m.health > 0.94 * m.maxHealth && !tech.isOverHeal && !tech.isDroneGrab && who.name === "heal") ||
             (tech.isSuperDeterminism && who.name === "field") ||
             ((tech.isEnergyNoAmmo || b.inventory.length === 0 || (tech.ammoCap !== 0 && b.guns[b.activeGun].ammo > 20)) && who.name === "ammo")
     },

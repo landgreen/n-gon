@@ -347,6 +347,43 @@ body.has-autosave.has-level-editor #start-button {
     background-color: var(--hover-card-color);
 }
 
+/* the autopilot tech's settings, in its pause menu description */
+.autopilot-settings-details summary {
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #777;
+}
+
+.autopilot-settings {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.1em;
+    margin-top: 0.4em;
+    font-size: 0.85em;
+    line-height: 1.35;
+}
+
+.autopilot-settings label {
+    cursor: pointer;
+    min-width: 0;
+}
+
+.autopilot-settings-group {
+    grid-column: 1 / -1;
+    margin-top: 0.5em;
+    border-bottom: 1px solid #bbb;
+    color: #777;
+    font-size: 0.9em;
+}
+
+.autopilot-settings-reset {
+    grid-column: 1 / -1;
+    justify-self: end;
+    margin-top: 0.4em;
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
 /* the power up choice the autopilot is about to pick, darker than a hover so it stands out */
 .choose-grid-module.autopilot-hover,
 .autopilot-hover .card-text {

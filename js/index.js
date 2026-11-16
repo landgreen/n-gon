@@ -2565,7 +2565,6 @@ function cycle() {
                 consoleMirror.showTitleLogs()
             }
             if (simulation.extraCycles) simulation.timeSkip(simulation.extraCycles)
-            if (autopilot.isOn) autopilot.do()
             simulation.loop();
         } catch (error) {
             consoleMirror.showError(error)

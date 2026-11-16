@@ -367,13 +367,6 @@ const tech = {
         }
     },
     inputHTML: {
-        autopilot(el) { //the autopilot JUNK tech's pause menu checkbox
-            if (!simulation.paused || simulation.isChoosing) {
-                el.checked = tech.isAutopilotChoose
-                return
-            }
-            tech.isAutopilotChoose = el.checked
-        },
         tunableLaser(value) {
             const entry = tech.tech.find(item => item.name === "acousto-optic modulator");
             if (!entry.count || !simulation.paused || simulation.isChoosing || (value !== "none" && !entry.modes.includes(value))) return;
@@ -1452,6 +1445,47 @@ const tech = {
             powerUps.spawn(m.pos.x, m.pos.y, "gun");
         },
         remove() { }
+    },
+    {
+        name: "recursion",
+        descriptionFunction() {
+            return `the next ${powerUps.orb.instant()} you choose that can <strong>stack</strong><br>is given <strong>3</strong> times${this.count && tech.isRecursion ? `<em style ="float: right;">(waiting)</em>` : ""}`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        isInstant: true,
+        allowed() {
+            return !tech.isRecursion
+        },
+        requires: "",
+        effect() {
+            tech.isRecursion = true //used in powerUps.choose
+        },
+        remove() {
+            tech.isRecursion = false
+        }
+    },
+    {
+        name: "instanton",
+        descriptionFunction() {
+            return `${powerUps.orb.tech()} have <strong>+2</strong> <strong class='color-choice' data-help='choice'><span>ch</span><span>oi</span><span>ces</span></strong><br>that are only ${powerUps.orb.instant()} instant tech`
+        },
+        maxCount: 1,
+        count: 0,
+        frequency: 1,
+        frequencyDefault: 1,
+        allowed() {
+            return true
+        },
+        requires: "",
+        effect() {
+            tech.isInstantChoices = true //used in powerUps.tech.effect
+        },
+        remove() {
+            tech.isInstantChoices = false
+        }
     },
     {
         name: "ordnance",
@@ -13128,11 +13162,8 @@ const tech = {
     {
         name: "autopilot",
         descriptionFunction() {
-            let menu = ''
-            if (this.count && !build.isExperimentSelection) { //only changes while paused
-                const isLocked = !simulation.paused || simulation.isChoosing
-                menu = `<br><label onclick="event.stopPropagation()" style="${isLocked ? "opacity:0.5;" : "cursor:pointer;"}"><input type="checkbox" onchange="tech.inputHTML.autopilot(this)" ${tech.isAutopilotChoose ? "checked" : ""} ${isLocked ? "disabled" : ""}> it makes <strong>power up</strong> choices</label>`
-            }
+            //its settings only in the pause menu, the choice menu keeps the short version
+            const menu = this.count && !build.isExperimentSelection && simulation.paused && !simulation.isChoosing ? autopilot.settingsHTML() : ''
             return `<strong>n-gon</strong> plays for you${menu}`
         },
         maxCount: 1,
@@ -13144,6 +13175,7 @@ const tech = {
         effect() {
             autopilot.set(true)
             tech.isAutopilotChoose = true
+            simulation.inGameConsole(`<span class='color-var'>autopilot</span>.toggle()<em> //turn autopilot on or off</em>`, 360) //teaches the console command, quiet while a save loads
         },
         remove() {
             tech.isAutopilotChoose = false

@@ -8,13 +8,13 @@
 //  a shortest path search from the goal gives every node its next step, so the player can be knocked anywhere and keep going
 //  an edge that doesn't work when it's tried costs more next time, so the path changes
 //  while running it also tries jumping from where it is, and takes the jump if that lands somewhere closer than the plan
-//  when the way to the exit goes through a closed door or a hazard, or there's no way at all, it presses buttons and flips toggles
+//  clear walks to upgrades and the exit use live terrain; buttons and toggles are fallbacks for a blocked exit
 //  a word above the player says what it's doing, like lost or stuck, and it circles what it's going for and shooting at
-//autopilot.do() runs once a cycle from cycle() in js/index.js, it only sets input.* and simulation.mouse
+//autopilot.do() runs once a cycle, before simulation.normalLoop() or testingLoop(), only while it's on (see attachLoop), it only sets input.* and simulation.mouse
 const autopilot = {
     isOn: false,
     isDrawPath: true, //a faint line along the planned path
-    only: "", //"exit" skips power ups and hunting, for tools/autopilot-test.js
+    only: "", //"exit" skips optional pickups and mob hunts, for tools/autopilot-test.js
     cell: 25, //world units; keep 25 until repeated play tests justify a finer default
     isPreciseGeometry: false, //experimental: enable with the corner benchmark before promoting
     cellsFor(distance) { return Math.ceil(distance / autopilot.cell) },
@@ -26,6 +26,7 @@ const autopilot = {
     boosts: [],
     elevators: [],
     activeElevators: new Set(),
+    triedDoors: new Map(),
     p: null, //the player's physics when the grid was built
     dyn: new Map(), //each moving obstacle and the cells it covers
     dynList: [], //the moving obstacles, to find the floor on top of one
@@ -36,29 +37,32 @@ const autopilot = {
     stats: { jump: [0, 0], fall: [0, 0], boost: [0, 0], grapple: [0, 0], portal: [0, 0] }, //[tried, landed where planned] for tools/autopilot-test.js
     misses: [], //what the ones that missed looked like
     jumpKinds: {}, //[tried, landed] by how the jump was started, for tools/autopilot-test.js
-    recentFailures: [], //a few recent maneuvers, including their nearby grid variants
+    recentFailures: [], //failed crossings, kept by world position across grid rebuilds
     failed: new Map(), //how often an edge failed, by its cells, so it isn't forgotten when a moving platform's node is made again
     //the plan
     goal: -1, //node id
     goalType: "", //"exit", "powerUp", "mob"
     goalWho: null,
+    goalWalk: null, //world x of a clear walk to an upgrade or the exit, even without graph nodes
     goalSince: 0,
     atGoalCount: 0,
     dist: null, //cycles from each node to the goal
     next: null, //the edge to take from each node
+    routeRank: null, //bits for a remembered failure and a fall off the map on the remaining route
     isPlanDirty: true,
     lastPlanCycle: -Infinity,
     ignored: new Map(), //power ups and mobs given up on, and the cycle to try them again
     //driving
     cur: -1, //the node the player is at, or was last at
+    wasOnGround: false,
     pending: null, //{ edge, mcycle, isJump } the edge being started, so leaving the ground knows which one it was
     flight: null, //{ edge, to, since, mStart, isJumped } while in the air
     loadedJumpMiss: null, //a ledge the current block made it too heavy to reach
     wiggleUntil: 0,
     wiggleDir: 1,
-    backUp: null, //{ dir, until } getting room to run before a running jump
+    recoverySite: null, //where recovery started, which moves were tried, and when to retry a blocked route
+    backUp: null, //{ edge, until } getting room to run before a running jump, see backUpForJump()
     slideSince: 0, //the cycle it started sliding down a slope too steep to stand on
-    pushCount: 0, //times in a row it got stuck and tried shoving a block beside it
     watch: { x: 0, y: 0, cycle: 0 }, //where the player was, to notice they are stuck
     blockedCycles: 0,
     target: null, //the mob being shot at
@@ -67,15 +71,16 @@ const autopilot = {
     pushOnUntil: 0,
     aim: { x: 0, y: 0 },
     hazards: [],
+    lasers: [], //level beams, observed only while their query methods are being called
+    laserHazards: [], //current beam segments, clipped by the terrain and blocks
     jumpZones: [], //read-only observations of zone methods the level actually runs
     winds: [], //each level.wind() zone, { x, y, width, height, velocity, isFloat }
     observeJumpZone(zone, method, effect) {
-        const run = zone[method]
-        zone[method] = function () {
+        autopilot.hook(zone, method, run => function () {
             //Some hazard objects are used as lasers. Only query() and heatQuery() affect motion.
             effect.cycle = simulation.cycle
             return run.apply(this, arguments)
-        }
+        })
         effect.zone = zone
         autopilot.jumpZones.push(effect)
     },
@@ -126,16 +131,17 @@ const autopilot = {
     triggers: [], //{ kind: "button" or "toggle", obj, arrivedAt, startOn } buttons and toggles in the level
     tried: new Map(), //each trigger and the cycle it was last tried
     lastHeavyMove: 0, //the last cycle a door, a moving map piece, or a hazard moved, to wait for them to finish
-    hazardSignature: 0,
+    hazardSignature: "",
     said: "", //the last thing it said in the in game console, and when
     saidCycle: -Infinity,
-    WALK: 0, JUMP: 1, FALL: 2, BOOST: 3, RIDE: 4, GRAPPLE: 5, PORTAL: 6,
-    edgeNames: ["walk", "jump", "fall", "boost", "ride", "grapple", "portal"],
+    WALK: 0, JUMP: 1, FALL: 2, BOOST: 3, RIDE: 4, GRAPPLE: 5, PORTAL: 6, CLIMB: 7,
+    edgeNames: ["walk", "jump", "fall", "boost", "ride", "grapple", "portal", "climb"],
 
     //*********************************************************************
     // setup
     //*********************************************************************
     setup() { //level.boost() and the others are local to each level's code, so what they make is tagged as it's made
+        autopilot.settingDefaults = Object.fromEntries(autopilot.settingList.filter(s => s.key).map(s => [s.key, s.key === "choose" ? true : autopilot.getSetting(s.key)])) //taking the tech turns choosing on
         const boost = level.boost
         level.boost = function (x, y, launchHeight = 1000, angle = Math.PI / 2) {
             const who = boost.apply(this, arguments)
@@ -146,17 +152,21 @@ const autopilot = {
         level.elevator = function (x, y, width, height, maxHeight, force = 0.003, friction = { up: 0.01, down: 0.2 }, isAtTop = false, isSmoothStop = false) {
             const who = elevator.apply(this, arguments)
             if (who) {
-                who.autopilotElevator = { width, height, bottom: y, top: maxHeight, force, friction: { ...friction }, isSmoothStop, mode: "unknown", enabled: false, commandCycle: -Infinity, commandPlayerCycle: -Infinity, nodes: [[], []] }
+                who.autopilotElevator = { width, height, bottom: y, top: maxHeight, force, friction: { ...friction }, isSmoothStop, mode: "unknown", enabled: false, commandCycle: -Infinity, commandPlayerCycle: -Infinity, lastMotion: m.cycle, lastY: who.position.y, waitingForTouch: false, boardedAt: null, nodes: [[], []] }
                 for (const mode of ["move", "moveOnTouch"]) {
-                    const move = who[mode]
-                    who[mode] = function (isOn = true) {
+                    autopilot.hook(who, mode, move => function (isOn = true) {
                         const e = this.autopilotElevator
+                        if (isOn && (!e.enabled || m.cycle - e.commandPlayerCycle > 2)) {
+                            e.lastMotion = m.cycle
+                            e.lastY = this.position.y
+                            e.boardedAt = null
+                        }
                         e.mode = mode
                         e.enabled = isOn
                         e.commandCycle = simulation.cycle
                         e.commandPlayerCycle = m.cycle
                         return move.apply(this, arguments)
-                    }
+                    })
                 }
             }
             return who
@@ -167,31 +177,61 @@ const autopilot = {
             if (who) who.autopilotDynamic = true //fast path-driven platforms must not be discarded as flying debris
             return who
         }
+        const spinner = level.spinner
+        level.spinner = function () {
+            const pin = spinner.apply(this, arguments)
+            if (pin?.bodyB) pin.bodyB.autopilotSpinner = true
+            return pin
+        }
         const doorMap = level.doorMap
         level.doorMap = function () {
             const who = doorMap.apply(this, arguments)
             if (who) {
                 who.autopilotDynamic = true //a map piece that moves
-                who.isDoor = true
+                autopilot.observeDoor(who)
             }
             return who
         }
         const door = level.door
         level.door = function () {
             const who = door.apply(this, arguments)
-            if (who) who.isDoor = true //it opens and closes, it can't be pushed out of the way
+            if (who) autopilot.observeDoor(who)
+            return who
+        }
+        const transport = level.transport
+        level.transport = function (x, y, width, height) { //a platform that goes back and forth between two stops, see trainStop()
+            const who = transport.apply(this, arguments)
+            if (who) {
+                who.autopilotTransport = { width, height, nodes: [[], []], stops: null }
+                autopilot.hook(who, "trainStop", run => function () { //it only goes between its stops while its level calls this
+                    this.autopilotTransport.cycle = simulation.cycle
+                    return run.apply(this, arguments)
+                })
+            }
+            return who
+        }
+        const mover = level.mover
+        level.mover = function () { //a belt only carries the player on the cycles its level calls push()
+            const who = mover.apply(this, arguments)
+            if (who) {
+                who.autopilotPushed = simulation.cycle
+                autopilot.hook(who, "push", push => function () {
+                    this.autopilotPushed = simulation.cycle
+                    return push.apply(this, arguments)
+                })
+            }
             return who
         }
         const button = level.button
         level.button = function () {
             const who = button.apply(this, arguments)
-            if (who) autopilot.triggers.push({ kind: "button", obj: who, arrivedAt: 0 })
+            if (who && autopilot.isUsefulTrigger("button", who)) autopilot.triggers.push({ kind: "button", obj: who, arrivedAt: 0 })
             return who
         }
         const toggle = level.toggle
         level.toggle = function () {
             const who = toggle.apply(this, arguments)
-            if (who) autopilot.triggers.push({ kind: "toggle", obj: who, arrivedAt: 0 })
+            if (who && autopilot.isUsefulTrigger("toggle", who)) autopilot.triggers.push({ kind: "toggle", obj: who, arrivedAt: 0 })
             return who
         }
         const wind = level.wind
@@ -203,7 +243,15 @@ const autopilot = {
         const portal = level.portal
         level.portal = function () {
             const pair = portal.apply(this, arguments)
-            if (pair) autopilot.portals.push(pair)
+            if (pair) {
+                autopilot.portals.push(pair)
+                for (const end of [pair[2], pair[3]]) if (end?.query) autopilot.hook(end, "query", run => function () {
+                    const before = player.isInPortal
+                    const result = run.apply(this, arguments)
+                    if (player.isInPortal === this.portalPair && before !== this.portalPair) autopilot.recordPortalExit(this.portalPair)
+                    return result
+                })
+            }
             return pair
         }
         const hazard = level.hazard
@@ -212,6 +260,25 @@ const autopilot = {
             autopilot.hazards.push(who)
             autopilot.observeJumpZone(who, "query", { kind: "slime", bounds: who })
             autopilot.observeJumpZone(who, "heatQuery", { kind: "heat", bounds: who })
+            for (const method of ["heatQuery", "heatWarning"]) autopilot.hook(who, method, run => function () {
+                this.autopilotIsHeat = true
+                return run.apply(this, arguments)
+            })
+            return who
+        }
+        const laser = level.laser
+        level.laser = function (p1, p2, damage = 0.12) {
+            const who = laser.apply(this, arguments)
+            if (!(damage > 0)) return who
+            const beam = { who, seen: -Infinity }
+            if (!autopilot.lasers.length && !autopilot.hazards.length && autopilot.grid) autopilot.relinkAll()
+            autopilot.lasers.push(beam)
+            for (const method of ["query", "motionQuery"]) {
+                autopilot.hook(who, method, run => function () {
+                    if (!m.isTimeDilated && (method === "query" || this.countDown > 0)) beam.seen = simulation.cycle
+                    return run.apply(this, arguments)
+                })
+            }
             return who
         }
         const gravityZone = level.gravityZone
@@ -230,118 +297,255 @@ const autopilot = {
         }
         const start = level.start
         level.start = function () {
+            autopilot.hooked.length = 0 //the last level's objects are gone
             autopilot.hazards.length = 0
+            autopilot.lasers.length = autopilot.laserHazards.length = 0
             autopilot.jumpZones.length = 0
             autopilot.triggers.length = 0
             autopilot.portals.length = 0
             autopilot.winds.length = 0
-            autopilot.reset()
+            if (autopilot.isOn) autopilot.reset() //set(false) already reset it, so there's nothing to clear while it's off
             return start.apply(this, arguments)
         }
     },
     set(isOn) {
         autopilot.isOn = isOn
+        for (const h of autopilot.hooked) autopilot.attachHook(h, isOn)
+        autopilot.attachLoop(isOn)
         autopilot.reset()
         if (typeof input !== "undefined") input.reset()
+    },
+    //while the autopilot is off the game runs none of its code each cycle: no check in the main loop and no wrapped level methods
+    //each level's helpers (level.elevator, level.door, level.hazard, ...) still list what they make, once, as it's made,
+    //so turning the autopilot on mid-level, like taking its tech, can watch what's already there
+    hooked: [], //{ obj, method, wrap, original, wrapped }, per-cycle methods of this level's elevators, doors, and zones, wrapped only while the autopilot is on
+    hook(obj, method, wrap) { //wrap(original) returns the replacement
+        const h = { obj, method, wrap, original: null, wrapped: null }
+        autopilot.hooked.push(h)
+        if (autopilot.isOn) autopilot.attachHook(h, true)
+    },
+    attachHook(h, isOn) {
+        if (isOn && !h.original && typeof h.obj[h.method] === "function") {
+            h.original = h.obj[h.method]
+            h.wrapped = h.obj[h.method] = h.wrap(h.original)
+        } else if (!isOn && h.original) {
+            if (h.obj[h.method] === h.wrapped) h.obj[h.method] = h.original
+            h.original = h.wrapped = null
+        }
+    },
+    loops: null, //the game's own normal and testing loops, while the autopilot runs before them
+    attachLoop(isOn) { //autopilot.do() runs at the start of each cycle's loop, only while it's on
+        if (typeof simulation === "undefined" || typeof simulation.normalLoop !== "function") return
+        if (isOn && !autopilot.loops) {
+            const loops = autopilot.loops = { normalLoop: simulation.normalLoop, testingLoop: simulation.testingLoop }
+            for (const name of ["normalLoop", "testingLoop"]) {
+                const run = loops[name]
+                simulation[name] = function () {
+                    autopilot.do()
+                    return run.apply(this, arguments)
+                }
+                if (simulation.loop === run) simulation.loop = simulation[name]
+            }
+        } else if (!isOn && autopilot.loops) {
+            for (const name of ["normalLoop", "testingLoop"]) {
+                if (simulation.loop === simulation[name]) simulation.loop = autopilot.loops[name]
+                simulation[name] = autopilot.loops[name]
+            }
+            autopilot.loops = null
+        }
     },
     toggle(isAutoChoose = false) { //for testing, from the browser console: autopilot.toggle() turns it on or off, autopilot.toggle(true) also picks power ups
         tech.isAutopilotChoose = isAutoChoose
         autopilot.set(!autopilot.isOn)
         return autopilot.isOn ? "autopilot on" + (isAutoChoose ? ", auto choosing power ups" : "") : "autopilot off"
     },
-    choiceDelay: 3000, //milliseconds a power up's menu stays up before auto choose clicks, so the player can see what it was
-    chooseDraft() { //called after the draft's click delay, even when the game loop is paused
-        const isReady = () => autopilot.isOn && tech.isAutopilotChoose && //tech.isAutopilotChoose is the autopilot tech's checkbox, it favors skins and weapon or field upgrades and skips JUNK
-            m.alive && !simulation.onTitlePage && simulation.isChoosing
+    canPlayInCurrentMode() {
+        return !levelEditor.isActive || levelEditor.isFullTest
+    },
+    choiceDelay: 2000, //milliseconds a power up's menu stays up before auto choose clicks, so the player can see what it was
+    draftScores(grid = document.getElementById("choose-grid")) { //also usable from the console to see why a draft card ranks where it does
+        const run = autopilotBuild.currentBuild()
+        const choices = []
+        for (const card of grid.querySelectorAll(".card-background[onclick]")) {
+            const match = card.getAttribute("onclick").match(/^powerUps\.choose\('(tech|gun|field)',(\d+)\)$/)
+            if (!match) continue
+            const type = match[1], index = Number(match[2])
+            const option = type === "tech" ? tech.tech[index] : type === "gun" ? b.guns[index] : m.fieldUpgrades[index]
+            if (option) choices.push({ type, name: option.name, ...autopilotBuild.score(type, option, run), card })
+        }
+        return choices.sort((a, b) => b.score - a.score)
+    },
+    chooseDraft(shownFor = 0) { //called after the draft's click delay, even when the game loop is paused
+        const isReady = () => autopilot.isOn && tech.isAutopilotChoose &&
+            m.alive && !simulation.onTitlePage && simulation.isChoosing && autopilot.canPlayInCurrentMode()
         if (!isReady()) return
         const grid = document.getElementById("choose-grid")
         let choice = grid.querySelector("#choose-difficulty")
+        let discardType = ""
         if (!choice) {
-            let fallback = null
-            for (const card of grid.querySelectorAll(".card-background[onclick]")) {
-                const match = card.getAttribute("onclick").match(/^powerUps\.choose\('tech',(\d+)\)$/)
-                const upgrade = match && tech.tech[Number(match[1])]
-                if (upgrade && upgrade.isJunk) continue
-                if (upgrade && (upgrade.isSkin || upgrade.isSkinUpgrade || upgrade.isGunTech || upgrade.isFieldTech)) {
-                    choice = card
-                    break
-                }
-                fallback ??= card
+            const ranked = autopilot.draftScores(grid)
+            const best = ranked.find(option => Number.isFinite(option.score))
+            const cancel = grid.querySelector(".cancel-card[onclick], .entanglement[onclick]")
+            const reroll = grid.querySelector(".research-card[onclick]:not(.entanglement)")
+            const canRandomize = cancel && tech.isCancelTech && tech.cancelTechCount === 0 && !cancel.classList.contains("entanglement")
+            const type = reroll?.getAttribute("onclick").match(/^powerUps\.research\.use\('(tech|gun|field)'\)$/)?.[1] ||
+                (canRandomize && cancel.getAttribute("onclick").match(/^powerUps\.endDraft\("(tech|gun|field)",true\)$/)?.[1])
+            const freeResearch = tech.isJunkResearch && powerUps.research.currentRerollCount < 2
+            // One speculative reroll per pickup. Preserve research for the run's other uses.
+            const researchReserve = tech.isRerollDamage || tech.isRerollBots || tech.interestRate > 0 ? 2 :
+                tech.isDeathAvoid && !tech.isDeathAvoidedThisLevel ? 1 : 0
+            const canResearch = reroll && !tech.isBrainstormActive && !tech.isResearchReality && !tech.isRerollHaste &&
+                powerUps.research.currentRerollCount === 0 && (freeResearch || powerUps.research.count > researchReserve)
+            const cancelValue = tech.isCancelDuplication || tech.isCancelRerolls || tech.isCancelCouple ? 10 : 0
+            const current = Math.max(best?.score ?? -100, cancel ? cancelValue : -100)
+            const worthReroll = (options, gain) => {
+                const forecast = autopilotBuild.rerollForecast(type, current, { floor: cancel ? cancelValue : -100, ...options })
+                return forecast && current < forecast.typical && forecast.expected - current >= gain && forecast.chanceBetter >= 0.6
             }
-            choice ||= fallback || grid.querySelector(".cancel-card[onclick], .entanglement[onclick]")
+            if (type && canRandomize && worthReroll({ expanded: true }, 5)) choice = cancel
+            else if (type && canResearch && worthReroll({ researchCost: freeResearch ? 0 : 1, extraJunkChance: freeResearch ? 0.01 : 0 }, freeResearch ? 5 : 8)) choice = reroll
+            else if (cancel && !canRandomize && (!best || best.score <= cancelValue)) choice = cancel
+            else if (type && canRandomize && (!best || best.score <= 0)) {
+                choice = cancel
+                discardType = type
+            } else if (best) choice = best.card
+            else if (ranked.length) {
+                // A forced draft can close without giving excluded tech or paying cancel rewards.
+                choice = ranked[0].card
+                discardType = "tech"
+            } else choice = cancel || grid.querySelector(".card-background[onclick]")
         }
         if (!choice) return
         const draftId = powerUps.draftId
+        const wait = Math.max(0, autopilot.choiceDelay - shownFor)
+        const delay = tech.isBrainstormActive ? Math.min(wait, Math.max(0, tech.brainStormDelay - 300)) : wait
         autopilot.pointAt(choice)
         setTimeout(() => { //the same menu, still open
-            if (isReady() && powerUps.draftId === draftId && choice.isConnected) choice.click()
-        }, autopilot.choiceDelay)
+            if (isReady() && powerUps.draftId === draftId && choice.isConnected) {
+                if (discardType) powerUps.endDraft(discardType)
+                else choice.click()
+            }
+        }, delay)
     },
     pointAt(choice) { //light up the choice like a mouse hover, so the player can see what it's about to pick
         choice.classList.add("autopilot-hover")
     },
     cancelMovement() { //node references and timers belong to one uninterrupted maneuver
+        if (autopilot.carry?.step && m.isHolding && m.holdingTarget === autopilot.carry.block) m.drop()
         autopilot.flight = autopilot.pending = autopilot.backUp = null
         autopilot.rayMove = null
         autopilot.loadedJumpMiss = null
         autopilot.flying = autopilot.warp = autopilot.grapple = autopilot.exactAim = autopilot.carry = autopilot.carryAim = null
+        autopilot.pilotClear = null
+        autopilot.endRemotePickup()
+        autopilot.pickupAim = null
+        autopilot.endBlockAttack()
+        autopilot.wallClimb = autopilot.wallRelease = null
         if (autopilot.blockClear && !m.isHolding) m.holdingTarget = null
         autopilot.blockClear = null
         autopilot.commit = null
         autopilot.window = { key: "", start: 0 }
-        autopilot.wiggleUntil = autopilot.blockedCycles = autopilot.stuckCount = autopilot.waitSince = autopilot.slideSince = autopilot.pushCount = 0
-        autopilot.isHolding = false
+        autopilot.resetRecovery()
         autopilot.riding = null
         autopilot.rideProgress = null
+        autopilot.doorApproach = null
         autopilot.combat = ""
+    },
+    resetRecovery() {
+        autopilot.recoverySite = null
+        autopilot.wiggleUntil = autopilot.blockedCycles = autopilot.stuckCount = autopilot.waitSince = autopilot.slideSince = 0
+        autopilot.isHolding = false
+        autopilot.routeLoop.pending = false
+        autopilot.routeLoop.since = simulation.cycle
         autopilot.watch = { x: typeof player !== "undefined" && player ? player.position.x : 0, y: typeof playerBody !== "undefined" && playerBody ? playerBody.bounds.max.y : 0, cycle: simulation.cycle }
     },
     invalidateNavigation() { //a rebuilt grid reuses node ids, none of the old references may survive
         autopilot.cancelMovement()
+        autopilot.exploreApproach = null
+        if (autopilot.upgradeHunt) autopilot.upgradeHunt.approach = null
+        if (autopilot.bossHunt) autopilot.bossHunt.approach = null
         autopilot.goal = autopilot.cur = -1
+        autopilot.wasOnGround = false
         autopilot.goalWho = null
         autopilot.goalType = ""
+        autopilot.goalWalk = null
         autopilot.dist = autopilot.next = null
+        autopilot.routes.cycle = autopilot.openRoutes.cycle = -1
+        autopilot.wrapRoutes = autopilot.routeRank = null
         autopilot.noFly.clear()
         autopilot.failed.clear()
-        autopilot.recentFailures.length = 0
         autopilot.isPlanDirty = true
         autopilot.lastPlanCycle = -Infinity
     },
     reset() {
         autopilot.invalidateNavigation()
+        autopilot.recentFailures.length = 0
+        autopilot.routeLoop = { since: simulation.cycle, pending: false, pickups: powerUp.length, kills: 0 }
+        autopilot.portalPass = null
+        autopilot.detourSpent = 0
+        autopilot.detourProgress = null
+        autopilot.upgradeHunt = null
+        autopilot.skippedUpgrades = new WeakMap()
+        autopilot.bossHunt = null
+        autopilot.skippedBosses = new WeakSet()
+        autopilot.stepBlocks.clear()
+        autopilot.nextBlockStep = 0
+        autopilot.levelExitProgress = -Infinity
         autopilot.target = null
         autopilot.atGoalCount = 0
         autopilot.isAiming = false
         autopilot.hazardSignature = ""
+        autopilot.laserHazards = []
         autopilot.manualControl = false
         autopilot.controlField = m.fieldMode
         autopilot.grid = null
         autopilot.nodes = []
         autopilot.elevators = []
         autopilot.activeElevators.clear()
+        autopilot.transports = []
+        autopilot.activeTransports.clear()
+        autopilot.train = null
+        autopilot.trainRide = null
+        autopilot.rodeFrom = []
+        for (const who of autopilot.swings.keys()) if (who.autopilotTransport?.isSwing) who.autopilotTransport = null
+        autopilot.swings.clear()
+        autopilot.triedDoors.clear()
         autopilot.dyn.clear()
         autopilot.dynList = []
         autopilot.relink.clear()
         autopilot.badAnchors = []
         autopilot.elevatorStuckUntil = 0
         autopilot.windSignature = null
+        autopilot.belts = []
+        autopilot.beltSignature = null
+        autopilot.beltTry = null
+        autopilot.beltMiss.clear()
+        autopilot.beltLast = 0
         autopilot.isPlanDirty = true
         autopilot.ignored.clear()
+        autopilot.remotePickupRetry = new WeakMap()
+        autopilot.blockAttackRetry = new WeakMap()
+        autopilot.nextBlockAttack = 0
         autopilot.tried.clear()
         autopilot.saidAt.clear()
-        autopilot.explored.length = 0
+        autopilot.explored.clear()
+        autopilot.exploreVisited.clear()
+        autopilot.exploreAgainAt = 0
         autopilot.lostSince = 0
         autopilot.lastHeavyMove = 0
         autopilot.lastBuildCycle = -Infinity
         autopilot.rayWalls = null
         autopilot.lastRayAttempt = -Infinity
         autopilot.pushOnUntil = 0
+        autopilot.ignoreBlocksUntil = autopilot.ignoreBlocksAgainAt = 0
     },
 
     //*********************************************************************
     // the grid and its nodes
     //*********************************************************************
+    standingOn() { //the body under the player's feet, the whole compound body when it's a part, or null
+        return m.standingOn?.parent || m.standingOn
+    },
     size() { //the standing player, from the middle of their feet
         const scale = player.scale || 1
         //Down also changes size with scale invariance. Plan for standing clearance at small size.
@@ -349,7 +553,7 @@ const autopilot = {
     },
     physics() { //what one cycle does to the player's velocity, like Matter's Body.update
         const dt2 = simulation.delta * simulation.delta
-        return {
+        const p = {
             gravity: simulation.g * dt2,
             jump: m.jumpForce / player.mass * dt2,
             push: m.FxAir / player.mass * dt2,
@@ -358,40 +562,316 @@ const autopilot = {
             coyote: Math.min(m.coyoteCycles, 600), //some tech makes it long enough to jump again and again in the air
             apex: m.apexGravity,
             blockJumps: simulation.ephemera.filter(effect => effect.name === "blockJump").length,
+            nitinol: !!tech.isNitinol, //grabs walls, so it can climb them, see linkWallClimbs()
         }
+        p.hop = autopilot.hopFlight(p, 6) //{ rise, cycles } of the short hops that go against a belt
+        p.hopLow = autopilot.hopFlight(p, 1) //the lowest hop, for under a ceiling
+        return p
+    },
+    //transports, see level.transport(): a platform that carries the player between two stops, like subway's trains, it leaves when the player steps on,
+    //and it comes to the stop the player is waiting by, both stops get standing spots joined by a ride, like an elevator's
+    transports: [], //this level's
+    activeTransports: new Set(), //the ones going between their stops
+    train: null, //the transport under the player's feet
+    trainRide: null, //the one it's riding between stops
+    rodeFrom: [], //the x of each stop it rode away from
+    //a platform hanging from ropes that swings back and forth the same way every time, like on towers and superstructure, is a transport too,
+    //its two stops are where it turns around, learned by watching it for a swing and a half, see watchSwings()
+    swings: new Map(), //each hanging platform being watched, who → { dir, far, farAt, turns }
+    isSwingShape(who) { //wide and flat enough to stand on, too heavy to be knocked off its path
+        const b = who.bounds
+        return b.max.x - b.min.x >= 200 && who.mass >= 8 && !who.autopilotElevator && !who.isMover && !who.isDoor
+    },
+    watchSwings() { //every cycle: where each hanging platform is, and where it turns around
+        const cycle = simulation.cycle
+        if (cycle % 30 === 1) { //which ones there are
+            const live = new Set()
+            for (const who of body) {
+                if (!autopilot.hanging.has(who) || !autopilot.isSwingShape(who)) continue
+                live.add(who)
+                if (!autopilot.swings.has(who)) autopilot.swings.set(who, { dir: 0, far: who.position.x, farAt: cycle, farTop: who.bounds.min.y, start: who.position.x, turns: [], since: cycle, thick: who.bounds.max.y - who.bounds.min.y })
+            }
+            for (const who of autopilot.swings.keys()) {
+                if (live.has(who)) continue
+                autopilot.swings.delete(who)
+                autopilot.unmakeSwing(who)
+            }
+        }
+        for (const [who, s] of autopilot.swings) {
+            const x = who.position.x
+            s.thick = Math.min(s.thick, who.bounds.max.y - who.bounds.min.y) //how thick it is when it's level, tipped its bounds are taller
+            if (s.dir === 0) { //which way it's going
+                if (Math.abs(x - s.start) > 60) {
+                    s.dir = Math.sign(x - s.start)
+                    s.far = x
+                    s.farAt = cycle
+                }
+            } else if ((x - s.far) * s.dir > 0) { //still going
+                s.far = x
+                s.farAt = cycle
+                s.farTop = autopilot.swingTop(who, s)
+                s.farAngle = who.angle
+                s.farWidth = who.bounds.max.x - who.bounds.min.x
+            } else if ((s.far - x) * s.dir > 60) { //it turned around at far
+                autopilot.swingTurn(who, s, { cycle: s.farAt, x: s.far, top: s.farTop, side: s.dir > 0 ? 1 : 0, angle: s.farAngle || 0, width: s.farWidth || 0 })
+                s.dir = -s.dir
+                s.far = x
+                s.farAt = cycle
+            }
+        }
+    },
+    unmakeSwing(who) { //a swing that stopped being a ride, its deck spots are plain spots until the next rebuild, see transportSum()
+        const t = who.autopilotTransport
+        if (!t?.isSwing) return
+        for (const list of t.nodes) for (const node of list) if (node.transport === who) node.transport = null
+        who.autopilotTransport = null
+        autopilot.activeTransports.delete(who)
+        if (autopilot.train === who) autopilot.train = null
+    },
+    swingTurn(who, s, turn) { //it turned around: a level turn at each end makes it a transport, a turn somewhere else unmakes it
+        const turns = s.turns
+        turns.push(turn)
+        if (turns.length > 6) turns.shift()
+        const t = who.autopilotTransport
+        const isLoaded = autopilot.train === who //the player's weight makes it sag and shifts its turns a little
+        if (t && t.isSwing) {
+            const isSame = Math.abs(turn.x - t.stops[turn.side]) < (isLoaded ? 160 : 90) && Math.abs(turn.top - t.tops[turn.side]) < (isLoaded ? 220 : 90)
+            if (!isSame) { //knocked off its path, or the level changed it
+                autopilot.unmakeSwing(who)
+                s.isOff = true
+                return
+            }
+            const last = t.turnAt[turn.side]
+            if (turn.cycle - last > 100) t.period = turn.cycle - last //a whole swing, measured
+            t.turnAt[turn.side] = turn.cycle
+            return
+        }
+        if (turns.length < 2 || s.isOff) return
+        const mid = turns[turns.length - 2]
+        const half = turn.cycle - mid.cycle
+        const isLevel = Math.abs(turn.angle) < 0.35 && Math.abs(mid.angle) < 0.35 //it tips a little at each end
+        if (mid.side === turn.side || !isLevel || half < 60 || half > 750 || Math.abs(mid.x - turn.x) < 300) return
+        if (turns.length > 2) { //the turn before has to have been at the same place
+            const before = turns[turns.length - 3]
+            if (Math.abs(before.x - turn.x) > 90 || Math.abs(before.top - turn.top) > 90) return
+        }
+        const stops = [], tops = [], turnAt = []
+        for (const one of [mid, turn]) {
+            stops[one.side] = one.x
+            tops[one.side] = one.top
+            turnAt[one.side] = one.cycle
+        }
+        who.autopilotTransport = { isSwing: true, width: Math.max(100, Math.min(turn.width, mid.width) - 50), height: who.bounds.max.y - who.bounds.min.y, nodes: [[], []], stops, tops, turnAt, period: 2 * half } //there and back takes about the same
+    },
+    isLearningSwing() { //a hanging platform that might turn out to be a ride is still being watched
+        for (const [who, s] of autopilot.swings) {
+            if (!who.autopilotTransport && !s.isOff && s.dir !== 0 && s.turns.length < 4 && simulation.cycle < s.since + 1200) return true
+        }
+        return false
+    },
+    swingArrives(who, stop, cycle, x) { //at cycle it's close enough to turning around at that stop that the spot at x on its deck there is under the player
+        const t = who.autopilotTransport
+        let late = (cycle - t.turnAt[stop]) % t.period //cycles after a turn there
+        if (late > t.period / 2) late -= t.period
+        //near a turn it's this far short of the stop: k * cycles squared, like the top of a sine, and always on the inside of the swing,
+        //so a spot on the inside half of the deck is under the player for longer than one at its outside end
+        const k = Math.abs(t.stops[1] - t.stops[0]) / 4 * (2 * Math.PI / t.period) ** 2
+        const inside = x === undefined ? 0 : (x - t.stops[stop]) * (stop ? -1 : 1)
+        const reach = Math.max(20, Math.min(110, inside + t.width / 2 - 35)) //how far short it can be
+        const window = Math.sqrt(reach / k)
+        return late > -window && late < window - 8 //and still be there a little after
+    },
+    swingTop(who, s = autopilot.swings.get(who)) { //the top of its deck at its middle, its bounds reach higher when it's tipped
+        return s ? who.position.y - s.thick / 2 : who.bounds.min.y
+    },
+    swingNear(who, stop) { //at that stop now, close enough to step or land on its deck
+        const t = who.autopilotTransport
+        return Math.abs(who.position.x - t.stops[stop]) < 50 && Math.abs(autopilot.swingTop(who) - t.tops[stop]) < 130
+    },
+    transportMoving(who) { //between its stops
+        return who.autopilotTransport.isSwing ? autopilot.transportAt(who) < 0 : !!who.isMoving
+    },
+    transportHeading(who) { //the stop it's going to
+        return (who.autopilotTransport.isSwing ? who.velocity.x : who.VxGoal) > 0 ? 1 : 0
+    },
+    transportEnabled(who) {
+        if (who.autopilotTransport.isSwing) return true
+        return simulation.cycle - who.autopilotTransport.cycle <= 2 && Number.isFinite(who.stops.left) && Number.isFinite(who.stops.right) && Math.abs(who.VxGoal) >= 1
+    },
+    transportStops(who) { //the middle of the deck at its left and right stop, it overshoots each by up to a cycle of travel, where it's parked is exact
+        if (who.autopilotTransport.isSwing) return who.autopilotTransport.stops
+        const over = Math.abs(who.VxGoal) / 2
+        const stops = [who.stops.left - over, who.stops.right + over]
+        const at = autopilot.transportAt(who)
+        if (at >= 0) stops[at] = who.position.x
+        return stops
+    },
+    transportAt(who) { //the stop it's parked at, 0 left, 1 right, or -1 while it's between them
+        if (who.autopilotTransport.isSwing) return autopilot.swingNear(who, 0) ? 0 : autopilot.swingNear(who, 1) ? 1 : -1
+        if (who.isMoving) return -1
+        const reach = Math.abs(who.VxGoal) + 5
+        if (Math.abs(who.position.x - who.stops.left) <= reach || who.position.x < who.stops.left) return 0
+        if (Math.abs(who.position.x - who.stops.right) <= reach || who.position.x > who.stops.right) return 1
+        return -1
+    },
+    transportSum() { //changes when a transport starts or stops being used, or its stops move
+        let sum = 0
+        for (const who of autopilot.transports) {
+            const t = who.autopilotTransport
+            if (!t) sum += 0.7 //a swing that stopped repeating
+            else if (t.isSwing) sum += 5 + t.stops[0] + 3 * t.stops[1]
+            else sum += autopilot.transportEnabled(who) ? 1 + who.stops.left + 3 * who.stops.right : 0
+        }
+        for (const who of autopilot.swings.keys()) if (who.autopilotTransport && !autopilot.activeTransports.has(who)) sum += 11 //one that was just learned
+        return sum
+    },
+    transportNode(who, stop, x) { //the standing spot on its deck at a stop, for a player this far from the middle of the deck
+        const built = who.autopilotTransport.stops
+        let best = -1, bestOff = Infinity
+        for (const node of who.autopilotTransport.nodes[stop]) {
+            const off = Math.abs(node.x - built[stop] - x)
+            if (!node.dead && off < bestOff) {
+                bestOff = off
+                best = node.id
+            }
+        }
+        return best
+    },
+    //mover belts, see level.mover(): a belt carries the player at its VxGoal, walking with it is faster, walking against a fast one gets nowhere,
+    //but nothing pushes the player in the air, so short hops go against any belt at about the air speed limit
+    belts: [], //the map's movers
+    beltSignature: null, //changes when a belt speeds up, stops, or turns around
+    beltSpeed(who) { //how fast the belt carries what's on it right now, 0 when it's off or too slow to matter
+        if (!who || simulation.cycle - who.autopilotPushed > 2) return 0
+        return Math.abs(who.VxGoal) < 0.5 ? 0 : who.VxGoal
+    },
+    beltV: node => node && node.belt ? autopilot.beltSpeed(node.belt) : 0, //the belt speed under a standing spot
+    beltUnder() { //the belt under the player's feet, or null
+        const who = m.onGround && m.standingOn ? m.standingOn.parent || m.standingOn : null
+        return who && who.isMover && !who.trainStop && autopilot.beltSpeed(who) ? who : null //not a transport, the player rides those standing still
+    },
+    hopFlight(p, hold) { //a short hop, jump held for hold cycles: how high it rises and how long it's in the air, see arc()
+        const drag = 1 - (player.frictionAir ?? 0.001)
+        let vy = 0, y = 0, rise = 0
+        for (let cycle = 1; cycle < 200; cycle++) {
+            const isHeld = cycle - 1 < hold
+            if (!isHeld && vy < 0) vy *= m.shortJumpDamp
+            const isApex = cycle > 1 && isHeld && Math.abs(vy) < m.apexSpeed
+            vy = vy * drag + p.gravity * (isApex ? m.apexGravity : 1) - (cycle === 1 ? p.jump : 0)
+            y += vy
+            rise = Math.max(rise, -y)
+            if (y >= 0 && cycle > 1) return { rise, cycles: cycle }
+        }
+        return { rise, cycles: 200 }
+    },
+    hopTakeoff(V) { //how fast it's still going against a belt moving at V on the cycle it touches down between hops, the belt takes some back
+        return Math.max(0, 0.89 * (autopilot.p.limit + 0.5) - 0.11 * Math.abs(V) - 1)
+    },
+    hopHold(x, feet, size, V, vx = -Math.sign(V) * autopilot.hopTakeoff(V)) { //how many cycles to hold jump for a hop against a belt moving at V, from x going vx, 0 when no hop works
+        //it needs the room overhead, and to come down about level, on the belt or just past its end, not off the end into a gap
+        const p = autopilot.p, dir = -Math.sign(V)
+        const isClear = rise => !autopilot.isBoxSolid(x - size.halfWidth + 3, feet - size.height - 1.1 * rise - 8, x + size.halfWidth - 3, feet - size.height + 2) //measured hops rise a little more than hopFlight()
+        const lands = hold => {
+            const hit = autopilot.arc(x, feet, vx, -p.jump, dir, p.limit, true, size, 0, false, hold)
+            return !!hit && Math.abs(autopilot.nodes[hit.node].y - feet) < 30
+        }
+        if (Math.abs(V) > 30 && isClear(p.jump ** 2 / (2 * p.gravity)) && lands(60)) return 60 //a fast belt takes back the most each landing, full jumps land the least
+        if (isClear(p.hop.rise) && lands(6)) return 6
+        return isClear(p.hopLow.rise) && lands(1) ? 1 : 0
+    },
+    beltGait(V, dir, x, feet, size) { //going dir on a belt moving at V: { speed, isHop }, how fast over the ground, and whether that's by hopping, speed 0 when it can't
+        const p = autopilot.p
+        if (!V) return { speed: p.run, isHop: false }
+        if (V * dir > 0) return { speed: p.run + Math.abs(V), isHop: false }
+        const walk = p.run - 1 - Math.abs(V) //measured, the belt also pushes whatever is slower than it
+        const hop = Math.abs(V) >= 1.5 && autopilot.hopHold(x, feet, size, V) ? Math.max(2, p.limit + 0.4 - 0.045 * Math.abs(V)) : 0 //about the air speed limit, less the cycle on the belt each landing
+        if (hop > walk) return { speed: hop, isHop: true }
+        return { speed: walk > 1.5 ? walk : 0, isHop: false }
+    },
+    beltSum() {
+        let sum = 0
+        for (let i = 0; i < autopilot.belts.length; i++) sum += (i + 1) * autopilot.beltSpeed(autopilot.belts[i])
+        return sum
     },
     isBoostPiece: who => !!(who.boostBounds || who.autopilotBoost),
     elevatorEnabled(who) {
         const e = who.autopilotElevator
         //Some levels park the lift by ceasing to call move() instead of calling move(false).
         //Use the player clock so a time skip that omits level updates doesn't park a running lift.
-        return who.isOn !== false && !!e.enabled && m.cycle - e.commandPlayerCycle <= 2
+        return who.isOn !== false && !!e.enabled && m.cycle - e.commandPlayerCycle <= 2 &&
+            (m.cycle - e.lastMotion <= 45 || e.waitingForTouch && (e.boardedAt === null || m.cycle - e.boardedAt <= 45))
+    },
+    updateElevator(who) {
+        const e = who.autopilotElevator, cycle = m.cycle
+        if (Math.abs(who.position.y - e.lastY) >= 4) {
+            e.lastY = who.position.y
+            e.lastMotion = cycle
+            e.boardedAt = null
+        }
+        const idle = e.enabled && e.mode === "moveOnTouch" && !who.isUp && Math.abs(who.bounds.min.y - e.bottom) < 5
+        if (idle && m.onGround && autopilot.standingOn() === who) e.boardedAt ??= cycle
+        else e.boardedAt = null
+        if (e.waitingForTouch !== idle) autopilot.isPlanDirty = true
+        e.waitingForTouch = idle
+    },
+    observeDoor(who) {
+        who.isDoor = true
+        autopilot.hook(who, "openClose", openClose => function () {
+            const y = this.position.y
+            const result = openClose.apply(this, arguments)
+            if (this.position.y < y) this.autopilotOpenedAt = m.cycle
+            return result
+        })
+    },
+    doorOpening(who) {
+        return who.isDoor && m.cycle - who.autopilotOpenedAt <= 3
     },
     isObstacle(who) { //a block in body[] the path goes around or over, small ones the player steps over or pushes
         if (m.isHolding && who === m.holdingTarget) return false
+        if (autopilot.isIgnoredBlock(who)) return false
         if (!(who.collisionFilter.mask & cat.player)) return false
         if (who.autopilotElevator) return !autopilot.activeElevators.has(who)
-        if (who.isNotHoldable && (who.autopilotSpinner || Math.abs(who.angularVelocity) > 0.003)) { //rotors and spinners turn all the time, redrawing them would never stop
-            who.autopilotSpinner = true
+        if (who.autopilotTransport && autopilot.activeTransports.has(who)) return false //its two stops are on the map instead
+        if (autopilot.isSpinner(who)) return autopilot.isBeam(who) //a flat beam is something to stand on, it tips as the player walks along it and is redrawn as it turns, a standing one the player pushes aside
+        //A deck on fixed ropes can tilt and settle again. Driven swings still use their timed stops.
+        if (autopilot.hanging.has(who) && autopilot.isSwingShape(who) &&
+            simulation.cycle > (autopilot.hangingDrivenAt.get(who) ?? -Infinity) + 120) return true
+        if (who.isNotHoldable && (who.autopilotRotating || Math.abs(who.angularVelocity) > 0.003)) { //other rotating bodies would need constant redraws
+            who.autopilotRotating = true
             return false
         }
         const b = who.bounds
         return b.max.y - b.min.y > 32 || b.max.x - b.min.x > 60
     },
+    isSpinner: who => !!(who.isRotor || who.autopilotSpinner),
+    beamSpin: 0.02, //faster than this a beam is left off the map
+    isBeam(who) { //a spinner lying about flat that isn't driven around, see level.spinner(), a rotor keeps turning on its own
+        if (who.isRotor || Math.abs(who.angularVelocity) > autopilot.beamSpin) return false //a slowly turning one would be redrawn every few cycles, it isn't much of a floor anyway
+        const b = who.bounds
+        return b.max.x - b.min.x > autopilot.beamSlope * (b.max.y - b.min.y) //lying flat or tilted like a step, one standing up is a wall the player pushes aside
+    },
+    beamSlope: 0.75, //how much wider than tall a spinner has to be to stand on, 0.75 is up to about 53 degrees
     hanging: new Set(), //blocks hanging from a constraint, like a swinging door, the player can push them aside even when they can't be picked up
+    hangingLengths: new WeakMap(),
+    hangingDrivenAt: new WeakMap(), //Towers and Superstructure drive their swings by changing rope lengths
     findHanging() {
         const set = autopilot.hanging = new Set()
         const lists = [typeof cons === "undefined" ? [] : cons, typeof consBB === "undefined" ? [] : consBB]
         for (const list of lists) {
             for (const c of list) {
-                if (c.bodyA && !c.bodyA.isStatic) set.add(c.bodyA)
-                if (c.bodyB && !c.bodyB.isStatic) set.add(c.bodyB)
+                const isDriven = Math.abs(c.length - autopilot.hangingLengths.get(c)) > 1
+                autopilot.hangingLengths.set(c, c.length)
+                for (const who of [c.bodyA, c.bodyB]) {
+                    if (!who || who.isStatic) continue
+                    set.add(who)
+                    if (isDriven) autopilot.hangingDrivenAt.set(who, simulation.cycle)
+                }
             }
         }
     },
     isPushable(who) { //a block the player can shove out of the way, not a door, platform, or something else the level moves
         if (who.autopilotDynamic || who.autopilotElevator || who.isStatic || who.isDoor) return false
-        return !who.isNotHoldable || autopilot.hanging.has(who)
+        return !who.isNotHoldable || autopilot.hanging.has(who) || autopilot.isSpinner(who) //a spinner turns out of the way when it's walked into
     },
     pushableBeside(x, feet) { //the closest block it could shove, beside the player, not under it or far above, or null
         let best = null, bestD = 90 //from the middle of the player to the block's near side, the player is about 50 wide
@@ -435,6 +915,8 @@ const autopilot = {
             maxY = Math.max(maxY, Math.min(limit.maxY, b.max.y))
         }
         if (!(maxX > minX)) return false
+        const physics = autopilot.physics()
+        if (autopilot.pScale !== (player.scale || 1) || autopilot.hasDifferentMovement(physics)) autopilot.recentFailures.length = 0
         autopilot.invalidateNavigation()
         const x0 = Math.floor(minX / cell) * cell - autopilot.cellsFor(200) * cell
         const y0 = Math.floor(minY / cell) * cell - autopilot.cellsFor(600) * cell
@@ -442,7 +924,7 @@ const autopilot = {
         const h = Math.ceil((maxY - y0) / cell) + autopilot.cellsFor(100)
         const base = new Uint8Array(w * h) //the map that doesn't move
         const grid = autopilot.grid = { x0, y0, w, h, base, solid: base, dynCount: new Uint16Array(w * h), dynWeight: new Float32Array(w * h), nodeAt: new Int32Array(w * h).fill(-1), mapCount: map.filter(who => !who.isRay).length }
-        autopilot.p = autopilot.physics()
+        autopilot.p = physics
         autopilot.pScale = player.scale || 1
         autopilot.flyStamp = autopilot.flyStamp % 65000 + 1
 
@@ -452,9 +934,7 @@ const autopilot = {
         for (let i = 0; i < map.length; i++) {
             const who = map[i]
             if (autopilot.isBoostPiece(who)) { //its body sits in the floor, the player never stands on it
-                const made = who.autopilotBoost || { launchHeight: 1000, angle: Math.PI / 2 }
-                const bounds = who.boostBounds //levels that flip move these, so where it was made isn't where it is
-                boosts.push({ x: bounds ? bounds.min.x : who.position.x - 50, y: bounds ? bounds.max.y : who.position.y - 35, launchHeight: made.launchHeight, angle: made.angle })
+                boosts.push(autopilot.boostZone(who))
                 continue
             }
             if (who.autopilotDynamic || who.isRay) continue
@@ -466,9 +946,12 @@ const autopilot = {
 
         autopilot.buildSurfaces()
         autopilot.indexExact()
+        autopilot.belts = map.filter(who => who.isMover)
+        autopilot.beltSignature = autopilot.beltSum()
 
         //An active elevator has virtual platforms at both stops. Parked lifts are drawn at their live position below.
         const elevators = autopilot.elevators = body.filter(who => who.autopilotElevator)
+        for (const who of elevators) autopilot.updateElevator(who)
         const activeElevators = autopilot.activeElevators = new Set(elevators.filter(autopilot.elevatorEnabled))
         for (const who of elevators) {
             const e = who.autopilotElevator
@@ -478,6 +961,25 @@ const autopilot = {
             for (const y of [e.bottom, e.top]) {
                 const cy = Math.floor((y + 2 - y0) / cell)
                 if (cy > 0 && cy < h) base.fill(1, c0 + cy * w, c1 + cy * w + 1)
+            }
+        }
+
+        //a transport has a deck at both of its stops
+        const transports = autopilot.transports = body.filter(who => who.autopilotTransport)
+        const activeTransports = autopilot.activeTransports = new Set(transports.filter(autopilot.transportEnabled))
+        autopilot.transportSignature = 0 //transportSum() reads activeTransports
+        autopilot.transportSignature = autopilot.transportSum()
+        for (const who of transports) {
+            const t = who.autopilotTransport
+            t.nodes = [[], []]
+            if (!activeTransports.has(who)) continue
+            t.stops = autopilot.transportStops(who)
+            if (!t.isSwing) t.tops = [who.bounds.min.y, who.bounds.min.y]
+            for (let i = 0; i < 2; i++) {
+                const stop = t.stops[i]
+                const cy = Math.floor((t.tops[i] + 2 - y0) / cell)
+                const c0 = Math.max(0, Math.floor((stop - t.width / 2 + 3 - x0) / cell)), c1 = Math.min(w - 1, Math.floor((stop + t.width / 2 - 3 - x0) / cell))
+                if (cy > 0 && cy < h && c1 >= c0) base.fill(1, c0 + cy * w, c1 + cy * w + 1)
             }
         }
 
@@ -501,7 +1003,7 @@ const autopilot = {
                 node.id = nodes.length
                 grid.nodeAt[cx + cy * w] = node.id
                 nodes.push(node)
-                autopilot.tagNode(node)
+                autopilot.tagNode(node, size)
             }
         }
         autopilot.rev = []
@@ -534,6 +1036,10 @@ const autopilot = {
         if (!base[cx + cy * w] && base[cx + (cy + 1) * w]) { //on the map that doesn't move
             y = floorAt(base)
             space = Number.isFinite(y) ? room(base, y) : 0
+            if (space < 2 && Number.isFinite(y) && autopilot.grid.exact) { //the grid rounds a ceiling down to a whole cell, a gap that only just fits, like crouching under a low ledge, check the map's real shape
+                const fits = height => !autopilot.isMapExact(x - size.halfWidth + 3, y - height + 3, x + size.halfWidth - 3, y - 26)
+                space = Math.max(space, fits(size.height) ? 2 : fits(size.crouchHeight) ? 1 : 0)
+            }
             isStatic = space > 0
         }
         if (!isStatic) { //on top of something that moves, or floating a little above a slope too steep to stand on, isOnMap() tells them apart
@@ -542,7 +1048,7 @@ const autopilot = {
             space = Number.isFinite(y) ? room(solid, y) : 0
             if (!space) return null
         }
-        const node = { id: -1, x, y, cx, cy, edges: [], isStatic, cover: 0, isBoost: false, isCrouch: space === 1, elevator: null, elevatorLevel: 0, dead: false }
+        const node = { id: -1, x, y, cx, cy, edges: [], isStatic, cover: 0, isBoost: false, isCrouch: space === 1, elevator: null, elevatorLevel: 0, belt: null, transport: null, transportStop: 0, dead: false }
         if (isStatic) autopilot.coverOf(node, size)
         return node
     },
@@ -557,9 +1063,53 @@ const autopilot = {
         }
         node.cover = most
     },
-    tagNode(node) { //boosts and elevator stops
+    boostZone(who) {
+        const { launchHeight = 1000, angle = Math.PI / 2 } = who.autopilotBoost || {}
+        //Vertical pads use a region and angled pads cast a 100-by-100 ray from their center.
+        let bounds = who.boostBounds, vertices = null
+        if (!bounds) {
+            const dx = Math.cos(angle) * 50, dy = -Math.sin(angle) * 50
+            vertices = [
+                { x: who.position.x - dy, y: who.position.y + dx },
+                { x: who.position.x + dy, y: who.position.y - dx },
+                { x: who.position.x + 2 * dx + dy, y: who.position.y + 2 * dy - dx },
+                { x: who.position.x + 2 * dx - dy, y: who.position.y + 2 * dy + dx },
+            ]
+            bounds = Matter.Bounds.create(vertices)
+        }
+        return { bounds, vertices, launchHeight, angle, nodes: [] }
+    },
+    boostAt(x, feet, size, height = size.height) {
+        const left = x - size.halfWidth, right = x + size.halfWidth
+        const top = feet - height, bottom = feet + 3 //the ground sensor extends below the feet
         for (const boost of autopilot.boosts) {
-            if (node.x > boost.x && node.x < boost.x + 100 && Math.abs(node.y - boost.y) < 40) node.isBoost = boost
+            const { min, max } = boost.bounds
+            if (right < min.x || left > max.x || bottom < min.y || top > max.y) continue
+            if (!boost.vertices || autopilot.polygonBox(boost.vertices, left, top, right, bottom)) return boost
+        }
+        return null
+    },
+    tagNode(node, size) { //boosts, elevator stops, and belts
+        if (node.isStatic) {
+            for (const who of autopilot.belts) {
+                const b = who.bounds
+                if (node.x > b.min.x - 5 && node.x < b.max.x + 5 && Math.abs(node.y - b.min.y) < 20) node.belt = who
+            }
+        }
+        const boost = autopilot.boostAt(node.x, node.y, size, node.isCrouch ? size.crouchHeight : size.height)
+        if (boost) {
+            node.isBoost = boost
+            boost.nodes.push(node)
+        }
+        for (const who of autopilot.activeTransports) {
+            const t = who.autopilotTransport
+            for (let i = 0; i < 2; i++) {
+                if (Math.abs(node.y - t.tops[i]) >= (t.isSwing ? 26 : 6)) continue //on the deck itself, not a platform beside it a step higher or lower, a swing's top isn't on a cell's edge
+                if (Math.abs(node.x - t.stops[i]) > t.width / 2) continue
+                node.transport = who
+                node.transportStop = i
+                t.nodes[i].push(node)
+            }
         }
         for (const who of autopilot.activeElevators) {
             const e = who.autopilotElevator
@@ -577,8 +1127,14 @@ const autopilot = {
         node.dead = true
         autopilot.detachEdges(node)
         autopilot.grid.nodeAt[node.cx + node.cy * autopilot.grid.w] = -1
+        if (node.isBoost) node.isBoost.nodes.splice(node.isBoost.nodes.indexOf(node), 1)
         if (node.elevator) {
             const list = node.elevator.autopilotElevator.nodes[node.elevatorLevel]
+            const index = list.indexOf(node)
+            if (index !== -1) list.splice(index, 1)
+        }
+        if (node.transport) {
+            const list = node.transport.autopilotTransport.nodes[node.transportStop]
             const index = list.indexOf(node)
             if (index !== -1) list.splice(index, 1)
         }
@@ -645,16 +1201,16 @@ const autopilot = {
                     if (Math.abs(b.x - a.x) < 0.5 || Math.abs(b.y - a.y) > 3 * Math.abs(b.x - a.x)) continue //walls
                     const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2
                     if (Matter.Vertices.contains(v, { x: mx, y: my - 1 }) || !Matter.Vertices.contains(v, { x: mx, y: my + 1 })) continue //faces down or sideways
-                    add(a.x < b.x ? { x1: a.x, y1: a.y, x2: b.x, y2: b.y } : { x1: b.x, y1: b.y, x2: a.x, y2: a.y })
+                    add(a.x < b.x ? { x1: a.x, y1: a.y, x2: b.x, y2: b.y, who } : { x1: b.x, y1: b.y, x2: a.x, y2: a.y, who })
                 }
             }
         }
     },
     edgeY: (e, x) => e.y1 + (Math.min(e.x2, Math.max(e.x1, x)) - e.x1) * (e.y2 - e.y1) / (e.x2 - e.x1),
-    surfaceAt(x, feet, above = 15, below = 40, skip = null) { //the top edge the feet are on, near feet, or null
+    surfaceAt(x, feet, above = 15, below = 40, skip = null, support = null) { //the top edge the feet are on, near feet, or null
         let best = null, bestD = Infinity
         for (const e of autopilot.surfaces.get(Math.floor(x / 200)) || []) {
-            if (e === skip || x < e.x1 - 0.5 || x > e.x2 + 0.5) continue
+            if (e === skip || (support && e.who !== support) || x < e.x1 - 0.5 || x > e.x2 + 0.5) continue
             const y = autopilot.edgeY(e, x)
             if (y < feet - above || y > feet + below) continue
             if (Math.abs(y - feet) < bestD) {
@@ -663,6 +1219,61 @@ const autopilot = {
             }
         }
         return best
+    },
+    straightWalk(toX, feet = playerBody.bounds.max.y) {
+        const x = player.position.x, dir = Math.sign(toX - x)
+        if (!autopilot.grid || !m.onGround || Math.abs(toX - x) > 800) return null
+        const canMove = who => autopilot.isCarryable(who) && autopilot.canClearBlock(who) && who.speed <= 8 && autopilot.canHoldBlocks()
+        const support = autopilot.standingOn()
+        let floor = autopilot.surfaceAt(x, feet, 6, 12), block = null
+        if (!floor && body.includes(support) && canMove(support)) {
+            floor = autopilot.surfaceAt(x, support.bounds.max.y, 6, 10)
+            block = support //continue along the permanent floor underneath the crate
+        }
+        if (!floor || floor.edge.who.isMover || floor.edge.who.autopilotDynamic) return null
+        const y = floor.y
+        //Cover the whole span with touching, level surfaces. A clear sight line can still cross a pit.
+        for (let end = x; (toX - end) * dir > 0;) {
+            let far = end
+            for (const edge of autopilot.surfaces.get(Math.floor(end / 200)) || []) {
+                if (edge.who.isMover || edge.who.autopilotDynamic || end < edge.x1 - 0.5 || end > edge.x2 + 0.5 ||
+                    Math.abs(edge.y1 - y) > 2 || Math.abs(edge.y2 - y) > 2) continue
+                const next = dir > 0 ? edge.x2 : edge.x1
+                if ((next - far) * dir > 0) far = next
+            }
+            if (far === end) return null
+            end = far
+        }
+        const { halfWidth, height } = autopilot.size()
+        const left = Math.min(x, toX) - halfWidth + 3, right = Math.max(x, toX) + halfWidth - 3
+        const top = y - height + 3, bottom = y - 5
+        const overlaps = b => b && b.min.x < right && b.max.x > left && b.min.y < y + 4 && b.max.y > top
+        const hitsMap = autopilot.grid.exact ? autopilot.isMapExact(left, top, right, bottom) : autopilot.isBoxSolidExact(left, top, right, bottom)
+        if (hitsMap || autopilot.boxInHazard([left, top, right, y])) return null
+        const blocksWalk = who => !who.isSensor && who.isThere !== false && (who.collisionFilter.mask & cat.player) &&
+            !(m.isHolding && who === m.holdingTarget) && who.bounds.min.y < bottom && overlaps(who.bounds)
+        if (autopilot.dynList.some(who => (who.autopilotDynamic || who.isRay) && blocksWalk(who))) return null
+        if (autopilot.boosts.some(boost => overlaps(boost.bounds)) || autopilot.portalEnds().some(end => overlaps(end.portal.bounds))) return null
+        if (autopilot.winds.some(w => w.x < right && w.x + w.width > left && w.y < y && w.y + w.height > top) ||
+            autopilot.jumpZones.some(z => z.lastBounds && z.lastBounds.left < right && z.lastBounds.right > left && z.lastBounds.top < y && z.lastBounds.bottom > top)) return null
+        for (const who of body) {
+            if (who === block || !blocksWalk(who) || autopilot.isSmallBlock(who)) continue //a small one is walked through
+            if (!canMove(who)) return null
+            if (!block || block !== support && Math.abs(who.position.x - x) < Math.abs(block.position.x - x)) block = who
+        }
+        return { y, block }
+    },
+    landingUphill(x, feet, target, support = null) {
+        const scale = player.scale || 1
+        const surface = autopilot.surfaceAt(x, feet, 15 * scale, (support ? 22 : autopilot.cell) * scale, null, support)
+        if (!surface) return 0
+        const { edge, y } = surface
+        const slope = (edge.y2 - edge.y1) / (edge.x2 - edge.x1)
+        const uphill = -Math.sign(slope)
+        if (Math.abs(slope) < 0.5 || Math.abs(target.x - x) > 150 || target.y > y + 20 || (target.x - x) * uphill < -10 * scale) return 0
+        const onward = autopilot.next?.[target.id]
+        if (onward?.type === autopilot.WALK && onward.dir === -uphill && autopilot.nodes[onward.to].y > target.y + 8) return 0
+        return uphill
     },
     landingRisk(id, dir) { //landing on a steep slope, or right at the edge it came over, often clips the corner and bounces off, the plan should land on the flat
         if (!autopilot.isLipTakeoff) return 0
@@ -681,10 +1292,80 @@ const autopilot = {
         const g = autopilot.grid
         return !(g.dynCount && g.dynCount[node.cx + (node.cy + 1) * g.w])
     },
+    realTop(node) { //the map's top under a spot, a spot on a sliver of a corner gets the top of its grid cell, the corner can be most of a cell lower
+        if (!node.isStatic) return node.y
+        const half = autopilot.cell / 2 - 1
+        for (let offset = 0; offset < autopilot.cell; offset += 2) {
+            for (const dx of [0, -half, half]) if (Matter.Query.point(map, { x: node.x + dx, y: node.y + offset + 1 }).length) return node.y + offset
+        }
+        return node.y
+    },
+    isLowStep(from, to, dir) {
+        if (!from.isStatic || !to.isStatic || from.y < to.y || from.elevator || to.elevator || from.transport || to.transport || to.isBoost) return false
+        const lower = autopilot.surfaceAt(from.x, from.y, 5, autopilot.cell)?.edge
+        let upper = autopilot.surfaceAt(to.x, to.y, 5, autopilot.cell)?.edge
+        if (!upper || upper === lower) upper = autopilot.surfaceAt(to.x + 5 * dir, to.y, 5, autopilot.cell)?.edge //the foot can overlap the lip before its center does
+        if (!lower || !upper || lower === upper) return false
+        const lip = dir > 0 ? upper.x1 : upper.x2
+        if ((lip - from.x) * dir < -0.5 || (to.x - lip) * dir < -5 || lip < lower.x1 - 0.5 || lip > lower.x2 + 0.5) return false
+        const rise = autopilot.edgeY(lower, lip) - autopilot.edgeY(upper, lip)
+        return rise > 0 && rise <= 15 * (player.scale || 1) //the player's slanted foot can ride onto it
+    },
+    isShortRun: true, //jumps with a short run-up from the far end of a ledge too short for a full one, false to compare
+    isMeasuredRun: true, //running jumps at the speed the floor behind the takeoff allows, false is full speed with 100 of floor and the short run-ups, to compare
+    runReach: 200, //the most run-up it measures, about 6.9 of the full 7.06
+    runRoom(x, feet, dir, size, reach = 100, step = 4) { //how far back from x, against dir, the player can stand on this ground, up to reach
+        let back = 0
+        for (let d = step; d <= reach; d += step) {
+            const at = x - dir * d
+            if (!autopilot.surfaceAt(at, feet, 3, 6)) break
+            if (autopilot.isBoxSolidExact(at - size.halfWidth + 2, feet - size.height + 2, at + size.halfWidth - 2, feet - 16)) break
+            back = d
+        }
+        return back
+    },
+    runTable: null, //[distance, speed] running from a standstill, measured to 100, then each cycle gets 0.111 of the way to the full 7.06
+    runSpeed(distance) { //how fast running from a standstill is going after this far, measured, a little under to be safe
+        if (!autopilot.runTable) {
+            const run = autopilot.runTable = [[0, 0], [1.3, 1.33], [4, 2.64], [7.5, 3.52], [11.9, 3.92], [16.7, 4.27], [21.9, 4.58], [27.3, 4.86], [33.1, 5.1], [39.1, 5.32], [45.3, 5.52], [51.7, 5.69], [58.3, 5.85], [65, 5.99], [71.9, 6.11], [79, 6.22], [86.1, 6.31], [93.3, 6.4], [100.8, 6.47]]
+            let [d, v] = run[run.length - 1]
+            while (d < 600) {
+                v += (7.06 - v) * 0.111
+                d += v
+                run.push([d, v])
+            }
+        }
+        const run = autopilot.runTable
+        const scale = autopilot.p.run / 7.06 //measured with the usual run speed
+        const d = distance / (scale * scale)
+        for (let i = 1; i < run.length; i++) {
+            if (d > run[i][0]) continue
+            const [d0, v0] = run[i - 1], [d1, v1] = run[i]
+            return 0.95 * scale * (v0 + (v1 - v0) * (d - d0) / (d1 - d0))
+        }
+        return 0.95 * scale * run[run.length - 1][1]
+    },
     standY(node) { //where the feet really are on this spot, a spot that clips a corner or floats above a steep slope is higher than the map under its middle
         if (!autopilot.isLipTakeoff || !autopilot.isOnMap(node)) return node.y
         const under = autopilot.surfaceAt(node.x, node.y, 2, 2 * autopilot.cell)
         return under && under.y > node.y + 4 ? under.y : node.y //floors found by the grid are 0 to 4 below the real surface
+    },
+    isUphillWalk(from, to) { //a continuous incline can span multiple grid rows without a step
+        if (from.elevator || to.elevator) return false
+        const tolerance = autopilot.cell
+        const slope = autopilot.surfaceAt(to.x, to.y, 8, tolerance)
+        if (!slope) return false
+        const { edge, y } = slope
+        const dir = Math.sign(to.x - from.x)
+        const grade = (edge.y1 - edge.y2) * dir / (edge.x2 - edge.x1)
+        if (grade <= 0 || grade > 1.05) return false
+        const startX = Math.max(edge.x1, Math.min(edge.x2, from.x))
+        const startY = autopilot.edgeY(edge, startX)
+        if (Math.abs(startY - from.y) > tolerance) return false
+        if (Math.abs(startX - from.x) < 0.5) return true
+        const before = autopilot.surfaceAt(from.x, from.y, 8, tolerance)
+        const meets = autopilot.surfaceAt(startX - dir, startY, 4, 4, edge)
+        return !!before && before.edge === meets?.edge
     },
     isLipTakeoff: true, //plan jumps off the exact top of a corner, false to compare in tools/autopilot-test.js
     lipDrop: 0.3, //a surface going down steeper than this, about 17 degrees, is where flat ground ends, running off it leaves the ground
@@ -715,6 +1396,19 @@ const autopilot = {
         }
         return null
     },
+    dropLip(node, lip, dir) { //follow the downhill face from the jump lip to its outer edge
+        let x = lip.x, y = lip.y, edge = null
+        for (let i = 0; i < 16; i++) {
+            const next = autopilot.surfaceAt(x + 1.5 * dir, y, 4, 5, edge)
+            if (!next) return edge ? { x, y } : null
+            edge = next.edge
+            if ((edge.y2 - edge.y1) * dir <= (edge.x2 - edge.x1) * autopilot.lipDrop) return null //the slope joins more walkable ground
+            x = dir > 0 ? edge.x2 : edge.x1
+            y = dir > 0 ? edge.y2 : edge.y1
+            if (Math.abs(x - node.x) > 120) return null
+        }
+        return null
+    },
     indexGeometry() {
         const g = autopilot.grid
         if (!autopilot.isPreciseGeometry) { delete g.geometry; return }
@@ -736,6 +1430,16 @@ const autopilot = {
         }
         for (const who of map) if (!who.isRay && !who.autopilotDynamic && !autopilot.isBoostPiece(who)) addBody(who, true)
         for (const who of autopilot.dyn.keys()) addBody(who, false)
+        for (const who of autopilot.activeTransports) {
+            const t = who.autopilotTransport
+            for (let i = 0; i < 2; i++) {
+                const stop = t.stops[i]
+                const y = g.y0 + Math.floor((t.tops[i] + 2 - g.y0) / autopilot.cell) * autopilot.cell
+                const x1 = g.x0 + Math.floor((stop - t.width / 2 + 3 - g.x0) / autopilot.cell) * autopilot.cell
+                const x2 = g.x0 + (Math.floor((stop + t.width / 2 - 3 - g.x0) / autopilot.cell) + 1) * autopilot.cell
+                add({ bounds: { min: { x: x1, y }, max: { x: x2, y: y + 2 } }, vertices: [{ x: x1, y }, { x: x2, y }, { x: x2, y: y + 2 }, { x: x1, y: y + 2 }] }, true)
+            }
+        }
         for (const who of autopilot.activeElevators) {
             const e = who.autopilotElevator
             const x1 = g.x0 + Math.floor((who.holdX - e.width / 2 + 3 - g.x0) / autopilot.cell) * autopilot.cell
@@ -844,6 +1548,25 @@ const autopilot = {
             }
         }
         if (!isMap) return false
+        return autopilot.isMapExact(x1, y1, x2, y2)
+    },
+    verticalJumpBlocked(x1, y1, x2, y2) {
+        const g = autopilot.grid
+        if (!g.exact || g.geometry) return autopilot.isBoxSolidExact(x1, y1, x2, y2)
+        if (!autopilot.isBoxSolid(x1, y1, x2, y2)) return false
+        if (autopilot.isMapExact(x1, y1, x2, y2)) return true
+        //A full margin matters beside a shrinking platform. Check its live shape, not the occupied cell.
+        for (const [who, obstacle] of autopilot.dyn) {
+            if (obstacle.isSoft || who.isThere === false) continue
+            const b = who.bounds
+            if (b.max.x < x1 || b.min.x > x2 || b.max.y < y1 || b.min.y > y2) continue
+            const parts = who.parts.length > 1 ? who.parts.slice(1) : [who]
+            if (parts.some(part => autopilot.polygonBox(part.vertices, x1, y1, x2, y2))) return true
+        }
+        return false
+    },
+    isMapExact(x1, y1, x2, y2) { //the real shape of the map that stays put is in this box, see indexExact()
+        const g = autopilot.grid
         const seen = new Set()
         for (let y = Math.floor(y1 / 200); y <= Math.floor(y2 / 200); y++) {
             for (let x = Math.floor(x1 / 200); x <= Math.floor(x2 / 200); x++) {
@@ -917,9 +1640,8 @@ const autopilot = {
             return true
         }
         if (m.isHolding || input.field || autopilot.flying) return false //negative mass temporarily changes air control
-        const now = autopilot.physics(), was = autopilot.p
-        const isChanged = now.blockJumps !== (was.blockJumps || 0) || ["jump", "run", "push", "limit", "gravity", "coyote", "apex"].some(k => Math.abs(now[k] - was[k]) > 0.04 * Math.abs(was[k]))
-        if (isChanged) { //simulate every edge again with the new numbers, a little each cycle
+        const now = autopilot.physics()
+        if (autopilot.hasDifferentMovement(now)) { //simulate every edge again with the new numbers, a little each cycle
             autopilot.cancelMovement()
             autopilot.failed.clear()
             autopilot.recentFailures.length = 0
@@ -932,6 +1654,11 @@ const autopilot = {
             autopilot.say("re-planning", "the player moves differently now")
         }
         return false
+    },
+    hasDifferentMovement(now) {
+        const was = autopilot.p
+        return !was || now.blockJumps !== (was.blockJumps || 0) || now.nitinol !== !!was.nitinol ||
+            ["jump", "run", "push", "limit", "gravity", "coyote", "apex"].some(k => Math.abs(now[k] - was[k]) > 0.04 * Math.abs(was[k]))
     },
     hasMapChanged() { //a map piece was added or removed, the grid is built again
         return map.filter(who => !who.isRay).length !== autopilot.grid.mapCount
@@ -991,7 +1718,7 @@ const autopilot = {
             const bounds = who.bounds
             const shapeChanged = was && (!was.bounds || Math.abs((bounds.max.x - bounds.min.x) - (was.bounds[2] - was.bounds[0])) >= 1 || Math.abs((bounds.max.y - bounds.min.y) - (was.bounds[3] - was.bounds[1])) >= 1)
             if (was && !shapeChanged && Math.abs(was.x - who.position.x) < 4 && Math.abs(was.y - who.position.y) < 4 && Math.abs(was.angle - who.angle) < 0.04) continue
-            if (!who.autopilotDynamic && !who.autopilotElevator && (who.speed > 5 || Math.abs(who.angularVelocity) > 0.06)) { //a block flying or spinning, leave it out until it settles, moving platforms stay in
+            if (!who.autopilotDynamic && !who.autopilotElevator && !who.isDoor && (who.speed > 5 || Math.abs(who.angularVelocity) > 0.06)) { //a block flying or spinning, leave it out until it settles, moving platforms stay in
                 if (was) {
                     change(was.cells, -1, was.weight, newBox(), was.isSoft)
                     autopilot.dyn.delete(who)
@@ -1001,6 +1728,10 @@ const autopilot = {
             const cells = []
             autopilot.cellsOfBody(who, cells)
             if (was && was.cells.length === cells.length && was.cells.every((c, k) => c === cells[k])) {
+                if (autopilot.isSpinner(who)) { //a beam tipping a little, the spots on it keep their cells, rebuilding every jump near a long beam isn't worth it
+                    was.angle = who.angle
+                    continue
+                }
                 const box = newBox()
                 for (const i of cells) {
                     const cx = i % w, cy = (i - cx) / w
@@ -1059,7 +1790,7 @@ const autopilot = {
                     g.nodeAt[i] = made.id
                     nodes.push(made)
                     autopilot.rev[made.id] = []
-                    autopilot.tagNode(made)
+                    autopilot.tagNode(made, size)
                 }
             }
         }
@@ -1097,6 +1828,9 @@ const autopilot = {
         }
         autopilot.updateNodes(box)
     },
+    relinkAll() { //rebuild the edges of every live node, a little each cycle
+        for (const node of autopilot.nodes) if (!node.dead) autopilot.relink.add(node.id)
+    },
     relinkSome(ms) { //rebuild queued edges for up to ms, then the plan once they're all done
         if (!autopilot.relink.size) return
         const start = performance.now()
@@ -1119,16 +1853,18 @@ const autopilot = {
         //coyote is how many cycles after running off a ledge the jump is pressed, 0 jumps from the ground
         if (from === to) return
         const edges = autopilot.nodes[from].edges
-        const edge = { from, to, type, dir, cost, steer, most, isRun, coyote, fail: 0, hazardPath: hit ? hit.hazardPath : null, travelFrames: hit ? hit.cycles : 0, landingVy: hit ? hit.vy : 0 }
+        const edge = { from, to, type, dir, cost, steer, most, isRun, coyote, fail: 0, hazardPath: hit ? hit.hazardPath : null, travelFrames: hit ? hit.cycles : 0, landingVy: hit ? hit.vy : 0, arcArgs: hit?.args || null, ceilingHit: hit?.ceilingHit } //arcArgs replays the arc for the path drawn
+        if (hit?.wraps) edge.wraps = hit.wraps
         if (extra) Object.assign(edge, extra) //takeoffX, where on the ground the jump leaves from when it isn't the middle of the node
         if (autopilot.failed.size) edge.fail = autopilot.failed.get(autopilot.edgeKey(edge)) || 0
         const totalCost = e => autopilot.edgeCost(e) + autopilot.retryCost(e)
         for (let i = 0; i < edges.length; i++) {
             const other = edges[i]
-            if (other.to === to && other.type === type && (type !== autopilot.JUMP || (other.isRun === isRun && !!other.coyote === !!coyote && !!other.hold === !!edge.hold && other.blockJumps === edge.blockJumps))) {
-                if (totalCost(other) > totalCost(edge)) edges[i] = edge
-                return
-            }
+            if (other.to !== to || other.type !== type || other.wraps !== edge.wraps) continue
+            if (type === autopilot.FALL && (other.steer !== steer || other.turnY !== edge.turnY)) continue
+            if (type === autopilot.JUMP && (other.isRun !== isRun || (other.runFrom === undefined) !== (edge.runFrom === undefined) || !!other.coyote !== !!coyote || !!other.hold !== !!edge.hold || !!other.delay !== !!edge.delay || other.turnY !== edge.turnY || other.blockJumps !== edge.blockJumps || other.airJumps !== edge.airJumps)) continue
+            if (totalCost(other) > totalCost(edge)) edges[i] = edge
+            return
         }
         edges.push(edge)
     },
@@ -1146,6 +1882,7 @@ const autopilot = {
         const p = autopilot.p
         if (autopilot.rev.length) autopilot.detachEdges(node) //relinking, not building
         node.edges = []
+        const V = node.beltWas = autopilot.beltV(node) //a belt under this spot carries the player this fast, see beltGait()
         const add = (to, type, dir, cost, steer, most, isRun, coyote, hit, extra) => {
             if (type === autopilot.JUMP || type === autopilot.FALL) {
                 if (Math.abs(nodes[to].x - node.x) < 37.5 && Math.abs(nodes[to].y - node.y) < 2) return //back where it started, arc() can't tell when it left from below a floating spot
@@ -1159,18 +1896,25 @@ const autopilot = {
             const isUp = boost.angle === Math.PI / 2
             const vx = isUp ? 0 : Math.cos(boost.angle) * speed
             const vy = isUp ? -speed : -Math.sin(boost.angle) * speed
+            const transfer = { leaveBoost: boost }
             for (const dir of [-1, 0, 1]) {
                 for (const most of dir ? [p.limit, p.limit * 0.5, p.limit * 0.2] : [0]) {
-                    const hit = autopilot.arc(node.x, node.y - 2, vx, vy, dir, most, false, size)
+                    const hit = autopilot.arc(node.x, node.y - 2, vx, vy, dir, most, false, size, 0, false, Infinity, 0, undefined, transfer)
                     if (hit) add(hit.node, autopilot.BOOST, dir || Math.sign(nodes[hit.node].x - node.x) || 1, hit.cycles + 10, dir, most, false, 0, hit)
                 }
             }
         } else {
             const standY = autopilot.standY(node) //jumps and falls leave from here, the spot itself can float a little above it
             if (autopilot.portals.length) autopilot.linkPortals(node, size, add)
+            if (autopilot.p.nitinol) autopilot.linkWallClimbs(node, standY, size, add)
             if (node.elevator) { //ride it to the other end
                 const other = node.elevator.autopilotElevator.nodes[1 - node.elevatorLevel].find(n => n.cx === node.cx && !n.dead)
                 if (other) add(other.id, autopilot.RIDE, 0, 150 + Math.abs(other.y - node.y) / 4)
+            }
+            if (node.transport) { //ride it to its other stop, the same spot on the deck
+                const t = node.transport.autopilotTransport
+                const other = autopilot.transportNode(node.transport, 1 - node.transportStop, node.x - t.stops[node.transportStop])
+                if (other >= 0) add(other, autopilot.RIDE, 0, t.isSwing ? 30 + t.period / 2 : 60 + Math.abs(t.stops[1] - t.stops[0]) / Math.abs(node.transport.VxGoal))
             }
             for (const dir of [-1, 1]) {
                 //a running jump needs room behind to get up to speed
@@ -1185,6 +1929,9 @@ const autopilot = {
                 const lipAhead = lip && !lip.isBehind && (lip.x - node.x) * dir > -2 && (lip.x - node.x) * dir < 1.5 * cell ? lip : null
                 const late = lip && lip.isBehind && ((node.x - lip.x) * dir < 80 || standY > node.y) ? 40 : 0 //on the slope past the top, the plan should jump from the top instead
                 let beside = autopilot.walkTo(node, dir)
+                const gait = autopilot.beltGait(V, dir, node.x, standY, size) //how fast it goes this way on a belt, and whether by hopping
+                const runVx = gait.isHop ? autopilot.hopTakeoff(V) : gait.speed //how fast it leaves the ground going this way, between hops against a belt it's slower than the hops average
+                const beltRun = V ? { beltVx: dir * runVx } : null //marks a jump that takes off from a belt, with the speed it was planned at
                 if (beside >= 0 && autopilot.winds.length) { //walking into a wind stronger than the player's legs doesn't get anywhere
                     const w = autopilot.windAt(node.x, node.y, true)
                     if (w) { //a float wind lifts the player off the ground, so it's the air push against all of the wind
@@ -1199,27 +1946,41 @@ const autopilot = {
                 if (isPushing) autopilot.grid.hard = autopilot.grid.fixed
                 try {
                     if (beside >= 0) {
-                        add(beside, autopilot.WALK, dir, (node.isCrouch || nodes[beside].isCrouch ? 3 : 1) * cell / p.run)
-                    } else if (!autopilot.isBoxSolid(node.x + dir * cell - size.halfWidth + 3, node.y - size.height + 3, node.x + dir * cell + size.halfWidth - 3, Math.min(node.y - 14, autopilot.grid.y0 + (node.cy + 1) * cell - 1))) { //above the floor's cell row, which can stick up past the real floor, the slanted foot rides over the last bit
+                        if (gait.speed) {
+                            const step = !V && autopilot.isLowStep(node, nodes[beside], dir)
+                            add(beside, autopilot.WALK, dir, (node.isCrouch || nodes[beside].isCrouch ? 3 : 1) * cell / gait.speed + (gait.isHop ? 1 : 0), 0, 0, false, 0, null, gait.isHop ? { isHop: true } : step ? { isLowStep: true } : null)
+                        }
+                    } else if (!gait.speed) { //a belt carrying it away from this ledge faster than it can go
+                    } else {
                         //a ledge, walk off it fast, slow, or turning back under it, the foot leaves the ground a little past the corner
                         const edgeLip = lipAhead || (lip && lip.isBehind && (node.x - lip.x) * dir < cell ? lip : null) //a spot just past the corner leaves the ground at the corner
-                        const x = edgeLip ? edgeLip.x + dir * 16 : node.x + dir * (cell / 2 + 14)
-                        const y = edgeLip ? edgeLip.y : standY
-                        for (const [vx, steer, most] of [[p.run, dir, p.limit], [3, 0, 0], [3, -dir, p.limit], [3, -dir, p.limit * 0.4]]) {
-                            const hit = autopilot.arc(x, y, dir * vx, 0, steer, most, false, size)
-                            if (hit) add(hit.node, autopilot.FALL, dir, hit.cycles + 8, steer, most, false, 0, hit)
-                        }
-                        if (isRoom && !node.isCrouch) { //run off the edge and jump a few cycles later, in coyote time, it reaches farther than jumping from the last spot on the ledge
-                            const coyote = Math.min(m.coyoteCycles, 8) - 3 //a few cycles to spare, longer coyote time is flying, see findFlight()
-                            let cx = x, cy = y, fall = 0
-                            for (let i = 0; i < coyote; i++) {
-                                fall += p.gravity
-                                cx += dir * p.run
-                                cy += fall
+                        const bevel = !V && !node.isCrouch && (lipAhead || lip?.isBehind) ? autopilot.dropLip(node, lip, dir) : null
+                        if (bevel) autopilot.linkBeveledFall(node, standY, bevel, dir, gait.speed, size, add)
+                        //Above the floor's cell row, which can stick up past the real floor.
+                        if (!autopilot.isBoxSolid(node.x + dir * cell - size.halfWidth + 3, node.y - size.height + 3, node.x + dir * cell + size.halfWidth - 3, Math.min(node.y - 14, autopilot.grid.y0 + (node.cy + 1) * cell - 1))) {
+                            const x = edgeLip ? edgeLip.x + dir * 16 : node.x + dir * (cell / 2 + 14)
+                            const y = edgeLip ? edgeLip.y : standY
+                            if (!bevel) {
+                                const slow = V * dir > 0 ? Math.max(3, Math.abs(V)) : 3 //a belt carries it off the end at least that fast
+                                for (const [vx, steer, most] of [[runVx, dir, p.limit], [slow, 0, 0], [slow, -dir, p.limit], [slow, -dir, p.limit * 0.4]]) {
+                                    const hit = autopilot.arc(x, y, dir * vx, 0, steer, most, false, size)
+                                    if (hit) add(hit.node, autopilot.FALL, dir, hit.cycles + 8, steer, most, false, 0, hit)
+                                }
+                                if (edgeLip && !node.isCrouch && !V) autopilot.linkUnderLedgeFall(x, y, dir, edgeLip.x, size, add)
                             }
-                            if (!autopilot.isBoxSolid(cx - size.halfWidth + 1, cy - size.height + 2, cx + size.halfWidth - 1, cy - 2)) {
-                                const hit = autopilot.arc(cx, cy, dir * p.run, -p.jump, dir, p.limit, true, size)
-                                if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + coyote + 35 + late, dir, p.limit, true, coyote, hit, edgeLip ? { takeoffX: edgeLip.x } : null) //15 of it is the run-up
+                            if (isRoom && !node.isCrouch && !gait.isHop) { //run off and jump a few cycles later, in coyote time
+                                const coyote = Math.min(m.coyoteCycles, 8) - 3 //a few cycles to spare, longer coyote time is flying, see findFlight()
+                                const offVx = V || !autopilot.isMeasuredRun ? runVx : autopilot.runSpeed(autopilot.runRoom(x - dir * 16, y, dir, size, autopilot.runReach, 8) + 16) //as fast as the floor behind the edge lets it get
+                                let cx = x, cy = y, fall = 0
+                                for (let i = 0; i < coyote; i++) {
+                                    fall += p.gravity
+                                    cx += dir * offVx
+                                    cy += fall
+                                }
+                                if (!autopilot.isBoxSolid(cx - size.halfWidth + 1, cy - size.height + 2, cx + size.halfWidth - 1, cy - 2)) {
+                                    const hit = autopilot.arc(cx, cy, dir * offVx, -p.jump, dir, p.limit, true, size)
+                                    if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + coyote + 35 + late, dir, p.limit, true, coyote, hit, edgeLip ? { takeoffX: edgeLip.x, ...beltRun } : beltRun) //15 of it is the run-up
+                                }
                             }
                         }
                     }
@@ -1227,10 +1988,17 @@ const autopilot = {
                     autopilot.grid.hard = hard
                 }
                 if (node.isCrouch) continue
-                //jumps from standing, pushing with different limits on speed
+                //jumps from standing, pushing with different limits on speed, on a belt it's carried through this spot with no key held
                 for (const most of [p.limit, p.limit * 0.6, p.limit * 0.3, p.limit * 0.12]) {
-                    const hit = autopilot.arc(node.x, standY, 0, -p.jump, dir, most, true, size)
-                    if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + late, dir, most, false, 0, hit)
+                    const hit = autopilot.arc(node.x, standY, V, -p.jump, dir, most, true, size)
+                    if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + late, dir, most, false, 0, hit, V ? { beltVx: V } : null)
+                }
+                if (V) { //on a belt it never stands still, so only the jumps it can take on the move: carried along, and going with the belt or hopping against it
+                    if (gait.isHop || (isRoom && gait.speed)) {
+                        const hit = autopilot.arc(node.x, standY, dir * runVx, -p.jump, dir, p.limit, true, size)
+                        if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 20 + late, dir, p.limit, true, 0, hit, beltRun)
+                    }
+                    continue
                 }
                 //with the map overhead, short hops under a ledge that hangs over where it lands, and jumps that go straight up first, past a ledge overhead, then over onto it
                 if (autopilot.jumpHasCeiling(node.x, standY, dir)) {
@@ -1238,12 +2006,17 @@ const autopilot = {
                         const hit = autopilot.arc(node.x, standY, 0, -p.jump, dir, p.limit, true, size, 0, true, hold) //precise moves, they have to land with the flat of the foot
                         if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + late, dir, p.limit, false, 0, hit, { hold })
                     }
-                    if (!autopilot.rev.length) { //delayed steering is more expensive, keep it on the initial build
-                        const hit = autopilot.arc(node.x, standY, 0, -p.jump, dir, p.limit, true, size, 12, true)
-                        if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + late, dir, p.limit, false, 0, hit, { delay: 12 })
-                    }
                 }
-                if (isRoom) {
+                autopilot.linkVerticalJumps(node, standY, dir, size, add)
+                if (autopilot.isMeasuredRun) { //a running jump as fast as the floor behind the takeoff lets it get, the run-up starts that far back
+                    const sx = lipAhead ? lipAhead.x - dir * 3 : node.x, sy = lipAhead ? lipAhead.y : standY
+                    const back = autopilot.runRoom(sx, sy, dir, size, autopilot.runReach, 8)
+                    if (back >= 20) {
+                        const runVx = autopilot.runSpeed(back)
+                        const hit = autopilot.arc(sx, sy, dir * runVx, -p.jump, dir, p.limit, true, size)
+                        if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 20 + back / 4 + late, dir, p.limit, true, 0, hit, { takeoffX: sx, runFrom: sx - dir * back, runVx })
+                    }
+                } else if (isRoom) {
                     const hit = autopilot.arc(node.x, standY, dir * p.run, -p.jump, dir, p.limit, true, size)
                     if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 35 + late, dir, p.limit, true, 0, hit) //15 of it is the run-up
                 }
@@ -1253,9 +2026,17 @@ const autopilot = {
                         const hit = autopilot.arc(sx, lipAhead.y, 0, -p.jump, dir, most, true, size)
                         if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + walk, dir, most, false, 0, hit, { takeoffX: sx })
                     }
-                    if (isRoom) {
+                    if (isRoom && !autopilot.isMeasuredRun) {
                         const hit = autopilot.arc(sx, lipAhead.y, dir * p.run, -p.jump, dir, p.limit, true, size)
                         if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 35 + walk, dir, p.limit, true, 0, hit, { takeoffX: sx })
+                    }
+                }
+                if (!isRoom && autopilot.isShortRun && !autopilot.isMeasuredRun) { //a ledge too short for a full run-up, like one against a wall: back up to its far end, run what there is, jump at the takeoff
+                    const sx = lipAhead ? lipAhead.x - dir * 3 : node.x, sy = lipAhead ? lipAhead.y : standY
+                    const back = autopilot.runRoom(sx, sy, dir, size)
+                    if (back >= 20) {
+                        const hit = autopilot.arc(sx, sy, dir * autopilot.runSpeed(back), -p.jump, dir, p.limit, true, size)
+                        if (hit) add(hit.node, autopilot.JUMP, dir, hit.cycles + 25 + back / 2, dir, p.limit, false, 0, hit, { takeoffX: sx, runFrom: sx - dir * back })
                     }
                 }
             }
@@ -1267,7 +2048,106 @@ const autopilot = {
                 if (hit) add(hit.node, autopilot.JUMP, steer || Math.sign(nodes[hit.node].x - node.x) || 1, hit.cycles + 28, steer, most, false, 0, hit, { blockJumps: p.blockJumps })
             }
         }
+        if (tech.isCoyote && p.coyote > 40 && !node.isBoost && !node.isCrouch && !node.elevator && !node.transport && !autopilot.beltV(node)) {
+            const y = autopilot.standY(node)
+            for (const [steer, most] of [[-1, p.limit], [1, p.limit], [-1, p.limit * 0.45], [1, p.limit * 0.45]]) {
+                const groundPush = 1.5 * steer * m.Fx / player.mass * simulation.delta ** 2
+                for (const airJumps of [1, 2, 4]) {
+                    if (21 * airJumps >= p.coyote - 4) break
+                    const hit = autopilot.arc(node.x, y, 0, -p.jump, steer, most, true, size, 0, true, 21, 0, undefined, { airJumps, groundPush })
+                    if (!hit || hit.ceilingHit || hit.isPortal || nodes[hit.node].elevator || nodes[hit.node].transport) continue
+                    add(hit.node, autopilot.JUMP, steer, hit.cycles + 20, steer, most, false, 0, hit, { airJumps, hold: 21 })
+                }
+            }
+        }
         if (autopilot.rev.length) autopilot.attachEdges(node)
+    },
+    linkBeveledFall(node, standY, bevel, dir, speed, size, add) {
+        const clearX = bevel.x + dir * (size.halfWidth + 2)
+        //Check the walk out along the slope before assuming the player is already beside the wall.
+        const distance = (clearX - node.x) * dir
+        if (distance <= 0) return
+        const steps = Math.ceil(distance / 5)
+        const hazardPath = autopilot.hazards.length || autopilot.lasers.length ? [] : null
+        for (let i = 0; i <= steps; i++) {
+            const x = node.x + dir * distance * i / steps
+            //The back of the foot still holds the player up while its center passes the curve.
+            const center = autopilot.surfaceAt(x, standY, 8, 125)?.y ?? bevel.y
+            const heel = autopilot.surfaceAt(x - dir * size.foot, standY, 25, 125)?.y ?? bevel.y
+            const y = Math.min(center, heel)
+            if (autopilot.isBoxSolidExact(x - size.halfWidth + 3, y - size.height + 2, x + size.halfWidth - 3, y - 26)) return
+            if (hazardPath) hazardPath.push([x - size.halfWidth, y - size.height, x + size.halfWidth, y])
+        }
+        const { p } = autopilot
+        const approach = distance / speed
+        for (const [steer, most] of [[dir, p.limit], [0, 0], [-dir, 0]]) {
+            const hit = autopilot.arc(clearX, bevel.y, dir * speed, 0, steer, most, false, size, 0, true)
+            if (!hit || hit.y <= bevel.y + 20) continue
+            if (hazardPath) hit.hazardPath = hazardPath.concat(hit.hazardPath)
+            add(hit.node, autopilot.FALL, dir, hit.cycles + approach + 8, steer, most, false, 0, hit, { clearX, dropY: bevel.y })
+        }
+        autopilot.linkUnderLedgeFall(clearX, bevel.y, dir, bevel.x, size, add, { speed, approach, hazardPath })
+    },
+    linkUnderLedgeFall(x, y, dir, lipX, size, add, bevel = null) {
+        //Find the underside of the lip. Brake outward momentum, then turn underneath.
+        const probe = lipX - dir * Math.min(8, size.foot)
+        let underside = y + 4
+        while (underside < y + 160 && autopilot.isBoxSolidExact(probe, underside, probe, underside)) underside += 8
+        if (underside >= y + 160) return
+        const turnY = underside + size.height + 4
+        const { p } = autopilot
+        for (const most of [p.limit, p.limit * 0.4]) {
+            const hit = autopilot.arc(x, y, dir * (bevel?.speed ?? p.run), 0, -dir, most, false, size, 0, true, undefined, 0, turnY)
+            if (!hit || hit.y <= turnY || (hit.x - lipX) * dir >= 0) continue
+            if (bevel?.hazardPath) hit.hazardPath = bevel.hazardPath.concat(hit.hazardPath)
+            const clearance = bevel ? { clearX: x, dropY: y, turnY } : { turnY }
+            add(hit.node, autopilot.FALL, dir, hit.cycles + (bevel?.approach ?? 0) + 8, -dir, most, false, 0, hit, clearance)
+        }
+    },
+    linkVerticalJumps(node, feet, dir, size, add) { //rise beside a ledge, then steer over it once the feet clear its top
+        const { w, nodeAt } = autopilot.grid
+        const { p, nodes } = autopilot
+        const rise = p.jump ** 2 / (2 * p.gravity)
+        const near = node.x + dir * (size.halfWidth - 6), far = node.x + dir * 115
+        if (rise <= 35 || !autopilot.isBoxSolid(Math.min(near, far), feet - rise, Math.max(near, far), feet - 35)) return
+        const heights = new Map()
+        for (let col = 1; col <= autopilot.cellsFor(115); col++) {
+            const cx = node.cx + col * dir
+            if (cx < 1 || cx >= w - 1) break
+            for (let cy = Math.max(0, node.cy - autopilot.cellsFor(rise)); cy < node.cy; cy++) {
+                const target = nodes[nodeAt[cx + cy * w]]
+                if (!target || target.isCrouch || target.elevator || feet - target.y < 35 || feet - target.y > rise) continue
+                heights.set(cy, Math.min(heights.get(cy) ?? Infinity, target.y))
+            }
+        }
+        for (const y of heights.values()) {
+            const holds = feet - y < 150 ? [6, 9, 12, undefined] : [12, 20, undefined]
+            for (const back of [0, 8, 16]) {
+                const x = node.x - dir * back, side = size.halfWidth + 2
+                if (back && !autopilot.isBoxSolid(x - 4, feet + 1, x + 4, feet + 8)) continue
+                let fits = false
+                //Start steering late, early enough to build speed before the feet reach the edge.
+                for (const offset of [-8, 20, 50, 85]) {
+                    const turnY = y + offset
+                    if (turnY >= feet - 25 || autopilot.verticalJumpBlocked(x - side, turnY - size.height, x + side, feet - size.height)) continue
+                    for (const most of [p.limit * 0.45, p.limit]) {
+                        for (const hold of holds) {
+                            const hit = autopilot.arc(x, feet, 0, -p.jump, dir, most, true, size, 0, true, hold, 0, turnY)
+                            if (!hit || Math.abs(nodes[hit.node].y - y) > 20 || (nodes[hit.node].x - node.x) * dir <= 0 ||
+                                Math.abs(nodes[hit.node].x - node.x) > 150 || autopilot.vanishBeforeLanding(nodes[hit.node], hit.cycles)) continue
+                            add(hit.node, autopilot.JUMP, dir, hit.cycles + 12 + back / p.run, dir, most, false, 0, hit, { hold, turnY, takeoffX: x })
+                            fits = true
+                        }
+                    }
+                    if (fits) break
+                }
+                if (fits) break
+            }
+        }
+    },
+    vanishBeforeLanding(node, frames) {
+        return autopilot.dynList.some(who => who.isThere && who.isTouched && who.fadeTime && who.fadeCount < frames + 6 &&
+            Math.abs(who.bounds.min.y - node.y) < autopilot.cell && node.x >= who.bounds.min.x && node.x <= who.bounds.max.x)
     },
     detachEdges(node) { //take its edges out of the lists of edges arriving at each node
         for (const edge of node.edges) {
@@ -1285,25 +2165,44 @@ const autopilot = {
     },
     edgeKey(edge) {
         const from = autopilot.nodes[edge.from], to = autopilot.nodes[edge.to]
-        return `${from.cx},${from.cy},${to.cx},${to.cy},${edge.type},${edge.dir},${edge.steer || 0},${(edge.most || 0).toFixed(3)},${edge.isRun ? 1 : 0},${edge.coyote || 0},${edge.delay || 0},${edge.hold || 0},${edge.blockJumps || 0}`
+        return `${from.cx},${from.cy},${to.cx},${to.cy},${edge.type},${edge.dir},${edge.steer || 0},${(edge.most || 0).toFixed(3)},${edge.isRun ? 1 : 0},${edge.coyote || 0},${edge.delay || 0},${edge.hold || 0},${edge.blockJumps || 0},${edge.isMomentum ? 1 : 0},${edge.turnY ?? ""},${edge.airJumps || 0}${edge.runFrom === undefined ? "" : ",r"}${edge.wraps ? ",wrap:" + edge.wraps : ""}`
     },
-    sameManeuver(a, b) {
-        if (a.type !== b.type || a.dir !== b.dir) return false
+    similarJumpHold(a, b) {
+        return Math.abs((a.hold ?? 60) - (b.hold ?? 60)) < 4
+    },
+    sameManeuver(a, b, from = autopilot.nodes[b.from], to = autopilot.nodes[b.to]) {
+        if (a.type !== b.type || a.dir !== b.dir || !!a.wraps !== !!b.wraps) return false
+        if (a.type === autopilot.FALL && a.steer !== b.steer) return false
         //Keep distinct takeoffs available, even when they go to the same platform.
-        if (!!a.isRun !== !!b.isRun || !!a.coyote !== !!b.coyote || !!a.hold !== !!b.hold || !!a.delay !== !!b.delay || a.blockJumps !== b.blockJumps) return false
-        const from = autopilot.nodes[a.from], otherFrom = autopilot.nodes[b.from]
-        const to = autopilot.nodes[a.to], otherTo = autopilot.nodes[b.to]
-        return Math.abs(from.x - otherFrom.x) <= 50 && Math.abs(from.y - otherFrom.y) <= 25 &&
-            Math.abs(to.x - otherTo.x) <= 75 && Math.abs(to.y - otherTo.y) <= 30
+        if (!!a.isRun !== !!b.isRun || !!a.coyote !== !!b.coyote || !autopilot.similarJumpHold(a, b) || !!a.delay !== !!b.delay || !!a.isMomentum !== !!b.isMomentum || a.turnY !== b.turnY || a.blockJumps !== b.blockJumps || a.airJumps !== b.airJumps) return false
+        return autopilot.sameCrossing(a, from, to)
+    },
+    sameCrossing(edge, from, to) {
+        const start = autopilot.nodes[edge.from], end = autopilot.nodes[edge.to]
+        return Math.abs(start.x - from.x) <= 50 && Math.abs(start.y - from.y) <= 25 &&
+            Math.abs(end.x - to.x) <= 75 && Math.abs(end.y - to.y) <= 30
     },
     retryCost(edge) {
-        const cycle = simulation.cycle
-        for (const attempt of autopilot.recentFailures) {
-            if (cycle < attempt.until && autopilot.sameManeuver(edge, attempt.edge)) return 360
-        }
-        return 0
+        return autopilot.crossingFailure(edge) ? 360 : 0
     },
-    addFail(edge, count = 1) {
+    crossingFailure(edge) {
+        const cycle = simulation.cycle
+        let temporary = null
+        for (const attempt of autopilot.recentFailures) {
+            if (cycle >= attempt.until) continue
+            const hold = edge.hold ?? 60
+            //Nearby attempts either need more rise or must release early enough to clear the ceiling.
+            const sameFailedHeight = edge.type === autopilot.JUMP && !edge.isElevatorTransfer &&
+                ((attempt.isTooLow && hold < attempt.edge.hold + 4) ||
+                 (attempt.ceilingAt && edge.dir === attempt.edge.dir && edge.turnY === attempt.edge.turnY && hold >= attempt.ceilingAt - 3))
+            if (!(sameFailedHeight && autopilot.sameCrossing(edge, attempt.from, attempt.to)) &&
+                !autopilot.sameManeuver(edge, attempt.edge, attempt.from, attempt.to)) continue
+            if (attempt.until === Infinity) return attempt
+            temporary = attempt
+        }
+        return temporary
+    },
+    addFail(edge, count = 1, isTooLow = false, ceilingAt = 0) {
         const key = autopilot.edgeKey(edge)
         edge.fail = Math.max(edge.fail || 0, autopilot.failed.get(key) || 0) + count
         autopilot.failed.set(key, edge.fail)
@@ -1311,14 +2210,43 @@ const autopilot = {
         for (const other of autopilot.nodes[edge.from].edges) {
             if (other !== edge && autopilot.edgeKey(other) === key) other.fail = edge.fail
         }
-        const recent = autopilot.recentFailures.filter(attempt => simulation.cycle < attempt.until && !autopilot.sameManeuver(edge, attempt.edge))
-        recent.push({ edge, until: simulation.cycle + 300 })
+        autopilot.rememberFailure(edge, isTooLow, ceilingAt, Infinity)
+    },
+    rememberFailure(edge, isTooLow = false, ceilingAt = 0, retryAfter = 300) {
+        const { cycle } = simulation
+        let until = cycle + retryAfter
+        const recent = autopilot.recentFailures.filter(attempt => {
+            if (cycle >= attempt.until) return false
+            if (!autopilot.sameManeuver(edge, attempt.edge, attempt.from, attempt.to)) return true
+            until = Math.max(until, attempt.until)
+            return false
+        })
+        const shortHold = isTooLow && edge.hold < 56 && !edge.isElevatorTransfer && !edge.blockJumps && !edge.airJumps
+        const from = autopilot.nodes[edge.from], to = autopilot.nodes[edge.to]
+        recent.push({ edge, from: { x: from.x, y: from.y }, to: { x: to.x, y: to.y }, cycle, until, isTooLow: shortHold, ceilingAt })
         autopilot.recentFailures = recent.slice(-8)
         autopilot.commit = autopilot.backUp = null
         autopilot.window.key = ""
-        autopilot.routes.cycle = -1
+        autopilot.routes.cycle = autopilot.openRoutes.cycle = -1
         autopilot.isPlanDirty = true
         autopilot.lastPlanCycle = -Infinity //failures should replan before the next attempt
+    },
+    confirmCrossing(edge) {
+        if (!autopilot.recentFailures.length && !edge.fail) return
+        const end = autopilot.nodes[edge.to]
+        const recent = autopilot.recentFailures.filter(attempt =>
+            attempt.until !== Infinity || Math.abs(end.x - attempt.to.x) > autopilot.cell / 2 || Math.abs(end.y - attempt.to.y) > autopilot.cell / 2 ||
+            !autopilot.sameManeuver(edge, attempt.edge, attempt.from, attempt.to))
+        if (recent.length === autopilot.recentFailures.length && !edge.fail) return
+        autopilot.recentFailures = recent
+        const key = autopilot.edgeKey(edge)
+        autopilot.failed.delete(key)
+        edge.fail = 0
+        for (const other of autopilot.nodes[edge.from].edges) {
+            if (autopilot.edgeKey(other) === key) other.fail = 0
+        }
+        autopilot.routes.cycle = autopilot.openRoutes.cycle = -1
+        autopilot.isPlanDirty = true
     },
     footOff(x, top) { //the player's flat foot is 10 wide, 5 past a corner it slides off, null if it stands here, or { x, side } the corner and which way it slides
         const scale = player.scale || 1
@@ -1389,35 +2317,66 @@ const autopilot = {
             if (!node.dead) autopilot.attachEdges(node)
         }
     },
-    arc(x, y, vx, vy, steer, most, isJump, size, delay = 0, isStrict = false, hold = Infinity, blockJumps = 0) { //hold: cycles jump is held, a short hop lets go early //fly the player's box through the grid, returns { node, cycles } where it lands, steer pushes that way up to speed most, after delay cycles
+    arc(...args) { //arcSim(), the landing remembers how it was simulated, so the path drawn can replay it
+        const hit = autopilot.arcSim(...args)
+        if (hit) hit.args = args
+        return hit
+    },
+    arcTrace: null, //an array while drawing, arcSim() adds x, y each cycle, NaN, NaN where it goes through a portal or wraps
+    arcSim(x, y, vx, vy, steer, most, isJump, size, delay = 0, isStrict = false, hold = Infinity, blockJumps = 0, turnY, transfer) { //simulate the player's box through the grid, returning its landing and travel time
         //isStrict: catching a ledge's corner with the slanted side of the foot slides off it, for steering a flight, planning keeps those landings, steering in the air fixes them
+        //transfer.jumpAge: a jump pressed that many cycles ago, already rising, holding jump until hold, transfer.switchAt: from that cycle on steer transfer.then up to transfer.thenMost
+        const points = autopilot.arcTrace
+        const isMidJump = transfer?.jumpAge !== undefined
+        const switchAt = transfer?.switchAt || 0
         const g = autopilot.grid
         const p = autopilot.p
         const bottom = g.y0 + g.h * autopilot.cell
         const { halfWidth, height, foot } = size
         const startX = x, startY = y
         let apexY = y
+        let ceilingHit = false
+        let canTurn = turnY === undefined || (isJump ? y <= turnY : y >= turnY)
         const zones = autopilot.jumpZones.length ? autopilot.jumpZones.filter(autopilot.jumpZoneActive) : autopilot.jumpZones
         const air = { ax: 0, ay: 0, vx: 0, vy: 0 }
         const drag = 1 - (player.frictionAir ?? 0.001)
-        const boxSolid = isStrict ? autopilot.isBoxSolidExact : autopilot.isBoxSolid //steering a flight, the map's real shape, the grid rounds a ledge out to whole cells
+        const boxSolid = (isJump && turnY !== undefined) || transfer?.verticalJump ? autopilot.verticalJumpBlocked :
+            isStrict ? autopilot.isBoxSolidExact : autopilot.isBoxSolid //steering a flight, the map's real shape, the grid rounds a ledge out to whole cells
         let vxBefore = vx //the speed a cycle ago, what the push this cycle was decided on
-        let lastJump = 1, blockJumpArmed = false
-        const firstPush = isJump && steer && !delay && vx * steer < most ? steer * p.push * m.airTurnFx : 0 //the jump's own cycle pushes harder, the feet are still on the ground
-        const hazards = autopilot.hazards.filter(h => h.isOn !== false && h.height > 0)
-        const hazardPath = autopilot.hazards.length ? [] : null
+        let lastJump = isMidJump ? 1 - transfer.jumpAge : 1, blockJumpArmed = false, airJumps = transfer?.airJumps || 0
+        const firstPush = transfer?.groundPush ?? (isJump && !isMidJump && steer && !delay && canTurn && vx * steer < most ? steer * p.push * m.airTurnFx : 0)
+        const hazardPath = autopilot.hazards.length || autopilot.lasers.length ? [] : null
         let box = null
         const trace = () => {
             if (!hazardPath) return
             if (!box) { box = [x - halfWidth, y - height, x + halfWidth, y]; hazardPath.push(box) }
             else { box[0] = Math.min(box[0], x - halfWidth); box[1] = Math.min(box[1], y - height); box[2] = Math.max(box[2], x + halfWidth); box[3] = Math.max(box[3], y) }
         }
-        let isWet = false //went through slime or another hazard on the way
         const ends = autopilot.portalEnds()
+        const hasBoosts = autopilot.boosts.length > 0
         let lastExit = null, isPortal = false
-        const wrap = level.fallMode === "position" || level.fallMode === "start" //falling out the bottom of the level comes back in from the sky, see simulation.js
+        let leaveBoost = transfer?.leaveBoost
+        const boostHit = (boost, cycles) => {
+            let node = -1, distance = Infinity
+            for (const n of boost.nodes) {
+                if (n.dead) continue
+                const d = Math.abs(n.x - x) + Math.abs(n.y - y)
+                if (d < distance) { node = n.id; distance = d }
+            }
+            if (node < 0) return null //an airborne pad without any standing node still interrupts the arc
+            trace()
+            if (points) points.push(x, y)
+            return { node, cycles, isWet: autopilot.pathIsWet(hazardPath), isPortal, hazardPath, x, y, vx, vy, apexY, ceilingHit, boost, wraps }
+        }
+        const wrap = autopilot.hasFallWrap()
         let wraps = 0 //each fall through drifts the player about 850 to the side, getting across a level can take a few
+        if (points) points.push(x, y)
         for (let cycle = 1; cycle < (wrap ? 2400 : 260); cycle++) {
+            if (points && cycle > 1) points.push(x, y)
+            if (switchAt && cycle === switchAt) {
+                steer = transfer.then
+                most = transfer.thenMost
+            }
             trace()
             if (cycle % 4 === 0) { box = null; trace() }
             if (y > bottom) { //below the level, nothing to hit until it falls far enough to wrap to the sky
@@ -1437,12 +2396,10 @@ const autopilot = {
                         vx = 0
                     }
                     box = null //wrapping is teleportation, not a sweep through the level
+                    if (points) points.push(NaN, NaN)
                     wraps++
                 }
                 continue
-            }
-            if (hazards.length && !isWet && cycle % 2 === 0) {
-                for (const h of hazards) if (x > h.min.x - halfWidth && x < h.max.x + halfWidth && y > h.min.y && y - height < h.max.y) isWet = true
             }
             for (const end of ends) { //going into a portal comes out the other end, see level.portal()
                 if (end === lastExit) continue //coming out of this one, the game skips it until the player is clear of it
@@ -1450,6 +2407,7 @@ const autopilot = {
                 if (x + halfWidth < b.min.x || x - halfWidth > b.max.x || y < b.min.y || y - height > b.max.y) continue
                 const out = autopilot.throughPortal(end, vx, vy)
                 box = null //do not count the space between portals as traveled
+                if (points) points.push(x, y, NaN, NaN)
                 x = out.x
                 y = out.feet
                 vx = out.vx
@@ -1463,17 +2421,25 @@ const autopilot = {
             const jumpAge = cycle - lastJump
             const release = blockJumps && !blockJumpArmed && jumpAge > 10 && vy >= -1.5
             const isBlockJump = blockJumps && blockJumpArmed && jumpAge > 10
+            const isAirJump = airJumps && jumpAge >= 21
             const isHeld = isJump && !release && jumpAge < Math.min(60, hold)
             if (isJump && !isHeld && jumpAge < 60 && vy < 0) vy *= m.shortJumpDamp //let go of jump early, it cuts the rise short, see m.airControl()
             const isApex = cycle > 1 && isHeld && Math.abs(vy) < m.apexSpeed
             //Air control and level effects set the forces for the next physics step.
-            const push = cycle === 1 ? firstPush : steer && cycle - 1 > delay && vxBefore * steer < most && vx * steer < p.limit ? steer * p.push * (vx * steer < 0 ? m.airTurnFx : 1) : 0
+            canTurn ||= isJump ? y <= turnY : y >= turnY
+            if (isJump && cycle > 1 && !canTurn && vy >= 0 && !zones.length && !autopilot.winds.length && !ends.length) return null
+            const steerLimit = canTurn ? most : isJump ? -Infinity : 0
+            const push = cycle === 1 && !isMidJump ? firstPush : steer && cycle - 1 > delay && vxBefore * steer < steerLimit && vx * steer < p.limit ? steer * p.push * (vx * steer < 0 ? m.airTurnFx : 1) : 0
             vxBefore = vx
             air.ax = push
-            const impulse = isJump && (cycle === 1 || isBlockJump) ? -p.jump : 0
+            const impulse = isJump && ((cycle === 1 && !isMidJump) || isBlockJump || isAirJump) ? -p.jump : 0
             air.ay = p.gravity * (isApex ? m.apexGravity : 1)
             air.vx = vx
-            air.vy = vy - (cycle === 1 ? impulse : 0)
+            air.vy = isAirJump ? 0 : vy - (cycle === 1 ? impulse : 0)
+            if (isAirJump) {
+                airJumps--
+                lastJump = cycle
+            }
             if (zones.length) {
                 //The jump impulse is a force, so slime drag acts on the inherited speed, not the impulse.
                 autopilot.jumpZoneStep(zones, x, y, vx, air.vy, size, p.gravity, air)
@@ -1489,6 +2455,7 @@ const autopilot = {
                     }
                 }
             }
+            if (isJump && steer && autopilot.isLedgeAssist && air.vy <= 8 && autopilot.ledgeAhead(x, y, air.vx, steer, size)) air.vy = Math.min(air.vy, -m.ledgeClimbSpeed * (player.scale || 1)) //holding toward a ledge just above the foot climbs it, see m.ledgeAssist()
             if (release) blockJumpArmed = true
             if (isBlockJump) {
                 air.vy = -7.5 + 0.25 * air.vy
@@ -1502,58 +2469,160 @@ const autopilot = {
             if (vx !== 0) {
                 const dir = vx > 0 ? 1 : -1
                 const nx = x + vx
-                if (boxSolid(nx - halfWidth + 1, y - height + 2, nx + halfWidth - 1, y - 14)) {
+                const room = autopilot.exactSideRoom
+                const isCorner = autopilot.isExactSides && vy < 0 && steer === dir && !g.geometry && g.exact && autopilot.isMapExact(nx - halfWidth - room, y - 14, nx + halfWidth + room, y + 6)
+                if (isCorner ? autopilot.isBoxSolidExact(nx - halfWidth - room, y - height + 2, nx + halfWidth + room, y - 14) : boxSolid(nx - halfWidth + 1, y - height + 2, nx + halfWidth - 1, y - 14)) { //rising, sideways against the map's real shape, the grid squares off a rounded corner and stops the player short of the climb up it
                     const ahead = nx + dir * (halfWidth + 2)
                     if (vy <= 8 && steer === dir && autopilot.isSolidAt(ahead, y - 12) && !autopilot.isSolidAt(ahead, y - m.ledgeStep - 2)) vy = Math.min(vy, -m.ledgeClimbSpeed) //ledge assist
                     vx = 0
                 } else x = nx
             }
             //up and down
+            if (transfer?.deck) {
+                const deck = transfer.deck[cycle]
+                const previous = transfer.deck[cycle - 1]
+                if (!deck) return null
+                if (Math.abs(x - deck.x) <= transfer.halfWidth && y <= previous.y + 3 && y + vy >= deck.y && vy > deck.vy) {
+                    if (deck.y <= y + 4 || !Number.isFinite(autopilot.surfaceY(x - foot, x + foot, y, deck.y - 4))) {
+                        y = deck.y
+                        if (hasBoosts && autopilot.boostAt(x, y, size)) return null
+                        trace()
+                        if (points) points.push(x, y)
+                        return { node: transfer.to, cycles: cycle, isWet: autopilot.pathIsWet(hazardPath), isPortal, hazardPath, x, y, vx, vy, apexY, ceilingHit, isDeckLanding: true, wraps }
+                    }
+                }
+                //A side or underside collision will not behave like a clean boarding arc.
+                if (Math.abs(x - deck.x) < transfer.halfWidth + halfWidth && y > deck.y + 5 && y - height < deck.y + transfer.height) return null
+            }
             if (vy < 0) {
-                if (boxSolid(x - halfWidth + 6, y - height + vy, x + halfWidth - 6, y - height + 2)) vy = 0
-                else y += vy
+                if (boxSolid(x - halfWidth + 6, y - height + vy, x + halfWidth - 6, y - height + 2)) {
+                    if (turnY !== undefined) return null
+                    ceilingHit = true
+                    vy = 0
+                } else y += vy
             } else {
                 const top = autopilot.surfaceY(x - foot, x + foot, y, y + vy + 1)
                 const edge = isStrict && Number.isFinite(top) && !g.geometry && autopilot.isLipTakeoff ? autopilot.footOff(x, top) : null
                 if (edge) { //only the slanted side of the foot caught a corner, the player slides off it and keeps falling
                     x = edge.side > 0 ? Math.max(x, edge.x + foot + 1) : Math.min(x, edge.x - foot - 1)
                 } else if (Number.isFinite(top)) { //the first real surface crossed this frame, however many grid rows that spans
+                    if (hasBoosts) {
+                        const boost = autopilot.boostAt(x, top, size)
+                        if (boost && boost !== leaveBoost) { y = top; return boostHit(boost, cycle) }
+                    }
                     let node = autopilot.nodeNear(x, top, 0, 0)
                     if (node < 0) node = autopilot.nodeNear(x, top, 1, g.geometry ? 1 : 0)
-                    if (node < 0) node = autopilot.slideTo(x, top)
+                    if (node < 0) { //no spot where it landed, on flat ground the grid's row can be a cell off the real top, only a slope slides it on to a spot further down
+                        const ground = autopilot.surfaceAt(x, top, 30, 10)
+                        const isFlat = ground && Math.abs((ground.edge.y2 - ground.edge.y1) / ((ground.edge.x2 - ground.edge.x1) || 1)) <= autopilot.lipDrop
+                        node = isFlat ? autopilot.nodeNear(x, ground.y, 1, 1) : autopilot.slideTo(x, top)
+                    }
                     if (node >= 0 && isStrict && Math.abs(autopilot.nodes[node].x - x) > 60) node = -1 //a narrow top with no spot of its own, not a slope down to one far off
-                    if (node < 0) return null
+                    if (node < 0 || airJumps) return null
                     const to = autopilot.nodes[node]
                     if (to.isCrouch) return null
                     if (Math.abs(to.x - startX) < 37.5 && Math.abs(to.y - startY) < 2) return null
                     y = top
                     trace()
-                    isWet = isWet || autopilot.pathIsWet(hazardPath, hazards)
-                    return { node, cycles: cycle, isWet, isPortal, hazardPath, x, y: top, vx, vy, apexY }
+                    if (points) points.push(x, y)
+                    return { node, cycles: cycle, isWet: autopilot.pathIsWet(hazardPath), isPortal, hazardPath, x, y: top, vx, vy, apexY, ceilingHit, wraps }
                 }
                 if (!g.geometry && boxSolid(x - foot, y, x + foot, y + vy + 1)) return null
                 y += vy
+            }
+            if (hasBoosts) {
+                const boost = autopilot.boostAt(x, y, size)
+                if (boost && boost !== leaveBoost) return boostHit(boost, cycle)
+                if (!boost) leaveBoost = null
             }
             apexY = Math.min(apexY, y)
             if (y > bottom && !wrap) return null
         }
         return null
     },
+    hasFallWrap() { //falling out the bottom of these levels sends the player back in from the sky
+        return level.fallMode === "position" || level.fallMode === "start"
+    },
 
     //*********************************************************************
     // planning, a shortest path search backward from the goal
     //*********************************************************************
-    pathIsWet(path, hazards = autopilot.hazards) {
-        if (!path) return false
-        return hazards.some(h => h.isOn !== false && h.height > 0 && path.some(b => b[2] > h.min.x && b[0] < h.max.x && b[3] > h.min.y && b[1] < h.max.y))
+    pathIsWet(path) {
+        return !!path?.some(autopilot.boxInHazard)
     },
+    boxInArea(box, area) {
+        return area.isOn !== false && area.height > 0 && box[2] > area.min.x && box[0] < area.max.x && box[3] > area.min.y && box[1] < area.max.y
+    },
+    boxInHazard(box) {
+        return autopilot.hazards.some(area => autopilot.boxInArea(box, area)) ||
+            autopilot.laserHazards.some(beam => autopilot.beamCrossesBox(beam, box))
+    },
+    pathHazardCost(path, frames) {
+        if (!path?.length) return 0
+        let exposure = 0
+        for (const box of path) {
+            let rate = 0
+            for (const area of autopilot.hazards) {
+                if (autopilot.boxInArea(box, area)) rate = Math.max(rate, area.autopilotIsHeat ? autopilot.heatPenalty : autopilot.hazardPenalty)
+            }
+            if (rate < autopilot.hazardPenalty && autopilot.laserHazards.some(beam => autopilot.beamCrossesBox(beam, box))) rate = autopilot.hazardPenalty
+            exposure += rate
+        }
+        return (frames / 60) * (exposure / path.length)
+    },
+    beamCrossesBox({ x, y, dx, dy, pad }, [left, top, right, bottom]) {
+        //Clip the segment parameter to the times spent inside each axis of the swept box.
+        left -= pad
+        right += pad
+        top -= pad
+        bottom += pad
+        if ((!dx && (x < left || x > right)) || (!dy && (y < top || y > bottom))) return false
+        const xEnter = dx ? ((dx > 0 ? left : right) - x) / dx : 0
+        const xLeave = dx ? ((dx > 0 ? right : left) - x) / dx : 1
+        const yEnter = dy ? ((dy > 0 ? top : bottom) - y) / dy : 0
+        const yLeave = dy ? ((dy > 0 ? bottom : top) - y) / dy : 1
+        return Math.max(0, xEnter, yEnter) <= Math.min(1, xLeave, yLeave)
+    },
+    edgeHazardCost(edge) {
+        if (!autopilot.hazards.length && !autopilot.laserHazards.length) return 0
+        if (edge.hazardRevision === autopilot.hazardRevision) return edge.hazardCost
+        const from = autopilot.nodes[edge.from], to = autopilot.nodes[edge.to]
+        let path = edge.hazardPath
+        if (!path) {
+            const size = autopilot.size()
+            const height = from.isCrouch && to.isCrouch ? size.crouchHeight : size.height
+            path = [[Math.min(from.x, to.x) - size.halfWidth, Math.min(from.y, to.y) - height,
+                Math.max(from.x, to.x) + size.halfWidth, Math.max(from.y, to.y)]]
+        }
+        edge.hazardRevision = autopilot.hazardRevision
+        return edge.hazardCost = autopilot.pathHazardCost(path, edge.travelFrames || edge.cost)
+    },
+    hazardPenalty: 1500, //cost per second exposed, independent of how many edges cross a hazard
+    heatPenalty: 30, //keep moving through heat instead of climbing around it
+    jumpCost: 12, //prefer an equivalent route with fewer jumps
+    boostEntryCost: 300, //prefer a direct landing over a bounce, but keep routes that need a pad
     refreshHazards() { //per-hazard values, so two moving hazards cannot cancel each other's change
-        const signature = autopilot.hazards.map(h => [h.isOn !== false, h.min.x, h.min.y, h.max.x, h.max.y, h.height].join(",")).join(";")
+        const beams = []
+        const cycle = simulation.cycle
+        for (const { who, seen } of autopilot.lasers) {
+            if (cycle - seen > 12 || who.isOn === false || m.isCloak) continue
+            const { position, look } = who
+            if (position.x === look.x && position.y === look.y) continue
+            const hit = vertexCollision(position, look, [map, body])
+            const end = hit.who ? hit : look
+            beams.push({ x: position.x, y: position.y, dx: end.x - position.x, dy: end.y - position.y,
+                pad: (who.isArc ? who.arcHitWidth / 2 : 0) + 5 })
+        }
+        const areas = autopilot.hazards.map(h => [h.isOn !== false, !!h.autopilotIsHeat, h.min.x, h.min.y, h.max.x, h.max.y, h.height].join(","))
+        const areaSignature = areas.join(";")
+        const signature = areaSignature + "|" + beams.map(({ x, y, dx, dy, pad }) =>
+            [x, y, x + dx, y + dy, pad].map(value => Math.round(value / 10)).join(",")).join(";")
         if (signature === autopilot.hazardSignature) return
+        if (areaSignature !== autopilot.hazardSignature.split("|")[0]) autopilot.lastHeavyMove = cycle
+        autopilot.laserHazards = beams
         autopilot.hazardSignature = signature
         autopilot.hazardRevision++
         autopilot.flyStamp = autopilot.flyStamp % 65000 + 1
-        autopilot.lastHeavyMove = simulation.cycle
         autopilot.isPlanDirty = true
     },
     hazardRevision: 0,
@@ -1577,11 +2646,17 @@ const autopilot = {
             }
         }
     },
-    platformForecast(who, frames) { //predict only known elevator rules; never extend unknown motion through an unseen reversal
+    platformForecast(who, frames, samples) { //predict only known elevator rules; never extend unknown motion through an unseen reversal
         const e = who.autopilotElevator
         const now = { x: who.position.x, y: e ? who.position.y - e.height / 2 : who.bounds.min.y, vy: who.velocity.y, reliable: false }
-        if (!e || e.mode === "unknown" || simulation.cycle - e.commandCycle > 2 || who.constraint) return now
-        if (m.isTimeDilated) return { ...now, vy: 0, reliable: true }
+        if (samples) samples.push(now)
+        if (!e || e.mode === "unknown" || simulation.cycle - e.commandCycle > 2 ||
+            (who.constraint && Matter.Composite.get(engine.world, who.constraint.id, "constraint"))) return now
+        if (m.isTimeDilated) {
+            const still = { ...now, vy: 0, reliable: true }
+            if (samples) for (let i = 0; i < frames; i++) samples.push(still)
+            return still
+        }
         let y = now.y, vy = now.vy, up = !!who.isUp, drag = who.frictionAir
         const dt2 = simulation.delta * simulation.delta
         let acceleration = simulation.g + who.force.y / who.mass
@@ -1605,156 +2680,253 @@ const autopilot = {
                 y = e.bottom
                 if (e.mode === "moveOnTouch" || !e.enabled) acceleration -= simulation.g
             }
+            if (samples) samples.push({ x: who.holdX, y, vy })
         }
         return { x: who.holdX, y, vy, reliable: frames <= 240 }
     },
-    elevatorDrop(who, edge, feet) { //try the planned exit from the lift's real height, even if its nominal stop is out of reach
+    elevatorExit(who, edge) { //find the first step off the lift, beyond any ride or walk across the deck
+        for (let i = 0; edge && i < 32; i++, edge = autopilot.next[edge.to]) {
+            if (autopilot.nodes[edge.to].elevator !== who) return edge
+        }
+        return null
+    },
+    elevatorRunTo(target, dir) { //advance the grounded approach using the same input each cycle
+        let x = player.position.x, vx = player.velocity.x
+        const drag = 1 - (player.frictionAir ?? 0.001)
+        const push = m.Fx / player.mass * simulation.delta ** 2
+        const positions = []
+        for (let i = 0; i < 90; i++) {
+            x += vx
+            positions.push(x)
+            if ((target - x) * dir <= 0) return { positions, vx }
+            const damp = Math.abs(vx) > 4 ? 0.89 : 1
+            vx = vx * damp * drag + dir * push * (vx * dir < 2 ? 1.5 : 1)
+        }
+        return null
+    },
+    elevatorDrop(who, edge, feet) { //try the planned exit from the height where the player will reach the lip
         const { nodes, dist, p } = autopilot
-        //The plan may still say to ride to a stop or walk across the deck before leaving.
-        let exit = edge
-        for (let i = 0; exit && nodes[exit.to].elevator === who && i < 32; i++) exit = autopilot.next[exit.to]
+        const exit = autopilot.elevatorExit(who, edge)
         if (!exit || !dist || !Number.isFinite(dist[exit.to])) return null
         const to = nodes[exit.to]
         const dir = Math.sign(to.x - who.holdX)
-        if (!dir || to.elevator || to.y < feet - 10) return null
+        if (!dir || to.elevator) return null
         const size = autopilot.size()
-        const x = player.position.x
         const lip = who.holdX + dir * who.autopilotElevator.width / 2
         const start = lip + dir * (size.foot + 2)
-        //Use the standing body's path across the deck and off the edge. Leave headroom for a moving lift.
-        const near = Math.min(x, start), far = Math.max(x, start)
-        if (autopilot.isBoxSolidExact(near - size.halfWidth + 3, feet - size.height - 8, far + size.halfWidth - 3, feet - 14)) return null
-        let best = null, bestCost = Infinity
-        for (const speed of [p.run, Math.min(3, p.run)]) {
-            const hit = autopilot.arc(start, feet, dir * speed, who.velocity.y, dir, p.limit, false, size, 0, true)
-            if (!hit || hit.isWet || hit.isPortal) continue
-            const land = nodes[hit.node]
-            if (land.dead || !land.isStatic || land.isBoost || land.elevator || land.cover >= 3000 || land.y < feet - 10 || land.y - feet > 400) continue
-            if (dist[land.id] > dist[exit.to] + 30 || !Number.isFinite(dist[land.id])) continue
-            if (tech.isFallingDamage && hit.vy * player.mass > 150) continue
-            const drop = { from: edge.from, to: land.id, type: autopilot.FALL, dir, steer: dir, most: p.limit, cost: hit.cycles, fail: 0 }
-            if (autopilot.retryCost(drop)) continue
-            const cost = hit.cycles + dist[land.id]
-            if (cost < bestCost) {
-                best = drop
-                bestCost = cost
-            }
+        const approach = autopilot.elevatorRunTo(start, dir)
+        if (!approach) return null
+        const deck = []
+        const prediction = autopilot.platformForecast(who, approach.positions.length, deck)
+        const leaveY = prediction.reliable ? prediction.y : feet
+        if (to.y < leaveY - 10) return null
+        //Check clearance as the deck carries the player toward the edge.
+        for (let i = 0; i < approach.positions.length; i++) {
+            const cx = approach.positions[i], y = prediction.reliable ? deck[i + 1].y : feet
+            if (autopilot.isBoxSolidExact(cx - size.halfWidth + 3, y - size.height, cx + size.halfWidth - 3, y - 14)) return null
         }
-        return best
+        const hit = autopilot.arc(start, leaveY, approach.vx, prediction.vy, dir, p.limit, false, size, 0, true)
+        if (!hit || hit.isWet || hit.isPortal || hit.wraps) return null
+        const land = nodes[hit.node]
+        if (land.dead || !land.isStatic || land.isBoost || land.elevator || land.cover >= 3000 || land.y < leaveY - 10 || land.y - leaveY > 400) return null
+        if (dist[land.id] > dist[exit.to] + 30 || !Number.isFinite(dist[land.id])) return null
+        if (tech.isFallingDamage && hit.vy * player.mass > 150) return null
+        const drop = { from: edge.from, to: land.id, type: autopilot.FALL, dir, steer: dir, most: p.limit, cost: hit.cycles, fail: 0 }
+        return autopilot.retryCost(drop) && !autopilot.canRetryCrossing(drop) ? null : drop
     },
-    boardingReady(edge, x) {
+    boardingReady(edge, x, feet) {
         const to = autopilot.nodes[edge.to], who = to.elevator
+        if (to.transport) { //a deck is only there while the transport is at that stop
+            if (autopilot.train === to.transport) return true
+            if (!to.transport.autopilotTransport) return false
+            if (!to.transport.autopilotTransport.isSwing) return autopilot.transportAt(to.transport) === to.transportStop
+            //a swinging platform only pauses there, it has to be there when the player arrives, and a little after
+            const frames = Math.round(edge.travelFrames || Math.abs(to.x - x) / Math.max(1, autopilot.p.run) + 6)
+            return autopilot.swingArrives(to.transport, to.transportStop, simulation.cycle + frames, to.x)
+        }
         if (!who) return true
         if (!autopilot.elevatorEnabled(who)) return false
+        if (who.autopilotElevator.waitingForTouch) return to.elevatorLevel === 0 && Math.abs(who.bounds.min.y - to.y) < 25
+        if (edge.type === autopilot.WALK && feet !== undefined) {
+            const dir = Math.sign(who.holdX - x) || edge.dir
+            const lip = who.holdX - dir * who.autopilotElevator.width / 2
+            const approach = autopilot.elevatorRunTo(lip + dir * 5, dir)
+            if (!approach) return false
+            const deck = autopilot.platformForecast(who, approach.positions.length)
+            return deck.y >= feet - 12 && deck.y <= feet + 22 && (deck.reliable || Math.abs(who.velocity.y) < 0.5)
+        }
         const frames = edge.travelFrames || Math.abs(to.x - x) / Math.max(1, autopilot.p.run) + 6
         const prediction = autopilot.platformForecast(who, frames)
         if (!prediction.reliable) return Math.abs(prediction.y - to.y) < 25 && Math.abs(who.velocity.y) < 0.5
         //A descending player must meet a platform that is actually present at the predicted landing time.
         return Math.abs(prediction.y - to.y) < 30 && (!edge.landingVy || edge.landingVy > prediction.vy)
     },
-    edgeCost(edge) {
-        const to = autopilot.nodes[edge.to]
-        if (edge.blockJumps && (edge.blockJumps > autopilot.p.blockJumps || autopilot.p.coyote > 40)) return Infinity
-        let cost = edge.cost * (1 + 6 * edge.fail) + 120 * edge.fail + to.cover
-        if (edge.hazardRevision !== autopilot.hazardRevision) {
-            edge.hazardRevision = autopilot.hazardRevision
-            edge.hazardCost = autopilot.pathIsWet(edge.hazardPath) ? 1500 : 0
+    elevatorJump(edge, feet, riding = null) {
+        const { nodes, p, dist } = autopilot
+        const target = nodes[edge.to], lift = target.elevator
+        if (target.isCrouch || (!riding && (!lift || !autopilot.elevatorEnabled(lift) ||
+            (lift.autopilotElevator.waitingForTouch && target.elevatorLevel !== 0)))) return null
+        const x = player.position.x, vx = player.velocity.x, size = autopilot.size()
+        const dir = Math.sign(target.x - x)
+        if (!dir || Math.abs(target.x - x) > 420) return null
+        const dt2 = simulation.delta * simulation.delta
+        const transfer = { groundPush: dir * m.Fx / player.mass * dt2 * (vx * dir < 2 ? 1.5 : 1) }
+        const launchVx = Math.abs(vx) > 4 ? 0.89 * vx : vx //ground control still applies its braking on the jump frame
+        let startY = feet, vy = 0
+        if (riding) {
+            const deck = autopilot.platformForecast(riding, 1)
+            if (deck.reliable) startY += deck.y - (riding.position.y - riding.autopilotElevator.height / 2)
+            vy = Math.max(-10, Math.min(10, deck.vy))
+        } else {
+            const deck = []
+            if (!autopilot.platformForecast(lift, 95, deck).reliable) return null
+            //The next physics step precedes ground control, which applies the jump for the step after.
+            Object.assign(transfer, { deck: deck.slice(1), halfWidth: lift.autopilotElevator.width / 2 - 8, height: lift.autopilotElevator.height, to: edge.to })
         }
-        cost += edge.hazardCost
-        if (autopilot.hazards.length) {
-            for (const hazard of autopilot.hazards) {
-                if (hazard.isOn !== false && hazard.height > 0 && to.x > hazard.min.x - 20 && to.x < hazard.max.x + 20 && to.y > hazard.min.y && to.y - 100 < hazard.max.y) cost += 1500
+        let hazardousJump = null
+        for (const hold of new Set([12, 20, edge.hold || 60, 60])) {
+            for (const most of [p.limit, p.limit * 0.55, p.limit * 0.3]) {
+                const hit = autopilot.arc(x + vx, startY, launchVx, vy - p.jump, dir, most, true, size, 0, true, hold, 0, undefined, transfer)
+                if (!hit || hit.ceilingHit || hit.isPortal || hit.wraps) continue
+                const land = nodes[hit.node]
+                if (!riding && (!hit.isDeckLanding ||
+                    Math.abs(hit.x + hit.vx * 8 - lift.holdX) > transfer.halfWidth)) continue
+                if (riding && (!dist || !Number.isFinite(dist[hit.node]) || land.dead || land.elevator || land.cover >= 1000 ||
+                    Math.abs(land.y - target.y) > 30 || dist[hit.node] > dist[edge.to] + 30)) continue
+                const jump = { from: edge.from, to: hit.node, type: autopilot.JUMP, dir, steer: dir, most, hold, cost: hit.cycles + 12, fail: 0, isElevatorTransfer: true, isBoarding: !!lift }
+                if (autopilot.retryCost(jump) && !autopilot.canRetryCrossing(jump)) continue
+                if (!hit.isWet) return jump
+                if (!hazardousJump && autopilot.edgeHazardCost(edge)) hazardousJump = jump
             }
         }
-        return cost
+        return hazardousJump
+    },
+    edgeCost(edge) {
+        const to = autopilot.nodes[edge.to]
+        if (autopilot.isUnavailableBoarding(edge)) return Infinity
+        if (edge.airJumps && !autopilot.canAirJump(edge)) return Infinity
+        if (to.cover >= 3000) {
+            const blocker = autopilot.blockerIn(to)
+            if (blocker && (!blocker.isDoor && !blocker.isRay || autopilot.triedDoors.has(blocker))) return Infinity
+        }
+        if (edge.blockJumps && (edge.blockJumps > autopilot.p.blockJumps || autopilot.p.coyote > 40)) return Infinity
+        let cost = edge.cost * (1 + 6 * edge.fail) + 120 * edge.fail + to.cover
+        if (edge.type === autopilot.JUMP) cost += autopilot.jumpCost + (edge.ceilingHit ? 45 : 0)
+        if (edge.type === autopilot.RIDE && to.transport && autopilot.rodeFrom.length) { //riding back the way it came is a last resort, anything it hasn't seen is the other way
+            const stop = to.transport.autopilotTransport.stops[to.transportStop]
+            if (autopilot.rodeFrom.some(from => Math.abs(from - stop) < 400)) cost += 20000
+        }
+        return cost + (to.isBoost ? autopilot.boostEntryCost : 0) + autopilot.edgeHazardCost(edge) + autopilot.fallWrapCost(edge)
+    },
+    fallWrapCost(move) {
+        return 20000 * (move.wraps || 0) //also account for wraps when comparing live arcs and goals
+    },
+    canRetryCrossing(edge) {
+        return (autopilot.routeRank?.[edge.from] & 1) !== 0
+    },
+    leadsBackToFailure(from, to) {
+        return (autopilot.routeRank?.[to] & 1) !== 0 && !(autopilot.routeRank?.[from] & 1)
     },
     plan() {
         const nodes = autopilot.nodes
         const count = nodes.length
-        const clearExit = autopilot.goalType === "exit" && autopilot.triggers.length && !autopilot.isExitBlocked(autopilot.goal)
+        const openOnly = autopilot.goalType === "explore" || autopilot.isUpgrade(autopilot.goalWho) || autopilot.isLiveBoss(autopilot.goalWho) || (autopilot.goalType === "exit" &&
+            (autopilot.triggers.length || autopilot.hasFallWrap()) && !autopilot.isExitBlocked(autopilot.goal))
         const dist = autopilot.dist = new Float64Array(count).fill(Infinity)
         const next = autopilot.next = new Array(count).fill(null)
+        const wrapped = autopilot.wrapRoutes = new Uint8Array(count)
+        const rank = autopilot.routeRank = new Uint8Array(count).fill(4)
         autopilot.isPlanDirty = false
         autopilot.lastPlanCycle = simulation.cycle
         if (autopilot.goal < 0 || nodes[autopilot.goal].dead) return
-        //binary heap of [distance, node]
-        const heapD = [0], heapN = [autopilot.goal]
-        dist[autopilot.goal] = 0
-        const push = (d, n) => {
-            let i = heapD.length
-            heapD.push(d)
-            heapN.push(n)
-            while (i > 0) {
-                const parent = (i - 1) >> 1
-                if (heapD[parent] <= d) break
-                heapD[i] = heapD[parent]
-                heapN[i] = heapN[parent]
-                i = parent
+        autopilot.searchRoutes(autopilot.goal, dist, next, wrapped, true, openOnly, rank)
+    },
+    heap() { //binary heap of [distance, node], the closest on top, for plan() and pathFrom()
+        const d = [], n = []
+        return {
+            d, n,
+            push(dist, node) {
+                let i = d.length
+                d.push(dist)
+                n.push(node)
+                while (i > 0) {
+                    const parent = (i - 1) >> 1
+                    if (d[parent] <= dist) break
+                    d[i] = d[parent]
+                    n[i] = n[parent]
+                    i = parent
+                }
+                d[i] = dist
+                n[i] = node
+            },
+            pop() {
+                const lastD = d.pop(), lastN = n.pop()
+                const length = d.length
+                if (length === 0) return
+                let i = 0
+                for (; ;) {
+                    let child = 2 * i + 1
+                    if (child >= length) break
+                    if (child + 1 < length && d[child + 1] < d[child]) child++
+                    if (d[child] >= lastD) break
+                    d[i] = d[child]
+                    n[i] = n[child]
+                    i = child
+                }
+                d[i] = lastD
+                n[i] = lastN
             }
-            heapD[i] = d
-            heapN[i] = n
         }
-        const pop = () => {
-            const lastD = heapD.pop(), lastN = heapN.pop()
-            const length = heapD.length
-            if (length === 0) return
-            let i = 0
-            for (; ;) {
-                let child = 2 * i + 1
-                if (child >= length) break
-                if (child + 1 < length && heapD[child + 1] < heapD[child]) child++
-                if (heapD[child] >= lastD) break
-                heapD[i] = heapD[child]
-                heapN[i] = heapN[child]
-                i = child
-            }
-            heapD[i] = lastD
-            heapN[i] = lastN
-        }
-        while (heapD.length) {
-            const d = heapD[0], n = heapN[0]
-            pop()
-            if (d > dist[n]) continue
-            const arriving = autopilot.rev[n]
-            if (!arriving) continue
-            for (let i = 0; i < arriving.length; i++) {
-                const edge = arriving[i]
-                if (nodes[edge.from].dead || (clearExit && autopilot.exitEdgeBlocked(edge))) continue
-                const total = d + autopilot.edgeCost(edge) + autopilot.retryCost(edge)
-                if (total < dist[edge.from]) {
-                    dist[edge.from] = total
-                    next[edge.from] = edge
-                    push(total, edge.from)
+    },
+    searchRoutes(start, dist, links, wrapped, reverse = false, openOnly = false, rank = new Uint8Array(dist.length).fill(4)) {
+        const nodes = autopilot.nodes
+        //Search without known failures first. Within routes that stay on the map, a retry is a fallback.
+        //Fall-off shortcuts come after both. An edge can only add risk, so each queue finishes in order.
+        const queues = [autopilot.heap()]
+        dist[start] = 0
+        rank[start] = 0
+        queues[0].push(0, start)
+        for (let risk = 0; risk < queues.length; risk++) {
+            const heap = queues[risk]
+            if (!heap) continue
+            while (heap.d.length) {
+                const d = heap.d[0], n = heap.n[0]
+                heap.pop()
+                if (rank[n] !== risk || d > dist[n]) continue
+                const edges = reverse ? autopilot.rev[n] : nodes[n].edges
+                if (!edges) continue
+                for (let i = 0; i < edges.length; i++) {
+                    const edge = edges[i]
+                    const to = reverse ? edge.from : edge.to
+                    if (nodes[to].dead || rank[to] < risk || (openOnly && autopilot.exitEdgeBlocked(edge))) continue
+                    const failure = autopilot.crossingFailure(edge)
+                    const nextRisk = risk | (edge.wraps ? 2 : 0) | (failure?.until === Infinity ? 1 : 0)
+                    if (nextRisk > rank[to]) continue
+                    const total = d + autopilot.edgeCost(edge) + (failure ? 360 : 0)
+                    if (!Number.isFinite(total) || (nextRisk === rank[to] && total >= dist[to])) continue
+                    dist[to] = total
+                    rank[to] = nextRisk
+                    wrapped[to] = (nextRisk & 2) !== 0
+                    if (links) links[to] = edge
+                    const queue = queues[nextRisk] ??= autopilot.heap()
+                    queue.push(total, to)
                 }
             }
         }
     },
-    pathFrom(start, prev = null) { //distances from one node to every other, to pick the closest thing to go for, prev gets the edge that reached each node
-        const nodes = autopilot.nodes
-        const dist = new Float64Array(nodes.length).fill(Infinity)
-        if (start < 0) return dist
-        dist[start] = 0
-        const queue = [start] //the graph is small, a simple relaxing queue is enough
-        for (let head = 0; head < queue.length; head++) {
-            const n = queue[head]
-            const edges = nodes[n].edges
-            for (let i = 0; i < edges.length; i++) {
-                const total = dist[n] + autopilot.edgeCost(edges[i]) + autopilot.retryCost(edges[i])
-                if (total < dist[edges[i].to] - 0.5) {
-                    dist[edges[i].to] = total
-                    if (prev) prev[edges[i].to] = edges[i]
-                    queue.push(edges[i].to)
-                }
-            }
-        }
+    pathFrom(start, prev = null, wrapped = new Uint8Array(autopilot.nodes.length), openOnly = false) { //distances from one node to every other, to pick the closest thing to go for
+        const dist = new Float64Array(autopilot.nodes.length).fill(Infinity)
+        if (start >= 0) autopilot.searchRoutes(start, dist, prev, wrapped, false, openOnly)
         return dist
     },
     routes: { cycle: -1, start: -1, count: 0, from: null, prev: null }, //pathFrom() with the edge that reached each node, kept for the rest of the cycle
-    routesFrom(start) {
-        const r = autopilot.routes
+    openRoutes: { cycle: -1, start: -1, count: 0, from: null, prev: null },
+    routesFrom(start, openOnly = false) {
+        const r = openOnly ? autopilot.openRoutes : autopilot.routes
         if (r.cycle !== simulation.cycle || r.start !== start || r.count !== autopilot.nodes.length) {
             r.prev = []
-            r.from = autopilot.pathFrom(start, r.prev)
+            r.wrapped = new Uint8Array(autopilot.nodes.length)
+            r.from = autopilot.pathFrom(start, r.prev, r.wrapped, openOnly)
             r.cycle = simulation.cycle
             r.start = start
             r.count = autopilot.nodes.length
@@ -1772,12 +2944,23 @@ const autopilot = {
         return false
     },
     isDoorIn(node) { //something that can't be pushed really overlaps the player standing at node, the grid's cover rounds it out to whole cells, so a spot beside a door has it too
+        return !!autopilot.blockerIn(node)
+    },
+    blockerIn(node) { //the heavy thing in the way standing at node, worked out once a cycle for each node, the plan asks for every move that lands there
+        if (node.blockerCycle === simulation.cycle) return node.blocker
+        node.blockerCycle = simulation.cycle
+        return node.blocker = autopilot.findBlocker(node)
+    },
+    findBlocker(node) {
         const size = autopilot.size()
         const box = { min: { x: node.x - size.halfWidth + 3, y: node.y - (node.isCrouch ? size.crouchHeight : size.height) + 3 }, max: { x: node.x + size.halfWidth - 3, y: node.y - 3 } }
+        let opening = null
         for (const who of autopilot.dynList) {
-            if (autopilot.obstacleWeight(who) >= 3000 && Matter.Query.region([who], box).length) return true
+            if (autopilot.obstacleWeight(who) < 3000 || !Matter.Query.region([who], box).length) continue
+            if (!autopilot.doorOpening(who)) return who
+            opening = who
         }
-        return false
+        return opening
     },
     nodeFor(where, reach = 8) { //a node to stand at to get to a point, under it or beside it
         let node = autopilot.nodeNear(where.x, where.y + 20, 2, 3)
@@ -1785,21 +2968,95 @@ const autopilot = {
         if (node >= 0 && autopilot.nodes[node].y - where.y > reach * 25) node = -1
         return node
     },
-    exitNode() {
-        return autopilot.nodeNear(level.exit.x + 50, level.exit.y, 2, 3)
+    exitSpot() { //the middle of the exit's floor
+        return { x: level.exit.x + 50, y: level.exit.y }
     },
+    exitNode() {
+        const exit = autopilot.nodeNear(level.exit.x + 50, level.exit.y, 2, 3)
+        if (exit >= 0) return exit
+        const stand = autopilot.levelExits[level.levels[level.onLevel]] //a level whose exit isn't there yet, where to go to get to it
+        return stand ? stand() : -1
+    },
+    walkToExit() {
+        if (level.exit.isInverted || level.isFlipping) return null
+        const { x, y } = level.exit
+        if (player.position.y <= y - 250 || player.position.y >= y + 35) return null
+        return autopilot.straightWalk(x + 50) ? x + 50 : null
+    },
+    //*********************************************************************
+    // exits that appear later, buttons and toggles, and exploring when there's no way
+    //*********************************************************************
+    levelExits: { //levels whose exit appears later, each returns the spot to head for in the meantime, or -1
+        subway() { //each station is built when the player rides past the middle of the tunnel, the exit opens three stations along, so keep riding the trains right
+            const x = player.position.x
+            let best = null
+            for (const who of autopilot.activeTransports) {
+                const t = who.autopilotTransport
+                if (!t || t.isSwing || !who.stops || who.stops.right < x + 500) continue //a train that carries it farther right
+                if (who.stops.left < autopilot.levelExitProgress) continue //never back to a train it already went for, a station can take it left of where that one stops
+                if (!best || who.stops.left < best.stops.left) best = who
+            }
+            if (!best) return -1
+            autopilot.levelExitProgress = best.stops.left
+            return autopilot.transportNode(best, 1, 0) //its deck at the far stop
+        },
+    },
+    levelTriggers: { //levels where only some buttons and toggles help get to the exit, the rest are left alone
+        labs: (kind, who) => kind === "button" && who.min.y > -60, //the tall room's button on the bottom floor adds its climb, the others spawn loot or switch lasers
+    },
+    isUsefulTrigger(kind, who) {
+        const keep = autopilot.levelTriggers[level.levels[level.onLevel]]
+        return !keep || keep(kind, who)
+    },
+    levelExitProgress: -Infinity, //on subway, the left stop of the train it last headed for, see levelExits
     isExplore: true, //when the exit is blocked and no button is left to try, wander to places it hasn't been, leaning toward the exit
-    explored: [], //{ x, y } spots it explored, so it goes somewhere new next time
+    explored: new Map(), //exploration goals already tried, keyed by area and its usable connections
+    exploreVisited: new Set(), //areas the player has actually stood in
+    exploreApproach: null,
+    exploreAgainAt: 0,
     lostSince: 0, //when the exit was blocked and it ran out of buttons, or last got closer to it
     lostBest: Infinity, //the closest it got to the blocked exit, by route cost
-    chooseExplore(exit) { //a spot it can get to, close to the exit, that it hasn't explored, or -1 if the exit can be reached or nothing is left
+    exploreArea(node) {
+        return Math.floor(node.x / 200) + "," + Math.floor(node.y / 125)
+    },
+    rememberExploreGoal() {
+        const hunt = autopilot.activeHunt()
+        if (hunt?.approach?.id === autopilot.goal) {
+            hunt.explored.set(hunt.approach.area, hunt.approach.connections)
+            hunt.approach = null
+            return
+        }
+        const approach = autopilot.exploreApproach
+        if (approach?.id === autopilot.goal) autopilot.explored.set(approach.area, approach.connections)
+        autopilot.exploreApproach = null
+    },
+    ignoreBlocksUntil: 0, //while simulation.cycle is below this, loose blocks are left off the map it plans on, see ignoreBlocks()
+    ignoreBlocksAgainAt: 0,
+    ignoreBlocksFor: 1800, //cycles to try shoving through blocks before putting them back on the map and looking again, 0 never does
+    isIgnoredBlock(who) { //a loose block it plans to shove through while stuck, not a door, platform, or something hanging
+        return simulation.cycle < autopilot.ignoreBlocksUntil && autopilot.isPushable(who) && !who.isNotHoldable && !autopilot.hanging.has(who)
+    },
+    ignoreBlocks() { //explored everywhere and still no way: plan as if the loose blocks weren't there, shoving through them is slow but usually works
+        const cycle = simulation.cycle
+        if (!autopilot.ignoreBlocksFor || cycle < autopilot.ignoreBlocksAgainAt || !autopilot.grid) return false
+        if (![...autopilot.dyn.keys()].some(who => autopilot.isPushable(who) && !who.isNotHoldable && !autopilot.hanging.has(who))) return false
+        autopilot.ignoreBlocksUntil = cycle + autopilot.ignoreBlocksFor
+        autopilot.ignoreBlocksAgainAt = autopilot.ignoreBlocksUntil + 600
+        autopilot.updateObstacles() //takes them off the grid and relinks the spots around them, they come back the same way once the time is up
+        autopilot.isPlanDirty = true
+        autopilot.routes.cycle = autopilot.openRoutes.cycle = -1
+        autopilot.exploreAgainAt = 0
+        autopilot.say("pushing through", "planning as if the blocks weren't there")
+        return true
+    },
+    chooseExplore(exit) { //find an open approach to a new area, or -1 if the exit is reachable
         const cur = autopilot.cur
-        if (cur < 0 || autopilot.relink.size) return autopilot.goalType === "explore" ? autopilot.goal : -1
+        if (cur < 0) return -1
         if (!autopilot.isExitBlocked(exit)) { //found a way
             autopilot.lostSince = 0
             return -1
         }
-        const from = autopilot.routesFrom(cur).from
+        const { from, prev } = autopilot.routesFrom(cur)
         const left = exit >= 0 ? from[exit] : Infinity //what's left to the exit, through the door or hazard
         if (!autopilot.lostSince) autopilot.lostBest = Infinity
         if (left < autopilot.lostBest - 50 && autopilot.goalType !== "explore") { //still getting closer, the wait starts once it's as close as it gets
@@ -1807,40 +3064,95 @@ const autopilot = {
             autopilot.lostSince = simulation.cycle
         }
         if (!autopilot.lostSince) autopilot.lostSince = simulation.cycle
-        const wait = left < Infinity ? 900 : 90 //at a closed door or hazard, wait there a while, they often open on their own, with no way at all just give moving platforms a moment
+        let wait = 90
+        for (let edge = prev[exit]; edge; edge = prev[edge.from]) {
+            const to = autopilot.nodes[edge.to]
+            if (to.cover >= 3000 && autopilot.isDoorIn(to)) {
+                wait = 90
+                break
+            }
+            if (autopilot.exitEdgeBlocked(edge)) wait = 900
+        }
         if (simulation.cycle < autopilot.lostSince + wait) return -1
         const nodes = autopilot.nodes
         if (autopilot.goalType === "explore" && autopilot.goal >= 0) { //keep going there until it arrives or it takes too long
-            const isThere = cur === autopilot.goal || Math.hypot(nodes[cur].x - nodes[autopilot.goal].x, nodes[cur].y - nodes[autopilot.goal].y) < 60
-            if (!isThere && from[autopilot.goal] < Infinity && simulation.cycle < autopilot.goalSince + 900) return autopilot.goal
-            autopilot.explored.push({ x: nodes[autopilot.goal].x, y: nodes[autopilot.goal].y })
+            const destination = nodes[autopilot.goal]
+            const isThere = cur === autopilot.goal || Math.hypot(nodes[cur].x - destination.x, nodes[cur].y - destination.y) < 50
+            if (!isThere && !destination.dead && from[autopilot.goal] < Infinity && !autopilot.isExitBlocked(autopilot.goal) &&
+                simulation.cycle < autopilot.goalSince + 900) return autopilot.goal
+            autopilot.rememberExploreGoal()
         }
-        const target = exit >= 0 ? nodes[exit] : { x: level.exit.x + 50, y: level.exit.y }
+        if (simulation.cycle < autopilot.exploreAgainAt) return -1
+        const target = exit >= 0 ? autopilot.nodes[exit] : autopilot.exitSpot()
+        const approach = autopilot.exploreToward(target, autopilot.routesFrom(cur, true).from, autopilot.explored)
+        if (!approach) {
+            if (autopilot.ignoreBlocks()) return -1 //try again once the spots around the blocks are relinked
+            autopilot.exploreAgainAt = simulation.cycle + 120 //wait for a connection to change instead of retrying the same areas
+            if (autopilot.isLearningSwing()) autopilot.say("watching", "a swinging platform")
+            else autopilot.say("stuck", "explored everywhere it can reach")
+            return -1
+        }
+        autopilot.exploreApproach = approach
+        return approach.id
+    },
+    exploreToward(target, reachable, explored, distanceWeight = 0.2) {
+        const { nodes, cur } = autopilot
+        const areas = new Map(), keys = nodes.map(n => autopilot.exploreArea(n))
+        for (let i = 0; i < nodes.length; i++) {
+            if (!(reachable[i] < Infinity) || nodes[i].dead) continue
+            const area = keys[i]
+            if (!areas.has(area)) areas.set(area, { connections: new Set(), frontier: false })
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            if (!(reachable[i] < Infinity) || nodes[i].dead) continue
+            const n = nodes[i]
+            const area = areas.get(keys[i])
+            for (const edge of n.edges) {
+                const next = keys[edge.to]
+                if (next === keys[i] || edge.wraps || !Number.isFinite(reachable[edge.to]) || autopilot.exitEdgeBlocked(edge)) continue
+                const changesFloor = Math.abs(nodes[edge.to].y - n.y) >= 100
+                const mechanism = edge.type === autopilot.PORTAL || edge.type === autopilot.RIDE || nodes[edge.to].transport || nodes[edge.to].elevator
+                area.connections.add(next)
+                if (changesFloor || mechanism) areas.get(next).frontier = true
+            }
+        }
+        for (const area of areas.values()) area.signature = [...area.connections].sort().join(";")
         let best = -1, bestScore = Infinity
         for (let i = 0; i < nodes.length; i++) {
-            if (!(from[i] < Infinity) || nodes[i].dead || i === cur) continue
-            const n = nodes[i]
-            if (autopilot.explored.some(e => Math.abs(e.x - n.x) < 250 && Math.abs(e.y - n.y) < 250)) continue
-            const score = Math.hypot(n.x - target.x, n.y - target.y) + 0.5 * from[i] + 600 * Math.random() //near the exit, not too far to go, and some of the time somewhere else
+            if (!(reachable[i] < Infinity) || nodes[i].dead || keys[i] === keys[cur]) continue
+            const n = nodes[i], area = areas.get(keys[i])
+            if (explored.get(keys[i]) === area.signature) continue
+            let score = distanceWeight * Math.hypot(n.x - target.x, n.y - target.y) + reachable[i] //straight-line distance is a weak hint through walls
+            if (autopilot.exploreVisited.has(keys[i])) score += 500
+            else if (area.frontier) score -= 600
+            if (n.transport) {
+                const stop = n.transport.autopilotTransport.stops[n.transportStop]
+                if (autopilot.rodeFrom.some(from => Math.abs(from - stop) < 400)) continue //it came from there
+                if (Math.abs(n.x - nodes[cur].x) > 800) score -= 5000 //a ride to somewhere it hasn't been is the best lead there is
+            }
             if (score < bestScore) {
                 bestScore = score
                 best = i
             }
         }
-        if (best < 0) {
-            autopilot.explored.length = 0 //been everywhere it can get to, start over, things may have moved
-            autopilot.say("stuck", "explored everywhere it can reach")
-        }
-        return best
+        if (best < 0) return null
+        const area = keys[best]
+        return { id: best, area, connections: areas.get(area).signature }
     },
     exitEdgeBlocked(edge) {
         const to = autopilot.nodes[edge.to]
+        if (autopilot.isUnavailableBoarding(edge)) return true
+        if (edge.airJumps && !autopilot.canAirJump(edge)) return true
         if (edge.blockJumps && (edge.blockJumps > autopilot.p.blockJumps || autopilot.p.coyote > 40)) return true
         if (to.cover >= 3000 && autopilot.isDoorIn(to)) return true
         if (simulation.cycle < autopilot.elevatorStuckUntil && (edge.type === autopilot.RIDE || to.elevator)) return true
-        return autopilot.hazards.length > 0 && autopilot.edgeCost(edge) - edge.cost * (1 + 6 * edge.fail) - 120 * edge.fail - to.cover >= 1000
+        return false //slime and beams affect the cost, and can still be crossed if needed
     },
-    isExitBlocked(exit) { //look for any open route, including a detour around a closed door
+    isUnavailableBoarding(edge) {
+        const to = autopilot.nodes[edge.to], who = to.elevator
+        return to.elevatorLevel === 1 && who?.autopilotElevator?.waitingForTouch && autopilot.nodes[edge.from].elevator !== who
+    },
+    isExitBlocked(exit, allowWrap = true) { //look for any open route, including a detour around a closed door
         const cur = autopilot.cur
         const nodes = autopilot.nodes
         if (exit < 0 || !nodes[cur] || nodes[cur].dead) return true
@@ -1851,42 +3163,45 @@ const autopilot = {
             const at = queue[i]
             if (at === exit) return false
             for (const edge of nodes[at].edges) {
-                if (seen[edge.to] || nodes[edge.to].dead || autopilot.exitEdgeBlocked(edge)) continue
+                if (seen[edge.to] || nodes[edge.to].dead || (!allowWrap && edge.wraps) || autopilot.exitEdgeBlocked(edge)) continue
                 seen[edge.to] = 1
                 queue.push(edge.to)
             }
         }
         return true
     },
-    isPathBlocked() { //the plan from here goes through a door, a heavy block, or a hazard, or there is no plan
-        const { dist, next, cur } = autopilot
-        if (cur < 0 || !dist || autopilot.nodes[cur].dead) return false
-        if (!(dist[cur] < Infinity)) return true
-        if (simulation.cycle < autopilot.elevatorStuckUntil) return true //an elevator on the way didn't come
-        let at = cur
-        for (let i = 0; i < 800 && next[at]; i++) {
-            const edge = next[at]
-            if (autopilot.edgeCost(edge) - edge.cost * (1 + 6 * edge.fail) - 120 * edge.fail >= 1000) return true
-            at = edge.to
-        }
-        return false
-    },
     triggerNode(trigger) { //where to stand to press it
         if (trigger.kind === "button") return autopilot.nodeNear((trigger.obj.min.x + trigger.obj.max.x) / 2, trigger.obj.min.y + 10, 2, 3)
         return autopilot.nodeNear(trigger.obj.flip.position.x, trigger.obj.flip.position.y + 10, 2, 3)
     },
-    chooseTrigger(exit) {
-        if (autopilot.cur < 0 || !autopilot.triggers.length || !autopilot.isExitBlocked(exit)) return null
+    chooseHeatButton() {
+        if (autopilot.cur < 0) return null
+        const { from, wrapped } = autopilot.routesFrom(autopilot.cur, true)
+        let best = null, closest = Infinity
+        for (const trigger of autopilot.triggers) {
+            if (trigger.obj.autopilotHeat?.isOn !== true || !trigger.obj.isUp) continue
+            if (simulation.cycle < (autopilot.tried.get(trigger) ?? -Infinity) + 240) continue
+            const node = autopilot.triggerNode(trigger)
+            if (node < 0) continue
+            const distance = from[node]
+            if (!(distance < closest) || wrapped[node]) continue
+            best = trigger
+            closest = distance
+        }
+        return best
+    },
+    chooseTrigger(destination, blocked = autopilot.isExitBlocked(destination, false)) {
+        if (autopilot.cur < 0 || !autopilot.triggers.length || !blocked) return null
         const cycle = simulation.cycle
         const working = autopilot.goalType === "trigger" ? autopilot.goalWho : null
-        if (working && working.arrivedAt) return working
-        const from = autopilot.routesFrom(autopilot.cur).from
+        const { from, wrapped } = autopilot.routesFrom(autopilot.cur, true)
         const ready = [], carryAgain = []
         let closest = Infinity
         for (const trigger of autopilot.triggers) {
             if (trigger.kind === "button" && (!map.length || (trigger.wasUp && !trigger.obj.isUp))) continue
             const node = autopilot.triggerNode(trigger)
-            if (node < 0 || !Number.isFinite(from[node])) continue
+            if (node < 0 || !Number.isFinite(from[node]) || wrapped[node]) continue
+            if (trigger === working && working.arrivedAt) return working
             const when = autopilot.tried.get(trigger)
             if (when === undefined || cycle >= when + 2400) {
                 if (trigger === working) return working //keep the choice while walking to it
@@ -1897,10 +3212,7 @@ const autopilot = {
             }
         }
         const choices = ready.length ? ready : carryAgain
-        if (!choices.length) {
-            autopilot.say("stuck", exit < 0 ? "no way to the exit" : "tried every button, going for the exit anyway")
-            return null
-        }
+        if (!choices.length) return null
         if (!ready.length) closest = Math.min(...choices.map(({ distance }) => distance))
         const weights = choices.map(({ distance }) => 1 + (closest + 60) / (distance + 60)) //the nearest gets at most twice the weight
         let roll = Math.random() * weights.reduce((sum, weight) => sum + weight, 0)
@@ -1945,6 +3257,8 @@ const autopilot = {
     isCarryBlocks: true,
     carry: null, //{ trigger, block, phase: "fetch" or "bring", spot, since, holdAt } the block it's bringing to a button
     carryAim: null, //{ x, y } the mouse goes exactly here this cycle, at the block it's picking up or the button it's dropping onto
+    stepBlocks: new Set(), //blocks left in place as steps this level
+    nextBlockStep: 0,
     canHoldBlocks() { //the field picks up blocks, most do, see m.lookForBlock()
         if (autopilot.holdField !== m.fieldMode) {
             autopilot.holdField = m.fieldMode
@@ -1966,6 +3280,57 @@ const autopilot = {
             if (b.max.x > o.min.x && b.min.x < o.max.x && b.max.y > o.min.y - 6 && b.max.y < o.max.y + 20) return true
         }
         return false
+    },
+    startBlockStep(feet, edge) {
+        const { cur, nodes, dist, p } = autopilot
+        const cycle = simulation.cycle
+        const source = nodes[cur]
+        if (!autopilot.isCarryBlocks || !autopilot.grid || !source?.isStatic || autopilot.carry || m.isHolding || !m.onGround || m.energy < 0.05 ||
+            cycle < autopilot.nextBlockStep || !autopilot.canHoldBlocks() || source.isBoost || autopilot.beltV(source)) return false
+        const jumpRise = autopilot.hopFlight(p, 60).rise
+        const targets = nodes.filter(to => !to.dead && to.isStatic && !to.cover && !to.isCrouch && !to.isBoost &&
+            feet - to.y >= jumpRise - 45 && feet - to.y <= jumpRise + 170 && Math.abs(to.x - source.x) < 275 &&
+            (to.id === edge?.to || (Number.isFinite(dist?.[to.id]) && dist[to.id] < dist[cur]) ||
+                (autopilot.goalType === "explore" && Math.hypot(to.x - level.exit.x, to.y - level.exit.y) <
+                    Math.hypot(source.x - level.exit.x, feet - level.exit.y) - 100)))
+        if (!targets.length) return false
+        const size = autopilot.size(), radius = 30 + 40 * (player.scale || 1)
+        const from = autopilot.routesFrom(cur).from
+        const blocks = body.filter(block => autopilot.isCarryable(block) && !block.isImmutable && block.vertices.length === 4 &&
+            !autopilot.isOnButton(block) && !autopilot.stepBlocks.has(block) && !autopilot.isIgnored(block) && !autopilot.hanging.has(block) &&
+            Math.abs(block.bounds.max.y - feet) < 30 && Math.abs(block.position.x - source.x) < 500 && block.speed < 3 &&
+            Number.isFinite(from[autopilot.fetchNode(block)]))
+        let best = null, bestCost = Infinity
+        for (const stage of nodes) {
+            if (stage.dead || !stage.isStatic || stage.cover || stage.isBoost || stage.isCrouch || Math.abs(stage.y - feet) > 12 ||
+                Math.abs(stage.x - source.x) > 135 || !Number.isFinite(from[stage.id])) continue
+            for (const dir of [-1, 1]) {
+                const x = stage.x + dir * radius
+                const floor = autopilot.surfaceAt(x, stage.y, 12, 12)
+                if (!floor || Math.abs((floor.edge.y2 - floor.edge.y1) / (floor.edge.x2 - floor.edge.x1)) > 0.15) continue
+                const base = [...autopilot.stepBlocks].find(block => body.includes(block) && block.speed < 2 &&
+                    Math.abs(block.bounds.max.y - floor.y) < 12 && Math.abs(block.position.x - x) < 12)
+                const y = base ? base.bounds.min.y : floor.y
+                for (const block of blocks) {
+                    const { min, max } = block.bounds, half = (max.x - min.x) / 2, height = max.y - min.y
+                    if (half < 27 || half > radius - size.halfWidth - 6 || height < 38 || (base && 2 * half > base.bounds.max.x - base.bounds.min.x)) continue
+                    if (!base && (floor.edge.x1 > x - half - 4 || floor.edge.x2 < x + half + 4)) continue
+                    if (autopilot.verticalJumpBlocked(x - half, y - height - size.height - 6, x + half, y - 5)) continue
+                    for (const to of targets) {
+                        const gap = (to.x - x) * dir, rise = y - height - to.y
+                        if (gap < 12 || gap > 155 || rise < 25 || rise > jumpRise + (!base && blocks.length > 1 ? 55 : -8)) continue
+                        const cost = Math.abs(stage.x - source.x) + Math.abs(block.position.x - stage.x) + gap + 5 * Math.max(0, rise - jumpRise + 8)
+                        if (cost >= bestCost) continue
+                        best = { block, spots: [stage.id], phase: "fetch", since: cycle, holdAt: 0, step: { x, y, base } }
+                        bestCost = cost
+                    }
+                }
+            }
+        }
+        if (!best) return false
+        autopilot.carry = best
+        autopilot.nextBlockStep = cycle + 420
+        return autopilot.updateCarry()
     },
     planCarry(trigger) { //the closest block to fetch for a button, counting the slow walk carrying it, or null
         if (!autopilot.isCarryBlocks || trigger.kind !== "button" || !autopilot.canHoldBlocks() || autopilot.cur < 0) return null
@@ -1996,12 +3361,23 @@ const autopilot = {
             autopilot.carry = null
             if (m.isHolding) m.drop()
             if (!isGood) autopilot.ignored.set(c.block, cycle + 3600)
-            c.trigger.carries = (c.trigger.carries || 0) + 1
-            autopilot.tried.set(c.trigger, cycle)
+            if (c.trigger) {
+                c.trigger.carries = (c.trigger.carries || 0) + 1
+                autopilot.tried.set(c.trigger, cycle)
+            }
             autopilot.say(isGood ? "dropped" : "stuck", why)
             return false
         }
         if (!body.includes(c.block)) return stop(false, "the block it was carrying is gone")
+        if (c.step?.base && (!body.includes(c.step.base) || Math.abs(c.step.base.position.x - c.step.x) > 15)) return stop(false, "the bottom block moved")
+        if (c.phase === "settle") {
+            if (Math.abs(c.block.bounds.max.y - c.step.y) < 10 && Math.abs(c.block.position.x - c.step.x) < 16 && c.block.speed < 1) {
+                autopilot.stepBlocks.add(c.block)
+                autopilot.updateObstacles()
+                return stop(true, "put a block in place as a step")
+            }
+            return cycle < c.since + 120 || stop(false, "the step block slid away")
+        }
         if (autopilot.isOnButton(c.block) && !m.isHolding) return stop(true, "a block is holding the button down")
         if (m.isHolding && m.holdingTarget === c.block) {
             if (c.phase !== "bring") {
@@ -2012,9 +3388,9 @@ const autopilot = {
             c.phase = "fetch"
             c.since = cycle
         }
-        if (cycle > c.since + 1200) return stop(false, c.phase === "fetch" ? "couldn't pick up the block" : "couldn't bring the block to the button")
+        if (cycle > c.since + (c.step ? 360 : 1200)) return stop(false, c.phase === "fetch" ? "couldn't pick up the block" : "couldn't place the block")
         let goal = -1
-        if (c.phase === "fetch") goal = autopilot.nodeNear(c.block.position.x, c.block.bounds.max.y, 3, 3)
+        if (c.phase === "fetch") goal = autopilot.fetchNode(c.block)
         else {
             const from = autopilot.cur >= 0 ? autopilot.routesFrom(autopilot.cur).from : null
             let best = Infinity
@@ -2027,29 +3403,86 @@ const autopilot = {
         }
         if (goal < 0 || nodes[goal].dead) return stop(false, "no way to the block or the button")
         if (goal !== autopilot.goal || autopilot.goalType !== "carry") {
-            if (autopilot.goalType !== "carry") autopilot.say("carrying", "a block to hold the button down")
+            if (autopilot.goalType !== "carry") autopilot.say("carrying", c.step ? "a block to make a step" : "a block to hold the button down")
             autopilot.goal = goal
             autopilot.goalType = "carry"
             autopilot.goalWho = c.block
+            autopilot.goalWalk = null
             autopilot.goalSince = cycle
             autopilot.isPlanDirty = true
         }
         return true
     },
+    releaseCarry(isDone = true) { //let go of a carry it no longer needs, false only pauses it, like for an upgrade on the way
+        const c = autopilot.carry
+        if (!c) return
+        if (m.holdingTarget === c.block) {
+            if (m.isHolding) m.drop()
+            else m.holdingTarget = null
+        }
+        if (isDone && c.trigger) { //counted like one updateCarry() finished, so a door that keeps reopening and closing can't start carries forever
+            c.trigger.carries = (c.trigger.carries || 0) + 1
+            autopilot.tried.set(c.trigger, simulation.cycle)
+        }
+        autopilot.carry = null
+    },
+    fetchNode(block) { //where to stand to pick up a block, beside it or under where it rests, not on top of it, the player can't stand there once it's picked up
+        const b = block.bounds, nodes = autopilot.nodes
+        const from = autopilot.cur >= 0 ? autopilot.routesFrom(autopilot.cur).from : null
+        const near = autopilot.nodeNear(block.position.x, b.max.y, 3, 3)
+        const isOnTop = n => nodes[n].x > b.min.x - 15 && nodes[n].x < b.max.x + 15 && Math.abs(nodes[n].y - b.min.y) < 20
+        let best = -1, bestCost = Infinity
+        for (const n of [near, autopilot.nodeNear(b.min.x - 40, b.max.y, 2, 3), autopilot.nodeNear(b.max.x + 40, b.max.y, 2, 3)]) {
+            if (n < 0 || nodes[n].dead || isOnTop(n) || !from || !(from[n] < bestCost)) continue
+            best = n
+            bestCost = from[n]
+        }
+        return best >= 0 ? best : near
+    },
+    carryReach() { //how far from the player's middle the field picks up a block, see m.lookForBlock(), a little under
+        return 80 + 70 * Math.max(1, player.scale || 1) + 20
+    },
+    isHoldingButton(trigger) { //the player standing on this button, it holds the door open only while they're there
+        if (trigger.kind !== "button" || trigger.obj.isUp) return false
+        const o = trigger.obj, x = player.position.x, feet = playerBody.bounds.max.y
+        return x > o.min.x - 30 && x < o.max.x + 30 && feet > o.min.y - 30 && feet < o.max.y + 15
+    },
     driveCarry(go) { //close to the block, pick it up, at the spot beside the button, drop it on, true while it's doing one of those
         const c = autopilot.carry
         if (!c || autopilot.goalType !== "carry" || !m.onGround) return false
         const cycle = simulation.cycle
+        if (c.phase === "settle") {
+            autopilot.why = "waiting for the step block to settle"
+            return true
+        }
         if (c.phase === "fetch" && !m.isHolding) {
             const b = c.block.position
-            if (Math.hypot(b.x - m.pos.x, b.y - m.pos.y) > 130 || Matter.Query.rayAny(map, b, m.pos)) return false
+            if (Math.hypot(b.x - m.pos.x, b.y - m.pos.y) > autopilot.carryReach() || Matter.Query.rayAny(map, b, m.pos)) return false
             autopilot.why = "picking up a block"
             autopilot.carryAim = { x: b.x, y: b.y }
+            if (c.step) {
+                input.field = m.holdingTarget !== c.block || m.fieldCDcycle >= m.cycle
+                return true
+            }
             if (!c.holdAt || cycle > c.holdAt + 40) c.holdAt = cycle //hold the field on it, then let go, and m.hold() picks it up
             input.field = cycle < c.holdAt + 14
             return true
         }
         if (c.phase === "bring" && m.isHolding && autopilot.cur === autopilot.goal) {
+            if (c.step) {
+                autopilot.why = "placing a block as a step"
+                const dx = autopilot.nodes[autopilot.goal].x - player.position.x
+                if (Math.abs(dx) > 5 && (dx * player.velocity.x <= 0 || Math.abs(dx) > Math.abs(player.velocity.x) * 10)) go(dx)
+                const b = c.block.bounds
+                autopilot.carryAim = { x: c.step.x, y: Math.min(m.pos.y, c.step.y - (b.max.y - c.block.position.y) - 16) }
+                input.field = false
+                if (Math.abs(c.block.position.x - c.step.x) < 13 && b.max.y <= c.step.y - 5 && Math.abs(player.velocity.x) < 0.65 && autopilot.blockDropFits(c.block, b)) {
+                    m.drop()
+                    c.phase = "settle"
+                    c.since = cycle
+                }
+                return true
+            }
             const o = c.trigger.obj, mid = (o.min.x + o.max.x) / 2
             autopilot.why = "dropping a block on the button"
             autopilot.carryAim = { x: mid, y: o.min.y - 50 } //the held block hangs out toward the mouse, over the button
@@ -2082,7 +3515,7 @@ const autopilot = {
         autopilot.cancelMovement()
         autopilot.ignored.set(block, cycle + 600)
         if (carry && carry.block === block) {
-            autopilot.tried.set(carry.trigger, cycle)
+            if (carry.trigger) autopilot.tried.set(carry.trigger, cycle)
             autopilot.goal = -1
             autopilot.goalWho = null
             autopilot.goalType = ""
@@ -2094,59 +3527,93 @@ const autopilot = {
         autopilot.say("dropped", "the block was too heavy for the jump")
         return true
     },
+    //*********************************************************************
+    // moving a block out of the way, by hand or with the pilot wave
+    //*********************************************************************
     blockClear: null,
     blockClearUntil: new WeakMap(),
-    blockDropFits(block, bounds, isUnderfoot) {
-        //A block lifted from underfoot needs to fall beside the player, outside the drop.
-        if (isUnderfoot && bounds.max.x > player.bounds.min.x - 4 && bounds.min.x < player.bounds.max.x + 4) return false
-        if (Matter.Bounds.overlaps(player.bounds, bounds) || Matter.Query.region(map, bounds).length) return false
-        return !Matter.Query.region(body, bounds).some(who => who !== block)
+    blockClearSize: 25, //a loose block no bigger than this either way gets hopped or pushed, not picked up and moved
+    isSmallBlock(who) { //no wider corner to corner than a blockClearSize square, the widest span doesn't change as it turns
+        if (!autopilot.isPushable(who) || !who.vertices) return false
+        const most = 2 * autopilot.blockClearSize * autopilot.blockClearSize //the square's diagonal, squared
+        const v = who.vertices
+        for (let i = 0; i < v.length; i++) {
+            for (let j = i + 1; j < v.length; j++) if ((v[i].x - v[j].x) ** 2 + (v[i].y - v[j].y) ** 2 > most + 1) return false
+        }
+        return true
     },
-    blockDropAim(block, angle, isUnderfoot) {
+    canClearBlock(block) {
+        return autopilot.isPushable(block) && !block.isNotHoldable && !autopilot.hanging.has(block) && (block.collisionFilter.mask & cat.player) &&
+            !autopilot.isOnButton(block) && !autopilot.stepBlocks.has(block) && simulation.cycle >= (autopilot.blockClearUntil.get(block) || 0)
+    },
+    blockDropFits(block, bounds, passage = null) {
+        //Anything parked above a drop could fall back into it, so keep the whole shaft clear.
+        if (passage && bounds.max.x > passage.min.x && bounds.min.x < passage.max.x &&
+            (passage.descend || bounds.min.y < passage.max.y)) return false
+        const overlaps = who => (who.parts.length > 1 ? who.parts.slice(1) : who.parts).some(part => !part.isSensor &&
+            autopilot.polygonBox(part.vertices, bounds.min.x, bounds.min.y, bounds.max.x, bounds.max.y))
+        if (Matter.Bounds.overlaps(player.bounds, bounds) && overlaps(player)) return false
+        if (Matter.Query.region(map, bounds).some(overlaps)) return false
+        return !Matter.Query.region(body, bounds).some(who => who !== block && overlaps(who))
+    },
+    blockDropAim(block, angle, passage = null) {
         const radius = 30 + 40 * player.scale //the same distance as m.holding()
         const bounds = block.bounds
-        for (const turn of [0, -Math.PI / 4, Math.PI / 4, -Math.PI / 2, Math.PI / 2]) {
-            const x = m.pos.x + radius * Math.cos(angle + turn)
-            const y = m.pos.y + radius * Math.sin(angle + turn)
+        const angles = [angle, angle - Math.PI / 4, angle + Math.PI / 4, angle - Math.PI / 2, angle + Math.PI / 2]
+        if (passage) angles.push(Math.PI, 0) //face exactly sideways if the block needs the full holding reach
+        for (const aim of angles) {
+            const x = m.pos.x + radius * Math.cos(aim)
+            const y = m.pos.y + radius * Math.sin(aim)
             const dx = x - block.position.x, dy = y - block.position.y
             const box = {
                 min: { x: bounds.min.x + dx, y: bounds.min.y + dy },
                 max: { x: bounds.max.x + dx, y: bounds.max.y + dy },
             }
-            if (autopilot.blockDropFits(block, box, isUnderfoot)) return { x, y }
+            if (autopilot.blockDropFits(block, box, passage)) return { x, y }
         }
         return null
     },
-    startBlockClear(feet, edge) {
-        if (autopilot.carry || autopilot.riding || m.isHolding || !m.onGround || m.fieldCDcycle >= m.cycle || !autopilot.canHoldBlocks()) return false
-        const cycle = simulation.cycle
+    blockClearPassage(feet, edge, target, isWalk = false) {
         const x = player.position.x
-        const goalId = edge ? edge.to : autopilot.goal
-        const goal = (!edge && autopilot.goalType === "explore" ? null : autopilot.nodes[goalId]) || { x: level.exit.x + 50, y: level.exit.y }
-        const dir = Math.sign(goal.x - x)
-        const targetDy = goal.y - feet
-        const under = m.standingOn && (m.standingOn.parent || m.standingOn)
         const size = autopilot.size()
+        const dy = target.y - feet, dx = target.x - x
+        const towardDrop = Math.abs(dx) <= Math.max(100, edge ? 0 : dy)
+        const descend = !isWalk && dy > 28 && (edge?.type === autopilot.FALL || (!edge || edge.type === autopilot.WALK) && towardDrop)
+        const climb = !isWalk && (dy < -25 || edge?.type === autopilot.JUMP)
+        if (!isWalk && !descend && !climb && Math.abs(dx) < 8) return null
+        const toward = descend ? (edge?.clearX ?? edge?.arcArgs?.[0] ?? target.x) - x : dx
+        const end = isWalk ? target.x : x + Math.max(-55, Math.min(55, toward))
+        const top = Math.min(feet, isWalk ? target.y : feet) - size.height - (climb ? 85 : 0)
+        const bottom = isWalk ? target.y : descend ? Math.min(target.y, feet + 115) : feet - 8
+        return {
+            min: { x: Math.min(x, end) - size.halfWidth, y: top },
+            max: { x: Math.max(x, end) + size.halfWidth, y: bottom },
+            descend,
+        }
+    },
+    startBlockClear(feet, edge, approach = null) {
+        if (!body.length || autopilot.carry || autopilot.riding || autopilot.train || m.isHolding || !m.onGround || m.fieldCDcycle >= m.cycle || !autopilot.canHoldBlocks()) return false
+        if (edge && edge.type !== autopilot.WALK && edge.type !== autopilot.FALL && edge.type !== autopilot.JUMP) return false
+        const cycle = simulation.cycle
+        const hunt = autopilot.activeHunt()
+        const target = approach || (!edge && autopilot.goalType === "explore" ? hunt?.who.position : autopilot.nodes[edge?.to ?? autopilot.goal]) ||
+            autopilot.exitSpot()
+        const passage = autopilot.blockClearPassage(feet, edge, target, approach?.isWalk)
+        if (!passage) return false
+        const support = autopilot.standingOn()
         let best = null, bestDistance = Infinity
-        for (const block of body) {
-            if (!autopilot.isPushable(block) || block.isNotHoldable || autopilot.hanging.has(block) || !(block.collisionFilter.mask & cat.player) || autopilot.isOnButton(block)) continue
-            if (cycle < (autopilot.blockClearUntil.get(block) || 0)) continue
+        for (const block of Matter.Query.region(body, passage)) {
+            if ((approach && block !== approach.block) || !autopilot.canClearBlock(block) || (!approach && autopilot.isSmallBlock(block))) continue
+            if (block === support ? !approach?.isWalk && !passage.descend : block.speed > 8) continue
             const b = block.bounds
-            const isUnderfoot = block === under
-            if (isUnderfoot) {
-                if (targetDy < 30 || Math.abs(goal.x - x) > Math.max(60, targetDy) || (edge && edge.type !== autopilot.FALL && edge.type !== autopilot.WALK)) continue
-            } else {
-                const beside = dir && (block.position.x - x) * dir > 0 && (dir > 0 ? b.min.x - x : x - b.max.x) < size.halfWidth + 35 && b.max.y > feet - size.height && b.min.y < feet - 8
-                const overhead = targetDy < -30 && b.max.y > feet - size.height - 45 && b.max.y < feet - size.height + 6 && b.min.x < x + size.halfWidth && b.max.x > x - size.halfWidth
-                if (!beside && !overhead) continue
-            }
+            if (edge?.type === autopilot.JUMP && target.x > b.min.x && target.x < b.max.x && Math.abs(target.y - b.min.y) < 15) continue //the jump lands on this block
             const dx = block.position.x - m.pos.x, dy = block.position.y - m.pos.y
             const distance = Math.hypot(dx, dy)
-            if (distance > 80 + 70 * Math.max(1, player.scale) || distance >= bestDistance || Matter.Query.rayAny(map, m.pos, block.position)) continue
+            if (distance > autopilot.carryReach() || distance >= bestDistance || Matter.Query.rayAny(map, m.pos, block.position)) continue
             const angle = Math.atan2(-dy, -dx)
-            const dropAim = autopilot.blockDropAim(block, angle, isUnderfoot)
+            const dropAim = autopilot.blockDropAim(block, angle, passage)
             if (!dropAim) continue
-            best = { block, angle, isUnderfoot, start: cycle, pickedUp: false, dropAim }
+            best = { block, angle, passage, start: cycle, pickedUp: false, dropAim }
             bestDistance = distance
         }
         if (!best) return false
@@ -2154,6 +3621,33 @@ const autopilot = {
         autopilot.pending = autopilot.backUp = autopilot.commit = null
         autopilot.blockedCycles = 0
         return autopilot.driveBlockClear(feet)
+    },
+    clearUnderfootDrop(feet) {
+        const block = autopilot.standingOn()
+        if (!autopilot.grid?.exact || m.isHolding || autopilot.carry || !body.includes(block) ||
+            !autopilot.isCarryable(block) || !autopilot.canClearBlock(block) || !autopilot.canHoldBlocks()) return false
+        const x = player.position.x
+        const below = autopilot.nodeBelow(x, Math.max(feet + 50, block.bounds.max.y + autopilot.cell))
+        const landing = autopilot.nodes[below]
+        if (!landing?.isStatic || landing.isBoost || landing.elevator || landing.transport || landing.y - feet > 700) return false
+        const hunt = autopilot.activeHunt()
+        const target = (autopilot.goalType === "explore" && hunt?.who.position) || autopilot.nodes[autopilot.goal] ||
+            autopilot.exitSpot()
+        const cost = autopilot.dist?.[below]
+        const savesRoute = Number.isFinite(cost) && cost + 60 < (autopilot.dist?.[autopilot.cur] ?? Infinity)
+        if (!savesRoute && (Math.abs(target.x - x) > 75 || target.y < feet + 50)) return false
+        const width = autopilot.size().halfWidth - 3
+        const shaft = [x - width, feet, x + width, landing.y - 8]
+        if (autopilot.isMapExact(...shaft) || autopilot.boxInHazard(shaft)) return false
+        const bounds = { min: { x: shaft[0], y: shaft[1] }, max: { x: shaft[2], y: shaft[3] } }
+        if (Matter.Query.region(body, bounds).some(who => who !== block && (who.collisionFilter.mask & cat.player)) ||
+            autopilot.dynList.some(who => who !== block && (who.autopilotDynamic || who.isRay) && Matter.Bounds.overlaps(who.bounds, bounds))) return false
+        if (m.fieldCDcycle >= m.cycle) {
+            autopilot.why = "waiting to pick up a block"
+            autopilot.pending = null
+        } else if (!autopilot.startBlockClear(feet, null, { x, y: landing.y, block })) return false
+        autopilot.flight = null
+        return true
     },
     driveBlockClear(feet) {
         const clear = autopilot.blockClear
@@ -2169,12 +3663,14 @@ const autopilot = {
             if (success) {
                 autopilot.updateObstacles()
                 autopilot.isPlanDirty = true
+                autopilot.lastPlanCycle = -Infinity
                 autopilot.say("cleared", "a block in the way")
             }
             return true
         }
         input.field = input.fire = input.left = input.right = input.up = input.down = false
-        if (!body.includes(block) || (m.isHolding && !isHeld) || (!isHeld && (clear.pickedUp || cycle > clear.start + 30))) return stop(false)
+        if (!body.includes(block) || (m.isHolding && !isHeld) || (!isHeld && (clear.pickedUp || cycle > clear.start + 30 ||
+            !Matter.Bounds.overlaps(block.bounds, clear.passage)))) return stop(false)
         if (!isHeld) {
             autopilot.why = "picking up a blocking block"
             autopilot.carryAim = block.position
@@ -2183,13 +3679,78 @@ const autopilot = {
         }
         clear.pickedUp = true
         autopilot.why = "moving a block out of the way"
-        const aim = autopilot.blockDropAim(block, clear.angle, clear.isUnderfoot)
+        const aim = autopilot.blockDropAim(block, clear.angle, clear.passage)
         if (aim) clear.dropAim = aim
         autopilot.carryAim = clear.dropAim
-        if (aim && Math.hypot(block.position.x - aim.x, block.position.y - aim.y) < 10 && autopilot.blockDropFits(block, block.bounds, clear.isUnderfoot)) return stop(true)
+        if (aim && Math.hypot(block.position.x - aim.x, block.position.y - aim.y) < 10 && autopilot.blockDropFits(block, block.bounds, clear.passage)) return stop(true)
         if (cycle > clear.start + 60) return stop(false)
         return true
     },
+    movePilotWave(feet) { //Bells theorem reverses the field input. Use the mouse to pull blocks out of our way.
+        if (m.fieldMode !== 8 || !tech.isNoPilotCost) {
+            autopilot.pilotClear = null
+            return
+        }
+        const cycle = simulation.cycle
+        if (autopilot.blockClear || autopilot.carry || m.isHolding || m.fieldCDcycle >= m.cycle) {
+            autopilot.pilotClear = null
+            return
+        }
+        const x = player.position.x
+        const size = autopilot.size()
+        const edge = autopilot.pending?.edge || autopilot.next?.[autopilot.cur]
+        const target = autopilot.nodes[edge?.to ?? autopilot.goal]
+        const dir = Number(input.right) - Number(input.left) || Math.sign((target?.x ?? x) - x) || edge?.dir
+        const clear = autopilot.pilotClear
+        if (clear && (cycle >= clear.until || !body.includes(clear.block) ||
+            autopilot.standingOn() === clear.block || autopilot.isOnButton(clear.block) ||
+            (clear.block.position.x - x) * clear.dir < -size.halfWidth - clear.halfWidth)) {
+            autopilot.pilotClear = null
+        }
+        if (clear && cycle >= clear.until && !clear.isForward) {
+            autopilot.blockClearUntil.set(clear.block, cycle + 75)
+        }
+        if (!autopilot.pilotClear && dir && autopilot.why !== "in the exit") {
+            const ahead = x + 110 * dir
+            const top = Math.min(feet, Math.max(feet - 100, target?.y ?? feet)) - size.height
+            const bounds = { min: { x: Math.min(x, ahead) - size.halfWidth, y: top }, max: { x: Math.max(x, ahead) + size.halfWidth, y: feet - 8 } }
+            const wave = m.fieldPosition
+            const radius = Math.max(65, m.fieldRadius)
+            const block = Matter.Query.region(body, bounds).find(who => (who.collisionFilter.mask & cat.player) &&
+                cycle >= (autopilot.blockClearUntil.get(who) || 0) &&
+                !who.isNotHoldable && autopilot.isPushable(who) && !autopilot.hanging.has(who) && !autopilot.isOnButton(who) && !autopilot.stepBlocks.has(who) &&
+                autopilot.standingOn() !== who &&
+                Math.hypot(who.position.x - wave.x, who.position.y - wave.y) < radius)
+            if (block) {
+                const { bounds: b, position } = block
+                const halfWidth = (b.max.x - b.min.x) / 2
+                const halfHeight = (b.max.y - b.min.y) / 2
+                const lift = top - halfHeight - 30
+                const safe = spot => !Matter.Query.rayAny(map, position, spot, Math.max(70, 2 * Math.min(halfWidth, halfHeight))) &&
+                    !Matter.Query.rayAny(map, wave, spot, 64)
+                const above = [170, 85, 0].map(lead => ({ x: position.x, y: lift - lead })).find(safe)
+                const forward = { x: position.x + dir * 245, y: position.y }
+                const aim = above || (safe(forward) ? forward : null)
+                autopilot.pilotClear = { block, dir, top, aim, isForward: aim === forward, halfWidth, until: cycle + (aim ? 110 : 20) }
+            }
+        }
+        const move = autopilot.pilotClear
+        if (move?.aim) {
+            autopilot.carryAim = move.aim
+            input.field = false
+            input.fire = false
+            if (m.onGround && !move.isForward && move.block.bounds.max.y >= move.top) {
+                input.left = input.right = input.up = false
+                autopilot.pending = null
+                autopilot.blockedCycles = 0
+                autopilot.isHolding = true
+                autopilot.why = "moving a block with pilot wave"
+            } else if (move.isForward) autopilot.why = "guiding a block ahead with pilot wave"
+        } else if (move || clear) input.field = true
+    },
+    //*********************************************************************
+    // saying what it's doing
+    //*********************************************************************
     saidAt: new Map(), //the cycle each word was last said, a word comes back after 900 cycles at the soonest, even with other words in between, so two don't flicker
     isRepeat(state) {
         return simulation.cycle < (autopilot.saidAt.get(state) ?? -Infinity) + 900
@@ -2198,6 +3759,7 @@ const autopilot = {
         if (autopilot.isRepeat(state)) return
         autopilot.saidAt.set(state, simulation.cycle)
         autopilot.said = state
+        autopilot.saidNote = note
         autopilot.saidCycle = simulation.cycle
         if (!autopilot.isTalking) return
         const word = autopilot.words[state] || state
@@ -2222,54 +3784,632 @@ const autopilot = {
         ctx.stroke(word.path)
         ctx.restore()
     },
+    //*********************************************************************
+    // picking up power ups from a distance
+    //*********************************************************************
     isWanted(who) {
-        if (who.name === "heal") return m.health < m.maxHealth * 0.95 || tech.isOverHeal
-        if (who.name === "ammo") return b.inventory.length > 0 && !tech.isEnergyNoAmmo
+        return autopilotBuild.pickupValue(who) > 0
+    },
+    remotePickupRetry: new WeakMap(),
+    pickupAim: null,
+    remotePickup: null,
+    pickupLookAhead: 800,
+    pickupPath() {
+        const { cur, goalWalk, next, nodes } = autopilot
+        const path = [m.pos]
+        const limit = autopilot.pickupLookAhead
+        if (goalWalk !== null) {
+            const dx = Math.max(-limit, Math.min(limit, goalWalk - m.pos.x))
+            if (dx) path.push({ x: m.pos.x + dx, y: m.pos.y })
+        } else {
+            const eyeHeight = playerBody.bounds.max.y - m.pos.y
+            let left = limit, at = cur
+            for (let i = 0; i <= autopilot.cellsFor(limit) && left > 0; i++) {
+                const edge = next?.[at]
+                const node = nodes[edge?.to]
+                if (!node || node.dead || node.isBoost || node.elevator || node.transport || edge.type !== autopilot.WALK || edge.isHop) break
+                const { x, y } = node
+                const from = path[path.length - 1]
+                const dx = x - from.x, dy = y - eyeHeight - from.y
+                const distance = Math.hypot(dx, dy)
+                if (distance) {
+                    const fraction = Math.min(1, left / distance)
+                    path.push({ x: from.x + fraction * dx, y: from.y + fraction * dy })
+                    left -= distance
+                }
+                at = edge.to
+            }
+        }
+        return path.length > 1 ? path : null
+    },
+    isNearPickupPath(point, path) {
+        const limit = autopilot.pickupLookAhead
+        if ((point.x - path[0].x) ** 2 + (point.y - path[0].y) ** 2 > limit ** 2) return false
+        for (let i = 1; i < path.length; i++) {
+            const a = path[i - 1], b = path[i]
+            const dx = b.x - a.x, dy = b.y - a.y
+            const px = point.x - a.x, py = point.y - a.y
+            const along = Math.max(0, Math.min(1, (px * dx + py * dy) / (dx * dx + dy * dy)))
+            if ((px - along * dx) ** 2 + (py - along * dy) ** 2 <= 180 ** 2) return true
+        }
+        return false
+    },
+    pickupOption(who, field, gun, closeUpgrade = false) {
+        if (who.cycle < 10 || who.isGrabbed || who.collisionFilter?.mask === 0 ||
+            !autopilot.isWanted(who) || autopilot.isIgnored(who) ||
+            simulation.cycle < (autopilot.remotePickupRetry.get(who) || 0)) return null
+        const to = who.position
+        const distance = Math.hypot(to.x - m.pos.x, to.y - m.pos.y)
+        const clear = () => !Matter.Query.rayAny(map, m.pos, to)
+        const ready = m.fieldCDcycle < m.cycle
+        if (closeUpgrade && ready && field !== "pilot wave" && field !== "grappling hook" &&
+            !(tech.isWormHolePause && (field === "wormhole" || field === "portal") && distance >= 70) &&
+            distance * distance + 10 < m.grabPowerUpRange2 && clear()) return { kind: "pull", cost: 10 + distance / 9 }
+        if (distance < 70 && field !== "grappling hook" && field !== "wormhole" && field !== "pilot wave" &&
+            !(field === "portal" && autopilot.isUpgrade(who))) return null //the portal uses this pull even for upgrades at its feet
+        if (field === "pilot wave" && ready && (tech.isNoPilotCost || m.energy > 0.2) && distance < 1050) {
+            const aim = { x: to.x, y: to.y - 35 }
+            const from = m.fieldOn ? m.fieldPosition : m.pos
+            const remaining = Math.hypot(to.x - from.x, to.y - from.y)
+            const cost = 30 + distance / 9
+            if (remaining < m.fieldRadius * 1.2) return { kind: "wave", cost }
+            const canReach = !Matter.Query.rayAny(map, from, aim, 40)
+            if (canReach) return { kind: "wave", cost }
+            //With Bells theorem the wave can still be behind a wall the player already passed.
+            if (tech.isNoPilotCost && m.fieldOn && !Matter.Query.rayAny(map, m.pos, aim, 40)) return { kind: "wave", cost, needsWaveReset: true }
+        }
+        if (field === "grappling hook" && ready && m.energy > 0.09 && distance < 1250 &&
+            !bullet.some(hook => hook.isGrapple) && clear() && !Matter.Query.rayAny(body, m.pos, to, 10)) {
+            return { kind: "hook", cost: 20 + distance / 13 }
+        }
+        if (field === "wormhole" && ready && distance < 1300) {
+            const hole = m.hole
+            if (hole.isOn && [hole.pos1, hole.pos2].some(end =>
+                Math.hypot(end.x - to.x, end.y - to.y) < 210 && !Matter.Query.rayAny(map, end, to))) return { kind: "hole", cost: 35 }
+            const wantsThis = autopilot.goalType === "powerUp" && autopilot.goalWho === who
+            if (!tech.isWormHolePause && distance > 450 && (wantsThis || autopilot.goalType === "exit") &&
+                m.energy > m.fieldUpgrades[m.fieldMode].energyCost() + 0.1) {
+                const node = autopilot.nodes[autopilot.nodeFor(to, 5)]
+                //Open a wormhole beside a pickup only if the landing can continue the current route.
+                if (node?.isStatic && !node.dead && !node.isCrouch && !node.isBoost && !node.cover && !node.elevator && !node.transport &&
+                    autopilot.dist?.[node.id] < Infinity &&
+                    autopilot.dist[node.id] <= autopilot.dist[autopilot.cur] + 30 &&
+                    !autopilot.pathIsWet([[node.x - 25, node.y - 145, node.x + 25, node.y]]) &&
+                    Math.hypot(node.x - to.x, node.y - 75 - to.y) < 145) {
+                    const aim = { x: node.x, y: node.y - 75 }
+                    const past = Vector.add(aim, Vector.mult(Vector.normalise(Vector.sub(aim, m.pos)), 25))
+                    if ((tech.isWormholeMapIgnore || !Matter.Query.rayAny(map, m.pos, past)) &&
+                        !Matter.Query.rayAny(map, { x: aim.x, y: aim.y - 40 }, { x: aim.x, y: aim.y + 40 }, 40)) {
+                        return { kind: "warp", aim, cost: 24 }
+                    }
+                }
+            }
+        }
+        const pulls = field === "perfect diamagnetism" || field === "plasma torch" ||
+            (!tech.isWormHolePause && (field === "wormhole" || field === "portal"))
+        if (pulls && ready && distance * distance + 10 < m.grabPowerUpRange2 && clear()) {
+            return { kind: "pull", cost: 10 + distance / 9 }
+        }
+        if (field !== "portal" && gun?.name === "harpoon" && gun.mode === "stab" && gun.ammo > 0 && m.energy > 0.1 &&
+            distance < (tech.isUHMWPE ? 470 : 300) && clear()) return { kind: "harpoon", cost: 40 }
+        if (who.cycle > 30 && distance < 1500 && !b.droneSkipsPowerUp?.(who)) {
+            const drone = bullet.find(drone => autopilot.pickupDrone(drone) && !Matter.Query.rayAny(map, drone.position, to))
+            if (drone) return { kind: "drone", drone, cost: 25 + Math.hypot(drone.position.x - to.x, drone.position.y - to.y) / 10 }
+            const slot = b.inventory?.findIndex(index => b.guns[index]?.name === "drones" && b.guns[index].ammo > 0)
+            if (field !== "portal" && slot >= 0 && (gun?.name === "drones" || (!tech.isGunCycle && !tech.isGunChoice)) && clear()) {
+                return { kind: "drone", slot, cost: 40 + distance / 10 }
+            }
+        }
+        return null
+    },
+    pickupDrone(drone) {
+        return drone.isDrone && !drone.isImproved && !drone.lockedOn?.alive && drone.endCycle > simulation.cycle + drone.deathCycles + 30
+    },
+    endRemotePickup() {
+        const attempt = autopilot.remotePickup
+        if (attempt?.field === "wormhole" && m.fieldMode === 9 && m.hole?.isReady) m.hole.isReady = false
+        if (attempt?.field === "portal" && m.fieldMode === 11 && attempt.kind === "pull") {
+            m.fieldUpgrades[11].cancelPresses()
+        }
+        if (attempt?.previousSlot !== undefined && b.inventoryGun === attempt.slot) {
+            simulation.switchToGunInInventory(attempt.previousSlot)
+        }
+        if (attempt && !m.isHolding && attempt.kind === "pull") m.holdingTarget = null
+        autopilot.remotePickup = null
+    },
+    driveRemotePickup() {
+        const cycle = simulation.cycle, field = autopilot.fieldName(), gun = b.guns?.[b.activeGun]
+        const wantedUpgrade = autopilot.upgradeHunt?.who
+        const closeUpgrade = wantedUpgrade && (autopilot.goalWalk !== null || autopilot.isInExit(110)) &&
+            Number.isFinite(autopilot.nearbyUpgradeDistance(wantedUpgrade))
+        autopilot.pickupAim = null
+        let attempt = autopilot.remotePickup
+        const directWalk = autopilot.goalWalk !== null
+        if (attempt && directWalk && !closeUpgrade && !attempt.onRoute) {
+            autopilot.endRemotePickup()
+            attempt = null
+        }
+        const support = autopilot.standingOn()
+        const threat = !closeUpgrade && autopilot.target && Math.hypot(autopilot.target.position.x - m.pos.x, autopilot.target.position.y - m.pos.y) < 450
+        const busy = autopilot.flying || autopilot.warp || autopilot.grapple || autopilot.wallClimb || autopilot.rayMove ||
+            autopilot.blockClear || autopilot.pilotClear || autopilot.carry || autopilot.riding || autopilot.train ||
+            m.isHolding || support?.isRay || autopilot.goalType === "trigger" || autopilot.goalType === "carry"
+        if (attempt) {
+            const gone = !powerUp.includes(attempt.who)
+            if (gone || (wantedUpgrade && attempt.who !== wantedUpgrade) || !autopilot.isWanted(attempt.who) || autopilot.detourLeft(attempt.who) <= 0 || cycle >= attempt.until || busy || field !== attempt.field || threat ||
+                (attempt.onRoute && (!m.onGround || autopilot.only === "exit")) ||
+                (attempt.drone && !autopilot.pickupDrone(attempt.drone)) ||
+                ((attempt.kind === "harpoon" || (attempt.kind === "drone" && !attempt.fired && !attempt.drone)) && gun !== attempt.gun)) {
+                autopilot.endRemotePickup()
+                if (!gone && !busy) autopilot.remotePickupRetry.set(attempt.who, cycle + 240)
+                attempt = null
+            }
+        }
+        if (!attempt) {
+            const canStart = !busy && m.onGround && !threat && powerUp.length &&
+                (closeUpgrade || !(autopilot.goalType === "exit" && autopilot.isInExit()))
+            if (!canStart || cycle % 6) return false
+            const route = !wantedUpgrade && autopilot.only !== "exit" && !autopilot.pending?.isJump &&
+                (directWalk || autopilot.goalType === "exit") ? autopilot.pickupPath() : null
+            if (directWalk && !closeUpgrade && !route) return false
+            const needsRemote = field === "pilot wave" || field === "grappling hook" || field === "wormhole" || field === "portal"
+            let best = Infinity
+            for (const who of powerUp) {
+                if (wantedUpgrade && who !== wantedUpgrade) continue
+                if (autopilot.only === "exit" && !autopilot.isUpgrade(who)) continue
+                if (autopilot.detourLeft(who) <= 0) continue
+                const onRoute = !!route && autopilot.isNearPickupPath(who.position, route)
+                if (directWalk && !closeUpgrade) {
+                    if (!onRoute) continue
+                    const dx = who.position.x - m.pos.x, dy = who.position.y - m.pos.y
+                    if (!needsRemote && dx * dx + dy * dy < m.grabPowerUpRange2) continue //the field can already pull it in while walking
+                }
+                const option = autopilot.pickupOption(who, field, gun, closeUpgrade)
+                if (!option || (directWalk && option.kind === "warp")) continue
+                const cost = option.cost * (who === autopilot.goalWho || onRoute ? 0.7 : 1) / autopilotBuild.pickupValue(who)
+                if (cost >= best) continue
+                best = cost
+                const time = directWalk && onRoute && option.kind === "pull" ? 72 : Math.max(105, 55 + option.cost)
+                attempt = { ...option, who, field, gun, onRoute: directWalk && onRoute, start: cycle, until: cycle + time }
+            }
+            if (!attempt) return false
+            autopilot.remotePickup = attempt
+            if (attempt.slot !== undefined && attempt.slot !== b.inventoryGun) {
+                attempt.previousSlot = b.inventoryGun
+                simulation.switchToGunInInventory(attempt.slot)
+                attempt.gun = b.guns[b.activeGun]
+            }
+        }
+        input.field = input.fire = false
+        input.left = input.right = input.up = input.down = false
+        autopilot.pending = null
+        autopilot.isHolding = true
+        autopilot.why = "collecting a distant power up"
+        const who = attempt.who, to = who.position
+        autopilot.pickupAim = to
+        if (attempt.kind === "wave") {
+            autopilot.pickupAim = { x: to.x, y: to.y - 35 }
+            input.field = !tech.isNoPilotCost
+            if (tech.isNoPilotCost && m.fieldOn && !attempt.didWaveReset) {
+                const remaining = Math.hypot(to.x - m.fieldPosition.x, to.y - m.fieldPosition.y)
+                if (remaining < (attempt.waveDistance ?? Infinity) - 8) {
+                    attempt.waveDistance = remaining
+                    attempt.waveProgressAt = cycle
+                }
+                const stalled = cycle >= attempt.waveProgressAt + 36 && remaining >= m.fieldRadius * 1.2
+                if (attempt.needsWaveReset || (stalled && !Matter.Query.rayAny(map, m.pos, autopilot.pickupAim, 40))) {
+                    input.field = true //one press turns it off, release next cycle reopens it at the player
+                    attempt.didWaveReset = true
+                    attempt.until = Math.max(attempt.until, cycle + 1 + Math.max(105, 55 + attempt.cost))
+                }
+            }
+        } else if (attempt.kind === "pull") {
+            input.field = true
+        } else if (attempt.kind === "warp") {
+            autopilot.pickupAim = attempt.aim
+            input.field = cycle - attempt.start < 5
+            if (cycle - attempt.start > 6 && !m.hole.isOn) attempt.until = cycle + 1
+        } else if (attempt.kind === "hook") {
+            const hook = bullet.find(hook => hook.isGrapple)
+            if (!hook && !attempt.fired) {
+                const flight = Math.min(18, 2 + Math.hypot(to.x - m.pos.x, to.y - m.pos.y) / 85)
+                autopilot.pickupAim = {
+                    x: to.x + who.velocity.x * flight - player.velocity.x * 1.5,
+                    y: to.y + Math.max(-45, Math.min(35, who.velocity.y * flight + 0.35 * flight ** 2)),
+                }
+                input.field = m.fieldCDcycle < m.cycle && cycle >= attempt.start + 2
+            } else if (hook) {
+                input.field = !hook.caughtPowerUp && !hook.attached && hook.do !== hook.returnToPlayer &&
+                    Math.hypot(hook.vertices[2].x - m.pos.x, hook.vertices[2].y - m.pos.y) < Math.hypot(to.x - m.pos.x, to.y - m.pos.y) + 160
+            }
+            if (hook) attempt.fired = true
+            else if (attempt.fired) {
+                const tries = (attempt.tries || 0) + 1
+                if (tries < 2) {
+                    attempt.tries = tries
+                    attempt.fired = false
+                } else attempt.until = cycle + 1
+            }
+        } else if (attempt.kind === "drone" || attempt.kind === "harpoon") {
+            if (attempt.kind === "drone" && !attempt.drone) attempt.drone = bullet.find(drone => autopilot.pickupDrone(drone))
+            if (!attempt.drone && !attempt.fired && m.fireCDcycle < m.cycle && (!tech.isFireMoveLock || player.speed < 0.5)) {
+                input.fire = true
+                attempt.fired = true
+            }
+        }
         return true
     },
+    //*********************************************************************
+    // detours, and upgrades and bosses worth staying for
+    //*********************************************************************
     isIgnored(who) {
         const until = autopilot.ignored.get(who)
         return until !== undefined && until > simulation.cycle
     },
     isArmed() {
-        return b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun] && b.guns[b.activeGun].ammo > 0
+        return m.fieldMode !== 11 && b.guns?.[b.activeGun]?.ammo > 0
     },
-    chooseGoal() {
-        const exit = autopilot.exitNode()
-        if (autopilot.carry) {
-            if (autopilot.isExitBlocked(exit)) {
-                if (autopilot.updateCarry()) return
-            } else {
-                const { block, trigger } = autopilot.carry
-                if (m.holdingTarget === block) {
-                    if (m.isHolding) m.drop()
-                    else m.holdingTarget = null
+    detourSpent: 0,
+    detourProgress: null,
+    detourLeft(who) { //a shared allowance, with a little extra for a heal or ammo the player needs now
+        if (autopilot.isUpgrade(who)) return autopilot.pendingUpgrade(who) ? Infinity : 0
+        const urgent = (who?.name === "heal" && m.health < 0.35 * m.maxHealth) ||
+            (who?.name === "ammo" && b.inventory.length && b.inventory.every(i => b.guns[i].ammo <= 0))
+        return (urgent ? 540 : 360) - autopilot.detourSpent
+    },
+    detourExitRoute(exit, from) {
+        const cur = autopilot.cur
+        if (!Number.isFinite(from[exit])) return null
+        const onward = new Float64Array(autopilot.nodes.length).fill(Infinity)
+        const wrapped = new Uint8Array(onward.length)
+        autopilot.searchRoutes(exit, onward, null, wrapped, true, true)
+        if (!Number.isFinite(onward[cur])) return null
+        const { x, y } = autopilot.nodes[cur]
+        const previous = autopilot.detourProgress
+        if (!previous || previous.exit !== exit || Math.hypot(x - previous.x, y - previous.y) >= 200 && onward[cur] <= previous.cost - 150) {
+            if (previous?.exit === exit) autopilot.detourSpent = 0
+            autopilot.detourProgress = { exit, x, y, cost: onward[cur] }
+        }
+        return { onward, wrapped }
+    },
+    upgradeHunt: null,
+    upgradeSearchLimit: 3600, //one minute of looking for alternatives per drop
+    skippedUpgrades: new WeakMap(), //an abandoned drop gets one more try if it comes within field reach at the exit
+    isUpgrade(who) {
+        return who?.name === "tech" || who?.name === "gun"
+    },
+    nearbyUpgradeDistance(who) {
+        if (!m.pos || who.isGrabbed || who.collisionFilter?.mask === 0) return Infinity
+        const distance = Math.hypot(who.position.x - m.pos.x, who.position.y - m.pos.y)
+        if (distance > 155 || (map.length && Matter.Query.rayAny(map, m.pos, who.position))) return Infinity
+        return distance
+    },
+    pendingUpgrade(who) {
+        if (!autopilot.isUpgrade(who)) return false
+        const skipped = autopilot.skippedUpgrades.get(who)
+        return !skipped?.abandoned || (!skipped.retriedAtExit && autopilot.isInExit(110) && Number.isFinite(autopilot.nearbyUpgradeDistance(who)))
+    },
+    holdExitForUpgrades() {
+        return autopilot.canPlayInCurrentMode() && powerUp.some(autopilot.pendingUpgrade)
+    },
+    holdExitForObjectives() {
+        return autopilot.holdExitForUpgrades() || (autopilot.canPlayInCurrentMode() && autopilot.canHuntBosses() && mob.some(autopilot.pendingBoss))
+    },
+    upgradeApproach(who, reachable, failed) {
+        let best = null
+        const { x, y } = who.position
+        const scale = player.scale || 1
+        for (const node of autopilot.nodes) {
+            if (node.dead || !Number.isFinite(reachable[node.id])) continue
+            const aimY = node.y - (node.isCrouch ? 45 : 75) * scale
+            const distance = Math.hypot(node.x - x, aimY - y)
+            if (distance > 150 || failed?.some(spot => Math.abs(node.x - spot.x) <= 75 && Math.abs(node.y - spot.y) <= 40)) continue
+            const cost = reachable[node.id] + distance * 0.5
+            if ((!best || cost < best.cost) && (!map.length || !Matter.Query.rayAny(map, { x: node.x, y: aimY }, who.position))) best = { node, cost }
+        }
+        return best
+    },
+    startUpgradeHunt(who) {
+        const skipped = autopilot.skippedUpgrades.get(who)
+        if (skipped?.abandoned) {
+            skipped.abandoned = false
+            skipped.retriedAtExit = true
+        }
+        return autopilot.upgradeHunt = { who, best: Infinity, progressAt: simulation.cycle, searchCycles: 0, lastSearchCycle: null, failed: [], explored: new Map(), approach: null, direct: null }
+    },
+    chooseDirectUpgrade() {
+        if (autopilot.manualControl || !m.onGround || !m.pos) return null
+        const { x, y } = m.pos, feet = playerBody.bounds.max.y
+        const hunt = autopilot.upgradeHunt
+        const cycle = simulation.cycle
+        let best = null
+        for (const who of powerUp) {
+            if (!autopilot.pendingUpgrade(who) || who.isGrabbed || who.collisionFilter?.mask === 0) continue
+            const distance = Math.hypot(who.position.x - x, who.position.y - y)
+            const progress = hunt?.who === who && hunt.direct
+            if (progress && cycle >= progress.at + 600 && distance >= progress.best - 15) continue
+            if (best && distance >= best.distance) continue
+            const close = Number.isFinite(autopilot.nearbyUpgradeDistance(who))
+            if (!close && (Math.abs(who.position.y - y) > 105 || !autopilot.straightWalk(who.position.x, feet))) continue
+            best = { who, distance, walk: close ? player.position.x : who.position.x }
+        }
+        if (!best) return null
+        const current = hunt?.who === best.who ? hunt : autopilot.startUpgradeHunt(best.who)
+        if (best.distance < (current.direct?.best ?? Infinity) - 15) current.direct = { best: best.distance, at: cycle }
+        current.lastSearchCycle = null
+        current.best = Infinity
+        return best
+    },
+    chooseUpgrade(exitOpen = true, coolingButton = null) {
+        const drops = powerUp.filter(autopilot.pendingUpgrade)
+        if (!drops.length || autopilot.manualControl) {
+            autopilot.upgradeHunt = null
+            return null
+        }
+        const cur = autopilot.cur
+        const cycle = simulation.cycle
+        const reachable = cur >= 0 ? autopilot.routesFrom(cur, true).from : []
+        let hunt = autopilot.upgradeHunt
+        const nearExit = autopilot.isInExit(110)
+        for (let i = 0; i < drops.length; i++) {
+            let nearby = null, nearest = Infinity
+            if (nearExit) {
+                for (const drop of drops) {
+                    if (!autopilot.pendingUpgrade(drop)) continue
+                    const distance = autopilot.nearbyUpgradeDistance(drop)
+                    if (distance >= nearest) continue
+                    nearby = drop
+                    nearest = distance
                 }
-                autopilot.tried.set(trigger, simulation.cycle)
-                autopilot.carry = null
             }
+            if (nearby && hunt && !Number.isFinite(autopilot.nearbyUpgradeDistance(hunt.who))) hunt = null
+            if (!hunt || !drops.includes(hunt.who)) {
+                let who = nearby, best = Infinity, hasRoute = false
+                if (!nearby) {
+                    for (const drop of drops) {
+                        if (!autopilot.pendingUpgrade(drop)) continue
+                        const route = autopilot.upgradeApproach(drop, reachable)
+                        if (hasRoute && !route) continue
+                        const cost = route?.cost ?? Math.hypot(player.position.x - drop.position.x, player.position.y - drop.position.y)
+                        if (cost < best || (route && !hasRoute)) {
+                            who = drop
+                            best = cost
+                            hasRoute = !!route
+                        }
+                    }
+                }
+                if (!who) break
+                hunt = autopilot.startUpgradeHunt(who)
+            }
+            const who = hunt.who
+            const route = autopilot.upgradeApproach(who, reachable, hunt.failed)
+            if (route) {
+                if (route.cost < hunt.best - 25) {
+                    hunt.best = route.cost
+                    hunt.progressAt = cycle
+                }
+                if (cycle < hunt.progressAt + 600) { //ten seconds without progress before trying another spot
+                    hunt.lastSearchCycle = null
+                    return { goal: route.node.id, type: "powerUp", who }
+                }
+                hunt.failed.push({ x: route.node.x, y: route.node.y })
+            }
+            hunt.best = Infinity
+            if (hunt.lastSearchCycle !== null) {
+                const elapsed = cycle - hunt.lastSearchCycle
+                if (elapsed <= autopilot.goalEvery) hunt.searchCycles += elapsed //a gap means another task interrupted the search
+            }
+            hunt.lastSearchCycle = cycle
+            if (hunt.searchCycles >= autopilot.upgradeSearchLimit) {
+                const retriedAtExit = !!autopilot.skippedUpgrades.get(who)?.retriedAtExit
+                autopilot.skippedUpgrades.set(who, { abandoned: true, retriedAtExit })
+                autopilot.say("leaving a power up", "couldn't reach the upgrade")
+                hunt = null
+                continue
+            }
+            if (!exitOpen) {
+                const pickupNode = cur >= 0 && autopilot.grid ? autopilot.nodeFor(who.position) : -1
+                const behindDoor = pickupNode >= 0 && !Number.isFinite(reachable[pickupNode]) && autopilot.isBehindDoor(pickupNode)
+                const trigger = coolingButton || (behindDoor && autopilot.chooseTrigger(pickupNode, true))
+                if (trigger) return { goal: autopilot.triggerNode(trigger), type: "trigger", who: trigger }
+            }
+            return autopilot.exploreForHunt(hunt, reachable)
+        }
+        autopilot.upgradeHunt = null
+        return null
+    },
+    exploreForHunt(hunt, reachable) {
+        const { cur, nodes } = autopilot
+        const cycle = simulation.cycle
+        const approach = hunt.approach
+        if (approach) {
+            const destination = nodes[approach.id], here = nodes[cur]
+            if (Number.isFinite(reachable[approach.id]) && here && Math.hypot(here.x - destination.x, here.y - destination.y) >= 50 &&
+                cycle < approach.until) return { goal: approach.id, type: "explore", who: null }
+            hunt.explored.set(approach.area, approach.connections)
+        }
+        hunt.approach = cur >= 0 ? autopilot.exploreToward(hunt.who.position, reachable, hunt.explored, 0.65) : null
+        if (hunt.approach) hunt.approach.until = cycle + 180
+        return { goal: hunt.approach?.id ?? cur, type: "explore", who: null }
+    },
+    bossHunt: null,
+    skippedBosses: new WeakSet(),
+    bossStallLimit: 3600, //cycles without getting closer to a firing position or damaging the boss
+    isLiveBoss(who) {
+        return !!(who?.alive && who.isBoss && !who.shield && !who.isMobBullet)
+    },
+    pendingBoss(who) {
+        return autopilot.isLiveBoss(who) && !autopilot.skippedBosses.has(who)
+    },
+    canHuntBosses() {
+        return tech.isEnergyHealth ? m.energy > 0.25 * m.maxEnergy : m.health > 0.25 * m.maxHealth
+    },
+    bossApproach(who, reachable, profile, failed = []) {
+        const reach = profile ? Math.min(700, 0.8 * profile.reach) : 400
+        const near = profile?.near || 0
+        const scale = player.scale || 1
+        let best = null
+        for (const node of autopilot.nodes) {
+            if (node.dead || node.isBoost || !Number.isFinite(reachable[node.id]) || (best && reachable[node.id] >= best.cost)) continue
+            const aim = { x: node.x, y: node.y - (node.isCrouch ? 45 : 75) * scale }
+            const distance = Math.hypot(aim.x - who.position.x, aim.y - who.position.y)
+            if (distance < near || distance > reach || failed.some(spot => Math.abs(node.x - spot.x) <= 150 && Math.abs(node.y - spot.y) <= 100)) continue
+            const cost = reachable[node.id] + 0.1 * distance
+            if ((!best || cost < best.cost) && (profile?.isThroughWalls || !map.length || !Matter.Query.rayAny(map, aim, who.position))) best = { node, cost }
+        }
+        return best
+    },
+    bossAmmo(reachable) {
+        if (!autopilot.grid || m.fieldMode === 11 || !b.inventory.length || b.inventory.some(i => b.guns[i].ammo > 0)) return null
+        let closest = 160, goal = null
+        for (const who of powerUp) {
+            if (who.name !== "ammo" || autopilot.isIgnored(who) || !autopilot.isWanted(who)) continue
+            const node = autopilot.nodeFor(who.position)
+            if (!(reachable[node] < closest)) continue
+            closest = reachable[node]
+            goal = { goal: node, type: "powerUp", who }
+        }
+        return goal
+    },
+    chooseBoss(exitOpen = true, coolingButton = null) {
+        const bosses = mob.filter(autopilot.pendingBoss)
+        if (!bosses.length || !autopilot.canHuntBosses() || autopilot.manualControl) {
+            autopilot.bossHunt = null
+            return null
+        }
+        const cycle = simulation.cycle, cur = autopilot.cur
+        const reachable = cur >= 0 ? autopilot.routesFrom(cur, true).from : []
+        const profile = autopilot.isArmed() ? autopilot.gunProfile() : null
+        let hunt = autopilot.bossHunt
+        for (let i = 0; i < bosses.length; i++) {
+            let route = null
+            if (!hunt || !bosses.includes(hunt.who)) {
+                let who = null, best = Infinity
+                for (const boss of bosses) {
+                    if (!autopilot.pendingBoss(boss)) continue
+                    const approach = autopilot.bossApproach(boss, reachable, profile)
+                    if (route && !approach) continue
+                    const cost = approach?.cost ?? Math.hypot(player.position.x - boss.position.x, player.position.y - boss.position.y)
+                    if (cost < best || (approach && !route)) {
+                        who = boss
+                        route = approach
+                        best = cost
+                    }
+                }
+                if (!who) break
+                autopilot.bossHunt = hunt = { who, health: who.health, best: Infinity, checkedAt: cycle, stalled: 0, trial: 0,
+                    failed: [], explored: new Map(), approach: null }
+            } else route = autopilot.bossApproach(hunt.who, reachable, profile, hunt.failed)
+            const { who } = hunt
+            const elapsed = cycle - hunt.checkedAt
+            hunt.checkedAt = cycle
+            const damaged = who.health < hunt.health - 0.005
+            const closer = route && route.cost < hunt.best - 40
+            if (damaged || closer) {
+                if (damaged) hunt.health = who.health
+                if (closer) hunt.best = route.cost
+                hunt.stalled = hunt.trial = 0
+            } else if (elapsed <= autopilot.goalEvery) {
+                hunt.stalled += elapsed
+                hunt.trial = route ? hunt.trial + elapsed : 0
+            }
+            if (hunt.stalled >= autopilot.bossStallLimit) {
+                autopilot.skippedBosses.add(who)
+                autopilot.say("leaving a boss", "couldn't make progress")
+                hunt = null
+                continue
+            }
+            const ammo = autopilot.bossAmmo(reachable)
+            if (ammo) return ammo
+            if (route && hunt.trial >= 720) {
+                hunt.failed.push(route.node)
+                hunt.trial = 0
+                route = autopilot.bossApproach(who, reachable, profile, hunt.failed)
+            }
+            if (route) return { goal: route.node.id, type: "mob", who }
+            if (!exitOpen) {
+                const trigger = coolingButton || autopilot.chooseTrigger(-1, true)
+                if (trigger) return { goal: autopilot.triggerNode(trigger), type: "trigger", who: trigger }
+            }
+            return autopilot.exploreForHunt(hunt, reachable)
+        }
+        autopilot.bossHunt = null
+        return null
+    },
+    activeHunt() { //the upgrade or boss being searched for, an upgrade comes first
+        return autopilot.upgradeHunt ?? autopilot.bossHunt
+    },
+    isHuntTarget(who) { //upgrades and bosses have their own search limits and loop handling
+        return !!who && (who === autopilot.upgradeHunt?.who || who === autopilot.bossHunt?.who)
+    },
+    //*********************************************************************
+    // choosing a goal
+    //*********************************************************************
+    chooseGoal() {
+        if (autopilot.bossHunt && (!autopilot.pendingBoss(autopilot.bossHunt.who) || !autopilot.canHuntBosses())) autopilot.bossHunt = null
+        const direct = autopilot.chooseDirectUpgrade()
+        if (direct) {
+            autopilot.releaseCarry(false)
+            return autopilot.setGoal(autopilot.cur, "powerUp", direct.who, direct.walk)
+        }
+        const exit = autopilot.exitNode()
+        const exitWalk = autopilot.walkToExit()
+        const exitOpen = exitWalk !== null || !autopilot.isExitBlocked(exit, false)
+        if (autopilot.carry) {
+            const { step, trigger } = autopilot.carry
+            //A button that pops back up only holds the door while something is on it. Up, or held by the player, the door
+            //is closing or will close once they step off, even if it still looks open, so only a clear walk to the exit ends the carry.
+            const needsBlock = trigger?.popsUp && exitWalk === null && (trigger.obj.isUp || autopilot.isHoldingButton(trigger))
+            const keepCarry = step ? exitWalk === null || !!autopilot.upgradeHunt : !exitOpen || needsBlock
+            if (keepCarry) {
+                if (autopilot.updateCarry()) return
+            } else autopilot.releaseCarry()
         }
         let goal = exit, type = "exit", who = null
-        if (autopilot.only !== "exit" && autopilot.cur >= 0) {
-            const from = autopilot.routesFrom(autopilot.cur).from
+        const hasCoolingButtons = autopilot.triggers.some(trigger => trigger.obj.autopilotHeat)
+        const coolingButton = !exitOpen && hasCoolingButtons ? autopilot.chooseHeatButton() : null
+        const upgradeGoal = autopilot.chooseUpgrade(exitOpen, coolingButton)
+        const priorityGoal = upgradeGoal || autopilot.chooseBoss(exitOpen, coolingButton)
+        if (priorityGoal) ({ goal, type, who } = priorityGoal)
+        if (type === "exit" && !hasCoolingButtons && !autopilot.remotePickup?.onRoute && autopilot.only !== "exit" && autopilot.cur >= 0 && !autopilot.isInExit() &&
+            (powerUp.length || mob.length && autopilot.isArmed())) {
+            const { from, wrapped } = autopilot.routesFrom(autopilot.cur)
+            const exitRoute = autopilot.detourExitRoute(exit, from)
+            const extraCost = node => {
+                if (!exitRoute) return 0 //the exit is blocked or the route is still unknown, so use local travel and the time allowance
+                const { onward, wrapped } = exitRoute
+                if (wrapped[node] && !wrapped[autopilot.cur]) return Infinity
+                return Math.max(0, from[node] + onward[node] - onward[autopilot.cur])
+            }
+            const wrapDetour = node => exitOpen && wrapped[node]
             let best = Infinity
             const keep = who => who === autopilot.goalWho ? 0.8 : 1 //the current goal has to be beaten clearly, so it doesn't switch back and forth
-            for (let i = 0; i < powerUp.length; i++) {
-                if (!autopilot.isWanted(powerUp[i]) || autopilot.isIgnored(powerUp[i])) continue
-                const node = autopilot.nodeFor(powerUp[i].position)
-                if (node >= 0 && from[node] * keep(powerUp[i]) < best && !autopilot.isBehindDoor(node)) {
-                    best = from[node] * keep(powerUp[i])
+            for (const pickup of powerUp) {
+                if (autopilot.isUpgrade(pickup)) continue
+                const value = autopilotBuild.pickupValue(pickup)
+                if (!value || autopilot.isIgnored(pickup)) continue
+                const node = autopilot.nodeFor(pickup.position)
+                if (node < 0 || wrapDetour(node)) continue
+                const extra = extraCost(node)
+                if (!(extra < autopilot.detourLeft(pickup))) continue
+                const cost = (extra + from[node] + 15) * keep(pickup) / value
+                if (cost < best && !autopilot.isBehindDoor(node)) {
+                    best = cost
                     goal = node
                     type = "powerUp"
-                    who = powerUp[i]
+                    who = pickup
                 }
             }
-            if (type === "exit" && autopilot.isArmed()) { //nothing to pick up, look for something to shoot
+            if (type === "exit" && autopilot.isArmed() && (autopilot.canHuntBosses() || !mob.some(autopilot.isLiveBoss))) { //nothing to pick up, look for something to shoot
                 for (let i = 0; i < mob.length; i++) {
-                    if (!mob[i].alive || mob[i].isBadTarget || mob[i].isInvulnerable || !mob[i].isDropPowerUp || autopilot.isIgnored(mob[i])) continue
+                    if (!mob[i].alive || mob[i].isBoss || mob[i].isBadTarget || mob[i].isInvulnerable || !mob[i].isDropPowerUp || autopilot.isIgnored(mob[i])) continue
                     const node = autopilot.nodeFor(mob[i].position, 16)
-                    if (node >= 0 && from[node] * keep(mob[i]) < best && !autopilot.isBehindDoor(node)) {
-                        best = from[node] * keep(mob[i])
+                    if (node < 0 || wrapDetour(node)) continue
+                    const extra = extraCost(node)
+                    if (!(extra < autopilot.detourLeft())) continue
+                    const cost = (extra + from[node]) * keep(mob[i])
+                    if (cost < best && !autopilot.isBehindDoor(node)) {
+                        best = cost
                         goal = node
                         type = "mob"
                         who = mob[i]
@@ -2277,8 +4417,8 @@ const autopilot = {
                 }
             }
         }
-        if (type === "exit") { //a closed door, a hazard, or no way at all, try a button or toggle
-            const trigger = autopilot.chooseTrigger(exit)
+        if (type === "exit" && !exitOpen) {
+            const trigger = coolingButton || (!hasCoolingButtons && autopilot.chooseTrigger(exit, true))
             if (trigger) {
                 type = "trigger"
                 who = trigger
@@ -2293,26 +4433,37 @@ const autopilot = {
                 }
             }
         }
-        if (type === "exit" && autopilot.isExplore) { //no way to the exit, go see somewhere that might have one
+        if (type === "exit" && !exitOpen && autopilot.isExplore) {
             const spot = autopilot.chooseExplore(exit)
             if (spot >= 0) {
                 type = "explore"
                 goal = spot
             }
         }
-        if (goal !== autopilot.goal || who !== autopilot.goalWho) {
-            if (who !== autopilot.goalWho || type !== autopilot.goalType) {
+        autopilot.setGoal(goal, type, who, type === "exit" ? exitWalk : null, coolingButton)
+    },
+    setGoal(goal, type, who, walk, coolingButton = null) {
+        const changedTarget = who !== autopilot.goalWho || type !== autopilot.goalType
+        const changedWalk = (walk === null) !== (autopilot.goalWalk === null)
+        autopilot.goalWalk = walk
+        if (changedTarget || changedWalk) {
+            autopilot.resetRecovery()
+            autopilot.commit = autopilot.backUp = null
+        }
+        if (goal !== autopilot.goal || changedTarget || changedWalk) {
+            if (changedTarget || type === "explore") autopilot.goalSince = simulation.cycle
+            if (changedTarget) {
                 const previous = autopilot.goalType === "trigger" && autopilot.goalWho
                 if (previous && previous.arrivedAt) {
                     autopilot.tried.set(previous, simulation.cycle)
                     previous.arrivedAt = 0
                 }
-                autopilot.goalSince = simulation.cycle
                 if (type === "powerUp") autopilot.say("fetching", who.name)
-                else if (type === "mob") autopilot.say("hunting", "a mob that drops power ups")
-                else if (type === "explore") autopilot.say("exploring", "the exit is blocked and no button is left to try")
-                else if (type === "trigger") autopilot.say(who.kind === "button" ? "pressing a button" : "flipping a toggle", "the way to the exit is blocked")
-                else if (exit < 0) autopilot.say("lost", "can't find the exit")
+                else if (type === "mob") autopilot.say("hunting", who.isBoss ? "a boss" : "a mob that drops power ups")
+                else if (type === "explore") autopilot.say("exploring", autopilot.upgradeHunt ? "looking for a route to an upgrade" :
+                    autopilot.bossHunt ? "looking for a route to a boss" : "the exit is blocked and no button is left to try")
+                else if (type === "trigger") autopilot.say(who.kind === "button" ? "pressing a button" : "flipping a toggle", who === coolingButton ? "turning off the heat" : "the way to the exit is blocked")
+                else if (goal < 0 && walk === null) autopilot.say("lost", "can't find the exit")
                 else autopilot.say("exiting", autopilot.only === "exit" ? "" : "nothing else to get")
             }
             autopilot.goal = goal
@@ -2326,17 +4477,24 @@ const autopilot = {
     // every cycle
     //*********************************************************************
     do() {
-        if (!m.alive || simulation.onTitlePage || simulation.paused || simulation.isChoosing || levelEditor.isActive || !player || simulation.clearNow) return
+        if (!m.alive || simulation.onTitlePage || simulation.paused || simulation.isChoosing || !autopilot.canPlayInCurrentMode() || !player || simulation.clearNow) return
         const cycle = simulation.cycle
         const isManual = input.movementKeys.size > 0
         if (isManual !== autopilot.manualControl || autopilot.controlField !== m.fieldMode) {
             autopilot.cancelMovement()
+            if (isManual) autopilot.upgradeHunt = autopilot.bossHunt = null
             autopilot.manualControl = isManual
             autopilot.controlField = m.fieldMode
         }
+        for (const who of autopilot.elevators) autopilot.updateElevator(who)
         const elevatorChanged = autopilot.elevators.some(who => autopilot.activeElevators.has(who) !== autopilot.elevatorEnabled(who))
-        if (!autopilot.grid || elevatorChanged || (cycle % 30 === 0 && cycle > autopilot.lastBuildCycle + 90 && autopilot.hasMapChanged())) {
-            if (!autopilot.build()) return
+        autopilot.watchSwings()
+        const transportChanged = (autopilot.transports.length > 0 || autopilot.swings.size > 0) && cycle % 10 === 7 && Math.abs(autopilot.transportSum() - autopilot.transportSignature) > 0.5
+        if (!autopilot.grid || elevatorChanged || transportChanged || (cycle % 30 === 0 && cycle > autopilot.lastBuildCycle + 90 && autopilot.hasMapChanged())) {
+            if (!autopilot.build()) {
+                if (cycle % autopilot.goalEvery === 0 && !autopilot.chooseUpgrade()) autopilot.chooseBoss()
+                return
+            }
         }
         if (cycle % 30 === 15) autopilot.findMovingMap()
         if ((player.scale || 1) !== autopilot.pScale || cycle % 30 === 20) autopilot.hasMovementChanged()
@@ -2345,11 +4503,23 @@ const autopilot = {
             for (const w of autopilot.winds) signature += 1000 * w.velocity.x + 3000 * w.velocity.y + (w.isFloat ? 7 : 0)
             if (Math.abs(signature - autopilot.windSignature) > 1e-6) {
                 if (autopilot.windSignature !== null) {
-                    for (const node of autopilot.nodes) if (!node.dead) autopilot.relink.add(node.id)
+                    autopilot.relinkAll()
                     autopilot.lastHeavyMove = cycle
                     autopilot.isPlanDirty = true
                 }
                 autopilot.windSignature = signature
+            }
+        }
+        if (cycle % 10 === 3 && autopilot.belts.length) { //a belt that speeds up, stops, or turns around changes the walks and jumps from every spot on it
+            const sum = autopilot.beltSum()
+            if (Math.abs(sum - autopilot.beltSignature) > 0.2) {
+                autopilot.beltSignature = sum
+                for (const node of autopilot.nodes) {
+                    if (node.dead || !node.belt) continue
+                    const v = autopilot.beltV(node)
+                    if (node.beltWas !== v) autopilot.relink.add(node.id)
+                }
+                autopilot.isPlanDirty = true
             }
         }
         if (cycle % 10 === 0) {
@@ -2359,6 +4529,11 @@ const autopilot = {
         const rayWalls = m.fieldUpgrades[2]?.rayWalls?.()
         if (cycle % 10 === 5 || ((rayWalls?.length || autopilot.rayWalls?.length) && rayWalls !== autopilot.rayWalls)) autopilot.updateObstacles()
         autopilot.rayWalls = rayWalls
+        for (const [door, until] of autopilot.triedDoors) {
+            if (cycle < until && !autopilot.doorOpening(door)) continue
+            autopilot.triedDoors.delete(door)
+            autopilot.isPlanDirty = true
+        }
         for (const t of autopilot.triggers) { //a button that went down and came back up needs something left on it
             if (t.kind !== "button") continue
             if (t.obj.isUp) {
@@ -2366,7 +4541,7 @@ const autopilot = {
                 t.wasUp = true
             } else if (t.wasUp) t.wasDown = true
         }
-        autopilot.relinkSome(1.5)
+        autopilot.relinkSome(autopilot.relinkBudget)
         const feet = playerBody.bounds.max.y
         if (autopilot.cur >= 0 && autopilot.nodes[autopilot.cur].dead) autopilot.cur = -1
         if (m.onGround) {
@@ -2375,7 +4550,7 @@ const autopilot = {
                 at = autopilot.nodeBelow(player.position.x, feet - 30)
                 if (at >= 0 && autopilot.nodes[at].y - feet > 250) at = -1
             }
-            const under = m.standingOn && (m.standingOn.parent || m.standingOn)
+            const under = autopilot.standingOn()
             autopilot.riding = autopilot.activeElevators.has(under) ? under : null
             if (autopilot.riding) { //between its two ends, the closer end's node in this column
                 const e = autopilot.riding.autopilotElevator
@@ -2388,23 +4563,63 @@ const autopilot = {
                     }
                 }
             }
-            if (at >= 0) autopilot.cur = at
-        } else autopilot.riding = null
-        if (autopilot.recentFailures.length && cycle >= autopilot.recentFailures[0].until) {
+            autopilot.train = under && under.autopilotTransport && autopilot.activeTransports.has(under) ? under : null
+            if (autopilot.train) { //on its deck, at the stop it's parked at, or the one it's headed for
+                const who = autopilot.train
+                const stop = autopilot.transportMoving(who) ? autopilot.transportHeading(who) : autopilot.transportAt(who)
+                const node = stop >= 0 ? autopilot.transportNode(who, stop, player.position.x - who.position.x) : -1
+                if (node >= 0) at = node
+            }
+            if (at >= 0) {
+                const step = autopilot.next?.[autopilot.cur]
+                if (autopilot.wasOnGround && !autopilot.flight && step?.type === autopilot.WALK && step.to === at) autopilot.confirmCrossing(step)
+                autopilot.cur = at
+                autopilot.exploreVisited.add(autopilot.exploreArea(autopilot.nodes[at]))
+            }
+            autopilot.beltLast = autopilot.beltSpeed(autopilot.beltUnder()) //kept through the flight that leaves it
+        } else {
+            autopilot.riding = null
+            if (autopilot.train && (!autopilot.train.autopilotTransport || !autopilot.transportMoving(autopilot.train))) autopilot.train = null //hopping on a parked one, a moving one carries on without it
+        }
+        if (autopilot.recentFailures.some(attempt => cycle >= attempt.until)) {
             autopilot.recentFailures = autopilot.recentFailures.filter(attempt => cycle < attempt.until)
             autopilot.isPlanDirty = true
         }
-        if (cycle % 30 === 0 || autopilot.goal < 0 || autopilot.nodes[autopilot.goal].dead) {
+        const isRiding = !!autopilot.train && autopilot.transportMoving(autopilot.train) //on a train between stops it keeps where it was going, what it can reach is about to change
+        const justLanded = m.onGround && !autopilot.wasOnGround
+        autopilot.wasOnGround = m.onGround
+        const pursuing = autopilot.remotePickup?.who ?? autopilot.goalWho
+        if (!isManual && !autopilot.isUpgrade(pursuing) && !autopilot.isLiveBoss(pursuing) &&
+            (autopilot.remotePickup || autopilot.goalType === "powerUp" || autopilot.goalType === "mob")) autopilot.detourSpent++
+        const objectiveBeforeExit = !isManual && !isRiding && autopilot.goalType === "exit" && autopilot.isInExit(110) && autopilot.holdExitForObjectives()
+        const upgradeCollected = autopilot.isUpgrade(autopilot.goalWho) && !powerUp.includes(autopilot.goalWho)
+        const boss = autopilot.bossHunt?.who
+        const bossResolved = boss && (!boss.alive || !autopilot.canHuntBosses())
+        //once each time the plan is rebuilt, not every cycle it's waiting to be, relinking and moving doors keep it dirty for many cycles
+        const reconsiderButton = autopilot.lastPlanCycle === cycle - 1 && (autopilot.goalType === "trigger" || autopilot.carry?.trigger)
+        const reconsiderWalk = justLanded && !isManual && !isRiding && autopilot.goalWalk === null &&
+            autopilot.goalType === "exit" && autopilot.walkToExit() !== null
+        if (objectiveBeforeExit || upgradeCollected || bossResolved || reconsiderButton || reconsiderWalk || (cycle % autopilot.goalEvery === 0 && !isRiding) ||
+            (autopilot.goal < 0 ? autopilot.goalWalk === null : autopilot.nodes[autopilot.goal].dead)) {
             autopilot.giveUp()
             autopilot.chooseGoal()
         }
-        if (autopilot.isPlanDirty && (cycle > autopilot.lastPlanCycle + 10 || !autopilot.next)) autopilot.plan()
+        if ((autopilot.goalWalk === null || !m.onGround) && autopilot.isPlanDirty && (cycle > autopilot.lastPlanCycle + autopilot.planEvery || !autopilot.next)) autopilot.plan()
         if (cycle % 60 === 0 && autopilot.dist && autopilot.cur >= 0 && autopilot.goal >= 0 && !(autopilot.dist[autopilot.cur] < Infinity) && !autopilot.relink.size) autopilot.say("lost", `no way from here to the ${autopilot.goalType === "exit" ? "exit" : "goal"}`)
         autopilot.fight()
         if (!isManual) {
-            autopilot.drive(feet) //holding a movement key takes over
+            autopilot.watchRouteLoop()
+            if (!autopilot.drivePortalEscape() && !autopilot.driveBlockAttack(feet) && !autopilot.driveRemotePickup()) {
+                autopilot.drive(feet) //holding a movement key takes over
+                autopilot.beltHop(feet)
+                autopilot.movePilotWave(feet)
+            }
             autopilot.measure()
             if (tech.isFireMoveLock && (input.left || input.right || input.up || autopilot.flying)) input.fire = false //Higgs mechanism, the player can't move while firing
+        } else {
+            autopilot.portalPass = null
+            autopilot.routeLoop.since = cycle
+            autopilot.routeLoop.pending = false
         }
         autopilot.look()
         autopilot.lastV.x = player.velocity.x
@@ -2459,6 +4674,7 @@ const autopilot = {
     giveUp() { //a power up or mob that takes too long isn't worth it
         const who = autopilot.goalWho
         if (!who || autopilot.goalType === "carry") return //a carry has its own time limits
+        if (autopilot.isHuntTarget(who)) return //priority goals have their own search limits
         if (autopilot.goalType === "trigger") {
             if (simulation.cycle > autopilot.goalSince + 1800 || (autopilot.dist && autopilot.cur >= 0 && !(autopilot.dist[autopilot.cur] < Infinity) && simulation.cycle > autopilot.goalSince + 120)) {
                 autopilot.tried.set(who, simulation.cycle)
@@ -2469,6 +4685,7 @@ const autopilot = {
             return
         }
         const isGone = autopilot.goalType === "powerUp" ? !powerUp.includes(who) : !who.alive
+        if (!isGone && autopilot.remotePickup?.who === who) return
         //standing where it should be reachable for a few checks in a row, and it isn't
         autopilot.atGoalCount = autopilot.cur === autopilot.goal && m.onGround && autopilot.target !== who ? autopilot.atGoalCount + 1 : 0
         const isThere = autopilot.atGoalCount > 3
@@ -2570,23 +4787,26 @@ const autopilot = {
     },
     flyShot(p, angle, from, goalX, goalY, isCheck = false) { //follow a shot fired at angle until it passes goalX, or is about level with goalY going straight up or down, { y, t, clear } or null
         const vp = player.velocity
-        let x = from.x, y = from.y
+        const offset = p.launchOffset || 0
+        let x = from.x + offset * Math.cos(angle), y = from.y + offset * Math.sin(angle)
         let vx = p.speed * Math.cos(angle) + p.inherit.x * vp.x, vy = p.speed * Math.sin(angle) + p.inherit.y * vp.y
         const dir = Math.sign(goalX - from.x) || 1
         const isVertical = Math.abs(goalX - from.x) < 30
         let lastX = x, lastY = y, clear = true
+        const obstacles = p.obstacles || map
+        if (isCheck && offset && Matter.Query.rayAny(obstacles, from, { x, y }, p.width)) return null
         for (let t = 1; t < 240; t++) {
             vx *= p.keep
             vy = vy * p.keep + p.gravity
             const nx = x + vx, ny = y + vy
             if (isCheck && t % 3 === 0) {
-                if (Matter.Query.rayAny(map, { x: lastX, y: lastY }, { x: nx, y: ny })) clear = false
+                if (Matter.Query.rayAny(obstacles, { x: lastX, y: lastY }, { x: nx, y: ny }, p.width)) clear = false
                 lastX = nx
                 lastY = ny
             }
             if (isVertical ? Math.abs(ny - goalY) < Math.abs(vy) + 1 || (ny - goalY) * Math.sign(vy) > 0 : (nx - goalX) * dir >= 0) {
                 const f = isVertical ? 1 : Math.abs(vx) > 1e-6 ? (goalX - x) / vx : 1
-                if (isCheck && Matter.Query.rayAny(map, { x: lastX, y: lastY }, { x: goalX, y: y + vy * f })) clear = false
+                if (isCheck && Matter.Query.rayAny(obstacles, { x: lastX, y: lastY }, { x: goalX, y: y + vy * f }, p.width)) clear = false
                 return { y: y + vy * f, t: t - 1 + f, clear }
             }
             if (!isVertical && vx * dir <= 0.05) return null //stalled before it got there
@@ -2613,7 +4833,7 @@ const autopilot = {
     aimArc(p, from, to, isCheck = true) { //the angles that land a falling shot on to, low arc first, each { angle, t, clear }, isCheck looks for the map in the way
         const dx = to.x - from.x, up = from.y - to.y, s = p.speed, g = p.gravity
         const along = Math.abs(dx), side = Math.sign(dx) || 1
-        if (along < 30) return [{ angle: Math.atan2(to.y - from.y, dx || 1e-6), t: Math.hypot(dx, up) / s, clear: !Matter.Query.rayAny(map, from, to) }]
+        if (along < 30) return [{ angle: Math.atan2(to.y - from.y, dx || 1e-6), t: Math.hypot(dx, up) / s, clear: !Matter.Query.rayAny(p.obstacles || map, from, to, p.width) }]
         const root = s * s * s * s - g * (g * along * along + 2 * up * s * s)
         if (root < 0) return [] //out of reach
         const found = []
@@ -2694,6 +4914,143 @@ const autopilot = {
             }
         } else if (!input.fire) autopilot.chargeSince = 0
     },
+    blockAttack: null,
+    blockAttackAim: null,
+    blockAttackRetry: new WeakMap(),
+    nextBlockAttack: 0,
+    endBlockAttack() {
+        const attack = autopilot.blockAttack
+        if (!attack) return
+        autopilot.blockAttack = autopilot.blockAttackAim = null
+        input.field = false
+        if (m.holdingTarget === attack.block) {
+            if (m.isHolding) m.drop()
+            else m.holdingTarget = null //a released block keeps its projectile collision filter
+        } else if (!m.isHolding && !attack.held) m.holdingTarget = null //discard any other block the field highlighted during pickup
+        if (m.fieldMode === 11) m.fieldUpgrades[11].cancelPresses()
+    },
+    blockAttackShot(block, target, charge) {
+        const origin = m.pos
+        const to = target.position
+        const dx = to.x - origin.x, dy = to.y - origin.y
+        const distance = Math.hypot(dx, dy)
+        const obstacles = map.concat(body.filter(who => who !== block && (who.collisionFilter.mask & (cat.player | cat.bullet))))
+        if (tech.isTokamak && charge > 4) {
+            const blast = 330 * Math.pow(block.mass, 0.25) * b.explosionRange()
+            if (distance < blast + (target.radius || 30) + 40 || Matter.Query.rayAny(obstacles, origin, to)) return null
+            return { x: to.x, y: to.y }
+        }
+        const speed = m.throwSpeed(Math.min(charge / 5, 1), block.mass)
+        const launchOffset = 30 + 40 * player.scale //the block's center in m.holding()
+        const width = Math.min(block.bounds.max.x - block.bounds.min.x, block.bounds.max.y - block.bounds.min.y)
+        if (speed < 12) return null
+        if (distance <= launchOffset + width / 2 || Math.abs(dx) < 30) {
+            const angle = Math.atan2(dy, dx)
+            const radius = Math.max(launchOffset, distance)
+            const end = { x: origin.x + radius * Math.cos(angle), y: origin.y + radius * Math.sin(angle) }
+            return Matter.Query.rayAny(obstacles, origin, end, width) ? null : to
+        }
+        const dt = simulation.delta
+        const profile = {
+            speed, launchOffset, width, obstacles, fuse: 36,
+            gravity: simulation.g * dt * dt, keep: 1 - block.frictionAir * dt / (1000 / 60),
+            inherit: { x: 0.5, y: 0.5 },
+        }
+        const velocity = target.velocity
+        const initial = autopilot.aimArc(profile, origin, to, false)[0]
+        if (!initial) return null
+        const lead = Math.min(initial.t, 24)
+        const ahead = { x: to.x + velocity.x * lead, y: to.y + velocity.y * lead }
+        const shot = autopilot.aimArc(profile, origin, ahead).find(arc => arc.clear)
+        return shot ? { x: origin.x + 500 * Math.cos(shot.angle), y: origin.y + 500 * Math.sin(shot.angle) } : null
+    },
+    driveBlockAttack(feet) {
+        const cycle = simulation.cycle
+        const target = autopilot.target
+        const support = autopilot.standingOn()
+        let attack = autopilot.blockAttack
+        const distance = target?.alive && !target.isBadTarget && !target.isInvulnerable ?
+            Math.hypot(target.position.x - m.pos.x, target.position.y - m.pos.y) : Infinity
+        const upgrade = autopilot.upgradeHunt?.who
+        const busy = autopilot.goalWalk !== null || autopilot.carry || autopilot.blockClear || autopilot.rayMove || autopilot.remotePickup || autopilot.flying ||
+            autopilot.warp || autopilot.grapple || autopilot.riding || autopilot.train || autopilot.wallClimb || autopilot.wallRelease ||
+            autopilot.backUp || autopilot.pending?.isJump || support?.isRay || autopilot.goalType === "trigger" ||
+            (autopilot.goalType === "exit" && autopilot.isInExit()) ||
+            (upgrade && autopilot.isInExit(110) && Number.isFinite(autopilot.nearbyUpgradeDistance(upgrade)))
+        if (attack?.released) {
+            autopilot.endBlockAttack()
+            return false
+        }
+        if (autopilot.isArmed() || busy || !m.onGround || distance > 1000 || (autopilot.only === "exit" && autopilot.goalWho !== autopilot.bossHunt?.who)) {
+            autopilot.endBlockAttack()
+            return false
+        }
+        if (!attack) {
+            if (cycle < autopilot.nextBlockAttack || cycle < autopilot.pushOnUntil || m.fieldCDcycle >= m.cycle ||
+                m.energy < 0.06 || m.isHolding || m.throwBlock !== m.throwBlockDefault || !autopilot.canHoldBlocks()) return false
+            if (autopilot.goalType === "powerUp" && autopilot.goalWho?.name === "ammo" &&
+                Math.hypot(autopilot.goalWho.position.x - m.pos.x, autopilot.goalWho.position.y - m.pos.y) < 250) return false
+            let best = Infinity
+            for (const block of body) {
+                const reach = Math.hypot(block.position.x - m.pos.x, block.position.y - m.pos.y)
+                if (reach > autopilot.carryReach() - 20 || block === support || block.isImmutable || block.isInvulnerable ||
+                    cycle < (autopilot.blockAttackRetry.get(block) || 0) || !autopilot.isCarryable(block) || !autopilot.isPushable(block) ||
+                    autopilot.hanging.has(block) || autopilot.isOnButton(block) || autopilot.stepBlocks.has(block) || block.speed > 10 ||
+                    Matter.Query.rayAny(map, m.pos, block.position)) continue
+                const cost = reach + block.mass * 6
+                if (cost < best) {
+                    best = cost
+                    attack = { block, started: cycle, held: false, released: false }
+                }
+            }
+            autopilot.nextBlockAttack = cycle + 15
+            if (!attack) return false
+            autopilot.blockAttack = attack
+            autopilot.say("throwing", "out of ammo, using a block")
+        }
+        const block = attack.block
+        const isHeld = m.isHolding && m.holdingTarget === block
+        if (!body.includes(block) || (m.isHolding && !isHeld) || (!isHeld && attack.held) ||
+            cycle - attack.started > (isHeld ? 95 : 32) || (!isHeld && (block === support || autopilot.isOnButton(block)))) {
+            autopilot.blockAttackRetry.set(block, cycle + 180)
+            autopilot.endBlockAttack()
+            return false
+        }
+        input.left = input.right = input.up = input.down = input.fire = false
+        autopilot.pending = autopilot.commit = null
+        autopilot.watch = { x: player.position.x, y: feet, cycle }
+        autopilot.blockedCycles = 0
+        autopilot.isHolding = true
+        if (!isHeld) {
+            autopilot.why = "picking up a block for combat"
+            autopilot.blockAttackAim = block.position
+            //Only let the field go once it has selected our block, so it can't take a button weight or the floor.
+            input.field = m.holdingTarget !== block || m.fieldCDcycle >= m.cycle
+            return true
+        }
+        attack.held = true
+        autopilot.why = "charging a block throw"
+        const minimumCharge = distance < 300 ? 2 : distance < 650 ? 3.5 : 5
+        //A close tokamak blast can hurt us. Try a physical throw before it reaches fusion charge.
+        const aim = m.throwCharge >= minimumCharge && autopilot.blockAttackShot(block, target, m.throwCharge)
+        if (aim) {
+            autopilot.blockAttackAim = aim
+            autopilot.why = "throwing a block at a mob"
+            input.field = false
+            attack.released = true
+            autopilot.blockAttackRetry.set(block, cycle + 150)
+            autopilot.nextBlockAttack = cycle + 25
+        } else if (m.energy < 0.004 || m.throwCharge >= 5) {
+            autopilot.blockAttackRetry.set(block, cycle + 180)
+            autopilot.endBlockAttack()
+            input.field = false
+        } else {
+            const away = Math.atan2(m.pos.y - target.position.y, m.pos.x - target.position.x)
+            autopilot.blockAttackAim = autopilot.blockDropAim(block, away) || target.position
+            input.field = true
+        }
+        return true
+    },
     fight() { //pick the closest mob in view, shoot it, and pull in power ups
         if (autopilot.flying || autopilot.warp || autopilot.grapple || autopilot.blockClear || autopilot.rayMove) {
             input.fire = input.field = false
@@ -2701,18 +5058,31 @@ const autopilot = {
             autopilot.isAiming = false
             return
         }
+        if (!autopilot.isArmed() && !autopilot.remotePickup && m.fieldMode !== 11 && !tech.isGunCycle && !tech.isGunChoice) {
+            const slot = b.inventory.findIndex(index => b.guns[index].ammo > 0)
+            if (slot >= 0) {
+                simulation.switchToGunInInventory(slot)
+                autopilot.cycleAim = -Infinity
+            }
+        }
+        if (autopilot.blockAttack) return
         const profile = autopilot.profile = autopilot.isGunAim && b.inventory.length ? autopilot.gunProfile() : null
         if (profile) autopilot.watchShots()
         const isThroughWalls = profile && profile.isThroughWalls
-        let target = null, best = 1800 * 1800
+        const boss = autopilot.goalType === "mob" && autopilot.goalWho === autopilot.bossHunt?.who ? autopilot.goalWho : null
+        let target = null, best = 1800 * 1800, bossInRange = false
         for (let i = 0; i < mob.length; i++) {
             const who = mob[i]
             if (!who.alive || who.isBadTarget || who.isInvulnerable) continue
             const dx = who.position.x - m.pos.x, dy = who.position.y - m.pos.y
             const d2 = dx * dx + dy * dy
-            if (d2 < best && ((isThroughWalls && d2 < profile.reach * profile.reach) || !Matter.Query.rayAny(map, m.pos, who.position))) {
+            const supportsBoss = boss?.isShielded && who.shield && who.shieldTargetID !== undefined && who.shieldTargetID === boss.id
+            const priority = (who === boss || supportsBoss) && d2 < (profile?.reach ?? (autopilot.isArmed() ? 1800 : 450)) ** 2
+            if (((!bossInRange && d2 < best) || (priority && (!bossInRange || d2 < best))) &&
+                ((isThroughWalls && d2 < profile.reach * profile.reach) || !Matter.Query.rayAny(map, m.pos, who.position))) {
                 best = d2
                 target = who
+                bossInRange = priority
             }
         }
         if (!target && profile && profile.kind === "arc") { //lob over what's in the way
@@ -2744,8 +5114,6 @@ const autopilot = {
         input.fire = false
         input.field = false
         if (target) {
-            if (!autopilot.isArmed() && b.inventory.length > 1 && simulation.cycle % 30 === 0) simulation.nextGun() //out of ammo, try another gun
-            if (!autopilot.isArmed()) autopilot.say(b.inventory.length ? "out of ammo" : "unarmed", "can't shoot back")
             if (profile) {
                 const shot = autopilot.cycleAim === simulation.cycle - 1 && autopilot.shotFor === target && simulation.cycle % 2 ? autopilot.shot : autopilot.aimAt(target, profile) //every other cycle
                 autopilot.shot = shot
@@ -2771,18 +5139,22 @@ const autopilot = {
         //the field pulls in power ups, it has to look at them unless they are close
         const field = autopilot.fieldName()
         const isFieldMoves = field === "negative mass" || field === "grappling hook" || field === "wormhole" //holding these fields lifts, hooks, or teleports the player, so only for power ups that are close
-        let grab = null, near = target || isFieldMoves ? 160 * 160 : m.grabPowerUpRange2
-        for (let i = 0; i < powerUp.length; i++) {
-            if (!autopilot.isWanted(powerUp[i])) continue
-            const dx = powerUp[i].position.x - m.pos.x, dy = powerUp[i].position.y - m.pos.y
+        const isRemoteField = field === "grappling hook" || field === "wormhole" || field === "pilot wave" || field === "portal"
+        const grabRange = isRemoteField && !autopilot.manualControl ? 0 : target || isFieldMoves ? 160 * 160 : m.grabPowerUpRange2
+        let grab = null, grabCost = Infinity
+        for (const pickup of powerUp) {
+            const value = autopilotBuild.pickupValue(pickup)
+            if (!value) continue
+            const dx = pickup.position.x - m.pos.x, dy = pickup.position.y - m.pos.y
             const d2 = dx * dx + dy * dy
-            if (d2 < near && !Matter.Query.rayAny(map, m.pos, powerUp[i].position)) {
-                near = d2
-                grab = powerUp[i]
+            const cost = (Math.sqrt(d2) + 15) / (pickup === autopilot.upgradeHunt?.who ? 50 : value)
+            if (d2 < grabRange && cost < grabCost && !Matter.Query.rayAny(map, m.pos, pickup.position)) {
+                grabCost = cost
+                grab = pickup
             }
         }
         //Keep a ray underfoot while walking or jumping off it. Field input would remove the support.
-        const support = m.standingOn && (m.standingOn.parent || m.standingOn)
+        const support = autopilot.standingOn()
         const canGrab = grab && !(support?.isRay && (m.onGround || m.cycle - m.lastOnGroundCycle < 10))
         if (canGrab) {
             input.field = true
@@ -2802,7 +5174,114 @@ const autopilot = {
         if (m.isHolding) m.drop()
         else if (!input.field) m.holdingTarget = null
     },
-    recoverMovement(feet, edge) {
+    //*********************************************************************
+    // loops, being stuck, and following the plan
+    //*********************************************************************
+    routeLoop: { since: 0, pending: false, pickups: 0, kills: 0 },
+    portalPass: null,
+    recordPortalExit(end) {
+        const previous = autopilot.portalPass
+        const cycle = simulation.cycle
+        const samePair = previous?.end.portalPair === end && cycle - previous.cycle <= 180
+        autopilot.portalPass = { end, cycle, count: samePair ? previous.count + 1 : 1, dir: 0, failedDir: samePair ? previous.dir : 0 }
+    },
+    drivePortalEscape() { //a trip through the same pair can repeat forever without landing
+        const pass = autopilot.portalPass
+        if (!pass) return false
+        const cycle = simulation.cycle
+        const age = cycle - pass.cycle
+        if ((m.onGround && age > 5) || age > 150) {
+            autopilot.portalPass = null
+            return false
+        }
+        if (pass.count < 3 && !(pass.count >= 2 && autopilot.routeLoop.pending)) return false
+        const mouth = pass.end.portal.bounds
+        const middle = pass.end.portal.position.x
+        const x = player.position.x
+        if (!pass.dir) {
+            const size = autopilot.size()
+            const y = mouth.min.y - 12
+            const clear = dir => {
+                const side = dir < 0 ? mouth.min.x - size.halfWidth - 35 : mouth.max.x + size.halfWidth + 35
+                return !autopilot.isBoxSolidExact(side - size.halfWidth, y - size.height, side + size.halfWidth, y)
+            }
+            const preferred = -pass.failedDir || Math.sign((autopilot.nodes[autopilot.goal]?.x ?? middle) - middle) || 1
+            pass.dir = clear(preferred) || !clear(-preferred) ? preferred : -preferred
+            autopilot.cancelMovement()
+            autopilot.routeLoop.pending = false
+            autopilot.routeLoop.since = cycle
+            autopilot.say("escaping", "the same portal pair keeps throwing it back")
+        }
+        const far = pass.dir > 0 ? mouth.max.x + 150 : mouth.min.x - 150
+        input.left = pass.dir < 0 && x > far
+        input.right = pass.dir > 0 && x < far
+        input.up = input.down = input.field = false
+        autopilot.why = "escaping a portal loop"
+        return true
+    },
+    repeatedRoute(cycle, since, history) {
+        if (!history?.length) return 0
+        const at = age => history[(cycle - age) % history.length]?.position
+        const here = at(0)
+        if (!here) return 0
+        const close = (a, b, radius) => b && (a.x - b.x) ** 2 + (a.y - b.y) ** 2 < radius ** 2
+        //Compare two laps using eight position samples per lap. Let each sample drift up to 12 cycles.
+        for (let lap = 120; lap <= 300; lap += 6) {
+            const oldest = lap + Math.round(7 * lap / 8) + 12
+            if (oldest >= history.length || cycle - since < oldest) break
+            if (!close(here, at(lap), 65)) continue
+            let matches = 1, traveled = false
+            for (let i = 1; i < 8; i++) {
+                const age = Math.round(i * lap / 8)
+                const now = at(age)
+                if (!now) break
+                if (!close(here, now, 120)) traveled = true
+                const previous = age + lap
+                if (close(now, at(previous), 55) || close(now, at(previous - 12), 55) || close(now, at(previous + 12), 55)) matches++
+            }
+            if (traveled && matches >= 7) return lap
+        }
+        return 0
+    },
+    watchRouteLoop() {
+        const cycle = simulation.cycle
+        const loop = autopilot.routeLoop
+        const kills = typeof mobs === "undefined" ? 0 : mobs.mobDeaths
+        const suspend = autopilot.goalWalk !== null || autopilot.riding || autopilot.train || autopilot.carry || autopilot.blockClear ||
+            autopilot.remotePickup || autopilot.blockAttack || simulation.isTimeSkipping ||
+            (autopilot.goalType === "trigger" && autopilot.goalWho?.arrivedAt)
+        if (suspend || kills !== loop.kills || powerUp.length < loop.pickups) {
+            loop.since = cycle
+            loop.pending = false
+        }
+        loop.kills = kills
+        loop.pickups = powerUp.length
+        if (!loop.pending && cycle % 12 === 0) loop.pending = !!autopilot.repeatedRoute(cycle, loop.since, m.history)
+    },
+    breakRouteLoop(feet) {
+        const cycle = simulation.cycle
+        const loop = autopilot.routeLoop
+        loop.pending = false
+        loop.since = cycle
+        autopilot.say("stuck", "repeating the same route")
+        const { goalType, goalWho, goal, nodes, cur } = autopilot
+        if (goalWho && autopilot.isHuntTarget(goalWho)) return autopilot.recoverMovement(feet, autopilot.next?.[cur], true)
+        if (((goalType === "powerUp" || goalType === "mob" || goalType === "trigger") && goalWho) ||
+            (goalType === "explore" && nodes[goal])) {
+            if (goalType === "explore") autopilot.rememberExploreGoal()
+            else if (goalType === "trigger") autopilot.tried.set(goalWho, cycle)
+            else autopilot.ignored.set(goalWho, cycle + 1200)
+            autopilot.goal = -1
+            autopilot.goalType = ""
+            autopilot.goalWho = null
+            autopilot.commit = autopilot.backUp = null
+            autopilot.chooseGoal()
+            autopilot.plan()
+            return
+        }
+        autopilot.recoverMovement(feet, autopilot.next?.[cur], true)
+    },
+    recoverMovement(feet, edge, isLoop = false) {
         const cycle = simulation.cycle, x = player.position.x
         if (autopilot.startBlockClear(feet, edge)) return
         input.left = input.right = input.up = false
@@ -2810,28 +5289,60 @@ const autopilot = {
         autopilot.blockedCycles = 0
         autopilot.watch = { x, y: feet, cycle }
         if (edge) {
-            autopilot.addFail(edge)
+            if (isLoop) autopilot.rememberFailure(edge) //a repeated route is evidence to try a detour, not a failed jump
+            else autopilot.addFail(edge)
             autopilot.plan()
             const next = autopilot.next[autopilot.cur]
-            if (next && !autopilot.sameManeuver(edge, next)) {
+            if (next && !autopilot.sameManeuver(edge, next) && !autopilot.retryCost(next)) {
                 autopilot.why = "trying another route"
                 return
             }
         }
-        //If the graph offers no different route, try a few distinct movements in order.
-        const dir = edge ? Math.sign(edge.dir || autopilot.nodes[edge.to].x - x) || 1 : Math.sign(level.exit.x + 50 - x) || 1
-        const block = autopilot.pushCount < 2 && (!edge || edge.type === autopilot.WALK) ? autopilot.pushableBeside(x, feet) : null
+        if (autopilot.stuckCount++ >= 2 && autopilot.startBlockStep(feet, edge)) return
+        const site = autopilot.recoverySite ??= { x, y: feet, pushed: false, hopped: false, until: 0, edge: null }
+        const dir = Math.sign(edge ? edge.dir || autopilot.nodes[edge.to].x - x : (autopilot.nodes[autopilot.goal]?.x ?? level.exit.x + 50) - x)
+        const block = !site.pushed && (!edge || edge.type === autopilot.WALK) ? autopilot.pushableBeside(x, feet) : null
         if (block) {
-            autopilot.pushCount++
+            site.pushed = true
             autopilot.recovery = "pushing"
             autopilot.wiggleDir = Math.sign(block.position.x - x) || dir
             autopilot.wiggleUntil = cycle + 60
             return
         }
-        const attempt = autopilot.isEscalate ? autopilot.stuckCount++ % 3 : 2
-        autopilot.recovery = ["hopping", "taking a run", "backing away"][attempt]
-        autopilot.wiggleDir = attempt === 2 ? -dir : dir
-        autopilot.wiggleUntil = cycle + [30, 60, 35][attempt]
+        if (dir && autopilot.isEscalate && !isLoop && !site.hopped && !edge?.isLowStep) {
+            site.hopped = true
+            autopilot.recovery = "hopping"
+            autopilot.wiggleDir = dir
+            autopilot.wiggleUntil = cycle + 30
+            return
+        }
+        //Give moving obstacles and replanning time to open a route without pacing back and forth.
+        site.edge = edge
+        site.until = cycle + 120
+        autopilot.wiggleUntil = 0
+        autopilot.commit = autopilot.backUp = null
+        autopilot.routeLoop.since = cycle
+        autopilot.routeLoop.pending = false
+        autopilot.why = "waiting for a new route"
+    },
+    waitForRecovery(feet) {
+        const site = autopilot.recoverySite
+        if (!site) return false
+        const x = player.position.x, cycle = simulation.cycle
+        if (Math.hypot(x - site.x, feet - site.y) >= 150) {
+            autopilot.recoverySite = null
+            autopilot.stuckCount = 0
+        } else if (site.until) {
+            const edge = autopilot.next?.[autopilot.cur]
+            const newRoute = edge && (!site.edge || !autopilot.sameManeuver(site.edge, edge)) && !autopilot.retryCost(edge)
+            if (cycle < site.until && !newRoute) {
+                autopilot.why = "waiting for a new route"
+                return true
+            }
+            site.until = 0
+            autopilot.watch = { x, y: feet, cycle }
+        }
+        return false
     },
     blockedStep(edge, feet, vx) {
         const cycle = simulation.cycle
@@ -2847,6 +5358,38 @@ const autopilot = {
         autopilot.recoverMovement(feet, edge)
         return true
     },
+    driveStraight(feet, go) {
+        if (autopilot.goalWalk === null) return false
+        const pickup = autopilot.goalType === "powerUp" && autopilot.goalWho
+        if (pickup && Number.isFinite(autopilot.nearbyUpgradeDistance(pickup))) {
+            autopilot.why = "collecting a nearby upgrade"
+            autopilot.isHolding = true
+            return true
+        }
+        const x = player.position.x
+        const dx = (pickup ? pickup.position.x : autopilot.goalWalk) - x
+        const lookahead = 48 + 3 * Math.abs(player.velocity.x)
+        const nextX = x + Math.sign(dx) * Math.min(Math.abs(dx), lookahead)
+        const walk = autopilot.straightWalk(nextX, feet)
+        if (walk?.block && Math.hypot(walk.block.position.x - m.pos.x, walk.block.position.y - m.pos.y) <= autopilot.carryReach()) {
+            if (m.fieldCDcycle >= m.cycle) {
+                autopilot.why = "waiting to pick up a block"
+                return true
+            }
+            if (autopilot.startBlockClear(feet, null, { ...walk, x: nextX, isWalk: true })) return true
+            autopilot.blockClearUntil.set(walk.block, simulation.cycle + 90)
+        } else if (walk) {
+            autopilot.why = pickup ? "walking to an upgrade" : "walking to the exit"
+            autopilot.isHolding = false
+            autopilot.pending = null
+            go(dx)
+            return true
+        }
+        autopilot.goalWalk = null //an obstacle moved into the walk; pick a new route next cycle
+        autopilot.goal = -1
+        autopilot.isPlanDirty = true
+        return true
+    },
     drive(feet) {
         input.left = input.right = input.up = input.down = false
         autopilot.carryAim = null
@@ -2860,31 +5403,70 @@ const autopilot = {
             else if (dir < 0) input.left = true
         }
         autopilot.why = "" //what it's doing on the ground this cycle, to measure why it stops or turns around
+        if (autopilot.blockClear) return autopilot.driveBlockClear(feet)
         if (autopilot.rayMove) return autopilot.driveRay(feet)
-        if (autopilot.goalType === "exit" && autopilot.isInExit()) return void (autopilot.why = "in the exit") //stand still while the exit charges
+        if (autopilot.goalType === "exit" && autopilot.isInExit()) {
+            autopilot.wallClimb = autopilot.wallRelease = null
+            return void (autopilot.why = "in the exit") //stand still while the exit charges
+        }
         if (autopilot.flying) return autopilot.flyPath(feet, go)
         if (autopilot.warp) return autopilot.doWarp()
         if (autopilot.grapple) return autopilot.doGrapple(feet, go)
-        if (autopilot.blockClear) return autopilot.driveBlockClear(feet)
-        if (autopilot.goalType === "explore" && m.onGround && !autopilot.relink.size) {
-            const support = m.standingOn && (m.standingOn.parent || m.standingOn)
-            if ((autopilot.dyn.has(support) || (Math.abs(vx) < 2 && cycle % 15 === 0)) && autopilot.startBlockClear(feet, null)) return
+        if (autopilot.wallClimb && autopilot.driveWallClimb(feet, go)) return
+        if (autopilot.releaseWall(feet, go)) return
+        const train = autopilot.train
+        const isJumpingOff = autopilot.pending && autopilot.pending.isJump && m.buttonCD_jump === autopilot.pending.mcycle //the feet can still touch the deck the cycle after
+        if (train && autopilot.transportMoving(train) && m.onGround && !isJumpingOff) { //carried to its other stop, stand on the deck away from its ends
+            const t = train.autopilotTransport
+            autopilot.why = t.isSwing ? "riding a platform" : "riding a train"
+            autopilot.isHolding = true
+            autopilot.watch = { x, y: feet, cycle }
+            autopilot.pending = null
+            if (autopilot.trainRide !== train) { //where it left from is somewhere it has been, so exploring doesn't ride straight back
+                autopilot.trainRide = train
+                if (t.stops && !t.isSwing) autopilot.rodeFrom.push(t.stops[train.VxGoal > 0 ? 0 : 1])
+                autopilot.say("riding", t.isSwing ? "a swinging platform" : "a train")
+            }
+            const off = x - train.position.x
+            let want = 0, leave = null //where on the deck to stand, and how the plan leaves it
+            if (t.isSwing && autopilot.next) { //it only pauses at its stop, so be standing where the plan leaves the deck from when it gets there
+                const dest = autopilot.transportHeading(train)
+                let at = autopilot.transportNode(train, dest, off)
+                for (let i = 0; at >= 0 && i < 40; i++) {
+                    const e = autopilot.next[at]
+                    if (!e) break
+                    if (e.type !== autopilot.WALK || nodes[e.to].transport !== train) {
+                        want = nodes[e.from].x - t.stops[dest]
+                        leave = e
+                        break
+                    }
+                    at = e.to
+                }
+                const room = Math.max(20, t.width / 2 - 45)
+                want = Math.max(-room, Math.min(room, want))
+                if (Math.abs(off - want) > 18) go(want - off)
+                else if (leave && leave.type === autopilot.JUMP && !leave.coyote && Math.abs(train.position.x - t.stops[dest]) < 160 && !m.crouch && m.hardLandCD < mc && m.buttonCD_jump + 20 < mc) {
+                    const jump = autopilot.beltJump(leave, feet) //coming up to the stop, jump off as soon as the jump lands from here, it only pauses there
+                    if (jump) {
+                        autopilot.why = "jumping off a platform"
+                        autopilot.isHolding = false
+                        input.up = true
+                        if (!jump.delay && jump.turnY === undefined && vx * (jump.steer || jump.dir) < Math.max(jump.most, 0.1)) go(jump.steer || jump.dir)
+                        autopilot.pending = { edge: jump, mcycle: mc, isJump: true }
+                    }
+                }
+            } else if (Math.abs(off) > Math.max(20, t.width / 2 - 60)) go(-off)
+            return
+        }
+        autopilot.trainRide = null
+        if (m.onGround && !isJumpingOff) {
+            if (autopilot.driveStraight(feet, go)) return
+            if (player.velocity.y >= -1 && autopilot.clearUnderfootDrop(feet)) return
         }
         if (cycle < autopilot.wiggleUntil && m.onGround) { //stuck, try something, see the stuck check
-            const left = autopilot.wiggleUntil - cycle
-            const kind = autopilot.recovery
-            autopilot.why = "stuck, " + kind
-            if (kind === "pushing") { //lean on the block beside it, no hopping, so it slides out of the way
-                go(autopilot.wiggleDir)
-            } else if (kind === "hopping") { //a low step or a block, hop at it
-                go(autopilot.wiggleDir)
-                input.up = left > 20
-            } else if (kind === "taking a run") { //back up, then run and jump
-                go(left > 25 ? -autopilot.wiggleDir : autopilot.wiggleDir)
-                input.up = left < 12
-            } else { //back away far enough to approach from a different spot
-                go(autopilot.wiggleDir)
-            }
+            autopilot.why = "stuck, " + autopilot.recovery
+            go(autopilot.wiggleDir)
+            input.up = autopilot.recovery === "hopping" && autopilot.wiggleUntil - cycle > 20
             autopilot.pending = null
             return
         }
@@ -2892,21 +5474,57 @@ const autopilot = {
         if (!m.onGround) autopilot.commit = null //committed only until it leaves the ground
         if (pending && pending.isJump && m.buttonCD_jump === pending.mcycle) { //the jump pressed last cycle took off
             autopilot.flight = { edge: pending.edge, to: pending.edge.to, since: cycle, mStart: pending.mcycle, isJumped: true, isWindowed: !!pending.isWindowed, takeoffX: x, takeoffVx: vx, heldBlock: m.isHolding && m.holdingTarget, apexY: feet }
-            autopilot.flight.takeoff = autopilot.recordTakeoff(pending.edge, x - vx, feet - player.velocity.y, autopilot.flight.isWindowed ? "windowed" : pending.edge.isLeap ? "leap" : "planned")
+            autopilot.flight.takeoff = autopilot.recordTakeoff(pending.edge, x - vx, feet - player.velocity.y, pending.edge.isMomentum ? "momentum" : autopilot.flight.isWindowed ? "windowed" : pending.edge.isLeap ? "leap" : "planned")
             autopilot.pending = null
         }
-        if (!m.onGround || (autopilot.flight && mc - autopilot.flight.mStart < 10)) return autopilot.fly(feet, go) //the feet stay on the ground for a few cycles after a jump
+        const landing = autopilot.flight
+        const landingTarget = nodes[landing?.to]
+        if (autopilot.isLandingSpan && landing?.isJumped && player.velocity.y >= -1 && landingTarget && !landingTarget.dead && !landingTarget.elevator && mc - landing.mStart >= 10 &&
+            (m.onGround || (landing.slopeLandingUntil && mc - m.lastOnGroundCycle <= 4))) {
+            const support = autopilot.standingOn()
+            if (m.onGround && support?.isTouched && support.fadeTime && Math.abs(feet - support.bounds.min.y) < 16) {
+                const { min, max } = support.bounds
+                const foot = autopilot.size().foot
+                const margin = Math.min(x - min.x, max.x - x)
+                const inward = Math.sign(support.position.x - x)
+                const next = autopilot.next?.[autopilot.cur]
+                const slippingOff = margin < -0.6 * foot || (margin < foot && vx * inward < -1)
+                if (slippingOff && (next?.type !== autopilot.WALK || next.dir !== inward)) {
+                    autopilot.why = "getting a foothold on a shrinking platform"
+                    go(inward)
+                    return
+                }
+            }
+            const uphill = support && autopilot.landingUphill(x, feet, landingTarget, support)
+            if (uphill) {
+                landing.slopeLandingUntil ??= mc + 45
+                if (mc < landing.slopeLandingUntil) {
+                    autopilot.why = "holding uphill on landing"
+                    go(uphill)
+                    return
+                }
+            }
+        }
+        const isBump = landing?.edge?.type === autopilot.WALK && !landing.isLaunched //walking over a bump, back on the ground the walking takes over at once, on a narrow top a few cycles at full speed runs off the end
+        if (!m.onGround || (landing && ((mc - landing.mStart < 10 && !isBump) || landing.isJumped && player.velocity.y < -1))) return autopilot.fly(feet, go) //slope contact can persist briefly during takeoff
         //on the ground
+        let isHopLanding = false //between hops against a belt it's on the ground a cycle at a time
         if (autopilot.flight) { //just landed
             const flight = autopilot.flight
             autopilot.flight = null
             const edge = flight.edge
-            if (edge && (edge.type !== autopilot.JUMP || flight.isJumped)) {
+            isHopLanding = !!flight.hopDir
+            if (edge && !flight.hopDir && (edge.type !== autopilot.JUMP || flight.isJumped)) {
                 const tally = autopilot.stats[autopilot.edgeNames[edge.type]]
                 const to = nodes[edge.to]
-                const isGood = (Math.abs(to.x - x) < 40 && Math.abs(to.y - feet) < 30) || (autopilot.dist && Number.isFinite(autopilot.dist[autopilot.cur]) && autopilot.dist[autopilot.cur] <= autopilot.dist[edge.to] + 5) //there, or somewhere as close to the goal
+                const boarded = edge.isBoarding && autopilot.standingOn() === to.elevator
+                const support = autopilot.standingOn()
+                const samePlatform = support?.isThere && support.fadeTime && Math.abs(support.bounds.min.y - to.y) < autopilot.cell &&
+                    to.x >= support.bounds.min.x - autopilot.cell && to.x <= support.bounds.max.x + autopilot.cell && Math.abs(feet - support.bounds.min.y) < 20
+                const landedAsPlanned = boarded || samePlatform || (Math.abs(to.x - x) < 40 && Math.abs(to.y - feet) < 30)
+                const isGood = landedAsPlanned || (autopilot.dist && Number.isFinite(autopilot.dist[autopilot.cur]) && !autopilot.leadsBackToFailure(edge.to, autopilot.cur) && autopilot.dist[autopilot.cur] <= autopilot.dist[edge.to] + 5)
                 if (tally) {
-                    const kind = edge.coyote ? "coyote" : edge.isLeap ? "leap" : flight.isWindowed ? "windowed" : "planned"
+                    const kind = edge.airJumps ? "acoustic levitation" : edge.turnY !== undefined ? "vertical first" : edge.isMomentum ? "momentum" : edge.coyote ? "coyote" : edge.isLeap ? "leap" : flight.isWindowed ? "windowed" : "planned"
                     const tallyKind = autopilot.jumpKinds[kind] = autopilot.jumpKinds[kind] || [0, 0]
                     if (edge.type === autopilot.JUMP) tallyKind[0]++
                     if (edge.type === autopilot.JUMP && isGood) tallyKind[1]++
@@ -2915,16 +5533,26 @@ const autopilot = {
                     else if (autopilot.misses.length < 200) autopilot.misses.push({ type: autopilot.edgeNames[edge.type], run: edge.isRun, most: +edge.most.toFixed(1), dir: edge.dir, dx: Math.round(to.x - nodes[edge.from].x), dy: Math.round(to.y - nodes[edge.from].y), offX: Math.round((x - to.x) * edge.dir), offY: Math.round(feet - to.y), takeoff: Math.round(flight.takeoffX - nodes[edge.from].x), vx: +flight.takeoffVx.toFixed(1), delay: edge.delay || 0, hold: edge.hold || 0, kind, lands: [Math.round(x - to.x), Math.round(feet - to.y)] })
                 }
                 if (flight.takeoff) flight.takeoff.isGood = isGood
+                if (landedAsPlanned) autopilot.confirmCrossing(edge)
                 if (edge.type === autopilot.JUMP && autopilot.recoverLoadedJump(flight, isGood)) return
-                if (!isGood && autopilot.dist && !(autopilot.dist[autopilot.cur] < autopilot.dist[edge.from])) {
-                    autopilot.addFail(edge)
+                if (edge.type === autopilot.JUMP && feet < nodes[edge.from].y - 35) {
+                    //Give the next takeoff time to line up after gaining a foothold.
+                    autopilot.watch = { x, y: feet, cycle }
+                }
+                const madeProgress = autopilot.dist && autopilot.dist[autopilot.cur] < autopilot.dist[edge.from]
+                const cameUpShort = edge.type === autopilot.JUMP && !to.elevator && flight.apexY > to.y + 8
+                if (!isGood && (flight.ceilingAt || cameUpShort || (autopilot.dist && !madeProgress))) {
+                    autopilot.addFail(edge, 1, cameUpShort && !flight.ceilingAt, flight.ceilingAt)
                     return
                 }
             }
         }
+        if (cycle % 6 === 0 && autopilot.startBlockClear(feet, autopilot.next?.[autopilot.cur])) return
         if (tech.isRay && m.fieldMode === 2 && autopilot.tryRay(feet, autopilot.next?.[autopilot.cur])) return autopilot.driveRay(feet)
+        if (autopilot.waitForRecovery(feet)) return
+        if (autopilot.routeLoop.pending && !autopilot.isInExit()) return autopilot.breakRouteLoop(feet)
         //Catch stalls that did not report a failed landing or a blocked step.
-        if (cycle > autopilot.watch.cycle + 150) {
+        if (cycle > autopilot.watch.cycle + autopilot.stuckAfter) {
             const moved = Math.abs(x - autopilot.watch.x) + Math.abs(feet - autopilot.watch.y)
             autopilot.watch = { x, y: feet, cycle }
             const isWaiting = (autopilot.cur >= 0 && autopilot.cur === autopilot.goal) || autopilot.isHolding
@@ -2932,7 +5560,6 @@ const autopilot = {
                 const edge = autopilot.next && autopilot.cur >= 0 ? autopilot.next[autopilot.cur] : null
                 return autopilot.recoverMovement(feet, edge)
             }
-            if (moved >= 150) autopilot.stuckCount = autopilot.pushCount = 0
         }
         autopilot.isHolding = false
         autopilot.pending = null
@@ -2957,7 +5584,8 @@ const autopilot = {
         //fighting changes how it travels, it keeps going while shooting, it backs away from a mob that gets close and holds only to shoot the mob it's hunting,
         //each starts at one distance and ends at a farther one, so a mob moving around the line doesn't flip it every cycle
         const target = autopilot.target
-        if (!autopilot.isSmoothCombat && target && autopilot.isArmed() && cycle > autopilot.pushOnUntil) { //the old way, to compare: stop within 750, back away within 420
+        const retreating = target?.isBoss && autopilot.goalType === "exit" && !autopilot.canHuntBosses()
+        if (!autopilot.isSmoothCombat && target && !retreating && autopilot.isArmed() && cycle > autopilot.pushOnUntil) { //the old way, to compare: stop within 750, back away within 420
             const dx = target.position.x - x
             const distance = Math.hypot(dx, target.position.y - m.pos.y)
             if (distance < 750) {
@@ -2970,7 +5598,7 @@ const autopilot = {
                 }
                 return
             }
-        } else if (target && autopilot.isArmed() && cycle > autopilot.pushOnUntil) {
+        } else if (target && !retreating && autopilot.isArmed() && cycle > autopilot.pushOnUntil) {
             const dx = target.position.x - x
             const distance = Math.hypot(dx, target.position.y - m.pos.y)
             const p = autopilot.profile
@@ -2993,8 +5621,9 @@ const autopilot = {
         } else autopilot.combat = ""
         if (autopilot.backUp) {
             autopilot.why = "backing up to run"
-            if (cycle < autopilot.backUp.until) return go(autopilot.backUp.dir)
+            const backup = autopilot.backUp
             autopilot.backUp = null
+            if (cycle < backup.until) return autopilot.backUpForJump(backup.edge, go, backup.until - cycle)
         }
         if (autopilot.goalType === "trigger" && autopilot.goalWho && (autopilot.cur === autopilot.goal || (autopilot.goalWho.arrivedAt && Math.abs(nodes[autopilot.goal].x - x) < 150))) {
             autopilot.why = "working a button"
@@ -3004,12 +5633,29 @@ const autopilot = {
         if (edge && edge.type === autopilot.JUMP && (edge.isRun || edge.coyote) && vx * edge.dir < 3 && autopilot.isUseAlternatives) edge = autopilot.standingAlternative(edge)
         const committed = autopilot.committedEdge(edge, x, feet) //a jump it's lining up for, kept while the plan around it shifts
         if (committed) edge = committed
-        if (cycle % 20 === 7 && autopilot.cur !== autopilot.goal && !autopilot.riding) { //a field or tech that flies or teleports, used when it's much faster than the plan, or there's no plan
+        if (edge?.type === autopilot.JUMP) {
+            const step = nodes[autopilot.cur].edges.find(walk => walk.isLowStep && walk.dir === edge.dir && !walk.fail)
+            let walk = step
+            for (let i = 0; i < autopilot.cellsFor(100) && walk?.type === autopilot.WALK && walk.dir === step.dir && !walk.fail; i++) {
+                if (walk.to === edge.to) {
+                    edge = step //the planned landing is a few uninterrupted steps away
+                    autopilot.commit = null
+                    break
+                }
+                walk = autopilot.next[walk.to]
+            }
+        }
+        //Finish crossing a walkable bump before jumping or climbing to something farther along.
+        let ahead = edge
+        for (let i = 0; i < autopilot.cellsFor(100) && ahead?.type === autopilot.WALK && !ahead.isLowStep && !nodes[ahead.to].elevator; i++) ahead = autopilot.next[ahead.to]
+        const stepAhead = ahead?.isLowStep
+        if (cycle % 20 === 7 && autopilot.cur !== autopilot.goal && !autopilot.riding && !stepAhead && !edge?.airJumps) { //a field or tech that flies or teleports, used when it's much faster than the plan, or there's no plan
             if (autopilot.findWarp()) return autopilot.doWarp()
             if (autopilot.findGrapple(feet)) return autopilot.doGrapple(feet, go)
             if (autopilot.findFlight(feet)) return autopilot.flyPath(feet, go)
         }
         if (!edge) return void (autopilot.why = autopilot.cur === autopilot.goal ? "at the goal" : "no way to the goal")
+        if (edge.type === autopilot.CLIMB) return autopilot.startWallClimb(edge, feet, go)
         const from = nodes[edge.from]
         const to = nodes[edge.to]
         const canJump = !m.crouch && m.hardLandCD < mc && m.buttonCD_jump + 20 < mc //see m.groundControl()
@@ -3032,21 +5678,106 @@ const autopilot = {
             }
             if (cycle > autopilot.waitSince + 30) autopilot.say("waiting", note)
         }
-        if (to.cover >= 3000 && !riding && !to.elevator && autopilot.isDoorIn(to)) { //a closed door, or a platform moving through, pushing into it does nothing, wait a step before it
+        if (train && edge.type === autopilot.RIDE && from.transport === train) { //it leaves when it senses the player stepping on, after it has seen them off it
+            const off = x - train.position.x
+            if (Math.abs(off) > Math.max(20, train.autopilotTransport.width / 2 - 60)) go(-off)
+            else if (!train.autopilotTransport.isSwing && !train.isSensing && canJump && cycle % 20 === 0) { //still on it from the ride here, a hop in place counts as stepping off
+                input.up = true
+                autopilot.pending = { edge: null, mcycle: mc, isJump: false, isHop: true, dir: 0, hold: 1 }
+            }
+            return wait(train.autopilotTransport.isSwing ? "for the platform to swing back" : "for the train to leave")
+        }
+        //a few steps before stepping onto a transport's deck, if it isn't parked at this stop, stop short of the edge, it comes when the player waits near
+        let board = null
+        for (let e = edge, i = 0; e && i < 8 && !board; i++) {
+            const stop = nodes[e.to]
+            if (stop.transport && stop.transport !== train && !nodes[e.from].transport) board = e
+            e = e.type === autopilot.WALK ? autopilot.next[e.to] : null
+        }
+        if (board && !autopilot.boardingReady(board, x, feet)) {
+            const dir = Math.sign(nodes[board.to].x - nodes[board.from].x) || board.dir
+            const isJump = board.type === autopilot.JUMP && !board.coyote //it waits on the spot it jumps from, or back from the edge it steps or drops off
+            const left = ((isJump ? board.takeoffX ?? nodes[board.from].x : nodes[board.from].x - dir * 30) - x) * dir
+            const speed = vx * dir
+            if (left < Math.max(0, speed) * 11 + 10) {
+                if (left < (isJump ? -7 : -15) || (speed > 2 && left < speed * 6)) go(-dir) //past it, or coming in too fast for friction alone
+                else if (isJump && left > 7 && speed < 2) go(dir)
+                return wait(nodes[board.to].transport.autopilotTransport?.isSwing ? "for the platform" : "for a train")
+            }
+        }
+        const blocker = to.cover >= 3000 && !riding && !to.elevator ? autopilot.blockerIn(to) : null
+        if (blocker) {
             if (tech.isRay && m.fieldMode === 2 && autopilot.tryRay(feet, edge, to.x)) return autopilot.driveRay(feet)
             if (autopilot.startBlockClear(feet, edge)) return
-            if (Math.abs(from.x - x) > 12) go(from.x - x)
-            return wait("for a door")
+            if (autopilot.doorOpening(blocker)) return wait("for an opening door")
+            if (blocker.isDoor && cycle >= (autopilot.triedDoors.get(blocker) ?? -Infinity)) {
+                if (autopilot.doorApproach?.who !== blocker) autopilot.doorApproach = { who: blocker, since: cycle, contact: null }
+                const approach = autopilot.doorApproach
+                const dir = Math.sign(blocker.position.x - x) || edge.dir
+                const face = dir > 0 ? blocker.bounds.min.x : blocker.bounds.max.x
+                if ((face - x) * dir < autopilot.size().halfWidth + 8) approach.contact ??= cycle
+                if (cycle < approach.since + 90 && (approach.contact === null || cycle < approach.contact + 15)) {
+                    autopilot.why = "checking a door by contact"
+                    go(dir)
+                    return
+                }
+                autopilot.triedDoors.set(blocker, cycle + 300)
+            }
+            autopilot.doorApproach = null
+            autopilot.waitSince = 0
+            autopilot.isHolding = false
+            return autopilot.recoverMovement(feet, edge)
+        }
+        autopilot.doorApproach = null
+        const transferJump = jump => {
+            autopilot.waitSince = 0
+            autopilot.isHolding = false
+            autopilot.commit = null
+            autopilot.why = jump.isBoarding ? "jumping onto the elevator" : "jumping off the elevator"
+            input.up = true
+            go(jump.dir)
+            autopilot.pending = { edge: jump, mcycle: mc, isJump: true }
         }
         if (riding) {
             const isLeaving = edge.type !== autopilot.RIDE && to.elevator !== riding
+            const exit = autopilot.elevatorExit(riding, edge)
+            if (exit) {
+                const out = nodes[exit.to]
+                const dir = Math.sign(out.x - riding.holdX)
+                const isClose = Math.abs(out.y - feet) <= 250
+                if (canJump && isClose && !out.elevator && (exit.type === autopilot.JUMP || out.y < feet - 18)) {
+                    const jump = autopilot.elevatorJump(exit, feet, riding)
+                    if (jump) return transferJump(jump)
+                }
+                if (!m.crouch) {
+                    const drop = autopilot.elevatorDrop(riding, edge, feet)
+                    if (drop) {
+                        autopilot.why = "stepping off the elevator"
+                        autopilot.waitSince = 0
+                        autopilot.pending = { edge: drop, mcycle: mc, isJump: false }
+                        go(drop.dir)
+                        return
+                    }
+                }
+                //Stage on the exit side while the lift travels, with room to brake before the lip.
+                if (dir && !out.elevator) {
+                    const margin = Math.max(28, autopilot.size().foot + 16)
+                    const spot = riding.holdX + dir * Math.max(0, riding.autopilotElevator.width / 2 - margin)
+                    if ((spot - x) * dir > Math.max(5, player.velocity.x * dir * 10) &&
+                        !autopilot.isBoxSolidExact(Math.min(spot, x) - 20, feet - autopilot.size().height, Math.max(spot, x) + 20, feet - 16)) {
+                        autopilot.why = "crossing the elevator deck"
+                        autopilot.waitSince = 0
+                        go(dir)
+                        return
+                    }
+                    if (!isLeaving || !isClose) return wait("riding the elevator")
+                }
+            }
             if (!isLeaving || Math.abs(feet - from.y) > 70) {
-                const drop = !m.crouch ? autopilot.elevatorDrop(riding, edge, feet) : null
-                if (drop) {
-                    autopilot.why = "stepping off the elevator"
+                if (edge.type === autopilot.WALK && to.elevator === riding && Math.abs(feet - from.y) <= 70) {
+                    autopilot.why = "crossing the elevator deck"
                     autopilot.waitSince = 0
-                    autopilot.pending = { edge: drop, mcycle: mc, isJump: false }
-                    go(drop.dir)
+                    go(to.x - x)
                     return
                 }
                 if (Math.abs(riding.holdX - x) > 15) go(riding.holdX - x)
@@ -3058,13 +5789,19 @@ const autopilot = {
                 autopilot.waitSince = 0
                 return
             }
-        } else if (to.elevator) { //getting on, it has to be at the stop by the time the player is
+        } else if (to.elevator) {
             const top = to.elevator.bounds.min.y
-            if (!autopilot.boardingReady(edge, x)) return wait("for the elevator")
+            if (canJump && edge.type === autopilot.JUMP && !edge.blockJumps) {
+                const jump = autopilot.elevatorJump(edge, feet)
+                if (jump) return transferJump(jump)
+            }
+            if (!autopilot.boardingReady(edge, x, feet)) return wait("for the elevator")
             if (top < feet - 20 && top > feet - 150 && canJump) input.up = true //it's a little above, hop on
         }
         autopilot.waitSince = 0
-        if (canJump && !riding && !from.isCrouch && cycle % 3 === 0 && edge.type !== autopilot.BOOST) { //a jump from right here that beats the plan
+        const isBeveledDrop = ahead?.type === autopilot.FALL && ahead.clearX !== undefined && !autopilot.retryCost(ahead)
+        const isVerticalJump = ahead?.type === autopilot.JUMP && ahead.turnY !== undefined
+        if (canJump && !riding && !from.isCrouch && (cycle % 3 === 0 || isHopLanding) && edge.type !== autopilot.BOOST && !stepAhead && !isBeveledDrop && !isVerticalJump) { //a jump from right here that beats the plan
             let leap = autopilot.bestLeap(feet)
             if (leap) {
                 const later = autopilot.bestLeap(feet, 4)
@@ -3079,15 +5816,17 @@ const autopilot = {
             }
         }
         if (!tech.isScaleInvariance && (from.isCrouch || (edge.type === autopilot.WALK && nodes[edge.to].isCrouch))) input.down = true
-        //the next jump on the plan, this edge or one a step or two of walking ahead, can it be taken from right here, so it doesn't rock back and forth lining up
-        let ahead = edge
-        for (let i = 0; i < autopilot.cellsFor(100) && ahead && ahead.type === autopilot.WALK; i++) ahead = autopilot.next[ahead.to]
+        if (!riding && ahead?.type === autopilot.WALK && nodes[ahead.to].elevator && !autopilot.boardingReady(ahead, x, feet)) {
+            const boardFrom = nodes[ahead.from].x
+            if ((boardFrom - x) * ahead.dir <= Math.max(3, vx * ahead.dir * 8)) return wait("for the elevator")
+        }
         //close to the planned spot it can jump from where it is, farther off, up to 120 away, only if the jump still lands when the player is a little off where and how fast they are,
         //so it keeps its running speed instead of slowing down to line up, jumps from farther off without that check land worse and look early
         const spotOf = e => e.takeoffX !== undefined ? e.takeoffX : nodes[e.from].x //where the planned jump leaves the ground
         const offTakeoff = ahead ? Math.abs(spotOf(ahead) - x) : Infinity
-        const isNearTakeoff = ahead && Math.abs(nodes[ahead.from].y - feet) < 30 && (offTakeoff < 30 || (offTakeoff < 120 && Math.abs(vx) > 2 && autopilot.isMomentumJump && autopilot.canJumpFromHere(ahead, feet, 0, true)))
-        if (ahead && ahead.type === autopilot.JUMP && !ahead.coyote && autopilot.isJumpWindow && isNearTakeoff && canJump && !riding && autopilot.canJumpFromHere(ahead, feet, 0, true)) { //still lands if the player is a little off, or a little faster or slower, a jump that just makes it in the simulation comes up short
+        const isNearTakeoff = ahead?.type === autopilot.JUMP && !isVerticalJump && !ahead.airJumps && !autopilot.retryCost(ahead) && !nodes[ahead.to].elevator && Math.abs(nodes[ahead.from].y - feet) < 30 &&
+            (offTakeoff < 30 || (offTakeoff < 120 && Math.abs(vx) > 2 && autopilot.isMomentumJump && autopilot.canJumpFromHere(ahead, feet, 0, true)))
+        if (isNearTakeoff && !ahead.coyote && autopilot.isJumpWindow && canJump && !riding && autopilot.canJumpFromHere(ahead, feet, 0, true)) { //still lands if the player is a little off, or a little faster or slower, a jump that just makes it in the simulation comes up short
             //the jump works from here, but jump in the middle of the stretch it works from, not at its first cycle, so it isn't early
             const key = autopilot.edgeKey(ahead)
             if (autopilot.window.key !== key) autopilot.window = { key, start: mc }
@@ -3110,7 +5849,7 @@ const autopilot = {
             else if (mc - autopilot.window.start >= left) {
                 autopilot.why = "jump"
                 input.up = true
-                if (!ahead.delay) go(ahead.blockJumps ? ahead.steer : ahead.steer || ahead.dir) //a delayed jump goes straight up first
+                if (!ahead.delay && ahead.turnY === undefined) go(ahead.blockJumps ? ahead.steer : ahead.steer || ahead.dir)
                 autopilot.pending = { edge: ahead, mcycle: mc, isJump: true, isWindowed: true }
                 return
             }
@@ -3122,9 +5861,23 @@ const autopilot = {
             return
         }
         if (edge.type === autopilot.WALK) {
+            if (ahead && ahead.type === autopilot.JUMP && ahead.beltVx !== undefined && !ahead.coyote) {
+                const jump = canJump && !riding ? autopilot.beltJump(ahead, feet) : null //a belt carries it past the planned spot in a cycle or two, take the jump as soon as it works
+                if (jump) {
+                    autopilot.why = "jumping off a belt"
+                    input.up = true
+                    if (!jump.delay && jump.turnY === undefined && vx * (jump.steer || jump.dir) < Math.max(jump.most, 0.1)) go(jump.steer || jump.dir)
+                    autopilot.pending = { edge: jump, mcycle: mc, isJump: true }
+                    return
+                }
+                const V = autopilot.beltV(nodes[ahead.from]) //a jump planned at the belt's own speed, let the belt carry it there, walking would make it too fast
+                if (Math.abs(ahead.beltVx - V) < 0.5 && Math.abs(spotOf(ahead) - x) < Math.abs(vx - V) * 11 + 20) return void (autopilot.why = "riding a belt to a jump")
+            }
             autopilot.why = "walking"
             go(edge.dir)
-            if (from.y - to.y > 16 && canJump && (to.x - x) * edge.dir < 30 + 3 * Math.abs(vx)) { //a step up taller than the slanted foot rides over, hop it without slowing down
+            if (edge.isLowStep) {
+                autopilot.pending = { edge, mcycle: mc, isJump: false } //keep running if the bevel lifts the feet off the ground
+            } else if (from.y - to.y > 16 && autopilot.realTop(from) - autopilot.realTop(to) > 16 && canJump && (to.x - x) * edge.dir < 30 + 3 * Math.abs(vx) && !autopilot.isUphillWalk(from, to)) { //hop a discrete step
                 input.up = true
                 autopilot.why = "hopping a step"
                 autopilot.pending = { edge, mcycle: mc, isJump: false } //in the air it keeps walking, see fly()
@@ -3132,43 +5885,113 @@ const autopilot = {
             autopilot.blockedStep(edge, feet, vx)
             return
         }
+        if (edge.type === autopilot.JUMP && edge.beltVx !== undefined && !edge.coyote) {
+            //taking off from a belt: it's carried, or hopping, through the spot and can't stand on it, so jump as soon as the jump lands from where it is,
+            //every spot along the belt has its own plan, so one that doesn't work out is passed by, and the next is tried
+            autopilot.why = "jumping off a belt"
+            const key = autopilot.edgeKey(edge)
+            const tried = autopilot.beltTry
+            if (!tried || tried.key !== key) {
+                if (tried && cycle - tried.cycle < 90) { //carried past the last one without it working
+                    const count = (autopilot.beltMiss.get(tried.key) || 0) + 1
+                    autopilot.beltMiss.set(tried.key, count)
+                    if (count >= 2) {
+                        autopilot.beltMiss.delete(tried.key)
+                        autopilot.addFail(tried.edge)
+                        autopilot.isPlanDirty = true
+                    }
+                }
+                autopilot.beltTry = { key, edge, cycle }
+            } else tried.cycle = cycle
+            const jump = canJump ? autopilot.beltJump(edge, feet) : null
+            if (jump) {
+                input.up = true
+                if (!jump.delay && jump.turnY === undefined && vx * (jump.steer || jump.dir) < Math.max(jump.most, 0.1)) go(jump.steer || jump.dir)
+                autopilot.pending = { edge: jump, mcycle: mc, isJump: true }
+                autopilot.beltTry = null
+                return
+            }
+            const V = autopilot.beltV(from)
+            if (Math.abs(edge.beltVx - V) >= 0.5) go(edge.beltVx - V) //going with the belt, or hopping against it, see beltHop(), else no key, the belt carries it
+            return
+        }
         if (edge.type === autopilot.JUMP && edge.coyote) { //run off the edge, the jump is pressed in the air, see fly()
             autopilot.why = "running off for a coyote jump"
             const past = (x - spotOf(edge)) * edge.dir //from the corner it runs off, it needs full speed there
             if (past > -20 && vx * edge.dir < 3) {
-                autopilot.backUp = { dir: -edge.dir, until: cycle + 24 } //get room to run
-                go(-edge.dir)
+                if (canJump && autopilot.keepMomentum(edge, feet, go)) return
+                if (!autopilot.backUpForJump(edge, go, 24)) return
             } else go(edge.dir)
             autopilot.pending = { edge, mcycle: mc, isJump: true }
             return
         }
         if (edge.type === autopilot.JUMP) {
             const toSpot = spotOf(edge) - x //the arc was simulated from here, the middle of the node or the top of a corner
+            if (edge.turnY !== undefined) {
+                autopilot.why = "lining up a vertical jump"
+                const offset = Math.abs(toSpot), speed = Math.abs(vx)
+                //Let the player settle, then check the live arc. A few pixels off the mark can still work.
+                if (offset <= 10 && speed <= 0.55 && canJump) {
+                    const fitted = autopilot.fitJumpHeight(edge, feet)
+                    if (fitted) {
+                        input.up = true
+                        autopilot.pending = { edge: fitted, mcycle: mc, isJump: true }
+                        return
+                    }
+                    if (offset <= 4) return autopilot.recoverMovement(feet, edge)
+                }
+                const coast = speed > 0.55 && toSpot * vx > 0 && Math.abs(toSpot - vx * 11) <= 10
+                if (offset > 4 && !coast && (toSpot * vx <= 0 || offset > speed * 11)) go(toSpot)
+                return
+            }
             const past = -toSpot * edge.dir //how far past the takeoff spot, in the jump's direction
-            const press = () => {
+            const press = fitted => {
                 input.up = true
-                if (!edge.delay) go(edge.blockJumps ? edge.steer : edge.dir) //a delayed jump goes straight up first
-                edge = autopilot.fitJumpHeight(edge, feet)
+                edge = fitted
+                if (!edge.delay && edge.turnY === undefined) go(edge.blockJumps ? edge.steer : edge.dir)
             }
             const stopping = Math.abs(vx) * 11 //how far ground friction slides the player with no key held
             autopilot.why = edge.isRun ? "running jump" : "lining up a standing jump"
-            if (edge.isRun && Math.abs(toSpot) < 80) autopilot.commitTo(edge) //a run-up, switching plans mid run backs it up again, standing jumps are better off taking the spot it slid to
-            if (edge.isRun) {
+            if ((edge.isRun || edge.runFrom !== undefined) && Math.abs(toSpot) < 80) autopilot.commitTo(edge) //a run-up, switching plans mid run backs it up again, standing jumps are better off taking the spot it slid to
+            if (edge.runFrom !== undefined) { //a run-up: fast enough already, jump at the takeoff, otherwise back to where the run-up starts, then run
+                const moving = vx * edge.dir
+                const need = edge.runVx ? 0.92 * edge.runVx : 0.5 //a short run-up from the old way jumps at any speed
+                autopilot.why = edge.isRun ? "running jump" : "short run-up"
+                if (moving >= need && past + moving > -4) {
+                    const fitted = canJump && autopilot.fitJumpHeight(edge, feet)
+                    if (fitted) press(fitted)
+                    else go(edge.dir)
+                } else if (moving < need && past + moving > -4 && canJump && autopilot.keepMomentum(edge, feet, go)) return
+                else if (moving < need && past > -20 && (x - edge.runFrom) * edge.dir > 4) { //too slow to make it, back up for the run
+                    if (!autopilot.backUpForJump(edge, go, 6)) return
+                } else if (moving > 0.5 || (x - edge.runFrom) * edge.dir <= 4) go(edge.dir) //running, or at the start of the run-up
+                else go(-edge.dir) //walking back to the start
+            } else if (edge.isRun) {
                 if (vx * edge.dir > 5.5 && past + vx * edge.dir > -4) { //reaches the spot this cycle
-                    if (canJump) press()
+                    const fitted = canJump && autopilot.fitJumpHeight(edge, feet)
+                    if (fitted) press(fitted)
+                    else if (canJump && autopilot.retryCost(edge)) return autopilot.recoverMovement(feet, edge)
                     else go(edge.dir)
                 } else if (past > -20 && vx * edge.dir < 3) {
-                    autopilot.backUp = { dir: -edge.dir, until: cycle + 24 } //get room to run
-                    go(-edge.dir)
+                    if (canJump && autopilot.keepMomentum(edge, feet, go)) return
+                    if (!autopilot.backUpForJump(edge, go, 24)) return
                 } else go(edge.dir)
             } else if (Math.abs(toSpot) < 12 && Math.abs(vx) < 1.5) {
-                if (canJump) press()
-            } else if (toSpot * vx > 0 && stopping > Math.abs(toSpot) - 8) {
-                //coasting, ground friction stops the player about on the spot
-            } else if (toSpot * vx < 0 && Math.abs(toSpot) < 30) {
-                //slid a little past it, let friction stop the player before walking back, so it doesn't rock back and forth
-                if (Math.abs(vx) < 0.5) go(toSpot)
-            } else go(toSpot)
+                if (canJump && vx * edge.dir < -0.3 && !autopilot.liveJumpLands(edge, feet)) return go(edge.dir) //still drifting back from lining up, from this speed it falls short, stop first
+                if (canJump) {
+                    const fitted = autopilot.fitJumpHeight(edge, feet)
+                    if (!fitted) {
+                        if (Math.abs(toSpot) > 3) return go(toSpot)
+                        return autopilot.recoverMovement(feet, edge)
+                    }
+                    press(fitted)
+                }
+            } else {
+                //Coast to the takeoff or let friction stop an overshoot before walking back.
+                const coast = toSpot * vx > 0 && stopping > Math.abs(toSpot) - 8 || toSpot * vx < 0 && Math.abs(toSpot) < 30 && Math.abs(vx) >= 0.5
+                if ((coast || toSpot * edge.dir < 0) && canJump && autopilot.keepMomentum(edge, feet, go)) return
+                if (!coast) go(toSpot)
+            }
             autopilot.pending = { edge, mcycle: mc, isJump: true } //walking off the edge before the jump still jumps, with coyote time
             return
         }
@@ -3178,12 +6001,32 @@ const autopilot = {
         autopilot.pending = { edge, mcycle: mc, isJump: false }
         if (edge.type === autopilot.FALL) autopilot.blockedStep(edge, feet, vx)
     },
+    backUpForJump(edge, go, frames) {
+        const support = autopilot.standingOn()
+        if (support?.isTouched && support.fadeTime) {
+            const x = player.position.x, dir = -edge.dir
+            const room = dir > 0 ? support.bounds.max.x - x : x - support.bounds.min.x
+            const travel = Math.max(0, player.velocity.x * dir, autopilot.p.run) * frames
+            if (support.fadeCount <= frames + 20 || room <= travel + autopilot.size().foot) {
+                //The run-up would outlast the foothold or walk off it. Replan while still standing on it.
+                autopilot.rememberFailure(edge)
+                autopilot.plan()
+                autopilot.why = "looking for a jump before the platform vanishes"
+                return false
+            }
+        }
+        autopilot.backUp = { edge, until: simulation.cycle + frames }
+        go(-edge.dir)
+        return true
+    },
     standingAlternative(edge) {
-        const { dist, nodes } = autopilot
+        const { dist, nodes, wrapRoutes } = autopilot
         let best = edge
         let cost = autopilot.edgeCost(edge) + autopilot.retryCost(edge) + dist[edge.to] + 15 //allow a little extra to avoid a run-up
         for (const option of nodes[edge.from].edges) {
             if (option.type !== autopilot.JUMP || option.isRun || option.coyote || autopilot.retryCost(option)) continue
+            if (autopilot.leadsBackToFailure(edge.to, option.to)) continue
+            if (!wrapRoutes?.[edge.from] && (option.wraps || wrapRoutes?.[option.to])) continue
             const value = autopilot.edgeCost(option) + dist[option.to]
             if (value < cost) {
                 best = option
@@ -3201,8 +6044,10 @@ const autopilot = {
         const node = autopilot.nodes[c.from]
         const edge = node && !node.dead ? node.edges.find(e => autopilot.edgeKey(e) === c.key) : null
         const dist = autopilot.dist
-        const isWorse = edge && dist && planned && dist[edge.to] + autopilot.edgeCost(edge) > dist[planned.from] + 60
-        if (!edge || (autopilot.retryCost(edge) && planned && !autopilot.sameManeuver(edge, planned)) || isWorse || Math.abs(node.x - x) > 150 || Math.abs(node.y - feet) > 60 || simulation.cycle > c.start + 240) {
+        const isWorse = edge && dist && planned && (autopilot.leadsBackToFailure(planned.to, edge.to) ||
+            dist[edge.to] + autopilot.edgeCost(edge) > dist[planned.from] + 60)
+        const canAvoidWrap = edge && !autopilot.wrapRoutes?.[c.from] && (edge.wraps || autopilot.wrapRoutes?.[edge.to])
+        if (!edge || (autopilot.retryCost(edge) && planned && !autopilot.sameManeuver(edge, planned)) || isWorse || canAvoidWrap || Math.abs(node.x - x) > 150 || Math.abs(node.y - feet) > 60 || simulation.cycle > c.start + 240) {
             autopilot.commit = null
             return null
         }
@@ -3227,10 +6072,14 @@ const autopilot = {
                 y = lip.y + 0.5 * p.gravity * air * air
             }
         }
-        const hit = autopilot.arc(x, y, vx, -p.jump, edge.steer, edge.most, true, autopilot.size(), edge.delay || 0, true, edge.hold || Infinity, edge.blockJumps)
-        if (!hit || hit.isWet || !(dist[hit.node] <= dist[edge.to] + 30)) return Infinity
+        const hit = autopilot.arc(x, y, vx, -p.jump, edge.steer, edge.most, true, autopilot.size(), edge.delay || 0, true, edge.hold || Infinity, edge.blockJumps, edge.turnY)
+        if (!hit || hit.isWet || hit.ceilingHit || autopilot.worsensLanding(edge, hit) || !(dist[hit.node] <= dist[edge.to] + 30)) return Infinity
         if (!autopilot.boardingReady({ to: hit.node, travelFrames: hit.cycles + frames, landingVy: hit.vy }, x)) return Infinity
-        return dist[hit.node] + autopilot.landingRisk(hit.node, Math.sign(nodes[hit.node].x - x) || dir)
+        return dist[hit.node] + autopilot.fallWrapCost(hit) + autopilot.landingRisk(hit.node, Math.sign(nodes[hit.node].x - x) || dir)
+    },
+    worsensLanding(edge, hit) {
+        return autopilot.leadsBackToFailure(edge.to, hit.node) ||
+            (!edge.wraps && (hit.wraps || (autopilot.wrapRoutes?.[hit.node] && !autopilot.wrapRoutes[edge.to])))
     },
     isMomentumJump: true, //jump at running speed from farther off when it's safe, see drive(), false to compare in tools/autopilot-test.js
     jumpHasCeiling(x, feet, dir) {
@@ -3239,77 +6088,167 @@ const autopilot = {
         const apex = autopilot.p.jump ** 2 / (2 * autopilot.p.gravity)
         return !!autopilot.grid && autopilot.isBoxSolidExact(Math.min(x, x + dir * reach) - halfWidth, feet - apex - height, Math.max(x, x + dir * reach) + halfWidth, feet - height)
     },
-    fitJumpHeight(edge, feet) { //the same landing can need a different hold at the player's actual takeoff speed
+    fitJumpHeight(edge, feet) { //the same landing can need a different hold from the live takeoff or after a miss
         const { p, nodes, dist } = autopilot
         const x = player.position.x, vx = player.velocity.x
-        if (edge.delay || edge.blockJumps || !autopilot.jumpHasCeiling(x, feet, edge.dir)) return edge
+        const retry = autopilot.retryCost(edge)
+        const canRetry = retry && autopilot.canRetryCrossing(edge)
+        const plannedHazard = autopilot.edgeHazardCost(edge)
+        if (edge.airJumps) {
+            if (!autopilot.canAirJump(edge) || (retry && !canRetry)) return null
+            const dir = edge.steer
+            const inheritedY = Math.max(-10, Math.min(10, m.standingOn?.velocity?.y || 0))
+            const groundPush = dir * m.Fx / player.mass * simulation.delta ** 2 * (vx * dir < 2 ? 1.5 : 1)
+            const launchVx = Math.abs(vx) > 4 ? 0.89 * vx : vx
+            const hit = autopilot.arc(x + vx, feet, launchVx, inheritedY - p.jump, dir, edge.most, true, autopilot.size(),
+                0, true, edge.hold, 0, undefined, { airJumps: edge.airJumps, groundPush })
+            if (hit && (!hit.isWet || plannedHazard) && !hit.isPortal && !hit.ceilingHit && !nodes[hit.node].elevator &&
+                !nodes[hit.node].transport && !autopilot.worsensLanding(edge, hit) && dist[hit.node] <= dist[edge.to] + 20) {
+                return { ...edge, to: hit.node, arcArgs: hit.args, trace: undefined, wraps: hit.wraps || undefined }
+            }
+            return null
+        }
+        if (edge.delay || edge.blockJumps || nodes[edge.to].elevator) return edge
+        if (!retry && edge.turnY === undefined && !autopilot.jumpHasCeiling(x, feet, edge.dir)) return edge
         const size = autopilot.size()
         const target = nodes[edge.to]
-        let best = edge, bestScore = Infinity
-        for (const hold of new Set([edge.hold, 8, 10, 11, 12, 14, 16, 18, 20, undefined])) {
-            const hit = autopilot.arc(x, feet, vx, -p.jump, edge.steer, edge.most, true, size, 0, true, hold)
-            if (!hit || hit.isWet || !Number.isFinite(dist[hit.node])) continue
-            if (dist[hit.node] > dist[edge.to] + 30 || Math.abs(nodes[hit.node].y - target.y) > 40) continue
-            if (!autopilot.boardingReady({ to: hit.node, travelFrames: hit.cycles, landingVy: hit.vy }, x)) continue
-            const candidate = { ...edge, to: hit.node, hold }
-            if (hold !== edge.hold && autopilot.retryCost(candidate)) continue
-            const landing = autopilot.surfaceAt(hit.x, nodes[hit.node].y)
+        let best = null, bestScore = Infinity
+        const holds = retry ? [6, 10, 14, 18, 22, 28, 34, undefined] : [edge.hold, 6, 8, 10, 11, 12, 14, 16, 18, 20, undefined]
+        const tryFit = (hold, turnY, repeating = false) => {
+            const hit = autopilot.arc(x, feet, vx, -p.jump, edge.steer, edge.most, true, size, 0, true, hold, 0, turnY)
+            if (!hit || (hit.isWet && !plannedHazard) || autopilot.worsensLanding(edge, hit) || !Number.isFinite(dist[hit.node])) return
+            const land = nodes[hit.node]
+            if (dist[hit.node] > dist[edge.to] + 30 || Math.abs(land.y - target.y) > 40 ||
+                (turnY !== undefined && (hit.ceilingHit || land.cover >= 1000 || autopilot.vanishBeforeLanding(land, hit.cycles)))) return
+            const margin = turnY === undefined ? 8 : 2
+            if (land.y < feet - 35 && hit.apexY > land.y - margin) return //allow for slight differences between the arc and real takeoff
+            if (!autopilot.boardingReady({ to: hit.node, travelFrames: hit.cycles, landingVy: hit.vy }, x)) return
+            const candidate = { ...edge, to: hit.node, hold, turnY, travelFrames: hit.cycles, landingVy: hit.vy, hazardPath: hit.hazardPath, arcArgs: hit.args, trace: undefined, ceilingHit: hit.ceilingHit, wraps: hit.wraps || undefined }
+            if (!repeating && autopilot.retryCost(candidate)) return
+            const landing = autopilot.surfaceAt(hit.x, land.y)
             const slope = landing ? Math.abs((landing.edge.y2 - landing.edge.y1) / (landing.edge.x2 - landing.edge.x1)) : 0
-            const score = hit.cycles + dist[hit.node] + autopilot.landingRisk(hit.node, edge.dir) + 0.15 * (feet - hit.apexY) + 0.2 * Math.abs(hit.x - target.x) + (slope > autopilot.lipDrop ? 60 : 0)
+            const score = hit.cycles + dist[hit.node] + autopilot.fallWrapCost(hit) + autopilot.landingRisk(hit.node, edge.dir) + 0.15 * (feet - hit.apexY) + 0.2 * Math.abs(hit.x - target.x) +
+                (slope > autopilot.lipDrop ? 60 : 0) + (hit.ceilingHit ? 45 : 0) + autopilot.pathHazardCost(hit.hazardPath, hit.cycles)
             if (score < bestScore) {
                 best = candidate
                 bestScore = score
             }
         }
+        for (const hold of new Set(holds)) {
+            if (!retry || !autopilot.similarJumpHold({ hold }, edge)) tryFit(hold, edge.turnY)
+        }
+        if (!best && !edge.isRun && Math.abs(vx) < 1.5 && Math.abs(target.x - x) <= 175 && target.y < feet - 35) {
+            //Try turning at a different height from this foothold before giving it up.
+            const turnHeights = [target.y - 8, target.y + 20, target.y + 50, target.y + 85]
+            const alternateHolds = new Set([edge.hold, 12, 20, undefined])
+            for (const turnY of turnHeights) {
+                if (turnY === edge.turnY || turnY >= feet - 25 ||
+                    autopilot.verticalJumpBlocked(x - size.halfWidth, turnY - size.height, x + size.halfWidth, feet - size.height)) continue
+                for (const hold of alternateHolds) tryFit(hold, turnY)
+            }
+        }
+        if (!best && canRetry) tryFit(edge.hold, edge.turnY, true)
         return best
     },
-    canJumpFromHere(edge, feet, frames = 0, isRobust = false) { //the planned jump, from where the player is, or will be in a few cycles, lands where planned or somewhere as good
+    canJumpFromHere(edge, feet, frames = 0, isRobust = false, dx = 0, dvx = 0, allowHazard = false) { //the live jump lands where planned or somewhere as good
         //isRobust also checks it lands that well starting 10 to either side and 1 slower and faster
         if (isRobust) {
             for (const [dx, dvx] of [[0, 0], [-10, 0], [10, 0], [0, -1], [0, 1]]) {
-                if (!autopilot.canJumpFromHere(edge, feet, frames, false, dx, dvx)) return false
+                if (!autopilot.canJumpFromHere(edge, feet, frames, false, dx, dvx, allowHazard)) return false
             }
             return true
         }
-        const dx = arguments[4] || 0, dvx = arguments[5] || 0
         const { dist, nodes, p } = autopilot
         const x = player.position.x + dx + player.velocity.x * frames
         if (frames && !autopilot.isBoxSolid(x - 18, feet + 1, x + 18, feet + 6 + frames * frames * p.gravity)) return false //past the ledge by then, too far into coyote time to count on
-        const hit = autopilot.arc(x, feet, player.velocity.x + dvx, -p.jump, edge.steer, edge.most, true, autopilot.size(), edge.delay || 0, true, edge.hold || Infinity, edge.blockJumps)
-        if (!hit || hit.isWet) return false
+        const hit = autopilot.arc(x, feet, player.velocity.x + dvx, -p.jump, edge.steer, edge.most, true, autopilot.size(), edge.delay || 0, true, edge.hold || Infinity, edge.blockJumps, edge.turnY)
+        if (!hit || hit.ceilingHit || autopilot.worsensLanding(edge, hit) || (hit.isWet && !allowHazard)) return false
         if (!autopilot.boardingReady({ to: hit.node, travelFrames: hit.cycles + frames, landingVy: hit.vy }, x)) return false
         if (hit.node === edge.to) return true
         const to = nodes[edge.to], land = nodes[hit.node] //or right beside where it was planned, landings elsewhere tend to be on the edge of something
         return Math.abs(land.x - to.x) <= 25 && Math.abs(land.y - to.y) < 15 && dist[hit.node] <= dist[edge.to] + 3 && land.cover < 1000
     },
-    bestLeap(feet, frames = 0) { //simulate jumping now, or in a few cycles, from where the player is and how fast they're going, the best landing if it's closer than the plan
+    isExactSides: true, //jumps and falls hit the sides of the map's real shape, not the grid's squares, false to compare
+    isLedgeAssist: true, //plan and fly with the game's climb up a ledge the foot just missed, holding toward it, false to compare
+    exactSideRoom: 4, //the room a rising jump keeps from the map's real side, with none it grazes corners the real player catches
+    ledgeAhead(x, feet, vx, dir, size) { //m.ledgeAssist(): the map just ahead at the slanted foot but not 30 up, a corner or the round end of a pipe the player rides up holding toward it
+        const scale = player.scale || 1
+        const ax = x + dir * (size.halfWidth + Math.max(0, dir * vx) + 2)
+        const g = autopilot.grid
+        if (!g?.exact || !autopilot.isBoxSolid(ax - 1, feet - 13 * scale, ax + 1, feet - 11 * scale, g.base)) return false //nothing there on the grid, the map's real shape is only checked near it
+        return autopilot.isMapExact(ax - 0.5, feet - 12 * scale - 0.5, ax + 0.5, feet - 12 * scale + 0.5) && !autopilot.isMapExact(ax - 0.5, feet - m.ledgeStep * scale - 0.5, ax + 0.5, feet - m.ledgeStep * scale + 0.5)
+    },
+    liveJumpLands(edge, feet) { //the jump from where the player is, at the speed it has, lands on the plan
+        const { p, nodes, dist } = autopilot
+        const hit = autopilot.arc(player.position.x, feet, player.velocity.x, -p.jump, edge.steer, edge.most, true, autopilot.size(), edge.delay || 0, true, edge.hold ?? Infinity, edge.blockJumps || 0, edge.turnY)
+        if (!hit || !dist || autopilot.worsensLanding(edge, hit)) return false
+        const at = nodes[hit.node], to = nodes[edge.to]
+        return hit.node === edge.to || (Math.abs(at.x - to.x) < 60 && Math.abs(at.y - to.y) < 30) || dist[hit.node] <= dist[edge.to] + 5
+    },
+    keepMomentum(edge, feet, go) {
+        if (!autopilot.isMomentumJump || autopilot.riding || input.down || input.field || m.isHolding || autopilot.nodes[edge.from].isCrouch ||
+            Math.abs(autopilot.nodes[edge.from].y - feet) > 30 || player.velocity.x * edge.dir < -0.5) return false
+        const leap = autopilot.bestLeap(feet, 0, edge)
+        if (!leap) return false
+        autopilot.why = "jumping without slowing"
+        autopilot.commit = null
+        autopilot.window.key = ""
+        input.up = true
+        if (!leap.delay && leap.turnY === undefined && player.velocity.x * leap.steer < leap.most) go(leap.steer)
+        autopilot.pending = { edge: leap, mcycle: m.cycle, isJump: true }
+        return true
+    },
+    bestLeap(feet, frames = 0, planned = null) { //simulate a jump from live position and speed, optionally to replace a slowdown before a planned jump
         const { dist, nodes, p } = autopilot
         const cur = autopilot.cur
+        if (!dist) return null
         const here = dist[cur]
         if (!(here < Infinity)) return null
         const size = autopilot.size()
         const vx = player.velocity.x
         const x = player.position.x + vx * frames
         if (frames && !autopilot.isBoxSolid(x - 18, feet + 1, x + 18, feet + 6)) return null //not on the ground by then
-        let best = null, bestValue = here - 20 + frames //worth it only if it saves some time
-        for (const steer of [-1, 0, 1]) {
+        const tryLonger = autopilot.recentFailures.some(attempt => {
+            if (!attempt.isTooLow || simulation.cycle >= attempt.until) return false
+            const from = attempt.from
+            return Math.abs(x - from.x) <= 50 && Math.abs(feet - from.y) <= 40
+        })
+        let best = null, bestValue = planned ? autopilot.edgeCost(planned) + dist[planned.to] + 15 : here - 20 + frames
+        const validLanding = hit => {
+            if (!hit || hit.isWet || hit.ceilingHit || nodes[hit.node].elevator || !(dist[hit.node] < Infinity)) return false
+            if (!autopilot.wrapRoutes?.[cur] && autopilot.landingNeedsWrap(hit)) return false
+            if (autopilot.leadsBackToFailure(planned?.to ?? cur, hit.node)) return false
+            if (!planned) return true
+            const land = nodes[hit.node]
+            return !land.dead && land.cover < 1000 && (land.x - x) * planned.dir > 25 &&
+                (hit.node === planned.to || (dist[hit.node] < here && dist[hit.node] <= dist[planned.to] + 25))
+        }
+        for (const steer of planned ? [planned.dir, 0] : [-1, 0, 1]) {
             const tries = steer ? [{ most: p.limit }, { most: p.limit * 0.4 }] : [{ most: 0 }]
             if (steer && autopilot.jumpHasCeiling(x, feet, steer)) {
                 for (const hold of [8, 11, 14, 17, 20]) tries.push({ most: p.limit, hold })
             }
-            for (const { most, hold } of tries) {
-                const hit = autopilot.arc(x, feet, vx, -p.jump, steer, most, true, size, 0, true, hold)
-                if (!hit || hit.isWet || !(dist[hit.node] < Infinity)) continue
+            if (steer && tryLonger) {
+                for (const hold of [24, 32]) tries.push({ most: p.limit, hold })
+            }
+            if (planned && !planned.airJumps && steer === planned.steer) tries.push(planned)
+            for (const { most, hold, delay, blockJumps, turnY } of tries) {
+                const arc = (dx, dvx) => autopilot.arc(x + dx, feet, vx + dvx, -p.jump, steer, most, true, size, delay, true, hold, blockJumps, turnY)
+                const hit = arc(0, 0)
+                if (!validLanding(hit)) continue
                 if (!autopilot.boardingReady({ to: hit.node, travelFrames: hit.cycles + frames, landingVy: hit.vy }, x)) continue
-                const edge = { from: cur, to: hit.node, type: autopilot.JUMP, dir: steer || Math.sign(nodes[hit.node].x - x) || 1, cost: hit.cycles + 12, steer, most, hold, isRun: false, coyote: 0, isLeap: true }
+                const edge = { from: cur, to: hit.node, type: autopilot.JUMP, dir: steer || Math.sign(nodes[hit.node].x - x) || 1, cost: hit.cycles + 12, steer, most, hold, delay, blockJumps, turnY, isRun: false, coyote: 0, isLeap: true, isMomentum: !!planned, travelFrames: hit.cycles, landingVy: hit.vy, hazardPath: hit.hazardPath, wraps: hit.wraps || undefined }
                 edge.fail = autopilot.failed.get(autopilot.edgeKey(edge)) || 0
                 if (edge.fail >= 2 || autopilot.retryCost(edge)) continue
-                const value = autopilot.edgeCost(edge) + dist[hit.node]
+                const value = autopilot.edgeCost(edge) + dist[hit.node] + (planned ? autopilot.landingRisk(hit.node, edge.dir) : 0)
                 if (value < bestValue) {
                     //a shortcut has to have room to spare, it still lands about as well a little behind and a little slower, a leap at the edge of its reach comes up short
-                    const isRoom = [[-steer * 10, 0], [0, -0.6 * (Math.sign(vx) || steer)]].every(([dx, dvx]) => {
-                        const worse = autopilot.arc(x + dx, feet, vx + dvx, -p.jump, steer, most, true, size, 0, true, hold)
-                        return worse && !worse.isWet && dist[worse.node] <= dist[hit.node] + 20
+                    const dir = planned?.dir || steer
+                    const offsets = planned ? [[-dir * 8, 0], [dir * 8, 0], [0, -0.7 * dir], [0, 0.7 * dir]] : [[-steer * 10, 0], [0, -0.6 * (Math.sign(vx) || steer)]]
+                    const isRoom = offsets.every(([dx, dvx]) => {
+                        const worse = arc(dx, dvx)
+                        return validLanding(worse) && dist[worse.node] <= dist[hit.node] + 20 &&
+                            (!planned || autopilot.boardingReady({ to: worse.node, travelFrames: worse.cycles, landingVy: worse.vy }, x + dx))
                     })
                     if (!isRoom) continue
                     bestValue = value
@@ -3319,6 +6258,41 @@ const autopilot = {
         }
         if (best) best.value = bestValue - frames
         return best
+    },
+    beltJump(edge, feet) { //the planned jump off a belt, taken from where the player is, or another jump from here that lands as well, the belt never has it right on the planned spot, or null
+        if (autopilot.canJumpFromHere(edge, feet)) return autopilot.fitJumpHeight(edge, feet) || edge
+        const leap = autopilot.bestLeap(feet, 0, edge)
+        if (leap) return leap
+        if (autopilot.edgeHazardCost(edge) && autopilot.canJumpFromHere(edge, feet, 0, false, 0, 0, true)) return autopilot.fitJumpHeight(edge, feet) || edge
+        return null
+    },
+    beltTry: null, //{ key, edge, cycle } the jump off a belt it's trying to take as it's carried by
+    beltMiss: new Map(), //how many times each was passed by
+    hop: null, //{ at, dir, hold, edge } the last hop against a belt, at is the m.cycle of its jump, hold is how many cycles jump is held
+    beltLast: 0, //the speed of the belt the player is on, or was on when it left the ground
+    beltHop(feet) { //whatever drive() is doing, going against a belt on foot gets nowhere, so it goes in short hops, nothing pushes the player in the air
+        const who = autopilot.beltUnder()
+        if (!who || autopilot.flying || autopilot.grapple || autopilot.warp || autopilot.rayMove) return
+        const mc = m.cycle
+        const hop = autopilot.hop
+        if (hop && hop.at === m.buttonCD_jump && mc - hop.at < hop.hold) { //the hop's jump, the feet can stay in contact a cycle or two after it
+            input.up = true
+            input.left = hop.dir < 0
+            input.right = hop.dir > 0
+            autopilot.pending = { edge: hop.edge, mcycle: mc, isJump: false, isHop: true, dir: hop.dir, hold: hop.hold }
+            return
+        }
+        const dir = input.right ? 1 : input.left ? -1 : 0
+        if (!dir || input.up || input.down || m.crouch || m.hardLandCD >= mc || m.buttonCD_jump + 20 >= mc) return
+        const V = autopilot.beltSpeed(who)
+        if (V * dir >= 0 || Math.abs(V) < 1.5) return
+        const hold = autopilot.hopHold(player.position.x, feet, autopilot.size(), V, player.velocity.x)
+        if (!hold) return
+        const walk = autopilot.next && autopilot.cur >= 0 ? autopilot.next[autopilot.cur] : null
+        input.up = true
+        autopilot.why = "hopping against a belt"
+        autopilot.hop = { at: mc, dir, hold, edge: walk && walk.type === autopilot.WALK && walk.dir === dir ? walk : null } //m.jump() stamps m.buttonCD_jump with this cycle
+        autopilot.pending = { edge: autopilot.hop.edge, mcycle: mc, isJump: false, isHop: true, dir, hold }
     },
     fly(feet, go) { //in the air, or just jumped
         const nodes = autopilot.nodes
@@ -3331,20 +6305,59 @@ const autopilot = {
             const walk = autopilot.cur >= 0 && autopilot.next ? autopilot.next[autopilot.cur] : null
             const edge = pending && mc - pending.mcycle <= 3 ? pending.edge : walk && walk.type === autopilot.WALK && Math.abs(vy) < 8 ? walk : null //walking, a low bump lifted the feet
             autopilot.flight = { edge, to: edge ? edge.to : -1, since: cycle, mStart: mc, isJumped: false, takeoffX: x, takeoffVx: vx }
+            if (pending && pending.isHop && mc - pending.mcycle <= 3) { //a short hop against a belt
+                autopilot.flight.isHop = true
+                autopilot.flight.hopDir = pending.dir
+                autopilot.flight.hopHold = pending.hold
+                autopilot.flight.hopY = feet
+            }
             autopilot.pending = null
         }
         const flight = autopilot.flight
+        if (flight.edge?.clearX !== undefined && !flight.clearedLedge) {
+            const { clearX, dir, dropY } = flight.edge
+            flight.clearedLedge = (x - clearX) * dir >= 0 || feet > dropY + autopilot.size().height
+            if (!flight.clearedLedge) {
+                go(dir)
+                return
+            }
+        }
+        if (flight.isHop) {
+            if (feet < flight.hopY + 40) { //let go of jump early for a low hop, and keep pushing the way it was going
+                input.up = mc - m.buttonCD_jump < flight.hopHold
+                go(flight.hopDir)
+                flight.lastVx = vx
+                flight.lastVy = vy
+                return
+            }
+            flight.isHop = false //off the end of the belt, falling, land it like any other flight
+            flight.edge = null
+            flight.to = -1
+        }
         if (flight.lastVx === undefined) { //how fast the player was going last cycle, on the ground
             flight.lastVx = autopilot.lastV.x
             flight.lastVy = autopilot.lastV.y
         }
         const isJustJumped = mc - m.buttonCD_jump < 3
-        const isTooFast = Math.abs(vx) > 12 || vy < -28 //faster than a jump, a boost under the jump
-        const isBlockLaunch = isJustJumped && (m.buttonCD_jump === flight.blockJumpAt || m.buttonCD_jump === flight.lastBlockJump)
-        if (Math.hypot(vx - flight.lastVx, vy - flight.lastVy) > 15 && (!isJustJumped || (isTooFast && !isBlockLaunch))) { //thrown by a boost, or knocked by something, fly by simulating from here
+        const isPlannedLaunch = isJustJumped && (m.buttonCD_jump === flight.blockJumpAt || m.buttonCD_jump === flight.lastBlockJump ||
+            m.buttonCD_jump === flight.airJumpAt ||
+            (flight.edge?.isElevatorTransfer && m.buttonCD_jump === flight.mStart))
+        const jumpSpeed = flight.edge?.type === autopilot.JUMP ? autopilot.p.jump : 0
+        const inheritedRise = Math.min(10, Math.max(0, -(m.standingOn?.velocity?.y ?? 0)))
+        const isTooFast = Math.abs(vx) > Math.max(12, autopilot.p.run + 2, autopilot.p.limit + 2) + Math.abs(autopilot.beltLast) || //a belt's speed carries into the jump
+            vy < -Math.max(28, jumpSpeed + inheritedRise + 2) //faster than the player's current jump, a boost under the jump
+        let hitCeiling = false
+        if (flight.isJumped && flight.lastVy < -3 && vy > flight.lastVy + 3 && autopilot.grid) {
+            const { halfWidth, height } = autopilot.size()
+            const headY = feet - height
+            hitCeiling = autopilot.isBoxSolidExact(x - halfWidth + 6, headY + flight.lastVy - 4, x + halfWidth - 6, headY + 5)
+            if (hitCeiling) flight.ceilingAt ??= Math.max(1, mc - m.buttonCD_jump)
+        }
+        if (!hitCeiling && Math.hypot(vx - flight.lastVx, vy - flight.lastVy) > 15 && (!isJustJumped || (isTooFast && !isPlannedLaunch))) { //thrown by a boost, or knocked by something, fly by simulating from here
             const below = autopilot.nodeBelow(x, feet - 40, 2) //the boost it came from, for remembering misses
             flight.from = below >= 0 && nodes[below].isBoost ? below : autopilot.cur
             flight.isLaunched = true
+            flight.leaveBoost = m.buttonCD_jump === 0 && autopilot.boosts.length ? autopilot.boostAt(x, feet, autopilot.size()) : null
             flight.isJumped = false
             flight.since = cycle
             flight.edge = null
@@ -3371,39 +6384,229 @@ const autopilot = {
             flight.apexY = Math.min(flight.apexY ?? feet, feet)
             //hold jump through the rise and the hang at the top, like the arc, letting go early cuts the jump short
             //but not when landing, holding jump then would jump again
+            const age = mc - m.buttonCD_jump
             const isLanding = vy > 0 && autopilot.isBoxSolid(x - 14, feet + 1, x + 14, feet + vy + 6)
-            input.up = mc - m.buttonCD_jump < Math.min(60, flight.edge.hold || 60) && vy < m.apexSpeed && !isLanding //a short hop lets go early
+            const isCatchingLedge = age > 20 && vy >= -m.apexSpeed - autopilot.p.gravity && vy < m.apexSpeed && autopilot.jumpContactAhead(x + vx, feet, vy)
+            input.up = age < Math.min(60, flight.edge.hold ?? 60) && vy < m.apexSpeed && !isLanding && !isCatchingLedge
             if (flight.edge.blockJumps && autopilot.doBlockJump(flight, go, isLanding)) return
+            if (flight.edge.airJumps) {
+                if (autopilot.doAirJumps(flight, feet, go, isLanding)) return
+                if (age > 20) input.up = false //finish this landing without spending another jump
+            }
         }
         if ((!flight.edge || flight.isLaunched) && cycle >= (flight.replanAt || 0) && autopilot.dist) { //no plan for this flight, or a boost's drift, find the best landing from here, again every few cycles
-            flight.replanAt = cycle + 6
+            flight.replanAt = cycle + autopilot.flightEvery
             autopilot.planFlight(flight, feet)
         }
         const to = flight.to
         if (to < 0 || nodes[to].dead) return
         const target = nodes[to]
         const edge = flight.edge
+        if (edge?.turnY !== undefined && !flight.hasTurned) {
+            const isDrop = edge.type === autopilot.FALL
+            flight.hasTurned = isDrop ? feet >= edge.turnY : feet <= edge.turnY
+            if (!flight.hasTurned) {
+                if (isDrop && vx * edge.steer < 0 && !autopilot.ledgeAhead(x, feet, vx, edge.steer, autopilot.size())) go(edge.steer) //brake without grabbing the ledge again
+                return
+            }
+        }
+        if (edge?.delay && mc - flight.mStart < edge.delay) return
         if (edge && edge.type === autopilot.WALK && !flight.isLaunched && feet < target.y + 60) { //riding over a low bump or stepping down, the feet leave the ground for a moment, keep walking at full speed
             go(edge.dir)
             return
         }
-        if (vy > 0.5 && feet < target.y + 2 && (!flight.isLaunched || target.y - feet < 250)) { //coming down, steer so it lands somewhere good, set up for the next move
+        if (edge?.isBoarding && target.elevator) {
+            if (vx * edge.steer < edge.most) go(edge.steer)
+            return
+        }
+        let control = null //{ steer, most }, push that way while slower than most
+        if (edge?.type === autopilot.JUMP && edge.beltVx !== undefined && !flight.isJumped && !flight.isLaunched) { //ran off a belt for a coyote jump, keep the belt's speed the jump was planned with, braking to aim the landing loses it before the jump
+            control = { steer: edge.steer || edge.dir, most: Infinity }
+        } else if (vy > 0.5 && feet < target.y + 2 && (!flight.isLaunched || target.y - feet < 250)) { //coming down, steer so it lands somewhere good, set up for the next move
             if (autopilot.isLandingSpan) {
                 if (cycle >= (flight.landAt || 0)) {
-                    flight.landAt = cycle + 3
-                    flight.landSteer = autopilot.landingSteer(to, feet)
+                    flight.landAt = cycle + autopilot.landEvery
+                    flight.landSteer = autopilot.landingSteer(to, feet, edge?.type === autopilot.FALL ? edge : null)
                 }
-                const land = flight.landSteer
-                if (land.steer && vx * land.steer < land.most) go(land.steer) //up to its speed, most 0 against the way it's going brakes to a stop
+                control = flight.landSteer //up to its speed, most 0 against the way it's going brakes to a stop
             } else {
                 const g = autopilot.p.gravity
                 const t = (-vy + Math.sqrt(vy * vy + 2 * g * Math.max(0, target.y - feet))) / g
                 const miss = target.x - (x + vx * t)
-                if (Math.abs(miss) > 8) go(miss)
+                control = { steer: Math.abs(miss) > 8 ? Math.sign(miss) : 0, most: Infinity }
             }
         } else if (edge) { //push like the arc did, after its delay
-            if (edge.steer && vx * edge.steer < edge.most && (!edge.delay || mc - flight.mStart >= edge.delay)) go(edge.steer)
+            control = { steer: edge.steer, most: edge.most }
         }
+        if (control && autopilot.isAirCheck && autopilot.canAirCheck(flight)) {
+            if ((mc - flight.mStart) % autopilot.airEvery === 0) control = autopilot.airCheck(flight, feet, control)
+            else if (flight.air) control = autopilot.airControl(flight.air) //between checks, keep the steering it chose
+        } else flight.preview = null
+        if (autopilot.isLedgeAssist && vy <= 8 && target.y < feet) { //a ledge just above the foot on the way to the landing, hold toward it and the game climbs it
+            const dir = Math.sign(target.x - x) || control?.steer || 0
+            if (dir && autopilot.ledgeAhead(x, feet, vx, dir, autopilot.size())) return go(dir)
+        }
+        if (control && control.steer && vx * control.steer < control.most) go(control.steer)
+    },
+    //*********************************************************************
+    // checking the landing every cycle in the air
+    //*********************************************************************
+    isAirCheck: true, //every cycle in the air simulate the rest of the flight, and when it won't land on the plan steer to whatever lands best, false to compare
+    canAirCheck(flight) { //flights that steer like a plain jump or fall, not block jumps, extra air jumps, or boarding something moving
+        const edge = flight.edge, to = autopilot.nodes[flight.to]
+        if (!edge || !autopilot.dist || !to || to.dead || to.elevator || to.transport) return false
+        if (edge.blockJumps || edge.airJumps || edge.isBoarding || edge.isElevatorTransfer || edge.type === autopilot.WALK) return false
+        if (edge.type === autopilot.JUMP && (!flight.isJumped || m.cycle - m.buttonCD_jump < 2)) return false //the jump's push shows up in the speed a cycle after it's pressed
+        return m.cycle - flight.mStart >= 2
+    },
+    airWays(vx) { //[steer, most, switchAt, then, thenMost], the ways of steering tried: one way all flight, or one way for a few cycles then another
+        const L = autopilot.p.limit
+        const ways = [[0, 0, 0, 0, 0]]
+        for (const s of [-1, 1]) {
+            for (const most of [L, L * 0.6, L * 0.3]) ways.push([s, most, 0, 0, 0])
+        }
+        if (Math.abs(vx) > 0.5) ways.push([-Math.sign(vx), 0, 0, 0, 0]) //brake to a stop over where it is
+        for (const k of [4, 10, 18]) {
+            for (const s of [-1, 0, 1]) {
+                for (const t of [-1, 0, 1]) if (s !== t) ways.push([s, s ? L : 0, k, t, t ? L : 0])
+            }
+        }
+        return ways
+    },
+    airArc(flight, feet, way) { //the rest of this flight from where the player is, steering way, holding jump like fly() does
+        const edge = flight.edge
+        const x = player.position.x, vx = player.velocity.x, vy = player.velocity.y
+        const [steer, most, switchAt, then, thenMost] = way
+        const transfer = { switchAt, then, thenMost, leaveBoost: flight.leaveBoost, verticalJump: edge?.type === autopilot.JUMP && edge.turnY !== undefined }
+        const hold = edge?.type === autopilot.JUMP && flight.isJumped ? Math.min(60, edge.hold ?? 60) : 0
+        const age = m.cycle - m.buttonCD_jump
+        if (hold && age < hold && vy < m.apexSpeed) { //still rising on a held jump
+            transfer.jumpAge = age
+            return autopilot.arc(x, feet, vx, vy, steer, most, true, autopilot.size(), 0, true, hold, 0, undefined, transfer)
+        }
+        return autopilot.arc(x, feet, vx, vy, steer, most, false, autopilot.size(), 0, true, Infinity, 0, undefined, transfer)
+    },
+    landingNeedsWrap(hit) {
+        return !!(hit.wraps || autopilot.wrapRoutes?.[hit.node])
+    },
+    landingRank(hit) {
+        if (!hit || (autopilot.dist && !Number.isFinite(autopilot.dist[hit.node]))) return 4
+        return (autopilot.landingNeedsWrap(hit) ? 2 : 0) | (autopilot.routeRank?.[hit.node] & 1)
+    },
+    airValue(flight, hit) { //lower is better: time in the air, then the plan's cost from where it lands
+        const { dist, nodes } = autopilot
+        if (!hit || !(dist[hit.node] < Infinity)) return Infinity
+        return hit.cycles + dist[hit.node] + nodes[hit.node].cover + autopilot.fallWrapCost(hit) + autopilot.pathHazardCost(hit.hazardPath, hit.cycles) +
+            (nodes[hit.node].isBoost ? autopilot.boostEntryCost : 0)
+    },
+    isAirOnPlan(flight, hit) { //lands on the target, a little to either side of it, or somewhere at least as close to the goal
+        const { dist, nodes } = autopilot
+        if (!hit || !(dist[hit.node] < Infinity) || hit.isWet || autopilot.leadsBackToFailure(flight.to, hit.node)) return false
+        const at = nodes[hit.node], to = nodes[flight.to]
+        if (at.isBoost && at.isBoost !== to.isBoost) return false
+        return (Math.abs(at.x - to.x) < 110 && Math.abs(at.y - to.y) < 30) || dist[hit.node] <= dist[flight.to] + 5
+    },
+    airCheck(flight, feet, control) { //simulate what the plan pushes, keep it if it lands on the plan, otherwise steer to whatever lands best
+        const mc = m.cycle
+        const planned = autopilot.airArc(flight, feet, [control.steer, control.most, 0, 0, 0])
+        flight.preview = planned
+        if (autopilot.isAirOnPlan(flight, planned) && !autopilot.landingNeedsWrap(planned)) {
+            flight.air = null
+            return control
+        }
+        const air = flight.air
+        if (air) { //the steering it switched to, from where it is in it now
+            const left = air.switchAt ? air.switchAt - (mc - air.mc) : 0
+            const way = left > 0 ? [air.steer, air.most, left, air.then, air.thenMost] : air.switchAt ? [air.then, air.thenMost, 0, 0, 0] : [air.steer, air.most, 0, 0, 0]
+            const hit = autopilot.airArc(flight, feet, way)
+            if (hit && (hit.node === air.node || autopilot.isAirOnPlan(flight, hit)) && !hit.isWet && !autopilot.landingNeedsWrap(hit)) {
+                flight.preview = hit
+                return autopilot.airControl(air)
+            }
+        }
+        let best = null, bestValue = autopilot.airValue(flight, planned) - 10 //has to be clearly better than what the plan pushes
+        const plannedRank = autopilot.landingRank(planned)
+        let bestRank = plannedRank
+        const { dist } = autopilot
+        const from = flight.edge.from
+        const fromRank = autopilot.landingRank({ node: from })
+        const advances = (hit, rank) => dist[hit.node] < dist[from] || rank < fromRank || (plannedRank < 4 && rank < plannedRank)
+        for (const way of autopilot.airWays(player.velocity.x)) {
+            const hit = autopilot.airArc(flight, feet, way)
+            if (!hit) continue
+            const rank = autopilot.landingRank(hit)
+            if (!advances(hit, rank)) continue
+            const value = autopilot.airValue(flight, hit) + (way[2] ? 2 : 0) - (hit && hit.node === flight.to ? 8 : 0)
+            if (rank < bestRank || (rank === bestRank && value < bestValue)) {
+                bestValue = value
+                bestRank = rank
+                best = { way, hit }
+            }
+        }
+        if (flight.edge.type !== autopilot.JUMP && m.buttonCD_jump + 20 < mc && mc < m.lastOnGroundCycle + m.coyoteCycles - 1) { //just walked off, a jump still works for a few cycles
+            const L = autopilot.p.limit, dir = flight.edge.dir || Math.sign(player.velocity.x) || 1, size = autopilot.size()
+            const ways = [[dir, L, 0, 0, 0], [dir, 0.6 * L, 0, 0, 0], [0, 0, 0, 0, 0], [-dir, L, 0, 0, 0], [-dir, 0, 0, 0, 0]]
+            for (const k of [10, 20, 30]) { //going too fast for where it lands, coast or push on, then brake
+                for (const s of [0, dir]) for (const [t, most] of [[-dir, 0], [-dir, L]]) ways.push([s, s ? L : 0, k, t, most])
+            }
+            for (const hold of [60, 20]) {
+                for (const way of ways) {
+                    const [steer, most, switchAt, then, thenMost] = way
+                    const hit = autopilot.arc(player.position.x, feet, player.velocity.x, -autopilot.p.jump, steer, most, true, size, 0, true, hold, 0, undefined, switchAt ? { switchAt, then, thenMost } : undefined)
+                    if (!hit || hit.ceilingHit) continue
+                    const rank = autopilot.landingRank(hit)
+                    if (!advances(hit, rank)) continue
+                    const value = autopilot.airValue(flight, hit) + autopilot.jumpCost + 4 + (switchAt ? 2 : 0)
+                    if (rank < bestRank || (rank === bestRank && value < bestValue)) {
+                        const jump = { ...flight.edge, type: autopilot.JUMP, to: hit.node, hold, steer, most, dir: steer || flight.edge.dir, isLeap: true, coyote: 0, turnY: undefined, arcArgs: hit.args, trace: undefined, wraps: hit.wraps || undefined }
+                        if (autopilot.retryCost(jump) && !autopilot.canRetryCrossing(jump)) continue
+                        bestValue = value
+                        bestRank = rank
+                        best = { way, hit, jump }
+                    }
+                }
+            }
+        }
+        autopilot.airSearches++
+        if (best?.jump) { //jump now, the fall it walked off on would have missed
+            autopilot.addFail(flight.edge)
+            const [steer, most, switchAt, then, thenMost] = best.way
+            flight.edge = best.jump
+            flight.to = best.hit.node
+            flight.isJumped = false
+            flight.air = switchAt ? { steer, most, switchAt, then, thenMost, mc, node: best.hit.node } : null
+            flight.landAt = 0
+            flight.preview = best.hit
+            autopilot.airSwitches++
+            input.up = true
+            return { steer, most }
+        }
+        if (!best) {
+            flight.air = null
+            return control
+        }
+        const [steer, most, switchAt, then, thenMost] = best.way
+        flight.air = { steer, most, switchAt, then, thenMost, mc, node: best.hit.node }
+        if (!autopilot.isAirOnPlan(flight, best.hit)) { //somewhere else, not just another spot on the same landing
+            flight.to = best.hit.node //aim the rest of the flight there, the edge it started on still counts the miss
+            flight.landAt = 0
+            autopilot.airSwitches++
+        }
+        flight.preview = best.hit
+        return autopilot.airControl(flight.air)
+    },
+    airSearches: 0, //how many times a flight looked for other steering, and how many times it changed where it lands, for tools/autopilot-test.js
+    airSwitches: 0,
+    airControl(air) {
+        return air.switchAt && m.cycle - air.mc >= air.switchAt ? { steer: air.then, most: air.thenMost } : { steer: air.steer, most: air.most }
+    },
+    jumpContactAhead(x, feet, vy) { //the wide ground sensor can catch a ledge before the middle of the foot lands
+        const reach = 18 * (player.scale || 1)
+        for (const dx of [0, -reach, reach]) {
+            const contact = autopilot.surfaceAt(x + dx, feet + vy, 3, 5)
+            if (contact && Math.abs(contact.edge.y2 - contact.edge.y1) < 0.5 * (contact.edge.x2 - contact.edge.x1)) return true
+        }
+        return false
     },
     doBlockJump(flight, go, isLanding) {
         const mc = m.cycle, edge = flight.edge
@@ -3427,8 +6630,147 @@ const autopilot = {
         if (edge.steer && player.velocity.x * edge.steer < edge.most) go(edge.steer)
         return true
     },
+    canAirJump(edge) {
+        return !!tech.isCoyote && 21 * edge.airJumps < m.coyoteCycles - 4
+    },
+    releaseWall(feet, go) {
+        let release = autopilot.wallRelease
+        if (!tech.isNitinol || m.onGround) {
+            autopilot.wallRelease = null
+            return false
+        }
+        const mc = m.cycle, grip = m.ledgeCoyote
+        const crossing = autopilot.flight || autopilot.pending
+        const step = crossing?.edge
+        if (step?.isLowStep && mc - (crossing.mStart ?? crossing.mcycle) < 18 &&
+            feet <= autopilot.nodes[step.to].y + 15 * (player.scale || 1)) {
+            autopilot.wallRelease = null
+            return false //keep running through brief contact on the lip
+        }
+        if (!release) {
+            //Nitinol refreshes the grab timer to 20 while leaning on a wall, even during a planned fall.
+            if (Math.abs(grip) !== 20 || Math.abs(player.velocity.y) > 1) return false
+            release = autopilot.wallRelease = { dir: Math.sign(grip), until: mc + 18, coast: false }
+            const edge = autopilot.flight?.edge
+            if (edge?.type === autopilot.JUMP && autopilot.nodes[edge.to].y < feet - 25) autopilot.addFail(edge)
+            autopilot.flight = autopilot.pending = null //predict a new landing after moving clear
+        }
+        if (mc >= release.until) {
+            autopilot.wallRelease = null
+            return false
+        }
+        if (grip === -20 * release.dir) release.coast = true //a narrow shaft can grab on either side
+        if (!release.coast) go(-release.dir)
+        autopilot.why = "letting go of a nitinol wall grab"
+        return true
+    },
+    climbHeight: 2000, //the tallest wall it plans to climb with nitinol
+    wallClimbTo(x, feet, n, dir, size) { //standing at x, the climb up the wall beside it to stand on n at its top, { wall, y, cost }, or null
+        const surface = autopilot.surfaceAt(n.x, n.y, 8, 12)
+        if (!surface || Math.abs(surface.edge.y2 - surface.edge.y1) > 0.2 * (surface.edge.x2 - surface.edge.x1)) return null //a flat top to stand on
+        const wall = dir > 0 ? surface.edge.x1 : surface.edge.x2
+        const gap = (wall - x) * dir
+        if (gap < size.halfWidth - 5 || gap > 145 || Math.abs(n.x - wall) > 110) return null
+        const y = surface.y
+        const nearX = wall - dir * (size.halfWidth + 3)
+        const hitsWall = yy => Matter.Query.rayAny(map, { x: wall - 3 * dir, y: yy }, { x: wall + 6 * dir, y: yy })
+        for (let yy = y + 20; yy < feet - 16; yy += 95) if (!hitsWall(yy)) return null //a face to grab all the way up, nitinol grabs with the lower body
+        if (autopilot.isBoxSolidExact(Math.min(x, nearX) - size.halfWidth + 3, feet - size.height, Math.max(x, nearX) + size.halfWidth - 3, feet - 20) ||
+            autopilot.isBoxSolidExact(nearX - size.halfWidth + 3, y - size.height, nearX + size.halfWidth - 3, feet - 20) ||
+            autopilot.pathIsWet([[Math.min(x, n.x) - size.halfWidth, y - size.height, Math.max(x, n.x) + size.halfWidth, feet]])) return null
+        return { wall, y, nearX, cost: 35 + gap / autopilot.p.run + (feet - y) / 6 }
+    },
+    linkWallClimbs(node, feet, size, add) { //with nitinol, climb the wall beside this spot to the top of it
+        if (!node.isStatic || node.isCrouch || node.isBoost || node.elevator || node.transport || node.belt) return
+        const { w, h, nodeAt } = autopilot.grid
+        const nodes = autopilot.nodes
+        const lowest = node.cy - autopilot.cellsFor(140), highest = Math.max(0, node.cy - autopilot.cellsFor(autopilot.climbHeight))
+        for (const dir of [-1, 1]) {
+            for (let k = 1; k <= autopilot.cellsFor(245); k++) {
+                const cx = node.cx + dir * k
+                if (cx < 0 || cx >= w) break
+                for (let cy = Math.min(lowest, h - 1); cy >= highest; cy--) {
+                    const id = nodeAt[cx + cy * w]
+                    if (id < 0) continue
+                    const n = nodes[id]
+                    if (n.dead || !n.isStatic || n.isCrouch || n.isBoost || n.elevator || n.transport || n.cover) continue
+                    const climb = autopilot.wallClimbTo(node.x, feet, n, dir, size)
+                    if (!climb) continue
+                    add(id, autopilot.CLIMB, dir, climb.cost, 0, 0, false, 0, null, {
+                        wall: climb.wall, wallY: climb.y, trace: Float32Array.from([climb.nearX, feet, climb.nearX, climb.y, n.x, n.y]),
+                    })
+                    break //the first top above this column, a higher one is another wall
+                }
+            }
+        }
+    },
+    startWallClimb(edge, feet, go) { //a planned climb, see linkWallClimbs()
+        autopilot.wallClimb = { node: edge.to, dir: edge.dir, wall: edge.wall, y: edge.wallY, edge, start: m.cycle, lastProgress: m.cycle, bestY: feet }
+        return autopilot.driveWallClimb(feet, go)
+    },
+    driveWallClimb(feet, go) {
+        const climb = autopilot.wallClimb, target = autopilot.nodes[climb.node]
+        const mc = m.cycle, x = player.position.x, vy = player.velocity.y
+        const finish = failed => {
+            autopilot.wallClimb = null
+            if (failed) {
+                autopilot.noFly.set(climb.node, simulation.cycle + 300)
+                if (climb.edge) autopilot.rememberFailure(climb.edge) //replan around it for a while
+            } else if (climb.edge) autopilot.confirmCrossing(climb.edge)
+            return false
+        }
+        if (!tech.isNitinol || !target || target.dead || m.isHolding) return finish(false)
+        if (feet < climb.bestY - 8) {
+            climb.bestY = feet
+            climb.lastProgress = mc
+        }
+        if (m.onGround && climb.launched && mc > climb.launched + 8) return finish(feet > climb.y + 25)
+        if (mc > climb.lastProgress + 70 || mc > climb.start + 240 + (climb.bestY - climb.y)) return finish(true) //a cycle for every unit of wall left
+        const across = (x - climb.wall) * climb.dir
+        const atTop = feet < climb.y - 9 || across > 3
+        autopilot.why = "climbing a wall with nitinol"
+        input.fire = false
+        if (atTop) {
+            if (Math.abs(target.x - x) > 12) go(target.x - x)
+            else if (Math.abs(player.velocity.x) > 1.2) go(-player.velocity.x)
+            return true
+        }
+        go(climb.dir)
+        if (m.onGround) {
+            if (!m.crouch && m.hardLandCD < mc && m.buttonCD_jump + 20 < mc) {
+                input.up = true
+                climb.launched = mc
+            }
+        } else if (m.buttonCD_jump + 20 >= mc) {
+            input.up = vy < m.apexSpeed
+        } else if (mc - m.lastOnGroundCycle > 10 &&
+            (Math.sign(m.ledgeCoyote) === climb.dir || (vy > -10 && Matter.Query.rayAny(map,
+                { x: m.pos.x + 25 * climb.dir, y: m.pos.y + 50 },
+                { x: m.pos.x + 25 * climb.dir, y: m.pos.y + 95 })))) {
+            input.up = true
+            autopilot.why = "jumping off a wall with nitinol"
+        }
+        return true
+    },
+    doAirJumps(flight, feet, go, isLanding) {
+        const edge = flight.edge, mc = m.cycle
+        if (flight.airJumpAt !== undefined) {
+            if (m.buttonCD_jump === flight.airJumpAt) flight.airJumpsUsed = (flight.airJumpsUsed || 0) + 1
+            flight.airJumpAt = undefined
+        }
+        if ((flight.airJumpsUsed || 0) >= edge.airJumps || !autopilot.canAirJump(edge)) return false
+        const age = mc - m.buttonCD_jump
+        const left = m.lastOnGroundCycle + m.coyoteCycles - mc
+        if (age > 20 && !m.onGround && left > 1 && !isLanding && !autopilot.jumpContactAhead(player.position.x + player.velocity.x, feet, player.velocity.y)) {
+            input.up = true
+            flight.airJumpAt = mc
+            autopilot.why = "jumping again with acoustic levitation"
+        } else if (age > 20) input.up = false
+        if (player.velocity.x * edge.steer < edge.most) go(edge.steer)
+        return true
+    },
     isLandingSpan: true, //land anywhere on the target or the next steps of the plan, false aims at the target's middle, for tools/autopilot-test.js
-    landingSteer(to, feet) { //simulate the rest of the fall steering a few ways, { steer, most }, and pick one that lands on the target or the next few steps after it, well away from the ends of a narrow ledge, pushing the way the plan goes next
+    landingSteer(to, feet, fall = null) { //simulate steering options and pick a safe landing on or near the route
         const { nodes, next, p } = autopilot
         const span = new Set([to])
         let at = to
@@ -3452,46 +6794,61 @@ const autopilot = {
         const size = autopilot.size()
         const ahead = nextDir || 1, vx = player.velocity.x
         const ways = [[ahead, p.limit], [0, 0], [-ahead, p.limit], [-ahead, p.limit * 0.3], [ahead, p.limit * 0.3]] //all the way, coast, back, and gently
+        if (fall?.steer) ways.unshift([fall.steer, fall.most])
         if (Math.abs(vx) > 0.5) ways.push([-Math.sign(vx), 0]) //brake to a stop over where it is
-        let best = { steer: 0, most: 0 }, bestScore = Infinity
+        let best = { steer: 0, most: 0 }, bestScore = Infinity, bestRank = 4
         for (const [steer, most] of ways) {
             const hit = autopilot.arc(player.position.x, feet, vx, player.velocity.y, steer, most, false, size, 0, true)
             let score
             if (hit && (span.has(hit.node) || along.has(hit.node))) {
                 score = (steer === nextDir && most === p.limit ? 0 : steer === 0 ? 1 : 2) + (along.get(hit.node) || 0) //in the span, best moving the way it goes next
+                if (fall?.steer && steer === fall.steer && most === fall.most) score -= 2
+                const uphill = autopilot.landingUphill(hit.x, hit.y, nodes[to])
+                if (uphill) score += steer === uphill && most === p.limit ? 1 : 5 //prefer arriving with enough uphill speed to climb
                 if (autopilot.isLipTakeoff) { //near the end of a ledge, or sliding toward it after landing, a little off and it slides off
                     const rest = hit.x + hit.vx * 6 //it slides a little after landing, while it brakes
-                    const left = autopilot.lipFor(hit.x, hit.y, -1), right = autopilot.lipFor(hit.x, hit.y, 1)
+                    const onX = autopilot.surfaceAt(hit.x, hit.y) ? hit.x : nodes[hit.node].x //past the end of a narrow top there's no ground under the middle of the foot, find its ends from the spot it lands on
+                    const left = autopilot.lipFor(onX, hit.y, -1), right = autopilot.lipFor(onX, hit.y, 1)
                     const marginAt = x => Math.min(left && !left.isBehind ? x - left.x : Infinity, right && !right.isBehind ? right.x - x : Infinity)
                     const margin = Math.min(marginAt(hit.x), marginAt(rest))
                     if (margin < 20) score += (20 - Math.max(-20, margin)) / 4
                     if (autopilot.landTries) autopilot.landTries.push(`[margin ${Number.isFinite(margin) ? margin.toFixed(0) : "inf"} rest ${rest.toFixed(0)} lips ${left ? left.x.toFixed(0) + (left.isBehind ? "b" : "") : "-"},${right ? right.x.toFixed(0) + (right.isBehind ? "b" : "") : "-"}]`)
                 }
             } else score = 10 + (hit ? Math.abs(nodes[hit.node].x - nodes[to].x) + 3 * Math.abs(nodes[hit.node].y - nodes[to].y) : 5000) //the closest miss
-            if (hit && hit.isWet) score += 1500
+            if (hit?.isWet) score += autopilot.pathHazardCost(hit.hazardPath, hit.cycles)
+            if (hit && nodes[hit.node].isBoost && nodes[hit.node].isBoost !== nodes[to].isBoost) score += autopilot.boostEntryCost
             if (autopilot.landTries) autopilot.landTries.push(`${steer}/${most.toFixed(1)}:${hit ? nodes[hit.node].x + "," + nodes[hit.node].y + " at " + Math.round(hit.x) : "none"}=${score.toFixed(1)}`)
-            if (score < bestScore) {
+            const rank = autopilot.landingRank(hit)
+            if (rank < bestRank || (rank === bestRank && score < bestScore)) {
                 bestScore = score
+                bestRank = rank
                 best = { steer, most }
             }
         }
-        if (bestScore >= 5000) best = { steer: Math.sign(nodes[to].x - player.position.x), most: p.limit * 0.3 } //nothing lands, ease toward the target, not all out one way
+        if (bestScore >= 5000) {
+            const steer = Math.sign(nodes[to].x - player.position.x)
+            best = { steer, most: fall?.steer === steer ? fall.most : p.limit * 0.3 }
+        }
         return best
     },
     planFlight(flight, feet) { //simulate the rest of this flight with a few ways of steering, and take the one that lands closest to the goal
         const { dist, nodes, p } = autopilot
         const size = autopilot.size()
         const x = player.position.x, vx = player.velocity.x, vy = player.velocity.y
-        let best = null, bestValue = Infinity
+        if (flight.leaveBoost && autopilot.boostAt(x, feet, size) !== flight.leaveBoost) flight.leaveBoost = null
+        const transfer = flight.leaveBoost ? { leaveBoost: flight.leaveBoost } : undefined
+        let best = null, bestValue = Infinity, bestRank = 4
         for (const steer of [-1, 0, 1]) {
             for (const most of steer ? [p.limit, p.limit * 0.6, p.limit * 0.3] : [0]) {
-                const hit = autopilot.arc(x, feet, vx, vy, steer, most, false, size, 0, true)
+                const hit = autopilot.arc(x, feet, vx, vy, steer, most, false, size, 0, true, Infinity, 0, undefined, transfer)
                 if (!hit || !(dist[hit.node] < Infinity)) continue
-                let value = hit.cycles + dist[hit.node] + nodes[hit.node].cover + (hit.isWet ? 1500 : 0)
+                let value = autopilot.airValue(flight, hit)
                 if (hit.node === flight.to) value -= 8 //keep the landing it was going for unless another is clearly better
-                if (value < bestValue) {
+                const rank = autopilot.landingRank(hit)
+                if (rank < bestRank || (rank === bestRank && value < bestValue)) {
                     bestValue = value
-                    best = { node: hit.node, steer, most, cycles: hit.cycles }
+                    bestRank = rank
+                    best = { node: hit.node, steer, most, cycles: hit.cycles, wraps: hit.wraps }
                 }
             }
         }
@@ -3502,7 +6859,7 @@ const autopilot = {
         const from = flight.from >= 0 ? flight.from : autopilot.cur
         if (from < 0) return
         flight.to = best.node
-        flight.edge = { from, to: best.node, type: flight.launchType || (flight.isLaunched ? autopilot.BOOST : autopilot.FALL), dir: best.steer || Math.sign(nodes[best.node].x - x) || 1, cost: best.cycles, steer: best.steer, most: best.most, isRun: false, fail: 0, isLeap: true }
+        flight.edge = { from, to: best.node, type: flight.launchType || (flight.isLaunched ? autopilot.BOOST : autopilot.FALL), dir: best.steer || Math.sign(nodes[best.node].x - x) || 1, cost: best.cycles, steer: best.steer, most: best.most, isRun: false, fail: 0, isLeap: true, wraps: best.wraps || undefined }
     },
     //*********************************************************************
     // fields and tech that fly or teleport
@@ -3514,7 +6871,7 @@ const autopilot = {
         const x = player.position.x, cycle = simulation.cycle
         if (m.isHolding || m.crouch || autopilot.riding || autopilot.carry || m.fieldCDcycle >= m.cycle) return false
         const ray = m.fieldUpgrades[2], walls = ray.rayWalls()
-        const support = m.standingOn?.parent || m.standingOn
+        const support = autopilot.standingOn()
         if (support?.isRay) return false
         const to = autopilot.nodes[edge?.to]
         const exit = autopilot.nodes[autopilot.exitNode()]
@@ -3589,7 +6946,7 @@ const autopilot = {
             const perCycle = tech.negativeMassCost > 0 ? 5 * tech.negativeMassCost + m.fieldRegen : 0 //energy rising costs, and holding the field uses up the regen too
             return { kind: "negative mass", across: 9, up: 9, down: 12, frames: perCycle > 0 ? Math.min(500, (m.energy - 0.05) / perCycle) : 500 }
         }
-        if (m.coyoteCycles > 40) { //acoustic levitation, holding jump jumps again every 20 cycles until coyote time runs out
+        if (tech.isCoyote && m.coyoteCycles > 40) {
             const left = m.onGround ? m.coyoteCycles : m.lastOnGroundCycle + m.coyoteCycles - m.cycle
             if (left > 40) return { kind: "air jumps", across: 5, up: 14, down: 15, frames: Math.min(500, left - 10) }
         }
@@ -3736,8 +7093,19 @@ const autopilot = {
                 if (tech.isScaleInvariance) input.field = false //let gravity sink without toggling size
                 else input.down = true
             }
-        } else { //air jumps, holding jump jumps again every 20 cycles, see m.airControl()
-            input.up = dy < -30 || (m.onGround && cycle < f.start + 10)
+        } else {
+            if (!tech.isCoyote || m.coyoteCycles <= 40) {
+                autopilot.flying = null
+                return
+            }
+            const age = m.cycle - m.buttonCD_jump
+            const needsRise = dy < -30 && (!isLanding || feet > target.y + 8)
+            const riseLeft = Math.min(21, Math.max(0, -vy) / autopilot.p.gravity)
+            const nextRise = Math.max(0, -vy) * riseLeft - 0.5 * autopilot.p.gravity * riseLeft ** 2
+            const left = m.lastOnGroundCycle + m.coyoteCycles - m.cycle
+            if (age <= 20) input.up = vy < m.apexSpeed
+            else if (m.onGround) input.up = needsRise
+            else if (left > 1 && needsRise && feet - nextRise > point.y + 20 && !autopilot.jumpContactAhead(x + vx, feet, vy)) input.up = true
         }
     },
     findWarp() { //a wormhole to a spot farther along the plan, or anywhere closer to the goal when there's no plan
@@ -3898,17 +7266,18 @@ const autopilot = {
         if (left < 90) return end(gr.bestValue < gr.here - 40) //at the anchor
         if (cycle > gr.lastProgress + 90 || age > 360) end(gr.bestValue < gr.here - 40) //the landing stopped getting better
     },
-    isInExit() { //the same box as level.exit.drawAndCheck()
+    isInExit(margin = 0) {
         const x = player.position.x, y = player.position.y
-        return x > level.exit.x + 12 && x < level.exit.x + 88 && y > level.exit.y - 250 && y < level.exit.y + 35 && !level.exit.isInverted
+        return x > level.exit.x + 12 - margin && x < level.exit.x + 88 + margin &&
+            y > level.exit.y - 250 - margin && y < level.exit.y + 35 + margin && !level.exit.isInverted && !level.isFlipping
     },
     isHolding: false,
     combat: "", //"back" or "hold" while fighting changes how it moves
     isSmoothCombat: true, //keep traveling while shooting, false is the old stop and back away, for tools/autopilot-test.js
     isCommit: true, //keep going for a running jump once it's lined up, false to compare
-    isEscalate: true, //when stuck, plan again, hop, take a run, then something random, false is always random, to compare
+    isEscalate: true, //try a forward hop when stuck, false to compare
     stuckCount: 0,
-    recovery: "backing away",
+    recovery: "",
     isUseAlternatives: true, //take a standing jump instead of backing up for a running one when both get there, false to compare
     lastV: { x: 0, y: 0 }, //the player's velocity last cycle
     riding: null, //the elevator under the player
@@ -3929,8 +7298,13 @@ const autopilot = {
                 autopilot.aim.y = m.pos.y + 300 * Math.sin(m.angle)
             }
         }
-        const exact = autopilot.warp || autopilot.exactAim || autopilot.carryAim
+        const exact = autopilot.blockAttackAim || autopilot.pickupAim || autopilot.warp || autopilot.exactAim || autopilot.carryAim
         if (exact) { //exactly on the warp spot or the hook's anchor, the camera follows the mouse this cycle too, solve for where the mouse has to be
+            if (autopilot.pickupAim || autopilot.blockAttackAim || autopilot.blockClear) {
+                //The game's look() reads the world mouse before camera() projects the screen mouse.
+                simulation.mouseInGame.x = exact.x
+                simulation.mouseInGame.y = exact.y
+            }
             const s = simulation.edgeZoomOutSmooth / simulation.zoom, L = m.lookSmoothing
             const solve = (world, half, trans, pos) => half + (world - half + trans + L * (half - pos - trans)) / (s + 0.8 * L)
             simulation.mouse.x = solve(exact.x, canvas.width2, m.transX, m.pos.x)
@@ -3952,6 +7326,128 @@ const autopilot = {
         simulation.mouse.x += (px + dx - simulation.mouse.x) * rate
         simulation.mouse.y += (py + dy - simulation.mouse.y) * rate
         if (autopilot.isAiming && (input.fire || (autopilot.profile && autopilot.profile.isAutoFire && autopilot.target))) m.angle = Math.atan2(autopilot.aim.y - m.pos.y, autopilot.aim.x - m.pos.x) //shots go right at the target while the mouse catches up
+    },
+    //*********************************************************************
+    // settings, a panel in the autopilot tech's description in the pause menu, see tech.js
+    //*********************************************************************
+    //how often it plans and aims, not in the panel, tools/autopilot-test.js can change them with --set
+    planEvery: 10, //plans again at most this often, in cycles, when something changed
+    goalEvery: 30, //chooses what to go for this often, in cycles
+    relinkBudget: 1.5, //milliseconds a cycle spent redrawing the map around what moved
+    airEvery: 1, //checks where a flight lands this often, in cycles
+    landEvery: 3, //picks how to steer a landing this often, in cycles
+    flightEvery: 6, //looks for the best landing after a boost or a knock this often, in cycles
+    stuckAfter: 150, //cycles without getting anywhere before it tries something else
+    settingDefaults: null, //every setting's starting value, from setup()
+    isSettingsOpen: false, //the settings in the pause menu are folded away until opened, and stay how they were left
+    settingList: [ //{ key, text } a checkbox, { group } a heading
+        { group: "what it does" },
+        { key: "choose", text: "chooses" }, //tech.isAutopilotChoose, its text is in settingsHTML()
+        { key: "hunt", text: "goes for other power ups and mobs" },
+        { key: "isCarryBlocks", text: "carries blocks to buttons" },
+        { key: "isExplore", text: "explores when there's no way" },
+        { key: "isSmoothCombat", text: "keeps moving while it shoots" },
+        { key: "isDrawPath", text: "draws its path" },
+        { key: "isStuckView", text: "shows why it's stuck" },
+        { key: "isTalking", text: "says what it's doing" },
+    ],
+    getSetting(key) {
+        if (key === "choose") return !!tech.isAutopilotChoose
+        return key === "hunt" ? autopilot.only !== "exit" : autopilot[key]
+    },
+    setSetting(key, value) { //from the pause menu, only while paused
+        if (!simulation.paused || simulation.isChoosing) return
+        const setting = autopilot.settingList.find(s => s.key === key)
+        if (!setting) return
+        if (key === "choose") tech.isAutopilotChoose = !!value
+        else if (key === "hunt") autopilot.only = value ? "" : "exit"
+        else autopilot[key] = !!value
+        if (autopilot.isOn) autopilot.isPlanDirty = true
+    },
+    resetSettings() {
+        if (!simulation.paused || simulation.isChoosing) return
+        for (const key in autopilot.settingDefaults) autopilot.setSetting(key, autopilot.settingDefaults[key])
+        build.generatePauseRight()
+    },
+    settingsHTML() { //a checkbox for every setting, folded away in a details menu
+        let html = `<details class="autopilot-settings-details" onclick="event.stopPropagation()" ontoggle="autopilot.isSettingsOpen = this.open" ${autopilot.isSettingsOpen ? "open" : ""}><summary>settings</summary><div class="autopilot-settings">`
+        for (const s of autopilot.settingList) {
+            const text = s.key === "choose" ? `<strong>n-gon</strong> <strong class='color-choice' data-help='choice'><span>ch</span><span>oo</span><span>ses</span></strong> ${powerUps.orb.tech()} ${powerUps.orb.field()} ${powerUps.orb.gun()} for you` : s.text
+            if (s.group) html += `<div class="autopilot-settings-group">${s.group}</div>`
+            else html += `<label><input type="checkbox" onchange="autopilot.setSetting('${s.key}', this.checked)" ${autopilot.getSetting(s.key) ? "checked" : ""}> ${text}</label>`
+        }
+        return html + `<button type="button" class="autopilot-settings-reset" onclick="autopilot.resetSettings()">defaults</button></div></details>`
+    },
+    //*********************************************************************
+    // the stuck view, why it isn't getting anywhere, drawn while it's stuck when the setting is on
+    //*********************************************************************
+    isStuckView: false,
+    stuckWatch: null, //{ x, y, cycle } where the player was when it last got somewhere
+    isStuck() { //hasn't got 150 from where it was for 3 seconds, has no way to its goal, or keeps failing moves
+        const x = player.position.x, y = player.position.y, cycle = simulation.cycle
+        const w = autopilot.stuckWatch
+        if (!w || cycle < w.cycle || Math.hypot(x - w.x, y - w.y) > 150) autopilot.stuckWatch = { x, y, cycle }
+        const isLost = autopilot.cur >= 0 && autopilot.dist && !(autopilot.dist[autopilot.cur] < Infinity)
+        return cycle - autopilot.stuckWatch.cycle > 180 || isLost || autopilot.recentFailures.filter(f => cycle - f.cycle < 300).length >= 2
+    },
+    drawStuck() { //nearby spots and their jumps and falls, the moves that failed and how many times, the goal, and what it's doing
+        const { nodes, dist } = autopilot
+        const x = player.position.x, feet = playerBody.bounds.max.y
+        const near = nodes.filter(n => !n.dead && Math.abs(n.x - x) < 450 && Math.abs(n.y - feet) < 350)
+        const isFailed = e => e.fail > 0 || autopilot.retryCost(e) > 0
+        const trace = (n, e) => {
+            const to = nodes[e.to]
+            ctx.moveTo(n.x, n.y - 12)
+            if (e.type === autopilot.PORTAL) ctx.moveTo(to.x, to.y - 12)
+            else if (e.type !== autopilot.WALK) autopilot.drawTrace(autopilot.edgeTrace(e))
+            ctx.lineTo(to.x, to.y - 12)
+        }
+        ctx.beginPath() //every jump and fall from where the player is standing, faint
+        for (const n of near) if (Math.abs(n.x - x) < 90 && Math.abs(n.y - feet) < 60) for (const e of n.edges) if (e.type !== autopilot.WALK && !isFailed(e)) trace(n, e)
+        ctx.strokeStyle = "rgba(0,0,0,0.18)"
+        ctx.lineWidth = 1
+        ctx.stroke()
+        ctx.beginPath() //spots with a way to the goal
+        for (const n of near) if (dist && dist[n.id] < Infinity) ctx.rect(n.x - 4, n.y - 4, 8, 8)
+        ctx.fillStyle = "rgba(0,140,255,0.6)"
+        ctx.fill()
+        ctx.beginPath() //spots with no way
+        for (const n of near) if (!dist || !(dist[n.id] < Infinity)) ctx.rect(n.x - 4, n.y - 4, 8, 8)
+        ctx.fillStyle = "rgba(120,120,120,0.6)"
+        ctx.fill()
+        ctx.beginPath() //moves that failed
+        const labels = []
+        for (const n of near) for (const e of n.edges) {
+            if (!isFailed(e)) continue
+            trace(n, e)
+            labels.push({ x: (n.x + nodes[e.to].x) / 2, y: Math.min(n.y, nodes[e.to].y) - 30, text: `${autopilot.edgeNames[e.type]} failed ${e.fail || 1}x` })
+        }
+        ctx.strokeStyle = "rgba(255,0,60,0.8)"
+        ctx.lineWidth = 3
+        ctx.stroke()
+        const goal = autopilot.goal >= 0 && nodes[autopilot.goal] && !nodes[autopilot.goal].dead ? nodes[autopilot.goal] : null
+        if (goal) {
+            ctx.beginPath()
+            ctx.arc(goal.x, goal.y - 40, 40, 0, 2 * Math.PI)
+            ctx.strokeStyle = "rgba(0,170,90,0.8)"
+            ctx.lineWidth = 3
+            ctx.stroke()
+            labels.push({ x: goal.x, y: goal.y - 95, text: `goal: ${autopilot.goalType || "?"}` })
+        }
+        const next = autopilot.cur >= 0 && autopilot.next ? autopilot.next[autopilot.cur] : null
+        const lines = [
+            `${autopilot.why || autopilot.said || "?"}${autopilot.saidNote && !autopilot.why ? ` (${autopilot.saidNote})` : ""}`,
+            `goal: ${autopilot.goalType || "none"}${goal ? `, ${autopilot.dist && autopilot.cur >= 0 && autopilot.dist[autopilot.cur] < Infinity ? Math.round(autopilot.dist[autopilot.cur]) : "no way"}` : ""}`,
+            next ? `next: ${autopilot.edgeNames[next.type]} to ${Math.round(nodes[next.to].x)}, ${Math.round(nodes[next.to].y)}${next.fail ? `, failed ${next.fail}x` : ""}` : "next: none",
+            `still for ${Math.round((simulation.cycle - autopilot.stuckWatch.cycle) / 60)} s, ${autopilot.recentFailures.length} remembered crossings`,
+        ]
+        ctx.font = "22px Arial"
+        ctx.textAlign = "center"
+        ctx.fillStyle = "rgba(0,0,0,0.75)"
+        for (let i = 0; i < lines.length; i++) ctx.fillText(lines[i], x, m.pos.y - 230 - (lines.length - 1 - i) * 26)
+        ctx.fillStyle = "rgba(255,0,60,0.9)"
+        for (const l of labels) ctx.fillText(l.text, l.x, l.y)
+        ctx.textAlign = "left"
     },
     drawRings() { //circle what it's going for and what it's shooting at
         const ring = (x, y, radius, color, dash) => {
@@ -3982,18 +7478,26 @@ const autopilot = {
             if (!autopilot.isOn) return simulation.removeEphemera(this)
             if (simulation.isTimeSkipping) return
             autopilot.drawWord()
+            if (autopilot.isStuckView && autopilot.isStuck()) autopilot.drawStuck()
             if (!autopilot.isDrawPath) return
             autopilot.drawRings()
             if (!autopilot.next || autopilot.cur < 0) return
             const nodes = autopilot.nodes
             let at = autopilot.cur
             ctx.beginPath()
-            ctx.moveTo(nodes[at].x, nodes[at].y - 12)
+            const flight = autopilot.flight
+            const landing = !m.onGround && flight && flight.to >= 0 && !nodes[flight.to].dead ? autopilot.flightTrace(flight) : null
+            if (landing) { //in the air, the rest of this flight as it's being steered, from the player
+                ctx.moveTo(player.position.x, playerBody.bounds.max.y - 12)
+                autopilot.drawTrace(landing.points)
+                at = landing.node
+            } else ctx.moveTo(nodes[at].x, nodes[at].y - 12)
             for (let i = 0; i < 400 && autopilot.next[at]; i++) {
                 const edge = autopilot.next[at]
-                const from = nodes[at], to = nodes[edge.to]
-                if (edge.type === autopilot.WALK) ctx.lineTo(to.x, to.y - 12)
-                else ctx.quadraticCurveTo((from.x + to.x) / 2, Math.min(from.y, to.y) - (edge.type === autopilot.FALL ? 40 : 300), to.x, to.y - 12)
+                const to = nodes[edge.to]
+                if (edge.type === autopilot.PORTAL) ctx.moveTo(to.x, to.y - 12) //through a portal
+                else if (edge.type !== autopilot.WALK) autopilot.drawTrace(autopilot.edgeTrace(edge))
+                ctx.lineTo(to.x, to.y - 12)
                 at = edge.to
             }
             ctx.strokeStyle = "rgba(0,140,255,0.3)"
@@ -4001,7 +7505,55 @@ const autopilot = {
             ctx.setLineDash([6, 14])
             ctx.stroke()
             ctx.setLineDash([])
+            if (landing && landing.x !== undefined) { //where this flight comes down
+                ctx.beginPath()
+                ctx.arc(landing.x, landing.y - 12, 9, 0, 2 * Math.PI)
+                ctx.strokeStyle = "rgba(0,140,255,0.5)"
+                ctx.lineWidth = 3
+                ctx.stroke()
+            }
         },
+    },
+    drawTrace(points) { //continue the path through x, y pairs 12 above the feet, NaN breaks it
+        if (!points) return
+        let isGap = false
+        for (let i = 0; i < points.length; i += 2) {
+            if (Number.isNaN(points[i])) {
+                isGap = true
+                continue
+            }
+            if (isGap) ctx.moveTo(points[i], points[i + 1] - 12)
+            else ctx.lineTo(points[i], points[i + 1] - 12)
+            isGap = false
+        }
+    },
+    replay(args) { //the cycle by cycle path of arcSim(...args)
+        autopilot.arcTrace = []
+        try {
+            autopilot.arcSim(...args)
+            return Float32Array.from(autopilot.arcTrace)
+        } finally {
+            autopilot.arcTrace = null
+        }
+    },
+    edgeTrace(edge) { //the flight a jump, fall, or boost was planned with, replayed once and kept on the edge
+        if (edge.trace === undefined) edge.trace = edge.arcArgs ? autopilot.replay(edge.arcArgs) : null
+        return edge.trace
+    },
+    flightTrace(flight) { //{ points, node, x, y } the rest of the flight being steered now, once a cycle
+        if (flight.traceCycle === simulation.cycle) return flight.traced
+        flight.traceCycle = simulation.cycle
+        const hit = flight.preview
+        if (hit && hit.args) {
+            const points = autopilot.replay(hit.args)
+            flight.traced = { points, node: hit.node, x: points[points.length - 2], y: points[points.length - 1] }
+        } else if (flight.edge && flight.edge.arcArgs && flight.edge.to === flight.to) { //a flight that isn't checked, the arc it was planned with
+            flight.traced = { points: [NaN, NaN, ...autopilot.edgeTrace(flight.edge)], node: flight.to }
+        } else {
+            const to = autopilot.nodes[flight.to]
+            flight.traced = { points: [to.x, to.y], node: flight.to }
+        }
+        return flight.traced
     },
 }
 autopilot.setup()
