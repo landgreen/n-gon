@@ -3396,7 +3396,7 @@ const b = {
             return this.life * this.jet() * tech.bulletsLastLonger
         },
         jet() { //plasma jet makes the wire 1.5x longer per stack, half from faster points and half from points that last longer, so they stay about as far apart
-            return Math.sqrt(tech.isPlasmaRange)
+            return Math.sqrt(tech.plasmaRangeScale)
         },
         speed() { //how far a point moves each cycle
             return 20 * this.jet()
@@ -4666,7 +4666,7 @@ const b = {
                                     ) {
                                         if (tech.isStun) b.AoEStunEffect(this.position, this.range + mob[i].radius + random); //AoEStunEffect(where, range, cycles = 90 + 60 * Math.random()) {
                                         if (tech.isMineSentry) {
-                                            this.lookFrequency = Math.floor(5 + 7 * b.fireCDscale + 10 * (tech.oneSuperBall && tech.isSuperMine) + Math.floor(2 * Math.random()))
+                                            this.lookFrequency = Math.floor(5 + 7 * b.fireCDscale + 10 * (tech.isOneSuperBall && tech.isSuperMine) + Math.floor(2 * Math.random()))
                                             // this.endCycle = Infinity
                                             this.shots = tech.sentryAmmo
                                             this.do = function () { //overwrite the do method for this bullet
@@ -4678,7 +4678,7 @@ const b = {
                                                             this.fireChildren(() => b.targetedFoam(this.position, 1, 21 + 7 * Math.random(), 1200, false))
                                                         }
                                                     } else if (tech.isSuperMine) {
-                                                        const cost = tech.oneSuperBall ? 2 : 0.7
+                                                        const cost = tech.isOneSuperBall ? 2 : 0.7
                                                         this.shots -= cost * this.fireChildren(() => b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false))
                                                         for (let i = 0, len = tech.extraSuperBalls / 4; i < len; i++) {
                                                             if (Math.random() < 0.33) this.fireChildren(() => b.targetedBall(this.position, 1, 42 + 12 * Math.random(), 1200, false))
@@ -5813,7 +5813,7 @@ const b = {
     },
     superBall(where, velocity, radius) {
         let gravity = 0.001
-        if (tech.superBallDelay) {
+        if (tech.isSuperBallDelay) {
             velocity = Vector.mult(velocity, 1.4)
             gravity *= 4
         }
@@ -5886,7 +5886,7 @@ const b = {
                     ) {
                         const balls = (where, mass) => { //1 ball for a 30x30 block, 3 for 100x100, up to 5 for 150x150 and bigger
                             let num = Math.min(5, Math.max(1, Math.floor(Math.sqrt(mass / 0.9) + 0.001)))
-                            if (tech.oneSuperBall) num = Math.max(1, Math.round(num / 3)) //super ball: 1/3 as many balls, at least 1
+                            if (tech.isOneSuperBall) num = Math.max(1, Math.round(num / 3)) //super ball: 1/3 as many balls, at least 1
                             if (b.shotCount() < 300) b.targetedBall(where, num) //limit balls so the game doesn't slow down
                         }
                         if (who.isCleaved) { //pieces from a split block shatter into the new balls
@@ -5910,7 +5910,7 @@ const b = {
         }
         bullet[me].beforeDmg = function (who) {
             if (!who.isInvulnerable) {
-                if (tech.oneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
+                if (tech.isOneSuperBall) mobs.statusStun(who, 120) // (2.3) * 2 / 14 ticks (2x damage over 7 seconds)
                 if (tech.isFoamBall) {
                     for (let i = 0, len = 5.6 * this.mass; i < len; i++) {
                         const radius = 6 + 9 * Math.random()
@@ -5973,7 +5973,7 @@ const b = {
                     requestAnimationFrame(() => {
                         Matter.Body.setVelocity(this, Vector.mult(unit, 40 + 20 * tech.isSuperBounce));
                         //+1 is about 1.7x for small balls, the large super ball scales with mass for about 1.8x at ricochet speed
-                        this.dmg += tech.oneSuperBall ? 4.8 * this.mass : 1
+                        this.dmg += tech.isOneSuperBall ? 4.8 * this.mass : 1
                         simulation.drawList.push({ //add dmg to draw queue
                             x: targets[index].x,
                             y: targets[index].y,
@@ -6056,7 +6056,7 @@ const b = {
                 targets.push(Vector.add(mob[i].position, Vector.mult(mob[i].velocity, dist / 60))) //predict where the mob will be in a few cycles
             }
         }
-        const radius = (11 + 9 * tech.oneSuperBall) * tech.bulletSize
+        const radius = (11 + 9 * tech.isOneSuperBall) * tech.bulletSize
         for (let i = 0; i < num; i++) {
             if (targets.length > 0) { // aim near a random target in array
                 const index = Math.floor(Math.random() * targets.length)
@@ -7025,7 +7025,7 @@ const b = {
         Matter.Body.setDensity(bullet[me], 0.00001); //0.001 is normal
         bullet[me].immuneList = []
         bullet[me].dmg = 6
-        if (tech.needleTunnel) {
+        if (tech.isNeedleTunnel) {
             bullet[me].dmg *= 1.2
             bullet[me].endCycle = simulation.cycle + 300;
             bullet[me].collisionFilter.mask = tech.isShieldPierce ? 0 : cat.mobShield
@@ -7163,7 +7163,7 @@ const b = {
             bullet[me].do = function () {
                 const hits = this.immuneList.length
                 needleDo.call(this)
-                if (this.immuneList.length > hits || (!tech.needleTunnel && Matter.Query.collides(this, map).length)) this.endCycle = 0 //nanowires still tunnel through the map
+                if (this.immuneList.length > hits || (!tech.isNeedleTunnel && Matter.Query.collides(this, map).length)) this.endCycle = 0 //nanowires still tunnel through the map
             }
         }
         const SPEED = 90
@@ -8087,7 +8087,7 @@ const b = {
                 const distanceToPlayer = Vector.magnitude(Vector.sub(this.position, m.pos))
                 if (distanceToPlayer > 150) this.force = Vector.mult(Vector.normalise(Vector.sub(m.pos, this.position)), this.mass * this.acceleration) //if far away move towards player
                 Matter.Body.setVelocity(this, Vector.add(Vector.mult(this.velocity, 0.90), Vector.mult(player.velocity, 0.17))); //add player's velocity
-                const rangeScale = tech.isPlasmaRange * tech.bulletsLastLonger //plasma jet tech and anti-shear topology tech, each one's stacks add up, and the two multiply
+                const rangeScale = tech.plasmaRangeScale * tech.bulletsLastLonger //plasma jet tech and anti-shear topology tech, each one's stacks add up, and the two multiply
 
                 if (!(simulation.cycle % this.lookFrequency)) { //find closest
                     this.lockedOn = null;
@@ -8335,7 +8335,7 @@ const b = {
             chooseFireMethod() { //set in simulation.startGame
                 if (tech.isNeedles) { //needles have priority, so needle gun from the shotgun can't leave the nail gun firing nails at 1/3 ammo
                     this.fire = this.fireNeedles
-                } else if (tech.nailRecoil) {
+                } else if (tech.isNailRecoil) {
                     if (tech.isRivets) {
                         this.fire = this.fireRecoilRivets
                     } else {
@@ -8343,7 +8343,7 @@ const b = {
                     }
                 } else if (tech.isRivets) {
                     this.fire = this.fireRivets
-                } else if (tech.nailInstantFireRate) {
+                } else if (tech.isNailInstantFireRate) {
                     this.fire = this.fireInstantFireRate
                     // } else if (tech.nailFireRate) {
                     // this.fire = this.fireNailFireRate
@@ -8366,7 +8366,7 @@ const b = {
             },
             fireRecoilNails() {
                 if (this.nextFireCycle + 1 < m.cycle) this.startingHoldCycle = m.cycle //reset if not constantly firing
-                const CD = tech.nailInstantFireRate ? 1 : Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 0.99) //CD scales with cycles fire is held down
+                const CD = tech.isNailInstantFireRate ? 1 : Math.max(11 - 0.06 * (m.cycle - this.startingHoldCycle), 0.99) //CD scales with cycles fire is held down
                 this.nextFireCycle = m.cycle + CD * b.fireCDscale //predict next fire cycle if the fire button is held down
 
                 m.fireCDcycle = m.cycle + Math.floor(CD * b.fireCDscale); // cool down
@@ -9067,9 +9067,9 @@ const b = {
                 b.queueSuperBalls({ count: 0, num, speed, delay })
             },
             chooseFireMethod() { //set in simulation.startGame
-                if (tech.oneSuperBall) {
+                if (tech.isOneSuperBall) {
                     this.fire = this.fireOne
-                } else if (tech.superBallDelay) {
+                } else if (tech.isSuperBallDelay) {
                     this.fire = this.fireQueue
                 } else {
                     this.fire = this.fireMulti
@@ -10344,7 +10344,7 @@ const b = {
                         };
                     }
 
-                } else if (tech.beamCollimator) {
+                } else if (tech.isBeamCollimator) {
                     this.fire = this.fireSplitCollimator
                 } else if (tech.beamSplitter) {
                     this.fire = this.fireSplit

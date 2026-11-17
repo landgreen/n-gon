@@ -106,6 +106,7 @@ const m = {
     squirrelJump: 1,
     velocitySmooth: { x: 0, y: 0 },//use for drawing skin's velocity gel tail
     standingOn: undefined,
+    isPassingRay: false, //tech: ray, the player is going through the line left behind, so the stuck checks skip it
     numTouching: 0,
     crouch: false,
     // isHeadClear: true,
@@ -233,7 +234,7 @@ const m = {
     hardLandCD: 0,
     hardLandCDScale: 1,
     checkHeadClear() {
-        if (Matter.Query.collides(headSensor, map).length > 0) {
+        if (Matter.Query.collides(headSensor, m.playerMap()).length > 0) {
             return false
         } else {
             return true
@@ -242,7 +243,7 @@ const m = {
     mapDepth() { //how deep the player's body or head is in the map, normal play stays below 6 and stuck players are above 15
         let depth = 0
         for (const part of [playerBody, playerHead]) {
-            const hits = Matter.Query.collides(part, map)
+            const hits = Matter.Query.collides(part, m.playerMap())
             for (let i = 0; i < hits.length; i++) {
                 if (hits[i].depth > depth) depth = hits[i].depth
             }
@@ -250,7 +251,10 @@ const m = {
         return depth
     },
     isInsideMap() { //the center of the player is in the map, or they are deep in a thin platform or wedged in a narrow gap
-        return Matter.Query.rayAny(map, m.pos, player.position) || m.mapDepth() > 15
+        return Matter.Query.rayAny(m.playerMap(), m.pos, player.position) || m.mapDepth() > 15
+    },
+    playerMap() { //the map the player can touch, tech: ray's line left behind lets the player through from the eye's side
+        return m.isPassingRay ? map.filter(who => !who.isRay) : map
     },
     lastUnstuckCycle: -1000,
     unstuck() { //move the player to the last spot in their history where they weren't in the map, or to the level start if it keeps happening
@@ -278,6 +282,7 @@ const m = {
         }
     },
     buttonCD_jump: 0, //cool down for player buttons
+    rayJumpScale: 1.75, //tech: eddy current, jump force off tech: ray's line, 3x as high
     isJumpBuffered() { //jump was pressed in the last few cycles, so tapping jump just before landing still jumps
         const cyclesSincePress = m.cycle - input.upPressCycle
         return cyclesSincePress >= 0 && cyclesSincePress < m.jumpBufferCycles
@@ -288,7 +293,7 @@ const m = {
         //apply a fraction of the jump force to the body the player is jumping off of
         // 0.2 * Math.max(0, Math.min(3 * (m.cycle - m.lastOnGroundCycle), Math.min(120, m.lastOnGroundCycle + m.coyoteCycles - m.cycle)))
         if (m.cycle - m.lastOnGroundCycle < 6) Matter.Body.applyForce(m.standingOn, m.pos, { x: 0, y: m.jumpForce * 0.12 * Math.min(m.standingOn.mass, 5) });
-        player.force.y = -m.jumpForce; //player jump force
+        player.force.y = -m.jumpForce * (tech.isPerfectBrake && tech.isRay && m.standingOn?.isRay ? m.rayJumpScale : 1); //player jump force, tech: eddy current jumps higher off tech: ray's line
         Matter.Body.setVelocity(player, { //zero player y-velocity for consistent jumps
             x: player.velocity.x,
             y: Math.max(-10, Math.min(m.standingOn.velocity.y, 10)) //cap velocity contribution from blocks you are standing on to 10 in the vertical
@@ -815,7 +820,7 @@ const m = {
         if (tech.isHyperpolarisation || m.skin?.isPolarDefense) m.skin.updatePolarDefense()
         let dmg = m.damageReduction * powerUps.difficulty.damageReduction
         if (tech.proportionality !== null) dmg *= Math.pow(tech.proportionality, 1.631)
-        if (tech.energyDefense && m.energy > 1.99) dmg *= 0.1
+        if (tech.isEnergyDefense && m.energy > 1.99) dmg *= 0.1
         if (powerUps.boost.isDefense && powerUps.boost.endCycle > simulation.cycle) dmg *= 0.3
         if (tech.isMaxHealthDefense && (m.health === m.maxHealth || (tech.isEnergyHealth && m.energy > m.maxEnergy - 0.01))) dmg *= 0.1
         if (tech.isDiaphragm) dmg *= 0.6 + 0.4 * Math.sin(m.cycle * 0.01);
@@ -933,8 +938,8 @@ const m = {
         simulation.fpsCap = 3 //1 is longest pause, 4 is standard
         simulation.fpsInterval = 1000 / simulation.fpsCap;
         m.defaultFPSCycle = m.cycle
-        if (tech.isRewindBot) {
-            const len = steps * 0.05 * tech.isRewindBot
+        if (tech.rewindBotCount) {
+            const len = steps * 0.05 * tech.rewindBotCount
             const botStep = Math.floor(steps / len)
             for (let i = 0; i < len; i++) {
                 const where = m.history[Math.abs(m.cycle - i * botStep) % 600].position //spread out spawn locations along past history
@@ -1595,8 +1600,8 @@ const m = {
                     ctx.restore();
                 }
 
-                if (tech.isGrabEnergy && m.ledgeCoyote !== 0) {
-                    m.addEnergy(0.0068 * level.isReducedRegen * tech.isGrabEnergy)
+                if (tech.grabEnergyCount && m.ledgeCoyote !== 0) {
+                    m.addEnergy(0.0068 * level.isReducedRegen * tech.grabEnergyCount)
                     if (!(simulation.cycle % 12)) simulation.energyGenGraphic()
                 }
                 if ((m.ledgeCoyote !== 0) !== wasGrabbing) { //pseudoelasticity fire rate changes while wall grabbing
@@ -1671,7 +1676,7 @@ const m = {
         },
         isPolarDefense: false,
         updatePolarDefense() {
-            const isActive = !!(tech.isHyperpolarisation && tech.isDamageCooldown && m.lastKillCycle + tech.isDamageCooldownTime > m.cycle)
+            const isActive = !!(tech.isHyperpolarisation && tech.isDamageCooldown && m.lastKillCycle + tech.damageCooldownTime > m.cycle)
             if (isActive !== m.skin.isPolarDefense) {
                 if (isActive) {
                     m.damageReduction *= 0.4
@@ -1700,7 +1705,7 @@ const m = {
                 ctx.translate(m.pos.x, m.pos.y);
                 m.calcLeg(Math.PI, -3);
 
-                const diff = (m.lastKillCycle - m.cycle + tech.isDamageCooldownTime) / tech.isDamageCooldownTime
+                const diff = (m.lastKillCycle - m.cycle + tech.damageCooldownTime) / tech.damageCooldownTime
                 const color = diff < 0 ? "#fff" : "#aaa"
                 const hue = 220 + 20 * Math.sin(0.01 * m.cycle)
                 const colorInverse = diff < 0 ? `hsl(${hue}, 80%, 40%)` : "#fff"
@@ -5028,18 +5033,57 @@ const m = {
                         solid: [], //the map without the line's own walls, for line of sight
                         lineWidth: 3,
                         band: 17, //width of the faded band on the eye's side of the line left behind after releasing the field, the band and the line are a wall you can stand on
-                        walls: [], //map bodies under the line left behind, they collide with the player, bullets, and lasers
+                        walls: [], //map bodies under the line left behind, they collide with the player, bullets, and lasers, down lets the player through, see passThrough()
                         wallKey: "", //where the walls were made, so they are only remade when the line moves
                         wallMap: null, //levels that rebuild the map replace the map array, which removes the walls
                         wallCycle: 0,
                         wallWatcher: null,
                         placed: null, //m.fieldPosition when the player last released the field, only a line the player placed is left behind, not one placed by a new level or a new field
+                        front: null, //{ point, out } a spot on the line left behind, and out of the line, away from the eye
+                        passing: false, //the player is going through the line, the walls leave cat.player out of their masks
+                        dropCycle: 0, //the player pressed down near the line, they go through it until this cycle
+                        setPassing(isPassing) {
+                            m.isPassingRay = isPassing //the player's stuck checks skip the line while going through it
+                            if (this.passing === isPassing) return
+                            this.passing = isPassing
+                            for (const who of this.walls) {
+                                if (isPassing) who.collisionFilter.mask &= ~cat.player
+                                else who.collisionFilter.mask |= cat.player
+                            }
+                        },
+                        passThrough() { //the line left behind is solid on both sides, pressing down near it lets the player through from either side
+                            if (input.down) this.dropCycle = m.cycle + 15 //a tap of down is enough to fall through, even a little before reaching the line
+                            if (!this.walls.length || !this.front) return this.setPassing(false)
+                            const margin = 5 + player.speed //touching, or will be next cycle
+                            const b = player.bounds
+                            if (!this.walls.some(who => b.min.x < who.bounds.max.x + margin && b.max.x > who.bounds.min.x - margin && b.min.y < who.bounds.max.y + margin && b.max.y > who.bounds.min.y - margin)) return this.setPassing(false)
+                            let isThrough = this.dropCycle > m.cycle
+                            if (!isThrough && this.passing) { //keeps going through until all of the player is out of the line, so it doesn't close on the player
+                                const { point, out } = this.front
+                                let min = Infinity, max = -Infinity //how far the player's nearest and farthest points are out of the line
+                                for (const v of player.vertices) {
+                                    const d = (v.x - point.x) * out.x + (v.y - point.y) * out.y
+                                    if (d < min) min = d
+                                    if (d > max) max = d
+                                }
+                                isThrough = max > -this.band - 1 && min < this.lineWidth / 2 + 1 //the walls go from the far edge of the line back through the band
+                            }
+                            this.setPassing(isThrough)
+                        },
                         setWalls(pieces, eye) {
                             this.wallCycle = m.cycle
                             if (this.wallMap !== map) { //the old walls went with the old map
                                 this.wallMap = map
                                 this.walls = []
                                 this.wallKey = ""
+                                this.setPassing(false)
+                            }
+                            if (pieces.length) {
+                                const { a, b } = pieces[0]
+                                const length = Math.hypot(b.x - a.x, b.y - a.y) || 1
+                                const normal = { x: (a.y - b.y) / length, y: (b.x - a.x) / length }
+                                const sign = (eye.x - a.x) * normal.x + (eye.y - a.y) * normal.y > 0 ? -1 : 1 //away from the eye
+                                this.front = { point: { x: a.x, y: a.y }, out: { x: sign * normal.x, y: sign * normal.y } }
                             }
                             let key = ""
                             for (const { a, b } of pieces) key += `${Math.round(a.x)},${Math.round(a.y)},${Math.round(b.x)},${Math.round(b.y)} `
@@ -5056,10 +5100,10 @@ const m = {
                                 const who = Bodies.rectangle((a.x + b.x) / 2 + dy * shift, (a.y + b.y) / 2 - dx * shift, length, thickness, {
                                     angle: Math.atan2(dy, dx),
                                     isStatic: true,
-                                    collisionFilter: { category: cat.map, mask: cat.player | cat.bullet | cat.mobBullet }, //lasers find it in map, mobs and blocks pass through
+                                    collisionFilter: { category: cat.map, mask: (this.passing ? 0 : cat.player) | cat.bullet | cat.mobBullet }, //lasers find it in map, mobs and blocks pass through
                                     isRay: true,
                                 })
-                                if (Matter.Query.collides(who, [playerBody, playerHead]).some(hit => hit.depth > 15)) { //never make a wall inside the player, try again next cycle, standing on it or the line moving into the player a little is fine
+                                if (!this.passing && Matter.Query.collides(who, [playerBody, playerHead]).some(hit => hit.depth > 15)) { //never make a wall inside the player, try again next cycle, standing on it or the line moving into the player a little is fine
                                     this.wallKey = ""
                                     continue
                                 }
@@ -5074,6 +5118,7 @@ const m = {
                                     do() {
                                         if (ray.wallCycle < m.cycle - 1) {
                                             ray.clearWalls()
+                                            ray.setPassing(false)
                                             simulation.removeEphemera(this)
                                         }
                                     },
@@ -5093,6 +5138,7 @@ const m = {
                         draw(center, angle, isAttached) {
                             if (!isAttached && this.placed !== m.fieldPosition) { //nothing is left behind until the player places a line, so every line you see is solid
                                 this.clearWalls()
+                                this.setPassing(false)
                                 return
                             }
                             const cos = Math.cos(angle)
@@ -5149,9 +5195,11 @@ const m = {
                             }
                             if (isAttached) {
                                 this.clearWalls()
+                                this.setPassing(false)
                                 this.placed = m.fieldPosition
                             } else {
                                 this.setWalls(pieces, where)
+                                this.passThrough()
                             }
                             this.drawCycle = m.cycle
                             this.pieces = pieces
@@ -5306,7 +5354,7 @@ const m = {
                         }
 
                         //deflect player with tech
-                        if (isFree && tech.isPerfectBrake) {
+                        if (isFree && tech.isPerfectBrake && !tech.isRay) { //tech: ray's line doesn't push the player, standing on it jumps higher instead, see m.jump()
                             const hit = current.touch(m.pos, 30)
                             if (hit && hit.dist > -130) { //only near the edge of the field
                                 m.fieldCDcycle = m.cycle + m.fieldBlockCD
@@ -6375,7 +6423,7 @@ const m = {
                         },
                         do() {
                             if (this.isOn) {
-                                this.effectRadius = 2 * m.plasmaBall.circleRadius * (0.6 + 0.4 * tech.isPlasmaRange)
+                                this.effectRadius = 2 * m.plasmaBall.circleRadius * (0.6 + 0.4 * tech.plasmaRangeScale)
                                 const solitonTarget = tech.isSoliton && !(this.solitonCycle > simulation.cycle) && this.isSolitonInReach() //skip looking for mobs while the burst is cooling down
                                 if (solitonTarget) {
                                     const bonus = b.solitonReady(this, b.solitonCost, 0.01) //each excess energy adds 0.01x

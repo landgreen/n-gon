@@ -1577,7 +1577,7 @@ const mobs = {
                             dmg *= 10
                             this.damageFlash(3, "#000", "#f07", 10, true)
                         }
-                        if (tech.isFarAwayDmg && this.isOffScreen()) dmg *= 1 + 0.7 * tech.isFarAwayDmg
+                        if (tech.farAwayDmgCount && this.isOffScreen()) dmg *= 1 + 0.7 * tech.farAwayDmgCount
                         //energy and heal drain should be calculated after damage boosts and before mass reduction
                         if (tech.energySiphon && this.isDropPowerUp) {
                             //dmg !== Infinity &&
@@ -1633,7 +1633,7 @@ const mobs = {
             leaveBody: true,
             isDropPowerUp: true,
             death() {
-                if (tech.collidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
+                if (tech.isCollidePowerUps && this.isDropPowerUp) powerUps.randomize(this.position) //needs to run before onDeath spawns power ups
                 this.onDeath(this); //custom death effects
                 this.removeConsBB();
                 this.alive = false; //triggers mob removal in mob[i].replace(i)
@@ -1916,8 +1916,8 @@ const mobs = {
                     bullet[bullet.length - 1].endCycle = simulation.cycle + 900 //15 seconds
                     this.leaveBody = false; // no body since it turned into the bot
                 }
-                if (tech.isEnergyLoss) {
-                    m.energy -= 0.05 * tech.isEnergyLoss;
+                if (tech.energyLossCount) {
+                    m.energy -= 0.05 * tech.energyLossCount;
                     if (m.energy < 0) m.energy = 0
                 }
                 if (tech.isAddRemoveMaxHealth) {

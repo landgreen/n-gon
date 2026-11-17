@@ -10,7 +10,7 @@ Object.assign(levelEditor, {
                 <li>Draw the ground and walls with the <b>map</b> tool.</li>
                 <li>Select and drag <b>entrance</b> and <b>exit</b> into place.</li>
                 <li>Open <b>add</b> to place <b>mob</b> spots, a <b>boss</b>, and a <b>starting</b> power up.</li>
-                <li>Press <b>▶ quick test</b> in <b>simulation</b> to play. Press <b>■ stop</b> to return to editing.</li>
+                <li>Press <b>▶ quick test</b> in <b>simulation</b> to play. Press <b>■ stop</b> or <b>esc</b> to return to editing.</li>
                 <li>Click the issues count in the bottom bar to check for problems. When you're ready to share, use <b>export</b> in <b>import/export</b>.</li>
             </ol>`],
         ["drawing", `

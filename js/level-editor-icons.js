@@ -102,6 +102,37 @@ Object.assign(levelEditor, {
                 <circle cx="3.2" cy="9.5" r="2.3" fill="rgb(182,99,124)" stroke="#222" stroke-width="0.6"/>
             </svg>`,
         },
+        stentorBoss: { get icon() { return levelEditor.stentorIcon("30, 145, 170", "5, 75, 90", "0, 65, 80") } }, //its trumpet is drawn each frame, its body is only the round head
+        stentorBoss3: { get icon() { return levelEditor.stentorIcon("30, 160, 135", "5, 85, 65", "0, 72, 58") } },
+    },
+    stentorIcon(rgb, dark, stripe) { //a stentor on its stalk: the holdfast at the bottom left, the trumpet curving up into the head, cilia around the mouth
+        const B = { x: 2.5, y: 14.5 }, C = { x: 3.5, y: 6 }, H = { x: 17, y: 8 }, r = 4.8
+        const left = [], right = [], stripes = [[], [], []]
+        for (let i = 0; i <= 12; i++) {
+            const t = i / 12, u = 1 - t
+            const p = { x: u * u * B.x + 2 * u * t * C.x + t * t * H.x, y: u * u * B.y + 2 * u * t * C.y + t * t * H.y }
+            const tx = 2 * u * (C.x - B.x) + 2 * t * (H.x - C.x), ty = 2 * u * (C.y - B.y) + 2 * t * (H.y - C.y)
+            const len = Math.hypot(tx, ty)
+            const perp = { x: -ty / len, y: tx / len }
+            const w = 0.6 + (0.95 * r - 0.6) * Math.pow(t, 2.5)
+            left.push(`${(p.x + w * perp.x).toFixed(1)},${(p.y + w * perp.y).toFixed(1)}`)
+            right.unshift(`${(p.x - w * perp.x).toFixed(1)},${(p.y - w * perp.y).toFixed(1)}`)
+            if (i > 3) [-0.55, 0, 0.55].forEach((s, k) => stripes[k].push(`${(p.x + s * w * perp.x).toFixed(1)},${(p.y + s * w * perp.y).toFixed(1)}`))
+        }
+        const a0 = -0.15
+        const cilia = Array.from({ length: 13 }, (_, i) => {
+            const a = a0 - 1.9 + 3.8 * i / 12
+            const len = 1.3 + 1.1 * Math.sin(i * 1.3)
+            const x = H.x + r * Math.cos(a), y = H.y + r * Math.sin(a)
+            return `M${x.toFixed(1)} ${y.toFixed(1)}L${(x + len * Math.cos(a)).toFixed(1)} ${(y + len * Math.sin(a)).toFixed(1)}`
+        }).join("")
+        return `<svg class="le-mob-icon" width="26" height="16" viewBox="0 0 26 16" aria-hidden="true">
+            <polygon points="${left.concat(right).join(" ")}" fill="rgba(${rgb},0.5)" stroke="rgba(${dark},0.8)" stroke-width="0.6"/>
+            <path d="${stripes.map(s => "M" + s.join("L")).join("")}" fill="none" stroke="rgba(${stripe},0.5)" stroke-width="0.4"/>
+            <circle cx="${B.x}" cy="${B.y}" r="1.2" fill="rgba(${dark},0.8)"/>
+            <path d="${cilia}" stroke="rgb(${dark})" stroke-width="0.5" stroke-linecap="round"/>
+            <circle cx="${H.x}" cy="${H.y}" r="${r}" fill="rgb(${rgb})" stroke="#222" stroke-width="0.6"/>
+        </svg>`
     },
     mobIcon(name, shapes, links = [], orbs = [], w = 26, h = 16) { //shapes are { points, fill, stroke } in world space, or { x, y, r, sides, fill } made up, it's fit into a w × h picture around the biggest
         shapes = shapes.map(shape => shape.points ? shape : { ...shape, points: Array.from({ length: shape.sides }, (_, i) => ({ x: shape.x + shape.r * Math.cos(2 * Math.PI * i / shape.sides), y: shape.y + shape.r * Math.sin(2 * Math.PI * i / shape.sides) })) })

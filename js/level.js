@@ -47,7 +47,7 @@ const level = {
                 // m.couplingChange(100)
                 //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch 
                 // 6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
-                // m.setField(7)
+                m.setField(2)
                 // simulation.molecularMode = 4;
                 // m.energy = m.maxEnergy = 10
                 // m.damageDone *= 0.1//20
@@ -63,11 +63,11 @@ const level = {
                 // b.guns[b.inventory[0]].ammo = 0 //test the autopilot's block throws
                 // tech.addJunkTechToPool(0.5)
                 // tech.giveTech("laminar flow")
-                // tech.giveTech("soliton")
+                tech.giveTech("ray")
                 // tech.giveTech("electric potential")
-                // tech.giveTech("electronvolt")
+                tech.giveTech("eddy current")
                 // tech.giveTech("flanking")
-                tech.giveTech("autopilot")
+                // tech.giveTech("autopilot")
                 // tech.giveTech("recursion")
                 // tech.giveTech("instanton")
                 // for (let i = 0; i < 3; i++) tech.giveTech("anti-shear topology")
@@ -112,8 +112,8 @@ const level = {
                 // localSettings.levelsClearedLastGame = 5 //triggers tech to spawn on initial level
                 // level.load("diamagnetism")
                 // level.load("vault")
-                level.load("initial")
-                // level.maps.testing()
+                // level.load("initial")
+                level.maps.testing()
                 // spawn.starter(870, -60, 42)
 
                 // powerUps.spawn(-115, -433, "difficulty", false);
@@ -129,8 +129,10 @@ const level = {
                 // spawn.pulsar5(2100, -400)
                 // spawn.slicer5(2400, -400)
                 // spawn.jellyBoss4(1300, -500)
-                // spawn.floodFillBoss(3300, -700)
+                spawn.floodFillBoss(3300, -700)
                 // spawn.jellyBoss(1300, -500)
+                // spawn.stentorBoss(3300, -500)
+                // spawn.stentorBoss3(3300, -500)
                 // for (let i = 0; i < 1; i++) spawn.shieldingBoss(2300 + 200 * i, -200)
                 // Matter.Body.setPosition(player, { x: -27000, y: -400 });
                 // m.storeTech() //sets entanglement
@@ -243,14 +245,14 @@ const level = {
             }
         }
         tech.isDeathAvoidedThisLevel = false;
-        if (tech.isForeverDrones) {
+        if (tech.foreverDroneCount) {
             if (tech.isDroneRadioactive) {
-                for (let i = 0; i < tech.isForeverDrones * 0.25; i++) {
+                for (let i = 0; i < tech.foreverDroneCount * 0.25; i++) {
                     b.droneRadioactive({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
                     bullet[bullet.length - 1].endCycle = Infinity
                 }
             } else {
-                for (let i = 0; i < tech.isForeverDrones; i++) {
+                for (let i = 0; i < tech.foreverDroneCount; i++) {
                     b.drone({ x: m.pos.x + 30 * (Math.random() - 0.5), y: m.pos.y + 30 * (Math.random() - 0.5) }, 5)
                     bullet[bullet.length - 1].endCycle = Infinity
                 }
@@ -428,10 +430,16 @@ const level = {
                 simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
                 powerUps.spawnDelay("research", r, 4);
             }
+            const smallRate = rate * 5 / 18 //each 18% stack gives 5% on coupling and qubits
             if (m.coupling > 0 && rate > 0) {
-                const c = Math.ceil(rate * m.coupling / 3)
+                const c = Math.ceil(smallRate * m.coupling)
                 powerUps.spawnDelay("coupling", c, 4);
-                simulation.inGameConsole(`${(rate * 100 / 3).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
+                simulation.inGameConsole(`${(smallRate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
+            }
+            if (powerUps.qubit.count > 0 && rate > 0) {
+                const q = Math.ceil(smallRate * powerUps.qubit.count)
+                powerUps.spawnDelay("qubit", q, 4);
+                simulation.inGameConsole(`${(smallRate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on qubits <span class='color-symbol'>=</span> ${q > 20 ? q + powerUps.orb.qubit(1) : powerUps.orb.qubit(q)}`)
             }
 
             // let ammoSum = 0
@@ -3510,7 +3518,7 @@ const level = {
                         }
                     }
                 }
-                if (tech.isForeverDrones) { //send drones out of the other portal
+                if (tech.foreverDroneCount) { //send drones out of the other portal
                     for (let i = 0; i < bullet.length; i++) {
                         if (bullet[i].endCycle === Infinity) Matter.Body.setPosition(bullet[i], inFrontOf(to));
                     }
@@ -5402,6 +5410,22 @@ const level = {
             },
         }
     },
+    triggerZoom({ on = 0, onTime = 2, off = 0, offTime = 2 } = {}) { //run do(isOn) in level.custom, zooms to on when isOn turns true and to off when it turns false
+        //on and off are zoom goals like level.defaultZoom, 1400 is normal, 0 doesn't zoom, times are seconds
+        return {
+            isOn: false,
+            do(isOn) {
+                isOn = !!isOn
+                if (isOn === this.isOn) return
+                this.isOn = isOn
+                const goal = isOn ? on : off
+                if (!(goal > 0)) return
+                for (const effect of simulation.ephemera.filter(effect => effect.name === "zoom")) simulation.removeEphemera(effect) //the last zoom stops, so they don't pull against each other
+                level.defaultZoom = goal
+                simulation.zoomTransition(goal, 60 * (isOn ? onTime : offTime))
+            },
+        }
+    },
     breakable(x, y, width, height, strength = 150) { //glass the player stands on, it cracks and shatters from fast blocks and bullets hitting it, strength is about how much momentum, run query() in level.custom
         //it's not in the map, so lasers and mobs can see through it
         const glass = composite[composite.length] = Bodies.rectangle(x + width / 2, y + height / 2, width, height, {
@@ -6580,7 +6604,7 @@ const level = {
             // spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
             simulation.zoomScale = 1000 //1400 is normal
             level.defaultZoom = 1600
-            simulation.zoomTransition(level.defaultZoom, 1)
+            simulation.zoomTransition(level.defaultZoom)
             document.body.style.backgroundColor = "#e1e1e1";
 
             // spawn.mapRect(-2750, -2800, 2600, 4600); //left wall
@@ -13228,28 +13252,14 @@ const level = {
             ].map(([x, y, isSmall = false]) => ({ x, y, isSmall }));
             spawn.randomMobFromArray()
             spawn.randomGroup(5300, -1400, 1.3);
-            // if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
-            //     if (level.levelsCleared > 7) { //T3
-            //         spawn.randomLevelBoss(2025, -1825, ["laserLayerBoss"]);
-            //         spawn.secondaryBossChance(-1900, -1800, ["historyBoss"]);
-            //     } else if (level.levelsCleared > 3) { //T2
-            //         spawn.randomLevelBoss(2025, -1825, ["pulsarBoss", "spawnerBossCulture"]);
-            //         spawn.secondaryBossChance(-1900, -1800, ["blockBoss"]);
-            //     } else {  //T1
-            //         spawn.randomLevelBoss(2025, -1825, ["shieldingBoss"]);
-            //         spawn.secondaryBossChance(-1900, -1800, ["shooterBoss"]);
-            //     }
-            // } else {
-            //     powerUps.spawnBossPowerUp(2800, -1400)
-            // }
             const bossSpawn = [{ x: -1900, y: -1825 }, { x: 2025, y: -1825 }, { x: 950, y: -1825 }, { x: -850, y: -1825 }]
             const where = bossSpawn[Math.floor(Math.random() * bossSpawn.length)]
             if (level.levelsCleared > 7) { //T3
-                spawn.randomLevelBoss(where.x, where.y, ["historyBoss", "laserLayerBoss", "conductorBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["historyBoss", "laserLayerBoss", "conductorBoss", "stentorBoss3"]);
             } else if (level.levelsCleared > 3) { //T2
                 spawn.randomLevelBoss(where.x, where.y, ["blockBoss", "pulsarBoss", "spawnerBossCulture"]);
             } else {  //T1
-                spawn.randomLevelBoss(where.x, where.y, ["shooterBoss", "shieldingBoss"]);
+                spawn.randomLevelBoss(where.x, where.y, ["shooterBoss", "shieldingBoss", "stentorBoss"]);
             }
             spawn.secondaryBossChance(3486, -557, [Math.random() < 0.5 ? "trainBoss" : "trainBoss2"]);
             // spawn.secondaryBossChance(3486, -557, ["trainBoss2"]);

@@ -28,6 +28,26 @@ const saveGame = {
         save.techCounts = renameKeys(save.techCounts)
         if (Array.isArray(save.techOrder)) save.techOrder = save.techOrder.map(rename)
         save.state.techEntries = renameKeys(save.state.techEntries)
+        const tech = save.state.tech
+        if (tech && typeof tech === "object") {
+            for (const [old, name] of Object.entries(saveGame.renamedTechFlags)) {
+                if (Object.hasOwn(tech, old)) {
+                    if (!Object.hasOwn(tech, name)) tech[name] = tech[old]
+                    delete tech[old]
+                }
+            }
+        }
+    },
+    renamedTechFlags: { //old tech.* name: new name, so older saves keep the values of renamed flags
+        isGrabEnergy: "grabEnergyCount", isDamageCooldownTime: "damageCooldownTime", isRewindBot: "rewindBotCount",
+        isOffGroundDamage: "offGroundDamageCount", isFarAwayDmg: "farAwayDmgCount", isDamageFromBulletCount: "damageFromBulletCount",
+        isEnergyLoss: "energyLossCount", isLowEnergyDamage: "lowEnergyDamageCount", isAcidDmg: "acidDmgCount",
+        isMaxHealthDamage: "maxHealthDamageCount", isLowHealthDmg: "lowHealthDmgCount", isForeverDrones: "foreverDroneCount",
+        isPlasmaRange: "plasmaRangeScale",
+        collidePowerUps: "isCollidePowerUps", noDefenseSettingDamage: "isNoDefenseSettingDamage", needleTunnel: "isNeedleTunnel",
+        nailInstantFireRate: "isNailInstantFireRate", nailRecoil: "isNailRecoil", superBallDelay: "isSuperBallDelay",
+        oneSuperBall: "isOneSuperBall", beamCollimator: "isBeamCollimator", energyDefense: "isEnergyDefense",
+        tooManyTechChoices: "isTooManyTechChoices",
     },
     simulationKeys: ["difficultyOptions", "difficultyMode", "difficulty", "accelScale", "CDScale", "healScale", "molecularMode", "isCheating", "isHorizontalFlipped", "cycle"],
 
@@ -161,7 +181,7 @@ const saveGame = {
         if (tech.isEigenstate && runtime?.eigen) saveGame.assign(m.eigen, runtime.eigen, ["block", "keyListener"])
         if (m.skin) {
             //Older saves still have the absolute defense multiplier, so synchronize its bookkeeping flag.
-            m.skin.isPolarDefense = runtime?.polarDefense ?? !!(tech.isHyperpolarisation && tech.isDamageCooldown && m.lastKillCycle + tech.isDamageCooldownTime > m.cycle)
+            m.skin.isPolarDefense = runtime?.polarDefense ?? !!(tech.isHyperpolarisation && tech.isDamageCooldown && m.lastKillCycle + tech.damageCooldownTime > m.cycle)
         }
         if (m.plasmaBall && runtime?.plasmaBall) {
             const radius = runtime.plasmaBall.circleRadius

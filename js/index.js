@@ -1329,11 +1329,11 @@ window.addEventListener("keydown", function (event) {
 }, true);
 
 //Cmd/Ctrl+F goes to the menu search box instead of the browser's find, when one is showing (experiment, pause)
-//pressing it again while already in the box falls through to the browser's find
+//always, even when the box already has focus, since experiment mode focuses it on open
 window.addEventListener("keydown", function (event) {
     if (!(event.metaKey || event.ctrlKey) || event.altKey || event.key.toLowerCase() !== "f") return
     const searchBox = ["sort-input", "pause-sort-input"].map(id => document.getElementById(id)).find(el => el && el.offsetParent !== null)
-    if (!searchBox || document.activeElement === searchBox) return
+    if (!searchBox) return
     event.preventDefault()
     searchBox.focus()
     searchBox.select()

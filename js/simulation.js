@@ -479,7 +479,7 @@ const simulation = {
         simulation.zoomScale = zoomScale
         simulation.zoom = canvas.height / zoomScale; //sets starting zoom scale
     },
-    zoomTransition(newZoomScale, step = 2) {
+    zoomTransition(newZoomScale, cycles = 120) { //cycles is how long it takes, 60 is a second
         //old version
         // if (simulation.isAutoZoom) {
         //     const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
@@ -513,7 +513,7 @@ const simulation = {
         if (simulation.isAutoZoom) {
             simulation.ephemera.push({
                 name: "zoom",
-                count: simulation.testing ? 1 : 120, //cycles before it self removes
+                count: simulation.testing ? 1 : Math.max(1, Math.round(cycles)), //cycles before it self removes
                 currentLevel: level.onLevel,
                 do() {
                     this.count--

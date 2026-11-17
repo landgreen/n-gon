@@ -1390,7 +1390,7 @@ const powerUps = {
         totalChoices = Math.max(1, Math.min(totalChoices, options.length))
         const unique = new Set(options)
         const resetBanish = isTech && tech.isBanish && unique.size <= totalChoices
-        if (isTech && tech.tooManyTechChoices) totalChoices = unique.size
+        if (isTech && tech.isTooManyTechChoices) totalChoices = unique.size
         totalChoices = Math.min(totalChoices, unique.size)
         // Keep the existing repeat suppression. Each removed tech uses up its draw weight.
         let remaining = unique.size
@@ -1475,7 +1475,7 @@ const powerUps = {
                     }
                     simulation.inGameConsole(`decoherence <span class='color-var'>tech</span> ejected<br>options reset`)
                 }
-                if (tech.tooManyTechChoices) tech.tooManyTechChoices = false
+                if (tech.isTooManyTechChoices) tech.isTooManyTechChoices = false
                 for (let i = 0; i < tech.tech.length; i++) tech.tech[i].isRecentlyShown = false //reset recently shown back to zero
                 if (options.length > 0) {
                     let text = powerUps.buildColumns(totalChoices, "tech")

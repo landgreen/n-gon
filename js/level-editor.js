@@ -75,6 +75,7 @@ Object.assign(levelEditor, {
     gameAutoZoom: true, //simulation.isAutoZoom before the editor turned it off, test export uses it so the level's zoom works like in a run
     saveTimer: null,
     inspected: "", //what the inspector is showing, so it only redraws when that changes
+    inspectedRows: "", //which props it shows, see shownRows()
     nameError: "", //why the last name typed wasn't used, shown under the level's properties
     exploreSearch: "", //the explorer's search box
     exploreLimits: {}, //type: how many the explorer lists, 100 to start, show more adds 100
@@ -275,7 +276,7 @@ Object.assign(levelEditor, {
         if (!saved) return
         levelEditor.savedAutopilot = null
         tech.isAutopilotChoose = saved.isAutoChoose
-        if (autopilot.isOn !== saved.isOn) autopilot.set(saved.isOn)
+        if (autopilot.isRequested() !== saved.isOn) autopilot.set(saved.isOn)
     },
     startFullTest(data) { //guard only the editor's test session, exported levels keep their ordinary callbacks
         levelData.unbuildAll()
@@ -297,8 +298,8 @@ Object.assign(levelEditor, {
             }
             b.giveGuns("all", 1000) //same loadout as G in testing mode
         }
-        //The autopilot drawer is shared across levels, including when it's added mid-test.
-        const session = levelEditor.fullTestSession = { stopped: false, effects: new Set([...simulation.ephemera, autopilot.drawer]) }
+        //The autopilot drawer is shared across levels, including when it's added mid-test, see guardEffects(). It only exists once autopilot has loaded.
+        const session = levelEditor.fullTestSession = { stopped: false, effects: new Set(simulation.ephemera) }
         const isCurrent = () => levelEditor.isFullTest && levelEditor.fullTestSession === session && !session.stopped
         const fail = error => {
             if (!isCurrent()) return
@@ -319,7 +320,7 @@ Object.assign(levelEditor, {
         }
         const guardEffects = () => { //also catches effects added later by a guarded callback
             for (const effect of simulation.ephemera) {
-                if (session.effects.has(effect)) continue
+                if (session.effects.has(effect) || effect === autopilot.drawer) continue
                 session.effects.add(effect)
                 if (typeof effect.do === "function") effect.do = guard(effect.do)
             }
@@ -1457,8 +1458,8 @@ Object.assign(levelEditor, {
         testAutopilot: {
             label: "let autopilot play this export and choose power ups", run() {
                 if (!levelEditor.isFullTest) return
-                const isOn = !autopilot.isOn
-                levelEditor.savedAutopilot ??= { isOn: autopilot.isOn, isAutoChoose: tech.isAutopilotChoose }
+                const isOn = !autopilot.isRequested() //on, or still downloading, see js/autopilot-loader.js
+                levelEditor.savedAutopilot ??= { isOn: autopilot.isRequested(), isAutoChoose: tech.isAutopilotChoose }
                 tech.isAutopilotChoose = isOn || levelEditor.savedAutopilot.isAutoChoose
                 autopilot.set(isOn)
                 levelEditor.renderLeft()
@@ -1556,6 +1557,8 @@ Object.assign(levelEditor, {
                 }
                 const code = document.getElementById("level-editor-code")
                 if (code.classList.contains("le-open")) return levelEditor.run("closeCode") //esc closes the javascript first
+                if (levelEditor.isFullTest) return levelEditor.run("fullTest") //then stops test export or quick test
+                if (levelEditor.isTesting) return levelEditor.run("test")
                 if (levelEditor.picking) { //then stops picking
                     levelEditor.picking = null
                     return levelEditor.renderRight()
@@ -2869,7 +2872,7 @@ Object.assign(levelEditor, {
                 return `<div class="le-row le-test-settings"><span class="le-row"><span class="le-label">level</span><input class="le-number le-short" aria-label="test level" data-setting="testLevel" value="${levelEditor.testLevel}" spellcheck="false" title="how many levels into a run you're testing, it picks mob types and difficulty, at 0 random mobs don't spawn"></span>
                 <span class="le-row"><span class="le-label">seed</span><input class="le-number" aria-label="test seed" data-setting="testSeed" value="${levelEditor.escape(levelEditor.testSeed)}" placeholder="random" spellcheck="false" title="the same seed starts each test the same: mob types, which spots get mobs, bosses, power ups, and debris, what mobs do after is still random, empty is random"></span></div>
             <div class="le-grid le-two le-run le-flush-x">${levelEditor.button("test", levelEditor.isTesting ? `${stop} stop` : `${play} quick test`, "", levelEditor.isTesting)}${levelEditor.button("fullTest", isExport ? `${stop} stop` : `${play} test export`, "", isExport)}</div>
-            ${isExport ? `<div class="le-grid le-one le-flush-x">${levelEditor.button("testAutopilot", "autopilot", "", autopilot.isOn)}</div>` : ""}
+            ${isExport ? `<div class="le-grid le-one le-flush-x">${levelEditor.button("testAutopilot", "autopilot", "", autopilot.isRequested())}</div>` : ""}
             <div class="le-grid le-time le-flush-x">${levelEditor.button("timeStop", "stop time", "", levelEditor.isTimeStopped, `everything but the player freezes, you can still edit, a speed starts it again${exportNote}`, { disabled: isExport })}${[0.1, 0.5, 1, 2].map(scale => levelEditor.button("timeScale", `${scale}×`, scale, !levelEditor.isTimeStopped && levelEditor.timeScale === scale, `game speed${exportNote}`, { disabled: isExport })).join("")}</div>
             <div class="le-grid le-flush-x">${levelEditor.button("invincible", "invincible", "", levelEditor.isInvincible, "the player takes no damage, in both tests too, the health bars hide")}${levelEditor.button("testGuns", "guns", "", levelEditor.isTestGuns, "start test export with every gun and full ammo, changing this restarts the test")}${levelEditor.button("testSpawning", "mobs", "", levelEditor.isTestSpawning || isExport, `quick test spawns mobs and power ups${isExport ? ", test export always does" : ""}`, { disabled: isExport })}</div>
             <div class="le-grid le-flush-x le-flush-bottom">${levelEditor.button("mouseLook", "mouse look", "", levelEditor.isMouseLook, `the camera leans toward the mouse right away, no smoothing${exportNote}`, { disabled: isExport })}${levelEditor.debugLayers.map(([name, tip]) => levelEditor.button("debugDraw", name, name, levelEditor.debugDraw.has(name), tip + exportNote, { disabled: isExport })).join("")}</div>`
@@ -3510,6 +3513,7 @@ Object.assign(levelEditor, {
         }
         for (const box of panel.querySelectorAll("[data-mixed]")) box.indeterminate = true //a checkbox for many that don't match, the dash state
         levelEditor.inspected = levelEditor.isHistoryOpen ? "history" : levelEditor.isAnalysisShown ? "analysis" : elements.map(el => `${el.id}:${el.type}`).join()
+        levelEditor.inspectedRows = levelEditor.shownRows(elements)
         document.querySelector('#level-editor-status [data-command="history"]')?.classList.toggle("le-on", levelEditor.isHistoryOpen)
         levelEditor.renderExplorer()
     },
@@ -3518,7 +3522,21 @@ Object.assign(levelEditor, {
         const elements = levelEditor.selected()
         const panel = document.getElementById("level-editor-right")
         if (elements.map(el => `${el.id}:${el.type}`).join() !== levelEditor.inspected || !panel.contains(document.activeElement)) return levelEditor.renderRight()
+        if (levelEditor.shownRows(elements) !== levelEditor.inspectedRows) { //a change showed or hid rows, like effects' time rows, redraw and stay in the same field
+            const focused = document.activeElement
+            const key = focused.dataset?.key
+            const owner = focused.dataset?.owner || ""
+            levelEditor.renderRight()
+            const again = key && [...panel.querySelectorAll("[data-key]")].find(input => input.dataset.key === key && (input.dataset.owner || "") === owner)
+            if (again) again.focus()
+            return
+        }
         levelEditor.refreshFields(panel)
+    },
+    shownRows(elements) { //which props the inspector shows, so a change that shows or hides one redraws it
+        if (levelEditor.isHistoryOpen || levelEditor.isAnalysisShown) return ""
+        const owners = elements.length ? elements : [levelEditor.data]
+        return owners.map(owner => levelEditor.propsOf(owner).filter(prop => !prop.isShown || prop.isShown(owner)).map(prop => prop.key).join()).join("|")
     },
     refreshFields(root = document.getElementById("level-editor-right")) { //new values in the fields, except the one being typed in, the level properties are in the inspector with nothing selected
         for (const input of root.querySelectorAll("[data-key]")) {
@@ -4135,6 +4153,7 @@ Object.assign(levelEditor, {
             return [el.id]
         })
         levelEditor.refreshRight()
+        if (prop.kind === "number" && input.isConnected && levelEditor.scrub?.input !== input) levelEditor.revertField(input) //the field shows what it was set to, like a minimum, not what was typed
     },
     setLevelProp(key, value) {
         const data = levelEditor.data

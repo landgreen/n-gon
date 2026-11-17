@@ -63,6 +63,7 @@ const levelData = {
                 delete el.size
             }
             if (!isId(el.id)) el.id = data.nextId++
+            if (el.type === "zone") for (const key of ["zoomOn", "zoomOff"]) if (el[key] === undefined) el[key] = levelElements.baseZoom(data) //its own level's zoom, not the one playing
             levelElements.fillDefaults(el)
             for (const key of levelElements.refKeys(el)) if (!isId(el[key])) el[key] = null
             if (el.type === "powerUp") {

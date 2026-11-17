@@ -1697,11 +1697,12 @@ levelElements.zoneWho = { //what a zone notices, and the same as javascript
     mob: { list: () => mob, code: "mob" },
     any: { list: () => [player].concat(body, mob), code: "[player].concat(body, mob)" },
 }
+levelElements.baseZoom = (data = levelData.data) => data && Number.isFinite(data.zoom) ? data.zoom : 1400 //the level's zoom, a zone's zoom goals start as it, levelData.data is the level being played or edited
 levelElements.define("zone", { //a trigger, a link source that's on while the player is inside, only the editor draws it, a box, or with circle a circle around x, y
     tip: "invisible box or circle, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in, check effects to push, slow, hurt, or drain what's inside",
     group: "element",
     isBackground: true, //it's often big, lock it so the mouse goes through
-    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, radius: 200, circle: false, who: "player", on: "inside", effects: false, force: 0, forceAngle: 90, drag: 0, damage: 0, energy: 0, affects: "player body bullet powerUp mob", visible: true }),
+    defaults: () => ({ x: 0, y: -400, width: 400, height: 400, radius: 200, circle: false, who: "player", on: "inside", effects: false, force: 0, forceAngle: 90, drag: 0, damage: 0, energy: 0, affects: "player body bullet powerUp mob", visible: true, zoomOn: levelElements.baseZoom(), zoomOnTime: 2, zoomOff: levelElements.baseZoom(), zoomOffTime: 2 }),
     props: [
         ...levelElements.rect().map(prop => prop.key === "width" || prop.key === "height" ? { ...prop, isShown: el => !el.circle } : prop),
         levelElements.prop.number("radius", { isGrid: true, min: 1, isShown: el => !!el.circle }),
@@ -1716,6 +1717,10 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
         levelElements.prop.number("energy", { step: 0.1, tip: "energy drained from the player each second, 1 is a full bar, negative charges it up to max", isShown: el => el.effects }),
         levelElements.prop.mask("affects", { names: ["player", "body", "mob", "bullet", "powerUp"], tip: "what the effects happen to, damage only hurts the player and mobs, energy is only the player's", isShown: el => el.effects }),
         levelElements.prop.bool("visible", { tip: "players see a tint, red for damage, blue for draining, green for charging, and arrows the way it pushes, the editor always draws it", isShown: el => el.effects }),
+        levelElements.prop.number("zoomOn", { step: 100, min: 200, tip: "the zoom it goes to when it turns on, it starts as the level's zoom, bigger sees more, if both are the level's zoom it doesn't zoom, level.triggerZoom()", isShown: el => el.effects }),
+        levelElements.prop.number("zoomOnTime", { step: 0.5, min: 0, tip: "seconds the zoom takes when it turns on", isShown: el => el.effects }),
+        levelElements.prop.number("zoomOff", { step: 100, min: 200, tip: "the zoom it goes to when it turns off, it starts as the level's zoom, so leaving zooms back", isShown: el => el.effects }),
+        levelElements.prop.number("zoomOffTime", { step: 0.5, min: 0, tip: "seconds the zoom takes when it turns off", isShown: el => el.effects }),
     ],
     setCircle(el, isCircle) { //a box becomes the circle in its middle, as big as the box on average, and back to the box around the circle, x, y is a circle's center
         if (!!el.circle === !!isCircle) return
@@ -1760,6 +1765,24 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
     linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
     affectsText: el => levelElements.collision.toggle(el.affects, "map", false).split(" ").filter(name => ["player", "body", "bullet", "powerUp", "mob"].includes(name)).join(" "), //only names it knows, it's written into code
     hasEffects: el => !!el.effects && (el.force !== 0 || el.drag > 0 || el.damage > 0 || el.energy !== 0) && !!levelElements.types.zone.affectsText(el),
+    zoomGoals(el, data) { //{ on, off }, a goal below the level's zoom range is the level's zoom
+        const base = levelElements.baseZoom(data)
+        const goal = value => Number.isFinite(value) && value >= 200 ? value : base
+        return { base, on: goal(el.zoomOn), off: goal(el.zoomOff) }
+    },
+    hasZoom(el, data) { //both goals at the level's zoom don't zoom
+        if (!el.effects) return false
+        const { base, on, off } = levelElements.types.zone.zoomGoals(el, data)
+        return on !== base || off !== base
+    },
+    zoomOptions(el, data) { //level.triggerZoom()'s options, times only when they aren't the default
+        const { on, off } = levelElements.types.zone.zoomGoals(el, data)
+        const options = { on }
+        if (el.zoomOnTime !== 2) options.onTime = el.zoomOnTime
+        options.off = off
+        if (el.zoomOffTime !== 2) options.offTime = el.zoomOffTime
+        return options
+    },
     effectOptions(el) { //level.effectZone()'s options, only what isn't its default
         const options = {}
         if (el.force !== 0) {
@@ -1778,10 +1801,12 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
         const check = el.circle ? () => who.list().some(body => Vector.magnitude(Vector.sub(body.position, zone)) < zone.radius) : () => Matter.Query.region(who.list(), zone).length > 0 //a circle has a body in once its center is
         const options = type.hasEffects(el) ? type.effectOptions(el) : null
         const effects = options && level.effectZone(zone, { ...options, angle: (options.angle ?? 90) * Math.PI / 180 })
+        const zoom = type.hasZoom(el, levelData.data) && level.triggerZoom(type.zoomOptions(el, levelData.data))
         return {
             zone,
             custom() {
                 if (el.on !== "stays on" || !zone.isOn) zone.isOn = check()
+                if (zoom) zoom.do(zone.isOn && levelData.linkState(el) !== false) //like its effects, only while its link is on
                 if (!effects) return
                 effects.do(levelData.linkState(el) !== false) //a zone linked to a trigger only does its effects while that's on
                 if (el.visible) effects.draw()
@@ -1801,6 +1826,12 @@ levelElements.define("zone", { //a trigger, a link source that's on while the pl
             const link = (el.link || el.orLink) && context && context.link(el)
             custom.push(`${name}Effects.do(${link ? link.on : ""});`)
             if (el.visible) custom.push(`${name}Effects.draw();`)
+        }
+        if (type.hasZoom(el, context && context.data)) {
+            const fields = Object.entries(type.zoomOptions(el, context && context.data)).map(([key, value]) => `${key}: ${levelElements.args(value)}`)
+            setup.push(`const ${name}Zoom = level.triggerZoom({ ${fields.join(", ")} });`)
+            const link = (el.link || el.orLink) && context && context.link(el)
+            custom.push(`${name}Zoom.do(${name}.isOn${link ? ` && (${link.on})` : ""});`)
         }
         return { setup, custom }
     },

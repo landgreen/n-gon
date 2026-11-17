@@ -1,24 +1,37 @@
-tech: instanton - tech power ups have +2 choices that are only instant tech
-tech: recursion - the next tech you choose that can stack is given 3 times
-exit: half of level exits have a mirror that feeds back into itself
-level editor: autopilot button for test export
 
-autopilot - some minor improvements in traversal, but it's still JUNK tech
+ray: press down to pass through the line left behind, from above or below
+eddy current: with ray, jump 3x higher off ray's line instead of being pushed by it
 
+boss
+  stentorBoss - a trumpet shaped ciliate that holds onto walls, its cilia swirl you
+    into its mouth, it snaps shut when hit, and swims to a new spot each phase
+  stentorBoss3 - greener, 8 phases, 3 fragments each phase, bigger current, faster
 
+level editor
+  zone effects can zoom the camera when it turns on and off, with a goal and time for each
+  esc stops quick test and test export
+interest: also spawns 5% of your qubits, coupling interest is 6->5%
+floodFillBoss waits a second before each dash, sending 4 grenades down its path
 
+bug fixes
+  level editor info box rows that depend on a value show up right away after pressing enter
+    number fields show their minimum right away instead of what was typed
+  leaving mass-energy equivalence returns the health you had when you took it
+    swapping skins with optimization no longer turns energy into health
+  eddy current no longer pins you under ray's line
+  ⌘/ctrl+F goes to experiment mode's search right away, without a click first
 
 *********************************************************** TODO *****************************************************
 
-boss - based on a "stentor"  single celled ciliate
+
 
 
 add alternator-like swing code to other situations
   every 3 swings make one with a much bigger range?
     or stab-stab-swing
   plasma torch tech?
-  stand along "melee" tech
-  make swing default and stab the upgrade
+  stand alone "melee" tech
+  make swing default and stab the upgrade?
 
 add more T5 mob types
 
