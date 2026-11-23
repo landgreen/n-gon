@@ -745,7 +745,7 @@ const powerUps = {
                     difficulty.updateScale();
                     const tierChanged = initial.isMobTier23 !== selected.isMobTier23 || initial.isMobTier4 !== selected.isMobTier4;
                     difficulty.setDamageAndDefense(tierChanged);
-                    if (tierChanged && level.levelsCleared > 0) {
+                    if (tierChanged && !level.trainingMobTier && level.levelsCleared > 0) {
                         spawn.mobTypeSpawnIndex = level.levelsCleared + 1;
                         spawn.pickList = [spawn.mobTypeSpawnOrder[Math.min(level.levelsCleared - 1, 13)], spawn.mobTypeSpawnOrder[Math.min(level.levelsCleared, 13)]];
                     }
@@ -1482,6 +1482,13 @@ const powerUps = {
 
                     const addTech = choose => { text += powerUps.anyTechText(choose) }
                     const removeOption = index => { options = options.filter(option => option !== index) }
+                    const offerTech = choose => {
+                        removeOption(choose)
+                        tech.tech[choose].isRecentlyShown = true
+                        if (tech.isBanish) tech.tech[choose].isBanished = true
+                        if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
+                        addTech(choose)
+                    }
                     if (tech.isRetain) { //coherence shows every tech you've been offered
                         for (let i = 0, len = powerUps.retainList.length; i < len; i++) {
                             for (let j = 0, len = tech.tech.length; j < len; j++) {
@@ -1504,17 +1511,8 @@ const powerUps = {
                             text += powerUps.junkTechText(chooseJUNK, `powerUps.choose('tech',${chooseJUNK})`)
                         } else {
                             const choose = options[Math.floor(Math.seededRandom(0, options.length))] //pick an element from the array of options
-                            if (tech.isBanish) {
-                                tech.tech[choose].isBanished = true
-                                if (i === 0) simulation.inGameConsole(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//removed from pool by decoherence</em>`)
-                            }
-                            removeOption(choose) //remove from options pool to avoid repeats
-
-                            //this flag prevents this option from being shown the next time you pick up a tech power up
-                            //check if not extra choices from "path integral"
-                            tech.tech[choose].isRecentlyShown = true
-                            if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
-                            addTech(choose)
+                            if (tech.isBanish && i === 0) simulation.inGameConsole(`options.length = ${optionLengthNoDuplicates} <em class='color-text'>//removed from pool by decoherence</em>`)
+                            offerTech(choose)
                         }
                     }
                     if (tech.isInstantChoices) { //instanton: +2 choices that are only instant tech
@@ -1522,10 +1520,7 @@ const powerUps = {
                             const instantOptions = options.filter(j => tech.tech[j].isInstant)
                             if (!instantOptions.length) break
                             const choose = instantOptions[Math.floor(Math.seededRandom(0, instantOptions.length))]
-                            removeOption(choose)
-                            tech.tech[choose].isRecentlyShown = true
-                            if (tech.isRetain && !powerUps.retainList.includes(tech.tech[choose].name)) powerUps.retainList.push(tech.tech[choose].name)
-                            addTech(choose)
+                            offerTech(choose)
                         }
                     }
                     text += powerUps.extraBotChoice(true)

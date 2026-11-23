@@ -480,53 +480,25 @@ const simulation = {
         simulation.zoom = canvas.height / zoomScale; //sets starting zoom scale
     },
     zoomTransition(newZoomScale, cycles = 120) { //cycles is how long it takes, 60 is a second
-        //old version
-        // if (simulation.isAutoZoom) {
-        //     const isBigger = (newZoomScale - simulation.zoomScale > 0) ? true : false;
-        //     requestAnimationFrame(zLoop);
-        //     const currentLevel = level.onLevel
-
-        //     function zLoop() {
-        //         if (currentLevel !== level.onLevel || simulation.isAutoZoom === false) return //stop the zoom if player goes to a new level
-
-        //         if (isBigger) {
-        //             simulation.zoomScale += step
-        //             if (simulation.zoomScale >= newZoomScale) {
-        //                 simulation.setZoom(newZoomScale);
-        //                 return
-        //             }
-        //         } else {
-        //             simulation.zoomScale -= step
-        //             if (simulation.zoomScale <= newZoomScale) {
-        //                 simulation.setZoom(newZoomScale);
-        //                 return
-        //             }
-        //         }
-
-        //         simulation.setZoom();
-        //         requestAnimationFrame(zLoop);
-        //     }
-        // }
-
-
-        //rewrite using the ephemera system
-        if (simulation.isAutoZoom) {
-            simulation.ephemera.push({
-                name: "zoom",
-                count: simulation.testing ? 1 : Math.max(1, Math.round(cycles)), //cycles before it self removes
-                currentLevel: level.onLevel,
-                do() {
+        if (!simulation.isAutoZoom) return
+        simulation.ephemera.push({
+            name: "zoom",
+            count: simulation.testing ? 1 : Math.max(1, Math.round(cycles)),
+            currentLevel: level.onLevel,
+            do() {
+                if (!simulation.isAutoZoom || this.currentLevel !== level.onLevel) {
+                    simulation.removeEphemera(this)
+                    return
+                }
+                if (this.count === 1) {
+                    simulation.setZoom(newZoomScale)
+                    simulation.removeEphemera(this)
+                } else {
+                    simulation.setZoom(simulation.zoomScale + (newZoomScale - simulation.zoomScale) / this.count)
                     this.count--
-                    const step = (newZoomScale - simulation.zoomScale) / this.count
-                    simulation.zoomScale += step
-                    if (this.count < 1 && simulation.isAutoZoom) {
-                        simulation.zoomScale = newZoomScale
-                        simulation.removeEphemera(this)
-                    }
-                    simulation.setZoom(simulation.zoomScale);
-                },
-            })
-        }
+                }
+            },
+        })
     },
     isInvertedVertical: false,
     flipCameraVertical(frames = 1, passFunction = () => { }) {
@@ -814,13 +786,13 @@ const simulation = {
         document.getElementById("info").style.opacity = "0";
         document.getElementById("experiment-button").style.display = "inline"
         document.getElementById("experiment-button").style.opacity = "0";
-        document.getElementById("training-button").style.display = "inline"
-        document.getElementById("training-button").style.opacity = "0";
+        document.getElementById("community-button").style.display = "inline"
+        document.getElementById("community-button").style.opacity = "0";
         document.getElementById("start-button").style.display = "inline"
         document.getElementById("start-button").style.opacity = "0";
         saveGame.updateContinueButton()
         document.getElementById("continue-button").style.opacity = "0";
-        levelEditor.updateSplashButton()
+        document.getElementById("level-editor-splash-button").style.display = "inline"
         document.getElementById("level-editor-splash-button").style.opacity = "0";
         document.getElementById("experiment-grid").style.display = "none"
         document.getElementById("pause-grid-left").style.display = "none"
@@ -834,7 +806,7 @@ const simulation = {
         document.body.style.cursor = "auto";
         setTimeout(() => {
             document.getElementById("experiment-button").style.opacity = "1";
-            document.getElementById("training-button").style.opacity = "1";
+            document.getElementById("community-button").style.opacity = "1";
             document.getElementById("start-button").style.opacity = "1";
             document.getElementById("continue-button").style.opacity = "1";
             document.getElementById("level-editor-splash-button").style.opacity = "1";
@@ -844,7 +816,7 @@ const simulation = {
     },
     fpsInterval: 0, //set in startGame
     then: null,
-    async startGame(isBuildRun = false, isTrainingRun = false) {
+    async startGame(isBuildRun = false, isTrainingRun = false, tutorialStart = "walk") {
         let i, len
         if (simulation.isStartingGame) return
         simulation.isStartingGame = true
@@ -871,11 +843,8 @@ const simulation = {
             document.body.style.cursor = "none";
             document.body.style.overflow = "hidden"
         }
-        if (isTrainingRun) {
-            simulation.isTraining = true
-        } else {
-            simulation.isTraining = false
-        }
+        level.trainingMobTier = null
+        simulation.isTraining = isTrainingRun
         simulation.difficultyOptions = powerUps.difficulty.normalize(simulation.isTraining ? {} : localSettings.difficultyOptions)
         powerUps.difficulty.updateScale()
         simulation.onTitlePage = false;
@@ -886,7 +855,7 @@ const simulation = {
         document.getElementById("info").style.display = "none";
         levelPoolMenu.close()
         document.getElementById("experiment-button").style.display = "none";
-        document.getElementById("training-button").style.display = "none";
+        document.getElementById("community-button").style.display = "none";
         document.getElementById("start-button").style.display = "none";
         document.getElementById("continue-button").style.display = "none";
         document.getElementById("level-editor-splash-button").style.display = "none";
@@ -979,7 +948,7 @@ const simulation = {
         mobs.mobDeaths = 0
         level.isFlipped = false
         level.isFlipping = false;
-        level.onLevel = 0;
+        level.onLevel = isTrainingRun && !level.isCommunityTraining ? Math.max(0, level.trainingLevels.indexOf(tutorialStart)) : 0;
         level.levelsCleared = 0;
         level.updateDifficulty()
         // level.setConstraints()

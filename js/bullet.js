@@ -316,7 +316,7 @@ const b = {
                     this.gunCycle = m.cycle
                 }
                 const range = 100 * Math.max(1, player.scale)
-                const isNear = who => !who.botType && Vector.magnitude(Vector.sub(who.position, m.pos)) < range
+                const isNear = who => !who.botType && !who.isFollowingNeedle && Vector.magnitude(Vector.sub(who.position, m.pos)) < range //hovering needles never leave, so they'd grow forever
                 if (m.cycle >= this.readyCycle && m.cycle - this.gunCycle < 2) { //a charged harpoon fires the cycle after it stops moving m.fireCDcycle
                     //a new bullet next to you came from your gun, so charging or firing with no ammo doesn't count
                     //bots fire from their center and don't move until the next physics step, so a new bullet on top of a bot is the bot's

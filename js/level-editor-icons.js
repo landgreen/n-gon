@@ -68,7 +68,7 @@ Object.assign(levelEditor, {
             const spawned = { mob: mob.length, powerUp: powerUp.length }
             const ephemera = new Set(simulation.ephemera)
             try {
-                spawn[name](0, -100000)
+                levelElements.spawnNamedMob(name, 0, -100000)
                 const made = levelData.made(start)
                 const shapes = mob.slice(spawned.mob).filter(who => !who.shield).map(who => ({
                     points: who.vertices.map(v => [round(v.x), round(v.y + 100000)]),
@@ -91,7 +91,8 @@ Object.assign(levelEditor, {
         laser: { lasers: 1 }, laserLayer: { lasers: 1 }, beamer: { lasers: 1 }, focuser: { lasers: 1 }, quadLaser: { lasers: 4 }, pentaLaserBoss: { lasers: 5 },
         laserTargetingBoss: { lasers: 1 }, laserBombingBoss: { lasers: 1 }, laserLayerBoss: { lasers: 1 },
         slasher: { sword: true }, slasher2: { sword: true }, slasher3: { sword: true }, slasher4: { sword: true }, slasher5: { sword: true }, slicer: { sword: true }, slicer5: { sword: true }, slashBoss: { sword: true },
-        sniper: { sight: true }, sucker: { hole: true }, bigSucker: { hole: true },
+        sniper: { sight: true }, sucker: { hole: true }, bigSucker: { hole: true }, suckerBoss: { hole: true },
+        laserBoss: { lasers: 3 }, laserScanBoss: { lasers: 2 },
         powerUpBoss: { nodeOrbs: true }, powerUpBossBaby: { nodeOrbs: true }, //it carries a power up at each corner
         mayflyBoss: { //its swarm of cells doesn't fit, so a cartoon mayfly: wings, a pink head, a white body that thins out, and long tail threads
             icon: `<svg class="le-mob-icon" width="26" height="16" viewBox="0 0 26 16" aria-hidden="true">
@@ -202,16 +203,19 @@ Object.assign(levelEditor, {
         train: `<path d="M2 14C8 14 9 4 15 4S22 9 24.5 9" fill="none" stroke="#444" stroke-width="1" stroke-dasharray="2 1.5"/><rect x="8" y="6" width="11" height="3.5" fill="#586370"/>`,
         elevator: `<rect x="6" y="12" width="14" height="3" fill="#586370"/><path d="M13 11V3M10 5.5L13 2L16 5.5" fill="none" stroke="#444" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>`,
         vanish: `<rect x="3" y="7" width="20" height="4" fill="rgba(88,99,112,0.3)" stroke="#586370" stroke-dasharray="2 1.5"/>`,
+        chain: `<path d="M3 4Q13 13 23 4" fill="none" stroke="rgba(0,0,0,0.2)" stroke-width="0.8"/><g fill="rgba(140,140,140,0.85)" stroke="#444" stroke-width="0.7"><circle cx="6" cy="6.3" r="2.2"/><circle cx="10.3" cy="8" r="2.2"/><circle cx="15" cy="8.2" r="2.2"/><circle cx="19.5" cy="6.6" r="2.2"/></g><circle cx="3" cy="4" r="1.3" fill="#444"/><circle cx="23" cy="4" r="1.3" fill="#444"/>`, //level.chain attached: gray round links sagging between two pins
         spinner: `<rect x="5" y="7" width="17" height="3" fill="#999" stroke="#444" stroke-width="0.8" transform="rotate(-22 13.5 8.5)"/><circle cx="13.5" cy="8.5" r="1.5" fill="#444"/><path d="M4.5 8A8 7 0 0 1 12 1.5" fill="none" stroke="#444" stroke-width="1.1"/><path d="M12 1.5L9.4 0.5M12 1.5L9.9 3.3" stroke="#444" stroke-width="1.1" stroke-linecap="round"/>`,
         buzzsaw: `<path d="M13 .5L13.8 2.6L18.3 2.7L17.7 4.7L20.5 8L18.6 9L18.3 13.3L16.3 12.6L13 15.5L12.2 13.4L7.7 13.3L8.3 11.3L5.5 8L7.4 7L7.7 2.7L9.7 3.4Z" fill="#555" stroke="#000" stroke-width="0.8" stroke-linejoin="round"/>`,
         wind: `<path d="M2 4H15A2.5 2.5 0 1 0 12.5 1.5M2 8H21A2.5 2.5 0 1 1 18.5 10.5M4 12H13" fill="none" stroke="#69c" stroke-width="1.5" stroke-linecap="round"/>`,
         portal: `<ellipse cx="5" cy="8" rx="2" ry="6" fill="none" stroke="hsl(197,100%,50%)" stroke-width="2"/><ellipse cx="21" cy="8" rx="2" ry="6" fill="none" stroke="hsl(29,100%,50%)" stroke-width="2"/><path d="M8 8H18" stroke="#999" stroke-width="1" stroke-dasharray="1.5 1.5"/>`,
         slime: `<path d="M2 7Q6 5 10 7T18 7T24 7V15H2Z" fill="hsla(160,100%,35%,0.65)"/>`,
+        heat: `<rect x="3" y="1" width="20" height="14" fill="hsla(0,100%,43%,0.6)"/><rect x="11" y="1" width="5" height="14" fill="hsla(25,100%,65%,0.5)"/><rect x="3" y="1" width="20" height="1.5" fill="hsl(0,100%,80%)"/><rect x="3" y="13.5" width="20" height="1.5" fill="hsl(0,100%,80%)"/>`, //level.heatZone burning: the red box, a hot stripe, the light bars on top and bottom
         laser: `<rect x="2" y="5.5" width="4" height="5" fill="#444"/><path d="M6 8H24" stroke="rgba(255,0,0,0.25)" stroke-width="4"/><path d="M6 8H24" stroke="#f00" stroke-width="1.2"/>`,
         fizzler: `<rect x="8" y="1" width="10" height="2" fill="#444"/><rect x="8" y="13" width="10" height="2" fill="#444"/><path d="M10 3V13M13 3V13M16 3V13" stroke="rgba(0,170,255,0.75)" stroke-width="1" stroke-dasharray="1.5 1"/>`,
         button: `<g transform="translate(5.2 9.35) scale(0.12 0.3)"><polygon points="165,12 -35,12 -5,-8 135,-8" fill="#444"/><rect x="2" y="-21" width="126" height="20" fill="hsl(0,100%,70%)"/></g>`, //level.button in its own units, stretched taller so it reads: the map base and the red pad up on it
         toggle: `<g transform="translate(1.95 11.46) scale(0.17)"><polygon points="27.9,-52.7 17.3,-42.1 68.2,8.8 78.8,-1.8" fill="rgba(140,140,140,0.85)" stroke="#222" stroke-width="4"/><polygon points="135,12 -5,12 25,-8 105,-8" fill="#444"/></g>`, //level.toggle off: the block lever leaning left from its pin, into the map platform
         zone: `<rect x="3" y="2" width="20" height="12" fill="rgba(70,150,200,0.15)" stroke="#49c" stroke-dasharray="2 1.5"/><circle cx="13" cy="8" r="2.5" fill="none" stroke="#444" stroke-width="1"/>`,
+        tripwire: `<rect x="1" y="5" width="3" height="6" fill="#444"/><rect x="22" y="5" width="3" height="6" fill="#444"/><path d="M4 8H22" stroke="rgba(255,60,60,0.6)" stroke-width="1.2"/><circle cx="13" cy="8" r="2.5" fill="none" stroke="#444" stroke-width="1"/>`, //level.tripwire: a faint red beam between two posts, a trigger's ring
         keyhole: `<g transform="translate(12.75 10.6) scale(0.125 0.18)"><polygon points="-70,12 70,12 70,-8 -70,-8" fill="#444"/><polygon points="-93,9 -93,-11 -73,-41 -47,-41 -18,9" fill="#444"/><polygon points="97,9 97,-11 77,-41 51,-41 22,9" fill="#444"/><rect x="-38" y="-26" width="80" height="25" fill="rgba(254,248,164,0.73)"/></g>`, //level.keyButton: the map base, its two cradle walls, and the key color between them
         key: `<g transform="translate(13 8) scale(0.22)"><polygon points="37.5,0 25,21.65 -25,21.65 -37.5,0 -25,-21.65 25,-21.65" fill="#FEF8A4" stroke="rgba(254,248,164,0.35)" stroke-width="22"/><polygon points="37.5,0 25,21.65 -25,21.65 -37.5,0 -25,-21.65 25,-21.65" fill="#FEF8A4" stroke="rgba(0,0,0,0.25)" stroke-width="3"/></g>`, //level.key: the glowing yellow hexagon, a faint edge so it shows on white
         oneWay: `<rect x="2" y="7" width="22" height="4" fill="rgba(68,68,68,0.45)"/><rect x="2" y="7" width="22" height="1.3" fill="#444"/><path d="M9 15V3M6.5 5.5L9 2.5L11.5 5.5M17 15V3M14.5 5.5L17 2.5L19.5 5.5" fill="none" stroke="#444" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>`, //level.oneWay: the thin platform with arrows going up through it

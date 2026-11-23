@@ -65,10 +65,15 @@ Object.assign(autopilot, {
             if (cycle - seen > 12 || who.isOn === false || m.isCloak) continue
             const { position, look } = who
             if (position.x === look.x && position.y === look.y) continue
+            const pad = (who.isArc ? who.arcHitWidth / 2 : 0) + 5
+            if (who.reflections > 0 && who.trace) { //each bounce is its own segment
+                const path = who.trace(false).path
+                for (let i = 1; i < path.length; i++) beams.push({ x: path[i - 1].x, y: path[i - 1].y, dx: path[i].x - path[i - 1].x, dy: path[i].y - path[i - 1].y, pad })
+                continue
+            }
             const hit = vertexCollision(position, look, [map, body])
             const end = hit.who ? hit : look
-            beams.push({ x: position.x, y: position.y, dx: end.x - position.x, dy: end.y - position.y,
-                pad: (who.isArc ? who.arcHitWidth / 2 : 0) + 5 })
+            beams.push({ x: position.x, y: position.y, dx: end.x - position.x, dy: end.y - position.y, pad })
         }
         const areas = autopilot.hazards.map(h => [h.isOn !== false, !!h.autopilotIsHeat, h.min.x, h.min.y, h.max.x, h.max.y, h.height].join(","))
         const areaSignature = areas.join(";")

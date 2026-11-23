@@ -141,8 +141,24 @@ const m = {
     ledgeClimbSpeed: 3, //how fast the player climbs up a ledge they barely missed
     angle: 0,
     walk_cycle: 0,
+    legPhase: 0, //where the legs are in their step, see updateLegGround
+    legWalkLast: 0,
     stepSize: 0,
     flipLegs: -1,
+    legSlope: 0, //smoothed rise over run of the ground under the player, positive when the ground goes down to the right
+    legSlopeGoal: 0,
+    legGap: 0, //smoothed height of the ground line under the player's center, below their lowest point
+    legGapGoal: 0,
+    legLineX: 0, //a point on the ground line the legs step along
+    legLineY: 0,
+    isLegEdgeLeft: false, //the ground the player stands on ends at legEdgeLeftX, like a ledge or the top of a peak
+    legEdgeLeftX: 0,
+    isLegEdgeRight: false,
+    legEdgeRightX: 0,
+    legEdgeShift: 0, //smoothed shift of the step back onto a ledge
+    legStrideScale: 1, //smoothed, steps get shorter near where the ground ends
+    isLegLine: false, //the legs step along the line through legLineX, legLineY, otherwise flat
+    legGroundCycle: -1, //the cycle updateLegGround last ran, so skins that draw many legs only run it once
     hip: {
         x: 12,
         y: 24
@@ -240,10 +256,10 @@ const m = {
             return true
         }
     },
-    mapDepth() { //how deep the player's body or head is in the map, normal play stays below 6 and stuck players are above 15
+    mapDepth(terrain = m.playerMap()) { //how deep the player's body or head is in the map, normal play stays below 6 and stuck players are above 15
         let depth = 0
         for (const part of [playerBody, playerHead]) {
-            const hits = Matter.Query.collides(part, m.playerMap())
+            const hits = Matter.Query.collides(part, terrain)
             for (let i = 0; i < hits.length; i++) {
                 if (hits[i].depth > depth) depth = hits[i].depth
             }
@@ -251,10 +267,11 @@ const m = {
         return depth
     },
     isInsideMap() { //the center of the player is in the map, or they are deep in a thin platform or wedged in a narrow gap
-        return Matter.Query.rayAny(m.playerMap(), m.pos, player.position) || m.mapDepth() > 15
+        const terrain = m.playerMap()
+        return Matter.Query.rayAny(terrain, m.pos, player.position) || m.mapDepth(terrain) > 15
     },
     playerMap() { //the map the player can touch, tech: ray's line left behind lets the player through from the eye's side
-        return m.isPassingRay ? map.filter(who => !who.isRay) : map
+        return tech.isRay && m.isPassingRay ? map.filter(who => !who.isRay) : map //tech.isRay, so a pass cut short by dying doesn't carry into the next run
     },
     lastUnstuckCycle: -1000,
     unstuck() { //move the player to the last spot in their history where they weren't in the map, or to the level start if it keeps happening
@@ -399,40 +416,41 @@ const m = {
             if (player.velocity.x < m.airSpeedLimit / player.mass) player.force.x += m.FxAir * (player.velocity.x < 0 ? m.airTurnFx : 1); //move player  right / d
         }
     },
-    isMapAt(x, y) {
-        return Matter.Query.point(map, { x, y }).length > 0
+    isMapAt(x, y, terrain = map) {
+        return Matter.Query.point(terrain, { x, y }).length > 0
     },
     ceilingCornerSlide() { //jumping into the edge of a ceiling slides the player around it over the cycles before they touch it
         const v = player.velocity
         if (v.y > -1) return
+        const terrain = m.playerMap()
         const ahead = 4 //cycles to look ahead for a ceiling corner
         for (const part of [playerHead, playerBody]) { //the body is wider than the head, so check the corners of both
             const top = part.bounds.min.y
             const left = part.bounds.min.x + 1
             const right = part.bounds.max.x - 1
-            const isHitAhead = x => Matter.Query.segmentAny(map, { x, y: top }, { x: x + ahead * v.x, y: top + ahead * v.y }) //this corner's path, so thin platforms aren't skipped
+            const isHitAhead = x => Matter.Query.segmentAny(terrain, { x, y: top }, { x: x + ahead * v.x, y: top + ahead * v.y }) //this corner's path, so thin platforms aren't skipped
             const isLeftBlocked = isHitAhead(left)
             if (isLeftBlocked === isHitAhead(right)) continue //clear above, or a gap narrower than the player
             const dir = isLeftBlocked ? 1 : -1 //slide away from the blocked side
             const edge = isLeftBlocked ? left : right
             //a stationary side probe is a point, including its boundary, rather than an open segment
-            if (v.x === 0 ? m.isMapAt(edge, top) : Matter.Query.segmentAny(map, { x: edge, y: top }, { x: edge + ahead * v.x, y: top })) continue //a wall beside the player, not a ceiling above them
+            if (v.x === 0 ? m.isMapAt(edge, top, terrain) : Matter.Query.segmentAny(terrain, { x: edge, y: top }, { x: edge + ahead * v.x, y: top })) continue //a wall beside the player, not a ceiling above them
             const vx = dir * v.x < 0 ? 0 : v.x //stop steering into the ceiling's edge, like bumping into its side
             let cycles = 1 //cycles until this corner reaches the ceiling
-            while (cycles < ahead && !m.isMapAt(edge + cycles * vx, top + cycles * v.y)) cycles++
+            while (cycles < ahead && !m.isMapAt(edge + cycles * vx, top + cycles * v.y, terrain)) cycles++
             const x = edge + cycles * vx //where the corner meets the ceiling
             const y = top + cycles * v.y
-            if (m.isMapAt((left + right) / 2 + cycles * vx, y)) return //the ceiling covers the middle of the player
+            if (m.isMapAt((left + right) / 2 + cycles * vx, y, terrain)) return //the ceiling covers the middle of the player
             const maxSlide = m.ceilingSlide * player.scale
-            if (m.isMapAt(x + dir * maxSlide, y)) return //the ceiling's edge is too far in to slide around
+            if (m.isMapAt(x + dir * maxSlide, y, terrain)) return //the ceiling's edge is too far in to slide around
             if (vx !== v.x) Matter.Body.setVelocity(player, { x: 0, y: v.y })
-            if (!m.isMapAt(x, y)) return //stopping the steering was enough
+            if (!m.isMapAt(x, y, terrain)) return //stopping the steering was enough
             let slide = 1
-            while (slide < maxSlide && m.isMapAt(x + dir * slide, y)) slide++
+            while (slide < maxSlide && m.isMapAt(x + dir * slide, y, terrain)) slide++
             const shift = dir * (slide + 1) / cycles //spread the slide evenly so it looks like a glancing hit
-            const depth = m.mapDepth()
+            const depth = m.mapDepth(terrain)
             Matter.Body.setPosition(player, { x: player.position.x + shift, y: player.position.y })
-            if (m.mapDepth() > depth) Matter.Body.setPosition(player, { x: player.position.x - shift, y: player.position.y }) //undo if it pushed the player into the map
+            if (m.mapDepth(terrain) > depth) Matter.Body.setPosition(player, { x: player.position.x - shift, y: player.position.y }) //undo if it pushed the player into the map
             return
         }
     },
@@ -442,8 +460,9 @@ const m = {
         const bounds = playerBody.bounds
         const x = (dir > 0 ? bounds.max.x : bounds.min.x) + dir * (Math.max(0, dir * player.velocity.x) + 2) //just ahead of the player next cycle
         const foot = bounds.max.y
+        const terrain = m.playerMap()
         const footSlant = 12 * player.scale //the slanted bottom of the player rides up over corners lower than this
-        if (m.isMapAt(x, foot - footSlant) && !m.isMapAt(x, foot - m.ledgeStep * player.scale)) { //a ledge, not a wall too tall to step onto
+        if (m.isMapAt(x, foot - footSlant, terrain) && !m.isMapAt(x, foot - m.ledgeStep * player.scale, terrain)) { //a ledge, not a wall too tall to step onto
             Matter.Body.setVelocity(player, { x: player.velocity.x, y: Math.min(player.velocity.y, -m.ledgeClimbSpeed * player.scale) })
         }
     },
@@ -1206,20 +1225,158 @@ const m = {
     // ****** drawing player and skins *************
     // *********************************************
     drawLeg(stroke) { },
+    drawToes(length, drop, rise = 0) { //two toe lines from the foot that lie along a slope and keep their length, rise moves where they start
+        const slope = m.legSlope * m.flipLegs //legs are drawn mirrored when facing left
+        const toeX = length / Math.sqrt(1 + slope * slope)
+        const toeY = toeX * slope
+        ctx.moveTo(m.foot.x, m.foot.y + rise);
+        ctx.lineTo(m.foot.x - toeX, m.foot.y + drop - toeY);
+        ctx.moveTo(m.foot.x, m.foot.y + rise);
+        ctx.lineTo(m.foot.x + toeX, m.foot.y + drop + toeY);
+    },
+    legStepPull(slope) { //how far along the ground line the step centers, steeper slopes pull it up toward the hips so the lower foot can still reach
+        return -(m.legGap + 10 * slope * slope) * slope / Math.sqrt(1 + slope * slope)
+    },
+    updateLegGround() { //once a cycle: the step phase, and the ground under the player, its slope, height, and where it ends, so the feet step along it
+        if (m.legGroundCycle === m.cycle) return
+        m.legGroundCycle = m.cycle
+        //the step phase moves so a planted foot covers the ground the body moved, a stride is 4.4 * stepSize across, short slow steps go faster so feet don't slide
+        const walked = m.walk_cycle - m.legWalkLast //anything that changes walk_cycle still moves the legs
+        m.legWalkLast = m.walk_cycle
+        const step = walked * Math.min(0.12, Math.PI * Math.sqrt(1 + m.legSlope * m.legSlope) / (4.4 * m.stepSize * m.legStrideScale + 0.001)) //at full speed this is about the old 0.034
+        m.legPhase += Math.max(-0.41, Math.min(0.41, step)) //no faster than the old steps at speed 12, so legs don't flail running up steep slopes
+        let lowest = -Infinity //the body's lowest corner, its bounds stretch in the direction it moves
+        for (const vertex of playerBody.vertices) if (vertex.y > lowest) lowest = vertex.y
+        if (m.onGround && m.standingOn?.vertices) {
+            //the edge of the ground closest to the player's feet, measured from the ground itself, the player's own pointed bottom or flat side can touch a steep slope first
+            const v = m.standingOn.vertices
+            const p = jumpSensor.position
+            let best = Infinity, bestSlope = 0, bestX = 0, bestY = 0, bestI = 0, bestT = 0.5
+            for (let i = 0, len = v.length; i < len; i++) {
+                const a = v[i], b = v[(i + 1) % len]
+                const dx = b.x - a.x, dy = b.y - a.y
+                if (dx === 0 || Math.abs(dy) > 2.75 * Math.abs(dx)) continue //steeper than about 70° is a wall, not ground
+                const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)))
+                const ex = a.x + t * dx - p.x, ey = a.y + t * dy - p.y
+                const dist = ex * ex + ey * ey
+                if (dist < best) {
+                    best = dist
+                    bestSlope = dy / dx
+                    bestX = a.x + t * dx
+                    bestY = a.y + t * dy
+                    bestI = i
+                    bestT = t
+                }
+            }
+            if (best < Infinity) { //all walls keeps the last slope
+                //wedged in a notch between two slopes, ground just below the downhill corner of the body, the feet stand flat across it
+                const probe = Math.abs(bestSlope) > 0.5 && { x: player.position.x + Math.sign(bestSlope) * 22 * player.scale, y: lowest + 4 }
+                m.isLegEdgeLeft = m.isLegEdgeRight = false
+                if (probe && (Matter.Query.point(map, probe).length || Matter.Query.point(body, probe).length)) {
+                    m.legSlopeGoal = 0
+                    m.isLegLine = false
+                } else {
+                    m.legSlopeGoal = Math.max(-2, Math.min(2, bestSlope))
+                    m.legLineX = bestX
+                    m.legLineY = bestY
+                    m.isLegLine = true
+                    //the steps stay on this edge when the ground ends past either of its corners, at a ledge or the top of a peak
+                    const count = v.length
+                    for (let end = 0; end < 2; end++) {
+                        const corner = v[(bestI + end) % count], inner = v[(bestI + 1 - end) % count] //this end, and the other end back along the ground
+                        if (Math.abs(corner.x - player.position.x) > 80 * player.scale) continue //too far for a step to reach
+                        const beyond = end ? v[(bestI + 2) % count] : v[(bestI - 1 + count) % count] //the next corner past it
+                        const dir = Math.sign(corner.x - inner.x) //the side the ground ends on
+                        const nx = beyond.x - corner.x, ny = beyond.y - corner.y
+                        const fall = (corner.y - inner.y) / Math.abs(corner.x - inner.x) //how fast the ground goes down toward the corner
+                        if (dir * nx > 0 && Math.abs(ny) <= 2.75 * Math.abs(nx) && ny / Math.abs(nx) - fall < 0.5) continue //more ground past the corner, not dropping away much faster
+                        const past = { x: corner.x + dir * 8, y: corner.y + 8 } //other ground right past the corner is a seam between two pieces, not a ledge
+                        const isOther = b => b !== m.standingOn && b !== m.standingOn.parent //only made near a corner, not every cycle
+                        if (Matter.Query.point(map, past).some(isOther) || Matter.Query.point(body, past).some(isOther)) continue
+                        if (dir > 0) {
+                            m.isLegEdgeRight = true
+                            m.legEdgeRightX = corner.x
+                        } else {
+                            m.isLegEdgeLeft = true
+                            m.legEdgeLeftX = corner.x
+                        }
+                    }
+                }
+            }
+        } else if (!m.onGround && (m.cycle - m.lastOnGroundCycle > 8 || player.velocity.y < 0 || m.isLegEdgeLeft || m.isLegEdgeRight)) { //short hops walking down a slope keep the slope, so the legs don't flatten between steps, jumps and stepping off a ledge don't
+            m.legSlopeGoal = 0
+            m.isLegLine = false
+            m.isLegEdgeLeft = m.isLegEdgeRight = false
+        }
+        if (m.isLegLine) {
+            //how far the ground's line, under the player's center, is below their lowest point, on a steep slope the player's side touches it, so it runs well below their feet
+            //measured from m.pos, which is a physics step behind the body, the player is drawn there, walking down a slope the body has already dropped a few pixels further
+            const bottom = lowest - playerBody.position.y + m.yOff * player.scale //the player's lowest point below m.pos, m.pos.y is set to playerBody.position.y - m.yOff * player.scale
+            m.legGapGoal = Math.max(-100, Math.min(100, (m.legLineY + (m.pos.x - m.legLineX) * m.legSlopeGoal - m.pos.y - bottom) / player.scale)) //legs are drawn scaled by player.scale
+        } else {
+            m.legGapGoal = 0
+        }
+        m.legSlope = 0.8 * m.legSlope + 0.2 * m.legSlopeGoal
+        m.legGap = 0.7 * m.legGap + 0.3 * m.legGapGoal
+        let edgeShift = 0, strideScale = 1
+        if (m.isLegEdgeLeft || m.isLegEdgeRight) { //near where the ground ends, the step moves back onto the ground's side of the corner
+            const slope = m.legSlope * m.flipLegs, len = Math.sqrt(1 + slope * slope)
+            const center = m.pos.x + m.flipLegs * player.scale * m.legStepPull(slope) / len //where calcLeg centers the step, in the world
+            const margin = (4 + 0.5 * m.stepSize) * player.scale
+            if (m.isLegEdgeRight && center > m.legEdgeRightX - margin) edgeShift = m.legEdgeRightX - margin - center
+            if (m.isLegEdgeLeft && center < m.legEdgeLeftX + margin) edgeShift = m.legEdgeLeftX + margin - center
+            //and the steps get shorter, so the front foot doesn't swing out past the corner
+            const stepCenter = center + edgeShift
+            const room = Math.min(m.isLegEdgeRight ? m.legEdgeRightX - stepCenter : Infinity, m.isLegEdgeLeft ? stepCenter - m.legEdgeLeftX : Infinity) //space left before the corner
+            const reach = 2.2 * m.stepSize * player.scale / len //how far a full step swings out, across
+            if (room < reach) strideScale = Math.max(0.3, room / reach)
+            edgeShift /= player.scale //in leg units, kept facing the world so turning around doesn't flip it
+        }
+        m.legEdgeShift = 0.7 * m.legEdgeShift + 0.3 * edgeShift
+        m.legStrideScale = 0.7 * m.legStrideScale + 0.3 * strideScale
+    },
     calcLeg(cycle_offset, offset) {
+        m.updateLegGround()
         m.hip.x = 12 + offset;
         m.hip.y = 24 + offset;
         //stepSize goes to zero if Vx is zero or not on ground (make m transition cleaner)
         m.stepSize = 0.8 * m.stepSize + 0.2 * (7 * Math.sqrt(Math.min(9, Math.abs(m.Vx))) * m.onGround);
         //changes to stepSize are smoothed by adding only a percent of the new value each cycle
-        const stepAngle = 0.034 * m.walk_cycle + cycle_offset;
-        m.foot.x = 2.2 * m.stepSize * Math.cos(stepAngle) + offset;
-        m.foot.y = offset + 1.2 * m.stepSize * Math.sin(stepAngle) + m.yOff + m.height;
-        const Ymax = m.yOff + m.height;
+        const stepAngle = m.legPhase + cycle_offset;
+        //the ground is a line through the slope, legs are drawn mirrored when facing left
+        const slope = m.legSlope * m.flipLegs
+        const base = m.yOff + m.height //where the feet stand on flat ground
+        const groundY = base + m.legGap //the ground line under the player's center
+        //the step centers on the spot of the ground line closest to where the feet stand on flat ground, and swings along the line, so on a steep slope it moves over onto the slope
+        const len = Math.sqrt(1 + slope * slope)
+        const ux = 1 / len, uy = slope / len //along the ground
+        const toBase = m.legStepPull(slope) + m.legEdgeShift * m.flipLegs / ux //near where the ground ends, legEdgeShift moves it back
+        const along = 2.2 * m.stepSize * m.legStrideScale * Math.cos(stepAngle) //shorter near where the ground ends
+        const lift = 1.2 * m.stepSize * Math.sin(stepAngle) //negative lifts the foot off the ground
+        m.foot.x = (toBase + along) * ux - lift * uy + offset; //the ground's normal is (uy, -ux)
+        m.foot.y = groundY + (toBase + along) * uy + lift * ux + offset;
+        const Ymax = groundY + m.foot.x * slope; //the ground under this foot
         if (m.foot.y > Ymax) m.foot.y = Ymax;
 
+        //keep the foot within reach of the hip, a foot stepping down a steep slope can be too far away
+        let d = Math.sqrt((m.hip.x - m.foot.x) * (m.hip.x - m.foot.x) + (m.hip.y - m.foot.y) * (m.hip.y - m.foot.y));
+        const reach = 0.99 * (m.legLength1 + m.legLength2)
+        if (d > reach) {
+            m.foot.x = m.hip.x + (m.foot.x - m.hip.x) * reach / d
+            m.foot.y = m.hip.y + (m.foot.y - m.hip.y) * reach / d
+            d = reach
+        } else if (d < 15) { //a foot stepping up a steep slope while crouched can reach the hip, a knee can't bend that far
+            if (d < 0.001) {
+                m.foot.x = m.hip.x
+                m.foot.y = m.hip.y + 15
+            } else {
+                m.foot.x = m.hip.x + (m.foot.x - m.hip.x) * 15 / d
+                m.foot.y = m.hip.y + (m.foot.y - m.hip.y) * 15 / d
+            }
+            d = 15
+        }
+
         //calculate knee position as intersection of circle from hip and foot
-        const d = Math.sqrt((m.hip.x - m.foot.x) * (m.hip.x - m.foot.x) + (m.hip.y - m.foot.y) * (m.hip.y - m.foot.y));
         const l = (m.legLength1 * m.legLength1 - m.legLength2 * m.legLength2 + d * d) / (2 * d);
         const h = Math.sqrt(m.legLength1 * m.legLength1 - l * l);
         m.knee.x = (l / d) * (m.foot.x - m.hip.x) - (h / d) * (m.foot.y - m.hip.y) + m.hip.x + offset;
@@ -1299,9 +1456,7 @@ const m = {
             ctx.beginPath();
             ctx.moveTo(m.foot.x, m.foot.y);
             if (m.onGround) {
-                ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                m.drawToes(14, 5) //toes lie along a slope
             } else {
                 ctx.lineTo(m.foot.x - 12, m.foot.y + 8);
                 ctx.moveTo(m.foot.x, m.foot.y);
@@ -1450,7 +1605,8 @@ const m = {
                 //foot
                 ctx.beginPath();
                 ctx.moveTo(foot.x, foot.y);
-                ctx.quadraticCurveTo(m.foot.x - 30, m.foot.y + 12, m.foot.x + 13, m.foot.y + 3);
+                const slope = m.legSlope * m.flipLegs, cos = 1 / Math.sqrt(1 + slope * slope), sin = slope * cos //the shoe turns to lie along a slope, the ankle stays put
+                ctx.quadraticCurveTo(m.foot.x - 30 * cos - 12 * sin, m.foot.y - 30 * sin + 12 * cos, m.foot.x + 13 * cos - 3 * sin, m.foot.y + 13 * sin + 3 * cos);
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
 
@@ -1638,7 +1794,8 @@ const m = {
                 //foot
                 ctx.beginPath();
                 ctx.moveTo(foot.x, foot.y);
-                ctx.quadraticCurveTo(m.foot.x - 30, m.foot.y + 12, m.foot.x + 13, m.foot.y + 3);
+                const slope = m.legSlope * m.flipLegs, cos = 1 / Math.sqrt(1 + slope * slope), sin = slope * cos //the shoe turns to lie along a slope, the ankle stays put
+                ctx.quadraticCurveTo(m.foot.x - 30 * cos - 12 * sin, m.foot.y - 30 * sin + 12 * cos, m.foot.x + 13 * cos - 3 * sin, m.foot.y + 13 * sin + 3 * cos);
                 // m.lastOnGroundCycle + m.coyoteCycles > m.cycle
 
                 ctx.lineWidth = 1.5
@@ -1756,9 +1913,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -1979,9 +2134,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 14, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 14, m.foot.y + 5);
+                    m.drawToes(14, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 12, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -2296,10 +2449,7 @@ const m = {
                     //toe lines
                     ctx.beginPath();
                     if (m.onGround) {
-                        ctx.moveTo(m.foot.x, m.foot.y + 2);
-                        ctx.lineTo(m.foot.x - 13, m.foot.y + 5);
-                        ctx.moveTo(m.foot.x, m.foot.y + 2);
-                        ctx.lineTo(m.foot.x + 13, m.foot.y + 5);
+                        m.drawToes(13, 5, 2);
                     } else {
                         ctx.moveTo(m.foot.x, m.foot.y);
                         ctx.lineTo(m.foot.x - 12, m.foot.y + 8);
@@ -2507,9 +2657,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -2620,9 +2768,10 @@ const m = {
 
                 //toe lines
                 ctx.beginPath();
+                const slope = m.legSlope * m.flipLegs, toeX = 15 / Math.sqrt(1 + slope * slope), toeY = toeX * slope //the foot lies along a slope
                 ctx.moveTo(m.foot.x, m.foot.y - 1);
-                ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                ctx.lineTo(m.foot.x - toeX, m.foot.y + 5 - toeY);
+                ctx.lineTo(m.foot.x + toeX, m.foot.y + 5 + toeY);
                 ctx.lineTo(m.foot.x, m.foot.y - 1);
                 ctx.lineWidth = 4;
                 ctx.stroke();
@@ -2745,9 +2894,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -2915,9 +3062,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -2998,9 +3143,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -3087,9 +3230,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 const footDrop = m.onGround ? 5 : 10
-                ctx.lineTo(m.foot.x - 15, m.foot.y + footDrop);
-                ctx.moveTo(m.foot.x, m.foot.y);
-                ctx.lineTo(m.foot.x + 15, m.foot.y + footDrop);
+                m.drawToes(15, footDrop);
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
@@ -3394,9 +3535,7 @@ const m = {
                 ctx.beginPath();
                 ctx.moveTo(m.foot.x, m.foot.y);
                 if (m.onGround) {
-                    ctx.lineTo(m.foot.x - 15, m.foot.y + 5);
-                    ctx.moveTo(m.foot.x, m.foot.y);
-                    ctx.lineTo(m.foot.x + 15, m.foot.y + 5);
+                    m.drawToes(15, 5);
                 } else {
                     ctx.lineTo(m.foot.x - 13, m.foot.y + 8);
                     ctx.moveTo(m.foot.x, m.foot.y);
@@ -5664,14 +5803,15 @@ const m = {
         },
         {
             name: "molecular assembler",
-            modeName(tag = "strong") { //0 spores, 1 missiles, 2 ice IX, 3 drones, 4 needles
-                const open = [`<${tag} class='spore' data-help='spore' style='letter-spacing: 2px;'>spores`, `<${tag}>missiles`, `<${tag} class='color-s' data-help='slow'>ice IX`, `<${tag}>drones`, `<${tag}>needles`]
+            modeName(tag = "strong") { //0 spores, 1 missiles, 2 ice IX, 3 drones, 4 needles, 5 random (molecular machine)
+                const open = [`<${tag} class='spore' data-help='spore' style='letter-spacing: 2px;'>spores`, `<${tag}>missiles`, `<${tag} class='color-s' data-help='slow'>ice IX`, `<${tag}>drones`, `<${tag}>needles`, `<${tag}>random bullets`]
                 return `${open[simulation.molecularMode]}</${tag}>`
             },
             modeText() {
                 return this.modeName()
             },
             nextMode() {
+                if (tech.isMolecularMachine) return //molecular machine locks the random mode
                 simulation.molecularMode = (simulation.molecularMode + 1) % 5
             },
             descriptionFunction() {
@@ -5687,7 +5827,9 @@ const m = {
                     }
                 }
             },
+            costScale: 1, //molecular machine prints at 0.5x cost
             spend(drain) { //use energy to print, returns false if there isn't enough energy
+                drain *= this.costScale
                 if (m.energy > drain) {
                     m.energy -= drain
                     this.endoThermic(drain)
@@ -5696,30 +5838,57 @@ const m = {
                 return false
             },
             print() { //spend excess energy on the current molecular mode
+                if (simulation.molecularMode === 5) { //molecular machine, a random bullet type at half cost
+                    this.costScale = 0.5
+                    this.printMode(this.randomMode())
+                    this.costScale = 1
+                } else {
+                    this.printMode(simulation.molecularMode)
+                }
+            },
+            printCost(mode, needles = mode === 4 ? b.followingNeedleSlot() : null) { //energy for one print of a mode, before costScale
+                switch (mode) {
+                    case 0: return tech.isSporeFlea || tech.isSporeWorm ? 0.2 : 0.3 //a flea or worm, or 3 spores
+                    case 1: return 0.33 //missiles
+                    case 2: return 0.04 //ice IX
+                    case 3: return tech.isDroneRadioactive ? 0.9 : 0.5 * tech.droneEnergyReduction //drones
+                    case 4: return needles.count < 36 ? 0.06 * (1 + Math.pow(2, 2.2 * Math.floor(needles.slot / 9))) : Infinity //needles, each row of 9 hovering needles costs more
+                }
+            },
+            randomMode() { //molecular machine, cheaper bullets are printed more often so each type gets about the same energy
+                const weights = [0, 1, 2, 3, 4].map(mode => 1 / this.printCost(mode))
+                let pick = Math.random() * weights.reduce((sum, weight) => sum + weight, 0)
+                for (let mode = 0; mode < 4; mode++) {
+                    pick -= weights[mode]
+                    if (pick < 0) return mode
+                }
+                return 4
+            },
+            printMode(mode) {
                 const r = 30 * player.scale
                 const aim = { x: Math.cos(m.angle), y: Math.sin(m.angle) }
-                switch (simulation.molecularMode) {
+                switch (mode) {
                     case 0: //spores
                         if (tech.isSporeFlea) {
-                            if (this.spend(0.2)) {
+                            if (this.spend(this.printCost(0))) {
                                 const speed = m.crouch ? 20 + 8 * Math.random() : 10 + 3 * Math.random()
                                 b.flea(Vector.add(m.pos, Vector.mult(aim, 35 * player.scale)), Vector.mult(aim, speed))
                             }
                         } else if (tech.isSporeWorm) {
-                            if (this.spend(0.2)) {
+                            if (this.spend(this.printCost(0))) {
                                 b.worm(Vector.add(m.pos, Vector.mult(aim, 35 * player.scale)))
                                 Matter.Body.setVelocity(bullet[bullet.length - 1], Vector.mult(aim, 2 + Math.random()));
                             }
                         } else {
                             for (let i = 0; i < 3; i++) {
-                                if (m.energy <= 0.3 || !this.spend(0.1)) break
+                                if (m.energy <= 0.3 || !this.spend(this.printCost(0) / 3)) break
                                 const unit = Vector.rotate({ x: 1, y: 0 }, 6.28 * Math.random())
                                 b.spore(Vector.add(m.pos, Vector.mult(unit, 25)), Vector.mult(unit, 10))
                             }
                         }
                         break
                     case 1: //missiles
-                        if (this.spend(0.33)) {
+                        if (this.spend(this.printCost(1))) {
                             if (tech.isMissileSide) {
                                 const side = Vector.perp(aim)
                                 b.missile(Vector.add(m.pos, Vector.mult(side, r)), m.angle + Math.PI / 2, 15)
@@ -5733,23 +5902,23 @@ const m = {
                         }
                         break
                     case 2: //ice IX
-                        if (this.spend(0.04)) b.iceIX(1)
+                        if (this.spend(this.printCost(2))) b.iceIX(1)
                         break
                     case 3: //drones
-                        if (tech.isDroneRadioactive) {
-                            if (this.spend(0.9)) {
+                        if (this.spend(this.printCost(3))) {
+                            if (tech.isDroneRadioactive) {
                                 b.droneRadioactive({
                                     x: m.pos.x + r * aim.x + 10 * (Math.random() - 0.5),
                                     y: m.pos.y + r * aim.y + 10 * (Math.random() - 0.5)
                                 }, 25)
+                            } else {
+                                b.drone()
                             }
-                        } else if (this.spend(0.5 * tech.droneEnergyReduction)) {
-                            b.drone()
                         }
                         break
-                    case 4: { //needles, each row of 9 hovering needles costs more
-                        const { slot, count } = b.followingNeedleSlot()
-                        if (count < 36 && this.spend(0.06 * (1 + Math.pow(2, 2.2 * Math.floor(slot / 9))))) b.followingNeedle(undefined, slot)
+                    case 4: { //needles, 36 at most, spend() fails on their Infinity cost when full
+                        const needles = b.followingNeedleSlot()
+                        if (this.spend(this.printCost(4, needles))) b.followingNeedle(undefined, needles.slot)
                         break
                     }
                 }

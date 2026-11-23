@@ -33,6 +33,7 @@
     <div id="level-editor-right" class="le-panel"></div>
     <div id="level-editor-status" class="le-status"></div>
     <div id="level-editor-hint" class="le-hint"></div>
+    <div id="level-editor-stop-hint" class="le-hint le-stop-hint"></div>
     <div id="level-editor-code" class="le-panel">
         <div class="le-row"><span class="le-name" data-code-name></span><span class="le-fill"></span><span class="le-segment"><button class="le-button" data-command="codeNext" hidden title="go to the next place its code is">next part</button></span><span class="le-segment"><button class="le-button" data-command="copyPanel">copy</button><button class="le-button" data-command="downloadPanel" title="save it as a .js file">download</button><button class="le-button" data-command="openFile" hidden title="load a level from a .js or .txt file">open file</button><button class="le-button" data-command="importText" hidden>import</button><button class="le-button" data-command="applyCode" hidden>apply</button><button class="le-button" data-command="importBack" hidden title="back to the import box">back</button><button class="le-button" data-command="importNoCode" hidden title="the map, blocks, mobs, power ups, and elements with their settings, none of its javascript runs">import without code</button><button class="le-button" data-command="importRun" hidden title="only for code from people you trust">run it</button><button class="le-button" data-command="closeCode">close</button></span></div>
         <div class="le-panel-box"><pre class="le-panel-colors" aria-hidden="true"></pre><textarea readonly spellcheck="false" wrap="off"></textarea></div>
@@ -55,8 +56,8 @@
         <title>level editor</title>
         <text x="10" y="32">editor</text>
     </svg>
-    <svg class="SVG-button SVG-button-splash" id="training-button" width="120" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="simulation.startGame(false, true)">
-        <text x="10" y="32">training</text>
+    <svg class="SVG-button SVG-button-splash" id="community-button" width="166" height="45" stroke='none' fill='#333' font-size="30px" font-family="Arial, sans-serif" onclick="level.chooseCommunityTraining()">
+        <text x="10" y="32">community</text>
     </svg>
     <svg class="SVG-button SVG-button-splash" id="experiment-button" width="170" height="45">
         <text stroke='none' fill='#333' stroke-width="2" font-size="30px" font-family="Arial, sans-serif" x="10" y="32">experiment</text>
@@ -102,8 +103,7 @@
                     <button onclick="saveGame.importFromBox()" class='sort-button' style="font-size:1em;">load code</button>
                     <br>
                     <br>
-                    <button id="level-pool-button" popovertarget="level-pool" class='sort-button' style="font-size:1em;" title="choose which levels can show up in a run">level pool</button>
-                    <button id="level-editor-button" onclick="levelEditor.open()" class='sort-button' style="font-size:1em;" title="make local levels">level editor</button> <span style="color:#aaa; font-size:0.75em;">(beta)</span>
+                    <button type="button" class="sort-button" style="font-size:1em;" aria-controls="level-pool" onclick="levelPoolMenu.showProgression()" title="choose which levels can show up in a run">level pool</button>
                     <br>
                     <label for="seed" title="the seed determines level order, tech choices, and mob types">randomization seed:</label>
                     <input type="text" id="seed" name="seed" autocomplete="off" spellcheck="false" minlength="1" style="width: 120px;">

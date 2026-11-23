@@ -126,6 +126,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(1900, -40); //normal spawn
         level.exit.x = -350;
         level.exit.y = -1250;
+        powerUps.spawnStartingPowerUps(level.exit.x - 75, level.exit.y - 30) //just left of the exit, a progression level's gun or tech
 
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom)
@@ -1340,6 +1341,7 @@ Object.assign(moreLevels, {
         spawn.mapRect(level.enter.x, level.enter.y + 20, 100, 20);
         level.exit.x = 550;
         level.exit.y = -2730;
+        powerUps.spawnStartingPowerUps(level.exit.x - 75, level.exit.y - 30) //just left of the exit, a progression level's gun or tech
         spawn.mapRect(level.exit.x, level.exit.y + 20, 100, 20);
 
         const portal = level.portal({ //main portals
@@ -27336,6 +27338,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(-2300, 592.5);
         level.exit.x = -3062.5;
         level.exit.y = 612.5;
+        powerUps.spawnStartingPowerUps(level.exit.x - 75, level.exit.y - 30) //just left of the exit, a progression level's gun or tech
         level.defaultZoom = 1800
         simulation.zoomTransition(level.defaultZoom)
         document.body.style.backgroundColor = "#d8dadf";
@@ -31617,8 +31620,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -31684,8 +31686,7 @@ Object.assign(moreLevels, {
         spawn.mapRect(-150, -50, 175, 75);
 
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -31742,8 +31743,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -31809,8 +31809,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -31894,8 +31893,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -31986,8 +31984,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32065,8 +32062,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = 15;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = 30;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32168,8 +32164,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32250,8 +32245,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32312,8 +32306,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32413,8 +32406,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32497,8 +32489,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32583,8 +32574,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32672,8 +32662,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -35;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 30); //exit bump
+        level.exit.y = -20;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32765,8 +32754,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(60, -50); //normal spawn
         spawn.mapRect(10, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -685;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -670;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32819,8 +32807,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(300, -50); //normal spawn
         spawn.mapRect(250, -10, 100, 20); //small platform for player
         level.exit.x = 1775;
-        level.exit.y = -685;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -670;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -32907,8 +32894,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(0, -50); //normal spawn
         spawn.mapRect(-50, -10, 100, 20); //small platform for player
         level.exit.x = 1900;
-        level.exit.y = -2835;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -2820;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)
@@ -33037,8 +33023,7 @@ Object.assign(moreLevels, {
         level.setPosToSpawn(0, -50); //normal spawn
         spawn.mapRect(-50, -10, 100, 20); //small platform for player
         level.exit.x = 1900;
-        level.exit.y = -2835;
-        spawn.mapRect(level.exit.x, level.exit.y + 25, 100, 100); //exit bump
+        level.exit.y = -2820;
         simulation.zoomScale = 1400 //1400 is normal
         level.defaultZoom = 1400
         simulation.zoomTransition(level.defaultZoom, 1)

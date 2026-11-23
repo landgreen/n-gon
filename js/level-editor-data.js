@@ -576,6 +576,7 @@ Object.assign(levelData, {
         "spawn.debris": ([x, y, width, count = 6], n) => n === 3 || n === 4 ? ["debris", { x, y, width, count }] : null,
         "powerUps.spawnStartingPowerUps": ([x, y], n) => n === 2 ? ["startingPowerUps", { x, y }] : null,
         "powerUps.chooseRandomPowerUp": ([x, y], n) => n === 2 ? ["randomPowerUp", { x, y }] : null,
+        "level.chain": ([x, y, angle = 0, attached = true, len = 15, radius = 20, stiffness = 1, damping = 1], n) => n >= 2 && n <= 8 && typeof attached === "boolean" && [x, y, angle, len, radius, stiffness, damping].every(Number.isFinite) && len >= 2 && radius > 0 ? ["chain", { x, y, x2: x + 2 * radius * (Math.round(len) - 1) * Math.cos(angle), y2: y + 2 * radius * (Math.round(len) - 1) * Math.sin(angle), radius, attached, stiffness, damping }] : null,
         "powerUps.spawn": ([x, y, name], n) => n === 3 && levelElements.types.powerUp.names.includes(name) ? ["powerUp", { x, y, name }] : null,
     },
     fromSource(source) { //elements and code elements, in the order the level's code has them

@@ -4,7 +4,7 @@ const tech = {
     removeCount: 0,
     aperiodicTiling: 0,
     qubit: 0,
-    resetAllTech() {
+    resetAllTech(resetSpawnOrder = true) {
         for (let i = 0, len = tech.tech.length; i < len; i++) {
             tech.tech[i].isLost = false
             tech.tech[i].isBanished = false
@@ -30,7 +30,7 @@ const tech = {
         tech.fireRate = 1
         m.damageDone = 1
         m.damageReduction = 1
-        powerUps.difficulty.setDamageAndDefense()
+        powerUps.difficulty.setDamageAndDefense(resetSpawnOrder)
         tech.junkChance = 0;
         tech.extraMaxHealth = 0;
         tech.totalCount = 0;
@@ -521,14 +521,11 @@ const tech = {
             const energy = m.energy
             const wasEnergyHealth = tech.isEnergyHealth
             if (oldSkin) tech.removeTech(oldSkin.name, false)
+            const restoredHealth = wasEnergyHealth ? m.health : health
             if (newSkin) tech.giveTech(newSkin.name)
             m.energy = energy
             if (!tech.isEnergyHealth) {
-                if (wasEnergyHealth) { //leaving mass-energy equivalence returns the health you had when you took it
-                    m.health = Math.max(Math.min(m.maxHealth, tech.massEnergyHealth || 0), 0.1)
-                } else {
-                    m.health = Math.min(m.maxHealth, health)
-                }
+                m.health = Math.min(m.maxHealth, restoredHealth)
                 m.displayHealth();
             }
             build.generatePauseRight()
@@ -901,7 +898,7 @@ const tech = {
                     document.getElementById("health-bg").style.display = "inline"
                 }
                 document.getElementById("dmg").style.backgroundColor = "#f67";
-                m.health = Math.max(Math.min(m.maxHealth, tech.massEnergyHealth || 0), 0.1);
+                m.health = Math.min(m.maxHealth, tech.massEnergyHealth ?? 0.1);
                 simulation.mobDmgColor = "rgba(255,0,0,0.7)"
                 m.displayHealth();
                 m.lastCalculatedDefense = 0 //this triggers a redraw of the defense bar
@@ -4817,11 +4814,11 @@ const tech = {
         name: "interest",
         descriptionFunction() {
             const rate = this.rate
-            const smallRate = rate * 5 / 18 //each 18% stack gives 5% on coupling and qubits, see level.js
+            const smallPercent = Math.round(100 * rate * 5 / 18) //each 18% stack gives 5% on coupling and qubits, see level.js
             const r = Math.ceil(rate * powerUps.research.count)
-            const c = Math.ceil(smallRate * m.coupling)
-            const q = Math.ceil(smallRate * powerUps.qubit.count)
-            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)}, ${q} ${powerUps.orb.qubit(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${(100 * this.rate * 5 / 18).toFixed(0)}%</strong> of your ${powerUps.orb.coupling(1)} ${powerUps.orb.qubit(1)}`
+            const c = Math.ceil(smallPercent * m.coupling / 100)
+            const q = Math.ceil(smallPercent * powerUps.qubit.count / 100)
+            return `at the start of each <strong>level</strong> <em style ="float: right;">(get ${r} ${powerUps.orb.research(1)}, ${c} ${powerUps.orb.coupling(1)}, ${q} ${powerUps.orb.qubit(1)})</em><br>spawn <strong>${(100 * this.rate).toFixed(0)}%</strong> of your ${powerUps.orb.research(1)} and <strong>${smallPercent}%</strong> of your ${powerUps.orb.coupling(1)} ${powerUps.orb.qubit(1)}`
         },
         maxCount: 9,
         count: 0,
@@ -11893,6 +11890,27 @@ const tech = {
         },
         remove() {
             tech.isEndothermic = false
+        }
+    },
+    {
+        name: "molecular machine",
+        description: `molecular assembler <strong class='color-print'>prints</strong> randomly<br>at <strong>0.5x</strong> <strong class='energy' data-help='energy'>energy</strong> cost`,
+        isFieldTech: true,
+        maxCount: 1,
+        count: 0,
+        frequency: 2,
+        frequencyDefault: 2,
+        allowed() {
+            return m.fieldMode === 4 && !tech.tech.some(t => t.isGunTech && t.count > 0)
+        },
+        requires: "molecular assembler, no gun tech",
+        effect() {
+            tech.isMolecularMachine = true
+            simulation.molecularMode = 5 //random mode, so tech that need one bullet type no longer show up
+        },
+        remove() {
+            tech.isMolecularMachine = false
+            if (simulation.molecularMode === 5) simulation.molecularMode = Math.floor(5 * Math.random())
         }
     },
     {

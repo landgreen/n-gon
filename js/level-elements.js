@@ -72,7 +72,7 @@ const levelElements = {
         code(text) { return String(text).split(" ").filter(name => levelElements.collision.names.includes(name)).map(name => `cat.${name}`).join(" | ") || "0" },
         isDefault(el) { return el.collides === levelElements.collision.defaults[el.type] },
     },
-    linkSources: ["button", "toggle", "keyhole", "zone", "scale", "mobClear", "logic"], //turn linked elements on and off, each has linkOn(el, runtime) and linkCode(el, name), see button
+    linkSources: ["button", "toggle", "keyhole", "zone", "tripwire", "scale", "mobClear", "logic"], //turn linked elements on and off, each has linkOn(el, runtime) and linkCode(el, name), see button
     orLinkProp() { return levelElements.prop.ref("orLink", levelElements.linkSources, { isShown: el => el.orLink !== null && el.orLink !== undefined }) }, //a second link, on while either is, set by linking a second button to it, only shown once it's set
     isLinkedTo: (el, source) => el.link === source.id || el.orLink === source.id,
     isLinkFull: el => !!el.link && !!el.orLink, //two links is the most, a third is refused, see levelEditor.linkTo()
@@ -236,6 +236,11 @@ const levelElements = {
         if (source === "angle") return levelElements.wrapTurn(made.angle - el.angle)
         if (source === "ends") return levelElements.wrapTurn(pointing(el.x, el.y, el.x2, el.y2) - pointing(made.x, made.y, made.x2, made.y2))
         return levelElements.wrapTurn(el.turned || 0)
+    },
+    straighten(el) { //two ends turned to a right angle line up exactly, the turn is rounded so one can end a hair off, like a laser's
+        if (levelElements.turnSource(el) !== "ends") return
+        const [a, b] = Math.abs(el.x2 - el.x) >= Math.abs(el.y2 - el.y) ? ["y", "y2"] : ["x", "x2"]
+        el[a] = el[b] = Number(((el[a] + el[b]) / 2).toFixed(3))
     },
     addTurned(el, degrees) { //turned is only kept while it isn't 0
         const turn = levelElements.wrapTurn((el.turned || 0) + degrees)
@@ -1046,6 +1051,70 @@ levelElements.define("slime", { //level.hazard
     },
 })
 
+levelElements.heatDefaults = { damage: 0.0006, burn: 160, cool: 600, warning: 240, start: 240 } //level.heatZone()'s, export leaves these out
+levelElements.define("heat", { //level.heatZone, the timed heat of furnace and refinery
+    label: "heat",
+    tip: "a zone that glows red, then burns the player and floats blocks, then cools, over and over, like furnace, burn 0 burns for good, linked to a button it can cool while pressed, like refinery",
+    group: "element",
+    isBackground: true, //it's often big, lock it so the mouse goes through
+    handlesLink: true, //it glows before it burns again instead of only running while on
+    writesLink: true, //its code() uses context.link
+    ownsLink: true, //a link source too, on while burning, its own link is what it burns or cools by, not also on like a button's, see levelData.sourceState()
+    defaults: () => ({ x: 0, y: -600, width: 600, height: 600, ...levelElements.heatDefaults, linked: "burns while on" }),
+    props: [
+        ...levelElements.rect(),
+        levelElements.prop.number("damage", { step: 0.0002, min: 0 }),
+        levelElements.prop.number("burn", { step: 20, min: 0 }),
+        levelElements.prop.number("cool", { step: 60, min: 0 }),
+        levelElements.prop.number("warning", { step: 20, min: 0 }),
+        levelElements.prop.number("start", { step: 20, min: 0 }),
+        levelElements.prop.select("linked", ["burns while on", "cools while on"], { isShown: el => !!(el.link || el.orLink) }),
+    ],
+    overlay(el) { //cool, it's invisible, a dashed outline and the phase so it can be found
+        const runtime = levelData.runtimes.get(el.id)
+        const heat = runtime && runtime.heat
+        ctx.setLineDash([10, 8])
+        ctx.lineWidth = 2
+        ctx.strokeStyle = "rgba(255,60,0,0.5)"
+        ctx.strokeRect(el.x, el.y, el.width, el.height)
+        ctx.setLineDash([])
+        levelElements.drawLinks(el, { x: el.x + el.width / 2, y: el.y + el.height / 2 })
+        if (!heat) return
+        const text = heat.isBurning ? (el.burn > 0 ? `burn ${Math.ceil(heat.countdown / 60)}` : "burn") : `cool ${Math.ceil(heat.countdown / 60)}`
+        ctx.font = "16px monospace"
+        ctx.textAlign = "left"
+        ctx.textBaseline = "top"
+        ctx.fillStyle = "rgba(0,0,0,0.5)"
+        ctx.fillText(text, el.x + 8, el.y + 18)
+        ctx.textBaseline = "alphabetic"
+    },
+    linkOn: (el, runtime) => runtime.heat ? runtime.heat.isBurning : null, //doors close and linked elements run while it burns, like refinery's doors
+    linkCode: (el, name) => ({ on: `${name}.isBurning`, off: `!${name}.isBurning` }),
+    options(el) { //level.heatZone()'s options that aren't its defaults
+        return Object.entries(levelElements.heatDefaults).filter(([key, value]) => el[key] !== value).map(([key]) => `${key}: ${levelElements.args(el[key])}`)
+    },
+    build(el) {
+        const heat = level.heatZone(el.x, el.y, el.width, el.height, Object.fromEntries(Object.keys(levelElements.heatDefaults).map(key => [key, el[key]])))
+        return {
+            heat,
+            top() {
+                const state = levelData.linkOn(el)
+                if (el.linked === "cools while on") heat.do(true, state === true)
+                else heat.do(state !== false)
+            },
+        }
+    },
+    code(el, name, context) {
+        const link = context && context.link(el)
+        const options = levelElements.types.heat.options(el)
+        const call = !link ? `${name}.do();` : el.linked === "cools while on" ? `${name}.do(true, ${link.on}); //cools while on` : `${name}.do(${link.on}); //burns while on`
+        return {
+            setup: [`const ${name} = level.heatZone(${levelElements.args(el.x, el.y, el.width, el.height)}${options.length ? `, { ${options.join(", ")} }` : ""});`],
+            top: [call],
+        }
+    },
+})
+
 levelElements.segment = { //geometry for a line between two points, x, y and x2, y2, drag either end, like laser and fizzler
     bounds(el) {
         const b = levelElements.boundsOf([{ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }])
@@ -1088,45 +1157,154 @@ levelElements.segment = { //geometry for a line between two points, x, y and x2,
     },
 }
 
+levelElements.chainOf = el => { //level.chain()'s arguments from the two ends: links 2 radii apart from x, y toward x2, y2, and where the last one is
+    const gap = 2 * Math.max(1, el.radius)
+    const angle = Math.atan2(el.y2 - el.y, el.x2 - el.x)
+    const len = Math.max(2, Math.min(200, Math.round(Math.hypot(el.x2 - el.x, el.y2 - el.y) / gap) + 1))
+    return { gap, angle, len, end: { x: el.x + gap * (len - 1) * Math.cos(angle), y: el.y + gap * (len - 1) * Math.sin(angle) } }
+}
+levelElements.chainEnd = (el, len) => { //x2, y2 for len links the way it points now, rounded like the editor's numbers
+    const { gap, angle } = levelElements.chainOf(el)
+    const round = n => Math.round(n * 1000) / 1000
+    return { x2: round(el.x + gap * (len - 1) * Math.cos(angle)), y2: round(el.y + gap * (len - 1) * Math.sin(angle)) }
+}
+levelElements.define("chain", { //level.chain, round links held together, pinned at x, y and with attached at the other end too
+    tip: "round links held together, pinned at the start, attached pins the other end too so it sags like a bridge, unattached it hangs like a rope, drag either end, the player and blocks hit it, the map doesn't",
+    group: "element",
+    defaults: () => ({ x: 0, y: -300, x2: 520, y2: -300, radius: 20, attached: true, stiffness: 1, damping: 1 }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("x2", { isGrid: true }),
+        levelElements.prop.number("y2", { isGrid: true }),
+        levelElements.prop.number("links", { //worked out from the ends, typing one moves the other end
+            step: 1,
+            min: 2,
+            read: el => levelElements.chainOf(el).len,
+            write(el, value) { Object.assign(el, levelElements.chainEnd(el, Math.max(2, Math.min(200, Math.round(value))))) },
+        }),
+        levelElements.prop.number("radius", { step: 1, min: 5 }),
+        levelElements.prop.bool("attached"),
+        levelElements.prop.number("stiffness", { step: 0.05, min: 0 }),
+        levelElements.prop.number("damping", { step: 0.05, min: 0 }),
+    ],
+    ...levelElements.segment,
+    bounds(el) {
+        const { end } = levelElements.chainOf(el)
+        const r = Math.max(10, el.radius)
+        const b = levelElements.boundsOf([{ x: el.x, y: el.y }, end])
+        return { x: b.x - r, y: b.y - r, width: b.width + 2 * r, height: b.height + 2 * r }
+    },
+    contains(el, p) { //on the line of links
+        const { end } = levelElements.chainOf(el)
+        const dx = end.x - el.x
+        const dy = end.y - el.y
+        const t = Math.max(0, Math.min(1, ((p.x - el.x) * dx + (p.y - el.y) * dy) / (dx * dx + dy * dy || 1)))
+        return Math.hypot(p.x - el.x - t * dx, p.y - el.y - t * dy) < Math.max(15, el.radius)
+    },
+    handles: el => [{ id: "start", x: el.x, y: el.y }, { id: "end", ...levelElements.chainOf(el).end }],
+    dragHandle(el, id, point) { //the end snaps to a whole number of links
+        if (id === "start") {
+            const { end } = levelElements.chainOf(el)
+            el.x = point.x
+            el.y = point.y
+            el.x2 = end.x
+            el.y2 = end.y
+            return
+        }
+        el.x2 = point.x
+        el.y2 = point.y
+        Object.assign(el, levelElements.chainEnd(el, levelElements.chainOf(el).len))
+    },
+    summary: el => `chain(${levelElements.args(el.x, el.y)}, ${levelElements.chainOf(el).len} links)`,
+    overlay(el) { //where the links start, dashed, and its pins
+        const { gap, angle, len } = levelElements.chainOf(el)
+        ctx.setLineDash([6, 6])
+        ctx.lineWidth = 1.5
+        ctx.strokeStyle = "rgba(0,0,0,0.35)"
+        ctx.beginPath()
+        for (let i = 0; i < len; i++) {
+            const x = el.x + gap * i * Math.cos(angle)
+            const y = el.y + gap * i * Math.sin(angle)
+            ctx.moveTo(x + el.radius, y)
+            ctx.arc(x, y, el.radius, 0, 2 * Math.PI)
+        }
+        ctx.stroke()
+        ctx.setLineDash([])
+        ctx.fillStyle = "#444"
+        ctx.beginPath()
+        for (const p of el.attached ? [{ x: el.x, y: el.y }, levelElements.chainOf(el).end] : [{ x: el.x, y: el.y }]) {
+            ctx.moveTo(p.x + 6, p.y)
+            ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI)
+        }
+        ctx.fill()
+    },
+    chainArgs(el) { //level.chain()'s arguments, the defaults at the end left out
+        const { angle, len } = levelElements.chainOf(el)
+        const args = [el.x, el.y, Math.round(angle * 1e10) / 1e10, !!el.attached, len, el.radius, el.stiffness, el.damping]
+        const defaults = { 5: 20, 6: 1, 7: 1 } //radius, stiffness, damping
+        while (args.length > 5 && args[args.length - 1] === defaults[args.length - 1]) args.pop()
+        return args
+    },
+    build(el) {
+        const [x, y, angle, attached, len, radius = 20, stiffness = 1, damping = 1] = levelElements.types.chain.chainArgs(el)
+        level.chain(x, y, angle, attached, len, radius, stiffness, damping)
+        return {}
+    },
+    code: el => ({ setup: [`level.chain(${levelElements.args(...levelElements.types.chain.chainArgs(el))});`] }),
+})
+
 levelElements.laserAngle = el => { //the laser's angle now, radians: where x2, y2 points, plus spin and swing, by simulation.cycle like written levels' oscillating lasers
     let angle = Math.atan2(el.y2 - el.y, el.x2 - el.x)
     if (el.spin) angle += el.spin * Math.PI / 180 / 60 * simulation.cycle
     if (el.swing) angle += el.swing * Math.PI / 180 * Math.sin(2 * Math.PI / el.swingTime * simulation.cycle)
     return angle
 }
+levelElements.reflectionsOf = el => Math.min(20, Math.max(0, Math.round(el.reflections || 0))) //a laser's or tripwire's bounces, each is another ray, so it stops at 20
 levelElements.laserStyles = { beam: "#ff0000", arc: "#46aaff" } //the top of its info box switches them, each with the color it starts with
 levelElements.define("laser", {
-    tip: "beam between two points that hurts the player, drag either end, the top of its info box makes it an arc of electricity that hits a little wider, spin and swing turn it around x, y, motion makes it a motion sensor",
+    tip: "beam between two points that hurts the player, drag either end, the top of its info box makes it an arc of electricity that hits a little wider, spin and swing turn it around x, y, tracking turns it toward the player while it sees them, reflections bounce it off walls and blocks, motion query makes it a motion sensor",
     group: "element",
-    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12, color: levelElements.laserStyles.beam, style: "beam", spin: 0, swing: 0, swingTime: 240, motion: false }),
+    defaults: () => ({ x: 0, y: -300, x2: 400, y2: -300, damage: 0.12, color: levelElements.laserStyles.beam, style: "beam", spin: 0, swing: 0, swingTime: 240, tracking: false, trackSpeed: 60, trackRange: 1500, trackReach: 180, trackReset: false, reflections: 0, motion: false }),
     props: [
         ...levelElements.position(),
         levelElements.prop.number("x2", { isGrid: true }),
         levelElements.prop.number("y2", { isGrid: true }),
         levelElements.prop.number("damage", { step: 0.02, min: 0 }),
         levelElements.prop.color("color"),
-        levelElements.prop.number("spin", { step: 15 }), //degrees a second around x, y
-        levelElements.prop.number("swing", { step: 5, min: 0 }), //degrees each way
-        levelElements.prop.number("swingTime", { step: 30, min: 10, isShown: el => el.swing > 0 }), //frames for one swing there and back
-        levelElements.prop.bool("motion"), //level.laser's motionQuery()
+        levelElements.prop.bool("tracking"), //level.laser's track(), replaces spin and swing
+        levelElements.prop.number("trackSpeed", { step: 15, min: 0, label: "track speed", isShown: el => el.tracking }), //degrees a second
+        levelElements.prop.number("trackRange", { step: 100, min: 0, label: "track range", isShown: el => el.tracking }), //how far it sees
+        levelElements.prop.number("trackReach", { step: 15, min: 0, label: "track reach", isShown: el => el.tracking }), //degrees each way from where it points, 180 or more is all the way around
+        levelElements.prop.bool("trackReset", { label: "reset tracking", isShown: el => el.tracking }), //turns back to where it points when it can't see the player
+        levelElements.prop.number("spin", { step: 15, isShown: el => !el.tracking }), //degrees a second around x, y
+        levelElements.prop.number("swing", { step: 5, min: 0, isShown: el => !el.tracking }), //degrees each way
+        levelElements.prop.number("swingTime", { step: 30, min: 10, isShown: el => !el.tracking && el.swing > 0 }), //frames for one swing there and back
+        levelElements.prop.number("reflections", { step: 1, min: 0 }), //bounces off the map and blocks
+        levelElements.prop.bool("motion", { label: "motion query" }), //level.laser's motionQuery()
     ],
     ...levelElements.segment,
     flip(el, axis, center) { //the ends mirror, and it spins the other way
         levelElements.segment.flip(el, axis, center)
         if (el.spin) el.spin = -el.spin
     },
-    overlay(el) { //the line, and where it turns: a circle for spin, the two ends of a swing
+    overlay(el) { //the line, and where it turns: a circle for spin, the two ends of a swing, tracking's reach and how far it sees
         levelElements.segment.overlay(el)
-        if (!el.spin && !el.swing) return
+        if (el.tracking ? false : !el.spin && !el.swing) return
         const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
         const base = Math.atan2(el.y2 - el.y, el.x2 - el.x)
-        const reach = el.swing * Math.PI / 180
+        const reach = (el.tracking ? Math.min(180, el.trackReach) : el.swing) * Math.PI / 180
         ctx.save()
         ctx.setLineDash([12, 8])
         ctx.lineWidth = 2
         ctx.strokeStyle = "rgba(255,0,0,0.35)"
         ctx.beginPath()
-        if (el.spin) {
+        if (el.tracking) {
+            ctx.arc(el.x, el.y, el.trackRange, 0, 2 * Math.PI) //how far it sees
+            ctx.stroke()
+            ctx.beginPath()
+            ctx.setLineDash([4, 6])
+        }
+        if (el.tracking ? reach >= Math.PI : el.spin) {
             ctx.arc(el.x, el.y, length, 0, 2 * Math.PI)
         } else {
             for (const side of [-1, 1]) {
@@ -1143,10 +1321,13 @@ levelElements.define("laser", {
     build(el) {
         const laser = level.laser({ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }, el.damage, el.color)
         laser.isArc = el.style === "arc"
+        laser.reflections = levelElements.reflectionsOf(el)
         const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
         return {
             custom() {
-                if (el.spin || el.swing) {
+                if (el.tracking) {
+                    laser.track(el.trackSpeed * Math.PI / 180 / 60, el.trackRange, Math.min(180, el.trackReach) * Math.PI / 180, Boolean(el.trackReset))
+                } else if (el.spin || el.swing) {
                     const angle = levelElements.laserAngle(el)
                     laser.look = { x: el.x + length * Math.cos(angle), y: el.y + length * Math.sin(angle) }
                 }
@@ -1158,7 +1339,9 @@ levelElements.define("laser", {
     code(el, name) {
         const a = levelElements.args
         const custom = []
-        if (el.spin || el.swing) { //like written levels' oscillating lasers
+        if (el.tracking) {
+            custom.push(`${name}.track(${a(el.trackSpeed * Math.PI / 180 / 60)}, ${a(el.trackRange)}, ${a(Math.min(180, el.trackReach) * Math.PI / 180)}${el.trackReset ? ", true" : ""});`)
+        } else if (el.spin || el.swing) { //like written levels' oscillating lasers
             const length = Math.hypot(el.x2 - el.x, el.y2 - el.y)
             const base = Math.atan2(el.y2 - el.y, el.x2 - el.x)
             const parts = base ? [a(base)] : [] //pointing right is 0
@@ -1168,7 +1351,7 @@ levelElements.define("laser", {
         }
         custom.push(el.motion ? `${name}.motionQuery();` : `${name}.query();`)
         return {
-            setup: [`const ${name} = level.laser({ x: ${a(el.x)}, y: ${a(el.y)} }, { x: ${a(el.x2)}, y: ${a(el.y2)} }, ${a(el.damage)}${el.color === levelElements.laserStyles.beam ? "" : `, ${a(el.color)}`});`, ...(el.style === "arc" ? [`${name}.isArc = true; //electricity, hits a little wider`] : [])],
+            setup: [`const ${name} = level.laser({ x: ${a(el.x)}, y: ${a(el.y)} }, { x: ${a(el.x2)}, y: ${a(el.y2)} }, ${a(el.damage)}${el.color === levelElements.laserStyles.beam ? "" : `, ${a(el.color)}`});`, ...(el.style === "arc" ? [`${name}.isArc = true; //electricity, hits a little wider`] : []), ...(levelElements.reflectionsOf(el) ? [`${name}.reflections = ${levelElements.reflectionsOf(el)}; //bounces off the map and blocks`] : [])],
             custom,
         }
     },
@@ -1266,7 +1449,7 @@ levelElements.define("train", { //level.train
     writesLink: true, //its code() uses context.link
     rebuildWithRefs: true, //it follows the path as it was when it was built
     outlivesRefs: true, //deleting its path leaves it where it is
-    defaults: () => ({ x: 0, y: -200, width: 200, height: 25, path: null, speed: 4 }),
+    defaults: () => ({ x: 0, y: -200, width: 200, height: 25, path: null, speed: 4, smoothStop: true }),
     props: [
         ...levelElements.position(), //its middle, on the path
         levelElements.prop.number("width", { isGrid: true, min: 10 }),
@@ -1281,6 +1464,7 @@ levelElements.define("train", { //level.train
             },
         }),
         levelElements.prop.number("speed", { step: 1, min: 0 }),
+        levelElements.prop.bool("smoothStop", { label: "smooth stop" }),
     ],
     bounds: el => ({ x: el.x - el.width / 2, y: el.y - el.height / 2, width: el.width, height: el.height }),
     handles: el => [{ id: "size", x: el.x + el.width / 2, y: el.y + el.height / 2 }],
@@ -1301,7 +1485,7 @@ levelElements.define("train", { //level.train
     },
     build(el) {
         const { points, isLoop, start } = levelElements.sawRoute(el, levelData.data)
-        const train = level.train(points, el.width, el.height, el.speed, isLoop, start)
+        const train = level.train(points, el.width, el.height, el.speed, isLoop, start, el.smoothStop)
         return {
             containsPoint: point => Matter.Bounds.contains(train.bounds, point), //clicking the moving train selects it
             custom() { train.move(levelData.linkOn(el) !== false) },
@@ -1312,8 +1496,8 @@ levelElements.define("train", { //level.train
         const link = context && context.link(el)
         const route = levelElements.sawRoute(el, context ? context.data : levelData.data)
         const round = n => Math.round(n * 10) / 10
-        const args = [el.width, el.height, el.speed, route.isLoop, round(route.start)]
-        const defaults = [200, 25, 4, false, 0]
+        const args = [el.width, el.height, el.speed, route.isLoop, round(route.start), el.smoothStop]
+        const defaults = [200, 25, 4, false, 0, true]
         while (args.length && args[args.length - 1] === defaults[args.length - 1]) args.pop() //leave out what's the default
         return {
             setup: [`const ${name} = level.train(${JSON.stringify(route.points.map(p => p.map(round)))}${args.length ? `, ${levelElements.args(...args)}` : ""});`],
@@ -1697,6 +1881,54 @@ levelElements.zoneWho = { //what a zone notices, and the same as javascript
     mob: { list: () => mob, code: "mob" },
     any: { list: () => [player].concat(body, mob), code: "[player].concat(body, mob)" },
 }
+levelElements.tripwireWho = { player: "player", block: "body", mob: "mob", any: "player body mob" } //a tripwire's who, and what level.tripwire() takes
+levelElements.define("tripwire", { //a trigger, a link source that's on while the player (or a block or mob) breaks its beam, level.tripwire()
+    tip: "a thin beam between two points, linked doors open and linked elements run while the player (or a block or mob) breaks it, drag either end, it doesn't hurt, it bounces off the map with reflections",
+    group: "element",
+    defaults: () => ({ x: 0, y: -100, x2: 400, y2: -100, who: "player", on: "while broken", reflections: 0, visible: true, color: "#ff3c3c", lineWidth: 1.5 }),
+    props: [
+        ...levelElements.position(),
+        levelElements.prop.number("x2", { isGrid: true }),
+        levelElements.prop.number("y2", { isGrid: true }),
+        levelElements.prop.select("who", Object.keys(levelElements.tripwireWho), { tip: "what breaks it: the player, a block, a mob, or any of them, anything else stops the beam short, a cloaked player doesn't break it" }),
+        levelElements.prop.select("on", ["while broken", "stays on"], { tip: "while broken is on only while something is in the beam, stays on is on for good once it's been broken" }),
+        levelElements.prop.number("reflections", { step: 1, min: 0, tip: "how many times it bounces off the map, 20 at most, blocks and mobs stop it" }),
+        levelElements.prop.bool("visible", { tip: "players see the beam, off makes it a hidden tripwire, the editor always draws it" }),
+        levelElements.prop.color("color", { tip: "any css color, it's faint while off and brighter while broken", isShown: el => el.visible !== false }),
+        levelElements.prop.number("lineWidth", { step: 0.5, min: 0.5, tip: "how thick it is while off, game units, it's twice as thick while broken", isShown: el => el.visible !== false }),
+    ],
+    ...levelElements.segment,
+    overlay(el) {
+        ctx.save()
+        ctx.setLineDash([6, 6])
+        levelElements.segment.overlay(el)
+        ctx.restore()
+        levelElements.drawLinks(el, { x: (el.x + el.x2) / 2, y: (el.y + el.y2) / 2 })
+    },
+    summary: el => `tripwire(${levelElements.args(el.x, el.y, el.x2, el.y2)})`,
+    build(el) {
+        const tripwire = level.tripwire({ x: el.x, y: el.y }, { x: el.x2, y: el.y2 }, levelElements.tripwireWho[el.who] || "player", el.on === "stays on")
+        tripwire.reflections = levelElements.reflectionsOf(el)
+        tripwire.isVisible = el.visible !== false //the editor draws its dashed line either way, overlay()
+        tripwire.color = el.color || "#ff3c3c"
+        tripwire.lineWidth = el.lineWidth > 0 ? el.lineWidth : 1.5
+        return { tripwire, custom() { tripwire.query() } }
+    },
+    linkOn: (el, runtime) => runtime.tripwire ? runtime.tripwire.isOn : null,
+    linkCode: (el, name) => ({ on: `${name}.isOn`, off: `!${name}.isOn` }),
+    code(el, name) {
+        const a = levelElements.args
+        const who = levelElements.tripwireWho[el.who] || "player"
+        const args = [`{ x: ${a(el.x)}, y: ${a(el.y)} }`, `{ x: ${a(el.x2)}, y: ${a(el.y2)} }`]
+        if (who !== "player" || el.on === "stays on") args.push(a(who))
+        if (el.on === "stays on") args.push("true")
+        const reflections = levelElements.reflectionsOf(el)
+        return {
+            setup: [`const ${name} = level.tripwire(${args.join(", ")});${el.on === "stays on" ? " //stays on once broken" : ""}`, ...(reflections ? [`${name}.reflections = ${reflections}; //bounces off the map`] : []), ...(el.visible === false ? [`${name}.isVisible = false; //hidden`] : []), ...(el.visible !== false && el.color && el.color !== "#ff3c3c" ? [`${name}.color = ${a(el.color)};`] : []), ...(el.visible !== false && el.lineWidth > 0 && el.lineWidth !== 1.5 ? [`${name}.lineWidth = ${a(el.lineWidth)};`] : [])],
+            custom: [`${name}.query();`],
+        }
+    },
+})
 levelElements.baseZoom = (data = levelData.data) => data && Number.isFinite(data.zoom) ? data.zoom : 1400 //the level's zoom, a zone's zoom goals start as it, levelData.data is the level being played or edited
 levelElements.define("zone", { //a trigger, a link source that's on while the player is inside, only the editor draws it, a box, or with circle a circle around x, y
     tip: "invisible box or circle, linked doors open and linked elements run while the player (or a block or mob) is inside, stays on once something has been in, check effects to push, slow, hurt, or drain what's inside",
@@ -1885,7 +2117,7 @@ levelElements.define("scale", { //level.scale, shaped like a button, a pad that'
 
 levelElements.waitingMobs = (el, data) => data.elements.filter(other => { //the linked mobs a mob clear counts, it can't be clear until they've spawned
     if (levelElements.types[other.type]?.group !== "mob" || (!other.link && !other.orLink) || other.edited) return false
-    const isBoss = other.type === "boss" || other.type === "secondaryBoss" || (other.type === "namedMob" && typeof spawn !== "undefined" && spawn.bossTier.flat().includes(other.name))
+    const isBoss = other.type === "boss" || other.type === "secondaryBoss" || (other.type === "namedMob" && levelElements.bossNames().includes(other.name))
     if (el.who === "bosses") return isBoss
     if (el.who === "level") return true
     return [[other.x, other.y], ...(other.spots || [])].some(([x, y]) => x >= el.x && x <= el.x + el.width && y >= el.y && y <= el.y + el.height)
@@ -2149,7 +2381,7 @@ levelElements.linkable = name => { //a link prop, so a button or toggle can turn
     type.defaults = () => ({ ...defaults(), link: null, orLink: null, runs: "while on" })
     type.props.push(levelElements.prop.ref("link", levelElements.linkSources), levelElements.orLinkProp(), levelElements.runsProp())
 }
-for (const name of ["boost", "mover", "transport", "elevator", "train", "laser", "buzzsaw", "wind", "slime", "fizzler", "spinner", "gravityZone", "dispenser"]) levelElements.linkable(name)
+for (const name of ["boost", "mover", "transport", "elevator", "train", "laser", "buzzsaw", "wind", "slime", "heat", "fizzler", "spinner", "gravityZone", "dispenser"]) levelElements.linkable(name)
 for (const name of levelElements.linkSources) { //a link source linked to another is only on while both are, set with the other one's link button, the row only shows once it's set
     const type = levelElements.types[name]
     const defaults = type.defaults
@@ -2773,7 +3005,21 @@ levelElements.define("constraint", {
     defaults: () => ({ x: 0, y: -300, anchor: null, body: null, bx: 0, by: 0, stiffness: 1, damping: 0, length: 200 }),
     props: [
         ...levelElements.position(), //pointA, in the level, on the anchor block if it has one
-        levelElements.prop.ref("anchor", ["block"], { tip: "pick a block to tie this one to, the circle end moves with it, null pins it to the level" }), //bodyA
+        levelElements.prop.ref("anchor", ["block"], {
+            tip: "pick a block to tie this one to, its circle end goes to that block's center, null pins it to the level",
+            write(el, id) { //a new anchor moves the circle end to its center and the length to how far apart the ends are where the blocks start, so the level starts at rest, Matter's constraints shake when tied far from a block's center
+                const anchor = id && id !== el.anchor && levelData.find(levelData.data, id)
+                el.anchor = id
+                if (!anchor) return
+                const c = levelElements.center(anchor)
+                el.x = c.x
+                el.y = c.y
+                const target = el.body && levelData.find(levelData.data, el.body)
+                if (!target) return
+                const end = levelElements.center(target)
+                el.length = Math.round(Math.hypot(end.x + el.bx - c.x, end.y + el.by - c.y))
+            },
+        }), //bodyA
         levelElements.prop.ref("body", ["block"]), //bodyB
         levelElements.prop.number("bx", { isGrid: true }), //pointB, from the block's center
         levelElements.prop.number("by", { isGrid: true }),
@@ -2946,7 +3192,12 @@ levelElements.define("nest", { //level.nest
         return { setup: [`level.nest(${levelElements.args(el.x, el.y, el.name, ...extra)});`] }
     },
 })
-levelElements.mobNames = () => typeof spawn === "undefined" ? ["starter"] : [...new Set([...spawn.tier.flat(), ...spawn.bossTier.flat()])] //every mob and boss by tier, spawn.js isn't loaded in the unit tests
+levelElements.mobNames = () => typeof spawn === "undefined" ? ["starter"] : [...new Set([...spawn.tier.flat(), ...levelElements.bossNames()])] //every mob and boss by tier, spawn.js isn't loaded in the unit tests
+levelElements.bossNames = () => typeof spawn === "undefined" ? [] : [...spawn.bossTier.flat(), ...(spawn.levelBossList || [])] //every boss by tier, then the ones made for one level
+levelElements.namedMobCalls = { //mobs that don't spawn with (x, y): their args, and their args as code
+    myriapodsBoss: (x, y) => [[[{ x: x - 190, y }]], `[{ x: ${levelElements.args(x - 190)}, y: ${levelElements.args(y)} }]`], //its worms grow right from each spot, so it starts left of the marker
+}
+levelElements.spawnNamedMob = (name, x, y) => spawn[name](...(levelElements.namedMobCalls[name] ? levelElements.namedMobCalls[name](x, y)[0] : [x, y]))
 levelElements.define("namedMob", { //one mob picked by name, for levels that want a specific mob
     ...levelElements.mobType("namedMob", "mob by name", 40, "rgba(255,40,40,0.35)", false),
     tip: "one mob picked by name, it always spawns",
@@ -2959,9 +3210,9 @@ levelElements.define("namedMob", { //one mob picked by name, for levels that wan
     overlay: el => levelElements.marker(el, 40, "rgba(255,40,40,0.35)", el.name),
     summary: el => `${el.name}(${levelElements.args(el.x, el.y)})`,
     build(el, options) {
-        if (options.isSpawning && levelElements.mobNames().includes(el.name) && typeof spawn[el.name] === "function") spawn[el.name](el.x, el.y)
+        if (options.isSpawning && levelElements.mobNames().includes(el.name) && typeof spawn[el.name] === "function") levelElements.spawnNamedMob(el.name, el.x, el.y)
     },
-    code: el => ({ setup: levelElements.mobNames().includes(el.name) ? [`spawn[${JSON.stringify(el.name)}](${levelElements.args(el.x, el.y)});`] : [] }),
+    code: el => ({ setup: levelElements.mobNames().includes(el.name) ? [`spawn[${JSON.stringify(el.name)}](${levelElements.namedMobCalls[el.name] ? levelElements.namedMobCalls[el.name](el.x, el.y)[1] : levelElements.args(el.x, el.y)});`] : [] }),
 })
 levelElements.bossType = (spawnName, label, radius, fill, fontSize) => ({ //a boss spawns at its spot or one of its other spots, picked at random each time the level loads, fontSize for a long label
     ...levelElements.mobType(spawnName, label, radius, fill, false),
@@ -3190,6 +3441,12 @@ levelElements.tips = {
     spin: "keeps turning around x, y, degrees a second, negative turns the other way, 0 doesn't",
     swing: "sways back and forth around x, y, this many degrees each way from where it points, 0 doesn't",
     swingTime: "frames for one swing there and back, 60 is a second",
+    tracking: "turns toward the player while it can see them, in range, not cloaked, nothing in the way, when it loses them it holds still, spin and swing are off",
+    trackSpeed: "how fast it turns toward the player, degrees a second",
+    trackRange: "how far away it can see the player, game units, its line won't always reach that far",
+    trackReach: "how far it can turn each way from where it points, degrees, 180 turns all the way around",
+    reflections: "how many times it bounces off the map and blocks, each bounce reaches up to 5000, it stops on the player, 0 doesn't bounce, 20 at most",
+    trackReset: "when it can't see the player, or they're outside its reach, it turns back to where it points at the same speed, off holds still",
     motion: "a motion sensor: a faint white beam, when the player crosses it, it flashes white for a second, then hurts like a laser for about 10 seconds",
     who: "what turns it on by being inside: the player, a block, a mob, or any of them",
     on: "",
@@ -3209,13 +3466,15 @@ levelElements.typeTips = {
     boost: { launchHeight: "about how high it throws the player, game units" },
     transport: { distance: "how far it slides from its start, game units" },
     buzzsaw: { radius: "how big it is, game units", path: "the path it travels along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put", spin: "how fast it turns, radians a cycle, negative turns it the other way", look: "how it's drawn, it hurts the same in every look" },
-    train: { width: "game units, its middle rides on the path", height: "game units", path: "the path it rides along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put" },
+    train: { width: "game units, its middle rides on the path", height: "game units", path: "the path it rides along, draw makes a new one and links it, pick links a draw path you've made, it goes back and forth, or around and around if it's closed, it starts at the closest spot to x, y, null stays put", speed: "game units a cycle, 0 stays put", smoothStop: "slows down to turn around at an upper end of its path, off it turns hard and jolts the player" },
     door: { distance: "how far up it slides to open, game units", speed: "how fast it opens and closes" },
     elevator: { travel: "how far up it goes, game units", force: "how hard it pushes up, more is faster", downSpeed: "about how fast it comes back down, game units each frame", smoothStop: "slows down to stop at the top, off it stops hard and flings the player up", onTouch: "only moves while the player stands on it" },
     vanish: { vertical: "shrinks sideways instead of down" },
     spinner: { spin: "how fast it's turning when the level starts, radians a frame", motor: "keeps it turning, negative turns the other way, its link turns the motor on and off", frictionAir: "slows its turning too, so a motor tops out sooner" },
     wind: { vx: "push to the right a frame, negative pushes left", vy: "push down a frame, negative pushes up", float: "cancels gravity inside it" },
+    chain: { links: "how many round links, typing one moves the far end", radius: "each link's size, links are 2 radii apart", attached: "pins the far end too, unchecked it hangs loose from the start", stiffness: "1 holds the links tight, small numbers stretch like a spring", damping: "how fast its stretching settles" },
     slime: { rise: "how fast it fills, game units a frame, 0 is always full, linked it drains while off" },
+    heat: { damage: "how much it hurts while burning, refinery and furnace use 0.0006", burn: "frames it burns, 60 is a second, 0 burns for good once it starts", cool: "frames it's cool before it glows again, the warning is the end of it", warning: "frames it glows red before it burns", start: "frames until it first burns, stagger zones with it so they take turns", linked: "burns while on: its link lets it glow and burn, off it cools, cools while on: it's cool while its link is on and for cool frames after, like refinery's buttons" },
     toggle: { isOn: "how it starts", staysOn: "once it's on it can't be flipped back" },
     logic: { onTime: "frames it's on, 60 is a second", offTime: "frames it's off, 60 is a second", offset: "frames to shift it, so timers can take turns" },
     portal: { angle: "which way end A faces, degrees, 0 is right, 90 up", angle2: "which way end B faces, degrees", exit: "how things come out: keep their momentum, straight out, or launched" },
@@ -3257,13 +3516,14 @@ levelElements.level = {
         levelElements.prop.text("name"),
         levelElements.prop.text("author"), //who made it, the level logs its name and author when it loads, see levelData.authorLog()
         levelElements.prop.text("log"), //a message in the in-game console when the level starts, after the author's
+        levelElements.prop.select("mobTier", ["1", "2", "3", "4", "5"], { label: "mob tier", tip: "the tier of a training level's random mobs and bosses, bosses are at most tier 4, until it's picked they're tier 1", isShown: data => data.isTraining }), //see level.applyMobTier(), not in defaults(), so default keeps it
         levelElements.prop.number("zoom", { step: 100, min: 200 }), //level.defaultZoom when it's played
         levelElements.prop.color("background"),
         levelElements.prop.color("mapColor"),
         levelElements.prop.color("blockColor"),
         levelElements.prop.number("gravity", { step: 0.1, min: 0.1 }), //times normal gravity, for the player, blocks, and power ups, mobs have their own
         levelElements.prop.select("fall", ["spawn", "sky"]), //falling off the bottom sends the player back to the spawn, or keeps them falling from the sky above it
-        levelElements.prop.bool("lineOfSight", { label: "line of sight", tip: "only what the player can see is drawn, like subway, it shows in quick test and test export, not while editing" }),
+        levelElements.prop.bool("lineOfSight", { label: "line of sight", tip: "only what the player can see is drawn, like subway, it shows in quick test and full test, not while editing" }),
         levelElements.prop.number("constraintTextX", { isGrid: true }), //where the run's constraint shows, from the spawn, level.announceText()
         levelElements.prop.number("constraintTextY", { isGrid: true }),
         levelElements.prop.veto("mobVeto", levelElements.vetoTiers.mob, "mob", { isShown: data => data.elements.some(el => el.type === "mobSpot") }), //each mob spot shows it too
@@ -3346,3 +3606,5 @@ for (const name of Object.keys(levelElements.types)) {
         },
     }))
 }
+
+levelElements.linkSources.push("heat") //after the loops above, it keeps the link, runs, and delay of a linked element, and its link is its own input, see ownsLink

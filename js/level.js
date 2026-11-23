@@ -16,21 +16,156 @@ const level = {
     playableLevels: ["labs", "rooftops", "skyscrapers", "warehouse", "highrise", "office", "aerie", "satellite", "sewers", "testChamber", "pavilion", "lock", "towers", "flocculation", "gravitron", "substructure", "corridor", "furnace", "superstructure", "HVAC", "chute", "refinery"], //, "vault"
     communityLevels: ["gauntlet", "stronghold", "basement", "crossfire", "vats", "run", "ngon", "house", "perplex", "coliseum", "tunnel", "islands", "temple", "dripp", "biohazard", "yingYang", "staircase", "fortress", "commandeer", "clock", "buttonbutton", "downpour", /* "superNgonBros", */ "underpass", "cantilever", "tlinat", "ruins", "ace", "crimsonTowers", "LaunchSite", "shipwreck", "unchartedCave", "dojo", "arena", "soft", "flappyGon", "rings", "trial", "zenith", "archipelago", "vents", "intervals", "turbine", "terminal", "conduit", "voltage", "lake", "ballast"],
     trainingLevels: ["walk", "crouch", "jump", "hold", "throw", "throwAt", "deflect", "heal", "fire", "nailGun", "shotGun", "superBall", "matterWave", "missile", "stack"], //, "mine", "grenades", "harpoon"
+    communityProgressionLevels: ["stronghold", "ngon", "vats", "perplex", "dripp", "vents", "ballast", "crossfire", "coliseum", "commandeer", "downpour", "LaunchSite", "zenith", "turbine"], //community levels flagged as progression, every other one is a training level, see isTrainingLevel()
+    isCommunityTraining: false, //the training run is a level picked in chooseCommunityTraining(), not the tutorial levels
+    communityTrainingStart: null, //the level the title page's training menu picked, populateLevels() starts the training run on it
+    localData(name) { //a local level's saved editor data, null for other levels
+        return Object.hasOwn(level.localMaps, name) && levelData.store.has(name) ? levelData.store.levels[name] : null
+    },
+    isTrainingLevel(name) { //community and local levels are training levels unless they're flagged progression, a local level by isTraining: false in its data
+        if (Object.hasOwn(level.localMaps, name)) return level.localData(name)?.isTraining !== false
+        return level.communityLevels.includes(name) && !level.communityProgressionLevels.includes(name)
+    },
+    communityTrainingLevels() { //local and built in training levels, the picker's order
+        return level.localLevels().concat(level.communityLevels).filter(name => level.isTrainingLevel(name))
+    },
+    startCommunityTraining(name) { //the training run's next level is this community training level, finishing it opens the picker again
+        level.levels = [name]
+        level.onLevel = -1 //nextLevel() goes to it
+        level.isCommunityTraining = true
+        level.nextLevel()
+    },
+    chooseCommunityTraining(door = null) { //opened by the title page's community button or a finished community training level's exit
+        const isTitle = !door
+        if (isTitle) {
+            if (level.isTrainingMenuOpen()) return level.closeTrainingMenu() //the community button again closes it
+            for (const details of document.querySelectorAll('details[name="front-page-group"]')) details.open = false //one title page menu at a time
+        } else {
+            simulation.paused = true
+            simulation.isChoosing = true //stops p from un pausing on key down
+            document.body.style.cursor = "auto"
+            mouseMove.unlock()
+            requestAnimationFrame(() => { //dims the paused game behind the menu
+                ctx.fillStyle = "rgba(150,150,150,0.9)"
+                ctx.fillRect(0, 0, canvas.width, canvas.height)
+            })
+        }
+        const names = level.communityTrainingLevels()
+        const local = names.filter(name => Object.hasOwn(level.localMaps, name))
+        const community = names.filter(name => !Object.hasOwn(level.localMaps, name))
+        levelPoolMenu.localThumbnails = {} //local levels can change in the level editor
+        const section = (title, list, { showThumbnails = true, action = "" } = {}) => {
+            if (!list.length && !action) return ""
+            const heading = `<div class="training-picker-title"><span>${title}</span>${action}</div>`
+            if (!list.length) return heading
+            const buttons = list.map(name => `<button type="button" class="training-picker-level" data-level="${name}">${showThumbnails ? levelPoolMenu.thumbnail(name) : ""}<span class="level-chip-name">${name}</span></button>`)
+            return `${heading}<div class="training-picker-levels${showThumbnails ? "" : " training-picker-tutorial-levels"}">${buttons.join("")}</div>`
+        }
+        const importButton = `<button type="button" class="training-picker-button training-picker-import">import</button>`
+        const randomButton = `<button type="button" class="training-picker-button training-picker-random"${names.length ? "" : " disabled"}>random</button>`
+        const exitButton = isTitle ? "" : `<button type="button" class="training-picker-button training-picker-exit">exit</button>`
+        const grid = document.getElementById("choose-grid")
+        grid.classList.add("choose-grid-no-images")
+        grid.classList.remove("choose-grid")
+        grid.style.pointerEvents = "auto"
+        grid.innerHTML = `<div class="training-picker">
+            ${levelPoolMenu.toolbar(false, exitButton)}
+            ${section("tutorial", level.trainingLevels, { showThumbnails: false })}
+            ${section("local storage", local, { action: importButton })}
+            ${section("community training", community, { action: randomButton })}
+            ${section("community progression", level.communityProgressionLevels)}
+        </div>`
+        const startTutorial = name => {
+            level.communityTrainingStart = null
+            if (isTitle) level.closeTrainingMenu()
+            else level.endRun()
+            simulation.startGame(false, true, name)
+        }
+        const play = name => {
+            if (level.trainingLevels.includes(name)) return startTutorial(name)
+            level.closeTrainingMenu()
+            if (!isTitle) {
+                level.unPause()
+                document.body.style.cursor = "none"
+                return level.startCommunityTraining(name)
+            }
+            level.communityTrainingStart = name
+            simulation.startGame(false, true)
+        }
+        grid.querySelector(".training-picker-import").addEventListener("click", () => {
+            if (isTitle) level.closeTrainingMenu()
+            level.openEditorImport(isTitle)
+        })
+        grid.querySelector(".training-picker-exit")?.addEventListener("click", () => {
+            level.closeTrainingMenu() //keep the level paused while fading to the title
+            door.isWaitingToLeave = true //the door doesn't reopen the menu while the run fades out
+            level.trainingFadeOut(500)
+        })
+        grid.querySelector(".training-picker-random").addEventListener("click", () => play(names[Math.floor(Math.random() * names.length)]))
+        for (const button of grid.querySelectorAll(".training-picker-level")) button.addEventListener("click", () => play(button.dataset.level))
+        grid.scrollTop = 0
+        grid.style.transitionDuration = isTitle ? "0s" : "0.25s" //pops up like the title page's other menus, fades in over a paused level
+        grid.style.opacity = "1"
+        grid.style.visibility = "visible"
+    },
+    isTrainingMenuOpen() { //tracks the title page picker and its level pool view
+        const grid = document.getElementById("choose-grid")
+        return simulation.onTitlePage && grid.style.visibility === "visible" && !!grid.querySelector(".training-picker")
+    },
+    closeTrainingMenu() { //hide the picker without resuming gameplay
+        levelPoolMenu.close()
+        const grid = document.getElementById("choose-grid")
+        grid.style.transitionDuration = "0s" //closes right away like the title page's other menus
+        grid.style.opacity = "0"
+        grid.style.visibility = "hidden"
+        grid.style.pointerEvents = "none"
+    },
+    endRun() { //back to the title page right away, without a fade
+        levelPoolMenu.close()
+        simulation.paused = true
+        simulation.isChoosing = false
+        Composite.clear(engine.world, false)
+        Engine.clear(engine)
+        simulation.splashReturn()
+    },
+    async openEditorImport(isTitle = false) { //the picker's import button, a shortcut that ends the training run and opens the level editor's import panel
+        if (!isTitle) level.endRun()
+        await levelEditor.open()
+        if (levelEditor.isActive) levelEditor.run("importLevel")
+    },
+    trainingMobTier: null, //set only while playing or testing a standalone training map
+    applyMobTier(tier) { //a training level's random mobs are this tier, its random bosses and groups at most tier 4, the only ones there are
+        level.trainingMobTier = tier
+        const list = spawn.tier[tier]
+        spawn.pickList = [list[Math.floor(Math.random() * list.length)], list[Math.floor(Math.random() * list.length)]]
+    },
+    communityTrainingLoadout(name) { //each community training level starts fresh: its own loadout, or a random gun with 3x ammo
+        const loadout = level.localData(name)?.loadout || null
+        levelEditor.giveLoadout(loadout)
+        if (!loadout) b.giveGuns("random", 66)
+        m.addHealth(Infinity)
+        m.energy = m.maxEnergy
+        document.getElementById("defense-bar").style.display = localSettings.isHideHUD ? "none" : "inline"
+        for (const id of ["health", "health-bg"]) document.getElementById(id).style.display = "inline" //walk hides them
+        simulation.lastLogTime = 0 //clears walk's training text
+    },
     levels: [],
     moreLevelsPromise: null,
     pendingTransfers: null,
     start() {
         saveGame.autosave() //the previous level is already cleared, so this is the state a loaded save starts from
+        level.exit.isWaitingToLeave = false
+        level.trainingMobTier = null
         spawn.randomMobPositions.length = 0
         spawn.isHigherTierMobSpawned = false
         level.surfacePortals.length = 0
         level.setConstraints()
         if (levelEditor.isActive) { //every level start while the level editor is open is its level, see js/level-editor.js
             levelEditor.startLevel()
-        } else if (level.levelsCleared === 0) { //this code only runs on the first level
+        } else if (level.levelsCleared === 0 && !level.isCommunityTraining) { //this code only runs on the first level, a community training level is set up like the training levels after walk
             // if (false) {
             if (true) {
-                level.load(simulation.isTraining ? "walk" : "initial") //normal starting level **************************************************
+                level.load(simulation.isTraining ? level.levels[level.onLevel] : "initial") //normal starting level **************************************************
             } else { //testing setup
                 // simulation.enableConstructMode()  //used to build maps in testing mode
                 // simulation.setZoom(600) //zoom way in to see details
@@ -47,7 +182,8 @@ const level = {
                 // m.couplingChange(100)
                 //1 standing wave  2 perfect diamagnetism  3 negative mass  4 molecular assembler  5 plasma torch 
                 // 6 time dilation  7 metamaterial cloaking  8 pilot wave  9 wormhole 10 grappling hook 11 portal
-                m.setField(2)
+                m.setField(4)
+                tech.giveTech("molecular machine")
                 // simulation.molecularMode = 4;
                 // m.energy = m.maxEnergy = 10
                 // m.damageDone *= 0.1//20
@@ -171,6 +307,15 @@ const level = {
             spawn.setSpawnList(); //picks a couple mobs types for a themed random mob spawns
             if (spawn.isPacifistStarters()) spawn.pickList = ["starter", "starter"] //pacifist lore run, regular mobs are all starters
             // spawn.pickList = ["focuser", "focuser"]
+            if (level.isCommunityTraining) {
+                if (level.levelsCleared === 0) { //started from the title page's training menu, like after walk
+                    level.levelsCleared = 1
+                    level.updateDifficulty()
+                }
+                const name = level.levels[level.onLevel]
+                level.communityTrainingLoadout(name)
+                level.applyMobTier(Number(level.localData(name)?.mobTier) || 1) //each one stands alone, so its random mobs are any two of its tier, 1 until it's picked, not the run's order that starts on starters
+            }
             level.load(level.levels[level.onLevel]); //picks the current map from level.maps or moreLevels
             spawn.higherTierMobAtLevelStart()
             if (!simulation.isCheating && !build.isExperimentRun && !simulation.isTraining && !saveGame.isResuming) {
@@ -358,6 +503,7 @@ const level = {
 
         if (simulation.isTraining) {
             simulation.difficultyMode = 1
+            if (level.isCommunityTraining) document.title = "n-gon - " + level.levels[level.onLevel] //the browser tab
         } else {
             simulation.inGameConsole(`<span class='color-var'>level</span>.onLevel <span class='color-symbol'>=</span> "<span class='color-text'>${level.levels[level.onLevel]}</span>"`);
             document.title = "n-gon: " + level.levelAnnounce();
@@ -417,68 +563,20 @@ const level = {
             // for (let i = 0; i < len; i++) powerUps.spawn(player.position.x + 90 * (Math.random() - 0.5), player.position.y + 90 * (Math.random() - 0.5), "heal", false);
             powerUps.spawnDelay("heal", Math.floor(len), 8);
         }
+        const phaseDivisor = level.levels[level.onLevel] === "final" ? 5 : 1
         if (tech.interestRate > 0) {
-            // const rate = ((level[level.levels[level.onLevel]].name === "final" || level[level.levels[level.onLevel]].name === "subway") ? 1 / 3 : 1) * tech.interestRate //this effect triggers extra times on these final levels
-            let rate = tech.interestRate
-            if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
-                const levelName = level.levels[level.onLevel]
-                if (levelName === "final") rate *= 1 / 5
-                // if (levelName === "subway") rate *= 1 / 3
+            const researchPercent = Math.round(100 * tech.interestRate)
+            const couplingAndQubitPercent = Math.round(researchPercent * 5 / 18)
+            for (const [type, balance, percent] of [["research", powerUps.research.count, researchPercent], ["coupling", m.coupling, couplingAndQubitPercent], ["qubit", powerUps.qubit.count, couplingAndQubitPercent]]) {
+                if (balance <= 0) continue
+                const amount = Math.ceil(balance * percent / (100 * phaseDivisor))
+                powerUps.spawnDelay(type, amount, 4)
+                const label = type === "qubit" ? "qubits" : `<span class='color-${type === "research" ? "r" : "coupling"}'>${type}</span>`
+                simulation.inGameConsole(`${(percent / phaseDivisor).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on ${label} <span class='color-symbol'>=</span> ${amount > 20 ? amount + powerUps.orb[type](1) : powerUps.orb[type](amount)}`)
             }
-            if (powerUps.research.count > 0 && rate > 0) {
-                const r = Math.ceil(rate * powerUps.research.count)
-                simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-r'>research</span> <span class='color-symbol'>=</span> ${r > 20 ? r + powerUps.orb.research(1) : powerUps.orb.research(r)}`)
-                powerUps.spawnDelay("research", r, 4);
-            }
-            const smallRate = rate * 5 / 18 //each 18% stack gives 5% on coupling and qubits
-            if (m.coupling > 0 && rate > 0) {
-                const c = Math.ceil(smallRate * m.coupling)
-                powerUps.spawnDelay("coupling", c, 4);
-                simulation.inGameConsole(`${(smallRate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-coupling'>coupling</span> <span class='color-symbol'>=</span> ${c > 20 ? c + powerUps.orb.coupling(1) : powerUps.orb.coupling(c)}`)
-            }
-            if (powerUps.qubit.count > 0 && rate > 0) {
-                const q = Math.ceil(smallRate * powerUps.qubit.count)
-                powerUps.spawnDelay("qubit", q, 4);
-                simulation.inGameConsole(`${(smallRate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on qubits <span class='color-symbol'>=</span> ${q > 20 ? q + powerUps.orb.qubit(1) : powerUps.orb.qubit(q)}`)
-            }
-
-            // let ammoSum = 0
-            // for (let i = 0; i < b.inventory.length; i++) {
-            //     if (b.guns[b.inventory[i]].ammo !== Infinity) ammoSum += b.guns[b.inventory[i]].ammo / b.guns[b.inventory[i]].ammoPack
-            // }
-            // if (ammoSum > 0 && b.inventory.length > 0) {
-            //     const amount = Math.ceil(rate * ammoSum / b.inventory.length)
-            //     powerUps.spawnDelay("ammo", amount, 4);
-            //     simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${amount > 20 ? amount + powerUps.orb.ammo(1) : powerUps.orb.ammo(amount)}`)
-            // }
-
-            // if (b.activeGun !== null && b.activeGun !== undefined && b.guns[b.activeGun].ammo !== Infinity) {
-            //     const ammoPerOrb = b.guns[b.activeGun].ammoPack
-            //     const a = Math.ceil(rate * b.guns[b.activeGun].ammo / ammoPerOrb)
-            //     powerUps.spawnDelay("ammo", a, 4);
-            //     simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-g'>ammo</span> <span class='color-symbol'>=</span> ${a > 20 ? a + powerUps.orb.ammo(1) : powerUps.orb.ammo(a)}`)
-            // }
-            // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
-            // const h = Math.ceil(rate * m.health / healPerOrb)
-            // powerUps.spawnDelay("heal", h, 4);
-            // simulation.inGameConsole(`${(rate * 100).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
-
-            // trying to spawn smaller heals
-            // const healPerOrb = (powerUps.heal.size() / 40 / (simulation.healScale ** 0.25)) ** 2
-            // console.log(healPerOrb)
-            // let h = tech.interestRate * m.health / healPerOrb
-            // console.log(tech.interestRate, m.health, healPerOrb, h)
-            // const overHeal = h - Math.floor(h)
-            // powerUps.spawn(m.pos.x, m.pos.y, "heal", true, null, Math.max(0.25, overHeal) * 40 * (simulation.healScale ** 0.25))
-            // if (h > healPerOrb) powerUps.spawnDelay("heal", h);
-            // simulation.inGameConsole(`${(Math.ceil(tech.interestRate * 100)).toFixed(0)}<span class='color-symbol'>%</span> <span class='color-m'>interest</span> on <span class='color-h'>health</span> <span class='color-symbol'>=</span> ${h > 20 ? h + powerUps.orb.heal(1) : powerUps.orb.heal(h)}`)
         }
         if (tech.interestRateGuns && b.inventory.length) {
-            let rate = tech.interestRateGuns
-            if (level.onLevel < level.levels.length - 1) {//make sure it's not on the lore level which has an undefined name
-                const levelName = level.levels[level.onLevel]
-                if (levelName === "final") rate *= 1 / 5
-            }
+            const rate = tech.interestRateGuns / phaseDivisor
             if (rate > 0) {
                 let a = 0
                 for (let i = 0; i < b.inventory.length; i++) {
@@ -1285,13 +1383,29 @@ const level = {
         }
     },
     announceMobTypes() {
-        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}`)
-        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${spawn.mobTierSpawnOrder[level.levelsCleared]}`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[0]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${level.trainingMobTier ?? spawn.mobTierSpawnOrder[level.levelsCleared - 1]}`)
+        simulation.inGameConsole(`spawn<span class='color-symbol'>.</span>${spawn.pickList[1]}<span class='color-symbol'>(</span>x<span class='color-symbol'>,</span>y<span class='color-symbol'>)</span> //Tier ${level.trainingMobTier ?? spawn.mobTierSpawnOrder[level.levelsCleared]}`)
     },
     disableExit: false,
+    trainingFadeOut(fadeTime = 0) { //the end of a training run, fades out and goes back to the title page, fadeTime in ms for a quick fade, 0 is #fade-out's slow 3s fade and a 6s wait
+        level.disableExit = true
+        const fade = document.getElementById("fade-out")
+        if (fadeTime) fade.style.transition = `opacity ${fadeTime}ms`
+        document.getElementById("health").style.display = "none"
+        document.getElementById("health-bg").style.display = "none"
+        document.getElementById("defense-bar").style.display = "none"
+        document.getElementById("text-log").style.display = "none"
+        fade.style.opacity = 1; //slowly fades out
+        setTimeout(function () {
+            fade.style.transition = "" //back to its usual speed
+            level.disableExit = false;
+            level.endRun()
+        }, fadeTime ? fadeTime + 100 : 6000);
+    },
     nextLevel() {
         let countMax
-        if (levelEditor.isActive) return levelEditor.reachedExit() //the exit doesn't leave while editing, in test export reaching it clears the level
+        if (levelEditor.isActive) return levelEditor.reachedExit() //the exit doesn't leave while editing, in full test reaching it clears the level
+        if (level.isCommunityTraining && level.onLevel >= level.levels.length - 1 && !level.disableExit) return level.chooseCommunityTraining(level.exit) //finishing a community training level opens the picker again
         if (!level.disableExit) {
             level.levelsCleared++;
             level.onLevel++; //cycles map to next level
@@ -1300,21 +1414,7 @@ const level = {
             if (simulation.isTraining) {
                 level.levelsCleared = 1 //to control the difficulty of mobs
                 if (level.onLevel > level.levels.length - 1) { //if all training levels are completed
-                    level.disableExit = true
-                    document.getElementById("health").style.display = "none"
-                    document.getElementById("health-bg").style.display = "none"
-                    document.getElementById("defense-bar").style.display = "none"
-                    document.getElementById("text-log").style.display = "none"
-                    document.getElementById("fade-out").style.opacity = 1; //slowly fades out
-                    setTimeout(function () {
-                        simulation.paused = true;
-                        level.disableExit = false;
-                        engine.world.bodies.forEach((body) => {
-                            Matter.Composite.remove(engine.world, body)
-                        })
-                        Engine.clear(engine);
-                        simulation.splashReturn();
-                    }, 6000);
+                    level.trainingFadeOut()
                     return
                 }
             } else {
@@ -1404,11 +1504,12 @@ const level = {
     localLevels() {
         return Object.keys(level.localMaps)
     },
-    randomLevelPool() { //the levels shuffled into the middle of a run, set in the level pool menu at the bottom of settings
+    poolableLevels: names => names.filter(name => !level.isTrainingLevel(name)), //only progression levels go in the level pool, a training level added before it was one stays out
+    randomLevelPool() { //the levels shuffled into the middle of a run, set in the level pool in the training menu
         const pool = localSettings.levelPool || { banned: [], added: [] }
         const levels = level.playableLevels.filter(name => !pool.banned.includes(name))
-            .concat(level.communityLevels.filter(name => pool.added.includes(name)))
-            .concat(level.localLevels().filter(name => pool.added.includes(name)))
+            .concat(level.poolableLevels(level.communityLevels).filter(name => pool.added.includes(name)))
+            .concat(level.poolableLevels(level.localLevels()).filter(name => pool.added.includes(name)))
         return levels.length ? levels : level.playableLevels.slice(0) //the menu keeps at least one level, this is just in case
     },
     populateLevels() {
@@ -1417,11 +1518,17 @@ const level = {
             Math.initialSeed = String(document.getElementById("seed").value)
         }
         Math.seed = Math.abs(Math.hash(Math.initialSeed)) //update randomizer seed
+        level.isCommunityTraining = false
 
         if (simulation.isTraining) {
             simulation.isHorizontalFlipped = false
             level.levels = level.trainingLevels.slice(0) //copy array, not by just by assignment
             if (simulation.isCommunityMaps) level.levels.push("diamagnetism")
+            if (level.communityTrainingStart) { //picked in the title page's training menu
+                level.levels = [level.communityTrainingStart]
+                level.isCommunityTraining = true
+                level.communityTrainingStart = null //only for the run it started
+            }
         } else {
             const pool = level.randomLevelPool()
             if (pool.some(name => !level.playableLevels.includes(name))) {
@@ -2013,6 +2120,7 @@ const level = {
         bottomOffset: 20, // Distance below exit.y to the drawn bottom edge.
         chargeThreshold: 176,
         fill: "rgba(0,180,180,0.2)",
+        isWaitingToLeave: false, //doesn't charge or hold the player until they step out, like after leaving the training menu
         // Video feedback band: this slice of the arch redraws last frame's arch, shifted sideways,
         // so echoes stream across it and fade. top and bottom are fractions of the arch height,
         // offsetX and offsetY are world units per cycle (offsetX positive is away from the reflected edge,
@@ -2033,8 +2141,8 @@ const level = {
         ],
         pickFeedback() {
             // Half of levels have no feedback; the rest get a random preset.
-            const presets = level.exit.feedbackPresets;
-            level.exit.feedback = Math.random() < 0.5 ? null : { ...presets[Math.floor(Math.random() * presets.length)] };
+            const presets = this.feedbackPresets;
+            this.feedback = Math.random() < 0.5 ? null : { ...presets[Math.floor(Math.random() * presets.length)] };
         },
         feedbackCanvas: null,
         ripple: null, // Wave state for the outline stroke; cleared by clearMap.
@@ -2110,9 +2218,9 @@ const level = {
             const rippleFrequency = 0.5; // Radians per cycle. Wavelength ≈ 2π·√waveSpeed·substeps / rippleFrequency points (6px each).
             const rippleDecay = 15; // Cycles for a splash's bobbing to fade to about a third; sets how many crests follow.
 
-            let r = level.exit.ripple;
-            if (!r || r.bottomOffset !== level.exit.bottomOffset) {
-                r = level.exit.ripple = level.exit.buildRipple(level.exit.bottomOffset);
+            let r = this.ripple;
+            if (!r || r.bottomOffset !== this.bottomOffset) {
+                r = this.ripple = this.buildRipple(this.bottomOffset);
                 r.rippleSpread = rippleSpread + (Math.random() - 0.5); // Each new mirror gets its own splash width, ±0.5.
                 r.waveSpeed = waveSpeed + 0.05 * Math.random(); // And its own travel speed, 0.03 to 0.08.
                 r.damping = damping + 0.04 * Math.random(); // And its own damping, 0.95 to 0.99.
@@ -2121,9 +2229,9 @@ const level = {
             r.cycle = simulation.cycle;
             // Track crossings of the arch itself, not the exit's charge zone: that zone ignores falling
             // players, so a jump in from above would only splash on landing, at a standstill.
-            const archX = (player.position.x - level.exit.x - 50) / 50;
-            const archY = player.position.y - level.exit.y;
-            const isInside = archY <= level.exit.bottomOffset && (archY >= -80 ? Math.abs(archX) < 1 : archX * archX + ((archY + 80) / 68) ** 2 < 1);
+            const archX = (player.position.x - this.x - 50) / 50;
+            const archY = player.position.y - this.y;
+            const isInside = archY <= this.bottomOffset && (archY >= -80 ? Math.abs(archX) < 1 : archX * archX + ((archY + 80) / 68) ** 2 < 1);
             if (!r.isActive && isInside === r.wasInside) return null; // Settled with no new splash.
             const { h, v, curvature } = r;
             const n = h.length;
@@ -2141,8 +2249,8 @@ const level = {
                 let nearest = 1;
                 let best = Infinity;
                 for (let i = 1; i < n - 1; i++) {
-                    const dx = level.exit.x + r.px[i] - m.pos.x;
-                    const dy = level.exit.y + r.py[i] - m.pos.y;
+                    const dx = this.x + r.px[i] - m.pos.x;
+                    const dy = this.y + r.py[i] - m.pos.y;
                     const distance = dx * dx + dy * dy;
                     if (distance < best) {
                         best = distance;
@@ -2192,7 +2300,7 @@ const level = {
         },
         traceOutline(ripple) {
             // Open path up the left side, over the arch, and down the right side.
-            const { x, y, bottomOffset } = level.exit;
+            const { x, y, bottomOffset } = this;
             if (!ripple) {
                 ctx.moveTo(x, y + bottomOffset);
                 ctx.lineTo(x, y - 80);
@@ -2218,24 +2326,25 @@ const level = {
         },
         drawAndCheck(isFinalPass = false, isInverted = false) {
             // Level scripts request the exit early; render it after the world is drawn.
-            if (!isFinalPass) level.exit.isInverted = isInverted;
+            if (!isFinalPass) this.isInverted = isInverted;
             if (!isFinalPass && !simulation.isTimeSkipping) {
-                level.exit.isDrawPending = true;
+                this.isDrawPending = true;
                 return;
             }
-            level.exit.isDrawPending = false;
-            const { x, y, bottomOffset } = level.exit;
-            const verticalSign = level.exit.isInverted ? -1 : 1;
+            this.isDrawPending = false;
+            const { x, y, bottomOffset } = this;
+            const verticalSign = this.isInverted ? -1 : 1;
             const isInside =
-                !level.exit.isInverted && // Inverted decorative exits keep their existing non-triggering behavior.
+                !this.isInverted && // Inverted decorative exits keep their existing non-triggering behavior.
                 player.position.x > x &&
                 player.position.x < x + 100 &&
                 player.position.y > y - 250 &&
                 player.position.y < y + 35 &&
                 !level.isFlipping;
-            const waitForObjectives = (isInside || level.exitCount >= level.exit.chargeThreshold) &&
+            const waitForObjectives = (isInside || level.exitCount >= this.chargeThreshold) &&
                 typeof autopilot !== "undefined" && autopilot.isOn && autopilot.holdExitForObjectives();
-            const canCharge = isInside && player.velocity.y < 0.15;
+            if (!isInside) this.isWaitingToLeave = false
+            const canCharge = isInside && player.velocity.y < 0.15 && !this.isWaitingToLeave;
             if (waitForObjectives) {
                 level.exitCount = 0
             } else if (canCharge) {
@@ -2246,22 +2355,22 @@ const level = {
             if (canCharge && m.immuneCycle < m.cycle + 1) m.immuneCycle = m.cycle + 1; //player is immune to damage while standing in the exit
 
             // Separate grounded slowdown zone: outer quarters ramp down to a stopped center half.
-            if (m.onGround && isInside && !waitForObjectives) {
+            if (m.onGround && isInside && !waitForObjectives && !this.isWaitingToLeave) {
                 const slowdown = Math.max(0, (Math.abs(player.position.x - (x + 50)) - 25) / 25);
                 Matter.Body.setVelocity(player, { x: player.velocity.x * slowdown, y: player.velocity.y * slowdown });
                 player.force.x += (x + 50 - player.position.x) * player.mass * 0.0005;
             }
 
-            const chargeProgress = Math.max(0, Math.min(1, level.exitCount / level.exit.chargeThreshold));
-            const ripple = level.exit.isInverted || localSettings.isHideHUD ? null : level.exit.updateRipple(); // Performance mode: no ripples.
+            const chargeProgress = Math.max(0, Math.min(1, level.exitCount / this.chargeThreshold));
+            const ripple = this.isInverted || localSettings.isHideHUD ? null : this.updateRipple(); // Performance mode: no ripples.
             ctx.beginPath();
-            if (level.exit.isInverted) {
+            if (this.isInverted) {
                 ctx.moveTo(x, y + verticalSign * bottomOffset);
                 ctx.lineTo(x, y - verticalSign * 80);
                 ctx.bezierCurveTo(x, y - verticalSign * 170, x + 100, y - verticalSign * 170, x + 100, y - verticalSign * 80);
                 ctx.lineTo(x + 100, y + verticalSign * bottomOffset);
             } else {
-                level.exit.traceOutline(ripple); // The fill and reflection follow the rippling stroke.
+                this.traceOutline(ripple); // The fill and reflection follow the rippling stroke.
             }
             ctx.closePath();
             // Original exit fill (restore these two lines to undo the reflection test).
@@ -2272,11 +2381,11 @@ const level = {
             // The final pass makes the current frame's player, map, and bullets available.
             const transform = localSettings.isHideHUD ? null : ctx.getTransform();
             if (!transform || transform.a <= 0 || transform.d === 0 || transform.b !== 0 || transform.c !== 0) {
-                level.exit.reflection = null; // Resume from the player's current side when reflections are enabled.
-                ctx.fillStyle = level.exit.fill;
+                this.reflection = null; // Resume from the player's current side when reflections are enabled.
+                ctx.fillStyle = this.fill;
                 ctx.fill();
             } else {
-                const top = y - (level.exit.isInverted ? bottomOffset : 170);
+                const top = y - (this.isInverted ? bottomOffset : 170);
                 const screenX = x * transform.a + transform.e;
                 const screenWidth = 100 * transform.a;
                 const height = 170 + bottomOffset;
@@ -2285,9 +2394,9 @@ const level = {
                 const screenY = drawY * transform.d + transform.f;
                 const screenHeight = height * Math.abs(transform.d);
                 const side = player.position.x <= x + 50 ? -1 : 1;
-                let reflection = level.exit.reflection;
+                let reflection = this.reflection;
                 if (!reflection || reflection.x !== x || reflection.y !== top || reflection.onLevel !== level.onLevel) {
-                    reflection = level.exit.reflection = { x, y: top, onLevel: level.onLevel, side, nextSide: side, start: null };
+                    reflection = this.reflection = { x, y: top, onLevel: level.onLevel, side, nextSide: side, start: null };
                 }
                 // Finish each fade before starting another, even if the player changes sides rapidly.
                 const fadeCycles = 9; // Entire side-switch transition: 0.15 seconds at 60 cycles/second.
@@ -2304,7 +2413,7 @@ const level = {
                     reflection.nextSide = side;
                     reflection.start = simulation.cycle;
                 }
-                let opacity = Math.max(0, Math.min(1, level.exit.mirrorOpacity));
+                let opacity = Math.max(0, Math.min(1, this.mirrorOpacity));
                 if (reflection.start !== null) {
                     const progress = (simulation.cycle - reflection.start) / fadeCycles;
                     opacity *= Math.abs(2 * progress - 1);
@@ -2339,11 +2448,11 @@ const level = {
                             -pad, -pad, 100 + 2 * pad, height + 2 * pad);
                     }
                     ctx.globalCompositeOperation = "source-over";
-                    const feedback = level.exit.feedback;
+                    const feedback = this.feedback;
                     if (feedback && feedback.gain > 0 && typeof document !== "undefined") {
                         // The buffer holds the arch in door space, so camera movement doesn't smear it.
-                        let buffer = level.exit.feedbackCanvas;
-                        if (!buffer) buffer = level.exit.feedbackCanvas = document.createElement("canvas");
+                        let buffer = this.feedbackCanvas;
+                        if (!buffer) buffer = this.feedbackCanvas = document.createElement("canvas");
                         const bufferHeight = 2 * Math.ceil(height);
                         if (buffer.width !== 200 || buffer.height !== bufferHeight) {
                             buffer.width = 200;
@@ -2375,16 +2484,16 @@ const level = {
                         reflection.hasFeedback = true;
                     }
                     ctx.globalAlpha = 1; // Let the RGBA color alone control tint opacity.
-                    ctx.fillStyle = level.exit.fill;
+                    ctx.fillStyle = this.fill;
                     ctx.fillRect(-pad, -pad, 100 + 2 * pad, height + 2 * pad); // The same arch clip also bounds the cyan tint.
                     ctx.restore();
                 }
             }
 
-            if (level.exit.isInverted) return;
+            if (this.isInverted) return;
 
             ctx.beginPath();
-            level.exit.traceOutline(ripple);
+            this.traceOutline(ripple);
             ctx.setLineDash([]); // Solid sides reach the bottom edge without a dash gap.
             if (m.health < 0) {
                 ctx.strokeStyle = "#f00"
@@ -2395,7 +2504,7 @@ const level = {
             }
             ctx.stroke();
 
-            if (waitForObjectives || level.exitCount < level.exit.chargeThreshold) return;
+            if (waitForObjectives || level.exitCount < this.chargeThreshold) return;
             level.exitCount = 0;
 
             // First-run players without a weapon get the tutorial choice; otherwise advance.
@@ -3176,7 +3285,7 @@ const level = {
     },
     cleared(x, y, width, height, who = "box", staysOn = true) { //a trigger that's on once no mobs are left, who is "box" for mobs in the box, "level" for every mob, or "bosses", run query() in level.custom
         const box = { min: { x: x, y: y }, max: { x: x + width, y: y + height } }
-        const counts = target => target.alive && !target.shield && !target.isMobBullet && target.collisionFilter.category !== cat.mobBullet && (who !== "bosses" || target.isBoss)
+        const counts = target => target.alive && !target.shield && !target.isMobBullet && target.collisionFilter.category !== cat.mobBullet && !target.isZombie && target.collisionFilter.mask !== 0 && (who !== "bosses" || target.isBoss) //not shields, bullets, your zombies, or mobs that can't touch anything, like dark matter, WIMPs, and hallucinations
         return {
             isOn: false,
             query() {
@@ -4619,6 +4728,34 @@ const level = {
             particles: [],
         }
     },
+    traceBeam(start, look, domains, reflections = 0, isMirror = () => true, reflectLength = 5000) { //{ path, best }: a ray from start toward look through domains (vertexCollision's), mirrored off each edge it hits, up to reflections times, while isMirror(who), each bounce reaching reflectLength, path is start, each bounce, then where it stops, best is the last hit (who is null if it hit nothing), the player's laser does the same
+        const path = [start]
+        let end = look
+        if (reflections > 0) { //a hair past look, so an end placed right on a wall still hits it and bounces
+            const length = Math.hypot(end.x - start.x, end.y - start.y)
+            if (length) end = { x: end.x + 2 * (end.x - start.x) / length, y: end.y + 2 * (end.y - start.y) / length }
+        }
+        for (let i = 0; ; i++) {
+            const from = path[path.length - 1]
+            const best = vertexCollision(from, end, domains, i ? 0.0001 : 0) //a bounce doesn't hit the edge it starts on
+            if (best.dist2 === Infinity) {
+                path.push(end)
+                return { path, best }
+            }
+            const hit = { x: best.x, y: best.y }
+            path.push(hit)
+            if (i >= reflections || !isMirror(best.who)) return { path, best }
+            const nx = best.v2.y - best.v1.y //the edge's normal, mirror the beam across it
+            const ny = best.v1.x - best.v2.x
+            const dx = hit.x - from.x
+            const dy = hit.y - from.y
+            const k = 2 * (dx * nx + dy * ny) / (nx * nx + ny * ny)
+            const rx = dx - k * nx
+            const ry = dy - k * ny
+            const r = Math.hypot(rx, ry) || 1
+            end = { x: hit.x + reflectLength * rx / r, y: hit.y + reflectLength * ry / r }
+        }
+    },
     laser(p1, p2, damage = 0.12, color = "#f00") {
         return {
             isOn: true,
@@ -4627,27 +4764,52 @@ const level = {
             color: color,
             isArc: false, //set it for electricity instead of a beam, it hits a little wider, see hitsPlayer()
             arcHitWidth: 24, //a beam is one thin ray
-            hitsPlayer(best) {
+            reflections: 0, //times it bounces off the map and blocks, like the player's laser, not off the player
+            reflectLength: 5000, //how far each bounce reaches
+            trace(isPlayerBlocking = !m.isCloak) { //{ path, best }: the beam from position, a point at each bounce, then where it stops, best is the last vertexCollision(), its who is the player when it stops on them
+                return level.traceBeam(this.position, this.look, isPlayerBlocking ? [map, body, [playerBody, playerHead]] : [map, body], this.reflections, who => who !== playerBody && who !== playerHead, this.reflectLength)
+            },
+            hitsPlayer({ path, best }) {
                 if (best.who === playerBody || best.who === playerHead) return true
                 if (!this.isArc || m.isCloak) return false
-                return Matter.Query.rayAny([player], this.position, best.dist2 === Infinity ? this.look : best, this.arcHitWidth) //only tests the player, a beam's vertexCollision() tests every body
+                for (let i = 1; i < path.length; i++) { //only tests the player, a beam's vertexCollision() tests every body
+                    if (Matter.Query.rayAny([player], path[i - 1], path[i], this.arcHitWidth)) return true
+                }
+                return false
             },
-            hitSpot(best) { //where the damage shows, an arc can touch the player without its middle hitting
+            hitSpot({ best }) { //where the damage shows, an arc can touch the player without its middle hitting
                 return best.who === playerBody || best.who === playerHead ? best : player.position
             },
-            drawArc(end) { //jumps around its line every frame, about as wide as a beam, a see through stroke then a thin one, not a shadow
-                const dx = end.x - this.position.x
-                const dy = end.y - this.position.y
-                const length = Math.hypot(dx, dy)
-                if (!length) return
-                const segments = Math.max(2, Math.min(24, Math.round(length / 28)))
+            hurtPlayer(trace) {
+                const spot = this.hitSpot(trace)
+                m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
+                const dmg = damage * spawn.dmgToPlayerByLevelsCleared();
+                m.takeDamage(dmg);
+                simulation.drawList.push({ //add dmg to draw queue
+                    x: spot.x,
+                    y: spot.y,
+                    radius: dmg * 1500,
+                    color: "rgba(255,0,0,0.5)",
+                    time: 20
+                });
+            },
+            drawArc(path) { //jumps around its line every frame, about as wide as a beam, a see through stroke then a thin one, not a shadow
                 ctx.beginPath()
-                ctx.moveTo(this.position.x, this.position.y)
-                for (let i = 1; i < segments; i++) {
-                    const jump = (Math.random() - 0.5) * 16 / length
-                    ctx.lineTo(this.position.x + dx * i / segments - dy * jump, this.position.y + dy * i / segments + dx * jump)
+                ctx.moveTo(path[0].x, path[0].y)
+                for (let p = 1; p < path.length; p++) {
+                    const start = path[p - 1]
+                    const end = path[p]
+                    const dx = end.x - start.x
+                    const dy = end.y - start.y
+                    const length = Math.hypot(dx, dy)
+                    if (!length) continue
+                    const segments = Math.max(2, Math.min(24, Math.round(length / 28)))
+                    for (let i = 1; i < segments; i++) {
+                        const jump = (Math.random() - 0.5) * 16 / length
+                        ctx.lineTo(start.x + dx * i / segments - dy * jump, start.y + dy * i / segments + dx * jump)
+                    }
+                    ctx.lineTo(end.x, end.y)
                 }
-                ctx.lineTo(end.x, end.y)
                 ctx.strokeStyle = this.color
                 ctx.globalAlpha = 0.3
                 ctx.lineWidth = 7
@@ -4656,49 +4818,60 @@ const level = {
                 ctx.lineWidth = 2.5
                 ctx.stroke()
             },
+            drawPath(path) { //strokes with whatever style is set
+                ctx.beginPath();
+                ctx.moveTo(path[0].x, path[0].y);
+                for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].x, path[i].y);
+                ctx.stroke();
+            },
             query() {
                 if (!m.isTimeDilated) {
-                    let best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
-                    // hitting player
-                    if (m.immuneCycle < m.cycle && this.hitsPlayer(best)) {
-                        const spot = this.hitSpot(best)
-                        m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                        const dmg = damage * spawn.dmgToPlayerByLevelsCleared();
-                        m.takeDamage(dmg);
-                        simulation.drawList.push({ //add dmg to draw queue
-                            x: spot.x,
-                            y: spot.y,
-                            radius: dmg * 1500,
-                            color: "rgba(255,0,0,0.5)",
-                            time: 20
-                        });
-                    }
-                    //draw
-                    if (best.dist2 === Infinity) best = this.look;
+                    const trace = this.trace()
+                    if (m.immuneCycle < m.cycle && this.hitsPlayer(trace)) this.hurtPlayer(trace)
                     if (this.isArc) {
-                        this.drawArc(best)
+                        this.drawArc(trace.path)
                         return
                     }
-                    ctx.beginPath();
-                    ctx.moveTo(this.position.x, this.position.y);
-                    ctx.lineTo(best.x, best.y);
                     ctx.strokeStyle = this.color;
                     ctx.lineWidth = 5;
                     ctx.setLineDash([50 + 200 * Math.random(), 50 * Math.random()]);
-                    ctx.stroke();
+                    this.drawPath(trace.path)
                     ctx.setLineDash([]);
                 }
+            },
+            track(speed = 0.02, range = 1500, reach = Math.PI, isReset = false) { //run before query(), turns look around position toward the player, speed radians a frame, only while it sees them: in range, not cloaked, no map or block between, when it loses them it holds still, reach is radians each way from where it first pointed that it can turn, Math.PI is all the way around, it keeps its length, isReset turns it back to where it first pointed while it can't see the player or they're outside its reach
+                if (m.isTimeDilated) return
+                if (this.trackRest === undefined) {
+                    this.trackRest = Math.atan2(this.look.y - this.position.y, this.look.x - this.position.x)
+                    this.trackLength = Math.hypot(this.look.x - this.position.x, this.look.y - this.position.y)
+                    this.trackTurn = 0 //radians from trackRest
+                }
+                const wrap = a => Math.atan2(Math.sin(a), Math.cos(a)) //-PI to PI
+                const dx = player.position.x - this.position.x
+                const dy = player.position.y - this.position.y
+                const isSeen = !m.isCloak && dx * dx + dy * dy < range * range && !Matter.Query.rayAny(map, this.position, player.position) && !Matter.Query.rayAny(body, this.position, player.position)
+                const want = wrap(Math.atan2(dy, dx) - this.trackRest)
+                if (isReset && (!isSeen || Math.abs(want) > reach)) { //back to where it first pointed, the way it came
+                    this.trackTurn -= Math.max(-speed, Math.min(speed, this.trackTurn))
+                } else if (isSeen) {
+                    if (reach >= Math.PI) { //all the way around, the short way
+                        this.trackTurn = wrap(this.trackTurn + Math.max(-speed, Math.min(speed, wrap(want - this.trackTurn))))
+                    } else { //stays inside its reach, never turning through the side it can't point
+                        const goal = Math.max(-reach, Math.min(reach, want))
+                        this.trackTurn += Math.max(-speed, Math.min(speed, goal - this.trackTurn))
+                    }
+                }
+                const angle = this.trackRest + this.trackTurn
+                this.look = { x: this.position.x + this.trackLength * Math.cos(angle), y: this.position.y + this.trackLength * Math.sin(angle) }
             },
             countDown: 0,
             countTotal: 690,
             countDelay: 630,
             motionQuery() {
                 if (!m.isTimeDilated) {
-                    let best = vertexCollision(this.position, this.look, m.isCloak ? [map, body] : [map, body, [playerBody, playerHead]]);
-
-                    let isFiring = false
+                    const trace = this.trace()
                     if (this.countDown === 0) {
-                        if (this.hitsPlayer(best)) this.countDown = this.countTotal // hitting player
+                        if (this.hitsPlayer(trace)) this.countDown = this.countTotal // hitting player
                         ctx.strokeStyle = `rgba(255,255,255,0.4)`;
                         ctx.lineWidth = 8 + 3 * Math.sin(simulation.cycle * 0.3);
                     } else if (this.countDown > this.countDelay) {
@@ -4707,37 +4880,55 @@ const level = {
                         this.countDown--
                     } else {
                         this.countDown--
-                        isFiring = true
-                        if (m.immuneCycle < m.cycle && this.hitsPlayer(best)) { // hitting player
-                            const spot = this.hitSpot(best)
-                            m.immuneCycle = m.cycle + m.collisionImmuneCycles + 60; //player is immune to damage for an extra second
-                            const dmg = damage * spawn.dmgToPlayerByLevelsCleared()
-                            m.takeDamage(dmg);
-                            simulation.drawList.push({ //add dmg to draw queue
-                                x: spot.x,
-                                y: spot.y,
-                                radius: dmg * 1500,
-                                color: "rgba(255,0,0,0.5)",
-                                time: 20
-                            });
+                        if (m.immuneCycle < m.cycle && this.hitsPlayer(trace)) this.hurtPlayer(trace)
+                        if (this.isArc) {
+                            this.drawArc(trace.path)
+                            return
                         }
                         ctx.strokeStyle = this.color;
                         ctx.lineWidth = 5;
                         ctx.setLineDash([50 + 200 * Math.random(), 50 * Math.random()]);
                     }
-                    //draw
-                    if (best.dist2 === Infinity) best = this.look;
-                    if (isFiring && this.isArc) {
-                        ctx.setLineDash([]);
-                        this.drawArc(best)
-                        return
-                    }
-                    ctx.beginPath();
-                    ctx.moveTo(this.position.x, this.position.y);
-                    ctx.lineTo(best.x, best.y);
-                    ctx.stroke();
+                    this.drawPath(trace.path)
                     ctx.setLineDash([]);
                 }
+            },
+        }
+    },
+    tripwire(p1, p2, who = "player", isStaysOn = false) { //a beam that's on (isOn) while who breaks it, "player", "body", "mob", or several like "player body", run query() each cycle, it bounces off the map reflections times, anything else stops it, a cloaked player doesn't break it, isStaysOn stays on once broken, isVisible false hides it from the player, color and lineWidth are how it looks while off, on it's brighter and twice as wide
+        const names = who.split(" ")
+        return {
+            isOn: false,
+            position: p1,
+            look: p2,
+            who: names,
+            isStaysOn,
+            isVisible: true,
+            color: "#ff3c3c",
+            lineWidth: 1.5,
+            reflections: 0,
+            reflectLength: 5000,
+            path: [p1, p2], //the beam last cycle
+            breaks(body) { //body is one who breaks it
+                if (body === playerBody || body === playerHead) return this.who.includes("player")
+                if (body.classType === "body") return this.who.includes("body")
+                return !!body.alive && this.who.includes("mob")
+            },
+            query() {
+                if (!m.isTimeDilated && !(this.isStaysOn && this.isOn)) {
+                    const { path, best } = level.traceBeam(this.position, this.look, m.isCloak ? [map, body, mob] : [map, body, mob, [playerBody, playerHead]], this.reflections, body => map.includes(body), this.reflectLength)
+                    this.path = path
+                    this.isOn = !!best.who && this.breaks(best.who)
+                }
+                if (!this.isVisible) return
+                ctx.beginPath()
+                ctx.moveTo(this.path[0].x, this.path[0].y)
+                for (let i = 1; i < this.path.length; i++) ctx.lineTo(this.path[i].x, this.path[i].y)
+                ctx.strokeStyle = this.color
+                ctx.globalAlpha = this.isOn ? 0.7 : 0.25
+                ctx.lineWidth = this.isOn ? 2 * this.lineWidth : this.lineWidth
+                ctx.stroke()
+                ctx.globalAlpha = 1
             },
         }
     },
@@ -5146,6 +5337,7 @@ const level = {
         let segment = 0 //the part of the route it's on, it only moves a little each cycle
         const follower = {
             position: { x: route[0][0], y: route[0][1] },
+            total, //the route's length
             along: 0, //how far along the route it is
             direction: 1, //-1 on its way back
             moveTo(along) {
@@ -5231,10 +5423,18 @@ const level = {
         }
         return saw
     },
-    train(points, width = 200, height = 25, speed = 4, isLoop = false, start = 0) { //a platform the player can ride along points, [[x, y], ...], its middle on the path, back and forth, or around and around with isLoop, run move() in level.custom and draw() in level.customTopLayer
+    train(points, width = 200, height = 25, speed = 4, isLoop = false, start = 0, isSmoothStop = true) { //a platform the player can ride along points, [[x, y], ...], its middle on the path, back and forth, or around and around with isLoop, isSmoothStop false turns around hard at an upper end and jolts the player, run move() in level.custom and draw() in level.customTopLayer
         //it's a very heavy block steered by its velocity, so it moves in the physics step along with the player standing on it, they stay right on its top, and m.carryOnBlock() carries them, it goes through the map, and counts as part of the level like a door, so ramming mobs doesn't do block damage
         //moving a static body in level.custom instead puts it where it'll be after the player's physics, so it's drawn a step ahead of them, floating or sinking as far as it moved
         const follower = level.pathFollower(points, isLoop, start)
+        const rise = (a, b) => { //how much of its speed is upward arriving at end a from b, 0 to 1
+            const length = Math.hypot(a[0] - b[0], a[1] - b[1])
+            return length ? Math.max(0, (b[1] - a[1]) / length) : 0
+        }
+        const ends = !isSmoothStop || isLoop && points.length > 2 || points.length < 2 ? [] : [ //it turns around at the ends, so it eases into and out of one it reaches going up, see move()
+            { rise: rise(points[0], points[1]), distance: () => follower.along },
+            { rise: rise(points[points.length - 1], points[points.length - 2]), distance: () => follower.total - follower.along },
+        ].filter(end => end.rise > 0)
         const who = body[body.length] = Bodies.rectangle(follower.position.x, follower.position.y, width, height, {
             collisionFilter: {
                 category: cat.body,
@@ -5253,10 +5453,13 @@ const level = {
                 this.force.y -= this.mass * simulation.g //it floats, undoing simulation.gravity()
                 if (m.isTimeDilated) return Matter.Body.setVelocity(this, { x: 0, y: 0 })
                 const before = { x: follower.position.x, y: follower.position.y }
-                if (isOn) follower.travel(speed)
-                const goal = Vector.add(Vector.sub(follower.position, before), Vector.mult(Vector.sub(before, this.position), 0.2)) //where the path goes next, catching up if it fell behind or something pushed it
                 //it never speeds up downward faster than 60% of gravity, so the player riding it doesn't float off going over a top or into a drop, then it catches up
                 const mostDown = 0.6 * simulation.g * simulation.delta * simulation.delta
+                let pace = speed
+                const ease = 0.5 * mostDown //slows going up into an end, and speeds up leaving it, at half of mostDown, so turning around never needs more, otherwise it overshoots up while already going back sideways and loops
+                for (const end of ends) pace = Math.min(pace, Math.max(ease, Math.sqrt(2 * ease * end.distance())) / end.rise)
+                if (isOn) follower.travel(pace)
+                const goal = Vector.add(Vector.sub(follower.position, before), Vector.mult(Vector.sub(before, this.position), 0.2)) //where the path goes next, catching up if it fell behind or something pushed it
                 if (goal.y - this.velocity.y > mostDown) goal.y = this.velocity.y + mostDown
                 Matter.Body.setVelocity(this, goal) //the next physics step moves it
             },
@@ -5785,6 +5988,41 @@ const level = {
                     }
                 }
             }
+        }
+    },
+    heatZone(x, y, width, height, { damage = 0.0006, burn = 160, cool = 600, warning = 240, start = 240 } = {}) { //furnace and refinery heat: it glows for warning cycles, burns for burn cycles, then cools for cool cycles, over and over, burn 0 burns for good once it starts, start is cycles until it first burns, run do() in level.customTopLayer
+        const hazard = level.hazard(x, y, width, height, damage)
+        hazard.isOn = false
+        return {
+            hazard,
+            isBurning: false,
+            countdown: Math.max(0, start), //cycles left in this phase
+            burn, cool, warning,
+            do(isOn = true, isCooling = false) { //isOn false keeps it out, it glows again before it burns, isCooling holds it cool, it burns again cool cycles after, like refinery's buttons
+                if (!isOn || isCooling) {
+                    this.isBurning = hazard.isOn = false
+                    this.countdown = isCooling ? Math.max(this.cool, this.warning) : this.warning
+                    return
+                }
+                if (m.isTimeDilated) { //stopped time stops its clock and damage
+                    if (this.isBurning) hazard.heatWarning(0.6)
+                    return
+                }
+                if (this.isBurning) {
+                    hazard.heatQuery()
+                    if (this.burn > 0 && --this.countdown <= 0) {
+                        this.isBurning = hazard.isOn = false
+                        this.countdown = Math.max(this.cool, this.warning)
+                    }
+                    return
+                }
+                this.countdown--
+                if (this.countdown < this.warning && this.countdown >= 0) hazard.heatWarning(0.3 * (1 - this.countdown / this.warning) + 0.06 * Math.random())
+                if (this.countdown <= 0) {
+                    this.isBurning = hazard.isOn = true
+                    this.countdown = this.burn
+                }
+            },
         }
     },
     pushRiders(platform, spinDamping) { //mover and transport carry the player, blocks, mobs, and power ups touching them toward VxGoal
@@ -6369,6 +6607,7 @@ const level = {
             // spawn.mapRect(475, -25, 25, 50); //edge shelf
         },
         initial() {
+            let isWireless = false //the secret run has no wires, so level.custom removes the difficulty power up where spawn.wireHead() would
             if (level.levelsCleared === 0) { //if this is the 1st level of the game
                 level.initialPowerUps()
                 if (level.levelsCleared === 0) powerUps.directSpawn(-60, -950, "difficulty", false);
@@ -6380,6 +6619,8 @@ const level = {
                         spawn.wireKnee();
                         spawn.wireKneeLeft();
                         spawn.wireHead();
+                    } else {
+                        isWireless = true
                     }
                 } else {
                     simulation.isCheating = true;
@@ -6508,6 +6749,15 @@ const level = {
             // let isSpawnedWarp = false
             const tubeCycle = m.cycle + 300 //power ups fall down the tube for 5 seconds after the level starts, m.cycle isn't reset between runs
             level.custom = () => {
+                if (isWireless && m.pos.x > 1300) { //past the head wire's breaking point, so the starting power ups can't be collected and then the difficulty changed to spawn them again
+                    isWireless = false
+                    for (let i = powerUp.length - 1; i > -1; i--) {
+                        if (powerUp[i].name === "difficulty") {
+                            Matter.Composite.remove(engine.world, powerUp[i]);
+                            powerUp.splice(i, 1);
+                        }
+                    }
+                }
                 //push around power ups stuck in the tube wall
                 if (!(simulation.cycle % 30)) {
                     for (let i = 0, len = powerUp.length; i < len; i++) {

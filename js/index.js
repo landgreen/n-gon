@@ -188,30 +188,6 @@ let color = { //light
 // }
 
 
-window.addEventListener('load', () => {
-    if (localSettings.isTrainingNotAttempted && localSettings.runCount < 30) { //make training button more obvious for new players
-        // document.getElementById("training-button").style.border = "0px #333 solid";
-        // document.getElementById("training-button").style.fill = "rgb(0, 150, 235)" //"#fff";
-        // document.getElementById("training-button").style.background = "rgb(0, 200, 255)";
-
-        //css classes not working for some reason
-        // document.getElementById("training-button").classList.add('lore-text');
-
-        let myanim = document.createElementNS("http://www.w3.org/2000/svg", 'animate');
-        myanim.setAttribute("id", "myAnimation");
-        myanim.setAttribute("attributeType", "XML");
-        myanim.setAttribute("attributeName", "fill");
-        // myanim.setAttribute("values", "#f55;#cc5;#5c5;#5dd;#66f;#5dd;#5c5;#cc5;#f55"); //rainbow
-        myanim.setAttribute("values", "#5dd;#66f;#5dd");
-        // myanim.setAttribute("values", "#333;rgb(0, 170, 255);#333");
-        myanim.setAttribute("dur", "3s");
-        myanim.setAttribute("repeatCount", "indefinite");
-        document.getElementById("training-button").appendChild(myanim);
-        document.getElementById("myAnimation").beginElement();
-    }
-});
-
-
 //**********************************************************************
 //set up canvas
 //**********************************************************************
@@ -347,7 +323,7 @@ const build = {
 
         let mobText
         if (level.levelsCleared > 0 && level.levelsCleared < 13) {
-            mobText = `<br>${spawn.pickList[0]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared - 1]}</strong>), ${spawn.pickList[1]} (<strong class="color-tier">T${spawn.mobTierSpawnOrder[level.levelsCleared]}</strong>)<span style="float: right;">mobs ${mob.length}</span>`
+            mobText = `<br>${spawn.pickList[0]} (<strong class="color-tier">T${level.trainingMobTier ?? spawn.mobTierSpawnOrder[level.levelsCleared - 1]}</strong>), ${spawn.pickList[1]} (<strong class="color-tier">T${level.trainingMobTier ?? spawn.mobTierSpawnOrder[level.levelsCleared]}</strong>)<span style="float: right;">mobs ${mob.length}</span>`
         } else {
             mobText = ""
         }
@@ -913,7 +889,7 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
             <div style="grid-column: 1;grid-row: 2 / 4;">
                 <svg class="SVG-button" onclick="build.startExperiment()" width="150" height="70" >
                     <g stroke='none' fill='#333' stroke-width="2" font-size="65px" font-family="Ariel, sans-serif">
-                        <text x="10" y="57">start</text>
+                        ${levelEditor.isActive ? `<text x="75" y="57" text-anchor="middle">set</text>` : `<text x="10" y="57">start</text>`}
                     </g>
                 </svg>
             </div>
@@ -1063,12 +1039,13 @@ ${b.guns[b.inventory[i]].descriptionFunction()}</div> </div>`
         simulation.paused = false;
         requestAnimationFrame(cycle);
         mouseMove.lock()
+        if (levelEditor.isActive) levelEditor.run("setLoadout") //in the level editor the start button says set, it sets the picks as the level's loadout
     }
 }
 
 async function openExperimentMenu() {
     document.getElementById("experiment-button").style.display = "none";
-    document.getElementById("training-button").style.display = "none";
+    document.getElementById("community-button").style.display = "none";
     document.getElementById("start-button").style.display = "none";
     document.getElementById("level-editor-splash-button").style.display = "none";
     const el = document.getElementById("experiment-grid")
@@ -1335,6 +1312,7 @@ window.addEventListener("keydown", function (event) {
     const searchBox = ["sort-input", "pause-sort-input"].map(id => document.getElementById(id)).find(el => el && el.offsetParent !== null)
     if (!searchBox) return
     event.preventDefault()
+    event.stopImmediatePropagation()
     searchBox.focus()
     searchBox.select()
 });
@@ -1894,8 +1872,8 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
         delete localSettings.banList
         localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
     }
-    if (localSettings.isLevelPoolThumbnails === undefined) localSettings.isLevelPoolThumbnails = true
-    localSettings.isCommunityMaps = localSettings.levelPool.added.some(name => level.communityLevels.includes(name))
+    delete localSettings.isLevelPoolThumbnails //the thumbnails button is gone, they always show
+    localSettings.isCommunityMaps = level.poolableLevels(level.communityLevels).some(name => localSettings.levelPool.added.includes(name))
     simulation.isCommunityMaps = localSettings.isCommunityMaps
 
     if (localSettings.fpsCapDefault === undefined) localSettings.fpsCapDefault = 'max'
@@ -1956,7 +1934,6 @@ if (localSettings.isAllowed && !localSettings.isEmpty) {
     const isAllowed = localSettings.isAllowed //don't overwrite isAllowed value
     localSettings = {
         levelPool: { banned: [], added: [] }, //official levels taken out of the pool, community and local levels put in
-        isLevelPoolThumbnails: true, //the level pool menu's thumbnails button
         isAllowed: isAllowed,
         personalSeeds: [],
         isJunkExperiment: false,
@@ -2067,13 +2044,30 @@ document.getElementById("auto-fullscreen").addEventListener("input", () => {
 });
 
 //**********************************************************************
-// level pool, the menu at the bottom of settings
+// progression tab and level pool
 // drag or click a level to move it into or out of the random pool, see level.randomLevelPool()
-// its thumbnails button shows a zoomed out picture above each level, they only load while the menu is open with thumbnails on
+// each level shows a zoomed out picture above its name, they only load while the menu is open
 //**********************************************************************
 const levelPoolMenu = {
+    siteLink: `<a class="level-menu-site-link" href="https://whyisthisnotavalable.github.io/n-vote/" target="_blank" rel="noopener" title="n-vote, a fan site for sharing and rating n-gon maps">upload, download, and rate maps on n-vote</a>`,
+    tabs(isProgression, isOpening = false) {
+        return `<div class="level-menu-tabs" role="group" aria-label="level menus">
+            <button type="button" class="level-menu-tab" data-training-tab${isProgression ? "" : ' aria-current="true"'}>Training</button>
+            <button type="button" class="level-menu-tab" ${isProgression ? `aria-current="true"${isOpening ? " autofocus" : ""}` : 'popovertarget="level-pool" popovertargetaction="show"'}>Progression</button>
+        </div>`
+    },
+    toolbar(isProgression, actions, isOpening = false) {
+        const description = isProgression
+            ? "a standard 13-level run with randomized levels, combat, multiple routes, and tech progression"
+            : "single play, scripted, puzzles, with more linear paths and set tech/guns/field"
+        return `<div class="level-menu-toolbar">
+            ${levelPoolMenu.tabs(isProgression, isOpening)}
+            ${levelPoolMenu.siteLink}
+            ${actions ? `<div class="level-menu-actions">${actions}</div>` : ""}
+            <div class="level-menu-description level-pool-note">${description}</div>
+        </div>`
+    },
     dragging: null, //name of the level being dragged
-    isShowingThumbnails: false, //set in render()
     thumbnailPath: "img/levels/", //made by tools/level-thumbnails.js, run "npm run level-thumbnails" after adding a level or changing how one looks
     thumbnailSize: [320, 160], //about twice the size they show at
     localThumbnails: {}, //local levels' thumbnails are drawn from their data each time the menu opens, they can change in the level editor
@@ -2103,7 +2097,7 @@ const levelPoolMenu = {
         levelPoolMenu.update()
     },
     update() { //save, then redraw
-        localSettings.isCommunityMaps = localSettings.levelPool.added.some(name => level.communityLevels.includes(name))
+        localSettings.isCommunityMaps = level.poolableLevels(level.communityLevels).some(name => localSettings.levelPool.added.includes(name))
         simulation.isCommunityMaps = localSettings.isCommunityMaps
         if (localSettings.isAllowed) localStorage.setItem("localSettings", JSON.stringify(localSettings)); //update local storage
         if (simulation.isCommunityMaps) level.loadMoreLevels().catch(error => console.error(error))
@@ -2112,12 +2106,11 @@ const levelPoolMenu = {
     chip(name) {
         const origin = levelPoolMenu.origin(name)
         const inPool = levelPoolMenu.isInPool(name)
-        const text = levelPoolMenu.isShowingThumbnails ? `${levelPoolMenu.thumbnail(name)}<span class="level-chip-name">${name}</span>` : name
-        return `<span class="level-chip level-chip-${origin}${inPool ? "" : " level-chip-out"}" draggable="true" tabindex="0" role="button" data-level="${name}">${text}</span>`
+        return `<span class="level-chip level-chip-${origin}${inPool ? "" : " level-chip-out"}" draggable="true" tabindex="0" role="button" data-level="${name}">${levelPoolMenu.thumbnail(name)}<span class="level-chip-name">${name}</span></span>`
     },
     thumbnail(name) {
         let src = `${levelPoolMenu.thumbnailPath}${name}.webp`
-        if (levelPoolMenu.origin(name) === "local") {
+        if (!level.trainingLevels.includes(name) && levelPoolMenu.origin(name) === "local") {
             if (levelPoolMenu.localThumbnails[name] === undefined) {
                 const data = levelData.store.get(name)
                 levelPoolMenu.localThumbnails[name] = data ? levelPoolMenu.thumbnailOfData(data) : ""
@@ -2172,27 +2165,27 @@ const levelPoolMenu = {
     },
     render(isOpening = false) {
         const menu = document.getElementById("level-pool")
-        levelPoolMenu.isShowingThumbnails = !!localSettings.isLevelPoolThumbnails && (isOpening || menu.matches(":popover-open")) //not while it's closed, so they don't load with the title page
-        menu.classList.toggle("level-pool-thumbnails", levelPoolMenu.isShowingThumbnails)
         const pool = level.randomLevelPool()
         const banned = level.playableLevels.filter(name => !pool.includes(name))
-        const community = level.communityLevels.filter(name => !pool.includes(name))
-        const local = level.localLevels().filter(name => !pool.includes(name))
+        const community = level.poolableLevels(level.communityLevels).filter(name => !pool.includes(name)) //only progression levels, training levels are in the training menu
+        const local = level.poolableLevels(level.localLevels()).filter(name => !pool.includes(name))
         const locked = name => `<span class="level-route-locked">${name}</span>`
         const random = count => `<span class="level-route-random">${count} random</span>`
-        const addAll = (zoneName, names) => names.length ? `<button class="sort-button level-pool-button" data-add-all="${zoneName}">add all</button>` : ""
-        const thumbnailsButton = `<button class="sort-button level-pool-button${localSettings.isLevelPoolThumbnails ? " level-pool-button-on" : ""}" data-thumbnails aria-pressed="${!!localSettings.isLevelPoolThumbnails}" title="show a zoomed out picture of each level">thumbnails</button>`
+        const addAll = (zoneName, names) => names.length ? `<button type="button" class="level-pool-button" data-add-all="${zoneName}">add all</button>` : ""
         menu.innerHTML = `
-            ${levelPoolMenu.header("random pool", `${thumbnailsButton}<button class="sort-button level-pool-button" data-reset title="every n-gon level, no community levels">reset</button>`)}
-            ${levelPoolMenu.zone("pool", pool, "")}
+            ${levelPoolMenu.toolbar(true, "", isOpening)}
             <div class="level-route">
-                ${[locked("initial"), random(6), locked("reactor"), random(3), locked("reservoir / factory / interferometer"), locked("subway"), locked("final")]
-                .map((step, i) => i ? `<span class="level-route-step"><span class="level-route-dash">-</span>${step}</span>` : step).join("")}
+                <div class="level-route-order">
+                    ${[locked("initial"), random(6), locked("reactor"), random(3), locked("reservoir / factory / interferometer"), locked("subway"), locked("final")]
+                    .map((step, i) => i ? `<span class="level-route-step"><span class="level-route-dash">-</span>${step}</span>` : step).join("")}
+                </div>
+                <button type="button" class="level-pool-button" data-reset title="every n-gon level, no community levels">reset</button>
             </div>
-            ${levelPoolMenu.header("local", addAll("local", local))}
-            ${levelPoolMenu.zone("local", local, "")}
-            ${levelPoolMenu.header(`community<a class="level-pool-site-link" href="https://whyisthisnotavalable.github.io/n-vote/" target="_blank" rel="noopener" title="n-vote, a fan site for n-gon maps: upload your levels, download other players' maps, and rate them. import a download in the level editor, then add it to the pool">upload, download, and rate maps on <span class="site-link-name">n-vote</span></a>`, addAll("community", community))}
-            ${levelPoolMenu.zone("community", community, "")}
+            ${levelPoolMenu.zone("pool", pool, "")}
+            ${levelPoolMenu.header("local storage", addAll("local", local))}
+            ${levelPoolMenu.zone("local", local, "progression levels from local storage")}
+            ${levelPoolMenu.header("community progression", addAll("community", community))}
+            ${levelPoolMenu.zone("community", community, "progression community maps go here")}
             ${levelPoolMenu.header("banned", addAll("banned", banned))}
             ${levelPoolMenu.zone("banned", banned, "")}`
     },
@@ -2205,22 +2198,17 @@ const levelPoolMenu = {
     clearTargets() {
         for (const el of document.querySelectorAll("#level-pool .level-pool-target")) el.classList.remove("level-pool-target")
     },
-    place() { //a pop up next to the settings menu, lined up with its bottom edge, or across the window above the level pool button if there isn't room
-        const card = document.querySelector("#settings-details > .details-div").getBoundingClientRect()
-        const button = document.getElementById("level-pool-button").getBoundingClientRect()
-        const menu = document.getElementById("level-pool")
-        const gap = 8
-        const room = Math.min(window.innerWidth, document.getElementById("start-button").getBoundingClientRect().left || Infinity) - card.right - 2 * gap //stay clear of the start button
-        const isBeside = room >= 480
-        const bottom = isBeside ? card.bottom : button.top - gap
-        menu.style.left = `${isBeside ? card.right + gap : gap}px`
-        menu.style.width = `${isBeside ? Math.min(1000, room) : window.innerWidth - 2 * gap}px`
-        menu.style.bottom = `${window.innerHeight - bottom}px`
-        menu.style.maxHeight = `${bottom - gap}px`
-    },
     close() {
         const menu = document.getElementById("level-pool")
         if (menu.matches(":popover-open")) menu.hidePopover()
+    },
+    showProgression() { //the settings shortcut opens the same picker with progression selected
+        if (!level.isTrainingMenuOpen()) level.chooseCommunityTraining()
+        document.getElementById("level-pool").showPopover()
+    },
+    showTraining() {
+        levelPoolMenu.close()
+        document.querySelector("#choose-grid [data-training-tab]")?.focus({ preventScroll: true })
     },
 }
 {
@@ -2229,22 +2217,20 @@ const levelPoolMenu = {
         if (event.newState === "open") {
             levelPoolMenu.localThumbnails = {}
             levelPoolMenu.render(true) //local levels can change in the level editor
-            levelPoolMenu.place()
+            menu.scrollTop = 0
         }
-    })
-    menu.addEventListener("toggle", (event) => {
-        document.getElementById("level-pool-button").classList.toggle("level-pool-button-open", event.newState === "open")
-    })
-    window.addEventListener("resize", () => {
-        if (menu.matches(":popover-open")) levelPoolMenu.place()
     })
     //a manual pop up, clicking outside it doesn't close it because a click on the title art starts a run
     window.addEventListener("keydown", (event) => {
-        if (event.key === "Escape") levelPoolMenu.close()
+        if (event.key !== "Escape") return
+        if (menu.matches(":popover-open")) levelPoolMenu.showTraining()
+        else if (level.isTrainingMenuOpen()) level.closeTrainingMenu()
     })
-    document.getElementById("settings-details").addEventListener("toggle", () => {
-        if (!document.getElementById("settings-details").open) levelPoolMenu.close()
-    })
+    for (const details of document.querySelectorAll('details[name="front-page-group"]')) { //one title page menu at a time, opening one closes the training menu, see level.chooseCommunityTraining()
+        details.addEventListener("toggle", () => {
+            if (details.open && level.isTrainingMenuOpen()) level.closeTrainingMenu()
+        })
+    }
     menu.addEventListener("click", (event) => {
         const chip = event.target.closest("[data-level]")
         if (chip) {
@@ -2252,22 +2238,27 @@ const levelPoolMenu = {
             levelPoolMenu.move(chip.dataset.level, !levelPoolMenu.isInPool(chip.dataset.level))
             return
         }
-        const button = event.target.closest("button")
+        if (event.target.closest("[data-training-tab]")) return levelPoolMenu.showTraining()
+        const button = event.target.closest("button[data-reset], button[data-add-all]")
         if (!button) return
         const pool = localSettings.levelPool
-        if (button.dataset.thumbnails !== undefined) {
-            localSettings.isLevelPoolThumbnails = !localSettings.isLevelPoolThumbnails
-        } else if (button.dataset.reset !== undefined) {
+        if (button.dataset.reset !== undefined) {
             pool.banned = []
             pool.added = []
         } else if (button.dataset.addAll === "banned") {
             pool.banned = []
         } else if (button.dataset.addAll === "community") {
-            pool.added = pool.added.filter(name => !level.communityLevels.includes(name)).concat(level.communityLevels)
+            pool.added = pool.added.filter(name => !level.communityLevels.includes(name)).concat(level.poolableLevels(level.communityLevels))
         } else if (button.dataset.addAll === "local") {
-            pool.added = pool.added.filter(name => !level.localLevels().includes(name)).concat(level.localLevels())
+            pool.added = pool.added.filter(name => !level.localLevels().includes(name)).concat(level.poolableLevels(level.localLevels()))
         }
         levelPoolMenu.update()
+        if (event.detail === 0) { //the update replaces the button; keep keyboard focus in the menu
+            const action = button.dataset.addAll
+            const replacement = action ? menu.querySelector(`[data-add-all="${action}"]`) : null
+            const focusTarget = replacement || menu.querySelector("[data-reset]")
+            focusTarget.focus()
+        }
     })
     menu.addEventListener("keydown", (event) => {
         const chip = event.target.closest("[data-level]")
@@ -2311,7 +2302,6 @@ const levelPoolMenu = {
         levelPoolMenu.dragging = null
         levelPoolMenu.move(name, zone.dataset.zone === "pool")
     })
-    levelPoolMenu.render()
 }
 
 // Add the Spotify and Apple Music playlist URLs to the empty strings below.
@@ -2575,4 +2565,3 @@ function cycle() {
 }
 
 saveGame.updateContinueButton() //show continue on the title page when there is an autosave
-levelEditor.updateSplashButton() //and the level editor when there are local levels

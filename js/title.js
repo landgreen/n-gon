@@ -260,7 +260,7 @@ const titlePage = {
             const center = Vertices.centre(hull)
             titlePage.addMap(Bodies.fromVertices(center.x, center.y, [hull]))
         }
-        for (const id of ["start-button", "training-button", "experiment-button", "continue-button", "level-editor-splash-button"]) {
+        for (const id of ["start-button", "community-button", "experiment-button", "continue-button", "level-editor-splash-button"]) {
             const rect = document.getElementById(id).getBoundingClientRect()
             if (rect.width) titlePage.addButton(rect) //hidden buttons have no size
         }

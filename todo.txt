@@ -1,30 +1,70 @@
+tech: molecular machine - molecular assembler prints random bullets for 0.5x energy cost
+  requires no gun tech, and its bullets don't unlock gun tech
+  cheaper bullets print more often, so each type gets about the same energy
 
-ray: press down to pass through the line left behind, from above or below
-eddy current: with ray, jump 3x higher off ray's line instead of being pushed by it
+player legs step along slopes, steep ones too, feet don't slide, and steps stay on ledges
 
-boss
-  stentorBoss - a trumpet shaped ciliate that holds onto walls, its cilia swirl you
-    into its mouth, it snaps shut when hit, and swims to a new spot each phase
-  stentorBoss3 - greener, 8 phases, 3 fragments each phase, bigger current, faster
+progression levels - repeatable, random, combat oriented, tech progression, easy traversal along multiple paths.
+  the level pool only lists progression maps, training maps are in the training menu
+    progression community maps: stronghold, ngon, vats, perplex, dripp, vents, ballast,
+      crossfire, coliseum, commandeer, downpour, LaunchSite, zenith, turbine
+    stronghold, perplex, and vents have a starting power up by the exit
+training levels - single play, scripted, puzzles, linear path. preset tech, guns, and field
+  the community button opens a menu of tutorial, community, and local training maps
+  random is next to community training, and import is next to local storage
 
 level editor
-  zone effects can zoom the camera when it turns on and off, with a goal and time for each
-  esc stops quick test and test export
-interest: also spawns 5% of your qubits, coupling interest is 6->5%
-floodFillBoss waits a second before each dash, sending 4 grenades down its path
+  the editor button is always in the lower-right corner of the title screen
+  selecting several things shows a close up of them, click it to fit them in view
+  minimap draws the entrance and exit as little arches, and the player as its head
+  train smooth stop, on by default, eases into an upper end of its path
+    instead of looping past it, off turns hard and jolts the player
+  ghost mode's dashed circle follows the view, showing where G drops you
+  laser tracking turns it toward the player while it can see them,
+    with a speed, range, and how far each way it can turn
+  laser reflections bounce it off walls and blocks that many times
+  tripwire trigger: a beam that turns on its links when the player, a block,
+    or a mob breaks it, link a laser and mobs to it for an alarm
+  experiment's set button keeps your field, guns, and tech as the level's loadout,
+    opening the level and test start with it
+  test hides the panels, esc or stopping shows them, a hint says esc stops it
+  level info box: training | progression, training levels show in the training menu
+  heat zone: furnace and refinery's timed heat, set burn, cool, warning, and start times
+    link it to a button so it burns while on, or cools while on like refinery
+    it's a trigger too, on while burning, a linked door set to runs while off
+      closes while it burns, like refinery
+  chain: round links pinned at one end, or both so it sags like a bridge
+  issues for training levels ask for a loadout, not bosses, mobs, or starting power ups
+    click the loadout warning to open experiment, set makes it the level's loadout
+  training levels have a mob tier, 1 to 5, for their random mobs and bosses
+  hold shift on the rotate handle to snap to 0, 90, 180, or 270°, even a tilted laser
 
 bug fixes
-  level editor info box rows that depend on a value show up right away after pressing enter
-    number fields show their minimum right away instead of what was typed
-  leaving mass-energy equivalence returns the health you had when you took it
-    swapping skins with optimization no longer turns energy into health
-  eddy current no longer pins you under ray's line
-  ⌘/ctrl+F goes to experiment mode's search right away, without a click first
+  switching to manual zoom during a camera transition keeps your zoom level
+  passing through the end of ray's line no longer nudges you sideways
+  mass-energy equivalence restores your original health even below 10 health
+  interest rounds correctly, and final boss phases share the reduced interest and dividend rate
+  decoherence remembers the instant tech you passed up from instanton
+  opening menu search with cmd/ctrl+f no longer also presses the fire key
+  level editor tests pick mobs from the selected test level
+  level editor minimap no longer stretches after the info box redraws
+  training level exit doors sit flush on the floor, no more ledge under them
+  level editor test lets you toggle testing mode with T again, it counts as an assist
+  level editor reach issues count trains, up wind, low gravity zones, and tilted boosts
+  mob clear ignores dark matter, WIMPs, hallucinations, and your zombies
+  outlier no longer makes hovering needles grow forever
+  dying while passing through ray's line no longer slows the next run's crouch checks
+  secret title page start no longer lets difficulty respawn the starting power ups
+  level editor rotate handle turning a shape back to square no longer leaves it slanted
 
 *********************************************************** TODO *****************************************************
 
 
 
+
+consider using moving ellipsis as a mob effect
+  in to show narrow suck like stentor
+  out to show push?
 
 add alternator-like swing code to other situations
   every 3 swings make one with a much bigger range?
@@ -42,7 +82,6 @@ make some new mobs
 new version of history boss with legs and it looks in the same direction the player looked in but +180
   also has a laser sword?
   also shots bullets?
-        
 
 new level element - color keys and keyButtons    
 !new map vault - 

@@ -10,8 +10,8 @@ Object.assign(levelEditor, {
                 <li>Draw the ground and walls with the <b>map</b> tool.</li>
                 <li>Select and drag <b>entrance</b> and <b>exit</b> into place.</li>
                 <li>Open <b>add</b> to place <b>mob</b> spots, a <b>boss</b>, and a <b>starting</b> power up.</li>
-                <li>Press <b>▶ quick test</b> in <b>simulation</b> to play. Press <b>■ stop</b> or <b>esc</b> to return to editing.</li>
-                <li>Click the issues count in the bottom bar to check for problems. When you're ready to share, use <b>export</b> in <b>import/export</b>.</li>
+                <li>Press <b>▶ test</b> in <b>simulation</b> to play. Press <b>■ stop</b> or <b>esc</b> to return to editing.</li>
+                <li>Click the issues count in the bottom bar to check for problems. When you're ready to share, use <b>export</b> in <b>load</b>.</li>
             </ol>`],
         ["drawing", `
             <ul>
@@ -21,7 +21,7 @@ Object.assign(levelEditor, {
                 <li>Drag the squares around a selection to resize it. Hold alt to move or resize without snapping to the grid.</li>
                 <li>The shapes at the top of <b>add</b> make ramps, domes, stairs, and more.</li>
                 <li>Select a map piece or block and press <b>V</b> or <b>vertices</b> to edit its corners. These shapes can't have inward dents; use several pieces to make those.</li>
-                <li>The angle box and ↻ buttons rotate your selection. Hold shift when clicking a ↻ button to turn the other way.</li>
+                <li>The angle box and ↻ buttons rotate your selection. Hold shift when clicking a ↻ button to turn the other way. Drag the round handle above one object to turn it, and hold shift to end at a right angle.</li>
                 <li>⌘Z undoes a change, ⌘⇧Z redoes it. <b>History</b> lets you return to an earlier step.</li>
                 <li>⌘X cuts, ⌘C copies, and ⌘V pastes at the mouse. Use ctrl instead of ⌘ on Windows or Linux. Delete removes the selection. The keys under the info box do the same when clicked.</li>
                 <li>Scroll to zoom. Drag with the middle mouse button (or the pan tool) to move the view, middle click to center on the player, or double-click either one to teleport the player to the mouse. Mouse 4 and 5 (the back and forward buttons) teleport with one click. <b>fit</b> in the bottom bar shows the whole level, or just the selection.</li>
@@ -48,10 +48,11 @@ Object.assign(levelEditor, {
             </ul>`],
         ["testing", `
             <ul>
-                <li><b>▶ quick test</b> returns the player to the entrance and puts blocks back where they started. Turn on <b>mobs</b> to include mobs and power ups in the test, and <b>invincible</b> to explore without taking damage.</li>
+                <!-- quick test is off for now: <li><b>▶ quick test</b> returns the player to the entrance and puts blocks back where they started. Turn on <b>mobs</b> to include mobs and power ups in the test, and <b>invincible</b> to explore without taking damage.</li> -->
+                <li>Turn on <b>invincible</b> to explore without taking damage.</li>
                 <li><b>level</b> sets how far into a run you're testing. Try 1 and 10 to see how the fights change. At 0, random mobs don't spawn.</li>
-                <li><b>▶ test export</b> runs the code that <b>export</b> produces, with the normal game camera and mouse controls. It always includes mobs and power ups. You don't need to know JavaScript to use it; try it before sharing your level.</li>
-                <li><b>Time</b> slows the game so you can watch something closely. Test export ignores it, and grays out the settings it doesn't use.</li>
+                <li><b>▶ test</b> runs the code that <b>export</b> produces, with the normal game camera and mouse controls. It always includes mobs and power ups. You don't need to know JavaScript to use it; try it before sharing your level.</li>
+                <li><b>Time</b> slows the game so you can watch something closely. Full test ignores it, and grays out the settings it doesn't use.</li>
                 <li>The buttons below the camera list show outlines, movement, and collision points to help explain how objects behave.</li>
                 <li>Play all the way to the exit, and try falling off the edges. The exit won't take you to another level while you're in the editor.</li>
             </ul>`],
@@ -63,15 +64,15 @@ Object.assign(levelEditor, {
             <p>Link two controls to the same object and either can turn it on. Link one control to another and both must be on. For example, link a zone to a logic timer, then the timer to a laser, to make the laser pulse only while something is in the zone.</p>`],
         ["code", `
             <p>Code is optional. For behavior the editor's tools can't make, <b>code</b> at the bottom of the level's info box (click empty space) lets you add your own JavaScript.</p>
-            <p>To explore how existing levels work, open one from <b>load more levels</b> in <b>import/export</b>. This makes a local copy, so you can experiment without changing the original.</p>
+            <p>To explore how existing levels work, open one from <b>levels</b> in <b>load</b>. This makes a local copy, so you can experiment without changing the original.</p>
             <p>If you're writing code: each code element runs when the level loads and can use variables defined in earlier code elements. Put behavior that needs to repeat each frame in <code>level.custom</code>.</p>`],
         ["sharing and submitting", `
             <ul>
                 <li>Your levels are saved in this browser. Use <b>export</b>, then <b>download</b> to save a backup file, or <b>copy</b> to share the text. If the bottom bar ever says <b>not saved</b>, export a backup right away.</li>
                 <li>Keep the whole export, including its final <code>//level editor:</code> line. That line lets <b>import</b> restore all the editable objects.</li>
                 <li><b>Import</b> saves a new local level, paste the text or use <b>open file</b>. Your current level is kept, and an imported name already in use gets a number added. <b>Fork</b> is also an easy way to experiment on a copy.</li>
-                <li><b>Add to level pool</b> includes the level in your own runs. It doesn't publish it.</li>
-                <li>Before submitting, play from start to finish with mobs on and try <b>test export</b>. Resolve the <b>fix</b> items in the issues list and review any warnings.</li>
+                <li><b>+ level pool</b> includes the level in your own runs. It doesn't publish it.</li>
+                <li>Before submitting, play from start to finish with mobs on and try <b>full test</b>. Resolve the <b>fix</b> items in the issues list and review any warnings.</li>
                 <li>To suggest your level for the game, open an issue on <a href="https://github.com/landgreen/n-gon/issues" target="_blank" rel="noopener">github.com/landgreen/n-gon</a> titled <i>New community map: your level's name</i> and paste the full export into it.</li>
                 <li>Submit once and allow time for a reply. It may take days or weeks.</li>
             </ul>`],

@@ -81,6 +81,7 @@ const levelAnalysis = {
     line(status, label, value = "", text = "", elements = [], add = "") { //elements are the ones it's about, the editor outlines them in the level, add is a type whose add fixes it, the editor adds one when it's clicked
         return { status, label, value: String(value), text, ids: elements.map(el => el.id).filter(id => id !== undefined), add }
     },
+    command: (line, name) => Object.assign(line, { command: name }), //a level editor command clicking the line runs, like experiment for no loadout
     repair: (line, kind) => Object.assign(line, { repair: kind }), //a fix the editor can do to the line's elements: "ground" sets them on the map, "lift" moves them up out of it, "delete" deletes them
     at: (x, y) => `(${Math.round(x)}, ${Math.round(y)})`,
     distance: (a, b) => Math.hypot(a.x - b.x, a.y - b.y),
@@ -248,7 +249,7 @@ const levelAnalysis = {
             for (const edge of tops(outlineOf(el))) if (!along(edge)) return null
         }
         for (const el of data.elements) {
-            if (el.type === "map" || !levelElements.isSnappable(el)) continue //what stands in the level, blocks too, players stack and carry them
+            if (el.type === "map" || (!levelElements.isSnappable(el) && el.type !== "train")) continue //what stands in the level, blocks too, players stack and carry them
             if (el.type === "elevator") { //its top, and where it rises to
                 const rect = { x1: el.x, x2: el.x + el.width }
                 const low = along([{ x: rect.x1, y: el.y }, { x: rect.x2, y: el.y }])
@@ -260,18 +261,50 @@ const levelAnalysis = {
             } else if (el.type === "train") { //anywhere along its path
                 const path = el.path ? levelData.find(data, el.path) : null
                 const route = path && path.type === "path" ? levelElements.pathOutline(path) : [{ x: el.x, y: el.y }]
-                sampled += route.length
-                if (sampled > most) return null
-                const riding = route.map(p => spot(p.x, p.y - el.height / 2))
+                const stops = [route[0]] //every 100 along it, so the player can get on and off anywhere
+                for (let i = 1; i < route.length; i++) {
+                    const p = route[i - 1]
+                    const q = route[i]
+                    const count = Math.max(1, Math.ceil(Math.hypot(q.x - p.x, q.y - p.y) / 100))
+                    sampled += count
+                    if (sampled > most) return null
+                    for (let j = 1; j <= count; j++) stops.push({ x: p.x + (q.x - p.x) * j / count, y: p.y + (q.y - p.y) * j / count })
+                }
+                if (++sampled > most) return null
+                const riding = stops.map(p => spot(p.x, p.y - el.height / 2))
                 for (let i = 1; i < riding.length; i++) links.push([riding[0], riding[i]], [riding[i], riding[0]])
             } else {
                 for (const edge of tops(outlineOf(el))) if (!along(edge)) return null
             }
         }
-        for (const el of context.of("boost")) { //a jump as high as it launches
+        for (const el of context.of("boost")) { //a jump as high as it launches, the same speed at any angle, so a tilted one goes lower and farther
             if (++sampled > most) return null
-            const height = Math.max(normal.height, el.launchHeight / gravity)
-            spot(el.x, el.y, { height, distance: normal.distance * Math.sqrt(height / normal.height) })
+            const launch = el.launchHeight / gravity
+            const angle = (Number.isFinite(el.angle) ? el.angle : 90) * Math.PI / 180
+            const up = Math.max(0, Math.sin(angle))
+            const height = Math.max(normal.height, launch * up * up)
+            const across = 4 * launch * up * Math.abs(Math.cos(angle)) //lands level with it that far away
+            spot(el.x, el.y, { height, distance: Math.max(normal.distance * Math.sqrt(height / normal.height), across) })
+        }
+        const lifts = [] //zones that carry the player to their top: wind pushing up harder than gravity, and gravity zones at 0 or less
+        for (const el of context.of("wind")) if (el.float || -el.vy > 0.0024 * gravity) lifts.push(el)
+        for (const el of context.of("gravityZone")) {
+            if (el.gravity <= 0) lifts.push(el)
+            else if (el.gravity < 1) { //lighter inside, jumps from spots in it go higher
+                const scale = 1 / el.gravity
+                for (const s of spots) {
+                    if (s.x >= el.x && s.x <= el.x + el.width && s.y >= el.y && s.y - 80 <= el.y + el.height && s.jump.height < normal.height * scale) {
+                        s.jump = { height: normal.height * scale, distance: normal.distance * scale }
+                    }
+                }
+            }
+        }
+        for (const el of lifts) { //getting in anywhere, the bottom too, gets to its top
+            const bottom = along([{ x: el.x, y: el.y + el.height }, { x: el.x + el.width, y: el.y + el.height }])
+            const top = along([{ x: el.x, y: el.y }, { x: el.x + el.width, y: el.y }])
+            if (!bottom || !top) return null
+            if (!top.length) continue //walking along the top from one spot gets to the rest
+            for (const s of spots) if (s.x >= el.x && s.x <= el.x + el.width && s.y > el.y && s.y - 80 <= el.y + el.height) links.push([s, top[0]])
         }
         for (const el of context.of("portal")) { //going in one end comes out the other
             sampled += 2
@@ -440,9 +473,23 @@ levelAnalysis.check("errors", c => { //javascript that throws while the level ru
     return lines
 })
 
+//a training level is played once, on its own, with its loadout: the run's random mobs, bosses, starting power up, and heal and ammo aren't needed, so only a progression level asks for them
+levelAnalysis.check("loadout", c => { //a training level swaps the player's field, guns, and tech for its loadout, see level.communityTrainingLoadout()
+    if (!c.data.isTraining) return []
+    if (!c.data.loadout) return [levelAnalysis.command(levelAnalysis.line("warn", "loadout", "none", "training levels start with a random gun, pick a field, guns, and tech in experiment, then press set"), "experiment")]
+    return [levelAnalysis.line("ok", "loadout", "", levelData.loadoutText(c.data.loadout))]
+})
+
+levelAnalysis.check("loadout", c => { //a training level's mob tier, in the level's settings
+    if (!c.data.isTraining) return []
+    if (!c.data.mobTier) return [levelAnalysis.command(levelAnalysis.line("warn", "mob tier", "none", "pick one in the level's settings, until then random mobs and bosses are tier 1"), "pickMobTier")]
+    return [levelAnalysis.line("ok", "mob tier", c.data.mobTier)]
+})
+
 levelAnalysis.check("bosses", c => {
     const { line, at, distance } = levelAnalysis
     const lines = []
+    const isTraining = c.data.isTraining
     const spotsOf = {} //each boss type's spots, with the element each is on
     const bossCalls = (c.code.match(/spawn\.\w*Boss\s*\(/g) || []).length //spawn.randomLevelBoss( or a named one like spawn.mantisBoss(, not secondaryBossChance(
     const inCode = { boss: bossCalls > 0, secondaryBoss: c.inCode("secondaryBossChance") || bossCalls > (c.of("boss").length ? 0 : 1) }
@@ -450,7 +497,7 @@ levelAnalysis.check("bosses", c => {
         const list = c.of(type)
         if (!list.length) {
             if (inCode[type]) lines.push(line("ok", label, "in code"))
-            else lines.push(line("fix", label, 0, type === "boss" ? "add a boss" : "add a 2nd boss", [], type))
+            else if (!isTraining) lines.push(line("fix", label, 0, type === "boss" ? "add a boss" : "add a 2nd boss", [], type))
             continue
         }
         spotsOf[type] = list.flatMap(el => levelElements.types[type].places(el).map(([x, y]) => ({ x, y, el })))
@@ -481,8 +528,11 @@ levelAnalysis.check("mobs", c => {
     const spots = c.of("mobSpot")
     const singles = c.of("mob").concat(c.of("smallMobs"))
     const places = spots.length + singles.length
+    const isTraining = c.data.isTraining
     if (!places && (c.inCode("randomMobPositions") || c.inCode("randomMob("))) {
         lines.push(line("ok", "mob places", "in code"))
+    } else if (isTraining) {
+        if (places) lines.push(line("ok", "mob places", places))
     } else if (!places) {
         lines.push(line("fix", "mob places", 0, "add some with mob in add mobs", [], "mobSpot"))
     } else if (places < c.norms.mobPlaces) {
@@ -490,7 +540,7 @@ levelAnalysis.check("mobs", c => {
     } else {
         lines.push(line("ok", "mob places", places))
     }
-    if (singles.length && !spots.length) lines.push(line("note", "random mobs", singles.length, "standard levels use spots, each level picks how many mobs to spawn from them"))
+    if (singles.length && !spots.length && !isTraining) lines.push(line("note", "random mobs", singles.length, "standard levels use spots, each level picks how many mobs to spawn from them"))
     const groups = c.of("mobGroup").length
     if (groups > 2 * c.norms.groups) lines.push(line("note", "groups", groups, `standard levels have up to ${c.norms.groups}`))
     else lines.push(line("ok", "groups", groups))
@@ -506,8 +556,9 @@ levelAnalysis.check("power ups", c => {
     const { line, at, distance } = levelAnalysis
     const lines = []
     const starting = c.of("startingPowerUps")
+    const isTraining = c.data.isTraining //its loadout is its gun and tech
     if (!starting.length && c.inCode("spawnStartingPowerUps")) lines.push(line("ok", "starting", "in code"))
-    else if (!starting.length) lines.push(line("warn", "starting", 0, "add one, it gives a gun or tech early in a run", [], "startingPowerUps"))
+    else if (!starting.length) { if (!isTraining) lines.push(line("warn", "starting", 0, "add one, it gives a gun or tech early in a run", [], "startingPowerUps")) }
     else if (starting.length > 1) lines.push(line("warn", "starting", starting.length, "standard levels have 1", starting))
     else lines.push(line("ok", "starting", 1))
     const nearEnter = c.spawn ? starting.filter(el => distance(el, c.spawn) < c.norms.near.startingPowerUps) : []
@@ -519,11 +570,12 @@ levelAnalysis.check("power ups", c => {
     const healAmmo = c.of("randomPowerUp").length + placed("heal") + placed("ammo") + levelAnalysis.debrisPowerUp * debris
     const [few, many] = c.norms.healAmmo
     const value = `~${Number(healAmmo.toFixed(1))}`
-    if (healAmmo < few) lines.push(line("warn", "heal and ammo", value, `levels should have ${few} to ${many}`, [], "randomPowerUp"))
+    if (isTraining) { if (healAmmo) lines.push(line("ok", "heal and ammo", value)) }
+    else if (healAmmo < few) lines.push(line("warn", "heal and ammo", value, `levels should have ${few} to ${many}`, [], "randomPowerUp"))
     else if (healAmmo > many) lines.push(line("warn", "heal and ammo", value, `levels should have ${few} to ${many}`))
     else lines.push(line("ok", "heal and ammo", value))
     const free = ["tech", "gun", "field"].filter(name => placed(name))
-    if (free.length) lines.push(line("warn", "free " + free.join(" "), free.reduce((sum, name) => sum + placed(name), 0), "standard levels give these from the boss and the starting power up", c.of("powerUp").filter(el => free.includes(el.name))))
+    if (free.length && !isTraining) lines.push(line("warn", "free " + free.join(" "), free.reduce((sum, name) => sum + placed(name), 0), "standard levels give these from the boss and the starting power up", c.of("powerUp").filter(el => free.includes(el.name))))
     if (placed("research")) lines.push(line("note", "research", placed("research"), "levels with mobs already get 1 on a random mob"))
     if (debris > c.norms.debris) lines.push(line("warn", "debris", debris, "many levels scatter about 16"))
     else lines.push(line(debris ? "ok" : "note", "debris", debris, debris ? "" : "many levels scatter about 16", [], debris ? "" : "debris"))
@@ -620,13 +672,13 @@ levelAnalysis.check("elements", c => {
     const noHole = c.of("key").filter(el => !holeColors.has(el.color))
     if (noHole.length && !c.inCode("level.keyButton(")) lines.push(line("warn", "key", noHole.length, `no ${noHole[0].color} keyhole for it`, noHole))
     const linked = new Set(c.data.elements.flatMap(el => [el.link, el.orLink]).filter(id => id !== null && id !== undefined))
-    const idle = c.data.elements.filter(el => levelElements.linkSources.includes(el.type) && !linked.has(el.id) && !String(el.log ?? "").trim() && !el.edited)
+    const idle = c.data.elements.filter(el => levelElements.linkSources.includes(el.type) && !levelElements.types[el.type].ownsLink && !linked.has(el.id) && !String(el.log ?? "").trim() && !el.edited)
     if (idle.length) lines.push(line("note", "does nothing", idle.length, `${levelElements.summary(idle[0])} has nothing linked, no log, and no edited code`, idle))
     const unwired = c.data.elements.filter(el => levelElements.types[el.type]?.isGate && [el.link, el.orLink].filter(Boolean).length < levelElements.gateOf(el).needs)
     if (unwired.length) lines.push(line("note", "gate inputs", unwired.length, `${levelElements.summary(unwired[0])} needs ${levelElements.gateOf(unwired[0]).needs === 1 ? "an input" : "2 inputs"}, link triggers to it`, unwired))
     if (c.spawn) { //the player's middle, head, feet, and sides at the entrance
         const body = [[0, 0], [0, -30], [0, 30], [-20, 0], [20, 0]].map(([dx, dy]) => ({ x: c.spawn.x + dx, y: c.spawn.y + dy }))
-        const hazards = c.of("slime").filter(el => el.damage > 0).concat(c.of("laser").filter(el => el.damage > 0), c.of("wind"))
+        const hazards = c.of("slime").filter(el => el.damage > 0).concat(c.of("heat").filter(el => el.damage > 0 && el.start < 120), c.of("laser").filter(el => el.damage > 0), c.of("wind"))
         const hit = hazards.filter(el => body.some(p => levelElements.contains(el, p)))
         if (hit.length) lines.push(line("warn", "hazard at entrance", hit.length, `${levelElements.summary(hit[0])}, at ${at(c.spawn.x, c.spawn.y)}, the player ${hit[0].type === "wind" ? "is pushed" : "is hurt"} before they can move`, hit))
     }

@@ -36,6 +36,7 @@ const spawn = {
         //finalBoss is T5
     ],
     // tier-n bosses: suckerBoss, laserBoss, tetherBoss, bounceBoss, sprayBoss, mineBoss, hopMotherBoss, trainBoss, trainBoss2    //these need a particular level to work so they scale with level.levelsCleared
+    levelBossList: ["suckerBoss", "laserBoss", "tetherBoss", "tetherBoss4", "hopMotherBoss", "myriapodsBoss", "sprayBoss", "bounceBoss", "mineBoss", "laserScanBoss", "timeBoss"], //bosses made for one level, never random, the level editor's boss list has them, trainBoss, trainBoss2, flockBossChaos, and finalBoss need their own level's map
     bossTierIndex: [0, 0, 0, 0, 0], //tracks which boss just spawned to avoid duplicates in random bosses
     randomBossList: [
         // "orbitalBoss", "historyBoss", "shooterBoss", "cellBossCulture", "bomberBoss", "spiderBoss", "launcherBoss", "laserTargetingBoss",
@@ -59,7 +60,7 @@ const spawn = {
     mobTypeSpawnOrder: [], //preset list of mob names calculated at the start of a run by the randomSeed
     mobTierSpawnOrder: [], //preset list of mob tiers calculated at the start of a run by the randomSeed
     mobTypeSpawnIndex: 0, //increases as the mob type cycles
-    setMobTypeSpawnOrder() {
+    setMobTypeSpawnOrder(depth = level.levelsCleared) {
         //set seeded random lists of mobs and bosses
         spawn.mobTypeSpawnIndex = 0
         spawn.mobTypeSpawnOrder = []
@@ -79,7 +80,8 @@ const spawn = {
             spawn.mobTypeSpawnOrder.push(spawn.tier[tier][i % spawn.tier[tier].length]);
             spawn.mobTierSpawnOrder.push(tier);
         }
-        spawn.setSpawnList()
+        spawn.setSpawnList(depth)
+        if (level.trainingMobTier) level.applyMobTier(level.trainingMobTier)
     },
     fasterMobs(scale) { //faster mobs difficulty, mobs get all of scale when it's on and half of its change the other way when it's off, so 1.2 gives 1.2 on and 0.9 off, and 0.6 gives 0.6 on and 1.2 off, bosses use fasterBoss
         return simulation.difficultyOptions.isFasterMobs ? scale : 1 - 0.5 * (scale - 1)
@@ -92,9 +94,18 @@ const spawn = {
         me.damageScale = function () { return 2 * damage * tierDamageScale.call(this) }
         me.damageReduction /= 1.5
     },
-    setSpawnList() { //this is run at the start of each new level to determine the possible mobs for the level
+    usesFullMobPool(depth = level.levelsCleared) {
+        return !level.trainingMobTier && depth > 13 && simulation.difficultyOptions.isMobTier23
+    },
+    levelMobPool(tier = level.trainingMobTier ?? spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)], depth = level.levelsCleared) {
+        return spawn.usesFullMobPool(depth) ? spawn.fullPickList : spawn.tier[tier]
+    },
+    groupTier() { //groups and bosses have no tier 5
+        return Math.min(4, level.trainingMobTier ?? spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)])
+    },
+    setSpawnList(depth = level.levelsCleared) { //this is run at the start of each new level to determine the possible mobs for the level
         spawn.pickList.splice(0, 1);
-        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
+        if (spawn.usesFullMobPool(depth)) {
             const push = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
             spawn.pickList.push(push);
         } else {
@@ -105,16 +116,10 @@ const spawn = {
     isPacifistStarters() { //on the final lore run, regular mobs are all starters while the player hasn't killed too many, bosses are normal
         return level.levelsCleared > 1 && mobs.isPacifist() && !simulation.isCheating //localSettings.loreCount === 6 &&
     },
-    randomizeSpawnList(tier) { //used in subway to get new random mobs at current tier level
-        spawn.pickList.splice(0, 1);
-        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
-            const push = spawn.fullPickList[Math.floor(Math.random() * spawn.fullPickList.length)]
-            spawn.pickList.push(push);
-        } else {
-            const array = spawn.tier[tier]
-            const push = array[Math.floor(Math.random() * array.length)]
-            spawn.pickList.push(push);
-        }
+    randomizeSpawnList(tier, depth = level.levelsCleared) { //replace the older mob type with a random one, available to level scripts
+        const list = spawn.levelMobPool(tier, depth)
+        spawn.pickList.shift()
+        spawn.pickList.push(list[Math.floor(Math.random() * list.length)])
     },
     afterDelay(cycles, action) { //run action after some game cycles, only if still on the same level
         simulation.ephemera.push({
@@ -183,13 +188,8 @@ const spawn = {
     },
     //theme like "hop" picks only mobs with that in their name, if any can spawn at this tier
     //tier overrides this level's tier, but after 13 levels every tier can spawn
-    randomMobByLevelsCleared(x, y, theme = "", tier = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]) {
-        let pickFrom
-        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
-            pickFrom = spawn.fullPickList
-        } else {
-            pickFrom = spawn.tier[tier]
-        }
+    randomMobByLevelsCleared(x, y, theme = "", tier) {
+        let pickFrom = spawn.levelMobPool(tier)
         if (theme) {
             const themed = pickFrom.filter(name => name.includes(theme))
             if (themed.length) pickFrom = themed
@@ -227,7 +227,7 @@ const spawn = {
     allowedPickList(veto = []) { //the level's mob types without veto, or others from its tier if that's all of them
         const isAllowed = name => !veto.includes(name)
         let pickList = spawn.pickList.filter(isAllowed)
-        if (!pickList.length) pickList = (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23 ? spawn.fullPickList : spawn.tier[spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]] || []).filter(isAllowed)
+        if (!pickList.length) pickList = (spawn.levelMobPool() || []).filter(isAllowed)
         if (!pickList.length) pickList = spawn.pickList
         return pickList
     },
@@ -291,44 +291,27 @@ const spawn = {
     ],
     randomGroup(x, y, chance = 1) {
         if ((spawn.spawnChance(chance) && simulation.difficulty > 2) || chance === Infinity) {
-            if (spawn.isPacifistStarters()) {
-                if (Math.random() < 0.55) {
-                    spawn.nodeGroup(x, y, "starter");
-                } else {
-                    spawn.lineGroup(x, y, "starter");
-                }
-            } else if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
-                function pickRandom(arr) {
-                    const group = arr[Math.floor(Math.random() * arr.length)];
-                    return group[Math.floor(Math.random() * group.length)];
-                }
-                let pick = pickRandom(spawn.allowedGroupList)
-                if (Math.random() < 0.55) {
-                    spawn.nodeGroup(x, y, pick);
-                } else {
-                    spawn.lineGroup(x, y, pick);
-                }
-            } else {
-                const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
-                let pick = spawn.allowedGroupList[t][Math.floor(Math.random() * spawn.allowedGroupList[t].length)];
-                if (Math.random() < 0.55) {
-                    spawn.nodeGroup(x, y, pick);
-                } else {
-                    spawn.lineGroup(x, y, pick);
-                }
+            let pick = "starter"
+            if (!spawn.isPacifistStarters()) {
+                const tier = spawn.usesFullMobPool() ? Math.floor(Math.random() * spawn.allowedGroupList.length) : spawn.groupTier()
+                const list = spawn.allowedGroupList[tier]
+                pick = list[Math.floor(Math.random() * list.length)]
             }
+            if (Math.random() < 0.55) spawn.nodeGroup(x, y, pick)
+            else spawn.lineGroup(x, y, pick)
         }
     },
     randomLevelBoss(x, y, options = [], veto = []) { //veto: boss names this level won't spawn, a vetoed boss stays next in line for later levels
         const isAllowed = name => !veto.includes(name)
-        const randomBossList = spawn.randomBossList.filter(isAllowed).length ? spawn.randomBossList.filter(isAllowed) : spawn.randomBossList
-        if (level.levelsCleared > 13 && simulation.difficultyOptions.isMobTier23) {
+        const allowedBosses = veto.length ? spawn.randomBossList.filter(isAllowed) : spawn.randomBossList
+        const randomBossList = allowedBosses.length ? allowedBosses : spawn.randomBossList
+        if (spawn.usesFullMobPool()) {
             const pick = randomBossList[Math.floor(Math.random() * randomBossList.length)]
             spawn[pick](x, y)
         } else {
-            if (simulation.difficultyMode > 1 || level.levelsCleared > 1) {
+            if (level.trainingMobTier || simulation.difficultyMode > 1 || level.levelsCleared > 1) {
                 if (options.length === 0) {
-                    const t = spawn.mobTierSpawnOrder[Math.min(level.levelsCleared, 13)]
+                    const t = spawn.groupTier()
                     const list = spawn.bossTier[t]
                     const index = spawn.bossTierIndex[t]
                     const swap = list.findIndex((name, i) => i > index && isAllowed(name)) //the next boss this level allows trades places with the vetoed one
@@ -370,7 +353,7 @@ const spawn = {
     },
     higherTierMobPick() { //the name of a next TIER mob for this level, or undefined when next TIER mobs is off
         if (!simulation.difficultyOptions.isNextTierMobs || spawn.isPacifistStarters()) return
-        const levelTier = level.levelsCleared > 13 ? 4 : spawn.mobTierSpawnOrder[level.levelsCleared] //the newest mob type is always the level's highest tier, after 13 levels every tier can spawn
+        const levelTier = level.trainingMobTier ?? (level.levelsCleared > 13 ? 4 : spawn.mobTierSpawnOrder[level.levelsCleared]) //the newest mob type is always the level's highest tier, after 13 levels every tier can spawn
         const pickFrom = spawn.tier[Math.min(5, levelTier + 1)]
         return pickFrom[Math.floor(Math.random() * pickFrom.length)]
     },
@@ -6306,7 +6289,7 @@ const spawn = {
         me.canSee = function (where) {
             const dx = player.position.x - where.x
             const dy = player.position.y - where.y
-            return !m.isCloak && dx * dx + dy * dy < this.sightRange2 && !Matter.Query.rayAny(map, where, player.position) && !Matter.Query.rayAny(body, where, player.position)
+            return !m.isCloak && dx * dx + dy * dy < this.sightRange2 && !Matter.Query.segmentAny(map, where, player.position) && !Matter.Query.segmentAny(body, where, player.position)
         }
         me.startSearch = function () {
             const start = { x: this.position.x, y: this.position.y, parent: null, links: this.startingPaths } //links counts the points branching off it and the paths growing from it
@@ -6423,7 +6406,8 @@ const spawn = {
         }
         me.found = function (node) { //the other paths disappear and the boss dashes down the path that saw the player
             this.route = []
-            for (; node; node = node.parent) this.route.unshift(node)
+            for (; node; node = node.parent) this.route.push(node)
+            this.route.reverse()
             this.route.push({ x: player.position.x, y: player.position.y })
             this.grenadesLaunched = 0
             let length = 0
@@ -12336,7 +12320,7 @@ const spawn = {
                 let score = 0.3 * Math.sqrt(hit.dist2)
                 if (target) {
                     score += Math.abs(Vector.magnitude(Vector.sub(target, out)) - 0.65 * this.stalkMax)
-                    if (Matter.Query.ray(map, out, target).length) score += 3000
+                    if (Matter.Query.segmentAny(map, out, target)) score += 3000
                 }
                 if (!best || score < best.score) best = { x: hit.x, y: hit.y, nx: normal.x, ny: normal.y, score }
             }
@@ -12386,7 +12370,7 @@ const spawn = {
                 this.reach = hit.who ? Math.max(this.stalkMin, Math.sqrt(hit.dist2) - 1.1 * this.radius) : this.stalkMax
                 //let go if the player stays out of reach
                 if (this.state === "feed" && target) {
-                    const far = Vector.magnitude(Vector.sub(target, foot)) > this.stalkMax + 450 || Matter.Query.ray(map, footOut, target).length
+                    const far = targetDist > this.stalkMax + 450 || Matter.Query.segmentAny(map, footOut, target)
                     this.farCycles = far ? this.farCycles + 8 : 0
                     if (this.farCycles > 150) {
                         this.anchor = null
@@ -12456,7 +12440,10 @@ const spawn = {
             ctx.fillStyle = `rgba(${o.dark}, 0.75)`
             ctx.fill()
         }
-        me.stalkSamples = [] //points along the stalk's center and its half width, updated in drawCell
+        const steps = 14
+        me.stalkSamples = Array.from({ length: steps + 1 }, (_, i) => ({
+            t: i / steps, taper: Math.pow(i / steps, 2.5), x: 0, y: 0, w: 0, offsetX: 0, offsetY: 0
+        })) //shared by the outline, pigment stripes, and stalk drag
         me.stalkDrag = function () { //the stalk is sticky, walking through it slows the player down a lot and drains energy
             const samples = this.stalkSamples
             for (let i = 0, len = samples.length - 3; i < len; i++) { //skips the end in the head
@@ -12485,24 +12472,26 @@ const spawn = {
                 C = Vector.add(H, Vector.mult(Vector.rotate(back, wag), 1.2))
             }
             //trumpet outline
-            const steps = 14
-            const left = [], right = [], mid = []
-            for (let i = 0; i <= steps; i++) {
-                const t = i / steps
-                const u = 1 - t
-                const p = { x: u * u * B.x + 2 * u * t * C.x + t * t * H.x, y: u * u * B.y + 2 * u * t * C.y + t * t * H.y }
-                const tan = Vector.normalise({ x: 2 * u * (C.x - B.x) + 2 * t * (H.x - C.x), y: 2 * u * (C.y - B.y) + 2 * t * (H.y - C.y) })
-                const w = Math.min(0.95 * this.radius, (6 + (0.95 * this.radius - 6) * Math.pow(t, 2.5)) * (1 + 0.6 * contracted)) //fattens when contracted
-                const perp = { x: -tan.y, y: tan.x }
-                mid.push({ p, perp, w, t })
-                this.stalkSamples[i] = { x: p.x, y: p.y, w }
-                left.push({ x: p.x + w * perp.x, y: p.y + w * perp.y })
-                right.push({ x: p.x - w * perp.x, y: p.y - w * perp.y })
-            }
+            const samples = this.stalkSamples
             ctx.beginPath()
-            ctx.moveTo(left[0].x, left[0].y)
-            for (let i = 1; i < left.length; i++) ctx.lineTo(left[i].x, left[i].y)
-            for (let i = right.length - 1; i > -1; i--) ctx.lineTo(right[i].x, right[i].y)
+            for (let i = 0; i < samples.length; i++) {
+                const point = samples[i]
+                const t = point.t, u = 1 - t
+                point.x = u * u * B.x + 2 * u * t * C.x + t * t * H.x
+                point.y = u * u * B.y + 2 * u * t * C.y + t * t * H.y
+                point.w = Math.min(0.95 * this.radius, (6 + (0.95 * this.radius - 6) * point.taper) * (1 + 0.6 * contracted))
+                const dx = u * (C.x - B.x) + t * (H.x - C.x)
+                const dy = u * (C.y - B.y) + t * (H.y - C.y)
+                const scale = point.w / (Math.sqrt(dx * dx + dy * dy) || 1)
+                point.offsetX = -dy * scale
+                point.offsetY = dx * scale
+                if (i === 0) ctx.moveTo(point.x + point.offsetX, point.y + point.offsetY)
+                else ctx.lineTo(point.x + point.offsetX, point.y + point.offsetY)
+            }
+            for (let i = samples.length - 1; i >= 0; i--) {
+                const point = samples[i]
+                ctx.lineTo(point.x - point.offsetX, point.y - point.offsetY)
+            }
             ctx.closePath()
             ctx.fillStyle = `rgba(${rgb}, ${0.5 + 0.3 * contracted})`
             ctx.fill()
@@ -12512,10 +12501,12 @@ const spawn = {
             //pigment stripes
             ctx.beginPath()
             for (const s of [-0.55, 0, 0.55]) {
-                for (let i = 2; i < mid.length; i++) {
-                    const x = mid[i].p.x + s * mid[i].w * mid[i].perp.x
-                    const y = mid[i].p.y + s * mid[i].w * mid[i].perp.y
-                    i === 2 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+                for (let i = 2; i < samples.length; i++) {
+                    const point = samples[i]
+                    const x = point.x + s * point.offsetX
+                    const y = point.y + s * point.offsetY
+                    if (i === 2) ctx.moveTo(x, y)
+                    else ctx.lineTo(x, y)
                 }
             }
             ctx.lineWidth = 1.5
@@ -12774,7 +12765,7 @@ const spawn = {
         //     this.attraction();
         // };
     },
-    tetherBoss(x, y, constraint, radius = 90) {
+    tetherBoss(x, y, constraint = { x: x, y: y - 500 }, radius = 90) { //constraint is where its tether is pinned, above it if not given
         // constrained mob boss for the towers level
         // often has a ring of mobs around it
         mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");
@@ -12846,7 +12837,7 @@ const spawn = {
             }
         };
     },
-    tetherBoss4(x, y, constraint, radius = 90) {
+    tetherBoss4(x, y, constraint = { x: x, y: y - 500 }, radius = 90) { //constraint is where its tether is pinned, above it if not given
         // constrained mob boss for the towers level
         // often has a ring of mobs around it
         mobs.spawn(x, y, 8, radius, "rgb(0,60,80)");

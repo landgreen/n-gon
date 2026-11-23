@@ -34,6 +34,9 @@ const levelData = {
         data.typedCode = levelData.normalizeTyped(data.typedCode)
         for (const key of ["author", "log"]) if (typeof data[key] !== "string") data[key] = "" //not in level.defaults(), the typical level properties button keeps them
         if (!Array.isArray(data.mobVeto)) data.mobVeto = []
+        data.loadout = levelData.normalizeLoadout(data.loadout)
+        if (data.mobTier === undefined) data.mobTier = null //a training level's tier, "1" to "5", checkValues() below makes anything else null
+        data.isTraining = data.isTraining !== false //a training level unless it's a progression level, see level.isTrainingLevel() and the info box's training | progression
         data.elements = Array.isArray(data.elements) ? data.elements.filter(el => el && typeof el === "object" && typeof el.type === "string" && /^\w+$/.test(el.type)) : [] //a type is a name, the editor shows it
         const isId = id => Number.isSafeInteger(id) && id > 0 && id < Number.MAX_SAFE_INTEGER //ids are whole numbers, the editor shows them, so an imported level can't put html there
         const ids = new Set()
@@ -92,6 +95,24 @@ const levelData = {
             if (!data.elements.some(el => el.type === type) && !levelData.hasCode(data)) levelData.add(data, levelElements.create(type))
         }
         return data
+    },
+    loadoutText(loadout) { //like "standard emitter, nail gun, 2 tech", the experiment button's tooltip and the loadout issue line
+        const techCount = Object.values(loadout.tech).reduce((sum, count) => sum + count, 0)
+        return [loadout.field, ...loadout.guns, techCount ? `${techCount} tech` : ""].filter(Boolean).join(", ")
+    },
+    normalizeLoadout(loadout) { //the field, guns, and tech a level starts with in the editor and its tests, null for none, only names and counts, the game's own are matched by name when it's given, see levelEditor.giveLoadout()
+        if (!loadout || typeof loadout !== "object" || Array.isArray(loadout)) return null
+        const isName = name => typeof name === "string" && name.length > 0 && name.length <= 100 && name !== "__proto__"
+        const field = isName(loadout.field) ? loadout.field : "field emitter"
+        const guns = Array.isArray(loadout.guns) ? [...new Set(loadout.guns.filter(isName))] : []
+        const tech = {}
+        if (loadout.tech && typeof loadout.tech === "object" && !Array.isArray(loadout.tech)) {
+            for (const [name, count] of Object.entries(loadout.tech)) {
+                if (isName(name) && Number.isInteger(count) && count > 0) tech[name] = Math.min(count, 1000)
+            }
+        }
+        if (field === "field emitter" && !guns.length && !Object.keys(tech).length) return null //the same as starting with nothing
+        return { field, guns, tech }
     },
     normalizeTyped(typed) { //lines typed between elements in the code panel, [{ after, runsAfter, part, lines }], see typedOf()
         if (!Array.isArray(typed)) return []
@@ -511,7 +532,7 @@ const levelData = {
         color.block = data.blockColor
         simulation.g = simulation.gDefault * data.gravity
         level.fallMode = data.fall === "sky" ? "start" : ""
-        const isSight = data.lineOfSight && (!levelEditor.isActive || levelEditor.isTesting || levelEditor.isFullTest) //while editing it would hide the level, so only quick test and test export show it
+        const isSight = data.lineOfSight && (!levelEditor.isActive || levelEditor.isTesting || levelEditor.isFullTest) //while editing it would hide the level, so only quick test and full test show it
         if (isSight && simulation.draw.drawMapPath !== simulation.draw.drawMapSightLevel) {
             simulation.draw.drawMapPath = simulation.draw.drawMapSightLevel
             simulation.draw.lineOfSightPrecalculation() //circleLoS would also catch up by itself, see simulation.sight.updateMapGrid()
@@ -532,7 +553,7 @@ const levelData = {
         if (!runtime) return null
         if (levelData.forced.has(from.id)) return levelData.forced.get(from.id)
         const own = runtime.linkOn ? runtime.linkOn() : levelElements.types[from.type].linkOn(from, runtime, depth) //edited code's own check, see writtenRuntime()
-        if (levelElements.types[from.type].isGate) return own //its links are its inputs, not also on
+        if (levelElements.types[from.type].isGate || levelElements.types[from.type].ownsLink) return own //its links are its inputs, not also on
         const above = depth < 8 ? levelData.linkState(from, depth + 1) : null //a link source linked to another is only on while both are, like a timer that only runs while a button is down
         return above === false ? false : own
     },
@@ -674,7 +695,7 @@ const levelData = {
             const from = levelData.find(data, id)
             if (!from || !levelElements.isLinkSource(from)) return null
             const own = levelElements.types[from.type].linkCode(from, names.get(from.id), context, depth)
-            const above = !levelElements.types[from.type].isGate && depth < 8 ? sourceCode(from, depth + 1) : null
+            const above = !levelElements.types[from.type].isGate && !levelElements.types[from.type].ownsLink && depth < 8 ? sourceCode(from, depth + 1) : null
             if (!above && !isEditorRuntime) return own
             const natural = above ? `${own.on} && ${above.on.includes("||") ? `(${above.on})` : above.on}` : own.on
             const on = isEditorRuntime ? `(__level.forced(${id}) ?? (${natural}))` : natural
@@ -922,9 +943,6 @@ const levelData = {
             if (isNew) levelData.store.sync()
             return isSaved && !levelData.store.isFailing
         },
-        hasWork() { //a local level that's more than the blank one opening the editor saves, the title page shows its editor button
-            return levelData.store.names().some(name => !/^untitled\d*$/.test(name) || !levelData.store.isBlank(name))
-        },
         isBlank(name) { //the same as the blank level new makes, nothing added or changed
             const data = levelData.store.levels[name]
             if (!data) return false
@@ -965,7 +983,7 @@ const levelData = {
             levelData.store.renameInPool(oldName, newName)
             return true
         },
-        renameInPool(oldName, newName) { //the level pool in settings remembers local levels by name, null takes it out
+        renameInPool(oldName, newName) { //the level pool remembers local levels by name, null takes it out
             const pool = localSettings.levelPool
             if (!pool || !pool.added.includes(oldName)) return
             pool.added = pool.added.filter(name => name !== oldName)
@@ -1038,12 +1056,45 @@ const levelEditor = {
         } catch (error) {
             return console.error(error)
         }
-        if (levelEditor.open !== stub) levelEditor.open() //js/level-editor.js's
+        if (levelEditor.open !== stub) return levelEditor.open() //js/level-editor.js's, returned so callers can wait for the editor to start
     },
     close() { }, //nothing is open before it loads
-    updateSplashButton() { //the title page's editor button, once there are local levels
-        const isShown = levelData.store.hasWork()
-        document.body.classList.toggle("has-level-editor", isShown)
-        document.getElementById("level-editor-splash-button").style.display = isShown && simulation.onTitlePage !== false ? "inline" : "none"
+    giveLoadout(loadout) { //here so runs can use it before the editor loads, community training levels do, swaps the player's field, guns, and tech for the loadout's, null is nothing, like a checkpoint without the rest of the run, names the game doesn't have are skipped
+        loadout ??= { field: "field emitter", guns: [], tech: {} }
+        const saved = { spawn: powerUps.spawn, spawnDelay: powerUps.spawnDelay, directSpawn: powerUps.directSpawn, inGameConsole: simulation.inGameConsole, isExperimentSelection: build.isExperimentSelection }
+        powerUps.spawn = powerUps.spawnDelay = powerUps.directSpawn = () => { } //tech that make power ups when they're picked
+        simulation.inGameConsole = () => { }
+        build.isExperimentSelection = true //like picking them in experiment: the tech list keeps its order, and gun tech look at every gun
+        try {
+            tech.resetAllTech(false) //changing equipment keeps this level's mob types and boss order
+            b.resetAllGuns()
+            m.setField(Math.max(0, m.fieldUpgrades.findIndex(field => field.name === loadout.field)))
+            for (const name of loadout.guns) b.giveGuns(name)
+            const counts = loadout.tech
+            for (const [name, count] of Object.entries(counts)) {
+                for (let i = 0; i < count; i++) tech.giveTech(name)
+            }
+            for (const t of tech.tech) { //tech that give or remove other tech can leave the wrong counts, like a checkpoint loading
+                const count = counts[t.name] || 0
+                if (t.count > count && !t.isInstant && !t.isLore) tech.removeTech(t.name, false)
+                for (let i = 0; t.count < count && i < count; i++) tech.giveTech(t.name)
+            }
+        } finally {
+            powerUps.spawn = saved.spawn
+            powerUps.spawnDelay = saved.spawnDelay
+            powerUps.directSpawn = saved.directSpawn
+            simulation.inGameConsole = saved.inGameConsole
+            build.isExperimentSelection = saved.isExperimentSelection
+        }
+        b.clearProjectiles() //giving tech can fire shots, like booby trap's mine
+        m.isHolding = false
+        m.holdingTarget = null
+        if (b.inventory.length) {
+            b.inventoryGun = 0
+            b.activeGun = b.inventory[0]
+        }
+        simulation.makeGunHUD()
+        simulation.switchGun()
+        simulation.updateTechHUD()
     },
 }
